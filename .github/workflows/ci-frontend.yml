@@ -44,6 +44,12 @@ jobs:
   ci:
     name: CI — Build + Tests
     runs-on: ubuntu-22.04
+    # El runner corre en UTC por defecto; varios tests asumen hora local
+    # (ej. ArqueoCajaPage). America/Bogota = UTC-5 fijo (sin DST) — mismo
+    # offset que usaba binax con America/Panama. Ajustar si AtlanticERP
+    # termina operando en otra zona horaria.
+    env:
+      TZ: America/Bogota
 
     steps:
       - name: Checkout código
