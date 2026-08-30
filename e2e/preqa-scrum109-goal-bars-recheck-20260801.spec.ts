@@ -8,10 +8,10 @@ import { test, expect, type Page } from '@playwright/test'
  * esta pusheado a dev.atlanticerp.ai todavia.
  *
  * Cuentas reales usadas (password = email, ver memoria project_roster_usuarios_reales_atlanticerp.md):
- *  - neil.quiel@illuminations.com.pa (Vendedor/Diseñador) — Meta $603.28, $0 vendido, mas un
+ *  - neil.quiel@atlantic.com.pa (Vendedor/Diseñador) — Meta $603.28, $0 vendido, mas un
  *    approved card sembrado a mano en el mes en curso para el caso de valor grande (ver sesion).
- *  - annie@illuminations.com.pa (Vendedor/Diseñador) — SIN fila en sales_goals (goal_amount null).
- *  - daniela@illuminations.com.pa (management) — unica con el toggle Resumen personal/Equipo.
+ *  - annie@atlantic.com.pa (Vendedor/Diseñador) — SIN fila en sales_goals (goal_amount null).
+ *  - daniela@atlantic.com.pa (management) — unica con el toggle Resumen personal/Equipo.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -31,7 +31,7 @@ async function gotoReports(page: Page) {
 }
 
 test('1. Neil (con Meta, $0 vendido) — barras + labels $ visibles, mes en curso ambar', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-neil-meta-configurada.png', fullPage: true })
 
@@ -40,7 +40,7 @@ test('1. Neil (con Meta, $0 vendido) — barras + labels $ visibles, mes en curs
 })
 
 test('2. Annie (SIN Meta configurada) — resto del grafico sigue funcionando', async ({ page }) => {
-  await login(page, 'annie@illuminations.com.pa')
+  await login(page, 'annie@atlantic.com.pa')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/02-annie-sin-meta.png', fullPage: true })
 
@@ -56,7 +56,7 @@ test('3. Daniela (management) — toggle Inicio(personal) / Equipo re-renderiza 
   // Nota: el toggle de scope en la UI real dice "Inicio"/"Equipo" (no "Resumen
   // personal"/"Equipo" como en el mockup viejo de Daniela) — variante de layout
   // preexistente, no forma parte del alcance de SCRUM-109.
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoReports(page)
   // Scope toggle es el primer div "rounded-lg border" dentro del Card de filtros
   // (canSeeTeam) — "Inicio" tambien matchea el link del sidebar, hay que acotar.
@@ -73,7 +73,7 @@ test('3. Daniela (management) — toggle Inicio(personal) / Equipo re-renderiza 
 })
 
 test('4. Neil — selector de periodo (Mes/Trimestre/Año) no rompe el panel Metas', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
 
   await page.getByRole('button', { name: /trimestre/i }).click()
@@ -86,7 +86,7 @@ test('4. Neil — selector de periodo (Mes/Trimestre/Año) no rompe el panel Met
 })
 
 test('5. Neil — modo oscuro, labels $ (#475569 fijo) siguen legibles', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
 
   // El theme es una preferencia persistida por cuenta (no solo localStorage) — no
@@ -106,13 +106,13 @@ test('5. Neil — modo oscuro, labels $ (#475569 fijo) siguen legibles', async (
 })
 
 test('6. Neil — valor grande (sembrado a mano) no corta ni superpone el label', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/06-neil-valor-grande.png', fullPage: true })
 })
 
 test('7. Neil — reload (F5) hidrata el chart sin parpadeo/plugin roto en el primer render', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
   await page.reload()
   await page.waitForTimeout(1800)
@@ -121,7 +121,7 @@ test('7. Neil — reload (F5) hidrata el chart sin parpadeo/plugin roto en el pr
 })
 
 test('8. Neil — tooltip on hover no choca visualmente con el label fijo de arriba', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoReports(page)
   const canvas = page.locator('canvas').first()
   const box = await canvas.boundingBox()

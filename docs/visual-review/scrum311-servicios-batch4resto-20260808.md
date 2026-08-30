@@ -43,7 +43,7 @@ Commits revisados: backend `3283c8d` + `0ff3e21` (fix de concurrencia, Senior Re
 
 Script descartable (no promovido a `e2e/`, se corrió y se borró — ver protocolo, Paso 5).
 Backend Docker local (nginx/laravel/horizon/postgres/redis) + frontend Vite dev server real en
-`localhost:5173`. Login real con `servicio@illuminations.com.pa` (Aaron Leis, `lider_servicios`).
+`localhost:5173`. Login real con `servicio@atlantic.com.pa` (Aaron Leis, `lider_servicios`).
 
 Fixture mínima `[VISUALREVIEW]` sembrada a mano vía tinker (MasterClient/SubClient/SalesProject
 — Postgres local no tenía datos de Ventas & Diseño, mismo gotcha que SCRUM-308/309/310) y

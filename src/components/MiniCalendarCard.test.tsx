@@ -14,7 +14,7 @@ vi.mock('react-i18next', () => ({
 function makeEvent(startAt: string, overrides: Partial<OutlookCalendarEvent> = {}): OutlookCalendarEvent {
   return {
     id: '1', title: 'Reunión', start_at: startAt, end_at: null,
-    all_day: false, location: null, organizer: null, owner_email: 'a@illuminations.com.pa', owner_name: null,
+    all_day: false, location: null, organizer: null, owner_email: 'a@atlantic.com.pa', owner_name: null,
     ...overrides,
   }
 }
@@ -46,10 +46,10 @@ describe('MiniCalendarCard', () => {
     render(
       <MiniCalendarCard
         view="day" today={today} showOwner
-        events={[makeEvent('2026-07-21T14:30:00', { owner_email: 'idmar@illuminations.com.pa', owner_name: null })]}
+        events={[makeEvent('2026-07-21T14:30:00', { owner_email: 'idmar@atlantic.com.pa', owner_name: null })]}
       />,
     )
-    expect(screen.getByText(/idmar@illuminations\.com\.pa/)).toBeInTheDocument()
+    expect(screen.getByText(/idmar@atlantic\.com\.pa/)).toBeInTheDocument()
   })
 
   it('vista Día sin showOwner (scope own) — no muestra el owner', () => {

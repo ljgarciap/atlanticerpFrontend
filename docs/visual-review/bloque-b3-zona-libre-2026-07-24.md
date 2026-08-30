@@ -5,7 +5,7 @@
 **Commit revisado:** `1bf08b4` (rama `dev`, `atlanticerp-frontend`, working tree clean).
 **Mockups de referencia:** `3C__Bodega_NuevaOrdenZL.html`, `3D__Bodega_OrdenesZL.html`.
 **Método:** Playwright CLI contra `http://localhost:5173` + backend Docker local, usuario
-`almacen@illuminations.com.pa` (lider_bodega). Fixtures sembradas a mano vía tinker (provider
+`almacen@atlantic.com.pa` (lider_bodega). Fixtures sembradas a mano vía tinker (provider
 "Zona Libre de Colón" ya existía por `ZonaLibreProviderSeeder`; se agregaron 2 `CatalogProduct`
 con `provider_id` de ese proveedor + stock en 2 bodegas, y 3 `BodegaZonaLibreRequest` en los 3
 estados posibles) — la DB local no traía data de Zona Libre antes de esta sesión.

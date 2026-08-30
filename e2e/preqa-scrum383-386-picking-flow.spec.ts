@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
  * pedido, y confirmar que se ve en modo solo lectura.
  *
  * Corre contra un fixture real sembrado a mano (Order #42, "PED-E2E-PICK-01", 2 artículos,
- * `illuminations_bodega.orders`/`order_items` en Docker local, ver reporte de la tarea para el
+ * `atlantic_bodega.orders`/`order_items` en Docker local, ver reporte de la tarea para el
  * script exacto) — mismo patrón que el resto de specs `preqa-*` del proyecto (fixtures reales, no
  * mocks). Se promueve a test permanente (regla del proyecto: un smoke test que verifica un
  * gate/flujo de estado no se borra) — si el fixture #42 ya no existe en el entorno donde corre
@@ -34,7 +34,7 @@ test('SCRUM-383→386 — asignar picker, iniciar picking, completar la Hoja de 
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
 
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 

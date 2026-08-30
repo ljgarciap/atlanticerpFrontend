@@ -134,7 +134,7 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   autoComplete="email"
-                  placeholder="usuario@illuminations.com"
+                  placeholder="usuario@atlantic.com"
                   {...register('email')}
                   className={inputCls(!!errors.email)}
                 />

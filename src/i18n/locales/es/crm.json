@@ -384,7 +384,7 @@
     "mailOverdueBy":       "Vencido {{days}}d",
     "mailDaysRemaining":   "{{days}}d restantes",
     "mailActionRequired": "Acción requerida: Actualiza el estatus o contacta al cliente.",
-    "mailSignature":      "CRM Illuminations"
+    "mailSignature":      "CRM Atlantic"
   },
   "document": {
     "title":       "Documentos",

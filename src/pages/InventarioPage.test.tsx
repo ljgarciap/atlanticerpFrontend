@@ -87,7 +87,7 @@ function renderPage(initialEntries: string[] = ['/inventario']) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockedComprasApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Illuminations' }] })
+  mockedComprasApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Atlantic' }] })
   mockedComprasApi.families.list.mockResolvedValue({
     restricted: false, can_manage: true, data: [],
     meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
@@ -142,7 +142,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('compras:inventory.toggle.ventas')).toBeInTheDocument()
   })
 
-  // Bug real de producción (2026-08-18, reportado por lider_compras/gerencia2@illuminations.com.pa):
+  // Bug real de producción (2026-08-18, reportado por lider_compras/gerencia2@atlantic.com.pa):
   // `TypeError: Cannot read properties of null (reading 'toLocaleString')` al cargar Inventario.
   // Causa raíz: `catalog_products.cost` es nullable en BD (3674/11632 filas NULL en prod, tras el
   // sync de migración ICG) y el chequeo `p.cost !== undefined` no cubre `null` — dejaba pasar
@@ -361,7 +361,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({
         warehouses: [
-          { warehouse_id: 1, warehouse_name: 'Illuminations', quantity: 2 },
+          { warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 2 },
           { warehouse_id: 2, warehouse_name: 'Reserva', quantity: 4 },
           { warehouse_id: 3, warehouse_name: 'Llano Bonito', quantity: 10 },
         ],
@@ -370,14 +370,14 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     })
     mockedComprasApi.inventory.get.mockResolvedValue(makeProduct())
     mockedComprasApi.inventory.warehouseStock.mockResolvedValue({
-      data: [{ warehouse_id: 1, warehouse_name: 'Illuminations', quantity: 2 }],
+      data: [{ warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 2 }],
     })
 
     renderPage()
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     // RN2/RN3 — no lista las 3 bodegas verticalmente en la celda, muestra "3 Bodegas".
-    expect(screen.queryByText(/Illuminations \(2\)/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Atlantic \(2\)/)).not.toBeInTheDocument()
     const compactAccess = screen.getByText('compras:inventory.table.warehousesCount count=3')
     expect(compactAccess).toBeInTheDocument()
 
@@ -602,7 +602,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await openCreateModalAndSelectProvider()
 
     fillRequiredFields()
-    fireEvent.change(screen.getByLabelText('Illuminations'), { target: { value: '5' } })
+    fireEvent.change(screen.getByLabelText('Atlantic'), { target: { value: '5' } })
     fillTechnicalSheetLink()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
@@ -916,7 +916,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({
         category: 'bombillos', rotation: 'alta', reorder_point: 5, por_servir: 3,
-        warehouses: [{ warehouse_id: 1, warehouse_name: 'Illuminations', quantity: 7 }],
+        warehouses: [{ warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 7 }],
       })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -926,7 +926,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     expect(screen.getByText('compras:newOrder.newProduct.categories.bombillos')).toBeInTheDocument()
     expect(screen.getByText('compras:inventory.rotation.alta')).toBeInTheDocument()
-    // SCRUM-244 (rebote 2026-08-12) — ya no lista "Illuminations (7)" en la celda, muestra el
+    // SCRUM-244 (rebote 2026-08-12) — ya no lista "Atlantic (7)" en la celda, muestra el
     // acceso compacto "1 Bodega" (ver describe de SCRUM-244 más abajo para el detalle completo).
     expect(screen.getByText('compras:inventory.table.warehousesCount count=1')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument() // Por servir
@@ -1148,7 +1148,7 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
   beforeEach(() => {
     mockedComprasApi.warehouses.list.mockResolvedValue({
       data: [
-        { id: 1, name: 'Illuminations' },
+        { id: 1, name: 'Atlantic' },
         { id: 2, name: 'Bodega Norte' },
         { id: 3, name: 'Bodega Sur' },
       ],
@@ -1175,7 +1175,7 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('inventory.filters.warehousesAll'))
-    fireEvent.click(screen.getByLabelText('Illuminations'))
+    fireEvent.click(screen.getByLabelText('Atlantic'))
     fireEvent.click(screen.getByLabelText('Bodega Sur'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
@@ -1188,14 +1188,14 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('inventory.filters.warehousesAll'))
-    fireEvent.click(screen.getByLabelText('Illuminations'))
+    fireEvent.click(screen.getByLabelText('Atlantic'))
     fireEvent.click(screen.getByLabelText('Bodega Norte'))
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
       expect.objectContaining({ warehouse_ids: [1, 2] }),
     ))
 
-    // Quitar Illuminations vía el chip visible (dropdown cerrado) — Bodega Norte se mantiene.
-    fireEvent.click(screen.getByLabelText('inventory.filters.removeWarehouse name=Illuminations'))
+    // Quitar Atlantic vía el chip visible (dropdown cerrado) — Bodega Norte se mantiene.
+    fireEvent.click(screen.getByLabelText('inventory.filters.removeWarehouse name=Atlantic'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
       expect.objectContaining({ warehouse_ids: [2] }),
@@ -1247,7 +1247,7 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('inventory.filters.warehousesAll'))
-    fireEvent.click(screen.getByLabelText('Illuminations'))
+    fireEvent.click(screen.getByLabelText('Atlantic'))
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
       expect.objectContaining({ warehouse_ids: [1] }),
     ))

@@ -61,7 +61,7 @@ function makeDetail(overrides: Partial<GoodsReceiptDetail> = {}): GoodsReceiptDe
     import_cost_total: null, freight_total: null, handling_total: null, other_costs_total: null,
     lines: [{
       id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27',
-      quantity: 10, unit_cost: 10, itbms_amount: null, import_cost_share: null, freight_cost_share: null, handling_cost_share: null, other_cost_share: null, cost_total: 100, warehouse_id: 1, warehouse_name: 'Illuminations',
+      quantity: 10, unit_cost: 10, itbms_amount: null, import_cost_share: null, freight_cost_share: null, handling_cost_share: null, other_cost_share: null, cost_total: 100, warehouse_id: 1, warehouse_name: 'Atlantic',
       is_pending: true,
     }],
     ...overrides,

@@ -50,7 +50,7 @@ beforeEach(() => {
   mockedApi.lookup.masterClients.mockResolvedValue([{ id: 1, name: 'Inmobiliaria Pacífico' }])
   mockedApi.lookup.subClients.mockResolvedValue([{ id: 10, business_name: 'Pacífico Norte SA' }])
   mockedApi.lookup.projects.mockResolvedValue([{ id: 100, name: 'Torre Pacífico' }])
-  mockedApi.lookup.products.mockResolvedValue([{ id: 500, reference: 'LUM-COL-014', name: 'Colgante LED', description: 'Colgante LED', brand: 'Illuminations', price_full: 89.9 }])
+  mockedApi.lookup.products.mockResolvedValue([{ id: 500, reference: 'LUM-COL-014', name: 'Colgante LED', description: 'Colgante LED', brand: 'Atlantic', price_full: 89.9 }])
 })
 
 // REQ-246 RN6 — Cliente Master/Subcliente/Proyecto obligatorios, RN3 — descripción obligatoria.

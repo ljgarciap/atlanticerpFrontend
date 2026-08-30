@@ -338,7 +338,7 @@ describe('Sidebar — ningún submenú expandido en un login fresco (SCRUM-711, 
   it('con acceso a Ventas & Diseño y Configuración, ambos grupos nacen sin sus items visibles', () => {
     useAuthStore.setState({ user: baseUser({
       id: 42,
-      email: 'mbekhar@illuminations.com.pa',
+      email: 'mbekhar@atlantic.com.pa',
       first_name: 'Mark',
       last_name: 'Bekhar',
       role: 'management',

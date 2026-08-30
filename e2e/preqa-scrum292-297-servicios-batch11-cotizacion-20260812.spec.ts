@@ -13,10 +13,10 @@ import { test, expect, Page, Locator } from '@playwright/test'
  *   - Técnico externo activo #1 "Luis Vargas" ($25/día), inactivo #2 "Pedro Inactivo".
  */
 
-const LIDER_SERVICIOS  = 'servicio@illuminations.com.pa'   // Aaron — lider_servicios, tiene view_cost_breakdown
-const TECNICO_ASIGNADO = 'carlos@illuminations.com.pa'      // Carlos — tecnico_servicios, asignado a RET-2026-0004
+const LIDER_SERVICIOS  = 'servicio@atlantic.com.pa'   // Aaron — lider_servicios, tiene view_cost_breakdown
+const TECNICO_ASIGNADO = 'carlos@atlantic.com.pa'      // Carlos — tecnico_servicios, asignado a RET-2026-0004
 const TECNICO_AJENO    = 'santopedro181994@gmail.com'       // Pedro Santos — tecnico_servicios, NO asignado a ningún ticket de este batch
-const GERENCIA_SIN_PERM = 'daniela@illuminations.com.pa'    // Management, NO tiene servicios.quotes.view_cost_breakdown
+const GERENCIA_SIN_PERM = 'daniela@atlantic.com.pa'    // Management, NO tiene servicios.quotes.view_cost_breakdown
 
 async function login(page: Page, email: string) {
   // Limpia sesión previa (esta suite reutiliza la misma `page` para cambiar de usuario dentro de

@@ -11,8 +11,8 @@ import { execSync } from 'node:child_process'
 // vez de asumir un pedido pre-sembrado a mano (que se pierde en la siguiente corrida, o si otra
 // sesion lo despuebla como paso en esta misma sesion).
 
-const FELIX = 'conta@illuminations.com.pa'
-const MARK = 'mbekhar@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
 const MARK_PASS = 'B1n4X_2026?'
 const MILENA = 'milena.e@grupolafayette.com'
 
@@ -167,7 +167,7 @@ test('ICONOGRAFIA — sin emoji en toda la pantalla de Comisiones Internas', asy
 
 test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', () => {
   // pedido_id (pipeline_cards.id) usado para este test — owner Idmar Hernandez
-  // (idmar@illuminations.com.pa), amount=549.27, mes de cierre agosto 2026. Compartido con
+  // (idmar@atlantic.com.pa), amount=549.27, mes de cierre agosto 2026. Compartido con
   // Bernardo Gomez.
   const SHARED_PEDIDO_ID = 184
   const SHARED_WITH_USER_ID = 42 // Bernardo Gomez
@@ -182,12 +182,12 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
   }
 
   const tenantSwitch = "App\\Shared\\Multitenancy\\Tenant::forgetCurrent(); "
-    + "App\\Shared\\Multitenancy\\Tenant::where('slug','illuminations')->first()->makeCurrent(); "
+    + "App\\Shared\\Multitenancy\\Tenant::where('slug','atlantic')->first()->makeCurrent(); "
 
   test.beforeAll(() => {
     sshTinker(
       tenantSwitch
-      + `DB::table('illuminations_ventas_diseno.pipeline_cards')->where('id', ${SHARED_PEDIDO_ID})`
+      + `DB::table('atlantic_ventas_diseno.pipeline_cards')->where('id', ${SHARED_PEDIDO_ID})`
       + `->update(['compartido_con' => json_encode([${SHARED_WITH_USER_ID}])]);`,
     )
   })
@@ -195,7 +195,7 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
   test.afterAll(() => {
     sshTinker(
       tenantSwitch
-      + `DB::table('illuminations_ventas_diseno.pipeline_cards')->where('id', ${SHARED_PEDIDO_ID})`
+      + `DB::table('atlantic_ventas_diseno.pipeline_cards')->where('id', ${SHARED_PEDIDO_ID})`
       + `->update(['compartido_con' => null]);`,
     )
   })

@@ -11,7 +11,7 @@ también contra `7__Requerimientos_CRM.xlsx` (attachment 11534, hojas "CRM"/"His
 Usuario"/"Modelo de Datos"/"Matriz de Permisos por Rol") — sin conflictos entre Excel y Jira para
 este batch.
 **Método:** Playwright CLI contra `https://dev.atlanticerp.ai` (ya desplegado por CI/CD antes de esta
-sesión). Cuentas reales: Whileyner Contreras (`whil@illuminations.com.pa`, Gerencia) y Milena
+sesión). Cuentas reales: Whileyner Contreras (`whil@atlantic.com.pa`, Gerencia) y Milena
 Estrada (`milena.e@grupolafayette.com`, Vendedor/Diseñador). Capturas en
 `e2e/.tmp/preqa-dashboard-batchc/` (1 a 6, descartables, no promovidas — el artefacto de esta
 revisión es la comparación, no el script de captura, per convención de este agente).
@@ -29,7 +29,7 @@ Extraído literalmente de `2__CRM_Dashboard.html` (estructura + script `renderDa
 | 6 tarjetas de conteo por etapa (Lead/Diseño/Cotización/Propuesta/Aprobado/Perdido) | Sí | Mismo orden fijo que el mockup |
 | 2 tarjetas de dinero ("Pipeline activo", "Cerrado (ganado)") dentro del mismo grid de 8 | Sí | Formato `$` con comas |
 | Gráfico de barras "Proyectos por etapa", 6 barras en orden fijo, conteo sobre cada barra | Sí | Mismo orden, mismo criterio de altura proporcional (Chart.js `barData`, altura relativa a la etapa con más proyectos) |
-| Gráfico de dona "Por tipo de solicitud" (Diseño/Cotización/Diseño+Cotización) + leyenda con conteo | Sí | Mismos 3 colores categóricos distintos (paleta ajustada al sistema de diseño de Illuminations en vez de los colores placeholder del mockup — ver "Aceptable" abajo), leyenda con conteo por categoría |
+| Gráfico de dona "Por tipo de solicitud" (Diseño/Cotización/Diseño+Cotización) + leyenda con conteo | Sí | Mismos 3 colores categóricos distintos (paleta ajustada al sistema de diseño de Atlantic en vez de los colores placeholder del mockup — ver "Aceptable" abajo), leyenda con conteo por categoría |
 | Nota "(N sin etiqueta, no incluida)" junto a la leyenda de la dona | Sí | Verificado con fixtures sembrados en esta misma sesión (dato real de dev no tenía tarjetas sin etiqueta hasta sembrarlas — ver Pre-QA) |
 | 2 "tarjetas totales" grandes con ícono, debajo de los gráficos (Pipeline activo / Cerrado, DUPLICADAS respecto al grid de 8 de arriba) | Sí | El mockup en sí mismo muestra el dato de Pipeline activo/Cerrado DOS veces (una vez en el grid de 8 chico, otra vez en 2 tarjetas grandes con ícono debajo de los gráficos) — el desarrollo replica exactamente esa misma duplicación intencional del mockup, con íconos SVG propios (`IcoDollarSign`/`IcoCheck`) en vez de los caracteres `$`/`✓` planos del mockup (ver "Aceptable") |
 | Nav lateral: item "Dashboard CRM" visible solo para el perfil correcto | Sí — más estricto que el mockup, que no modela el gate de permiso (el mockup es estático, un solo usuario "Diseñador" en el `user-role` de la topbar, sin lógica de roles real) | El desarrollo agrega el gate que el mockup, al ser HTML estático, no podía representar — no es una desviación, es la parte que corresponde al backend/frontend real |
@@ -38,7 +38,7 @@ Extraído literalmente de `2__CRM_Dashboard.html` (estructura + script `renderDa
 
 - **Colores de la dona:** el mockup usa `#5B8DEF`/`#A78BFA`/`#5BC4A0` (colores ad-hoc de este
   mockup puntual); el desarrollo usa `#2a78d6`/`#eb6834`/`#1baf7a` — paleta categórica del sistema
-  de diseño de Illuminations ya validada por el skill `dataviz` en trabajo previo de este mismo
+  de diseño de Atlantic ya validada por el skill `dataviz` en trabajo previo de este mismo
   repo (comentario explícito en `DashboardPage.tsx`: "únicas 3 que pasan la validación de pares
   completos en luz y oscuro"). Misma cantidad de categorías, mismo criterio de asignación
   (Diseño/Cotización/Ambos), solo cambia el valor exacto del color dentro de la paleta de marca ya

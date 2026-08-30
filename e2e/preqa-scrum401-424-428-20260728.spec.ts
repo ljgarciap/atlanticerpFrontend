@@ -33,8 +33,8 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const ESTEBAN_EMAIL = 'almacen@illuminations.com.pa'
-const ESTEBAN_PASSWORD = 'almacen@illuminations.com.pa'
+const ESTEBAN_EMAIL = 'almacen@atlantic.com.pa'
+const ESTEBAN_PASSWORD = 'almacen@atlantic.com.pa'
 
 async function login(page: Page, email = ESTEBAN_EMAIL, password = ESTEBAN_PASSWORD) {
   await page.goto(`${BASE}/login`)

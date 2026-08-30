@@ -13,9 +13,9 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const VENDEDOR_SIN_PERMISO = 'milena.e@grupolafayette.com'
-const OTRO_VENDEDOR_SIN_PERMISO = 'neil.quiel@illuminations.com.pa'
-const MARK = 'mbekhar@illuminations.com.pa'
-const MANAGEMENT = 'daniela@illuminations.com.pa'
+const OTRO_VENDEDOR_SIN_PERMISO = 'neil.quiel@atlantic.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
+const MANAGEMENT = 'daniela@atlantic.com.pa'
 
 const STAMP = Date.now()
 
@@ -207,7 +207,7 @@ echo "PART_ID:" . $part->id . "\\n";
   test('2. Backend (HTTP real): POST de un ítem nuevo sobre una cotización confirmada es rechazado con 422 (gate ensureEditable, fix retroactivo 56cb6f6)', async () => {
     const loginOut = execSync(
       `curl -s -X POST http://localhost:8090/api/auth/login -H "Content-Type: application/json" `
-      + `-d '{"email":"${VENDEDOR_SIN_PERMISO}","password":"${VENDEDOR_SIN_PERMISO}","tenant":"illuminations"}'`,
+      + `-d '{"email":"${VENDEDOR_SIN_PERMISO}","password":"${VENDEDOR_SIN_PERMISO}","tenant":"atlantic"}'`,
       { encoding: 'utf8' },
     )
     const token = JSON.parse(loginOut).token as string

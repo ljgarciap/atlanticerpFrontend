@@ -28,7 +28,7 @@ async function login(page, email: string, password: string) {
 // ─────────────────────────────────────────────────────────────────────────
 test.describe('SCRUM-366 — selector de persona en Equipo', () => {
   test('BUG 1 (marly) — el selector solo lista Asistentes, no Jefe/Ayudante/Transporte', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
@@ -44,7 +44,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
   })
 
   test('RN1/Escenario 2 — "Equipo completo" queda seleccionado por defecto al activar Equipo', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
@@ -56,7 +56,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
   })
 
   test('BUG 2 (marly) — filtrar por una persona puntual habla en singular, no en plural de equipo', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
@@ -71,7 +71,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
   })
 
   test('camino de ruptura — volver a "Equipo completo" tras filtrar por persona restaura el plural', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
@@ -89,7 +89,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
   test('camino de ruptura — recargar a mitad de un filtro por persona no rompe la pantalla', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', err => errors.push(err.message))
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
@@ -117,7 +117,7 @@ function brandSelect(page) {
 
 test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   test('BUG (marly) — el dropdown Proveedor tiene opciones reales, no solo el placeholder', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -127,21 +127,21 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   })
 
   test('BUG (marly) — el dropdown Marca tiene opciones reales, no solo el placeholder', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
     const options = await brandSelect(page).locator('option').allTextContents()
     expect(options.length).toBeGreaterThan(1)
-    expect(options.some(o => /illuminations home/i.test(o))).toBeTruthy()
+    expect(options.some(o => /atlantic home/i.test(o))).toBeTruthy()
   })
 
   test('RN1 — filtrar por Marca no encoge el propio dropdown de facetas', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    await brandSelect(page).selectOption({ label: 'Illuminations Home' })
+    await brandSelect(page).selectOption({ label: 'Atlantic Home' })
     await page.waitForTimeout(1200)
 
     const optionsAfter = await brandSelect(page).locator('option').allTextContents()
@@ -155,7 +155,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   })
 
   test('camino de ruptura — seleccionar un Proveedor realmente filtra la tabla (RN1)', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -174,7 +174,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     // Adversarial explícito pedido en el re-check de hoy: no alcanza con probar Proveedor solo,
     // hay que combinarlo con otros 2 filtros a la vez y verificar que cada uno agrega una
     // restricción real (no que se pisen entre sí ni que alguno quede ignorado).
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
     const perPageSelect = page.locator('select').filter({ has: page.locator('option[value="all"]') })
@@ -206,13 +206,13 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   test('camino de ruptura — Proveedor + búsqueda de texto sin intersección da tabla vacía sin romper la UI', async ({ page }) => {
     // Combo garantizado vacío (a diferencia de adivinar una combinación Proveedor+Marca sin
     // solapamiento, que resultó ser un falso terreno — ver nota de la sesión: un intento inicial
-    // asumió que LightCorp + "Illuminations Home" no se solapaban, pero re-verificado en vivo SÍ
+    // asumió que LightCorp + "Atlantic Home" no se solapaban, pero re-verificado en vivo SÍ
     // hay intersección real (MESA-LAMP-015 es de esa marca) — usar un texto de búsqueda inexistente
     // combinado con un Proveedor real sí garantiza 0 resultados sin depender de qué marca tiene
     // cada producto.
     const errors: string[] = []
     page.on('pageerror', err => errors.push(err.message))
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -238,7 +238,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     // simplemente NUNCA aparece como opción seleccionable. No hay forma de llegar al escenario
     // "proveedor sin productos" desde este dropdown; el camino de ruptura real (intersección
     // vacía entre 2 filtros que sí existen) ya está cubierto por el test anterior.
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -258,7 +258,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     // verificado por si el negocio decide más adelante que sí debería persistir.
     const errors: string[] = []
     page.on('pageerror', err => errors.push(err.message))
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -276,7 +276,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   test('camino de ruptura — búsqueda de texto sin resultados no rompe la tabla', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', err => errors.push(err.message))
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -307,7 +307,7 @@ function warehouseModal(page) {
 
 test.describe('SCRUM-422 — desglose de stock por bodega', () => {
   test('BUG 1/2 (marly) — SPOT-EMP-010 muestra "2 bodegas" y el modal desglosa 200/100 reales, no 7 en 0', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
     await searchProduct(page, 'SPOT-EMP-010')
@@ -332,7 +332,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
   })
 
   test('BUG 2 (marly) — APLQ-PAR-020 (60 disponibles) ya no dice "0 bodegas"', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
     await searchProduct(page, 'APLQ-PAR-020')
@@ -350,7 +350,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
   })
 
   test('camino de ruptura — un producto con stock en una sola bodega muestra "1 bodega", no las 7', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
     await searchProduct(page, 'CAND-SAL-005')
@@ -389,7 +389,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
     // check siga siendo una alarma real ante CUALQUIER OTRO producto nuevo con el mismo problema.
     const KNOWN_GAPS = ['SUST-CAND-002', 'SUST-CAND-003']
 
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -444,7 +444,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
 // ─────────────────────────────────────────────────────────────────────────
 test.describe('SCRUM-421 — tabla de catálogo, 15 columnas', () => {
   test('RN — las 15 columnas del ticket están presentes en el header, en el orden esperado', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
@@ -459,7 +459,7 @@ test.describe('SCRUM-421 — tabla de catálogo, 15 columnas', () => {
   })
 
   test('columna Imagen — nunca una imagen rota; placeholder cuando el producto no tiene foto', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
     const perPageSelect = page.locator('select').filter({ has: page.locator('option[value="all"]') })
@@ -486,7 +486,7 @@ test.describe('SCRUM-421 — tabla de catálogo, 15 columnas', () => {
   })
 
   test('RN1 — Stock Total = Disponible + Por servir, con Por servir > 0 real', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa', 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 

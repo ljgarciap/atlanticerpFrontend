@@ -4,7 +4,7 @@ const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
 async function login(page) {
   await page.goto(`${BASE}/login`)
-  await page.fill('input[type="email"]', 'management@illuminations.test')
+  await page.fill('input[type="email"]', 'management@atlantic.test')
   await page.fill('input[type="password"]', 'Password123!')
   await page.click('button[type="submit"]')
   await page.waitForURL(/dashboard|inicio|home|\/$/, { timeout: 15000 }).catch(() => {})

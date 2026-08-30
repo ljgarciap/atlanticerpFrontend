@@ -7,8 +7,8 @@ import { test, expect, type Page } from '@playwright/test'
  * Corre contra dev.atlanticerp.ai REAL (recién deployado, CI/CD verde).
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa      (lider_servicios) — puede cambiar estado.
- *  - carlos@illuminations.com.pa        (tecnico_servicios) — NO puede cambiar estado.
+ *  - servicio@atlantic.com.pa      (lider_servicios) — puede cambiar estado.
+ *  - carlos@atlantic.com.pa        (tecnico_servicios) — NO puede cambiar estado.
  *  - milena.e@grupolafayette.com        (vendedor_disenador) — solo lectura en Servicios.
  */
 test.describe.configure({ mode: 'serial' })
@@ -36,7 +36,7 @@ async function apiLogin(request: any, email: string): Promise<string> {
 }
 
 test('1. Aaron — tabla de Tickets muestra los 14 [DEMO], NO "0 de 0"', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/01-tabla-seeder.png`, fullPage: true })
 
@@ -50,7 +50,7 @@ test('1. Aaron — tabla de Tickets muestra los 14 [DEMO], NO "0 de 0"', async (
 })
 
 test('2. Select "Técnico" tiene 4 opciones reales (no vacío)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const tecnicoSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /técnico/i }) })
@@ -77,7 +77,7 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
     }
   })
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const rowsBefore = await page.locator('table tbody tr').count()
@@ -107,7 +107,7 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
 })
 
 test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente) BLOQUEA el cierre', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
@@ -138,7 +138,7 @@ test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente
 })
 
 test('5. REQ-218 — Oficinas Grupo Melo (Garantía, on_site, cotización enviada no aprobada) BLOQUEA el cierre', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
@@ -163,7 +163,7 @@ test('5. REQ-218 — Oficinas Grupo Melo (Garantía, on_site, cotización enviad
 })
 
 test('6. Tablero — las 6 columnas tienen tarjetas (antes vacías)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.getByRole('button', { name: /tablero/i }).click()
   await page.waitForTimeout(1200)
@@ -193,7 +193,7 @@ test('6. Tablero — las 6 columnas tienen tarjetas (antes vacías)', async ({ p
 })
 
 test('7. Carlos (técnico interno) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
-  const token = await apiLogin(request, 'carlos@illuminations.com.pa')
+  const token = await apiLogin(request, 'carlos@atlantic.com.pa')
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }
 
   const list = await request.get(`${BASE}/api/servicios/tickets`, { headers })
@@ -208,7 +208,7 @@ test('7. Carlos (técnico interno) — API directa: 403 al intentar cambiar esta
 })
 
 test('8. Carlos (técnico interno) — UI: select de estado deshabilitado', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/09-carlos-tabla.png`, fullPage: true })
 

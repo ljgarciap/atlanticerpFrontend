@@ -27,7 +27,7 @@ test.describe.configure({ mode: 'serial' })
 
 test('1. Persistencia — el archivo cargado sigue apareciendo al reabrir la tarjeta (sin re-cargarlo)', async ({ page }) => {
   test.skip(CARD_ID === '', 'Requiere PREQA767_CARD_ID — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await openCard(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa767-01-tarjeta-abierta.png', fullPage: true })
 
@@ -36,7 +36,7 @@ test('1. Persistencia — el archivo cargado sigue apareciendo al reabrir la tar
 
 test('2. Escenario central — clic en el nombre abre la previsualización del PDF real', async ({ page }) => {
   test.skip(CARD_ID === '', 'Requiere PREQA767_CARD_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await openCard(page)
 
   await page.getByText(FILE_NAME).first().click()
@@ -62,7 +62,7 @@ test('2. Escenario central — clic en el nombre abre la previsualización del P
 
 test('3. Cerrar la previsualización regresa al detalle de la tarjeta', async ({ page }) => {
   test.skip(CARD_ID === '', 'Requiere PREQA767_CARD_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await openCard(page)
 
   await page.getByText(FILE_NAME).first().click()
@@ -80,7 +80,7 @@ test('3. Cerrar la previsualización regresa al detalle de la tarjeta', async ({
 
 test('4. Descargar es independiente de Ver — no abre el visor', async ({ page }) => {
   test.skip(CARD_ID === '', 'Requiere PREQA767_CARD_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await openCard(page)
 
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 }).catch(() => null)

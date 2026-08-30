@@ -235,7 +235,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 autoComplete="email"
-                placeholder="usuario@illuminations.com"
+                placeholder="usuario@atlantic.com"
                 {...loginReg('email')}
                 className={inputCls(!!loginErrors.email)}
               />

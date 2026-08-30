@@ -1039,7 +1039,7 @@ const PRODUCT_ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica'
  *    ProductDetailModal más arriba) ofrece "+ Crear familia" cuando el texto no matchea ninguna
  *    existente, vía el endpoint nuevo de creación-por-nombre.
  *    // TODO: backend batch4 — mismo endpoint, ver nota de FamilyCombobox.
- * 3. "Stock inicial" — el mockup hardcodea 5 bodegas por nombre (Illuminations/Mermas/Préstamo
+ * 3. "Stock inicial" — el mockup hardcodea 5 bodegas por nombre (Atlantic/Mermas/Préstamo
  *    Zona Libre/Reserva/Llano Bonito), pero esos nombres NO existen en las bodegas reales del
  *    sistema (`useWarehouses()` día de hoy: Bodega Central/Bodega Zona Libre/Showroom
  *    Cliente/Obarrio/SM/Merma/Reclamos y Devoluciones) — hardcodear los nombres del mockup

@@ -22,8 +22,8 @@ import { execSync } from 'node:child_process'
  * basura de una corrida previa el mismo día rompería el conteo exacto de visitas de la próxima).
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa (lider_servicios) — alta completa, vista Equipo/Agenda.
- *  - carlos@illuminations.com.pa   (tecnico_servicios) — solo consulta, sin alta.
+ *  - servicio@atlantic.com.pa (lider_servicios) — alta completa, vista Equipo/Agenda.
+ *  - carlos@atlantic.com.pa   (tecnico_servicios) — solo consulta, sin alta.
  *  - milena.e@grupolafayette.com   (vendedor_disenador) — solo vista de Agenda equipo (RN5).
  */
 test.describe.configure({ mode: 'serial' })
@@ -40,15 +40,15 @@ interface Fixture {
 
 function seedFixture(): Fixture {
   const script = `
-$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'illuminations')->first();
+$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'atlantic')->first();
 $tenant->makeCurrent();
 $now = \\Carbon\\Carbon::now('America/Panama');
 $stamp = ${Date.now()};
 
-$carlos = \\App\\Models\\User::where('email', 'carlos@illuminations.com.pa')->first();
+$carlos = \\App\\Models\\User::where('email', 'carlos@atlantic.com.pa')->first();
 $pedro = \\App\\Models\\User::where('email', 'santopedro181994@gmail.com')->first();
 $agustin = \\App\\Models\\User::where('email', 'agustinrodriguez141985@gmail.com')->first();
-$miguel = \\App\\Models\\User::where('email', 'garantias@illuminations.com.pa')->first();
+$miguel = \\App\\Models\\User::where('email', 'garantias@atlantic.com.pa')->first();
 
 function mk($numero, $tech, $estado, $start, $end) {
   return \\App\\Modules\\Servicios\\Models\\Ticket::create([
@@ -92,7 +92,7 @@ echo "FIXTURE_JSON:" . json_encode([
 
 function cleanupFixture(ticketIds: number[]) {
   const script = `
-$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'illuminations')->first();
+$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'atlantic')->first();
 $tenant->makeCurrent();
 \\App\\Modules\\Servicios\\Models\\Ticket::whereIn('id', [${ticketIds.join(',')}])->delete();
 echo "CLEANED\\n";
@@ -136,7 +136,7 @@ function techCard(page: Page, name: string) {
 }
 
 test('REQ-255/256 — Vista Equipo refleja estado, especialidad y visitas de hoy en tiempo real', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('Carlos Vergara')).toBeVisible()
@@ -153,7 +153,7 @@ test('REQ-255/256 — Vista Equipo refleja estado, especialidad y visitas de hoy
 })
 
 test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visitas muestra el estado vacío', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   await techCard(page, 'Carlos Vergara').getByRole('button', { name: /visitas hoy/i }).click()
@@ -174,18 +174,18 @@ test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visi
 })
 
 test('REQ-255 RN5 — clic en nombre/avatar abre el detalle con teléfono/correo/especialidad', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   await page.getByText('Miguel Castillo').click()
   const detail = page.getByTestId('internal-technician-detail-modal')
   await expect(detail).toBeVisible()
   await expect(detail.getByText('Garantías')).toBeVisible()
-  await expect(detail.getByText('garantias@illuminations.com.pa')).toBeVisible()
+  await expect(detail.getByText('garantias@atlantic.com.pa')).toBeVisible()
 })
 
 test('REQ-259 RN5 — técnico interno (tecnico_servicios) NO ve el botón de alta', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('+ Nuevo técnico')).not.toBeVisible()
@@ -205,7 +205,7 @@ test('REQ-260 RN5 — Vendedor/Diseñador tiene acceso de solo vista a Agenda eq
 })
 
 test('REQ-260 — Agenda equipo agrupa por técnico y filtra a uno solo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
   await page.getByText('Agenda equipo').click()
   await page.waitForTimeout(1000)
@@ -221,7 +221,7 @@ test('REQ-260 — Agenda equipo agrupa por técnico y filtra a uno solo', async 
 })
 
 test('REQ-259 — alta de técnico interno: validación bloquea envío sin nombre, éxito con datos válidos', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   await page.getByText('+ Nuevo técnico').click()
@@ -250,7 +250,7 @@ test('REQ-259 — alta de técnico interno: validación bloquea envío sin nombr
 })
 
 test('REQ-259 — doble clic en Guardar no crea 2 técnicos duplicados', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInternalTechnicians(page)
 
   const name2 = `${TECH_NAME} DblClick`

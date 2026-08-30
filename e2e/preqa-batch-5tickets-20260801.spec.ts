@@ -19,8 +19,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const MGMT_EMAIL = 'management@illuminations.test'
-const DESIGNER_EMAIL = 'designer@illuminations.test'
+const MGMT_EMAIL = 'management@atlantic.test'
+const DESIGNER_EMAIL = 'designer@atlantic.test'
 const PASS = 'Password123!'
 
 async function login(page: Page, email: string, pass = PASS) {

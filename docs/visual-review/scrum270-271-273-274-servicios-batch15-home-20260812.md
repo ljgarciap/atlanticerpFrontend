@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-12
 Corrido contra: stack Docker aislado `batch15review` (backend `:8095`, migrado + seedeado desde
-cero, tenant `illuminations`) + `vite dev` de `batch15-frontend` (`:5173`), NO `dev.atlanticerp.ai` —
+cero, tenant `atlantic`) + `vite dev` de `batch15-frontend` (`:5173`), NO `dev.atlanticerp.ai` —
 este trabajo todavía no se pusheó. Fusionado con Pre-QA en el mismo despacho (ver
 `docs/pre-qa/scrum270-271-273-274-servicios-batch15-home-20260812.md`), por preferencia del
 proyecto de reducir overhead de aprobación en batches (`feedback_gate_overhead_proportional_to_batch_size`).

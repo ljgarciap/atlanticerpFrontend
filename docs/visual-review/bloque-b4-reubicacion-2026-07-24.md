@@ -20,8 +20,8 @@ de la revisión, nunca commiteados).
   de llamar el endpoint directo sin pasar por la UI.
 - Frontend build (`npm run build`) confirmado más nuevo que el fix fuente y servido por nginx —
   verificado con `grep -o "Ver detalle" dist/assets/index-*.js`.
-**Usuarios de prueba:** `almacen@illuminations.com.pa` (Esteban Cardenas, `lider_bodega`) y
-`mbekhar@illuminations.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno) —
+**Usuarios de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, `lider_bodega`) y
+`mbekhar@atlantic.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno) —
 password = mismo email en ambos casos, confirmado con `Hash::check()` contra `password_hash` antes
 de arrancar.
 **Datos de prueba:** producto `VR-B4-TEST-001` (id 344) + 2 `WarehouseLocation` en Bodega Central
@@ -46,7 +46,7 @@ para el rechazo server-side del endpoint. Ningún hallazgo nuevo, ninguna regres
 
 ## 1. Fix específico — botón "Reubicar" vs "Ver detalle" en modo `pendiente`
 
-**Frontend (Playwright, `almacen@illuminations.com.pa`):**
+**Frontend (Playwright, `almacen@atlantic.com.pa`):**
 - Bodega Zona Libre (`modo_detalle = pendiente`), fila del producto de prueba: columna Acción
   muestra **"Ver detalle"**, botón con atributo `disabled` confirmado (`toBeDisabled()`), y
   **"Reubicar" tiene 0 coincidencias** en esa fila (`toHaveCount(0)`) — confirmado leyendo el DOM

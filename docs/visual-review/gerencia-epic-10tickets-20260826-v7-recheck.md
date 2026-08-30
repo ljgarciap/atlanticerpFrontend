@@ -29,7 +29,7 @@ el propio Gherkin del ticket:
 - Modal de confirmación secundario ("¿Aprobar/Rechazar X? / Sí, aprobar / Cancelar") — **presente**
 - **ACEPTABLE** (no bloquea): el modal es una implementación completamente nueva de Marly/Claude sin
   spec visual propia — el diseño (tarjeta centrada, badge de módulo, botones a la derecha) es
-  consistente con el resto del sistema de diseño de Illuminations (paleta teal/lima, sin
+  consistente con el resto del sistema de diseño de Atlantic (paleta teal/lima, sin
   iconografía de emoji — cumple regla SCRUM-56).
 
 ### SCRUM-167/169/170 — Tarjetas "Salud por módulo" redefinidas por Daniela (2026-08-25)

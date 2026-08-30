@@ -18,11 +18,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  *
  * Nota de entorno (doc obligatoria — ver instrucción del ticket "si falla, documentá qué
  * funcionó"): el login sugerido para este ticket en la memoria del proyecto era
- * idmar@illuminations.com.pa ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
+ * idmar@atlantic.com.pa ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
  * Postgres LOCAL de esta sesión, VentasDisenoDemoSeeder resuelve el rol "designer" seedeado a
- * neil.quiel@illuminations.com.pa (no a idmar, que localmente no tiene ninguna tarjeta propia
+ * neil.quiel@atlantic.com.pa (no a idmar, que localmente no tiene ninguna tarjeta propia
  * tras `tenants:artisan db:seed`). Se usó neil.quiel (Vendedor/Diseñador real) y
- * daniela@illuminations.com.pa (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
+ * daniela@atlantic.com.pa (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
  * ambas cuentas reales, no demo, password = mismo email, mismo patrón que el resto de
  * atlanticerp-frontend/e2e/.
  */
@@ -50,7 +50,7 @@ const errBanner = (page: Page) =>
 test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER vía que resuelva el dato', () => {
   test('Diseño → Crear cotización: falta superficie, se resuelve vía Editar/Guardar (escenario EXACTO de Daniela)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'neil.quiel@illuminations.com.pa')
+    await login(page, 'neil.quiel@atlantic.com.pa')
     await openCard(page, 'PreQA Lead 677')
 
     // Gate 1: falta superficie trabajada.
@@ -105,7 +105,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
 
   test('Cotización → Mover a Propuesta: 2 gates distintos en secuencia, cada banner se limpia sin mezclarse', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'daniela@illuminations.com.pa')
+    await login(page, 'daniela@atlantic.com.pa')
     await openCard(page, '[DEMO] Amenidades Delta')
 
     await page.getByRole('button', { name: /Mover a Propuesta/ }).click()
@@ -139,7 +139,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
 
   test('Lead → Crear cotización: falta contacto, se resuelve agregando un contacto (no reintentando el botón)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'neil.quiel@illuminations.com.pa')
+    await login(page, 'neil.quiel@atlantic.com.pa')
     await openCard(page, 'PreQA SubClient 677')
 
     await page.getByRole('button', { name: 'Crear cotización' }).click()

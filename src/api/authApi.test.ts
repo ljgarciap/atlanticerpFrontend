@@ -51,7 +51,7 @@ function getResponseHandlers() {
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Original', last_name: 'User', email: 'test@illuminations.test',
+    id: 1, first_name: 'Original', last_name: 'User', email: 'test@atlantic.test',
     phone: null, notes: null, department_id: null, language: 'es', security_level: 4,
     role: 'designer', role_id: 1, permissions: [], modules: {} as UserInfo['modules'],
     flags: { approve_large_amounts: false, manage_users: false },

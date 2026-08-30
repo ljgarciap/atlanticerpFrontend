@@ -16,8 +16,8 @@ import { execSync } from 'node:child_process'
  * `preqa-scrum214-215-216-logistica-20260805.spec.ts` — nunca IDs hardcodeados, `infra/test.sh`
  * comparte la misma Postgres que el stack local y la vacía entre corridas.
  */
-const LIDER_COMPRAS = 'gerencia2@illuminations.com.pa'
-const SIN_PERMISO = 'designer@illuminations.test'
+const LIDER_COMPRAS = 'gerencia2@atlantic.com.pa'
+const SIN_PERMISO = 'designer@atlantic.test'
 const STAMP = Date.now()
 
 interface Fixture {
@@ -76,7 +76,7 @@ test.beforeAll(() => {
 
 async function login(page: Page, email: string, password: string) {
   await page.goto('/')
-  await page.getByPlaceholder('usuario@illuminations.com').fill(email)
+  await page.getByPlaceholder('usuario@atlantic.com').fill(email)
   await page.getByPlaceholder('••••••••').fill(password)
   await page.getByRole('button', { name: /iniciar sesión/i }).click()
   await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 15000 })

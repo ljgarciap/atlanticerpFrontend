@@ -6,7 +6,7 @@ Fecha: 2026-08-12. Fusionado con Visual Review en el mismo despacho (ver
 ## Entorno
 
 Stack Docker aislado `batch15review` (postgres `:5436`, nginx `:8095`), levantado desde cero:
-tenant `illuminations` creado + migrado (`tenant:create`), `db:seed --force` (roster real de 32
+tenant `atlantic` creado + migrado (`tenant:create`), `db:seed --force` (roster real de 32
 usuarios + demo de Servicios), más 15 tickets fixture sembrados vía `tinker` para cubrir escenarios
 que el seeder estándar no ejercita (ver Paso 0):
 - 6 visitas HOY repartidas entre los 4 técnicos internos reales (para el límite de 5 + "Ver agenda
@@ -21,9 +21,9 @@ que el seeder estándar no ejercita (ver Paso 0):
 Backend: `.env` real (secrets del `.env` local del repo principal, `FILESYSTEM_DISK=local` para no
 tocar S3 real). Frontend: `vite dev` apuntando al backend aislado (proxy `/api` → `:8095`).
 Playwright CLI contra `http://localhost:5173`. Cuentas reales, password = email (regla del
-proyecto, nunca `*@illuminations.test`): `servicio@illuminations.com.pa` (Aaron, lider_servicios),
-`carlos@illuminations.com.pa` (tecnico_servicios), `garantias@illuminations.com.pa`
-(garantias_servicios), `daniela@illuminations.com.pa` (management).
+proyecto, nunca `*@atlantic.test`): `servicio@atlantic.com.pa` (Aaron, lider_servicios),
+`carlos@atlantic.com.pa` (tecnico_servicios), `garantias@atlantic.com.pa`
+(garantias_servicios), `daniela@atlantic.com.pa` (management).
 
 Smoke test permanente agregado: `e2e/preqa-scrum270-271-273-274-servicios-batch15-home-20260812.spec.ts`
 (12 casos, gate de rol + deep-link + rutas del día + indicadores — todos ejercitan comportamiento
@@ -211,14 +211,14 @@ Confirmado end-to-end, backend + frontend, con cuentas reales:
   Instalación cerrados en el mes — sembrado un caso real vía tinker (ticket Instalación cerrado +
   cotización aprobada por USD 2000) y confirmado `value: 2000` en la respuesta, luego limpiado.
 - **Backend (`PUT /api/servicios/home/installation-goal`):** confirmado `200` con `daniela@
-  illuminations.com.pa` (management) y `403` con `servicio@illuminations.com.pa` (lider_servicios,
+  atlantic.com.pa` (management) y `403` con `servicio@atlantic.com.pa` (lider_servicios,
   sin el rol requerido) — gate `role:superadmin,management` intacto. Validación `value >= 0` y
   `value` requerido confirmadas con `422` (con header `Accept: application/json` — sin ese header
   Laravel redirige 302 en vez de devolver JSON, comportamiento estándar de Laravel no relacionado
   con el fix, el frontend real siempre manda ese header vía axios).
 - **Frontend (`HomeMonthlyIndicators.tsx` + `InstallationGoalModal.tsx`):** ícono de lápiz visible
-  SOLO para `daniela@illuminations.com.pa` (management) — confirmado AUSENTE para
-  `servicio@illuminations.com.pa` (lider_servicios) y `carlos@illuminations.com.pa`
+  SOLO para `daniela@atlantic.com.pa` (management) — confirmado AUSENTE para
+  `servicio@atlantic.com.pa` (lider_servicios) y `carlos@atlantic.com.pa`
   (tecnico_servicios). Modal abre prefilleado con el valor actual, guarda un valor nuevo (77),
   panel refleja `0 / 77` de inmediato (sin recargar), leyenda cambia a "Meta ajustada manualmente
   por Gerencia para este mes." (i18n `home.indicators.installations.metaSource.manual_override`).

@@ -8,7 +8,7 @@ Mockup/referencia visual: `Catalogo_Ejemplo.pdf` (adjunto del ticket, PDF estát
 el cliente en REQ-621 — RN3/RN6 exigen explícitamente reutilizar ese formato).
 Entorno: local (Docker), rama `dev`, código ya commiteado y desplegado en dev.atlanticerp.ai
 (commits `8195e0d` backend / `269cc81` frontend).
-Cuenta usada: `designer@illuminations.test` (permiso `ventas_diseno.read`).
+Cuenta usada: `designer@atlantic.test` (permiso `ventas_diseno.read`).
 Herramienta: generación directa del PDF vía `POST /api/ventas-diseno/catalog/send-pdf`
 (no aplica Playwright para esta comparación — el artefacto a revisar es el PDF en sí, no una
 pantalla de navegador; los botones que lo disparan ya existían visualmente desde el batch anterior
@@ -35,7 +35,7 @@ existen), sin ningún dato de stock/disponibilidad.
 
 ## ACEPTABLE (nota, no bloquea)
 
-- **Header**: el mockup usa el isotipo de círculos + wordmark "ILLUMINATIONS" centrado, con
+- **Header**: el mockup usa el isotipo de círculos + wordmark "ATLANTIC" centrado, con
   subtítulo explícito "Documento de ejemplo — versión para compartir con clientes (sin información
   de inventario/stock)". El PDF real usa el wordmark en teal alineado a la izquierda + una línea
   divisoria gruesa, sin el isotipo de círculos ni la leyenda "sin información de inventario/stock".

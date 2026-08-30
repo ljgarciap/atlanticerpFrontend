@@ -11,8 +11,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://test.atlanticerp.ai'
-const PAOLA_EMAIL = 'paola@illuminations.com.pa'
-const PAOLA_PASS  = 'paola@illuminations.com.pa'
+const PAOLA_EMAIL = 'paola@atlantic.com.pa'
+const PAOLA_PASS  = 'paola@atlantic.com.pa'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)

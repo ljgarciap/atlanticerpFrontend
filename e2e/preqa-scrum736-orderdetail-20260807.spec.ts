@@ -18,8 +18,8 @@ import { execSync } from 'node:child_process'
  * hardcodeados de una corrida anterior.
  */
 
-const LIDER_COMPRAS_EMAIL = 'gerencia2@illuminations.com.pa'
-const LIDER_COMPRAS_PASS = 'gerencia2@illuminations.com.pa'
+const LIDER_COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
+const LIDER_COMPRAS_PASS = 'gerencia2@atlantic.com.pa'
 // Candidato de "rol sin permiso de edición" investigado en vivo, no asumido: el módulo Compras
 // hoy en el sistema SOLO es visible (`modules.compras.view`) para `lider_compras`/`management`,
 // y AMBOS security levels que lo ven tienen `can_edit=true` (confirmado con query directa a
@@ -29,8 +29,8 @@ const LIDER_COMPRAS_PASS = 'gerencia2@illuminations.com.pa'
 // routes/compras.php) — exactamente el mismo puente que usa el botón "Ver orden" del panel "Por
 // recibir" de Bodega Home (SCRUM-371/REQ-301). Confirmado en vivo: GET 200, PATCH
 // advance/liquidate y PUT update devuelven 403 con este mismo token.
-const BODEGA_EMAIL = 'almacen@illuminations.com.pa'
-const BODEGA_PASS = 'almacen@illuminations.com.pa'
+const BODEGA_EMAIL = 'almacen@atlantic.com.pa'
+const BODEGA_PASS = 'almacen@atlantic.com.pa'
 
 interface Fixture {
   stamp: number
@@ -74,7 +74,7 @@ $orderB = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' 
 $orderC = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'recibido', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 100, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()->subDays(5), 'en_transito_local_at' => now()->subDays(1)]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderC->id, 'catalog_product_id' => $prod1->id, 'quantity' => 1, 'unit_cost' => 100, 'subtotal' => 100]);
 
-$orderF = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'por_aprobar', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'aereo', 'who_pays_shipping' => 'illuminations', 'total_amount' => 500, 'currency' => 'USD', 'requires_mark_approval' => true]);
+$orderF = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'por_aprobar', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'aereo', 'who_pays_shipping' => 'atlantic', 'total_amount' => 500, 'currency' => 'USD', 'requires_mark_approval' => true]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderF->id, 'catalog_product_id' => $prod1->id, 'quantity' => 5, 'unit_cost' => 100, 'subtotal' => 500]);
 
 $orderE = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'ordenado', 'status_changed_at' => now(), 'modality' => 'directo', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 75, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()]);

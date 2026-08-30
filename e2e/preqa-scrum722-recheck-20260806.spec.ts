@@ -17,7 +17,7 @@ import { execSync } from 'node:child_process'
  * cotización sin confirmar, y confirmar en Pipeline que ambas terminan como
  * tarjetas independientes.
  */
-const VENDEDOR = 'neil.quiel@illuminations.com.pa'
+const VENDEDOR = 'neil.quiel@atlantic.com.pa'
 const STAMP = Date.now()
 
 interface Fixture {
@@ -36,7 +36,7 @@ function seedFixture(): Fixture {
   const architectName = `PreQA 722 Arq ${STAMP}`
 
   const script = `
-$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'illuminations')->first();
+$tenant = \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'atlantic')->first();
 $tenant->makeCurrent();
 $owner = \\App\\Models\\User::where('email', '${VENDEDOR}')->first();
 

@@ -6,13 +6,13 @@ import { test, expect, type Page } from '@playwright/test'
  * este trabajo todavía no se pusheó.
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa    (lider_servicios) — Aaron, único que cambia estado.
- *  - carlos@illuminations.com.pa      (tecnico_servicios) — solo lectura del estado.
- *  - garantias@illuminations.com.pa   (garantias_servicios) — solo lectura del estado.
- *  - daniela@illuminations.com.pa     (management) — solo lectura del estado.
- *  - neil.quiel@illuminations.com.pa  (vendedor_disenador) — menú reducido a 3 tabs.
- *  - conta@illuminations.com.pa       (lider_admin_contab) — sin acceso al módulo.
- *  - gerencia2@illuminations.com.pa   (lider_compras) — sin acceso al módulo.
+ *  - servicio@atlantic.com.pa    (lider_servicios) — Aaron, único que cambia estado.
+ *  - carlos@atlantic.com.pa      (tecnico_servicios) — solo lectura del estado.
+ *  - garantias@atlantic.com.pa   (garantias_servicios) — solo lectura del estado.
+ *  - daniela@atlantic.com.pa     (management) — solo lectura del estado.
+ *  - neil.quiel@atlantic.com.pa  (vendedor_disenador) — menú reducido a 3 tabs.
+ *  - conta@atlantic.com.pa       (lider_admin_contab) — sin acceso al módulo.
+ *  - gerencia2@atlantic.com.pa   (lider_compras) — sin acceso al módulo.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -45,7 +45,7 @@ test('1. Aaron — REQ-218: cambiar estado vía SELECT en tabla llega al backend
     }
   })
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/01-tabla-aaron.png`, fullPage: true })
 
@@ -79,7 +79,7 @@ test('2. Aaron — REQ-221: Tablero renderiza las 6 columnas (Reportado→Cancel
     }
   })
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.getByRole('button', { name: /tablero/i }).click()
   await page.waitForTimeout(1000)
@@ -95,7 +95,7 @@ test('2. Aaron — REQ-221: Tablero renderiza las 6 columnas (Reportado→Cancel
 })
 
 test('3. Carlos (tecnico_servicios) — select de estado DESHABILITADO pero visible, no oculto', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/04-tabla-carlos.png`, fullPage: true })
 
@@ -107,7 +107,7 @@ test('3. Carlos (tecnico_servicios) — select de estado DESHABILITADO pero visi
 })
 
 test('4. Daniela (management) — select de estado DESHABILITADO pero visible', async ({ page }) => {
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/05-tabla-daniela.png`, fullPage: true })
 
@@ -119,7 +119,7 @@ test('4. Daniela (management) — select de estado DESHABILITADO pero visible', 
 })
 
 test('5. Neil (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/06-tabla-neil.png`, fullPage: true })
 
@@ -145,7 +145,7 @@ test('5. Neil (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, s
 })
 
 test('6. Aaron — comparación: menú completo con 5 pestañas + 2 opciones de Técnicos', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const nav = page.locator('nav[aria-label]').first()
@@ -161,7 +161,7 @@ test('6. Aaron — comparación: menú completo con 5 pestañas + 2 opciones de 
 })
 
 test('7. Felix (Administración) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
-  await login(page, 'conta@illuminations.com.pa')
+  await login(page, 'conta@atlantic.com.pa')
   await page.screenshot({ path: `${DL_DIR}/09-felix-post-login.png`, fullPage: true })
 
   // Sidebar no debe mostrar el módulo Servicios en absoluto.
@@ -178,7 +178,7 @@ test('7. Felix (Administración) — SIN acceso al módulo Servicios (REQ-288 RN
 })
 
 test('8. Yirena (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.screenshot({ path: `${DL_DIR}/11-yirena-post-login.png`, fullPage: true })
 
   await page.goto(`${BASE}/servicios/tickets`)
@@ -189,7 +189,7 @@ test('8. Yirena (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', as
 })
 
 test('9. REQ-217 — filtros: sin fila de chips (RN5)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   // Sin fila de chips de tipo (RN5) — solo debe existir el select.
@@ -209,7 +209,7 @@ test('9b. REGRESIÓN — buscar con un ticket de cliente=null en pantalla ya no 
   const pageErrors: string[] = []
   page.on('pageerror', (err) => pageErrors.push(err.message))
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   // Confirmar primero que la tabla carga bien (incl. tickets con cliente=null creados por
@@ -234,7 +234,7 @@ test('9b. REGRESIÓN — buscar con un ticket de cliente=null en pantalla ya no 
 })
 
 test('10. REQ-217 RN6 — filtros (select Tipo) persisten al alternar Tabla/Tablero', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   // Se usa el select de Tipo para verificar RN6 — el buscador de texto ya se cubre aparte en 9b.
@@ -258,7 +258,7 @@ test('10. REQ-217 RN6 — filtros (select Tipo) persisten al alternar Tabla/Tabl
 
 test('11. REQ-249 — creación de ticket vía API: numeración secuencial y derivación de estados', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'servicio@illuminations.com.pa', password: 'servicio@illuminations.com.pa' },
+    data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -305,7 +305,7 @@ test('11. REQ-249 — creación de ticket vía API: numeración secuencial y der
 
 test('12. REQ-249 — input inválido: tipo faltante, subtipo inválido para el tipo, subtipo en claim/retrofit', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'servicio@illuminations.com.pa', password: 'servicio@illuminations.com.pa' },
+    data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -341,7 +341,7 @@ test('12. REQ-249 — input inválido: tipo faltante, subtipo inválido para el 
 
 test('13. REQ-218 backend — gate vía API directa (bypass del bug de ruta) para probar RN1-RN6 tal cual el backend las implementa', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'servicio@illuminations.com.pa', password: 'servicio@illuminations.com.pa' },
+    data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -395,7 +395,7 @@ test('13. REQ-218 backend — gate vía API directa (bypass del bug de ruta) par
 
 test('14. REQ-218 Escenario 4 — cotización Rechazada sin reemplazo bloquea (requiere update directo, sin módulo Cotización real)', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'servicio@illuminations.com.pa', password: 'servicio@illuminations.com.pa' },
+    data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -413,7 +413,7 @@ test('14. REQ-218 Escenario 4 — cotización Rechazada sin reemplazo bloquea (r
 
 test('15. Carlos (tecnico_servicios) — API directa: 403 al intentar cambiar estado aunque tenga servicios.edit', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'carlos@illuminations.com.pa', password: 'carlos@illuminations.com.pa' },
+    data: { email: 'carlos@atlantic.com.pa', password: 'carlos@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -431,7 +431,7 @@ test('15. Carlos (tecnico_servicios) — API directa: 403 al intentar cambiar es
 
 test('16. Daniela (management) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'daniela@illuminations.com.pa', password: 'daniela@illuminations.com.pa' },
+    data: { email: 'daniela@atlantic.com.pa', password: 'daniela@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -448,7 +448,7 @@ test('16. Daniela (management) — API directa: 403 al intentar cambiar estado',
 })
 
 test('17. REQ-216 Escenario 2 — "Sin tickets para este filtro" cuando el filtro no matchea nada', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   // Combinación de tipo+estado que no debería matchear ningún ticket sembrado

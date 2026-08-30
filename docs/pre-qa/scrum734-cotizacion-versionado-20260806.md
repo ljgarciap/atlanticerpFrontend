@@ -9,7 +9,7 @@
 ## Paso 0 — permisos angostos y valores paramétricos
 
 - `PricingSettings::min_margin_percent` (30% default) vive en una tabla paramétrica real, con CRUD (`PricingSettingsController`, permiso angosto `ventas_diseno.pricing.configure`) — **no hardcodeado**, confirmado en código.
-- La excepción de margen de Mark (`mbekhar@illuminations.com.pa`) y David (`david@grupolafayette.com`) — `ventas_diseno.override_min_margin` — está en `database/seeders/SpecialPermissionSeeder.php` (grants por email explícito, comentado con el ticket que lo originó), **no un grant manual** — corre en todos los entornos.
+- La excepción de margen de Mark (`mbekhar@atlantic.com.pa`) y David (`david@grupolafayette.com`) — `ventas_diseno.override_min_margin` — está en `database/seeders/SpecialPermissionSeeder.php` (grants por email explícito, comentado con el ticket que lo originó), **no un grant manual** — corre en todos los entornos.
 - Ambos puntos verificados también en vivo: usuario sin el permiso queda bloqueado duro; Mark, con el permiso, ve el modal de confirmación en vez del bloqueo (8/8 en la suite SCRUM-725).
 
 ## Loop — 1 vuelta, 2 hallazgos reales, ambos corregidos y re-verificados

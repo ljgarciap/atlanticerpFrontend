@@ -5,7 +5,7 @@ Ticket ancla: SCRUM-695 (REQ-615→622)
 Ruta: `/ventas-diseno/catalog` (`src/pages/ventas-diseno/CatalogPage.tsx`)
 Mockup de referencia: `Catalogo.html` (adjunto del ticket)
 Entorno: local (Docker + Vite dev server), rama `dev`, código SIN COMMITEAR
-Cuenta usada: neil.quiel@illuminations.com.pa (Vendedor/Diseñador) + daniela@illuminations.com.pa
+Cuenta usada: neil.quiel@atlantic.com.pa (Vendedor/Diseñador) + daniela@atlantic.com.pa
 (management, solo para el caso de navegación a Bodega con permiso)
 Herramienta: Playwright CLI (`npx playwright test`, specs descartables, no promovidas a `e2e/`)
 
@@ -98,8 +98,8 @@ REQ-622) sin ningún error.
 
 **REQ-620** — "Inventario de Compras" navega a `/inventario` (real). "Inventario de Bodega" navega
 a `/bodega/inventario` (real) — confirmado con un usuario que tiene `bodega.read`
-(daniela@illuminations.com.pa). Con un usuario Vendedor/Diseñador sin `bodega.read`
-(neil.quiel@illuminations.com.pa) el click SÍ dispara la navegación, pero la pantalla destino lo
+(daniela@atlantic.com.pa). Con un usuario Vendedor/Diseñador sin `bodega.read`
+(neil.quiel@atlantic.com.pa) el click SÍ dispara la navegación, pero la pantalla destino lo
 redirige por su propio gate de permiso — comportamiento correcto y a propósito según el docblock
 del componente ("RN3: no amplía ni restringe permisos acá"), no es un defecto de Catálogo.
 
@@ -147,7 +147,7 @@ COMMITEAR), confirmado que no quedó ninguna ocurrencia del path viejo
 (`compras:newProduct.categories.`) en el archivo.
 
 **Verificación en vivo (Playwright CLI, `localhost:5173`, backend Docker `infra-*` local, cuenta
-`neil.quiel@illuminations.com.pa`):** los 10 productos con `category` poblada (UPDATE manual de la
+`neil.quiel@atlantic.com.pa`):** los 10 productos con `category` poblada (UPDATE manual de la
 pasada anterior) seguían presentes en la BD local — no hizo falta re-sembrar. Confirmado con
 capturas de pantalla real (no solo lectura de código) en los 3 lugares:
 

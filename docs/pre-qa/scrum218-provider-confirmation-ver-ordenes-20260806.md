@@ -9,7 +9,7 @@ encontrar que REQ-148 declara su ubicación en Ver Órdenes pero solo estaba imp
 Logística.
 
 **Entorno:** Docker local (`infra-laravel-1`, `infra-nginx-1` puerto 8090), datos reales de
-negocio (usuarios reales del roster, nunca `*@illuminations.test`). Verificación vía Playwright
+negocio (usuarios reales del roster, nunca `*@atlantic.test`). Verificación vía Playwright
 contra el build real servido por nginx (`../../atlanticerp-frontend/dist`, confirmado reconstruido
 después del último cambio de código fuente).
 
@@ -47,7 +47,7 @@ documento) se eliminaron de la BD al cerrar la sesión.
 | 3 | Ausencia de UI de subida en Ver Órdenes | **PASA.** `input[type=file]` count = 0 en `/compras/ordenes/:id` (órdenes #1 y #2). En Logística (`/compras/logistica`) el mismo check da 1 — el checklist de documentos sigue ahí, subida exclusiva de Logística confirmada por inspección real del DOM, no solo lectura de código. |
 | 4 | Sincronización cross-página (SPA, sin reload manual) | **PASA.** Navegación 100% client-side (sidebar React Router, sin `page.reload()` ni `page.goto()` intermedio): Logística → clic en "Revalidar" (dispara mutación real) → clic en "Ver Órdenes" → clic en fila #1 → detalle de orden. La Confirmación del Proveedor en Ver Órdenes refleja el estado actualizado de inmediato (mismo `queryKey: ['compras/orders', orderId, 'documents', documentId, 'validation']` en `useProviderConfirmationValidation`, invalidado por la mutación `useValidateProviderConfirmation` sin importar desde qué página se disparó) — no se observó dato stale ni un segundo intento de refetch manual necesario. |
 | 5 | Regresión en Logística tras la extracción a componente compartido | **PASA.** Checklist de documentos, timeline de envío, e input de subida (`input[type=file]` count=1) siguen presentes e idénticos — no se detectó ningún cambio visible. |
-| 6 | Usuario con `bodega.read` sin `compras.read` accediendo a Ver Órdenes | **PASA (comportamiento ya conocido, no es hallazgo nuevo).** Con `logistica@illuminations.com.pa` (asistente_bodega): la página completa renderiza sin errores visibles ni pantalla rota — el nuevo card de Confirmación del Proveedor cae en el estado vacío ("Todavía no se subió...") en vez de mostrar el documento real, porque `GET .../documents` devuelve 403 (gateado por `compras.read`, no `bodega.read`) y el componente trata "sin datos" como "sin documento". Se registraron 4 requests 403 en la consola de red — mismo patrón preexistente que `PurchaseOrderPaymentsPanel` en la misma página (confirmado por la sesión principal antes de este Pre-QA), no una regresión introducida por este cambio. No hay error boundary ni pantalla rota. |
+| 6 | Usuario con `bodega.read` sin `compras.read` accediendo a Ver Órdenes | **PASA (comportamiento ya conocido, no es hallazgo nuevo).** Con `logistica@atlantic.com.pa` (asistente_bodega): la página completa renderiza sin errores visibles ni pantalla rota — el nuevo card de Confirmación del Proveedor cae en el estado vacío ("Todavía no se subió...") en vez de mostrar el documento real, porque `GET .../documents` devuelve 403 (gateado por `compras.read`, no `bodega.read`) y el componente trata "sin datos" como "sin documento". Se registraron 4 requests 403 en la consola de red — mismo patrón preexistente que `PurchaseOrderPaymentsPanel` en la misma página (confirmado por la sesión principal antes de este Pre-QA), no una regresión introducida por este cambio. No hay error boundary ni pantalla rota. |
 
 ## Lo que sí funciona (además de la tabla)
 

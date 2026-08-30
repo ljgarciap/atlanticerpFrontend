@@ -49,7 +49,7 @@ individual, sin importar cuándo se haya creado ese override ni qué valor tenga
 
 ### Camino feliz — confirmado en navegador real (Playwright, cuentas reales del roster)
 - Hide de Compras/Bodega/Servicios/Configuración + 2 botones de Catálogo → confirmado oculto para
-  `milena.e@grupolafayette.com` (Vendedor/Diseñador, Catálogo) y `daniela@illuminations.com.pa`
+  `milena.e@grupolafayette.com` (Vendedor/Diseñador, Catálogo) y `daniela@atlantic.com.pa`
   (Gerencia, Configuración/Seguridad — cuenta elegida a propósito porque SÍ tiene el permiso
   `security.users`, a diferencia de Milena, que nunca lo tiene y hubiera dado un falso negativo).
 - Restore → todo vuelve, confirmado con las mismas 2 cuentas.

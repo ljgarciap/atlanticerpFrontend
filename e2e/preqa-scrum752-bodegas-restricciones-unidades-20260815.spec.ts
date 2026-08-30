@@ -18,7 +18,7 @@ test.describe.configure({ mode: 'serial' })
 
 test('1. Escenario 3 — columna "Unidades en [bodega]" muestra el valor real de esa bodega, no el global', async ({ page }) => {
   test.skip(REF === '', 'Requiere PREQA752_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/bodegas`)
   await page.waitForTimeout(1200)
   // Bodega Central es la pestaña activa por defecto.
@@ -33,7 +33,7 @@ test('1. Escenario 3 — columna "Unidades en [bodega]" muestra el valor real de
 
 test('2. Escenario 1/2 — Zona Libre: sin acción propia y excluida como destino en otras bodegas', async ({ page }) => {
   test.skip(REF === '', 'Requiere PREQA752_REF')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/bodegas`)
   await page.waitForTimeout(1200)
 
@@ -62,7 +62,7 @@ test('2. Escenario 1/2 — Zona Libre: sin acción propia y excluida como destin
 
 test('3. Escenario 4 — bloqueo al exceder el máximo real de la bodega de origen', async ({ page }) => {
   test.skip(REF === '', 'Requiere PREQA752_REF')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/bodegas`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar" i]').first().fill(REF)
@@ -86,7 +86,7 @@ test('3. Escenario 4 — bloqueo al exceder el máximo real de la bodega de orig
 
 test('4. Escenario 5 — envío exitoso dentro del límite real', async ({ page }) => {
   test.skip(REF === '', 'Requiere PREQA752_REF')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/bodegas`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar" i]').first().fill(REF)

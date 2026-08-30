@@ -8,7 +8,7 @@ local. Reemplaza el placeholder "próximamente".
 **Mockup de referencia:** `2B__CRM_Lista_Proyectos.html` (attachment 11545 de SCRUM-690).
 **Método:** Playwright CLI contra la app LOCAL (`http://localhost:5173`, proxy a `infra-nginx-1`
 puerto 8090, contenedores Docker ya corrientes). Cuentas reales: Daniela Amaya
-(`daniela@illuminations.com.pa`, Gerencia) y Neil Quiel (`neil.quiel@illuminations.com.pa`,
+(`daniela@atlantic.com.pa`, Gerencia) y Neil Quiel (`neil.quiel@atlantic.com.pa`,
 Vendedor/Diseñador).
 **Nota de datos:** `pipeline_cards` estaba vacía en la BD local (0 filas) al empezar — no permitía
 ejercitar filtros/scope/click-de-fila/CSV con datos reales. Se corrió `db:seed --force` en el

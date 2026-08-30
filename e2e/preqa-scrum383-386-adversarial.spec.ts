@@ -14,7 +14,7 @@ import { test, expect } from '@playwright/test'
  * Los 3 tests de la primera pasada documentaban el estado ROTO (selector vacío pero visible, sin
  * entry point) — ya no aplican tal cual: se reescriben acá para confirmar el estado CORREGIDO.
  *
- * Fixtures sembrados a mano para esta pasada (`illuminations_bodega.orders`, ver reporte de la
+ * Fixtures sembrados a mano para esta pasada (`atlantic_bodega.orders`, ver reporte de la
  * tarea para el script `tinker` exacto) — IDs reales de esta corrida (cambian si se resetea el
  * schema de tenant, `infra/test.sh` comparte Postgres con Docker local, ver memoria
  * `feedback_local_test_db_no_es_fresh.md` — sembrados DESPUÉS del último `infra/test.sh` de la
@@ -47,7 +47,7 @@ async function login(page, email: string) {
  * sigue rechazando con 403 vía API directa (defensa en profundidad).
  */
 test('SCRUM-383 RN3 (corregido) — el botón "Asignar Picker" no se muestra para un Picker, y el backend igual responde 403 vía API directa', async ({ page }) => {
-  await login(page, 'apolonio.gonzalez@illuminations.com.pa')
+  await login(page, 'apolonio.gonzalez@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 
@@ -76,7 +76,7 @@ test('SCRUM-383 RN3 (corregido) — el botón "Asignar Picker" no se muestra par
 
 /** Regresión — el mismo botón SÍ debe seguir visible para un Jefe/Asistente (view_team=true). */
 test('SCRUM-383 RN3 — regresión: el botón "Asignar Picker" sigue visible para el Jefe de Bodega', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 
@@ -90,7 +90,7 @@ test('SCRUM-383 RN3 — regresión: el botón "Asignar Picker" sigue visible par
 })
 
 test('SCRUM-385/386 — picking parcial dispara Revisión de Inventario, edición de Alistada respeta tope', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 
@@ -157,7 +157,7 @@ test('SCRUM-385/386 — picking parcial dispara Revisión de Inventario, edició
  * negocio no permite llegar a Packing sin pasar por asignación de picker).
  */
 test('SCRUM-385 RN3 (corregido) — "Ver hoja de picking" reabre la hoja en modo solo lectura desde el detalle del pedido', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 

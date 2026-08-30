@@ -13,7 +13,7 @@ const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
 test('elegir Subcliente habilita "Agregar contacto existente" sin guardar antes', async ({ page }) => {
   await page.goto(`${BASE}/login`)
-  await page.locator('input[type="email"]').fill('management@illuminations.test')
+  await page.locator('input[type="email"]').fill('management@atlantic.test')
   await page.locator('input[type="password"]').fill('Password123!')
   await page.getByRole('button', { name: /iniciar sesión|login/i }).click()
   await page.waitForTimeout(2000)

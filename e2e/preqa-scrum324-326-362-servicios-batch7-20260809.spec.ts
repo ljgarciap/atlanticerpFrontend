@@ -6,9 +6,9 @@ import { test, expect, Page } from '@playwright/test'
  * SCRUM-362 (REQ-292 captura mensual de comisión + SLA por tipo).
  * Password default = email (BusinessRoleUserSeeder).
  */
-const LIDER_SERVICIOS = 'servicio@illuminations.com.pa'
-const TECNICO_SERVICIOS = 'carlos@illuminations.com.pa'
-const MANAGEMENT = 'daniela@illuminations.com.pa'
+const LIDER_SERVICIOS = 'servicio@atlantic.com.pa'
+const TECNICO_SERVICIOS = 'carlos@atlantic.com.pa'
+const MANAGEMENT = 'daniela@atlantic.com.pa'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

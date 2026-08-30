@@ -22,8 +22,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const FELIX = 'conta@illuminations.com.pa'
-const MARK  = 'mbekhar@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa'
+const MARK  = 'mbekhar@atlantic.com.pa'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -140,7 +140,7 @@ test('SCRUM-570 RN2 — detalle de F-0002 (Corrección de datos, no Devolución)
   await page.screenshot({ path: 'e2e/.tmp/preqa-b12-detalle-nc0002-aplicada.png', fullPage: true })
 })
 
-// NOTA: el password real de mbekhar@illuminations.com.pa ya no es el default (email) en
+// NOTA: el password real de mbekhar@atlantic.com.pa ya no es el default (email) en
 // dev.atlanticerp.ai — no se pudo loguear como Mark en esta sesión (sin acceso para resetearlo). El
 // modal de detalle es el MISMO componente para cualquier rol con acceso (puede_aprobar_rechazar
 // se calcula 100% server-side, ver CreditNoteService::show()) — ya verificado con Felix arriba.

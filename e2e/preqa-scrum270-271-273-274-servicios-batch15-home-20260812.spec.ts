@@ -16,9 +16,9 @@ import { test, expect, type Page } from '@playwright/test'
  * Indicadores del mes.
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa   (lider_servicios) — Aaron, ve TODO incl. "+ Nuevo ticket"
- *  - carlos@illuminations.com.pa     (tecnico_servicios) — NO debe ver "+ Nuevo ticket"
- *  - garantias@illuminations.com.pa  (garantias_servicios) — NO debe ver "+ Nuevo ticket"
+ *  - servicio@atlantic.com.pa   (lider_servicios) — Aaron, ve TODO incl. "+ Nuevo ticket"
+ *  - carlos@atlantic.com.pa     (tecnico_servicios) — NO debe ver "+ Nuevo ticket"
+ *  - garantias@atlantic.com.pa  (garantias_servicios) — NO debe ver "+ Nuevo ticket"
  *
  * ⚠️ Tests 1-12 (arriba) dependen de las fixtures de rutas/pendientes/indicadores sembradas para el
  * worktree `batch15review` original (backend :8095), que ya no existe — al re-correr esta suite
@@ -65,7 +65,7 @@ async function gotoHome(page: Page) {
 }
 
 test('1. Aaron (lider_servicios) — Encabezado: título, botones Agenda y + Nuevo ticket', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/01-home-aaron.png`, fullPage: true })
 
@@ -75,7 +75,7 @@ test('1. Aaron (lider_servicios) — Encabezado: título, botones Agenda y + Nue
 })
 
 test('2. Aaron — REQ-207 RN2: botón Agenda navega a Técnicos Internos → Agenda equipo sin filtro', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.getByRole('button', { name: 'Agenda', exact: true }).click()
   await page.waitForTimeout(1500)
@@ -90,7 +90,7 @@ test('2. Aaron — REQ-207 RN2: botón Agenda navega a Técnicos Internos → Ag
 })
 
 test('3. Aaron — REQ-207 RN1: + Nuevo ticket abre EXACTAMENTE el mismo formulario del módulo Tickets', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.getByRole('button', { name: 'Nuevo ticket' }).click()
   await page.waitForTimeout(1000)
@@ -105,7 +105,7 @@ test('3. Aaron — REQ-207 RN1: + Nuevo ticket abre EXACTAMENTE el mismo formula
 })
 
 test('4. Aaron — REQ-208: Rutas del día muestra máx. 5 de 6 visitas + "Ver agenda completa"', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/04-rutas-dia.png`, fullPage: true })
 
@@ -131,7 +131,7 @@ test('4. Aaron — REQ-208: Rutas del día muestra máx. 5 de 6 visitas + "Ver a
 })
 
 test('5. Aaron — REQ-210: Pendientes muestra badge=1 y SOLO el ticket >3 días (no el de 1 día)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/05-pendientes.png`, fullPage: true })
 
@@ -146,7 +146,7 @@ test('5. Aaron — REQ-210: Pendientes muestra badge=1 y SOLO el ticket >3 días
 })
 
 test('6. Aaron — REQ-210 RN5: "Ver ticket" navega al ticket CORRECTO (deep-link ?ticket=)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
 
   await page.getByRole('button', { name: 'Ver ticket' }).click()
@@ -165,7 +165,7 @@ test('6. Aaron — REQ-210 RN5: "Ver ticket" navega al ticket CORRECTO (deep-lin
 })
 
 test('7. Aaron — REQ-211: Indicadores del mes con datos reales sembrados', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/07-indicadores.png`, fullPage: true })
 
@@ -179,7 +179,7 @@ test('7. Aaron — REQ-211: Indicadores del mes con datos reales sembrados', asy
 })
 
 test('8. Carlos (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo ticket", panels SÍ visibles (RN1)', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/08-home-carlos.png`, fullPage: true })
 
@@ -193,7 +193,7 @@ test('8. Carlos (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo t
 })
 
 test('9. Miguel (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticket"', async ({ page }) => {
-  await login(page, 'garantias@illuminations.com.pa')
+  await login(page, 'garantias@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/09-home-miguel.png`, fullPage: true })
 
@@ -201,7 +201,7 @@ test('9. Miguel (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticke
 })
 
 test('10. Daniela (management) — SÍ debe ver "+ Nuevo ticket" (rol autorizado)', async ({ page }) => {
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/10-home-daniela.png`, fullPage: true })
 
@@ -209,7 +209,7 @@ test('10. Daniela (management) — SÍ debe ver "+ Nuevo ticket" (rol autorizado
 })
 
 test('11. Ruptura — recargar Home a mitad del modal "+ Nuevo ticket" no deja la app en estado roto', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await page.getByRole('button', { name: 'Nuevo ticket' }).click()
   await page.waitForTimeout(500)
@@ -223,7 +223,7 @@ test('11. Ruptura — recargar Home a mitad del modal "+ Nuevo ticket" no deja l
 })
 
 test('12. Ruptura — doble clic en "+ Nuevo ticket" no abre 2 modales superpuestos', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   const btn = page.getByRole('button', { name: 'Nuevo ticket' })
   await btn.click()
@@ -250,12 +250,12 @@ async function apiLogin(request: import('@playwright/test').APIRequestContext, e
 
 test('13. Gate de rol — pencil de "Ajustar meta" visible SOLO para superadmin/management', async ({ page }) => {
   // Daniela (management) — SÍ debe ver el ícono.
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoHome(page)
   await expect(page.getByTitle(/ajustar meta|meta de instalaciones/i)).toBeVisible()
 
   // Aaron (lider_servicios) — NO debe verlo (mismo gate que el backend, role:superadmin,management).
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoHome(page)
   await expect(page.getByTitle(/ajustar meta|meta de instalaciones/i)).toHaveCount(0)
   await page.screenshot({ path: `${DL_DIR}/13-gate-rol-sin-pencil-aaron.png`, fullPage: true })
@@ -263,13 +263,13 @@ test('13. Gate de rol — pencil de "Ajustar meta" visible SOLO para superadmin/
 
 test('14. Management guarda un valor nuevo — panel y leyenda se actualizan de inmediato', async ({ page, request }) => {
   // Captura el valor/origen actual vía API para poder restaurarlo al final (idempotencia).
-  const token = await apiLogin(request, 'daniela@illuminations.com.pa')
+  const token = await apiLogin(request, 'daniela@atlantic.com.pa')
   const before = await (await request.get(`${API_BASE}/api/servicios/home/summary`, {
     headers: { Authorization: `Bearer ${token}` },
   })).json()
   const originalMeta = before.indicadores_mes.instalaciones.meta as number
 
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoHome(page)
 
   const testValue = originalMeta === 999 ? 998 : 999
@@ -292,7 +292,7 @@ test('14. Management guarda un valor nuevo — panel y leyenda se actualizan de 
 })
 
 test('15. Validación — valor negativo o vacío deja "Guardar" deshabilitado (no llega a la API)', async ({ page }) => {
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await gotoHome(page)
   await page.getByTitle(/ajustar meta|meta de instalaciones/i).click()
   await page.waitForTimeout(400)
@@ -309,7 +309,7 @@ test('15. Validación — valor negativo o vacío deja "Guardar" deshabilitado (
 })
 
 test('16. Gate de backend — PUT installation-goal responde 403 para un rol sin permiso', async ({ request }) => {
-  const token = await apiLogin(request, 'servicio@illuminations.com.pa') // lider_servicios
+  const token = await apiLogin(request, 'servicio@atlantic.com.pa') // lider_servicios
   const res = await request.put(`${API_BASE}/api/servicios/home/installation-goal`, {
     headers: { Authorization: `Bearer ${token}` },
     data: { year: new Date().getFullYear(), month: new Date().getMonth() + 1, value: 50 },

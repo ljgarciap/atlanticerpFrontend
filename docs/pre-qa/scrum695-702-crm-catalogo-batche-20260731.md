@@ -5,7 +5,7 @@ Ticket ancla: SCRUM-695
 Ruta: `/ventas-diseno/catalog`
 Entorno: local (Docker `infra-*` + Vite dev server), rama `dev` en ambos repos, código commiteado
 localmente (backend `f435cd8`, frontend `7acafb8`) pero SIN pushear al arrancar esta sesión.
-Cuenta usada: `neil.quiel@illuminations.com.pa` (Vendedor/Diseñador — `ventas_diseno.read`, sin
+Cuenta usada: `neil.quiel@atlantic.com.pa` (Vendedor/Diseñador — `ventas_diseno.read`, sin
 `bodega.read` ni `compras.read`).
 Herramientas: curl directo contra la API (inspección de JSON crudo + concurrencia), `aws s3` CLI
 contra el bucket real `atlanticerp-dev`, Playwright CLI (`npx playwright test`, suite promovida a

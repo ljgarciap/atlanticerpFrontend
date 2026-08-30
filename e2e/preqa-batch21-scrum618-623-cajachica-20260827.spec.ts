@@ -18,10 +18,10 @@ test.describe.configure({ mode: 'serial' })
 // seguro correr el spec repetidas veces sin colisionar con datos de corridas previas.
 const BASE = 'http://localhost:8090'
 
-const FELIX = 'conta@illuminations.com.pa'
-const YANETH = 'asistente@illuminations.com.pa'
-const MARK = 'mbekhar@illuminations.com.pa'
-const DANIELA = 'daniela@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa'
+const YANETH = 'asistente@atlantic.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
+const DANIELA = 'daniela@atlantic.com.pa'
 
 const RUN_ID = Date.now().toString()
 
@@ -652,8 +652,8 @@ test('Extra — Configuración Fiscal (Mark): campo "máximo de intentos de rech
   // ejercitar el guardado real si hiciera falta.
   const seedIncompleto = await page.locator('input[name="razon_social"]').inputValue()
   if (seedIncompleto === '') {
-    await page.locator('input[name="razon_social"]').fill('Illuminations, S.A.')
-    await page.locator('input[name="nombre_comercial"]').fill('Illuminations')
+    await page.locator('input[name="razon_social"]').fill('Atlantic, S.A.')
+    await page.locator('input[name="nombre_comercial"]').fill('Atlantic')
     await page.locator('input[name="ruc"]').fill('155632146-2-2020')
     await page.locator('input[name="dv"]').fill('42')
     await page.locator('input[name="direccion_fiscal"]').fill('Ciudad de Panamá')

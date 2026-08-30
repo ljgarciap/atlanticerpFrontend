@@ -23,7 +23,7 @@ import { test, expect, type Page } from '@playwright/test'
  * vacío y este test falla en "esperando el primer item de la lista", no por una regresión real
  * del fix — resembrar antes de asumir que se rompió algo.
  */
-const EMAIL = 'gerencia2@illuminations.com.pa'
+const EMAIL = 'gerencia2@atlantic.com.pa'
 const STAMP = Date.now()
 
 async function login(page: Page) {

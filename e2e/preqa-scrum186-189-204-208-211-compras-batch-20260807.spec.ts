@@ -19,14 +19,14 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const LIDER_COMPRAS_EMAIL = 'gerencia2@illuminations.com.pa'
-const LIDER_COMPRAS_PASS  = 'gerencia2@illuminations.com.pa'
-// Nota: mbekhar@illuminations.com.pa (Mark, Gerencia — único aprobador real) NO se usa en esta
+const LIDER_COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
+const LIDER_COMPRAS_PASS  = 'gerencia2@atlantic.com.pa'
+// Nota: mbekhar@atlantic.com.pa (Mark, Gerencia — único aprobador real) NO se usa en esta
 // suite — su cuenta real en dev.atlanticerp.ai ya no tiene el password por defecto (mismo gap
 // documentado en el Pre-QA de SCRUM-211 del 2026-08-01), y no corresponde adivinarlo/forzarlo.
 // Ver notas en los tests de SCRUM-204/SCRUM-211 sobre cómo se cubrió el criterio sin su login.
-const BODEGA_EMAIL        = 'almacen@illuminations.com.pa'
-const BODEGA_PASS         = 'almacen@illuminations.com.pa'
+const BODEGA_EMAIL        = 'almacen@atlantic.com.pa'
+const BODEGA_PASS         = 'almacen@atlantic.com.pa'
 
 const STAMP = Date.now()
 
@@ -295,11 +295,11 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     const orderZL = await createOrder(request, token, provZL.id, { modality: 'zona_libre' })
     expect(orderZL.status).toBe('pendiente_liquidar')
 
-    // Camino de ruptura — requiere aprobación de Mark (aéreo + Illuminations paga): SÍ debe
+    // Camino de ruptura — requiere aprobación de Mark (aéreo + Atlantic paga): SÍ debe
     // nacer en "Por aprobar", sin importar la modalidad.
     const provAereo = await createProvider(request, token, 'europa')
     const orderAereo = await createOrder(request, token, provAereo.id, {
-      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'illuminations',
+      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'atlantic',
     })
     expect(orderAereo.status).toBe('por_aprobar')
 
@@ -337,7 +337,7 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     const token = await tokenFor(page)
     const prov = await createProvider(request, token, 'online')
     const order = await createOrder(request, token, prov.id, {
-      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'illuminations',
+      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'atlantic',
     })
     expect(order.status).toBe('por_aprobar')
 
@@ -509,7 +509,7 @@ test.describe('SCRUM-211 — Confirmación del proveedor', () => {
     const token = await tokenFor(page)
     const prov = await createProvider(request, token, 'europa')
     const order = await createOrder(request, token, prov.id, {
-      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'illuminations',
+      modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'atlantic',
     })
     expect(order.status).toBe('por_aprobar')
 
@@ -534,7 +534,7 @@ test.describe('SCRUM-211 — Confirmación del proveedor', () => {
     await login(page, LIDER_COMPRAS_EMAIL, LIDER_COMPRAS_PASS)
     const token = await tokenFor(page)
     const prov = await createProvider(request, token, 'europa')
-    // Sin aereo/Illuminations -> nace directo en pendiente_liquidar, nunca pasa por "Por
+    // Sin aereo/Atlantic -> nace directo en pendiente_liquidar, nunca pasa por "Por
     // aprobar" — cubre la mitad "habilitado" del gate sin depender del login de Mark.
     const order = await createOrder(request, token, prov.id, { modality: 'directo', shipping_type: 'maritimo' })
     expect(order.status).toBe('pendiente_liquidar')

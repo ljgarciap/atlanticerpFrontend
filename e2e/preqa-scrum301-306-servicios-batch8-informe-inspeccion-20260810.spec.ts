@@ -10,10 +10,10 @@ import { test, expect, Page } from '@playwright/test'
  *   T93 = RET-2026-0001 (retrofit, técnico=Pedro Santos, 1 producto asociado)
  *   T94 = RET-2026-0002 (retrofit, técnico=Carlos Vergara, SIN producto)
  */
-const AARON   = 'servicio@illuminations.com.pa'
-const MIGUEL  = 'garantias@illuminations.com.pa'
-const CARLOS  = 'carlos@illuminations.com.pa'
-const DANIELA = 'daniela@illuminations.com.pa'
+const AARON   = 'servicio@atlantic.com.pa'
+const MIGUEL  = 'garantias@atlantic.com.pa'
+const CARLOS  = 'carlos@atlantic.com.pa'
+const DANIELA = 'daniela@atlantic.com.pa'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

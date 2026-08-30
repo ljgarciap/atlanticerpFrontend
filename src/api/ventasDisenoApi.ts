@@ -395,7 +395,7 @@ export const ventasDisenoApi = {
       const url = URL.createObjectURL(res.data as Blob)
       const a   = document.createElement('a')
       a.href     = url
-      a.download = `Catalogo-Illuminations-${new Date().toISOString().slice(0, 10)}.pdf`
+      a.download = `Catalogo-Atlantic-${new Date().toISOString().slice(0, 10)}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     },

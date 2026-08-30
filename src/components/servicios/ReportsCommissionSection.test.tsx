@@ -25,7 +25,7 @@ const CARLOS_USER_ID = 18
 function technician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
     id: 1, user_id: CARLOS_USER_ID, nombre: 'Carlos Vergara', telefono: null,
-    email: 'carlos@illuminations.com.pa', especialidad: 'general', color: '#3B82F6',
+    email: 'carlos@atlantic.com.pa', especialidad: 'general', color: '#3B82F6',
     has_bonus_plan: true, estado: 'off', visitas_hoy: 0, herramientas_asignadas: 0,
     pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
     ...overrides,

@@ -39,7 +39,7 @@ lo incluían en la respuesta JSON de `GET /api/compras/orders` ni `GET /api/comp
 ni la tabla "Ver Órdenes" (`OrdersPage.tsx`) ni el detalle (`OrderDetailPage.tsx`) lo pintaban en
 ningún lado — tampoco vía el campo `notes` (que sí lo describe en texto: "Solicitud de Reserva
 Servicios — …"), porque `notes` tampoco se renderiza en esas pantallas. Confirmado en vivo:
-Yirena (`gerencia2@illuminations.com.pa`, `lider_compras`) no tenía NINGUNA forma de distinguir
+Yirena (`gerencia2@atlantic.com.pa`, `lider_compras`) no tenía NINGUNA forma de distinguir
 una orden de Servicios del resto — ni badge, ni columna, ni tooltip.
 
 **Fix aplicado (mismo dispatch):**

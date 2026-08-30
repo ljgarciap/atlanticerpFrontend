@@ -59,7 +59,7 @@ también `compras.edit` a nivel de `security_level_module_permissions` — los �
 Para verificar el gate de todas formas sin esperar a que exista ese usuario, se flippeó
 temporalmente `security_level_module_permissions.can_edit` a `false` para el nivel 8
 (`id=34`, el nivel de Whileyner Contreras — Gerencia Restringida), se logueó como
-`whil@illuminations.com.pa`, se confirmó: página `/compras/logistica` carga con normalidad
+`whil@atlantic.com.pa`, se confirmó: página `/compras/logistica` carga con normalidad
 (`READONLY_PAGE_HAS_LOGISTICA=true`), timeline visible (`READONLY_TIMELINE_VISIBLE=true`), botón
 de avance con conteo **0** en el DOM (`READONLY_ADVANCE_BUTTON_COUNT=0`). Se restauró el valor
 original (`can_edit=true`) inmediatamente después y se confirmó la restauración por consulta

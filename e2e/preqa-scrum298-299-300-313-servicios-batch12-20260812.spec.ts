@@ -34,17 +34,17 @@ import { execSync } from 'node:child_process'
  * ausencia del evento `download`, que no es un indicador confiable en CI headless.
  *
  * Cuentas reales (password = email, ver memoria project_roster_usuarios_reales_atlanticerp):
- *  - servicio@illuminations.com.pa (lider_servicios) — genera/envía/decide cotizaciones, Ajustes
+ *  - servicio@atlantic.com.pa (lider_servicios) — genera/envía/decide cotizaciones, Ajustes
  *    de Servicios visible pero NO editable.
- *  - daniela@illuminations.com.pa  (management) — Ajustes de Servicios editable (REQ-237 RN1).
+ *  - daniela@atlantic.com.pa  (management) — Ajustes de Servicios editable (REQ-237 RN1).
  *  - santopedro181994@gmail.com    (tecnico_servicios) — NO asignado a los tickets de este
  *    fixture, usado para confirmar visibilidad transversal del historial global (REQ-250 RN2).
  */
 test.describe.configure({ mode: 'serial' })
 
 const BASE             = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const LIDER_SERVICIOS  = 'servicio@illuminations.com.pa'
-const MANAGEMENT       = 'daniela@illuminations.com.pa'
+const LIDER_SERVICIOS  = 'servicio@atlantic.com.pa'
+const MANAGEMENT       = 'daniela@atlantic.com.pa'
 const TECNICO_AJENO    = 'santopedro181994@gmail.com'
 
 interface Fixture {
@@ -66,7 +66,7 @@ $mc = \\App\\Modules\\VentasDiseno\\Models\\MasterClient::create(['name' => 'E2E
 $sc = \\App\\Modules\\VentasDiseno\\Models\\SubClient::create(['master_client_id' => $mc->id, 'business_name' => 'E2E PreQA Batch12 Sub ${stamp}', 'tax_id' => '8-888-8888', 'delivery_address' => 'Calle E2E, Panama', 'category' => 'a_walkin']);
 $sp = \\App\\Modules\\VentasDiseno\\Models\\SalesProject::create(['sub_client_id' => $sc->id, 'name' => 'Proyecto E2E ${stamp}', 'tag' => 'both']);
 
-$aaron = \\App\\Models\\User::where('email', 'servicio@illuminations.com.pa')->first();
+$aaron = \\App\\Models\\User::where('email', 'servicio@atlantic.com.pa')->first();
 $base = ['tipo' => 'warranty', 'subtipo' => null, 'tipo_instalacion' => 'internal', 'sales_project_id' => $sp->id, 'cliente' => $sc->business_name, 'contacto' => 'Contacto E2E', 'telefono' => '6000-1234', 'email' => 'e2e@preqa-batch12.test', 'direccion' => 'Calle E2E, Panama', 'requerimientos_especiales' => null, 'observaciones' => null, 'estado' => \\App\\Modules\\Servicios\\Models\\Ticket::ESTADO_REPORTED, 'quote_status' => 'pending', 'inspection_report_status' => 'not_applicable', 'internal_technician_id' => null, 'scheduled_at' => null, 'scheduled_ends_at' => null, 'created_by' => $aaron->id];
 
 $t1 = \\App\\Modules\\Servicios\\Models\\Ticket::create(array_merge($base, ['numero' => 'GAR-2026-E2E${stamp}1', 'descripcion' => 'E2E Batch12 multi-version']));

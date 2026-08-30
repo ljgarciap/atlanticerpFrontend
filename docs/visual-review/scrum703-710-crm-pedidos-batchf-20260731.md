@@ -2,7 +2,7 @@
 
 Comparado contra el mockup real del ticket (`1F__Ventas_Disen_o_Pedidos.html`, adjunto en
 SCRUM-703) vía Playwright CLI contra `dev` local (`localhost:5173`), logueado como
-`designer@illuminations.test`.
+`designer@atlantic.test`.
 
 ## Resultado: sin CRÍTICOs — misma funcionalidad y elementos que el mockup
 

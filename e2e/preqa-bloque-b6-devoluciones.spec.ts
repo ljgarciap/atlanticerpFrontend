@@ -14,7 +14,7 @@ test.describe.configure({ mode: 'serial' })
 test.beforeAll(async () => {
   const { execSync } = await import('node:child_process')
   execSync(
-    `docker compose -f /Users/lgarcia/Documents/GitHub/Softclass/Illumination/atlanticerp/atlanticerp-backend/infra/docker-compose.yml exec -T postgres psql -U atlanticerp -d atlanticerp -c "truncate table illuminations_bodega.customer_return_lines, illuminations_bodega.customer_returns restart identity cascade; delete from illuminations_bodega.inventory_movements where catalog_product_id in (4,5); delete from illuminations_bodega.product_warehouse_stock where catalog_product_id in (4,5);"`,
+    `docker compose -f /Users/lgarcia/Documents/GitHub/Softclass/Illumination/atlanticerp/atlanticerp-backend/infra/docker-compose.yml exec -T postgres psql -U atlanticerp -d atlanticerp -c "truncate table atlantic_bodega.customer_return_lines, atlantic_bodega.customer_returns restart identity cascade; delete from atlantic_bodega.inventory_movements where catalog_product_id in (4,5); delete from atlantic_bodega.product_warehouse_stock where catalog_product_id in (4,5);"`,
     { encoding: 'utf-8' },
   )
 })
@@ -23,7 +23,7 @@ test.beforeAll(async () => {
 // Corre contra playwright.config.ts estándar del repo (dev server npm run dev, baseURL :5173,
 // que proxea /api a http://localhost:8090).
 // Fixture: Order VR-9001 (Order::STAGE_DESPACHADO), pipeline card "Residencia Punta Pacifica VR"
-// (owner id 12 = almacen@illuminations.com.pa), 2 OrderItem: NORDIC-40-VR (qty_delivered=5) y
+// (owner id 12 = almacen@atlantic.com.pa), 2 OrderItem: NORDIC-40-VR (qty_delivered=5) y
 // PERFIL-2M-VR (qty_delivered=3) — sembrada vía tinker (script en scratchpad de la sesión, mismo
 // que usó Visual Reviewer). infra/test.sh borra este fixture (resetea el schema de tenant) — si
 // hay que re-correr este spec desde cero, re-sembrar primero.
@@ -65,7 +65,7 @@ async function goToNew(page: Page) {
 
 test.describe('SCRUM-473 (REQ-403) — Bandeja', () => {
   test('columnas exactas + chip sin resultados muestra mensaje explicativo, no tabla vacía muda', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
 
     for (const col of ['Pedido', 'Cliente', 'Proyecto', 'Producto(s)', 'Fecha', 'Estado', 'Doc. firmado', 'Acciones']) {
@@ -86,7 +86,7 @@ test.describe('SCRUM-473 (REQ-403) — Bandeja', () => {
 
 test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
   test('RN1 buscador: sin resultados muestra mensaje explícito', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToNew(page)
     await page.locator('input[placeholder*="Buscar"]').fill('PEDIDO-QUE-NO-EXISTE-XYZ')
     await page.waitForTimeout(800)
@@ -94,7 +94,7 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
   })
 
   test('RN1: no existe atajo en la UI para crear sin partir de una guía — campos de contacto no existen antes de elegir orden', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToNew(page)
     // Sin buscar/seleccionar nada: no debe haber ningún input de contacto ni tabla de productos.
     await expect(page.locator('text=Nombre de quien devuelve')).toHaveCount(0)
@@ -102,7 +102,7 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
   })
 
   test('flujo completo: buscar → seleccionar → RN1 Cliente/Proyecto solo lectura (intento DOM) → contacto vacío/espacios/parcial bloquea → 2 productos con motivos distintos → guardar', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToNew(page)
 
     await page.locator('input[placeholder*="Buscar"]').fill('VR-9001')
@@ -190,7 +190,7 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
   })
 
   test('reload a mitad de flujo (orden ya seleccionada) pierde el estado sin romper la página', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToNew(page)
     await page.locator('input[placeholder*="Buscar"]').fill('VR-9001')
     await page.waitForTimeout(900)
@@ -208,7 +208,7 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
 
 test.describe('SCRUM-474/475/488 — expandir fila multi-producto + Ver detalle', () => {
   test('devolución con 2 productos: fila colapsa en "2 productos", expande detalle, y cada motivo se mantiene independiente en Ver detalle', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(600)
 
@@ -241,7 +241,7 @@ test.describe('SCRUM-474/475/488 — expandir fila multi-producto + Ver detalle'
 
 test.describe('SCRUM-483 (REQ-413) RN1 — no se pueden saltar pasos', () => {
   test('devolución SIN documento firmado: el único botón de acción de ciclo es "Cargar documento firmado", nunca "Confirmar recepción física"', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(600)
 
@@ -253,7 +253,7 @@ test.describe('SCRUM-483 (REQ-413) RN1 — no se pueden saltar pasos', () => {
 
 test.describe('SCRUM-478 — Cargar documento firmado', () => {
   test('tipo de archivo inválido rechazado client-side; tras cargar uno válido, la columna se actualiza y habilita Confirmar recepción', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(600)
 
@@ -291,7 +291,7 @@ test.describe('SCRUM-478 — Cargar documento firmado', () => {
 
 test.describe('SCRUM-476 — Ver formulario (firma simulada)', () => {
   test('sin documento firmado el botón "Ver formulario" sigue disponible (no bloquea el flujo)', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(600)
     const row = page.locator('tr', { has: page.getByText('Pendiente', { exact: true }) }).last()
@@ -301,7 +301,7 @@ test.describe('SCRUM-476 — Ver formulario (firma simulada)', () => {
 
 test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ciclo completo)', () => {
   test('RN1: cantidad REAL distinta a la solicitada es la que se suma al inventario, y "notifica" (credit_note_notified_at) en el mismo momento', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(700)
 
@@ -335,14 +335,14 @@ test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ci
     const result = await queryDb(`
       select cr.status, cr.received_at is not null as received, cr.credit_note_notified_at is not null as notified,
              l.qty_requested, l.qty_received
-      from illuminations_bodega.customer_returns cr
-      join illuminations_bodega.customer_return_lines l on l.customer_return_id = cr.id
+      from atlantic_bodega.customer_returns cr
+      join atlantic_bodega.customer_return_lines l on l.customer_return_id = cr.id
       order by cr.id;
     `)
     expect(result).toContain('esperando_nota_credito')
     expect(result).toContain(' t '.trim()) // received/notified = t (true)
 
-    const stock = await queryDb(`select catalog_product_id, quantity from illuminations_bodega.product_warehouse_stock where warehouse_id = 6 and catalog_product_id in (4,5) order by catalog_product_id;`)
+    const stock = await queryDb(`select catalog_product_id, quantity from atlantic_bodega.product_warehouse_stock where warehouse_id = 6 and catalog_product_id in (4,5) order by catalog_product_id;`)
     // NORDIC (id 4): pedido 2, real 1 → stock debe ser 1, NO 2.
     // PERFIL (id 5): pedido 1, real 1 → stock debe ser 1.
     expect(stock).toContain('4 |        1')
@@ -350,7 +350,7 @@ test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ci
   })
 
   test('luego de confirmada, "Simular finalización" la mueve a Finalizado; Ver detalle muestra el historial COMPLETO (no solo el estado final)', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(700)
 
@@ -384,7 +384,7 @@ test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ci
     })
     expect(created.id).toBeTruthy()
 
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToTray(page)
     await page.waitForTimeout(700)
     await page.getByRole('button', { name: 'Pendientes', exact: true }).click()
@@ -439,19 +439,19 @@ test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ci
   })
 
   test('efecto de rechazo verificado en base de datos: NO suma inventario, NO sella credit_note_notified_at', async () => {
-    const stock = await queryDb(`select coalesce(sum(quantity),0) from illuminations_bodega.product_warehouse_stock where catalog_product_id = 5 and warehouse_id != 6;`)
+    const stock = await queryDb(`select coalesce(sum(quantity),0) from atlantic_bodega.product_warehouse_stock where catalog_product_id = 5 and warehouse_id != 6;`)
     // el único stock de PERFIL (id 5) debe seguir siendo el de la devolución CONFIRMADA anterior
     // (1 unidad en Bodega Central, id 6) — nada más en ninguna otra bodega.
     expect(stock.trim()).toContain('0')
 
-    const rejected = await queryDb(`select credit_note_notified_at is null as notified_null, received_at is null as received_null from illuminations_bodega.customer_returns where contact_name = 'Para Rechazo Pre-QA';`)
+    const rejected = await queryDb(`select credit_note_notified_at is null as notified_null, received_at is null as received_null from atlantic_bodega.customer_returns where contact_name = 'Para Rechazo Pre-QA';`)
     expect(rejected).toContain(' t ')
   })
 })
 
 test.describe('SCRUM-477 — Ver guía de entrega original: mismos productos/cantidades que Pedidos', () => {
   test('la guía reusa exactamente OrderDocumentService — cross-check contra los OrderItem reales', async () => {
-    const items = await queryDb(`select reference_snapshot, qty_delivered from illuminations_bodega.order_items where order_id = (select id from illuminations_bodega.orders where order_number = 'VR-9001') order by id;`)
+    const items = await queryDb(`select reference_snapshot, qty_delivered from atlantic_bodega.order_items where order_id = (select id from atlantic_bodega.orders where order_number = 'VR-9001') order by id;`)
     expect(items).toContain('NORDIC-40-VR')
     expect(items).toContain('PERFIL-2M-VR')
     // Endpoint dedicado: /bodega/returns/{id}/delivery-guide reusa generateGuiaEntrega($return->order,
@@ -482,13 +482,13 @@ test.describe('RN2 (REQ-417) acumulado + mensaje específico del backend', () =>
     // anterior).
     const itemId = await getOrderItemId('NORDIC-40-VR')
     const accumulated = parseInt((await queryDb(
-      `select coalesce(sum(qty_requested),0) from illuminations_bodega.customer_return_lines where order_item_id = ${itemId} and customer_return_id in (select id from illuminations_bodega.customer_returns where status != 'rechazada');`,
+      `select coalesce(sum(qty_requested),0) from atlantic_bodega.customer_return_lines where order_item_id = ${itemId} and customer_return_id in (select id from atlantic_bodega.customer_returns where status != 'rechazada');`,
     )).trim(), 10)
     const remaining = 5 - accumulated
     test.skip(remaining < 2, `cupo restante de NORDIC (${remaining}) insuficiente para el escenario de este test`)
     const firstQty = remaining - 1
 
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await goToNew(page)
     await page.locator('input[placeholder*="Buscar"]').fill('VR-9001')
     await page.waitForTimeout(900)
@@ -533,7 +533,7 @@ async function login2FetchToken(): Promise<string> {
   const res = await fetch('http://localhost:8090/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'almacen@illuminations.com.pa', password: 'almacen@illuminations.com.pa' }),
+    body: JSON.stringify({ email: 'almacen@atlantic.com.pa', password: 'almacen@atlantic.com.pa' }),
   })
   const json = await res.json()
   return json.token

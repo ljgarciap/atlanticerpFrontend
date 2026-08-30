@@ -233,7 +233,7 @@ export default function OrderDetailPage() {
                 )}
                 {order.who_pays_shipping !== null && (
                   <span className="text-slate-400 font-normal">
-                    {' '}· {t(`compras:newOrder.shipping.whoPays${order.who_pays_shipping === 'illuminations' ? 'Illuminations' : 'Cliente'}`)}
+                    {' '}· {t(`compras:newOrder.shipping.whoPays${order.who_pays_shipping === 'atlantic' ? 'Atlantic' : 'Cliente'}`)}
                   </span>
                 )}
               </>

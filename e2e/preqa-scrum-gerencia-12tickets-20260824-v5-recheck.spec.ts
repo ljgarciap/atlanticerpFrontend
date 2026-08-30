@@ -6,8 +6,8 @@ import { test, expect, Page } from '@playwright/test'
 // barras del gráfico. Verifica en vivo contra dev.atlanticerp.ai cuáles hallazgos de
 // docs/pre-qa/gerencia-epic-12tickets-20260824-v4-final.md siguen vigentes tras ese fix.
 
-const WHIL = 'whil@illuminations.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@illuminations.com.pa' // Mark Approver real
+const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()

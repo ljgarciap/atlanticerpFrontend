@@ -48,7 +48,7 @@ Fixtures: tickets `GAR-2026-0001` (warranty con producto, técnico Miguel Castil
 `RET-2026-0001` (retrofit con producto, técnico Pedro Santos), `INS-2026-0003`
 (installation/inspection sin producto, informe ya completado), `RET-2026-0002` (retrofit sin
 producto, técnico Carlos Vergara) — mismos fixtures que documenta el e2e permanente de Pre-QA.
-Login real como Aaron Leis (`servicio@illuminations.com.pa`, Líder de Servicios).
+Login real como Aaron Leis (`servicio@atlantic.com.pa`, Líder de Servicios).
 
 - `vr-garantias-con-producto.png` — bloque Diagnóstico + Observación específica por producto.
 - `vr-retrofit-con-producto.png` — bloque Estado actual + Observación técnica por producto.

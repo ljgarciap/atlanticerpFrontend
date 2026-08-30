@@ -26,7 +26,7 @@ test.describe.configure({ mode: 'serial' })
 
 test('1. Bodega — antes de confirmar, el detalle no muestra nota de espera', async ({ page }) => {
   test.skip(REF === 'PREQA427-FIXTURE-MISSING', 'Requiere PREQA427_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/inventario`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar" i]').first().fill(REF)
@@ -42,7 +42,7 @@ test('1. Bodega — antes de confirmar, el detalle no muestra nota de espera', a
 
 test('2. Bodega — confirma 5 de 8 y la nota enriquecida muestra cantidad + usuario (Esteban Cardenas / Management Demo)', async ({ page }) => {
   test.skip(REF === 'PREQA427-FIXTURE-MISSING', 'Requiere PREQA427_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/inventario`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar" i]').first().fill(REF)
@@ -68,7 +68,7 @@ test('2. Bodega — confirma 5 de 8 y la nota enriquecida muestra cantidad + usu
 
 test('3. Compras — el detalle del mismo producto refleja lo que Bodega ya confirmó (cantidad + usuario), bloqueado de re-confirmar', async ({ page }) => {
   test.skip(REF === 'PREQA427-FIXTURE-MISSING', 'Requiere PREQA427_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/inventario`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar" i]').first().fill(REF)

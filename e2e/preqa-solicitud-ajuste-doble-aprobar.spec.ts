@@ -29,7 +29,7 @@ test('Doble clic rápido en Aprobar sobre la misma línea Pendiente — a lo sum
     }
   })
 
-  await login(page, 'management@illuminations.test', 'Password123!')
+  await login(page, 'management@atlantic.test', 'Password123!')
   await page.goto('/bodega/solicitud-ajuste')
   await page.waitForTimeout(1000)
 

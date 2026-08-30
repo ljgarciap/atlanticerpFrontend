@@ -54,7 +54,7 @@ export function emptyOrderDraft(): OrderDraft {
 }
 
 export function draftRequiresMarkApproval(draft: OrderDraft): boolean {
-  return draft.shippingType === 'aereo' && draft.whoPaysShipping === 'illuminations'
+  return draft.shippingType === 'aereo' && draft.whoPaysShipping === 'atlantic'
 }
 
 export function draftTotal(draft: OrderDraft): number {
@@ -264,7 +264,7 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="cliente">{t('compras:newOrder.shipping.whoPaysCliente')}</option>
-                  <option value="illuminations">{t('compras:newOrder.shipping.whoPaysIlluminations')}</option>
+                  <option value="atlantic">{t('compras:newOrder.shipping.whoPaysAtlantic')}</option>
                 </select>
               </div>
             )}

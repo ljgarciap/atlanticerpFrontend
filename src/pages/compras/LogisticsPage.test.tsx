@@ -74,7 +74,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
 function makeDetail(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderDetail {
   return {
     ...makeSummary(),
-    who_pays_shipping: 'illuminations',
+    who_pays_shipping: 'atlantic',
     liquidation_agency_id: null, liquidation_agency_name: null,
     container_number: null, carrier: null, approved_at: null,
     pending_amount_change: null, amount_change_requested_by: null,

@@ -23,7 +23,7 @@ Cambio: Agregado componente `PeriodLabel` que muestra el rango del período actu
 
 ## Verificación — 2026-07-27
 
-**Entorno:** dev.atlanticerp.ai (login: management@illuminations.test)  
+**Entorno:** dev.atlanticerp.ai (login: management@atlantic.test)  
 **Método:** Playwright CLI — navegación directa a /bodega/reportes, captura de pantalla en 3 estados de período.
 
 ### Checklist funcional — CUMPLE

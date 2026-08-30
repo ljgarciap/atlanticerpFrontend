@@ -22,7 +22,7 @@ import { test, expect, type Page } from '@playwright/test'
  * antes de navegar por "Técnicos".
  *
  * Cuenta real (password = email, ver memory/feedback_testing_uses_real_users_not_demo.md):
- *  - servicio@illuminations.com.pa (lider_servicios, Aaron) — acceso completo a Servicios.
+ *  - servicio@atlantic.com.pa (lider_servicios, Aaron) — acceso completo a Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -40,7 +40,7 @@ async function login(page: Page, email: string) {
 }
 
 test('1. RN4/Escenario 2 — encabezado de Tickets tiene toggle Tabla/Tablero + Ver cotizaciones + Nuevo ticket', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   await expect(page.getByRole('heading', { name: 'Tickets' })).toBeVisible()
@@ -52,7 +52,7 @@ test('1. RN4/Escenario 2 — encabezado de Tickets tiene toggle Tabla/Tablero + 
 })
 
 test('2. RN1/Escenario 1 — filtro Estado=Agendado sobrevive al toggle Tabla→Tablero', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
 
@@ -90,7 +90,7 @@ test('2. RN1/Escenario 1 — filtro Estado=Agendado sobrevive al toggle Tabla→
 })
 
 test('3. RN2/Escenario 2 — "Ver cotizaciones" navega a Historial de cotizaciones y cambia el encabezado', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
 
@@ -107,7 +107,7 @@ test('3. RN2/Escenario 2 — "Ver cotizaciones" navega a Historial de cotizacion
 })
 
 test('4. RN3/Escenario 3 — "Técnicos" → "Técnicos externos" navega directo, sin pasos intermedios, desde cualquier pantalla del módulo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   // Arrancar desde una pantalla DISTINTA de Tickets (Inicio) para confirmar "desde cualquier
   // pantalla del módulo Servicios", no solo desde Tickets.
   await page.goto(`${BASE}/servicios/inicio`)
@@ -128,7 +128,7 @@ test('4. RN3/Escenario 3 — "Técnicos" → "Técnicos externos" navega directo
 })
 
 test('5. RN4/Escenario 3 — encabezado de Técnicos externos: Ver cotizaciones/Nuevo ticket desaparecen, aparece Agregar técnico externo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1500)
 

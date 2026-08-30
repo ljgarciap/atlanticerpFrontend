@@ -28,7 +28,7 @@ test.describe.configure({ mode: 'serial' })
 
 test('1. Escenario 1 — clic en cualquier parte de la fila (no solo el nombre) abre el detalle', async ({ page }) => {
   test.skip(REF === 'PREQA431-FIXTURE-MISSING', 'Requiere PREQA431_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openDetail(page, REF)
 
   // Clic en la celda de Categoría/Familia (columna que antes NO abría el modal).
@@ -41,7 +41,7 @@ test('1. Escenario 1 — clic en cualquier parte de la fila (no solo el nombre) 
 
 test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 columnas, Bloque 2 completo (barcode/descripción antes ausentes)', async ({ page }) => {
   test.skip(REF === 'PREQA431-FIXTURE-MISSING', 'Requiere PREQA431_REF — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openDetail(page, REF)
   await page.getByText(REF, { exact: true }).first().click()
   await page.waitForTimeout(600)
@@ -80,7 +80,7 @@ test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 colu
 
 test('3. RN1 — producto inactivo muestra el aviso, sin botón de reactivar, tras el rediseño', async ({ page }) => {
   test.skip(REF_INACTIVE === 'PREQA431-INACTIVE-FIXTURE-MISSING', 'Requiere PREQA431_REF_INACTIVE')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/inventario`)
   await page.waitForTimeout(1200)
   // Los inactivos solo se listan bajo el chip "Inactivos" (index() filtra is_active=true por
@@ -100,7 +100,7 @@ test('3. RN1 — producto inactivo muestra el aviso, sin botón de reactivar, tr
 
 test('4. RN4 — sin categoría/familia asignada muestra fallback, nunca "undefined"', async ({ page }) => {
   test.skip(REF_INACTIVE === 'PREQA431-INACTIVE-FIXTURE-MISSING', 'Requiere PREQA431_REF_INACTIVE')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/inventario`)
   await page.waitForTimeout(1200)
   await page.getByRole('button', { name: 'Inactivos' }).click()
@@ -117,7 +117,7 @@ test('4. RN4 — sin categoría/familia asignada muestra fallback, nunca "undefi
 
 test('5. Sin iconografía de emoji en el modal rediseñado (SCRUM-56)', async ({ page }) => {
   test.skip(REF === 'PREQA431-FIXTURE-MISSING', 'Requiere PREQA431_REF')
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openDetail(page, REF)
   await page.getByText(REF, { exact: true }).first().click()
   await page.waitForTimeout(600)

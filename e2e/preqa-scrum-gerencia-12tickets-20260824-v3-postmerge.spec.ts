@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // copy/labels y wiring — el spec v2 (16 tests) quedó con selectores del texto viejo, por eso este
 // spec nuevo verifica contra el estado real post-deploy en vez de reciclar aserciones stale.
 
-const WHIL = 'whil@illuminations.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -128,7 +128,7 @@ test('SCRUM-171 — CONFIRMADO ARREGLADO: "Ver detalle" de Bodega ahora navega a
 })
 
 test('MEDIO#9 — CONFIRMADO ARREGLADO: un rol sin acceso ahora es redirigido fuera de /gerencia (antes se quedaba con pantalla de error)', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa') // Vendedor/Diseñador, sin permiso gerencia.view
+  await login(page, 'neil.quiel@atlantic.com.pa') // Vendedor/Diseñador, sin permiso gerencia.view
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   expect(page.url()).not.toContain('/gerencia') // RequirePermission ahora sí redirige

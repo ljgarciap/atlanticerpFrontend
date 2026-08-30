@@ -6,8 +6,8 @@ nueva exclusiva de Gerencia, sobre datos reales de `PipelineCard` (no una copia)
 
 Entorno: `dev.atlanticerp.ai` real (no Docker local), vía Playwright CLI + llamadas API directas
 (`curl`/`request` de Playwright con tokens reales extraídos de `localStorage`). Cuentas usadas:
-Whileyner Contreras (`whil@illuminations.com.pa`, Gerencia Restringida, rol `management`) — Daniela
-Amaya (`daniela@illuminations.com.pa`, reportera del ticket) no autenticó con la convención
+Whileyner Contreras (`whil@atlantic.com.pa`, Gerencia Restringida, rol `management`) — Daniela
+Amaya (`daniela@atlantic.com.pa`, reportera del ticket) no autenticó con la convención
 password=email, probablemente cambiada a mano; se usó otra cuenta Gerencia real en su lugar, mismo
 nivel de acceso al Dashboard. Milena Estrada (`milena.e@grupolafayette.com`, Vendedor/Diseñador)
 para el camino de ruptura de REQ-609.

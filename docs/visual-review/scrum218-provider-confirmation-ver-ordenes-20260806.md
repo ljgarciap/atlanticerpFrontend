@@ -12,7 +12,7 @@ detalle de orden (Ver Órdenes/`OrderDetailPage.tsx`), confirmado revisando ambo
 Jira. **No existe mockup de Ver Órdenes para esta funcionalidad** — la comparación de fidelidad
 visual contra mockup no aplica para la parte nueva; sí aplica confirmar que Logística no cambió.
 **Método:** verificación en vivo con Playwright contra Docker local (`http://localhost:8090`,
-login real `gerencia2@illuminations.com.pa`/`lider_compras`) + lectura de código.
+login real `gerencia2@atlantic.com.pa`/`lider_compras`) + lectura de código.
 
 ## Logística — confirmar que la extracción del componente no cambió nada visible
 

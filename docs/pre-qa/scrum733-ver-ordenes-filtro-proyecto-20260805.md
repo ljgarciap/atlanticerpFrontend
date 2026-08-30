@@ -26,7 +26,7 @@ por liquidar, REQ-151), Ver Órdenes no filtra por status en absoluto — porque
 | 6 | Búsqueda con string que no matchea nada | OK — dropdown vacío, sin crash |
 | 7 | Combinación Proyecto + Estado en AND (proyecto "Por aprobar" + status "Ordenado" → 0 filas; + status "Por aprobar" → 1 fila) | OK — combina en AND real |
 | 8 | Confirmación de querystring real (no solo lectura de código) — interceptado con `page.on('request')` | OK — `active_shipments` ausente en Ver Órdenes, `active_shipments=true` en Logística |
-| 9 | Rol sin `compras.read` (`designer@illuminations.test`) contra `GET /api/compras/orders/shipment-projects` | OK — 403, igual que antes del fix |
+| 9 | Rol sin `compras.read` (`designer@atlantic.test`) contra `GET /api/compras/orders/shipment-projects` | OK — 403, igual que antes del fix |
 | 10 | Tests automatizados — backend (`infra/test.sh --filter=PurchaseOrderLogisticsTest`), frontend (`OrdersPage.test.tsx`, `LogisticsPage.test.tsx`), PHPStan Level 8 | 26/26, 20/20, sin errores |
 
 ## Hallazgo — MEDIO, no bloqueante

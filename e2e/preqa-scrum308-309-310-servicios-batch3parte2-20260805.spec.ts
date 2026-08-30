@@ -9,9 +9,9 @@ import { test, expect, Page } from '@playwright/test'
  * para esta validación — local dev no tenía datos de Ventas & Diseño. Limpiar con
  * DemoCleanupController o a mano después de esta sesión.
  */
-const LIDER_SERVICIOS   = 'servicio@illuminations.com.pa'
+const LIDER_SERVICIOS   = 'servicio@atlantic.com.pa'
 const VENDEDOR_DISENADOR = 'milena.e@grupolafayette.com'
-const TECNICO_SERVICIOS  = 'carlos@illuminations.com.pa'
+const TECNICO_SERVICIOS  = 'carlos@atlantic.com.pa'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

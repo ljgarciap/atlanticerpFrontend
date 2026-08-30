@@ -2,7 +2,7 @@
 
 Fecha: 2026-07-29
 Reviewer: Visual Reviewer (AtlanticERP)
-Entorno: `https://dev.atlanticerp.ai` (usuario `management@illuminations.test`)
+Entorno: `https://dev.atlanticerp.ai` (usuario `management@atlantic.test`)
 Mockup de referencia: `1A__Ventas_Disen_o_Pipeline.html` (adjunto Jira 10136/10139/10142, subido por
 Daniela Amaya 2026-07-07) + `Requerimientos Ventas Diseño.xlsx` (REQ-019/020/022).
 

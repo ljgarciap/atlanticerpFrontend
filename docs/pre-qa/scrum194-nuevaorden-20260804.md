@@ -7,7 +7,7 @@ REFERENCIA" hoy 2026-08-04. Fix bajo revisión: precheck async (`comprasApi.prod
 `NewProductModal.tsx`, aprobado en Senior Review hoy mismo (19:12).
 
 Entorno: local (Docker `:8090` + Vite `:5173`, código de `dev` local con el fix ya mergeado).
-Usuario: `gerencia2@illuminations.com.pa` (lider_compras, Yirena Teng) — password = email, funcionó
+Usuario: `gerencia2@atlantic.com.pa` (lider_compras, Yirena Teng) — password = email, funcionó
 al primer intento, sin fallback necesario. Smoke test permanente:
 `atlanticerp-frontend/e2e/preqa-scrum194-nuevaorden-20260804.spec.ts` (1 test con 7 `test.step()`,
 corrido con `npx playwright test e2e/preqa-scrum194-nuevaorden-20260804.spec.ts --workers=1

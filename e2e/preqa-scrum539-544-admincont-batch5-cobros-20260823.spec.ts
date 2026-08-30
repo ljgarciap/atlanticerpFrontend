@@ -11,7 +11,7 @@ import { test, expect, type Page } from '@playwright/test'
  * fixtures de QA, ninguna cuenta real) con últimos 4 dígitos placeholder "0000" — Felix/Yaneth
  * deben corregirlos con los reales antes de que el auto-completado tenga sentido para el negocio.
  *
- * Cuenta real: conta@illuminations.com.pa (Felix, lider_admin_contab, password = email).
+ * Cuenta real: conta@atlantic.com.pa (Felix, lider_admin_contab, password = email).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -31,7 +31,7 @@ async function login(page: Page, email: string) {
 }
 
 test('1. REQ-463 — tarjetas del mes visibles al entrar a Cobros', async ({ page }) => {
-  await login(page, 'conta@illuminations.com.pa')
+  await login(page, 'conta@atlantic.com.pa')
   await page.goto(`${BASE}/admin-contab/cobros`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/01-cobros-inicial.png`, fullPage: true })
@@ -40,10 +40,10 @@ test('1. REQ-463 — tarjetas del mes visibles al entrar a Cobros', async ({ pag
 })
 
 test('2. REQ-464/465/466/467 — registrar cobro real: 2 facturas, saldo a favor, transferencia', async ({ page, request }) => {
-  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'conta@illuminations.com.pa', password: 'conta@illuminations.com.pa' } })
+  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'conta@atlantic.com.pa', password: 'conta@atlantic.com.pa' } })
   const { token } = await loginRes.json()
 
-  await login(page, 'conta@illuminations.com.pa')
+  await login(page, 'conta@atlantic.com.pa')
   await page.goto(`${BASE}/admin-contab/cobros`)
   await page.waitForTimeout(1200)
   await page.getByRole('button', { name: /registrar cobro/i }).click()
@@ -87,7 +87,7 @@ test('2. REQ-464/465/466/467 — registrar cobro real: 2 facturas, saldo a favor
 })
 
 test('3. REQ-466 — Tarjeta autocompleta Banistmo, oculto para Retención de impuestos', async ({ page }) => {
-  await login(page, 'conta@illuminations.com.pa')
+  await login(page, 'conta@atlantic.com.pa')
   await page.goto(`${BASE}/admin-contab/cobros`)
   await page.waitForTimeout(1200)
   await page.getByRole('button', { name: /registrar cobro/i }).click()

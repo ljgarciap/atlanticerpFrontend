@@ -31,7 +31,7 @@ const mockedStore = vi.mocked(useAuthStore)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Araúz', email: 'servicio@illuminations.com.pa',
+    id: 1, first_name: 'Aaron', last_name: 'Araúz', email: 'servicio@atlantic.com.pa',
     role: 'lider_servicios', role_id: 1, permissions: [], modules: {}, flags: {},
     security_level: 6, language: 'es',
     ...overrides,

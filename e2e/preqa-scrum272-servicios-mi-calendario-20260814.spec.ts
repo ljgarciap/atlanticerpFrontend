@@ -16,7 +16,7 @@ test('Carlos Vergara (tecnico_servicios) — Mi calendario muestra solo lo propi
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())
   })
 
-  await login(page, 'carlos@illuminations.com.pa', 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa', 'carlos@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(3000)
 
@@ -36,7 +36,7 @@ test('Aaron Leis (lider_servicios, gerencia sin visitas de campo) — Mi calenda
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())
   })
 
-  await login(page, 'servicio@illuminations.com.pa', 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa', 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(3000)
 
@@ -55,7 +55,7 @@ test('Toggle Día/Semana/Mes cambia el rango pedido al backend (RN4)', async ({ 
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())
   })
 
-  await login(page, 'carlos@illuminations.com.pa', 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa', 'carlos@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(2000)
   calendarRequests.length = 0

@@ -20,7 +20,7 @@ import { execSync } from 'node:child_process'
  * cotización aprobada vigente. Fix: `shipmentProjects.search()` nuevo, sin ese gate — ver
  * `PurchaseOrderController::searchShipmentProjects()`.
  */
-const LIDER_COMPRAS = 'gerencia2@illuminations.com.pa'
+const LIDER_COMPRAS = 'gerencia2@atlantic.com.pa'
 const STAMP = Date.now()
 
 interface Fixture {

@@ -38,7 +38,7 @@ async function openDetail(page, reference: string) {
 test.describe.configure({ mode: 'serial' })
 
 test('SCRUM-414 — Bodega ve todo solo lectura, sin crear/inactivar/precio-costo', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
 
@@ -55,7 +55,7 @@ test('SCRUM-414 — Bodega ve todo solo lectura, sin crear/inactivar/precio-cost
 })
 
 test('SCRUM-415 — "+ Nueva orden de compra" va a Zona Libre, no a un form general', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: '+ Nueva orden de compra' }).click()
@@ -64,7 +64,7 @@ test('SCRUM-415 — "+ Nueva orden de compra" va a Zona Libre, no a un form gene
 })
 
 test('SCRUM-416 — KPI "En atención": alta+sin_stock cuenta, baja+sin_stock NO', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/scrum416-00-kpis.png', fullPage: false })
@@ -78,7 +78,7 @@ test('SCRUM-416 — KPI "En atención": alta+sin_stock cuenta, baja+sin_stock NO
 })
 
 test('SCRUM-417 — Toggle Productos/Familias sin recarga', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Familias' }).click()
@@ -91,7 +91,7 @@ test('SCRUM-417 — Toggle Productos/Familias sin recarga', async ({ page }) => 
 })
 
 test('SCRUM-418 — Vista Familias sin botón "Generar compra" para Bodega', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Familias' }).click()
@@ -103,7 +103,7 @@ test('SCRUM-418 — Vista Familias sin botón "Generar compra" para Bodega', asy
 })
 
 test('SCRUM-419 — Filtros combinables: estado + rotación', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
 
@@ -116,7 +116,7 @@ test('SCRUM-419 — Filtros combinables: estado + rotación', async ({ page }) =
 })
 
 test('SCRUM-420 — Chip "Por ingresar" combinable, filtra solo pendientes', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /por ingresar/i }).click()
@@ -128,7 +128,7 @@ test('SCRUM-420 — Chip "Por ingresar" combinable, filtra solo pendientes', asy
 })
 
 test('SCRUM-421 — 14 columnas + Stock Total = Disponible + Por servir', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   const headers = await page.locator('thead th').allInnerTexts()
@@ -147,7 +147,7 @@ test('SCRUM-421 — 14 columnas + Stock Total = Disponible + Por servir', async 
 })
 
 test('SCRUM-422 — Bodega(s): desglose real sin inventar bodegas sin stock', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.locator('input[placeholder*="Buscar por referencia"]').fill('SPOT-EMP-010')
@@ -164,7 +164,7 @@ test('SCRUM-422 — Bodega(s): desglose real sin inventar bodegas sin stock', as
 })
 
 test('SCRUM-423 — Por servir: detalle con 2 pedidos activos, Entregado NO cuenta; caso vacío', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
 
@@ -191,7 +191,7 @@ test('SCRUM-423 — Por servir: detalle con 2 pedidos activos, Entregado NO cuen
 })
 
 test('SCRUM-424 — En camino: proveedor+fecha real; caso vacío sin botón (verificar consistencia)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
 
@@ -216,7 +216,7 @@ test('SCRUM-424 — En camino: proveedor+fecha real; caso vacío sin botón (ver
 })
 
 test('SCRUM-427 — Confirmar llegada física: flujo completo + rupturas (0, exceso, doble confirmación)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
 
@@ -263,7 +263,7 @@ test('SCRUM-427 — Confirmar llegada física: flujo completo + rupturas (0, exc
 })
 
 test('SCRUM-427b — reload a mitad del flujo (form de confirmar abierto)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await openDetail(page, 'RIEL-TRK-050')
@@ -274,7 +274,7 @@ test('SCRUM-427b — reload a mitad del flujo (form de confirmar abierto)', asyn
 })
 
 test('SCRUM-431 — modal solo lectura: banner "Inactivo" sin botón de reactivar; campo Familia', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /inactivos/i }).click()
@@ -289,7 +289,7 @@ test('SCRUM-431 — modal solo lectura: banner "Inactivo" sin botón de reactiva
 })
 
 test('SCRUM-432 — deep-link ?filter=en_atencion aplica el chip sin clic adicional', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario?filter=en_atencion')
   await page.waitForTimeout(1200)
   const text = await page.locator('table').innerText()
@@ -308,7 +308,7 @@ test('SCRUM-432 — deep-link ?filter=en_atencion aplica el chip sin clic adicio
  * con CAND-SAL-005 — la distinción es justo lo que separa este chip de "Críticos".
  */
 test('SCRUM-432 (fix) — deep-link ?filter=rotacion filtra por rotation=alta', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario?filter=rotacion')
   await page.waitForTimeout(1200)
   const text = await page.locator('table').innerText()
@@ -327,7 +327,7 @@ test('SCRUM-432 (fix) — deep-link ?filter=rotacion filtra por rotation=alta', 
  * filtra por rotación, solo por estado de stock.
  */
 test('SCRUM-432 (fix) — deep-link ?filter=criticos filtra por estado, no por rotación', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario?filter=criticos')
   await page.waitForTimeout(1200)
   const text = await page.locator('table').innerText()
@@ -338,14 +338,14 @@ test('SCRUM-432 (fix) — deep-link ?filter=criticos filtra por estado, no por r
 })
 
 test('Visual — chips y tabla sin iconografía de emoji (SCRUM-56)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/emoji-check-00-full-page.png', fullPage: true })
 })
 
 test('Permisos — rol SIN bodega.read no accede (ni por UI ni por API directa)', async ({ page }) => {
-  await login(page, 'neil.quiel@illuminations.com.pa')
+  await login(page, 'neil.quiel@atlantic.com.pa')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   const bodyText = await page.locator('body').innerText()

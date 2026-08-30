@@ -32,11 +32,11 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeProfile(overrides: Partial<CompanyProfile> = {}): CompanyProfile {
   return {
-    razon_social: 'Illuminations S.A.',
-    nombre_comercial: 'Illuminations',
+    razon_social: 'Atlantic S.A.',
+    nombre_comercial: 'Atlantic',
     logo_url: null,
     descripcion_corta: 'Diseño e iluminación',
-    sitio_web: 'https://illuminations.com.pa',
+    sitio_web: 'https://atlantic.com.pa',
     redes_sociales: [],
     moneda: 'USD',
     anio_fiscal: 'Enero-Diciembre',
@@ -54,7 +54,7 @@ function makeLocations(): Location[] {
 
 function makeContacts(): Contact[] {
   return [
-    { id: 1, area: 'Facturación', email: 'facturacion@illuminations.com.pa', telefono: '+507 000-0000', activo: true },
+    { id: 1, area: 'Facturación', email: 'facturacion@atlantic.com.pa', telefono: '+507 000-0000', activo: true },
   ]
 }
 
@@ -78,7 +78,7 @@ describe('CompanyProfilePage', () => {
   it('carga en modo solo lectura por defecto: campos deshabilitados y sin botón Guardar', async () => {
     renderPage()
 
-    const sitioWeb = await screen.findByDisplayValue('https://illuminations.com.pa')
+    const sitioWeb = await screen.findByDisplayValue('https://atlantic.com.pa')
     expect(sitioWeb).toBeDisabled()
     expect(screen.queryByText('adminContab:empresa.saveChanges')).not.toBeInTheDocument()
     expect(screen.getByText('common:actions.edit')).toBeInTheDocument()
@@ -86,22 +86,22 @@ describe('CompanyProfilePage', () => {
 
   it('al presionar Editar se desbloquean los campos editables y cambia a modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
 
-    expect(screen.getByDisplayValue('https://illuminations.com.pa')).not.toBeDisabled()
+    expect(screen.getByDisplayValue('https://atlantic.com.pa')).not.toBeDisabled()
     expect(await screen.findByText('adminContab:empresa.saveChanges')).toBeInTheDocument()
   })
 
   it('razón social, nombre comercial, moneda y año fiscal nunca se habilitan, ni en modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
 
-    expect(screen.getByDisplayValue('Illuminations S.A.')).toBeDisabled()
-    expect(screen.getByDisplayValue('Illuminations')).toBeDisabled()
+    expect(screen.getByDisplayValue('Atlantic S.A.')).toBeDisabled()
+    expect(screen.getByDisplayValue('Atlantic')).toBeDisabled()
     expect(screen.getByDisplayValue('USD')).toBeDisabled()
     expect(screen.getByDisplayValue('Enero-Diciembre')).toBeDisabled()
   })
@@ -109,7 +109,7 @@ describe('CompanyProfilePage', () => {
   it('Guardar cambios pide confirmación explícita antes de aplicar', async () => {
     mockedApi.companyProfile.update.mockResolvedValue(makeProfile({ descripcion_corta: 'Nueva descripción' }))
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
     fireEvent.click(await screen.findByText('adminContab:empresa.saveChanges'))
@@ -137,7 +137,7 @@ describe('CompanyProfilePage', () => {
 
   it('el formulario de alta de ubicación solo ofrece Oficina/Otra, nunca Bodega/Showroom', async () => {
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     fireEvent.click(await screen.findByText('adminContab:empresa.ubicaciones.addButton'))
@@ -149,7 +149,7 @@ describe('CompanyProfilePage', () => {
 
   it('una ubicación no editable (sourced de Bodega) no muestra acción de desactivar, ni en modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     await screen.findByText('Bodega Central')
@@ -164,7 +164,7 @@ describe('CompanyProfilePage', () => {
       { id: 1, nombre: 'Oficina Administrativa', tipo: 'Oficina', direccion: 'Panamá', activa: true, editable: true, source: 'admin_contab' },
     ])
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     await screen.findByText('Bodega Central')
@@ -185,7 +185,7 @@ describe('CompanyProfilePage', () => {
       id: 9, nombre: 'Oficina Norte', tipo: 'Oficina', direccion: 'Panamá', activa: true, editable: true, source: 'admin_contab',
     })
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     fireEvent.click(await screen.findByText('adminContab:empresa.ubicaciones.addButton'))
@@ -200,26 +200,26 @@ describe('CompanyProfilePage', () => {
 
   it('crea un contacto nuevo con área/email/teléfono', async () => {
     mockedApi.contacts.create.mockResolvedValue({
-      id: 2, area: 'Soporte', email: 'soporte@illuminations.com.pa', telefono: '+507 111-1111', activo: true,
+      id: 2, area: 'Soporte', email: 'soporte@atlantic.com.pa', telefono: '+507 111-1111', activo: true,
     })
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     fireEvent.click(await screen.findByText('adminContab:empresa.contactos.addButton'))
     fireEvent.change(screen.getByLabelText('adminContab:empresa.contactos.fields.area'), { target: { value: 'Soporte' } })
-    fireEvent.change(screen.getByLabelText('adminContab:empresa.contactos.fields.email'), { target: { value: 'soporte@illuminations.com.pa' } })
+    fireEvent.change(screen.getByLabelText('adminContab:empresa.contactos.fields.email'), { target: { value: 'soporte@atlantic.com.pa' } })
     fireEvent.change(screen.getByLabelText('adminContab:empresa.contactos.fields.telefono'), { target: { value: '+507 111-1111' } })
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.contacts.create).toHaveBeenCalledWith({
-      area: 'Soporte', email: 'soporte@illuminations.com.pa', telefono: '+507 111-1111',
+      area: 'Soporte', email: 'soporte@atlantic.com.pa', telefono: '+507 111-1111',
     }))
   })
 
   it('zona horaria exige una selección para guardar', async () => {
     renderPage()
-    await screen.findByDisplayValue('https://illuminations.com.pa')
+    await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     const zonaHorariaSelect = screen.getByLabelText('adminContab:empresa.regional.fields.zonaHoraria') as HTMLSelectElement

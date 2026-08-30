@@ -16,14 +16,14 @@ import { test, expect, type Page } from '@playwright/test'
 
 async function login(page: Page, email: string, password: string) {
   await page.goto('/')
-  await page.getByPlaceholder('usuario@illuminations.com').fill(email)
+  await page.getByPlaceholder('usuario@atlantic.com').fill(email)
   await page.getByPlaceholder('••••••••').fill(password)
   await page.getByRole('button', { name: /iniciar sesión/i }).click()
   await page.waitForURL(/\/(dashboard|compras|ventas|seguridad)/, { timeout: 10000 })
 }
 
 test('un rol sin acceso a Compras (vendedor_disenador) no ve el módulo en el sidebar ni puede leer datos reales en /compras/proveedores', async ({ page }) => {
-  await login(page, 'designer@illuminations.test', 'Password123!')
+  await login(page, 'designer@atlantic.test', 'Password123!')
   await expect(page.getByRole('link', { name: /compras/i })).toHaveCount(0)
 
   await page.goto('/compras/proveedores')
@@ -31,7 +31,7 @@ test('un rol sin acceso a Compras (vendedor_disenador) no ve el módulo en el si
 })
 
 test('el formulario de Proveedores tiene un selector de Origen (local/internacional) — B2, Senior Review 2026-07-16', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa', 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa', 'gerencia2@atlantic.com.pa')
   await page.goto('/compras/proveedores')
   await page.getByRole('button', { name: /agregar proveedor/i }).click()
 

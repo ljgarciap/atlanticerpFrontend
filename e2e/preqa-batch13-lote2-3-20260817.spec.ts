@@ -16,7 +16,7 @@ async function login(page: Page, email: string) {
 }
 
 test('SCRUM-244 — Desglose de stock por bodega: solo bodegas con stock > 0', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.goto('/inventario')
   await page.waitForTimeout(4000)
 
@@ -40,7 +40,7 @@ test('SCRUM-244 — Desglose de stock por bodega: solo bodegas con stock > 0', a
 })
 
 test('SCRUM-260 — Nuevo reclamo: no permite exceder cantidad pedida + captura visual del tamaño del modal', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.goto('/compras/reclamos')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: '+ Nuevo reclamo' }).click()
@@ -82,7 +82,7 @@ test('SCRUM-260 — Nuevo reclamo: no permite exceder cantidad pedida + captura 
 })
 
 test('SCRUM-478 — Devoluciones: Ver documento firmado abre/descarga (no solo un botón que aparece)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/devoluciones')
   await page.waitForTimeout(1200)
 
@@ -108,7 +108,7 @@ test('SCRUM-478 — Devoluciones: Ver documento firmado abre/descarga (no solo u
 })
 
 test('SCRUM-393 — Registrar entrega: columna Disponible presente + motivo obligatorio cuando entregado < pedido', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 

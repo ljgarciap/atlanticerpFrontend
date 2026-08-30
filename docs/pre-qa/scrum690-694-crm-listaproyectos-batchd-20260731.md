@@ -27,7 +27,7 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
   arriba.
 - **Rol "Líder" vs "Gerencia"**: no son sinónimos automáticos en este módulo — se confirmó en
   código (`RoleModuleVisibility`) que solo el rol `management` tiene `can_view_team=true` para el
-  módulo `ventas_diseno`; el rol `lider_admin_contab` (Felix, `conta@illuminations.com.pa`) no
+  módulo `ventas_diseno`; el rol `lider_admin_contab` (Felix, `conta@atlantic.com.pa`) no
   tiene ninguna fila de visibilidad para `ventas_diseno` en absoluto (`view=false`), por lo que ni
   siquiera puede entrar a `/crm/projects` (403 backend, redirect frontend). Esto es consistente con
   el resto del módulo (mismo gate que Pipeline/Clientes), no es un gap de este batch.

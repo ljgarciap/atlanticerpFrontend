@@ -88,7 +88,7 @@ function makeTiers(): CommissionTier[] {
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Felix', last_name: 'Test', email: 'felix@illuminations.com.pa',
+    id: 1, first_name: 'Felix', last_name: 'Test', email: 'felix@atlantic.com.pa',
     role: 'lider_admin_contab', permissions: [],
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,

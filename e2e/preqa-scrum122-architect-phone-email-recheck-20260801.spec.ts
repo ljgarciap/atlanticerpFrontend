@@ -11,8 +11,8 @@ import { test, expect, type Page } from '@playwright/test'
  * phone/email. Fix renders them as secondary text under the Arquitecto picker,
  * same visual pattern as the Contacts list (`text-slate-400`, "·" separator).
  *
- * Uses a REAL account (neil.quiel@illuminations.com.pa, password = email per
- * CoreUserSeeder default, unchanged) — *@illuminations.test demo accounts were
+ * Uses a REAL account (neil.quiel@atlantic.com.pa, password = email per
+ * CoreUserSeeder default, unchanged) — *@atlantic.test demo accounts were
  * removed from the roster (project rule, 2026-07-30).
  *
  * Serial — same rationale as other Pre-QA specs in this repo (CrowdSec/ModSecurity
@@ -27,7 +27,7 @@ import { test, expect, type Page } from '@playwright/test'
  * that may not exist in the environment running this file:
  *
  *   docker compose -f infra/docker-compose.yml exec -T postgres psql -U atlanticerp -d atlanticerp -c \
- *     "INSERT INTO illuminations_ventas_diseno.architects (name, phone, email, created_at, updated_at) \
+ *     "INSERT INTO atlantic_ventas_diseno.architects (name, phone, email, created_at, updated_at) \
  *      VALUES ('PreQA Arq Vacio Legacy <ts>', NULL, NULL, now(), now());"
  *
  *   PREQA_LEGACY_ARCHITECT_NAME='PreQA Arq Vacio Legacy <ts>' npx playwright test \
@@ -43,8 +43,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:5173'
-const EMAIL = 'neil.quiel@illuminations.com.pa'
-const PASS  = 'neil.quiel@illuminations.com.pa'
+const EMAIL = 'neil.quiel@atlantic.com.pa'
+const PASS  = 'neil.quiel@atlantic.com.pa'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)
@@ -188,7 +188,7 @@ test('1-3. Architect with only phone / only email / neither — no stray separat
   // before this validation existed, or a hand-edited record), never producible
   // through the current create flow. Simulated by seeding directly at the DB layer
   // (bash, before this spec ran): `PreQA Arq Vacio Legacy <ts>` with phone=NULL,
-  // email=NULL in illuminations_ventas_diseno.architects.
+  // email=NULL in atlantic_ventas_diseno.architects.
   const legacyName = process.env.PREQA_LEGACY_ARCHITECT_NAME
   test.skip(!legacyName, 'PREQA_LEGACY_ARCHITECT_NAME env var not set — see spec comment for how to seed it')
   await newQuote(page)
@@ -306,7 +306,7 @@ test('6. Switch architect A (with data) -> B (without data) without saving — n
 test('7. Long / unusual characters in phone+email do not break layout', async ({ page }) => {
   await login(page)
   const uniq = Date.now()
-  const longEmail = `preqa.very.long.email.address.for.layout.stress.${uniq}@subdomain.illuminations-example.com.pa`
+  const longEmail = `preqa.very.long.email.address.for.layout.stress.${uniq}@subdomain.atlantic-example.com.pa`
   const weirdPhone = '+507 (6000) 5555 ext.9999 / WhatsApp'
 
   await newQuote(page)

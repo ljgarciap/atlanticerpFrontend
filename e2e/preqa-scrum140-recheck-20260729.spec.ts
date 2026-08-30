@@ -4,7 +4,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Visual Reviewer RE-CHECK — SCRUM-140 (REQ-048/049), commit ae6d5db.
  *
  * Prior Visual Review (docs/visual-review/scrum-140-2026-07-29.md, commit bcbf1e2) found 1
- * CRITICAL: payment instructions ("Cheque a nombre de: ILLUMINATIONS USA CORP" + ACH account
+ * CRITICAL: payment instructions ("Cheque a nombre de: ATLANTIC USA CORP" + ACH account
  * line) and the company contact footer (address/phone/email/web) from the mockup's footerHtml
  * were entirely missing from QuoteDocument.tsx.
  *
@@ -19,17 +19,17 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const DESIGNER_EMAIL = 'designer@illuminations.test'
+const DESIGNER_EMAIL = 'designer@atlantic.test'
 const DESIGNER_PASS  = 'Password123!'
 
 const CHECK_PAYABLE = 'Cheque a nombre de'
-const COMPANY_NAME = 'ILLUMINATIONS USA CORP'
+const COMPANY_NAME = 'ATLANTIC USA CORP'
 const ACH_LABEL = 'Pagos por ACH'
 const ACH_ACCOUNT = 'CTA CORRIENTE BANCO GENERAL N° 03-01-01-074455-4'
 const FOOTER_ADDR = 'Calle 57 Este'
 const FOOTER_PHONE = '269-8051'
-const FOOTER_EMAIL = 'info@illuminations.com.pa'
-const FOOTER_WEB = 'www.illuminationslatam.com'
+const FOOTER_EMAIL = 'info@atlantic.com.pa'
+const FOOTER_WEB = 'www.atlanticlatam.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)

@@ -11,7 +11,7 @@ test.describe.configure({ mode: 'serial' })
 // ver memoria feedback_playwright_spec_default_baseurl_remote_gotcha).
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const WHIL = 'whil@illuminations.com.pa' // Gerencia Restringida, Nivel 8
+const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8
 const WHIL_PASSWORD = WHIL // default = email, confirmado en v7/v8
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {

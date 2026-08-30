@@ -35,7 +35,7 @@ function todayStartAt(hour = 12): string {
 function makeEvent(overrides: Partial<OutlookCalendarEvent> = {}): OutlookCalendarEvent {
   return {
     id: '1', title: 'Visita técnica', start_at: todayStartAt(), end_at: null,
-    all_day: false, location: null, organizer: null, owner_email: 'designer@illuminations.test', owner_name: null,
+    all_day: false, location: null, organizer: null, owner_email: 'designer@atlantic.test', owner_name: null,
     ...overrides,
   }
 }

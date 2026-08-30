@@ -8,7 +8,7 @@
 `npm run dev` (Vite, puerto 5173) vía `webServer` de `playwright.config.ts`.
 **Herramienta:** Playwright CLI (`npx playwright test`) — specs temporales dentro de
 `atlanticerp-frontend/e2e/_vr_b6_*.spec.ts`, borrados al cierre de la revisión, nunca commiteados.
-**Usuario de prueba:** `almacen@illuminations.com.pa` (Esteban Cardenas, Jefe de Bodega,
+**Usuario de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, Jefe de Bodega,
 password = email).
 
 **Estado del código revisado:** implementación local en `dev` (ambos repos), sin push a origin

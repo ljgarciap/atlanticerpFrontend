@@ -16,7 +16,7 @@ async function login(page, email: string, password: string) {
 test('Bodegas — las 7 pestañas se muestran, Bodega Central por defecto (REQ-381)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'designer@illuminations.test', 'Password123!')
+  await login(page, 'designer@atlantic.test', 'Password123!')
   await page.goto('/bodega/bodegas')
 
   await expect(page.getByRole('button', { name: 'Bodega Central' })).toBeVisible()
@@ -32,7 +32,7 @@ test('Bodegas — las 7 pestañas se muestran, Bodega Central por defecto (REQ-3
 test('Bodegas — chip "Espacio libre" no rompe la pantalla (regresión CRÍTICO Pre-QA 2026-07-21)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'designer@illuminations.test', 'Password123!')
+  await login(page, 'designer@atlantic.test', 'Password123!')
   await page.goto('/bodega/bodegas')
 
   await page.getByRole('button', { name: /Espacio libre/i }).click()
@@ -51,7 +51,7 @@ test('Bodegas — navegar a la pantalla nunca crashea, tenga o no el permiso el 
   // RequirePermission redirija o que la pantalla cargue con datos reales.
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'designer@illuminations.test', 'Password123!')
+  await login(page, 'designer@atlantic.test', 'Password123!')
   await page.goto('/bodega/bodegas')
   await page.waitForTimeout(1000)
 

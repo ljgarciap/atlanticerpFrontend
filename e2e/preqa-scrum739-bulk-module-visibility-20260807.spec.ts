@@ -8,7 +8,7 @@ import { test, expect, Page } from '@playwright/test'
  * validar: un override individual preexistente en un módulo, sobreviviendo (o no) a un ciclo
  * bulk-hide → bulk-restore de ESE MISMO módulo.
  *
- * Cuentas reales (NUNCA *@illuminations.test, no existen en esta BD):
+ * Cuentas reales (NUNCA *@atlantic.test, no existen en esta BD):
  *   superadmin: lujogarpin78@gmail.com (password = mismo email)
  *   Vendedor/Diseñador: milena.e@grupolafayette.com (password = mismo email)
  *

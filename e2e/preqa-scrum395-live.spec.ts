@@ -18,7 +18,7 @@ async function login(page, email: string) {
 test.describe.configure({ mode: 'serial' })
 
 test('1. PED-2026-0004 (Por despachar) — Ver guía, Imprimir abre PDF real (no window.print)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto(`${BASE}/bodega/pedidos`)
   await page.waitForTimeout(1200)
   await page.locator('input[placeholder*="Buscar"]').fill('PED-2026-0004')

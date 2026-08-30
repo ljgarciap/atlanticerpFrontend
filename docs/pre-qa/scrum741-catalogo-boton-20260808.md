@@ -13,8 +13,8 @@ en :5173, proxy `/api` -> :8090). Cambios sin commitear en `dev`:
 - `src/pages/ventas-diseno/ReportsPage.tsx`
 
 **Cuentas reales usadas** (password = email, ver `project_roster_usuarios_reales_atlanticerp.md`):
-- `neil.quiel@illuminations.com.pa` (vendedor_disenador) — tiene `ventas_diseno.read`.
-- `carlos@illuminations.com.pa` (tecnico_servicios) — NO tiene `ventas_diseno.read`, usado
+- `neil.quiel@atlantic.com.pa` (vendedor_disenador) — tiene `ventas_diseno.read`.
+- `carlos@atlantic.com.pa` (tecnico_servicios) — NO tiene `ventas_diseno.read`, usado
   para el check negativo.
 
 **Smoke test permanente:** `e2e/preqa-scrum741-catalogo-boton-20260808.spec.ts` (4 tests,
@@ -29,7 +29,7 @@ otras pantallas).
 | 1 | Inicio -> click "Catálogo" -> navega a `/ventas-diseno/catalog`, carga con datos reales (49 productos), sin error JS ni pantalla de error. "Nueva cotización" sigue habilitado. | PASA |
 | 2 | Cotizaciones -> mismo check. "Nueva cotización" sigue habilitado. | PASA |
 | 3 | Reportes -> mismo check. Botón ya no aparece con estilo `disabled` (antes gris/`cursor-not-allowed`). Toggle de configuración no visible para este rol (esperado, requiere `ventas_diseno.reports.configure` que `vendedor_disenador` no tiene) — no bloquea, es comportamiento de otro criterio no tocado por este fix. | PASA |
-| 4 | `/ventas-diseno/catalog` sigue exigiendo `ventas_diseno.read` — cuenta `carlos@illuminations.com.pa` (tecnico_servicios) redirigida a `/servicios/inicio` (su home real), nunca renderiza el Catálogo. Ruta no se amplió. | PASA |
+| 4 | `/ventas-diseno/catalog` sigue exigiendo `ventas_diseno.read` — cuenta `carlos@atlantic.com.pa` (tecnico_servicios) redirigida a `/servicios/inicio` (su home real), nunca renderiza el Catálogo. Ruta no se amplió. | PASA |
 
 ## Camino de ruptura intentado (Paso 3)
 - Doble navegación al mismo botón desde 2 pantallas distintas en la misma sesión — sin

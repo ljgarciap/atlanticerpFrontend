@@ -5,8 +5,8 @@ import { test, expect, type Page } from '@playwright/test'
  * Corre contra dev.atlanticerp.ai (ya deployado, CI/CD verde).
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa (lider_servicios) — Aaron, único que edita/agenda.
- *  - carlos@illuminations.com.pa   (tecnico_servicios) — solo lectura, sin Editar/Agendar.
+ *  - servicio@atlantic.com.pa (lider_servicios) — Aaron, único que edita/agenda.
+ *  - carlos@atlantic.com.pa   (tecnico_servicios) — solo lectura, sin Editar/Agendar.
  *  - milena.e@grupolafayette.com   (vendedor_disenador) — solo lectura, sin Editar/Agendar.
  */
 test.describe.configure({ mode: 'serial' })
@@ -34,7 +34,7 @@ async function getToken(page: Page): Promise<string> {
 }
 
 test('1. REQ-222 — 4 tarjetas de estadísticas con valores reales (Aaron)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/01-stat-cards.png`, fullPage: true })
 
@@ -56,7 +56,7 @@ test('1. REQ-222 — 4 tarjetas de estadísticas con valores reales (Aaron)', as
 })
 
 test('2. REQ-224 — modal de detalle tiene todos los campos del mockup', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const eyeButtons = page.locator('button[title="Ver detalle"]')
@@ -92,7 +92,7 @@ test('2b. RE-CHECK 2026-08-03(2) — "Horario de trabajo/visita" y teléfono de 
   // - CRÍTICO: "Horario de trabajo / visita" era un campo completamente ausente en el modal.
   // - Moderado: "Contacto" mostraba solo el nombre, nunca el teléfono (dato ya existía en BD,
   //   pero TicketService::detail() nunca lo serializaba).
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   // Tomar un ticket YA agendado (fecha real) para que "Horario" muestre una hora real, no "—".
@@ -125,7 +125,7 @@ test('2b. RE-CHECK 2026-08-03(2) — "Horario de trabajo/visita" y teléfono de 
 })
 
 test('3. REQ-225 — editar Subtipo persiste tras reabrir el modal (Aaron)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const eyeButtons = page.locator('button[title="Ver detalle"]')
@@ -169,7 +169,7 @@ test('4. CASO CRÍTICO RN5 — ticket no-Garantía con técnico del pool general
   // queda ninguno para filtrar por nombre. Se generaliza: escanear la tabla completa y tomar
   // CUALQUIER ticket no-Garantía con un técnico del pool general ya asignado (no "Sin asignar").
   // Esto hace el test resiliente al desgaste de la data demo entre corridas de Pre-QA.
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/04a-tabla-completa.png`, fullPage: true })
@@ -231,7 +231,7 @@ test('4. CASO CRÍTICO RN5 — ticket no-Garantía con técnico del pool general
 })
 
 test('5. REQ-226 — Agendar ticket "Reportado" sin fecha → selectores REALES (no texto libre) → pasa a Agendado', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const filterStatus = page.locator('select').filter({ hasText: 'Todos los estados' })
@@ -281,7 +281,7 @@ test('5. REQ-226 — Agendar ticket "Reportado" sin fecha → selectores REALES 
 })
 
 test('6. REQ-226 RN5 — Reagendar un ticket ya agendado NO cambia el estado', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const filterStatus = page.locator('select').filter({ hasText: 'Todos los estados' })
@@ -324,7 +324,7 @@ test('6. REQ-226 RN5 — Reagendar un ticket ya agendado NO cambia el estado', a
 })
 
 test('7. REQ-226 RN2 — filtro de especialidad: Agendar en ticket de Garantía SOLO ofrece a Miguel Castillo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
 
   const filterType = page.locator('select').filter({ hasText: 'Todos los tipos' })
@@ -354,7 +354,7 @@ test('7. REQ-226 RN2 — filtro de especialidad: Agendar en ticket de Garantía 
 })
 
 test('8a. Permisos negativos UI — Carlos (técnico interno) sin botón Editar ni Agendar', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/08a-carlos-tabla.png`, fullPage: true })
 
@@ -388,7 +388,7 @@ test('8b. Permisos negativos UI — Milena (vendedor/diseñador) sin botón Edit
 })
 
 test('9. Permisos negativos API directa — Carlos, PATCH /tickets/{id} y /agendar → 403', async ({ page, request }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   const token = await getToken(page)
   expect(token).toBeTruthy()
 
@@ -424,7 +424,7 @@ test('9. Permisos negativos API directa — Carlos, PATCH /tickets/{id} y /agend
 })
 
 test('10. Sanity — tabla/tablero sin regresión (Aaron)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTickets(page)
   await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 })
 

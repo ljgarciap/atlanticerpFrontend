@@ -1,6 +1,6 @@
 import type { UserInfo } from '@/types/auth'
 
-// SCRUM-175 (REQ-111) — hallazgo CRÍTICO de Daniela (2026-08-04): gerencia2@illuminations.com.pa
+// SCRUM-175 (REQ-111) — hallazgo CRÍTICO de Daniela (2026-08-04): gerencia2@atlantic.com.pa
 // (Yirena, role_key='lider_compras') no veía nada al entrar a AtlanticERP. Causa raíz: App.tsx tenía
 // una única `FALLBACK_ROUTE = '/ventas-diseno/home'` hardcodeada, usada tanto para el redirect
 // post-login como para el catch-all `*` y como destino de "acceso denegado" de

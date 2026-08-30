@@ -47,7 +47,7 @@
     "subtitle": "Operaciones exclusivas de superadmin",
     "demoCleanup": {
       "label": "Limpiar datos demo",
-      "description": "Elimina todos los proyectos [DEMO] y usuarios @illuminations.test. Esta acción no se puede deshacer.",
+      "description": "Elimina todos los proyectos [DEMO] y usuarios @atlantic.test. Esta acción no se puede deshacer.",
       "confirm": "¿Estás seguro? Se eliminarán todos los datos de demostración permanentemente.",
       "confirmBtn": "Sí, limpiar",
       "cancelBtn": "Cancelar",

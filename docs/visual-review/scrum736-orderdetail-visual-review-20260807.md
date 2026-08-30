@@ -45,7 +45,7 @@ de Compras en el repo) para poder ejercitar la pantalla:
 
 Todo el fixture (orden, líneas, pago, documento, agencia, master/sub-cliente, 2 proyectos, 2
 productos de catálogo) se **borró al cerrar esta revisión** — verificado con conteos en 0 después
-del cleanup (ver comando en la sesión). Login real usado: `gerencia2@illuminations.com.pa`
+del cleanup (ver comando en la sesión). Login real usado: `gerencia2@atlantic.com.pa`
 (Yirena Teng, `lider_compras`) — sin cuentas demo, regla del proyecto.
 
 ## Checklist funcional (contra `captura2.png`)

@@ -244,11 +244,11 @@
       "typeMaritimo": "Sea",
       "typeTerrestre": "Land",
       "whoPays": "Who pays for shipping?",
-      "whoPaysIlluminations": "Illuminations",
+      "whoPaysAtlantic": "Atlantic",
       "whoPaysCliente": "Client",
       "cost": "Air shipping cost",
       "estimatedArrival": "Estimated arrival",
-      "markApprovalNotice": "This order will require Mark's approval (air shipping paid by Illuminations)."
+      "markApprovalNotice": "This order will require Mark's approval (air shipping paid by Atlantic)."
     },
     "actions": {
       "next": "Next",

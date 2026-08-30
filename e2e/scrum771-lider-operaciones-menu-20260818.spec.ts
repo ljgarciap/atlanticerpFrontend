@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 // Validación visual SCRUM-771 (2026-08-18) — confirma que el sidebar de Compras para
-// Líder de Operaciones (operaciones@illuminations.com.pa) muestra SOLO Ver Órdenes/
+// Líder de Operaciones (operaciones@atlantic.com.pa) muestra SOLO Ver Órdenes/
 // Logística/Inventario/Ver registros de ingreso/Comparación de Referencias, y que los
 // 7 ítems restantes (Inicio, Proveedores, Nueva Orden, Agencias de Liquidación, Pagos a
 // Proveedores, Garantías & Reclamos, Reportes) están ocultos — config aplicada vía
@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test'
 //
 // Credenciales por env var, nunca hardcodeadas — default = seeder de esta cuenta real
 // (BusinessRoleUserSeeder: password default = email, create-only-if-not-exists).
-const EMAIL    = process.env.OPERACIONES_EMAIL    ?? 'operaciones@illuminations.com.pa'
+const EMAIL    = process.env.OPERACIONES_EMAIL    ?? 'operaciones@atlantic.com.pa'
 const PASSWORD = process.env.OPERACIONES_PASSWORD ?? EMAIL
 
 // SCRUM-747 reagrupó los 12 ítems en 7 accesos, 3 de ellos NavDropdown (Órdenes/Catálogo y

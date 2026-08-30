@@ -8,14 +8,14 @@ import { test, expect, type Page } from '@playwright/test'
  * Corre contra dev.atlanticerp.ai. Serial a propósito: CrowdSec/ModSecurity dispara falsos timeouts
  * con logins en paralelo desde la misma IP (ver CLAUDE.md, Epic 11).
  *
- * Usuario real de Compras (lider_compras): Yirena Teng, gerencia2@illuminations.com.pa —
+ * Usuario real de Compras (lider_compras): Yirena Teng, gerencia2@atlantic.com.pa —
  * password default = email (BusinessRoleUserSeeder).
  */
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const COMPRAS_EMAIL = 'gerencia2@illuminations.com.pa'
-const COMPRAS_PASS = 'gerencia2@illuminations.com.pa'
+const COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
+const COMPRAS_PASS = 'gerencia2@atlantic.com.pa'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)
@@ -131,9 +131,9 @@ test.describe('SCRUM-193/194/197 — Nueva Orden', () => {
       await shippingTypeSelect.selectOption('aereo')
       await page.waitForTimeout(300)
       await expect(page.getByText('¿Quién paga el envío?')).toBeVisible()
-      const whoPaysSelect = page.locator('select').filter({ hasText: /Illuminations|Cliente/i }).first()
+      const whoPaysSelect = page.locator('select').filter({ hasText: /Atlantic|Cliente/i }).first()
       const whoPaysOpts = await whoPaysSelect.locator('option').allTextContents()
-      expect(whoPaysOpts.map(o => o.trim())).toEqual(expect.arrayContaining(['Cliente', 'Illuminations']))
+      expect(whoPaysOpts.map(o => o.trim())).toEqual(expect.arrayContaining(['Cliente', 'Atlantic']))
       expect(whoPaysOpts.some(o => /proveedor/i.test(o))).toBe(false)
     }
 

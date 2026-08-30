@@ -8,8 +8,8 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * a nivel de UI real contra dev.atlanticerp.ai: no crash, no leak visual, camino feliz de quien sí tiene
  * el permiso intacto, y un smoke de edición.
  *
- * Cuentas reales (password = email): servicio@illuminations.com.pa (Aaron, lider_servicios,
- * puede_ver_costos=true), carlos@illuminations.com.pa (Carlos Vergara, tecnico_servicios,
+ * Cuentas reales (password = email): servicio@atlantic.com.pa (Aaron, lider_servicios,
+ * puede_ver_costos=true), carlos@atlantic.com.pa (Carlos Vergara, tecnico_servicios,
  * puede_ver_costos=false). Técnico externo id 2 "QA Luis Vargas" tiene rate_history real (1 fila,
  * $25.00) y tarifa_visible=true — el mismo que crasheaba en el pase anterior.
  */
@@ -40,7 +40,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 test('1. Carlos (tecnico_servicios) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/01-carlos-listado.png`, fullPage: true })
@@ -56,7 +56,7 @@ test('2. Carlos — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history r
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
 
@@ -88,7 +88,7 @@ test('2. Carlos — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history r
 // ---------- 3: Aaron (con puede_ver_costos) — camino feliz intacto en listado + ficha ----------
 
 test('3a. Aaron (lider_servicios) — listado SÍ muestra la tarifa real en la columna TARIFA', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/03-aaron-listado.png`, fullPage: true })
@@ -101,7 +101,7 @@ test('3a. Aaron (lider_servicios) — listado SÍ muestra la tarifa real en la c
 test('3b. Aaron — ficha de "QA Luis Vargas" SÍ muestra tarifa, margen y el historial completo', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
   const row = page.locator('tbody tr', { hasText: 'QA Luis Vargas' })
@@ -120,7 +120,7 @@ test('3b. Aaron — ficha de "QA Luis Vargas" SÍ muestra tarifa, margen y el hi
 // ---------- 4: smoke de edición (Aaron) — no se rompió el resto del CRUD ----------
 
 test('4. Ruptura directa — PATCH tarifa/estado de Aaron siguen funcionando (200), no se rompió el resto del CRUD', async ({ request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
 
   // Confirmar estado actual y volver a setearlo (sin cambiar datos reales) — smoke no destructivo.
   const before = await request.get(`${BASE}/api/servicios/external-technicians/2`, {

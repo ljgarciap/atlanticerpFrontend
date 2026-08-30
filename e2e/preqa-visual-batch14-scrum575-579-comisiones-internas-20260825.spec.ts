@@ -4,8 +4,8 @@ import { test, expect, Page } from '@playwright/test'
 // Contra dev.atlanticerp.ai (backend ac2a712, frontend c9d4084). Ver docs/reviews/scrum575-579-batch14-comisiones-internas-20260825.md
 // y docs/adr/ADR-SCRUM575-579-batch14-comisiones-internas.md (§3 — alcance vs Batch 15).
 
-const FELIX = 'conta@illuminations.com.pa' // Lider Admin&Cont
-const MARK = 'mbekhar@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa' // Lider Admin&Cont
+const MARK = 'mbekhar@atlantic.com.pa'
 const MARK_PASS = 'B1n4X_2026?'
 const VENDEDOR = 'milena.e@grupolafayette.com'
 

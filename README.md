@@ -1,12 +1,12 @@
-# AtlanticERP — Frontend (CRM Illuminations)
+# AtlanticERP — Frontend (CRM Atlantic)
 
-SPA del CRM comercial para **Illuminations** (empresa de diseño y suministro de iluminación).
+SPA del CRM comercial para **Atlantic** (empresa de diseño y suministro de iluminación).
 Consume la API del repo hermano [`atlanticerp-backend`](../atlanticerp-backend) (Laravel 12, multi-tenant)
 y reemplaza un mock HTML+Supabase con una plataforma real.
 
 Cubre los módulos **CRM** (pipeline de proyectos, actividades, contactos) e **Installations**
 (casos de instalación/garantía). La identidad visual debe respetar los colores y componentes
-de marca de Illuminations (ver tokens CSS en `atlanticerp/CLAUDE.md`).
+de marca de Atlantic (ver tokens CSS en `atlanticerp/CLAUDE.md`).
 
 ---
 
@@ -73,7 +73,7 @@ por Vite para exponerlas al cliente), documentarlas aquí y mantener un `.env.ex
 ```
 src/
 ├── api/            llamadas HTTP (authApi.ts, projectsApi.ts)
-├── components/      IlluminationsLogo, TopBar, KpiGrid, KanbanBoard, ProjectCard,
+├── components/      AtlanticLogo, TopBar, KpiGrid, KanbanBoard, ProjectCard,
 │                    ProjectModal, ActivityTimeline, AlertBanner
 ├── pages/           LoginPage, DashboardPage
 ├── store/           authStore.ts (Zustand)

@@ -15,8 +15,8 @@ test.describe.configure({ mode: 'serial' })
 // destino recibe el filtro Y la pantalla destino lo aplica) vs. cuáles solo agregaron un
 // querystring que la pantalla destino no sabe interpretar.
 
-const WHIL = 'whil@illuminations.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@illuminations.com.pa' // Mark Approver real
+const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {

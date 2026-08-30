@@ -18,12 +18,12 @@ la primera que corre la app real en navegador contra este fix.
 **Entorno:** stack local (Docker: postgres/redis/laravel/horizon/nginx en :8090, `npm run dev` en
 :5173 levantado para esta sesión y detenido al cerrar). Cuentas reales usadas (password = email,
 ver `project_roster_usuarios_reales_atlanticerp.md`):
-- `david@grupolafayette.com` y `mbekhar@illuminations.com.pa` (`management`/Gerencia) — los 2
+- `david@grupolafayette.com` y `mbekhar@atlantic.com.pa` (`management`/Gerencia) — los 2
   usuarios que el ticket nombra explícitamente como el reporte original del bug.
 - `milena.e@grupolafayette.com` (`vendedor_disenador` real) — check negativo del camino ya
   arreglado.
-- `gerencia2@illuminations.com.pa` (`lider_compras` real, Yirena Teng) — usuario real del módulo.
-- `carlos@illuminations.com.pa` (`tecnico_servicios`, sin ningún permiso relevante) — sanity check.
+- `gerencia2@atlantic.com.pa` (`lider_compras` real, Yirena Teng) — usuario real del módulo.
+- `carlos@atlantic.com.pa` (`tecnico_servicios`, sin ningún permiso relevante) — sanity check.
 
 Ocultamiento/restauración de Compras y Bodega ejecutado vía el mecanismo real
 (`POST /api/admin/module-visibility/bulk` como superadmin, mismo endpoint que usa el modal de
@@ -49,7 +49,7 @@ arrancó la sesión) al cerrar.
 ## CRÍTICO — el fix no cierra el camino real por el que David/Mark reportaron el bug
 
 **Qué se rompe:** con Compras oculto por UAT, `david@grupolafayette.com` y
-`mbekhar@illuminations.com.pa` (Gerencia, los 2 usuarios que el ticket nombra explícitamente)
+`mbekhar@atlantic.com.pa` (Gerencia, los 2 usuarios que el ticket nombra explícitamente)
 siguen teniendo acceso funcional COMPLETO y sin restricción a `/inventario` — costo, margen,
 botón "+ Crear nuevo producto", toggle "Compras/Ventas & Diseño", exactamente como si Compras
 NO estuviera oculto. Mismo patrón en Bodega (`/bodega/pedidos/status`, ve TODOS los pedidos sin
@@ -72,7 +72,7 @@ consultar el estado UAT" — asumiendo que ese es el ÚNICO camino de acceso que
 Verificado en vivo que es falso: el rol `management` tiene `compras.read`/`bodega.read` **reales**
 vía `role_module_visibility` (`can_view=2` para los 7 módulos del catálogo — "Gerencia ve todo"
 es el diseño intencional de ese rol, confirmado por consulta directa a
-`illuminations_auth.role_module_visibility`). Eso significa que David/Mark entran por la rama
+`atlantic_auth.role_module_visibility`). Eso significa que David/Mark entran por la rama
 `hasFullAccess` de `InventoryController::resolveAccess()` / el chequeo equivalente de
 `OrderStatusController::resolveAccess()` — la rama que el fix de esta sesión **nunca tocó**,
 porque el ticket nunca consideró que Gerencia tuviera el permiso real de acceso completo, no solo
@@ -104,7 +104,7 @@ resolver unilateralmente, es una decisión de producto/diseño:
 - **Opción B** — el diseño de Senior Review está mal targeteado: la máscara UAT SÍ debe cortar
   acceso real a TODO no-superadmin (incluido personal real de Compras/Bodega) mientras el módulo
   esté en rollout — es lo que ya hace `modulesPayload()`/`menuVisibilityPayload()` para el
-  Sidebar de TODOS (confirmado: `gerencia2@illuminations.com.pa`, lider_compras real, YA pierde
+  Sidebar de TODOS (confirmado: `gerencia2@atlantic.com.pa`, lider_compras real, YA pierde
   el link del Sidebar hoy — ver hallazgo MEDIO abajo — así que el precedente de "solo superadmin
   bypassa" ya existe en el código, solo no está aplicado acá).
 
@@ -118,7 +118,7 @@ próxima sesión de Pre-QA apenas haya decisión, por la regla dura del protocol
 
 ## MEDIO — inconsistencia ya existente para personal real de Compras (no introducida por este fix)
 
-`gerencia2@illuminations.com.pa` (Yirena, `lider_compras` real): con Compras oculto, su Sidebar
+`gerencia2@atlantic.com.pa` (Yirena, `lider_compras` real): con Compras oculto, su Sidebar
 YA pierde el link "Compras/Inventario" hoy (`modulesPayload()` enmascara `modules.compras.view`
 para cualquier no-superadmin, sin excepción por rol — esto es de SCRUM-739, previo a este ticket,
 no algo que este diff introduzca). Pero si navega directo a `/inventario`, el backend le sigue
@@ -175,9 +175,9 @@ rápido de no-regresión.
 
 **Entorno:** mismo stack local (Docker :8090 + `npm run dev` :5173, levantado para esta sesión y
 detenido al cerrar). Mismas cuentas reales que la pasada original: `david@grupolafayette.com`,
-`mbekhar@illuminations.com.pa` (Gerencia), más `milena.e@grupolafayette.com` (`vendedor_disenador`,
-rama restringida) y `carlos@illuminations.com.pa` (sin permiso relevante) para el chequeo de
-no-regresión. Superadmin: `andres.loi@illuminations.com.pa` (roster de `CoreUserSeeder`).
+`mbekhar@atlantic.com.pa` (Gerencia), más `milena.e@grupolafayette.com` (`vendedor_disenador`,
+rama restringida) y `carlos@atlantic.com.pa` (sin permiso relevante) para el chequeo de
+no-regresión. Superadmin: `andres.loi@atlantic.com.pa` (roster de `CoreUserSeeder`).
 Ocultamiento/restauración vía el endpoint real `POST /api/admin/module-visibility/bulk`
 (equivalente al modal de superadmin), no por escritura directa en BD.
 

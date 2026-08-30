@@ -8,10 +8,10 @@ test.describe.configure({ mode: 'serial' })
 // Password LOCAL = email para todos los usuarios (distinto de dev/test.atlanticerp.ai).
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 
-const FELIX = 'conta@illuminations.com.pa'
-const YANETH = 'asistente@illuminations.com.pa'
-const MARK = 'mbekhar@illuminations.com.pa'
-const DANIELA = 'daniela@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa'
+const YANETH = 'asistente@atlantic.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
+const DANIELA = 'daniela@atlantic.com.pa'
 
 async function login(page: Page, email: string): Promise<void> {
   await page.context().clearCookies()

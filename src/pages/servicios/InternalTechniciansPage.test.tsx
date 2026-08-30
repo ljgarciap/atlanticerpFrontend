@@ -51,7 +51,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@illuminations.com.pa',
+    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
     role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }
@@ -59,7 +59,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
 
 function makeTechnician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 1, user_id: 1, nombre: 'Carlos Vergara', telefono: '6000-0000', email: 'carlos@illuminations.com.pa',
+    id: 1, user_id: 1, nombre: 'Carlos Vergara', telefono: '6000-0000', email: 'carlos@atlantic.com.pa',
     especialidad: 'general', color: '#3B82F6', has_bonus_plan: false, estado: 'available', visitas_hoy: 0,
     herramientas_asignadas: 0, pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
     ...overrides,
@@ -181,7 +181,7 @@ describe('InternalTechniciansPage — REQ-255 RN5 detalle del técnico', () => {
 
     const modal = within(await screen.findByTestId('internal-technician-detail-modal'))
     expect(modal.getByText('6000-0000')).toBeInTheDocument()
-    expect(modal.getByText('carlos@illuminations.com.pa')).toBeInTheDocument()
+    expect(modal.getByText('carlos@atlantic.com.pa')).toBeInTheDocument()
   })
 })
 

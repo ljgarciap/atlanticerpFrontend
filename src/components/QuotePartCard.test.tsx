@@ -121,7 +121,7 @@ describe('QuotePartCard', () => {
   it('muestra el catálogo completo al abrir la lupa, sin necesidad de tipear', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Illuminations Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
@@ -138,7 +138,7 @@ describe('QuotePartCard', () => {
   it('busca en el catálogo por coincidencia exacta/parcial, sin banner de aproximados', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Illuminations Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
@@ -156,7 +156,7 @@ describe('QuotePartCard', () => {
   it('SCRUM-796 — escribir en Referencia dispara búsqueda dinámica (debounce) y autocompleta al elegir', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Illuminations Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
@@ -182,7 +182,7 @@ describe('QuotePartCard', () => {
   it('selecciona un producto de catálogo, ve la ficha técnica y crea el ítem sin precio propio', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Illuminations Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     mockedApi.quotes.parts.items.create.mockResolvedValue(makeItem({ id: 2, catalog_product_id: 9, is_custom: false }))
     renderCard(makePart({ items: [] }))
@@ -193,7 +193,7 @@ describe('QuotePartCard', () => {
     fireEvent.click(await screen.findByText('LAMP-050', { exact: false }))
 
     // Ficha técnica (REQ-036 AC2): marca, disponible, precio — nunca costo.
-    expect(await screen.findByText(/Illuminations Home/)).toBeInTheDocument()
+    expect(await screen.findByText(/Atlantic Home/)).toBeInTheDocument()
     expect(screen.getByText('$189.99')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('ventasDiseno:catalog.selectProduct'))
@@ -434,7 +434,7 @@ describe('QuotePartCard', () => {
   it('muestra alerta de stock insuficiente al agregar un ítem nuevo de catálogo', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Illuminations Home', photo_url: null, price_full: 189.99, stock_quantity: 3 }],
+      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 3 }],
     })
     renderCard(makePart({ items: [] }))
 

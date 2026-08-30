@@ -7,14 +7,14 @@ import { test, expect, Page } from '@playwright/test'
 // completo — solo un smoke rápido post-deploy.
 //
 // Credenciales por variables de entorno, NUNCA hardcodeadas acá (el default sirve para
-// dev.atlanticerp.ai, donde sí existen las cuentas demo *@illuminations.test — ver
+// dev.atlanticerp.ai, donde sí existen las cuentas demo *@atlantic.test — ver
 // AuthUserSeeder/CrmDemoSeeder, gateadas a local/dev/testing, no a qa). Para correr contra
 // test.atlanticerp.ai (APP_ENV=qa, sin cuentas demo) pasar una cuenta real:
 //   SMOKE_EMAIL=... SMOKE_PASSWORD=... npx playwright test --config=playwright.test-remote.config.ts ...
 
 test.describe.configure({ mode: 'serial' })
 
-const SMOKE_EMAIL    = process.env.SMOKE_EMAIL    ?? 'management@illuminations.test'
+const SMOKE_EMAIL    = process.env.SMOKE_EMAIL    ?? 'management@atlantic.test'
 const SMOKE_PASSWORD = process.env.SMOKE_PASSWORD ?? 'Password123!'
 
 async function login(page: Page) {

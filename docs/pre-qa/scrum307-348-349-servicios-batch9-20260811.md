@@ -23,7 +23,7 @@ completo re-corrido 3 veces consecutivas sin regresiones.
 **Criterio incumplido:** REQ-244, permisos — "Descargar plantilla en blanco: Aaron y técnico
 interno" (no Gerencia, no Vendedor/Diseñador, no Garantías).
 
-**Cómo se reprodujo:** login como `daniela@illuminations.com.pa` (rol `management`) → abrir un
+**Cómo se reprodujo:** login como `daniela@atlantic.com.pa` (rol `management`) → abrir un
 ticket de instalación sin informe completado → el botón "Ver plantilla en blanco" se mostraba
 igual. Al hacer clic, el backend rechazaba correctamente con 403 (la defensa real ya estaba
 intacta), pero el usuario solo veía un toast de error genérico sin explicar que era un tema de

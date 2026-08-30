@@ -8,7 +8,7 @@ const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 // del proyecto (smoke tests que verifican un hallazgo ya roto una vez no se borran).
 test('SCRUM-67 — "+N pendientes más" abre el listado completo con drill-down', async ({ page }) => {
   await page.goto(`${BASE}/login`)
-  await page.fill('input[type="email"]', 'management@illuminations.test')
+  await page.fill('input[type="email"]', 'management@atlantic.test')
   await page.fill('input[type="password"]', 'Password123!')
   await page.click('button[type="submit"]')
   await page.waitForTimeout(2000)

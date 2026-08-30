@@ -53,7 +53,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
 const mockedApi = vi.mocked(bodegaApi, true)
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Illuminations', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
+  { id: 1, name: 'Atlantic', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
   { id: 2, name: 'Mermas', responsable: null, capacidad_pct: 10, modo_detalle: 'ubicacion_exacta' },
 ]
 
@@ -237,7 +237,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
   it('modal "Bodega(s)" reusa useProductWarehouseStock (bodega.read) para el desglose', async () => {
     const stock: ProductWarehouseStockResponse = {
       por_servir: 3,
-      warehouses: [{ warehouse_id: 1, name: 'Illuminations', quantity: 9 }, { warehouse_id: 2, name: 'Mermas', quantity: 3 }],
+      warehouses: [{ warehouse_id: 1, name: 'Atlantic', quantity: 9 }, { warehouse_id: 2, name: 'Mermas', quantity: 3 }],
     }
     mockedApi.adjustmentRequests.productWarehouseStock.mockResolvedValue(stock)
     renderPage()
@@ -247,7 +247,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
 
     const modalTitle = await screen.findByText(/warehouseModal\.title/)
     const modal = modalTitle.closest('[class*="rounded-2xl"]') as HTMLElement
-    await waitFor(() => expect(within(modal).getByText('Illuminations')).toBeInTheDocument())
+    await waitFor(() => expect(within(modal).getByText('Atlantic')).toBeInTheDocument())
     expect(within(modal).getByText('9')).toBeInTheDocument()
     expect(mockedApi.adjustmentRequests.productWarehouseStock).toHaveBeenCalledWith(1)
   })

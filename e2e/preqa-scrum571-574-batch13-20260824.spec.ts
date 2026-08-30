@@ -31,10 +31,10 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const FELIX = 'conta@illuminations.com.pa'
-const FELIX_PW = 'conta@illuminations.com.pa'
-const MARK = 'mbekhar@illuminations.com.pa'
-const MARK_PW = 'mbekhar@illuminations.com.pa' // default (email-como-password) — NO la del prompt de despacho, ver docblock arriba
+const FELIX = 'conta@atlantic.com.pa'
+const FELIX_PW = 'conta@atlantic.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
+const MARK_PW = 'mbekhar@atlantic.com.pa' // default (email-como-password) — NO la del prompt de despacho, ver docblock arriba
 
 async function login(page: Page, email: string, password: string) {
   await page.context().clearCookies()

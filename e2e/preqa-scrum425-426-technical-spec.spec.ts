@@ -28,7 +28,7 @@ const SPEC_FIELDS = [
 test.describe.configure({ mode: 'serial' })
 
 test('1. Camino feliz — crear producto con los 12 campos, ver ficha técnica con esos valores', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openCreateModal(page)
 
   const ref = `PREQA-HAPPY-${Date.now()}`
@@ -74,7 +74,7 @@ test('1. Camino feliz — crear producto con los 12 campos, ver ficha técnica c
 })
 
 test('2a. Bloqueo — falta 1 campo (power vacío) bloquea el botón Guardar', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openCreateModal(page)
 
   await page.locator('input[placeholder="Referencia pública"]').fill(`PREQA-BLOCK-A-${Date.now()}`)
@@ -93,7 +93,7 @@ test('2a. Bloqueo — falta 1 campo (power vacío) bloquea el botón Guardar', a
 })
 
 test('2b. Bloqueo — falta 1 campo (certifications, último) bloquea el botón Guardar', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openCreateModal(page)
 
   await page.locator('input[placeholder="Referencia pública"]').fill(`PREQA-BLOCK-B-${Date.now()}`)
@@ -112,7 +112,7 @@ test('2b. Bloqueo — falta 1 campo (certifications, último) bloquea el botón 
 })
 
 test('2c. Bloqueo real de backend — POST directo con technical_spec incompleto -> 422 con mensaje específico', async ({ page, request }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   // grab bearer token from localStorage (axios interceptor JWT)
   const token = await page.evaluate(() => {
     for (let i = 0; i < localStorage.length; i++) {
@@ -175,7 +175,7 @@ test('2c. Bloqueo real de backend — POST directo con technical_spec incompleto
 })
 
 test('3. Producto legado (technical_spec NULL) muestra estado vacío coherente, sin crash', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/inventario`)
   await page.waitForTimeout(1000)
   await page.locator('input[placeholder="Buscar producto…"]').fill('PREQA-LEGACY-001')
@@ -194,7 +194,7 @@ test('3. Producto legado (technical_spec NULL) muestra estado vacío coherente, 
 })
 
 test('4. Persistencia real tras F5', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openCreateModal(page)
   const ref = `PREQA-RELOAD-${Date.now()}`
   await page.locator('input[placeholder="Referencia pública"]').fill(ref)
@@ -230,7 +230,7 @@ test('4. Persistencia real tras F5', async ({ page }) => {
 })
 
 test('5. Caracteres especiales y valor > 255 chars', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await openCreateModal(page)
   const ref = `PREQA-EDGE-${Date.now()}`
   await page.locator('input[placeholder="Referencia pública"]').fill(ref)
@@ -259,7 +259,7 @@ test('5. Caracteres especiales y valor > 255 chars', async ({ page }) => {
 })
 
 test('6. Sin iconografía de emoji en el modal de ficha técnica (SCRUM-56)', async ({ page }) => {
-  await login(page, 'management@illuminations.test')
+  await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/inventario`)
   await page.waitForTimeout(1000)
   await page.locator('input[placeholder="Buscar producto…"]').fill('PREQA-LEGACY-001')
@@ -282,7 +282,7 @@ test('6. Sin iconografía de emoji en el modal de ficha técnica (SCRUM-56)', as
 })
 
 test('7. Modo restringido (Ventas & Diseño) — visibilidad del botón + no leak de costo/margen', async ({ page }) => {
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await page.goto(`${BASE}/inventario`)
   await page.waitForTimeout(1000)
   await page.locator('input[placeholder="Buscar producto…"]').fill('PREQA-LEGACY-001')

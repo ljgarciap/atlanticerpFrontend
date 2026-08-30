@@ -23,7 +23,7 @@ test.describe.configure({ mode: 'serial' })
 
 test('1. Vista Previa interna — PDF real embebido, con precios y foto', async ({ page }) => {
   test.skip(QUOTE_ID === '', 'Requiere PREQA766_QUOTE_ID — ver checkpoint de memoria 2026-08-16')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
 
   const [response] = await Promise.all([
     page.waitForResponse(r => r.url().includes(`/quotes/${QUOTE_ID}/pdf`) && r.url().includes('external=0')),
@@ -58,7 +58,7 @@ test('1. Vista Previa interna — PDF real embebido, con precios y foto', async 
 
 test('2. Vista Externa — misma estructura, sin precios ni condiciones (política SCRUM-140 intacta)', async ({ page }) => {
   test.skip(QUOTE_ID === '', 'Requiere PREQA766_QUOTE_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
 
   const [response] = await Promise.all([
     page.waitForResponse(r => r.url().includes(`/quotes/${QUOTE_ID}/pdf`) && r.url().includes('external=1')),
@@ -86,7 +86,7 @@ test('2. Vista Externa — misma estructura, sin precios ni condiciones (políti
 
 test('3. Descargar PDF dispara una descarga real con el nombre correcto', async ({ page }) => {
   test.skip(QUOTE_ID === '', 'Requiere PREQA766_QUOTE_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await page.goto(`${BASE}/ventas-diseno/quotes/${QUOTE_ID}`)
   await page.getByText('Vista previa').click()
   await expect(page.locator('iframe')).toBeVisible()
@@ -99,7 +99,7 @@ test('3. Descargar PDF dispara una descarga real con el nombre correcto', async 
 
 test('4. Cotizaciones → Detalle (QuoteViewerModal) — mismo PDF, más la sección Versiones (React)', async ({ page }) => {
   test.skip(QUOTE_ID === '', 'Requiere PREQA766_QUOTE_ID')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
 
   const [response] = await Promise.all([
     page.waitForResponse(r => r.url().includes(`/quotes/${QUOTE_ID}/pdf`)),

@@ -5,6 +5,6 @@ import { test, expect } from '@playwright/test'
 test('la página carga y muestra contenido', async ({ page }) => {
   await page.goto('/')
 
-  await expect(page.getByRole('heading', { name: 'ILLUMINATIONS' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'ATLANTIC' })).toBeVisible()
   await expect(page.getByRole('button', { name: /iniciar sesión/i })).toBeVisible()
 })

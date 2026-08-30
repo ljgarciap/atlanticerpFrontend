@@ -16,8 +16,8 @@ import { execSync } from 'node:child_process'
  * Fixture propio en `beforeAll` (mismo patrón que `preqa-scrum214-215-216-logistica-20260805`) —
  * nunca IDs hardcodeados, capturados del stdout de tinker.
  */
-const LIDER_COMPRAS = 'gerencia2@illuminations.com.pa'
-const SIN_COMPRAS = 'neil.quiel@illuminations.com.pa' // vendedor_disenador — sin compras.view/edit
+const LIDER_COMPRAS = 'gerencia2@atlantic.com.pa'
+const SIN_COMPRAS = 'neil.quiel@atlantic.com.pa' // vendedor_disenador — sin compras.view/edit
 const STAMP = Date.now()
 
 interface Fixture {

@@ -17,7 +17,7 @@ async function login(page, email: string) {
 test('SCRUM-390 — Excel export: camino feliz + pedido sin items + doble clic', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -59,7 +59,7 @@ test('SCRUM-390 — Excel export: camino feliz + pedido sin items + doble clic',
 test('SCRUM-390 — doble clic rápido en Descargar Excel no revienta ni duplica', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   const card9005 = page.locator('[data-testid^="order-card-"]', { hasText: 'VR-9005' })
@@ -78,7 +78,7 @@ test('SCRUM-390 — doble clic rápido en Descargar Excel no revienta ni duplica
 })
 
 test('SCRUM-403 — Ver bodegas: 2 bodegas con stock, 1 bodega, 0 bodegas (no inventar cantidades)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -127,7 +127,7 @@ test('SCRUM-403 — Ver bodegas: 2 bodegas con stock, 1 bodega, 0 bodegas (no in
 })
 
 test('SCRUM-401 — Factura: invoice_ready true (mensaje + botón ver, solo lectura) y false (sin botón)', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -155,7 +155,7 @@ test('SCRUM-401 — Factura: invoice_ready true (mensaje + botón ver, solo lect
 test('SCRUM-391 — consolidado: mismo picker/2 pedidos misma referencia + picker sin en_picking + doble clic imprimir', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 

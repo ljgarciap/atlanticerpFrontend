@@ -31,8 +31,8 @@ test.describe.configure({ mode: 'serial' })
 // asumir ninguno de esos comentarios como válido.
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const WHIL = 'whil@illuminations.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@illuminations.com.pa' // Mark Approver real
+const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 const WHIL_PASSWORD = WHIL // default = email, confirmado en esta sesión (200 real)
 const TECH_SUPERADMIN = 'lujogarpin78@gmail.com' // password real = default (email)

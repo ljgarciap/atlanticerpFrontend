@@ -18,7 +18,7 @@ técnicos externos, sin informe con recomendación). Usuarios reales del roster,
 - `servicios.quotes.view_cost_breakdown` (grant angosto por persona, REQ-232 RN5: "Aaron, Mark,
   David y Whil") — confirmado en `database/seeders/SpecialPermissionSeeder.php`: los 4 nombres
   están ahí (Mark vía `mbekhar@...`, David vía `david@grupolafayette.com`, Aaron vía
-  `servicio@illuminations.com.pa` con el rol `lider_servicios`, Whil vía `whil@...`). Verificado en
+  `servicio@atlantic.com.pa` con el rol `lider_servicios`, Whil vía `whil@...`). Verificado en
   vivo con Aaron (ve costos) y Daniela — management sin el grant — (no ve costos). Sin hallazgo.
 - Margen mínimo (REQ-230 RN4) — confirmado que reusa `PricingSettings::min_margin_percent`
   (parametrizable, con CRUD/vista de superadmin ya existente de Ventas & Diseño), NO un literal

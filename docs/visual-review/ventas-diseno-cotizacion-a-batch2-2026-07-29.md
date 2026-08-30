@@ -7,7 +7,7 @@
 **Mockup de referencia:** `1E__Ventas_Disen_o_Cotizacion.html` (compartido por los 3 tickets) +
 4 capturas de pantalla de Daniela Amaya (2026-07-23, adjuntas a SCRUM-116) + `Requerimientos
 Ventas Diseño.xlsx`.
-**Método:** Playwright CLI contra `https://dev.atlanticerp.ai`, usuario `designer@illuminations.test`
+**Método:** Playwright CLI contra `https://dev.atlanticerp.ai`, usuario `designer@atlantic.test`
 (rol `vendedor_disenador`). UI observada en inglés (toggle EN activo en la sesión de prueba) —
 mismos componentes/labels que la versión en español, ver nota en "ACEPTABLE" abajo.
 

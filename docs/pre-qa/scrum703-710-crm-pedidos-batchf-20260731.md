@@ -31,7 +31,7 @@ checklist COMPLETO (no solo los 2 puntos corregidos) encontró un hallazgo nuevo
   `scope`). `OrdersService::list()` defaulteaba a `'own'` cuando el filtro no venía — como nadie
   manda `'team'` explícito, Líder/Gerencia/Mark quedaban viendo solo sus propios pedidos en la app
   real, nunca el equipo completo. Confirmado en vivo con Playwright logueado como
-  `management@illuminations.test` contra `localhost:5173`, sin query params.
+  `management@atlantic.test` contra `localhost:5173`, sin query params.
   **Fix:** el default pasó de `'own'` a `'team'` — sin selector en el frontend, pedir siempre
   `'team'` es correcto porque `buildOrders()` ya baja a `'own'` internamente para quien no tenga
   `canViewTeamV2('ventas_diseno')` (esa lógica no se tocó, ya estaba bien).

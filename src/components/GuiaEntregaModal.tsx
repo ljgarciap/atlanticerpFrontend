@@ -93,7 +93,7 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
                 <div className="flex items-center gap-3">
                   <AppLogo size={40} />
                   <div>
-                    <p className="text-lg font-bold text-[#5BA5A0] leading-tight">ILLUMINATIONS</p>
+                    <p className="text-lg font-bold text-[#5BA5A0] leading-tight">ATLANTIC</p>
                     <p className="text-[10px] text-slate-500">Powered by AtlanticERP</p>
                   </div>
                 </div>

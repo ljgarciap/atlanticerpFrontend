@@ -18,7 +18,7 @@ async function login(page, email: string, password: string = 'Password123!') {
 
 test('Final Stage → detalle → "Ver" navega a Pipeline con el proyecto correcto localizado', async ({ page }) => {
   test.skip(CARD_ID === '', 'Requiere PREQA765_CARD_ID — ver checkpoint de memoria 2026-08-15')
-  await login(page, 'designer@illuminations.test')
+  await login(page, 'designer@atlantic.test')
   await page.goto(`${BASE}/ventas-diseno/home`)
   await page.waitForTimeout(1200)
 

@@ -14,7 +14,7 @@ const EMPTY_MODULES: UserInfo['modules'] = {
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Test', last_name: 'User', email: 'test@illuminations.test',
+    id: 1, first_name: 'Test', last_name: 'User', email: 'test@atlantic.test',
     phone: null, notes: null, department_id: null, language: 'es', security_level: 4,
     role: 'lider_compras', role_id: 1, permissions: [],
     modules: EMPTY_MODULES,

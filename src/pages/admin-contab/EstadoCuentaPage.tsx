@@ -116,7 +116,7 @@ export default function EstadoCuentaPage() {
           <div className="flex items-center gap-2 mb-2">
             <AppLogo size={24} iconOnly />
             <span className="text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400 uppercase">
-              Illuminations · AtlanticERP
+              Atlantic · AtlanticERP
             </span>
           </div>
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t('estadoCuenta.title')}</h1>

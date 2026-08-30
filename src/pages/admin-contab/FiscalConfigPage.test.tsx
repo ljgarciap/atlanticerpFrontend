@@ -30,8 +30,8 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeSettings(overrides: Partial<FiscalSettings> = {}): FiscalSettings {
   return {
-    razon_social: 'Illuminations S.A.',
-    nombre_comercial: 'Illuminations',
+    razon_social: 'Atlantic S.A.',
+    nombre_comercial: 'Atlantic',
     ruc: '1-2-3',
     dv: '10',
     direccion_fiscal: 'Panamá',
@@ -78,7 +78,7 @@ describe('FiscalConfigPage', () => {
   it('carga en modo solo lectura por defecto: campos deshabilitados y sin botón Guardar', async () => {
     renderPage()
 
-    const razonSocial = await screen.findByDisplayValue('Illuminations S.A.')
+    const razonSocial = await screen.findByDisplayValue('Atlantic S.A.')
     expect(razonSocial).toBeDisabled()
     expect(screen.queryByText('adminContab:fiscal.saveChanges')).not.toBeInTheDocument()
     expect(screen.getByText('common:actions.edit')).toBeInTheDocument()
@@ -86,17 +86,17 @@ describe('FiscalConfigPage', () => {
 
   it('al presionar Editar se desbloquean los campos y cambia a modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
 
-    expect(screen.getByDisplayValue('Illuminations S.A.')).not.toBeDisabled()
+    expect(screen.getByDisplayValue('Atlantic S.A.')).not.toBeDisabled()
     expect(await screen.findByText('adminContab:fiscal.saveChanges')).toBeInTheDocument()
   })
 
   it('"Última sincronización" nunca se habilita, ni siquiera en modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
 
@@ -141,7 +141,7 @@ describe('FiscalConfigPage', () => {
   it('Guardar cambios pide confirmación explícita antes de aplicar', async () => {
     mockedApi.fiscalSettings.update.mockResolvedValue(makeSettings({ razon_social: 'Nuevo Nombre' }))
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
 
     fireEvent.click(screen.getByText('common:actions.edit'))
     fireEvent.click(await screen.findByText('adminContab:fiscal.saveChanges'))
@@ -169,7 +169,7 @@ describe('FiscalConfigPage', () => {
 
   it('una tasa base (es_base=true) no muestra botón de eliminar, ni en modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     await screen.findByText('7% General')
@@ -180,7 +180,7 @@ describe('FiscalConfigPage', () => {
 
   it('crear una tasa exige porcentaje y descripción (ya no pide nombre — RN3 REQ-558)', async () => {
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     fireEvent.click(await screen.findByText('adminContab:fiscal.itbms.addRate'))
@@ -198,7 +198,7 @@ describe('FiscalConfigPage', () => {
       id: 5, nombre: null, descripcion: 'Descripción', porcentaje: 10, es_base: false, activa: false, created_at: '2026-08-19',
     })
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
     fireEvent.click(await screen.findByText('adminContab:fiscal.itbms.addRate'))
@@ -217,14 +217,14 @@ describe('FiscalConfigPage', () => {
       { id: 9, nombre: null, descripcion: 'Servicios de hospedaje', porcentaje: 10, es_base: false, activa: false, created_at: '2026-08-19' },
     ])
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
 
     expect(await screen.findByText('Servicios de hospedaje')).toBeInTheDocument()
   })
 
   it('el estado de conexión del PAC se muestra como badge de solo lectura, incluso en modo edición', async () => {
     renderPage()
-    await screen.findByDisplayValue('Illuminations S.A.')
+    await screen.findByDisplayValue('Atlantic S.A.')
 
     expect(await screen.findByText('adminContab:fiscal.facturacionElectronica.connectionStatus.conectado')).toBeInTheDocument()
 

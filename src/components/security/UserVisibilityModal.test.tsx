@@ -21,7 +21,7 @@ const mockedApi = vi.mocked(usersApi, true)
 
 function makeUser(overrides: Partial<UserListItem> = {}): UserListItem {
   return {
-    id: 5, first_name: 'Juan', last_name: 'García', email: 'juan@illuminations.test', phone: null,
+    id: 5, first_name: 'Juan', last_name: 'García', email: 'juan@atlantic.test', phone: null,
     is_active: true, mfa_enabled: false, notes: null, department: null, extra_permissions: [],
     security_level: { id: 3, level: 3, name: 'Nivel 3' }, roles: [],
     role_id: 1, additional_role_ids: [], approve_large_amounts: false, manage_users: false,

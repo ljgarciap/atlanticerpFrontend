@@ -11,9 +11,9 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * 0574d5c (SCRUM-780) — atlanticerp-frontend 7171c72 (SCRUM-779), 6dd47f3 (SCRUM-780).
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): servicio@illuminations.com.pa (Aaron, lider_servicios),
- * carlos@illuminations.com.pa (Carlos Vergara, tecnico_servicios), gerencia2@illuminations.com.pa
- * (Yirena, lider_compras), whil@illuminations.com.pa (Whileyner, management — mbekhar/daniela/
+ * (password = email): servicio@atlantic.com.pa (Aaron, lider_servicios),
+ * carlos@atlantic.com.pa (Carlos Vergara, tecnico_servicios), gerencia2@atlantic.com.pa
+ * (Yirena, lider_compras), whil@atlantic.com.pa (Whileyner, management — mbekhar/daniela/
  * luis.garcia NO loguean con password=email en este entorno, ver hallazgo de proceso en el reporte).
  *
  * HALLAZGO CRÍTICO real de este pase (SCRUM-337, ver tests 8/9 abajo): el fix de backend
@@ -53,7 +53,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 test('1. Yirena (lider_compras) — Ingresos > + Nuevo ingreso carga la lista de órdenes elegibles sin 500', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.goto(`${BASE}/compras/ingresos/nuevo`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/01-scrum347-ingresos-nuevo.png`, fullPage: true })
@@ -64,7 +64,7 @@ test('1. Yirena (lider_compras) — Ingresos > + Nuevo ingreso carga la lista de
 })
 
 test('2. Ruptura directa — GET /compras/goods-receipts/eligible-orders responde 200, no 500', async ({ request }) => {
-  const token = await apiToken(request, 'gerencia2@illuminations.com.pa')
+  const token = await apiToken(request, 'gerencia2@atlantic.com.pa')
   const res = await request.get(`${BASE}/api/compras/goods-receipts/eligible-orders`, {
     headers: { Authorization: `Bearer ${token}` },
   })
@@ -75,7 +75,7 @@ test('2. Ruptura directa — GET /compras/goods-receipts/eligible-orders respond
 // ---------- SCRUM-344 (REQ-274) — ciclo completo Servicios -> Compras -> Recibido, bloqueado en cascada por 347 ----------
 
 test('3. Aaron — Insumos: producto "PreQA204 producto" en estado "Solicitud pendiente" antes del ciclo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Insumos', exact: true }).click()
@@ -88,14 +88,14 @@ test('3. Aaron — Insumos: producto "PreQA204 producto" en estado "Solicitud pe
 })
 
 test('4. Yirena — avanza la orden real de Servicios (id 97, en_transito_local) hasta Recibido vía Ingreso de Mercancía real', async ({ page, request }) => {
-  const token = await apiToken(request, 'gerencia2@illuminations.com.pa')
+  const token = await apiToken(request, 'gerencia2@atlantic.com.pa')
 
   const orderRes = await request.get(`${BASE}/api/compras/orders/97`, { headers: { Authorization: `Bearer ${token}` } })
   const order = await orderRes.json()
   expect(order.origin_module).toBe('servicios')
   console.log('[SCRUM-344] orden 97 antes:', order.status, order.lines[0].catalog_product_id, order.lines[0].quantity)
 
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.goto(`${BASE}/compras/ordenes/97`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/03-scrum344-orden97-en-transito-local.png`, fullPage: true })
@@ -131,7 +131,7 @@ test('4. Yirena — avanza la orden real de Servicios (id 97, en_transito_local)
 })
 
 test('5. Aaron — tras "Recibido" el disponible del insumo sube y el botón vuelve a "Solicitar" (cascada real cerrada)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Insumos', exact: true }).click()
@@ -147,7 +147,7 @@ test('5. Aaron — tras "Recibido" el disponible del insumo sube y el botón vue
 // ---------- SCRUM-361/779 (REQ-291/275) — nombre de insumo vacío ----------
 
 test('6. Aaron — tabla de Insumos muestra el nombre real del producto, no vacío', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Insumos', exact: true }).click()
@@ -159,7 +159,7 @@ test('6. Aaron — tabla de Insumos muestra el nombre real del producto, no vac�
 })
 
 test('7. Aaron — Informe de Inspección (ticket GAR-2026-0001, id 5): datalist "Material" trae nombres reales de insumos, no vacíos', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets?ticket=5`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/06-scrum361-ticket-detail.png`, fullPage: true })
@@ -182,7 +182,7 @@ test('7. Aaron — Informe de Inspección (ticket GAR-2026-0001, id 5): datalist
 test('8. Aaron (puede_ver_costos) — ficha de técnico externo id 2: ve tarifa, margen e historial completo, sin crash', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
   const row = page.locator('tbody tr', { hasText: 'QA Luis Vargas' })
@@ -198,7 +198,7 @@ test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos):
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
 
   // 9a. La tabla de LISTADO ya leakea tarifa_dia (ExternalTechnicianController::summary() nunca
   // se tocó en el fix de SCRUM-337, sigue exponiendo tarifa_dia basado solo en tarifa_visible,
@@ -228,7 +228,7 @@ test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos):
 // ---------- SCRUM-780 — Reorganización de menú y permisos "Ajustes" ----------
 
 test('10. Aaron — desplegable "Tickets" revela "Listado de Tickets" + "Cotizaciones" al hacer clic', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1200)
 
@@ -259,7 +259,7 @@ test('10. Aaron — desplegable "Tickets" revela "Listado de Tickets" + "Cotizac
 })
 
 test('11. Aaron (lider_servicios) — "Ajustes" NO aparece en el sidebar Y navegar por URL directa a /servicios/ajustes lo redirige', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1000)
   const expandBtn11 = page.locator('[title="Expandir menú"]')
@@ -282,14 +282,14 @@ test('11. Aaron (lider_servicios) — "Ajustes" NO aparece en el sidebar Y naveg
 })
 
 test('12. Ruptura directa — GET /servicios/settings con token de Aaron (lider_servicios) da 403', async ({ request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const res = await request.get(`${BASE}/api/servicios/settings`, { headers: { Authorization: `Bearer ${token}` } })
   console.log('[SCRUM-780] GET /servicios/settings como lider_servicios → status:', res.status())
   expect(res.status()).toBe(403)
 })
 
 test('13. Whileyner (management) — ve "Ajustes" en el sidebar y accede normalmente a /servicios/ajustes', async ({ page }) => {
-  await login(page, 'whil@illuminations.com.pa')
+  await login(page, 'whil@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1000)
   const expandBtn13 = page.locator('[title="Expandir menú"]')

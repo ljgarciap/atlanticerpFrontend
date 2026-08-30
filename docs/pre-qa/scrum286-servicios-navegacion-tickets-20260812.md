@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-12
 **Entorno:** stack local (nginx `http://localhost:8090`, vite `http://localhost:5173`)
-**Usuario:** `servicio@illuminations.com.pa` (Aaron Leis, `lider_servicios`, acceso completo a Servicios)
+**Usuario:** `servicio@atlantic.com.pa` (Aaron Leis, `lider_servicios`, acceso completo a Servicios)
 **Herramienta:** Playwright CLI — `atlanticerp-frontend/e2e/preqa-scrum286-servicios-navegacion-tickets-20260812.spec.ts`
 
 ## Por qué esta pasada es distinta

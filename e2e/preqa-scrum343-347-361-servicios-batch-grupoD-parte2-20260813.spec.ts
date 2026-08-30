@@ -8,10 +8,10 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * mergeado a `dev` local en ambos repos, todavía sin push.
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa  (lider_servicios) — Aaron, escritura completa de Insumos
- *  - carlos@illuminations.com.pa    (tecnico_servicios) — Carlos Vergara, solo lectura del módulo
- *  - daniela@illuminations.com.pa   (management) — Gerencia, ve el Kardex de herramientas
- *  - gerencia2@illuminations.com.pa (lider_compras) — Yirena, avanza la orden real en Compras
+ *  - servicio@atlantic.com.pa  (lider_servicios) — Aaron, escritura completa de Insumos
+ *  - carlos@atlantic.com.pa    (tecnico_servicios) — Carlos Vergara, solo lectura del módulo
+ *  - daniela@atlantic.com.pa   (management) — Gerencia, ve el Kardex de herramientas
+ *  - gerencia2@atlantic.com.pa (lider_compras) — Yirena, avanza la orden real en Compras
  *
  * Hallazgo real de este pase (corregido en el mismo dispatch, ver OriginBadge.tsx +
  * PurchaseOrderController.php): REQ-274 RN3 pedía que la orden generada quedara "visible en
@@ -55,7 +55,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 // ---------- REQ-273 — Listado + gate de escritura ----------
 
 test('1. Aaron — REQ-273: panel Insumos vacío al arrancar, botón "+ Agregar insumo" visible', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/01-panel-vacio.png`, fullPage: true })
 
@@ -63,7 +63,7 @@ test('1. Aaron — REQ-273: panel Insumos vacío al arrancar, botón "+ Agregar 
 })
 
 test('2. Carlos (tecnico_servicios) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/02-carlos-solo-lectura.png`, fullPage: true })
 
@@ -74,7 +74,7 @@ test('2. Carlos (tecnico_servicios) — modo lectura: sin botón "Agregar insumo
 })
 
 test('3. Ruptura — Carlos vía API directa: POST /servicios/insumos debe dar 403', async ({ request }) => {
-  const token = await apiToken(request, 'carlos@illuminations.com.pa')
+  const token = await apiToken(request, 'carlos@atlantic.com.pa')
   const res = await request.post(`${API_BASE}/api/servicios/insumos`, {
     headers: { Authorization: `Bearer ${token}` },
     data: { catalog_product_id: 1, minimo: 1, cantidad_inicial: 1 },
@@ -86,7 +86,7 @@ test('3. Ruptura — Carlos vía API directa: POST /servicios/insumos debe dar 4
 // ---------- REQ-275 — Alta de insumo nuevo (buscador del catálogo real) ----------
 
 test('4. Aaron — REQ-275 Escenario 2: buscar un insumo que NO existe no muestra ninguna opción, sin forma de crearlo libre', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
 
   await page.getByRole('button', { name: /Agregar insumo/i }).click()
@@ -102,7 +102,7 @@ test('4. Aaron — REQ-275 Escenario 2: buscar un insumo que NO existe no muestr
 })
 
 test('5. Aaron — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3, cantidad inicial=5) crea la fila en 0 disponible / Bajo mínimo', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
 
   await page.getByRole('button', { name: /Agregar insumo/i }).click()
@@ -133,7 +133,7 @@ test('5. Aaron — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3
 })
 
 test('6. Aaron — REQ-275 RN1: ese mismo producto YA NO aparece en el buscador (excluido)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
 
   await page.getByRole('button', { name: /Agregar insumo/i }).click()
@@ -153,7 +153,7 @@ test('6. Aaron — REQ-275 RN1: ese mismo producto YA NO aparece en el buscador 
 // ---------- REQ-274/277 — ciclo completo real hasta "Recibido", vía Compras ----------
 
 test('7. Yirena (Compras) — la orden generada por Aaron aparece con "Origen: Servicios" (hallazgo corregido)', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await page.goto(`${BASE}/compras/ordenes`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/08-compras-ver-ordenes.png`, fullPage: true })
@@ -164,9 +164,9 @@ test('7. Yirena (Compras) — la orden generada por Aaron aparece con "Origen: S
 })
 
 test('8. Yirena — avanza la orden hasta Recibido (Pendiente → Ordenado → En tránsito local → Ingreso de Mercancía → Recibido)', async ({ page, request }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
 
-  const token = await apiToken(request, 'gerencia2@illuminations.com.pa')
+  const token = await apiToken(request, 'gerencia2@atlantic.com.pa')
   const listRes = await request.get(`${API_BASE}/api/compras/orders?search=LightCorp`, {
     headers: { Authorization: `Bearer ${token}` },
   })
@@ -237,7 +237,7 @@ test('8. Yirena — avanza la orden hasta Recibido (Pendiente → Ordenado → E
 })
 
 test('9. Aaron — REQ-277 RN3/RN4: tras "Recibido" el insumo pasa a "OK" (disponible=5 > mínimo=3), botón vuelve a "Solicitar"', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/12-insumo-recibido.png`, fullPage: true })
@@ -251,7 +251,7 @@ test('9. Aaron — REQ-277 RN3/RN4: tras "Recibido" el insumo pasa a "OK" (dispo
 })
 
 test('10. REQ-291 RN5 — Bodega ve exactamente el mismo disponible en "Reserva Servicios" que Servicios (una sola fuente, sin duplicar)', async ({ request }) => {
-  const token = await apiToken(request, 'gerencia2@illuminations.com.pa')
+  const token = await apiToken(request, 'gerencia2@atlantic.com.pa')
 
   const listRes = await request.get(`${API_BASE}/api/bodega/inventory?search=${encodeURIComponent(PRODUCT_SEARCH)}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -279,7 +279,7 @@ test('10. REQ-291 RN5 — Bodega ve exactamente el mismo disponible en "Reserva 
 // ---------- REQ-276 — Kardex de herramientas: gate + filtros combinados ----------
 
 test('11. Carlos (tecnico_servicios) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/13-carlos-kardex-bloqueado.png`, fullPage: true })
@@ -288,7 +288,7 @@ test('11. Carlos (tecnico_servicios) — URL directa a /servicios/tools/kardex l
 })
 
 test('12. Ruptura — Carlos vía API directa: GET /servicios/tools/movements debe dar 403', async ({ request }) => {
-  const token = await apiToken(request, 'carlos@illuminations.com.pa')
+  const token = await apiToken(request, 'carlos@atlantic.com.pa')
   const res = await request.get(`${API_BASE}/api/servicios/tools/movements`, {
     headers: { Authorization: `Bearer ${token}` },
   })
@@ -297,7 +297,7 @@ test('12. Ruptura — Carlos vía API directa: GET /servicios/tools/movements de
 })
 
 test('13. Daniela (management) — accede al Kardex de herramientas, ve filtros combinables', async ({ page }) => {
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/14-daniela-kardex-ok.png`, fullPage: true })
@@ -308,7 +308,7 @@ test('13. Daniela (management) — accede al Kardex de herramientas, ve filtros 
 })
 
 test('14. Aaron — botón "Movimiento de herramientas" visible y abre el Kardex en pestaña nueva', async ({ page, context }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoInsumos(page)
   await page.getByRole('button', { name: 'Herramientas', exact: true }).click()
   await page.waitForTimeout(600)

@@ -43,12 +43,12 @@ const LEVELS = [
 ]
 
 function baseUser(overrides: Partial<UserInfo> = {}): UserInfo {
-  return { id: 1, first_name: 'Actor', last_name: 'Demo', email: 'actor@illuminations.test', permissions: [], security_level: 9, role: 'management', ...overrides }
+  return { id: 1, first_name: 'Actor', last_name: 'Demo', email: 'actor@atlantic.test', permissions: [], security_level: 9, role: 'management', ...overrides }
 }
 
 function makeUser(overrides: Partial<UserListItem> = {}): UserListItem {
   return {
-    id: 5, first_name: 'Juan', last_name: 'García', email: 'juan@illuminations.test', phone: null,
+    id: 5, first_name: 'Juan', last_name: 'García', email: 'juan@atlantic.test', phone: null,
     is_active: true, mfa_enabled: false, notes: null, department: null, extra_permissions: [],
     security_level: { id: 3, level: 3, name: 'Nivel 3' }, roles: [],
     role_id: 1, additional_role_ids: [], approve_large_amounts: false, manage_users: false,
@@ -113,7 +113,7 @@ describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
 
     fireEvent.change(container.querySelector('input[name="first_name"]')!, { target: { value: 'Nueva' } })
     fireEvent.change(container.querySelector('input[name="last_name"]')!, { target: { value: 'Persona' } })
-    fireEvent.change(container.querySelector('input[name="email"]')!, { target: { value: 'nueva@illuminations.test' } })
+    fireEvent.change(container.querySelector('input[name="email"]')!, { target: { value: 'nueva@atlantic.test' } })
 
     await waitFor(() => expect(screen.getByText('Vendedor/Diseñador')).toBeInTheDocument())
     const roleSelect = screen.getByDisplayValue('security:users.form.noRole')

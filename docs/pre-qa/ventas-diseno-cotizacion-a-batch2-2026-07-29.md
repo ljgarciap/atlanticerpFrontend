@@ -2,7 +2,7 @@
 
 Tickets: SCRUM-116 (REQ-024, Cliente Master), SCRUM-117 (REQ-025, Subcliente),
 SCRUM-124 (REQ-032, Entrega). Commit bajo prueba: `58fdd4d` sobre `a45f41e`.
-Entorno: `https://dev.atlanticerp.ai`, usuario `designer@illuminations.test`
+Entorno: `https://dev.atlanticerp.ai`, usuario `designer@atlantic.test`
 (vendedor_disenador). Senior Review y Visual Review ya corrieron limpios sobre
 este mismo despliegue antes de este pase.
 

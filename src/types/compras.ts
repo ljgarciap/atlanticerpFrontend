@@ -74,9 +74,9 @@ export interface ProviderPayload {
 }
 
 export type ShippingType = 'aereo' | 'maritimo' | 'terrestre'
-// SCRUM-197 (REQ-134, 2026-07-30) — el mockup solo contempla Cliente/Illuminations, "proveedor"
+// SCRUM-197 (REQ-134, 2026-07-30) — el mockup solo contempla Cliente/Atlantic, "proveedor"
 // no existía en el requerimiento.
-export type WhoPaysShipping = 'illuminations' | 'cliente'
+export type WhoPaysShipping = 'atlantic' | 'cliente'
 export type Modality = 'directo' | 'zona_libre'
 
 /** REQ-117/141 — las 7 etapas, en el orden que sigue un proveedor internacional. */

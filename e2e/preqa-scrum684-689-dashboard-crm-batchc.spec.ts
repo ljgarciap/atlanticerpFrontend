@@ -11,17 +11,17 @@ import { test, expect, type Page } from '@playwright/test'
  * Este es el gate de permiso (REQ-609) — se promueve a e2e/ permanente por regla del
  * proyecto (gates de rol/permiso que ya se probaron una vez no se borran).
  *
- * Nota sobre cuentas: daniela@illuminations.com.pa (Gerencia, reportera del ticket) no
+ * Nota sobre cuentas: daniela@atlantic.com.pa (Gerencia, reportera del ticket) no
  * autentica con la convención password=email — probablemente cambió su password a mano
  * (mismo patrón de la lección "verificar password real" en CLAUDE.md). Se usa
- * whil@illuminations.com.pa (Whileyner Contreras, Gerencia Restringida, rol `management`)
+ * whil@atlantic.com.pa (Whileyner Contreras, Gerencia Restringida, rol `management`)
  * como cuenta Gerencia real alternativa — mismo nivel de acceso al Dashboard CRM.
  */
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const MGMT_EMAIL = 'whil@illuminations.com.pa'
-const MGMT_PASS = 'whil@illuminations.com.pa'
+const MGMT_EMAIL = 'whil@atlantic.com.pa'
+const MGMT_PASS = 'whil@atlantic.com.pa'
 const VENDOR_EMAIL = 'milena.e@grupolafayette.com'
 const VENDOR_PASS = 'milena.e@grupolafayette.com'
 

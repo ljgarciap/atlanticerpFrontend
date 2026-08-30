@@ -15,7 +15,7 @@ import { test, expect, Page } from '@playwright/test'
  *
  * password default = email (BusinessRoleUserSeeder).
  */
-const EMAIL = 'gerencia2@illuminations.com.pa'
+const EMAIL = 'gerencia2@atlantic.com.pa'
 const STAMP = Date.now()
 
 async function login(page: Page) {

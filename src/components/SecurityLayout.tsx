@@ -15,7 +15,7 @@ export default function SecurityLayout({ children }: Props) {
   // Pre-QA 2026-07-28 (SCRUM-713): estos 4 tabs estaban todos gateados por el mismo
   // check de rol (isSuperAdmin), pero las rutas reales en App.tsx exigen permisos
   // distintos entre sí -- un usuario management sin security.levels/superadmin.all
-  // (ej. whil@illuminations.com.pa) veía los 4 tabs clickeables y 3 lo redirigían en
+  // (ej. whil@atlantic.com.pa) veía los 4 tabs clickeables y 3 lo redirigían en
   // silencio a /ventas-diseno/home. Cada tab ahora refleja el gate real de su ruta.
   const isDepartmentsRole = user?.role === 'superadmin' || user?.role === 'management' // matches RequireRole en App.tsx
   const canSeeLevels = usePermission('security.levels')

@@ -9,9 +9,9 @@ import { test, expect, Page } from '@playwright/test'
 // DATOS DE PRUEBA" (no bugs de código) — verificamos que `admincont:seed-rebotes-qa` (corrido
 // contra dev.atlanticerp.ai el mismo día) efectivamente deja cada escenario visible/alcanzable.
 
-const MARK = 'mbekhar@illuminations.com.pa'
+const MARK = 'mbekhar@atlantic.com.pa'
 const MARK_PASS = 'B1n4X_2026?'
-const FELIX = 'conta@illuminations.com.pa'
+const FELIX = 'conta@atlantic.com.pa'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()

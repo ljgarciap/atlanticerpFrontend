@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Este es un smoke test PERMANENTE (no descartable) — CLAUDE.md del proyecto pide promover a
  * e2e/ cualquier gate de routing/estado/permiso que ya se rompió una vez. El bug original
- * (CRÍTICO, reportado por Daniela 2026-08-04): gerencia2@illuminations.com.pa (Yirena,
+ * (CRÍTICO, reportado por Daniela 2026-08-04): gerencia2@atlantic.com.pa (Yirena,
  * lider_compras) quedaba en loop infinito de <Navigate> / pantalla en blanco al hacer login,
  * porque App.tsx tenía un FALLBACK_ROUTE fijo a '/ventas-diseno/home' (módulo al que ella no
  * tiene acceso). Fix: src/lib/homeRoute.ts resuelve el primer módulo real del usuario
@@ -42,7 +42,7 @@ async function logout(page: Page) {
 }
 
 test('CRÍTICO original — Yirena (lider_compras) aterriza directo en /compras/inicio, sin loop ni pantalla en blanco', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
   // Contenido real visible, no solo la URL correcta — el bug original era loop -> blanco aunque
   // la URL a veces parpadeaba correcta a mitad del loop.
@@ -67,29 +67,29 @@ test('CRÍTICO original — Yirena (lider_compras) aterriza directo en /compras/
 })
 
 test('logout/login repetido — no es un fluke de caché, Yirena sigue aterrizando en /compras/inicio', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
 
   await logout(page)
   await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
 
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
   await expect(page.getByRole('heading', { name: 'Resumen del mes' })).toBeVisible()
 })
 
 test('regresión — Daniela (Gerencia Total, acceso a todo) sigue aterrizando en Ventas & Diseño primero', async ({ page }) => {
-  await login(page, 'daniela@illuminations.com.pa')
+  await login(page, 'daniela@atlantic.com.pa')
   await expect(page).toHaveURL(/\/ventas-diseno\/home/, { timeout: 15000 })
 })
 
 test('regresión — Esteban (lider_bodega, sin compras/ventas_diseno) aterriza en /bodega/home', async ({ page }) => {
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await expect(page).toHaveURL(/\/bodega\/home/, { timeout: 15000 })
 })
 
 test('catch-all — ruta vieja eliminada (/dashboard) resuelve al home real del usuario logueado, sin loop ni blanco', async ({ page }) => {
-  await login(page, 'gerencia2@illuminations.com.pa')
+  await login(page, 'gerencia2@atlantic.com.pa')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
 
   await page.goto('/dashboard')
@@ -106,7 +106,7 @@ test('fallback universal — perfil más angosto del roster real (asistente_admi
   // determinísticamente en src/lib/homeRoute.test.ts ("sin ningún módulo visible, cae al
   // fallback universal"). Acá el objetivo es más angosto pero igual de real: confirmar que el
   // perfil de MENOR acceso del sistema no cae en loop/blanco/login-roto.
-  await login(page, 'asistente@illuminations.com.pa')
+  await login(page, 'asistente@atlantic.com.pa')
   await page.waitForTimeout(1000)
   const url = page.url()
   const landedOnSettingsOrModule =

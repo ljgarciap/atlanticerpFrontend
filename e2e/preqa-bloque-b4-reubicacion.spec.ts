@@ -36,7 +36,7 @@ async function openWarehouse(page: Page, name: string) {
 
 test.describe('Bloque B4 — chip Espacio libre (REQ-384)', () => {
   test('exclusivo con Todos + solo muestra ubicaciones vacias de la bodega actual', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
 
     await page.getByRole('button', { name: 'Espacio libre', exact: true }).click()
@@ -52,7 +52,7 @@ test.describe('Bloque B4 — chip Espacio libre (REQ-384)', () => {
   })
 
   test('bodega con TODAS las ubicaciones ocupadas: lista vacia con estado claro, no rota', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Showroom Obarrio')
 
     await page.getByRole('button', { name: 'Espacio libre', exact: true }).click()
@@ -62,7 +62,7 @@ test.describe('Bloque B4 — chip Espacio libre (REQ-384)', () => {
   })
 
   test('bodega SIN ninguna ubicacion registrada: estado vacio claro, no rota ni queda en blanco', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Merma')
 
     await page.getByRole('button', { name: 'Espacio libre', exact: true }).click()
@@ -74,7 +74,7 @@ test.describe('Bloque B4 — chip Espacio libre (REQ-384)', () => {
 
 test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
   test('RN1: selector de destino excluye la bodega actual (Bodega Central)', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 
@@ -90,7 +90,7 @@ test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
   })
 
   test('RN2: enviar vacio no llama al backend, muestra validacion cliente', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 
@@ -104,7 +104,7 @@ test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
   })
 
   test('reload a mitad de flujo: modal parcialmente lleno, recargar no deja estado raro', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 
@@ -125,7 +125,7 @@ test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
   })
 
   test('doble clic rapido en Solicitar reubicacion no crea 2 solicitudes', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     const token = await page.evaluate(() => localStorage.getItem('accessToken'))
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
@@ -162,7 +162,7 @@ test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
 
 test.describe('Bloque B4 — bandeja Solicitudes de reubicacion (SCRUM-459)', () => {
   test('Escenario 1: filtro vuelve a Todas al reabrir el modal', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 
@@ -184,7 +184,7 @@ test.describe('Bloque B4 — bandeja Solicitudes de reubicacion (SCRUM-459)', ()
   })
 
   test('RN2: solicitud ya resuelta no tiene ninguna accion disponible', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 
@@ -203,7 +203,7 @@ test.describe('Bloque B4 — bandeja Solicitudes de reubicacion (SCRUM-459)', ()
   })
 
   test('RN1: rechazar sin motivo bloquea en UI', async ({ page }) => {
-    await login(page, 'almacen@illuminations.com.pa')
+    await login(page, 'almacen@atlantic.com.pa')
     await openWarehouse(page, 'Bodega Central')
     await page.waitForTimeout(500)
 

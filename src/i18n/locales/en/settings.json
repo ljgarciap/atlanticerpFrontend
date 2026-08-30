@@ -47,7 +47,7 @@
     "subtitle": "Superadmin-only operations",
     "demoCleanup": {
       "label": "Clear demo data",
-      "description": "Removes all [DEMO] projects and @illuminations.test users. This action cannot be undone.",
+      "description": "Removes all [DEMO] projects and @atlantic.test users. This action cannot be undone.",
       "confirm": "Are you sure? All demo data will be permanently deleted.",
       "confirmBtn": "Yes, clear",
       "cancelBtn": "Cancel",

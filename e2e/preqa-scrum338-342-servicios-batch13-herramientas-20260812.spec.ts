@@ -9,8 +9,8 @@ import { test, expect, type Page } from '@playwright/test'
  * mergeado a `dev` local en ambos repos, todavía sin push.
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa   (lider_servicios) — Aaron, escritura completa
- *  - garantias@illuminations.com.pa  (garantias_servicios) — Miguel Castillo, solo lectura
+ *  - servicio@atlantic.com.pa   (lider_servicios) — Aaron, escritura completa
+ *  - garantias@atlantic.com.pa  (garantias_servicios) — Miguel Castillo, solo lectura
  *
  * TOOL_NAME lleva un sufijo único por corrida (Date.now()) para que re-correr la suite no colisione
  * con datos reales dejados por una corrida anterior (no hay borrado de fixtures entre corridas).
@@ -41,7 +41,7 @@ async function gotoTools(page: Page) {
 // ---------- REQ-271 — Alta de herramienta nueva, de punta a punta ----------
 
 test('1. Aaron — REQ-271 Escenario 1: solicitar 3 unidades nuevas crea fila pendiente 0 unidades', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.screenshot({ path: `${DL_DIR}/01-panel-inicial.png`, fullPage: true })
 
@@ -64,7 +64,7 @@ test('1. Aaron — REQ-271 Escenario 1: solicitar 3 unidades nuevas crea fila pe
 })
 
 test('2. Aaron — REQ-271 Escenario 2: marcar "Recibida" crea 3 unidades reales con códigos nuevos, en bodega', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -92,7 +92,7 @@ test('2. Aaron — REQ-271 Escenario 2: marcar "Recibida" crea 3 unidades reales
 // ---------- REQ-272 — Reposición sobre unidad EXISTENTE ----------
 
 test('3. Aaron — REQ-272: "Solicitar" en una unidad existente, luego "Recibida" genera códigos NUEVOS distintos del original', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -128,7 +128,7 @@ test('3. Aaron — REQ-272: "Solicitar" en una unidad existente, luego "Recibida
 // ---------- REQ-269 — Cambio de estado con responsable automático ----------
 
 test('4. Aaron — REQ-269 Escenario 1: marcar unidad ASIGNADA como Dañada atribuye responsable automático', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -155,7 +155,7 @@ test('4. Aaron — REQ-269 Escenario 1: marcar unidad ASIGNADA como Dañada atri
 })
 
 test('5. Aaron — REQ-269 Escenario 2: marcar unidad EN BODEGA (sin asignar) como Perdida → "Sin asignar al momento del incidente"', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -172,7 +172,7 @@ test('5. Aaron — REQ-269 Escenario 2: marcar unidad EN BODEGA (sin asignar) co
 })
 
 test('6. Aaron — REQ-269 Escenario 3: marcar Desgaste NO atribuye responsable', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -188,7 +188,7 @@ test('6. Aaron — REQ-269 Escenario 3: marcar Desgaste NO atribuye responsable'
 })
 
 test('7. Aaron — REQ-269 RN4: volver una unidad Dañada a "Buen estado" limpia el responsable', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -208,7 +208,7 @@ test('7. Aaron — REQ-269 RN4: volver una unidad Dañada a "Buen estado" limpia
 // ---------- REQ-270 — Reasignación ----------
 
 test('8. Aaron — REQ-270: reasignar una unidad actualiza "Desde" a hoy', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.waitForTimeout(1000)
@@ -237,7 +237,7 @@ test('8. Aaron — REQ-270: reasignar una unidad actualiza "Desde" a hoy', async
 // ---------- REQ-268 — Filtros combinados + estado vacío ----------
 
 test('9. Aaron — REQ-268 RN4: filtro sin resultados muestra "Sin herramientas para este filtro"', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill('ZZZ-NO-EXISTE-NINGUNA-HERRAMIENTA-ZZZ')
   await page.waitForTimeout(1000)
@@ -247,7 +247,7 @@ test('9. Aaron — REQ-268 RN4: filtro sin resultados muestra "Sin herramientas 
 })
 
 test('10. Aaron — REQ-268 RN3: filtros combinados (búsqueda + estado a la vez)', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
   await page.getByRole('combobox', { name: /filtrar por estado/i }).selectOption({ label: 'Buen estado' })
@@ -263,7 +263,7 @@ test('10. Aaron — REQ-268 RN3: filtros combinados (búsqueda + estado a la vez
 // ---------- Modo lectura — técnico interno ----------
 
 test('11. Miguel (garantias_servicios) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
-  await login(page, 'garantias@illuminations.com.pa')
+  await login(page, 'garantias@atlantic.com.pa')
   await gotoTools(page)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/17-modo-lectura-miguel.png`, fullPage: true })
@@ -282,7 +282,7 @@ test('11. Miguel (garantias_servicios) — modo lectura: sin selects de edición
 
 test('12. Ruptura — rol de escritura vía API directa: PATCH estado con garantias_servicios debe dar 403', async ({ request }) => {
   const loginRes = await request.post(`${API_BASE}/api/auth/login`, {
-    data: { email: 'garantias@illuminations.com.pa', password: 'garantias@illuminations.com.pa' },
+    data: { email: 'garantias@atlantic.com.pa', password: 'garantias@atlantic.com.pa' },
   })
   const { token } = await loginRes.json()
 

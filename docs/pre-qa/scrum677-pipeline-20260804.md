@@ -21,11 +21,11 @@ el dato se completaba por otra vía. Fix: `saveMutation`, `uploadFileMutation` y
 
 ## Nota de entorno — desvío del login sugerido en el ticket
 
-La instrucción original pedía loguear con `idmar@illuminations.com.pa` ("vendedor con data real
+La instrucción original pedía loguear con `idmar@atlantic.com.pa` ("vendedor con data real
 sembrada"). En el Postgres LOCAL de esta sesión ese usuario no tenía ninguna tarjeta de pipeline
 propia — `VentasDisenoDemoSeeder` resuelve el rol `designer` seedeado a
-**neil.quiel@illuminations.com.pa**, no a idmar (válido para `dev.atlanticerp.ai`, no para local). Se
-usó **neil.quiel@illuminations.com.pa** (Vendedor/Diseñador) y **daniela@illuminations.com.pa**
+**neil.quiel@atlantic.com.pa**, no a idmar (válido para `dev.atlanticerp.ai`, no para local). Se
+usó **neil.quiel@atlantic.com.pa** (Vendedor/Diseñador) y **daniela@atlantic.com.pa**
 (Gerencia, dueña de tarjetas en Cotización/Propuesta) — ambas cuentas reales, password = mismo
 email, mismo patrón que el resto de `e2e/`. Adicionalmente, `infra/test.sh` corrido en esta misma
 sesión (para validar el backend) comparte el Postgres local y lo dejó sin datos — se corrió

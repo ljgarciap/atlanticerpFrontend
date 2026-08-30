@@ -13,7 +13,7 @@ async function login(page, email: string) {
 test('SCRUM-391 — seleccionar picker, verificar consolidado sumado + doble clic Imprimir + picker que dejó de tener en_picking', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@illuminations.com.pa')
+  await login(page, 'almacen@atlantic.com.pa')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 

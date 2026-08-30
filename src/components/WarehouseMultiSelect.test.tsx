@@ -26,7 +26,7 @@ vi.mock('@/api/comprasApi', () => ({
 const mockedApi = vi.mocked(comprasApi, true)
 
 const WAREHOUSES = [
-  { id: 1, name: 'Illuminations' },
+  { id: 1, name: 'Atlantic' },
   { id: 2, name: 'Bodega Norte' },
   { id: 3, name: 'Bodega Sur' },
 ]
@@ -66,7 +66,7 @@ describe('WarehouseMultiSelect — estado cerrado', () => {
     expect(await screen.findByText('inventory.filters.warehousesCount count=2')).toBeInTheDocument()
     // Chips de la selección vigente, visibles con el dropdown cerrado — solo aparecen una vez
     // que useWarehouses() resuelve (los chips necesitan el nombre real de cada bodega).
-    expect(await screen.findByText('Illuminations')).toBeInTheDocument()
+    expect(await screen.findByText('Atlantic')).toBeInTheDocument()
     expect(screen.getByText('Bodega Norte')).toBeInTheDocument()
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
@@ -91,11 +91,11 @@ describe('WarehouseMultiSelect — dropdown', () => {
     await waitFor(() => expect(mockedApi.warehouses.list).toHaveBeenCalled())
     fireEvent.click(screen.getByText('inventory.filters.warehousesAll'))
 
-    fireEvent.click(screen.getByLabelText('Illuminations'))
+    fireEvent.click(screen.getByLabelText('Atlantic'))
     fireEvent.click(screen.getByLabelText('Bodega Sur'))
 
     await waitFor(() => expect(screen.getByText('inventory.filters.warehousesCount count=2')).toBeInTheDocument())
-    expect(screen.getByLabelText('Illuminations')).toBeChecked()
+    expect(screen.getByLabelText('Atlantic')).toBeChecked()
     expect(screen.getByLabelText('Bodega Sur')).toBeChecked()
     expect(screen.getByLabelText('Bodega Norte')).not.toBeChecked()
   })
@@ -130,7 +130,7 @@ describe('WarehouseMultiSelect — dropdown', () => {
     fireEvent.click(screen.getByLabelText('Bodega Norte'))
 
     await waitFor(() => expect(screen.getByText('inventory.filters.warehousesCount count=2')).toBeInTheDocument())
-    expect(screen.getByLabelText('Illuminations')).toBeChecked()
+    expect(screen.getByLabelText('Atlantic')).toBeChecked()
     expect(screen.getByLabelText('Bodega Sur')).toBeChecked()
     expect(screen.getByLabelText('Bodega Norte')).not.toBeChecked()
   })
@@ -138,11 +138,11 @@ describe('WarehouseMultiSelect — dropdown', () => {
   it('quitar 1 bodega desde el chip visible (dropdown cerrado) no afecta el resto', async () => {
     renderComponent([1, 2])
 
-    fireEvent.click(await screen.findByLabelText('inventory.filters.removeWarehouse name=Illuminations'))
+    fireEvent.click(await screen.findByLabelText('inventory.filters.removeWarehouse name=Atlantic'))
 
     await waitFor(() => expect(screen.getByText('inventory.filters.warehousesCount count=1')).toBeInTheDocument())
     expect(screen.getByText('Bodega Norte')).toBeInTheDocument()
-    expect(screen.queryByText('Illuminations')).not.toBeInTheDocument()
+    expect(screen.queryByText('Atlantic')).not.toBeInTheDocument()
   })
 
   it('cierra el dropdown al hacer clic afuera', async () => {

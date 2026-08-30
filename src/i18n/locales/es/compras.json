@@ -244,11 +244,11 @@
       "typeMaritimo": "Marítimo",
       "typeTerrestre": "Terrestre",
       "whoPays": "¿Quién paga el envío?",
-      "whoPaysIlluminations": "Illuminations",
+      "whoPaysAtlantic": "Atlantic",
       "whoPaysCliente": "Cliente",
       "cost": "Costo del envío aéreo",
       "estimatedArrival": "Llegada estimada",
-      "markApprovalNotice": "Esta orden quedará pendiente de aprobación de Mark (envío aéreo pagado por Illuminations)."
+      "markApprovalNotice": "Esta orden quedará pendiente de aprobación de Mark (envío aéreo pagado por Atlantic)."
     },
     "actions": {
       "next": "Siguiente",

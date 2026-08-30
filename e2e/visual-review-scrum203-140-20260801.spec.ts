@@ -18,7 +18,7 @@ import { test, expect, type Page } from '@playwright/test'
  * este test lo agarra antes de que llegue a QA.
  */
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const EMAIL = 'management@illuminations.test'
+const EMAIL = 'management@atlantic.test'
 const PASS  = 'Password123!'
 
 async function login(page: Page) {

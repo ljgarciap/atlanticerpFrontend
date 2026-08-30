@@ -7,7 +7,7 @@ cierre), SCRUM-282 (REQ-219 Indicador Cotización), SCRUM-283 (REQ-220 Indicador
 (REQ-287→290) comparado contra descripción textual, sin mockup HTML propio.
 Mockup: `5A__Servicios_Tickets.html` (adjunto de SCRUM-279).
 Entorno: local, `http://localhost:8090` (nginx, build de producción del frontend + proxy backend).
-Cuenta usada: `servicio@illuminations.com.pa` (lider_servicios / Aaron Leis).
+Cuenta usada: `servicio@atlantic.com.pa` (lider_servicios / Aaron Leis).
 Herramienta: Playwright CLI (script descartable, node directo con `playwright` importado desde
 `atlanticerp-frontend/node_modules`), 6 tickets de prueba ya sembrados repartidos en las 6 columnas.
 
@@ -146,8 +146,8 @@ corrido después del fix (dist `index-DnCVQI4r.js`, timestamp 22:20:34, coincide
 commit del fix).
 
 Entorno: local, `http://localhost:8090`, mismos 6 tickets sembrados (sin re-siembra, confirmados
-intactos vía consulta directa a `illuminations_servicios.tickets`). Cuenta:
-`servicio@illuminations.com.pa`. Herramienta: Playwright CLI (script descartable).
+intactos vía consulta directa a `atlantic_servicios.tickets`). Cuenta:
+`servicio@atlantic.com.pa`. Herramienta: Playwright CLI (script descartable).
 
 **Verificación punto por punto del criterio del hallazgo original:**
 
@@ -186,8 +186,8 @@ sin el carácter Unicode U+1F512 en ningún lugar del body. Cumple regla SCRUM-5
 Tablero):** confirmado en código (`TicketIndicators.tsx` línea 73: `{showAmount && amount != null
 && ...}`) que la lógica de mostrar el monto no fue tocada por el fix — sigue intacta. Nota nueva
 (no bloqueante, ya implícita en el comentario `quote_amount: puede faltar en este batch` de
-`types/servicios.ts`): la tabla `illuminations_servicios.tickets` en la base real **no tiene
-columna `quote_amount`** (confirmado vía `\d illuminations_servicios.tickets`), así que el monto
+`types/servicios.ts`): la tabla `atlantic_servicios.tickets` en la base real **no tiene
+columna `quote_amount`** (confirmado vía `\d atlantic_servicios.tickets`), así que el monto
 nunca se renderiza con los datos sembrados actuales — no es un bug de este batch ni del fix, es un
 campo que depende de un batch posterior del módulo de Cotización (ya documentado como fuera de
 alcance). Se deja registrado acá para que quede explícito, no como hallazgo nuevo.

@@ -22,7 +22,7 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const MARK  = 'mbekhar@illuminations.com.pa' // Mark Approver real
+const MARK  = 'mbekhar@atlantic.com.pa' // Mark Approver real
 const MARK_PASSWORD = 'B1n4X_2026?'
 
 async function login(page: Page, email: string, password?: string): Promise<void> {

@@ -17,9 +17,9 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * lista de "Criterios de aceptación globales" del propio ticket SCRUM-781. Ver hallazgo 0 abajo.
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): servicio@illuminations.com.pa (Aaron Leis, lider_servicios — tiene
+ * (password = email): servicio@atlantic.com.pa (Aaron Leis, lider_servicios — tiene
  * can_view_cost_breakdown=true, cubre el gate de Gerencia para ver costo/margen de cotización),
- * carlos@illuminations.com.pa (Carlos Vergara, tecnico_servicios).
+ * carlos@atlantic.com.pa (Carlos Vergara, tecnico_servicios).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -48,12 +48,12 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 // ============================================================================
 
 test('1. SCRUM-777 REQ-255 — asignar herramienta a Carlos actualiza el conteo en Técnicos Internos sin F5', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const before = await (await request.get(`${BASE}/api/servicios/internal-technicians`, { headers: { Authorization: `Bearer ${token}` } })).json()
   const carlosBefore = before.data.find((t: any) => t.nombre === 'Carlos Vergara')
   console.log('[SCRUM-777] Carlos herramientas_asignadas ANTES:', carlosBefore.herramientas_asignadas)
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1500)
   // Tab de Herramientas si hace falta
@@ -113,7 +113,7 @@ test('1. SCRUM-777 REQ-255 — asignar herramienta a Carlos actualiza el conteo 
 })
 
 test('2. SCRUM-777 REQ-256 — reagendar visita de un ticket actualiza el estado del técnico en Técnicos Internos sin F5', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   // Ticket 28 asignado a Carlos (internal_technician_id 30... id interno 1), reagendar a "ahora + 20min" -> técnico debería pasar a "En ruta"
   const now = new Date()
   const newStart = new Date(now.getTime() + 20 * 60 * 1000).toISOString()
@@ -124,7 +124,7 @@ test('2. SCRUM-777 REQ-256 — reagendar visita de un ticket actualiza el estado
   }).catch(() => null)
   console.log('[SCRUM-777] reagendar status:', res?.status(), await res?.text().catch(() => ''))
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tecnicos`)
   await page.waitForTimeout(2000)
   await page.screenshot({ path: `${DL_DIR}/03-tecnicos-antes-reagendar.png`, fullPage: true })
@@ -141,7 +141,7 @@ test('2. SCRUM-777 REQ-256 — reagendar visita de un ticket actualiza el estado
 })
 
 test('3. SCRUM-777 REQ-257 — modal "Visitas hoy" es clickeable y navega al ticket', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tecnicos`)
   await page.waitForTimeout(2000)
 
@@ -181,9 +181,9 @@ test('3. SCRUM-777 REQ-257 — modal "Visitas hoy" es clickeable y navega al tic
 // directo a la API con el bearer token (mismos bytes que recibiría el frontend) y renderizando a
 // PNG con pdftoppm para inspección visual — evidencia en /tmp/preqa-pdfs/*.png de esta sesión,
 // confirmada a mano: los 3 documentos muestran el isólogo real (círculos verde/teal), no texto
-// plano "ILLUMINATIONS" y no página en blanco (el hallazgo original de dompdf+SVG, dbefecc).
+// plano "ATLANTIC" y no página en blanco (el hallazgo original de dompdf+SVG, dbefecc).
 test('4. SCRUM-781 punto 1/8 (REQ-278/279) — PDF de Hoja de Reclamo diligenciada responde con PDF real, no vacío', async ({ request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const res = await request.get(`${BASE}/api/servicios/tickets/28/claim-sheet/pdf`, { headers: { Authorization: `Bearer ${token}` } })
   console.log('[SCRUM-781] claim-sheet/pdf status:', res.status(), 'content-type:', res.headers()['content-type'], 'bytes:', (await res.body()).length)
   expect(res.status()).toBe(200)
@@ -196,7 +196,7 @@ test('4. SCRUM-781 punto 1/8 (REQ-278/279) — PDF de Hoja de Reclamo diligencia
 })
 
 test('5. SCRUM-781 punto 1 — PDF de Informe de Inspección responde con PDF real, no vacío', async ({ request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const res = await request.get(`${BASE}/api/servicios/tickets/26/inspection-report/pdf`, { headers: { Authorization: `Bearer ${token}` } })
   console.log('[SCRUM-781] inspection-report/pdf status:', res.status(), 'content-type:', res.headers()['content-type'], 'bytes:', (await res.body()).length)
   expect(res.status()).toBe(200)
@@ -205,7 +205,7 @@ test('5. SCRUM-781 punto 1 — PDF de Informe de Inspección responde con PDF re
 })
 
 test('6. SCRUM-781 punto 1/9 (REQ-235) — documento formal de Cotización responde con PDF real, no vacío', async ({ request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const res = await request.get(`${BASE}/api/servicios/tickets/22/quote/4/document`, { headers: { Authorization: `Bearer ${token}` } })
   console.log('[SCRUM-781] quote document status:', res.status(), 'content-type:', res.headers()['content-type'], 'bytes:', (await res.body()).length)
   expect(res.status()).toBe(200)
@@ -214,8 +214,8 @@ test('6. SCRUM-781 punto 1/9 (REQ-235) — documento formal de Cotización respo
 })
 
 test('7a. SCRUM-781 punto 2 (REQ-227) — botón "Cancelar" explícito pide motivo obligatorio', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
-  await login(page, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets?ticket=16`)
   await page.waitForTimeout(2000)
   await page.screenshot({ path: `${DL_DIR}/11a-detalle-ticket16.png`, fullPage: true })
@@ -247,8 +247,8 @@ test('7a. SCRUM-781 punto 2 (REQ-227) — botón "Cancelar" explícito pide moti
 })
 
 test('7b. SCRUM-781 punto 2 (REQ-227) — cambio de estado desde la tabla (Lista) pide motivo obligatorio', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
-  await login(page, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(2000)
   // Asegurar vista Lista
@@ -290,9 +290,9 @@ test('7b. SCRUM-781 punto 2 (REQ-227) — cambio de estado desde la tabla (Lista
 })
 
 test('7c. SCRUM-781 punto 2 (REQ-227) — arrastrar tarjeta a "Cancelado" en el Tablero pide motivo obligatorio', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   await page.setViewportSize({ width: 2400, height: 1000 }) // el Tablero tiene 6 columnas con overflow-x — ensanchar para tener Reportado..Cancelado sin scroll
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(2000)
   const tableroBtn = page.getByRole('button', { name: /^tablero$/i }).or(page.getByRole('tab', { name: /tablero/i }))
@@ -351,12 +351,12 @@ test('7c. SCRUM-781 punto 2 (REQ-227) — arrastrar tarjeta a "Cancelado" en el 
 })
 
 test('8. SCRUM-781 punto 3 (REQ-232) — costo editable en ítem Subcontratado, no toca el maestro del técnico', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
   const techBefore = await (await request.get(`${BASE}/api/servicios/external-technicians`, { headers: { Authorization: `Bearer ${token}` } })).json()
   const luisBefore = techBefore.data.find((t: any) => t.id === 2)
   console.log('[SCRUM-781] QA Luis Vargas tarifa_dia ANTES:', luisBefore.tarifa_dia)
 
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets?ticket=25`) // GAR-2026-0007, draft quote existente
   await page.waitForTimeout(2000)
   await page.screenshot({ path: `${DL_DIR}/14a0-ticket25-detalle.png`, fullPage: true })
@@ -417,7 +417,7 @@ test('8. SCRUM-781 punto 3 (REQ-232) — costo editable en ítem Subcontratado, 
 })
 
 test('9. SCRUM-781 punto 4 (REQ-247) — buscador de productos reclamados muestra nombre real', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   const nuevoBtn = page.getByRole('button', { name: /nuevo ticket/i }).first()
@@ -429,7 +429,7 @@ test('9. SCRUM-781 punto 4 (REQ-247) — buscador de productos reclamados muestr
 })
 
 test('10. SCRUM-781 punto 6 — "Generar cotización"/"Generar informe" abren modal desde Lista y Tablero', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   const listaBtn = page.getByRole('button', { name: /^lista$/i }).or(page.getByRole('tab', { name: /lista/i }))
@@ -480,7 +480,7 @@ test('10. SCRUM-781 punto 6 — "Generar cotización"/"Generar informe" abren mo
 })
 
 test('11. SCRUM-781 punto 7/9 — ancho de tarjetas del Tablero, sin datos cortados', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   const tableroBtn = page.getByRole('button', { name: /^tablero$/i }).or(page.getByRole('tab', { name: /tablero/i }))
@@ -496,8 +496,8 @@ test('11. SCRUM-781 punto 7/9 — ancho de tarjetas del Tablero, sin datos corta
 })
 
 test('12. SCRUM-781 punto REQ-225 — editar ticket: agregar/editar/quitar producto y agregar adjunto (fix en vivo durante este mismo Pre-QA, commits 3716c8d/a1a76ac)', async ({ page, request }) => {
-  const token = await apiToken(request, 'servicio@illuminations.com.pa')
-  await login(page, 'servicio@illuminations.com.pa')
+  const token = await apiToken(request, 'servicio@atlantic.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await page.goto(`${BASE}/servicios/tickets?ticket=25`)
   await page.waitForTimeout(1500)
   const editBtn = page.getByRole('button', { name: /^editar$/i }).first()

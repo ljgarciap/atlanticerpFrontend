@@ -17,8 +17,8 @@ import { test, expect, type Page } from '@playwright/test'
  * estrictos de Playwright).
  *
  * Cuentas reales (password = email):
- *  - servicio@illuminations.com.pa (lider_servicios) — alta completa.
- *  - carlos@illuminations.com.pa   (tecnico_servicios) — solo consulta (RN5).
+ *  - servicio@atlantic.com.pa (lider_servicios) — alta completa.
+ *  - carlos@atlantic.com.pa   (tecnico_servicios) — solo consulta (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -49,7 +49,7 @@ async function searchAndOpenFicha(page: Page) {
 }
 
 test('REQ-264 RN1 — especialidad vacía muestra "Sin especificar" en la ficha, no en blanco', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoExternalTechnicians(page)
 
   await page.getByText('+ Agregar técnico externo').click()
@@ -66,7 +66,7 @@ test('REQ-264 RN1 — especialidad vacía muestra "Sin especificar" en la ficha,
 })
 
 test('REQ-263 RN4 — buscador + chip de estado se combinan', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoExternalTechnicians(page)
 
   const search = page.getByPlaceholder('Buscar por nombre...')
@@ -80,7 +80,7 @@ test('REQ-263 RN4 — buscador + chip de estado se combinan', async ({ page }) =
 })
 
 test('REQ-266 — editar tarifa acumula historial; ocultar tarifa muestra "Sin tarifa asignada" sin nueva entrada', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoExternalTechnicians(page)
   const detail = await searchAndOpenFicha(page)
 
@@ -103,7 +103,7 @@ test('REQ-266 — editar tarifa acumula historial; ocultar tarifa muestra "Sin t
 })
 
 test('REQ-267 RN3 — sin proyectos asignados muestra el mensaje de estado vacío', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoExternalTechnicians(page)
   const detail = await searchAndOpenFicha(page)
 
@@ -111,7 +111,7 @@ test('REQ-267 RN3 — sin proyectos asignados muestra el mensaje de estado vací
 })
 
 test('REQ-265 Escenario 2 — inactivar sin proyectos activos aplica directo, sin advertencia', async ({ page }) => {
-  await login(page, 'servicio@illuminations.com.pa')
+  await login(page, 'servicio@atlantic.com.pa')
   await gotoExternalTechnicians(page)
   const detail = await searchAndOpenFicha(page)
 
@@ -122,7 +122,7 @@ test('REQ-265 Escenario 2 — inactivar sin proyectos activos aplica directo, si
 })
 
 test('RN5 (REQ-263/264/265/266) — técnico interno tiene acceso de solo consulta, sin controles de escritura', async ({ page }) => {
-  await login(page, 'carlos@illuminations.com.pa')
+  await login(page, 'carlos@atlantic.com.pa')
   await gotoExternalTechnicians(page)
 
   await expect(page.getByText('+ Agregar técnico externo')).not.toBeVisible()

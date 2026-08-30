@@ -64,7 +64,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@illuminations.com.pa',
+    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
     role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }
@@ -159,7 +159,7 @@ describe('ServiciosHomePage', () => {
       data: [{
         id: 'evt-1', title: 'Instalación — Torres Pacífico', start_at: `${todayKey}T13:30:00Z`,
         end_at: `${todayKey}T14:30:00Z`, all_day: false, location: null, organizer: null,
-        owner_email: 'tecnico@illuminations.com.pa', owner_name: null,
+        owner_email: 'tecnico@atlantic.com.pa', owner_name: null,
       }],
       source_unavailable: false,
     })

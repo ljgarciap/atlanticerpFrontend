@@ -20,8 +20,8 @@ commiteados).
   `BodegaInventarioGeneralPage.tsx` (badge + test) y ambos i18n (`en`/`es`), para alinear con el
   enum real del backend (`GeneralCountRequest::ESTADO_PENDIENTE_EVALUACION`) — el frontend tenía un
   valor obsoleto de una iteración anterior del contrato.
-**Usuarios de prueba:** `almacen@illuminations.com.pa` (Esteban Cardenas, rol con `bodega.write`) y
-`mbekhar@illuminations.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno).
+**Usuarios de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, rol con `bodega.write`) y
+`mbekhar@atlantic.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno).
 **Datos de prueba:** productos `VR-B5-TEST-001` (sin cruce, stock 10 en Bodega Central id 6) y
 `VR-B5-TEST-002` (con cruce, stock 20 en Bodega Central), + `AdjustmentRequestLine` pendiente sobre
 el segundo (creada con fecha 2026-06-26 para probar RN1 REQ-391) — sembrados a mano vía tinker.

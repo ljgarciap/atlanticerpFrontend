@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // fixtures originales de familia/por_despachar de SCRUM-501 ya habían sido consumidos/avanzados
 // por verificaciones previas de Senior Review).
 
-const ESTEBAN = 'almacen@illuminations.com.pa' // Jefe de Bodega (lider_bodega)
-const OSVALDO = 'logistica@illuminations.com.pa' // Asistente de Bodega
+const ESTEBAN = 'almacen@atlantic.com.pa' // Jefe de Bodega (lider_bodega)
+const OSVALDO = 'logistica@atlantic.com.pa' // Asistente de Bodega
 
 const SOLO_ORDER_ID = 16
 const FAMILY_ROOT_ID = 17

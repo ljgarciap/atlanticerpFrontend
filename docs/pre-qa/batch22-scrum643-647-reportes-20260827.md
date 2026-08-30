@@ -13,7 +13,7 @@ El comentario original en `App.tsx` (Batch 22) asumía que el rol `vendedor_dise
 `admin_contab.view` y por eso no hacía falta un `RequireRole` adicional — falso: ese rol SÍ tiene
 `admin_contab.view=true` en su JWT real (lo necesita para ver su propio historial de Comisiones
 Internas, Batch 14/15), así que la ruta `RequirePermission permission="admin_contab.view"` sola lo
-dejaba pasar. Confirmado con la cuenta real `neil.quiel@illuminations.com.pa` (rol
+dejaba pasar. Confirmado con la cuenta real `neil.quiel@atlantic.com.pa` (rol
 `vendedor_disenador`):
 
 - El sidebar mostraba "Reportes" bajo Admin. & Contab. (item plano, sin gate por-ítem, mismo
@@ -37,7 +37,7 @@ anidar `RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_admin
 mismo mecanismo, mismo roster que el backend. Sin cambios de backend (el 403 ya era correcto).
 
 **Re-verificación tras el fix** (checklist completo, no solo el punto que falló):
-- `neil.quiel@illuminations.com.pa` → redirigido a su home real (`/ventas-diseno/home`) antes de
+- `neil.quiel@atlantic.com.pa` → redirigido a su home real (`/ventas-diseno/home`) antes de
   montar `ReportesPage`; **0** requests a `/api/admin-contab/reports/*` disparados (antes había 4,
   todas 403); texto "Comisión por gestión de cartera +90 días" ya no aparece en el DOM.
 - Felix/Yaneth/Mark siguen entrando sin regresión — confirmado con Playwright tras el fix.
