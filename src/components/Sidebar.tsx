@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { useUnsavedQuoteGuard } from '@/store/unsavedQuoteGuard'
 import { usePermission } from '@/hooks/usePermission'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 import { Button } from '@/components/ui/Button'
 import ExitWithoutSavingModal from '@/components/ExitWithoutSavingModal'
 import {
@@ -695,7 +695,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           {collapsed ? (
             /* Collapsed: isotipo centrado + toggle abajo */
             <div className="flex flex-col items-center py-2 gap-1">
-              <IlluminationsLogo size={28} iconOnly />
+              <AppLogo size={28} iconOnly />
               <Button
                 variant="icon"
                 onClick={onToggleCollapse}
@@ -710,7 +710,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             <div className="px-3 py-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <IlluminationsLogo size={28} iconOnly />
+                  <AppLogo size={28} iconOnly />
                   <span
                     className="font-bold tracking-widest text-xs truncate text-[#2a2520] dark:text-slate-100"
                   >

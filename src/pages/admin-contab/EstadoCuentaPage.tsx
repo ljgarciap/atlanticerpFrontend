@@ -8,7 +8,7 @@ import {
 import type { AccountStatementClientOption, AccountStatementMovement } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 import {
   IcoClose, IcoSearch, IcoFileText, IcoDownload, IcoChevronDown, IcoPrinter, IcoAlertTriangle,
 } from '@/components/icons'
@@ -114,7 +114,7 @@ export default function EstadoCuentaPage() {
       <div className="flex items-start justify-between mb-5 pb-4 border-b border-slate-100 dark:border-slate-700 flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <IlluminationsLogo size={24} iconOnly />
+            <AppLogo size={24} iconOnly />
             <span className="text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400 uppercase">
               Illuminations · AtlanticERP
             </span>

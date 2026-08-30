@@ -8,7 +8,7 @@ import { authApi } from '@/api/authApi'
 import { useAuthStore } from '@/store/authStore'
 import { getHomeRoute } from '@/lib/homeRoute'
 import { isMultiRoleResponse, isMfaRequiredResponse } from '@/types/auth'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 import RolePickerModal from '@/components/RolePickerModal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -148,7 +148,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <IlluminationsLogo size={76} />
+          <AppLogo size={76} />
           <h1
             className="font-medium mt-3 text-[#2a2520] dark:text-slate-100"
             style={{ fontSize: '22px', letterSpacing: '2.5px' }}

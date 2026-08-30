@@ -5,9 +5,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary:  { DEFAULT: '#5BA5A0', dark: '#3D7E7A', light: '#6FBAB5', soft: '#E3F0EF' },
-        accent:   { DEFAULT: '#9fc54d', dark: '#83a33e' },
-        brand:    '#2a2520',
+        // Paleta AtlanticERP (agregado 2026-08-30) — tomada del isólogo real de la marca
+        // (Atlantic/ats.jpeg): azul marino del swirl/wordmark como primary, coral del
+        // swirl como accent. Reemplaza la paleta teal/verde heredada de Illuminations.
+        primary:  { DEFAULT: '#2B3F73', dark: '#1B2A52', light: '#4A63A0', soft: '#E9ECF6' },
+        accent:   { DEFAULT: '#E8734A', dark: '#C85A34' },
+        brand:    '#1B2A52',
         surface:  '#fafaf7',
       },
       fontFamily: {

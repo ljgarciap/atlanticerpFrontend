@@ -4,7 +4,7 @@ import { useOrderDetail, useOrderDocumentDownloadUrl } from '@/hooks/useBodega'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoPrinter } from '@/components/icons'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 
 interface Props {
   orderId: number
@@ -91,7 +91,7 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
             <div className="border-b-4 border-[#5BA5A0] pb-4 mb-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <IlluminationsLogo size={40} />
+                  <AppLogo size={40} />
                   <div>
                     <p className="text-lg font-bold text-[#5BA5A0] leading-tight">ILLUMINATIONS</p>
                     <p className="text-[10px] text-slate-500">Powered by AtlanticERP</p>

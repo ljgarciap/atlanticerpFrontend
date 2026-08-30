@@ -27,7 +27,7 @@ vi.mock('@/api/settingsApi', () => ({
   settingsApi: { getPreferences: vi.fn(), updatePreferences: vi.fn() },
 }))
 vi.mock('@/hooks/useTheme', () => ({ applyTheme: vi.fn() }))
-vi.mock('./IlluminationsLogo', () => ({ default: () => <div /> }))
+vi.mock('./AppLogo', () => ({ default: () => <div /> }))
 vi.mock('./LanguageSelector', () => ({ default: () => <div /> }))
 vi.mock('./RoleSwitcher', () => ({ default: () => <div /> }))
 vi.mock('./ChangePasswordModal', () => ({ default: () => <div /> }))

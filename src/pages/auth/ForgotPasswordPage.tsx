@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { authApi } from '@/api/authApi'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <IlluminationsLogo size={64} />
+          <AppLogo size={64} />
           <h1
             className="font-medium mt-3 text-[#2a2520] dark:text-slate-100"
             style={{ fontSize: '22px', letterSpacing: '2.5px' }}

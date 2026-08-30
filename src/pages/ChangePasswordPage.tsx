@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { authApi } from '@/api/authApi'
-import IlluminationsLogo from '@/components/IlluminationsLogo'
+import AppLogo from '@/components/AppLogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -69,7 +69,7 @@ export default function ChangePasswordPage() {
       {/* Mini topbar */}
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
-          <IlluminationsLogo size={28} iconOnly />
+          <AppLogo size={28} iconOnly />
           <span className="font-bold tracking-widest text-[#2a2520] text-sm">{t('common:brand')}</span>
         </div>
         <LanguageSelector />

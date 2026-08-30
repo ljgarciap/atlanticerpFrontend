@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { settingsApi } from '@/api/settingsApi'
 import { applyTheme } from '@/hooks/useTheme'
-import IlluminationsLogo from './IlluminationsLogo'
+import AppLogo from './AppLogo'
 import LanguageSelector from './LanguageSelector'
 import RoleSwitcher from './RoleSwitcher'
 import ChangePasswordModal from './ChangePasswordModal'
@@ -87,7 +87,7 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
           )}
           {/* Logo + brand: visible on mobile (sidebar is a drawer); hidden on desktop (sidebar shows it) */}
           <div className="flex items-center gap-2 lg:hidden">
-            <IlluminationsLogo size={32} iconOnly />
+            <AppLogo size={32} iconOnly />
             <span className="font-bold tracking-widest text-[#2a2520] dark:text-slate-100 text-sm">{t('common:brand')}</span>
           </div>
           {/* SCRUM-58 — antes decía "CRM" fijo en toda la app; ahora refleja el módulo
