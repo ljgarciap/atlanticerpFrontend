@@ -1,0 +1,1323 @@
+{
+  "warehouses": {
+    "title": "Bodegas",
+    "subtitle": "Ubicación física del inventario, bodega por bodega",
+    "kpis": {
+      "responsable": "Responsable",
+      "totalProducts": "Total de productos",
+      "totalUnits": "{{count}} unidades en total",
+      "capacityUsed": "% de capacidad usada",
+      "noData": "Sin dato (pendiente)"
+    },
+    "filters": {
+      "search": "Buscar producto o ubicación...",
+      "category": "Todas las categorías",
+      "location": "Todas las ubicaciones",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "all": "Todos",
+      "freeSpace": "Espacio libre"
+    },
+    "table": {
+      "factoryRef": "Ref. fábrica",
+      "publicRef": "Ref. pública",
+      "location": "Ubicación",
+      "product": "Producto",
+      "client": "Cliente",
+      "category": "Categoría",
+      "unitsInWarehouse": "Unidades en {{warehouse}}",
+      "available": "Disponible",
+      "toServe": "Por servir",
+      "totalStock": "Stock Total",
+      "toReceive": "Por ingresar",
+      "inTransit": "En camino",
+      "minStock": "Stock mínimo",
+      "status": "Estado",
+      "provider": "Proveedor",
+      "action": "Acción",
+      "relocate": "Reubicar",
+      "viewDetail": "Ver detalle"
+    },
+    "status": {
+      "disponible": "Disponible",
+      "bajo_stock": "Bajo stock",
+      "sin_stock": "Sin stock"
+    },
+    "modo": {
+      "pendiente": "Sin ubicación detallada (pendiente)"
+    },
+    "empty": "No hay productos en esta bodega con los filtros actuales.",
+    "notImplemented": "Próximamente — todavía no hay un catálogo de ubicaciones vacías definido.",
+    "freeSpace": {
+      "location": "Ubicación",
+      "status": "Estado",
+      "available": "Disponible",
+      "empty": "No hay espacio libre disponible en esta bodega."
+    },
+    "relocateModal": {
+      "title": "Reubicar producto",
+      "product": "Producto",
+      "originWarehouse": "Bodega origen",
+      "destinationWarehouse": "Bodega destino",
+      "selectDestination": "Selecciona la bodega destino",
+      "quantity": "Cantidad a reubicar",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Motivo de la reubicación...",
+      "submit": "Solicitar reubicación",
+      "success": "Solicitud de reubicación enviada — queda pendiente de aprobación.",
+      "errors": {
+        "quantity": "Ingresa una cantidad válida (mayor a 0).",
+        "maxQuantity": "Estás intentando mover más unidades de las que hay en esta bodega. La cantidad máxima es de {{max}} unidades.",
+        "destination": "Selecciona una bodega destino.",
+        "reason": "Escribe un motivo para la reubicación.",
+        "generic": "No se pudo enviar la solicitud. Intenta de nuevo."
+      }
+    },
+    "relocationRequests": {
+      "openButton": "Solicitudes de reubicación",
+      "title": "Solicitudes de reubicación",
+      "chips": {
+        "todas": "Todas",
+        "pendiente": "Pendientes",
+        "aprobada": "Aprobadas",
+        "rechazada": "Rechazadas"
+      },
+      "table": {
+        "product": "Producto",
+        "origin": "Bodega origen",
+        "destination": "Bodega destino",
+        "quantity": "Cantidad",
+        "reason": "Motivo",
+        "requestedBy": "Solicitado por",
+        "date": "Fecha",
+        "status": "Estado",
+        "action": "Acción",
+        "viewReason": "Ver motivo"
+      },
+      "status": {
+        "pendiente": "Pendiente",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada"
+      },
+      "actions": {
+        "approve": "Aprobar",
+        "reject": "Rechazar"
+      },
+      "empty": "No hay solicitudes de reubicación con este filtro.",
+      "reasonModal": {
+        "title": "Motivo del rechazo"
+      },
+      "rejectModal": {
+        "title": "Rechazar reubicación",
+        "placeholder": "Motivo del rechazo...",
+        "required": "Escribe un motivo para rechazar la solicitud.",
+        "confirm": "Rechazar"
+      }
+    },
+    "locations": {
+      "manageButton": "Administrar ubicaciones",
+      "title": "Ubicaciones — {{warehouse}}",
+      "code": "Código",
+      "status": "Estado",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "addPlaceholder": "Nuevo código de ubicación...",
+      "add": "Agregar",
+      "activate": "Activar",
+      "deactivate": "Desactivar",
+      "empty": "Todavía no hay ubicaciones registradas para esta bodega.",
+      "errors": {
+        "required": "Escribe un código de ubicación.",
+        "generic": "No se pudo guardar la ubicación. Intenta de nuevo."
+      }
+    }
+  },
+  "kardex": {
+    "title": "Movimientos de inventario",
+    "subtitle": "Historial completo de entradas, salidas, ajustes, reubicaciones y devoluciones",
+    "filters": {
+      "search": "Buscar producto...",
+      "type": "Todos los tipos",
+      "warehouse": "Todas las bodegas",
+      "clear": "Limpiar filtros"
+    },
+    "table": {
+      "date": "Fecha",
+      "product": "Producto",
+      "warehouse": "Bodega",
+      "type": "Tipo",
+      "quantity": "Cantidad",
+      "reference": "Referencia",
+      "doneBy": "Realizado por",
+      "initialBalance": "Saldo inicial",
+      "finalBalance": "Saldo resultante"
+    },
+    "empty": "No se encontraron movimientos con ese criterio."
+  },
+  "adjustments": {
+    "title": "Solicitud de ajuste",
+    "subtitle": "Historial de solicitudes de ajuste de inventario, por bodega",
+    "actions": {
+      "new": "+ Nueva solicitud",
+      "approve": "Aprobar",
+      "reject": "Rechazar"
+    },
+    "chips": {
+      "todas": "Todas",
+      "Pendiente": "Pendientes",
+      "Aprobada": "Aprobadas",
+      "Rechazada": "Rechazadas"
+    },
+    "status": {
+      "Pendiente": "Pendiente",
+      "Aprobada": "Aprobada",
+      "Rechazada": "Rechazada",
+      "Reemplazada": "Reemplazada"
+    },
+    "table": {
+      "factoryReference": "Ref. fábrica",
+      "product": "Producto",
+      "warehouse": "Bodega",
+      "type": "Tipo",
+      "quantity": "Cantidad",
+      "reason": "Motivo",
+      "evidence": "Evidencia",
+      "requestedBy": "Solicitado por",
+      "date": "Fecha",
+      "status": "Estado",
+      "action": "Acción",
+      "view": "Ver",
+      "viewReason": "Ver motivo",
+      "viewDetail": "Ver detalle"
+    },
+    "empty": "No hay solicitudes de ajuste con los filtros actuales.",
+    "rejectModal": {
+      "title": "Rechazar solicitud",
+      "placeholder": "Motivo del rechazo...",
+      "required": "Escribe un motivo para rechazar la solicitud.",
+      "confirm": "Rechazar"
+    },
+    "newModal": {
+      "title": "Nueva solicitud de ajuste",
+      "searchProduct": "Buscar producto...",
+      "lineLabel": "Bodega {{n}}",
+      "sum": "Sumar",
+      "subtract": "Restar",
+      "unitsCount": "{{count}} unidades",
+      "committedWarning": "Este producto tiene {{count}} unidades comprometidas a un pedido en curso — verifica antes de restar.",
+      "quantity": "Cantidad",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Selecciona un motivo...",
+      "reasons": {
+        "CONTEO_FISICO_NO_COINCIDE": "Conteo físico no coincide con el sistema",
+        "PRODUCTO_DANADO_ROTO": "Producto dañado/roto",
+        "PRODUCTO_VENCIDO_OBSOLETO": "Producto vencido/obsoleto",
+        "ERROR_DE_REGISTRO": "Error de registro (entrada o salida mal digitada)",
+        "ROBO_O_PERDIDA": "Robo o pérdida",
+        "OTRO_ESPECIFICAR": "Otro (especificar)"
+      },
+      "description": "Descripción",
+      "descriptionOptional": "opcional",
+      "descriptionPlaceholder": "Detalle adicional del ajuste…",
+      "responsible": "Responsable",
+      "responsibleOptional": "opcional",
+      "responsiblePlaceholder": "Nombre de la persona responsable…",
+      "addWarehouse": "+ Agregar bodega a la solicitud",
+      "submit": "Enviar solicitud",
+      "errors": {
+        "product": "Selecciona un producto.",
+        "noLines": "Agrega al menos una bodega a la solicitud.",
+        "incomplete": "Completa todos los campos de cada línea, incluida la evidencia.",
+        "submitFailed": "No se pudo enviar la solicitud. Intenta de nuevo."
+      }
+    },
+    "detailModal": {
+      "title": "Solicitud de ajuste #{{id}}",
+      "product": "Producto",
+      "warehouse": "Bodega",
+      "type": "Tipo",
+      "quantity": "Cantidad",
+      "reason": "Motivo",
+      "description": "Descripción",
+      "descriptionEmpty": "Sin descripción.",
+      "responsible": "Responsable",
+      "responsibleEmpty": "Sin responsable indicado.",
+      "evidence": "Evidencia",
+      "requestedBy": "Solicitado por",
+      "date": "Fecha de solicitud",
+      "status": "Estado",
+      "resolvedBy": "Resuelto por",
+      "rejectionReason": "Motivo de rechazo"
+    },
+    "duplicateModal": {
+      "title": "Ya existe un conteo o ajuste sin resolver",
+      "sameType": "Ya hay una solicitud de ajuste pendiente para este producto en esta bodega (del {{date}}). Si continúas, quedará reemplazada por esta.",
+      "crossType": "Esta bodega tiene un conteo general sin resolver (del {{date}}) que ya cubre este producto — solo un aviso, ese conteo no se modifica.",
+      "confirm": "Continuar de todos modos"
+    }
+  },
+  "pedidos": {
+    "title": "Pedidos",
+    "subtitle": "{{count}} pedido en proceso · de Asignado a Entregado",
+    "subtitle_other": "{{count}} pedidos en proceso · de Asignado a Entregado",
+    "actions": {
+      "printPickingOfTheDay": "Imprimir picking del día (todos)",
+      "orderStatus": "Status de pedidos",
+      "comingSoon": "Próximamente",
+      "startPickingFailed": "No se pudo iniciar el picking. Intenta de nuevo.",
+      "dispatchFailed": "No se pudo despachar el pedido. Intenta de nuevo."
+    },
+    "assignPickerForm": {
+      "label": "Elegir picker",
+      "placeholder": "Selecciona un picker...",
+      "errors": {
+        "required": "Elige un picker antes de continuar.",
+        "generic": "No se pudo asignar el picker. Intenta de nuevo."
+      }
+    },
+    "assignCourierForm": {
+      "label": "Elegir repartidor",
+      "placeholder": "Selecciona un repartidor...",
+      "errors": {
+        "required": "Elige un repartidor antes de continuar.",
+        "generic": "No se pudo asignar el repartidor. Intenta de nuevo."
+      }
+    },
+    "workload": {
+      "title": "Carga por asistente",
+      "ofTotal": "{{pct}}% del total",
+      "imbalanceWarning": "Reparto desbalanceado entre asistentes — considera reasignar algunos pedidos.",
+      "empty": "Todavía no hay pedidos asignados a un asistente."
+    },
+    "filters": {
+      "search": "Buscar por # de pedido, cliente o proyecto...",
+      "assistant": "Todos los asistentes",
+      "client": "Todos los clientes",
+      "seller": "Todos los vendedores",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "all": "Todos",
+      "urgentes": "Urgentes",
+      "atrasados": "Atrasados",
+      "sinStock": "Sin stock"
+    },
+    "stages": {
+      "asignado": "Asignado",
+      "picking_pendiente": "Picking pendiente",
+      "en_picking": "En picking",
+      "packing": "Packing",
+      "por_despachar": "Por despachar",
+      "despachado": "Despachado",
+      "entregado": "Entregado"
+    },
+    "board": {
+      "empty": "No hay pedidos en esta etapa con los filtros actuales."
+    },
+    "card": {
+      "atrasado": "Atrasado",
+      "sinStock": "Sin stock",
+      "familyComplete": "Entrega completa",
+      "familyPending": "ENTREGA PARCIAL",
+      "familySequence": "ENTREGA {{seq}} DE {{total}}",
+      "noAssistant": "Sin asistente",
+      "noDeliveryDate": "Sin fecha comprometida",
+      "viewGuide": "Ver guía",
+      "supplierEta": "ETA proveedor: {{date}}",
+      "supplierEtaNote": "Se actualiza automáticamente cuando Compras marque la orden de compra como recibida.",
+      "alertsTitle": "Alertas del pedido",
+      "itemsSummary": "{{products}} productos y {{units}} unidades"
+    },
+    "actionButton": {
+      "asignado": "Asignar Picker",
+      "picking_pendiente": "Iniciar Picking",
+      "en_picking": "Continuar Picking",
+      "packing": "Registrar entrega y Generar Guía",
+      "assignCourier": "Asignar Repartidor",
+      "changeCourier": "Cambiar repartidor",
+      "dispatch": "Despachar",
+      "despachado": "Confirmar Guía Firmada",
+      "entregado": "Completado",
+      "reviewInventory": "Revisar Inventario"
+    },
+    "invoiceRow": {
+      "waiting": "Esperando a Administración",
+      "ready": "Factura lista",
+      "view": "ver"
+    },
+    "detailModal": {
+      "title": "Pedido #{{number}}",
+      "stageSubtitle": "Etapa: {{stage}}",
+      "orderNumber": "N° de pedido",
+      "client": "Cliente",
+      "seller": "Vendedor",
+      "assistant": "Asistente",
+      "deliveryDate": "Fecha de entrega comprometida",
+      "summary": "Resumen",
+      "summaryAggregate": "{{products}} productos · {{units}} unidades",
+      "deliveryAddress": "Dirección de entrega",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "supplierEta": "ETA proveedor",
+      "observations": "Observaciones",
+      "noObservations": "Sin observaciones.",
+      "notAvailable": "No disponible todavía (pendiente de backend)",
+      "viewItems": "Ver detalle de artículos →",
+      "hideItems": "Ocultar detalle de artículos",
+      "viewPickingSheet": "Ver hoja de picking",
+      "items": {
+        "item": "Artículo",
+        "factoryRef": "Ref. fábrica",
+        "publicRef": "Ref. pública",
+        "location": "Ubicación",
+        "requested": "Pedido",
+        "available": "Disponible",
+        "viewWarehouses": "Ver bodegas",
+        "noProduct": "Artículo personalizado, sin bodega asociada",
+        "exportExcel": "Descargar Excel"
+      }
+    },
+    "warehousesModal": {
+      "title": "Bodegas — {{reference}}",
+      "empty": "Este artículo no tiene stock registrado en ninguna bodega."
+    },
+    "invoiceModal": {
+      "title": "Factura — Pedido #{{number}}"
+    },
+    "pickingModal": {
+      "title": "Picking del día",
+      "readOnlyNote": "Vista de solo consulta — no permite marcar cantidades ni dispara oleadas automáticas; refleja el momento en que se abre.",
+      "emptyPickers": "No hay pickers con pedidos en picking en este momento.",
+      "selectPicker": "Selecciona un picker para ver su consolidado.",
+      "emptyItems": "Este picker no tiene artículos pendientes de recolectar.",
+      "ordersCount": "{{count}} pedido en picking",
+      "ordersCount_other": "{{count}} pedidos en picking",
+      "print": "Imprimir",
+      "items": {
+        "reference": "Ref. pública",
+        "description": "Descripción",
+        "location": "Ubicación",
+        "quantity": "Cantidad",
+        "orders": "Pedido(s)"
+      }
+    },
+    "guideModal": {
+      "title": "Guía de Entrega",
+      "guideNumber": "Guía n°",
+      "orderNumber": "Pedido #",
+      "date": "Fecha",
+      "seller": "Vendedor",
+      "courier": "Repartidor",
+      "client": "Cliente",
+      "project": "Proyecto",
+      "deliveryAddress": "Dirección de entrega",
+      "contactName": "Contacto",
+      "contactPhone": "Teléfono",
+      "contactEmail": "Correo",
+      "items": {
+        "publicRef": "Ref. pública",
+        "item": "Artículo",
+        "quantity": "Cantidad"
+      },
+      "status": "Estado de la entrega",
+      "signature": "Firma",
+      "signedBy": "Firmado y recibido por",
+      "pendingSignature": "Pendiente de firma",
+      "noPrices": "Este documento no incluye precios.",
+      "print": "Imprimir",
+      "notGenerated": "La Guía de Entrega todavía no se ha generado para este pedido.",
+      "deliveryData": {
+        "title": "Datos de entrega",
+        "receivedBy": "Recibido por — Nombre y cédula/identificación",
+        "signature": "Firma y fecha/hora"
+      },
+      "footer": "Illuminations · Panamá · Powered by AtlanticERP"
+    },
+    "pickingSheetModal": {
+      "title": "Hoja de Picking",
+      "orderNumber": "Pedido",
+      "readOnly": "Solo consulta (picking ya completado)",
+      "meta": {
+        "generated": "Generado",
+        "picker": "Asignado a (Picking)",
+        "seller": "Vendedor",
+        "assistant": "Asistente de Bodega",
+        "clienteMaster": "Cliente Master",
+        "subcliente": "Subcliente",
+        "proyecto": "Proyecto",
+        "entregaCliente": "Entrega al Cliente"
+      },
+      "itemsTitle": "Artículos a recoger",
+      "itemsOrderedByLocation": "(ordenado por ubicación)",
+      "downloadExcel": "Descargar Excel",
+      "columns": {
+        "recogido": "Recogido",
+        "item": "Artículo",
+        "factoryRef": "Ref. fábrica",
+        "publicRef": "Ref. pública",
+        "location": "Ubicación",
+        "foundAt": "Encontrado en",
+        "requested": "Pedida",
+        "picked": "Alistada",
+        "observations": "Observación"
+      },
+      "completedBy": "Picking completado por {{name}}",
+      "missingRecogido": "Falta marcar \"Recogido\" en {{count}} artículo.",
+      "missingRecogido_other": "Falta marcar \"Recogido\" en {{count}} artículos.",
+      "completeFailed": "No se pudo completar el picking. Intenta de nuevo.",
+      "notesFailed": "No se pudo guardar la observación. Intenta de nuevo.",
+      "completedFull": "Picking completado — el pedido avanzó a Packing.",
+      "completedWithReview": "Picking completado con faltantes — el pedido avanzó a Packing y se generó una Revisión de Inventario (Pedido #{{number}}).",
+      "print": "Imprimir"
+    },
+    "inventoryReviewModal": {
+      "title": "Revisión de Inventario",
+      "subtitle": "Jefe de Bodega y Asistentes de Bodega confirman si cada artículo tenía stock real.",
+      "orderNumber": "Pedido",
+      "columns": {
+        "item": "Artículo",
+        "location": "Ubicación",
+        "quantity": "Cantidad",
+        "stockStatus": "¿Hay stock?",
+        "foundAt": "¿Dónde se encontró?"
+      },
+      "stockStatus": {
+        "pending": "Pendiente",
+        "yes": "Sí hay",
+        "no": "No hay"
+      },
+      "foundAtPlaceholder": "Ubicación real",
+      "foundAtRequired": "Indica dónde se encontró el artículo.",
+      "missingDecision": "Falta indicar si hay stock en {{count}} artículo.",
+      "missingDecision_other": "Falta indicar si hay stock en {{count}} artículos.",
+      "confirm": "Confirmar revisión",
+      "confirmFailed": "No se pudo confirmar la revisión. Intenta de nuevo.",
+      "confirmed": "Revisión confirmada."
+    },
+    "registerDeliveryModal": {
+      "title": "Registrar entrega y generar guía",
+      "orderNumber": "Pedido",
+      "columns": {
+        "factoryRef": "Ref. fábrica",
+        "publicRef": "Ref. pública",
+        "product": "Producto",
+        "requested": "Pedida",
+        "available": "Disponible",
+        "picked": "Alistada",
+        "warehouses": "Bodegas",
+        "toDeliver": "A entregar",
+        "action": "Acción",
+        "observation": "Observación"
+      },
+      "pickedHelp": "Cantidad realmente alistada en el picking — tope real de \"A entregar\".",
+      "edit": "Editar",
+      "lock": "Bloquear",
+      "motivoPlaceholder": "Selecciona un motivo...",
+      "motivoDetallePlaceholder": "Detalle el motivo...",
+      "shortageReasons": {
+        "sin_stock": "Sin stock",
+        "no_encontrado": "No encontrado",
+        "danado": "Encontrado con avería/dañado",
+        "reservado_otro_pedido": "Reservado/tomado por otro pedido",
+        "referencia_equivocada": "Referencia equivocada",
+        "otra": "Otra"
+      },
+      "generalObservation": "Observación general del pedido (opcional)",
+      "save": "Guardar entrega",
+      "errors": {
+        "qtyExceedsCap": "No puede superar lo alistado en el picking.",
+        "motivoRequired": "Indica el motivo de la entrega parcial.",
+        "motivoDetalleRequired": "Detalla el motivo.",
+        "saveFailed": "No se pudo registrar la entrega. Intenta de nuevo."
+      }
+    },
+    "signedGuideModal": {
+      "title": "Confirmar Guía Firmada",
+      "subtitle": "Pedido #{{number}} — sube la guía firmada por el cliente para cerrar la entrega.",
+      "deliveredBy": "Quién entregó",
+      "deliveredByPlaceholder": "Selecciona un repartidor...",
+      "receivedBy": "Quién recibió (firma)",
+      "receivedByPlaceholder": "Nombre de quien firmó la guía",
+      "fileLabel": "Guía firmada (foto o escaneado)",
+      "dropzone": "Selecciona o arrastra el archivo (jpg, png o pdf, máx. 20MB)",
+      "selectedFile": "Archivo: {{name}}",
+      "confirm": "Confirmar",
+      "errors": {
+        "courierRequired": "Elige quién entregó el pedido.",
+        "receivedByRequired": "Indica el nombre de quien recibió y firmó.",
+        "fileRequired": "Adjunta la guía firmada.",
+        "invalidType": "Formato no permitido. Usa jpg, jpeg, png o pdf.",
+        "tooLarge": "El archivo supera el máximo de 20MB.",
+        "saveFailed": "No se pudo confirmar la guía firmada. Intenta de nuevo."
+      }
+    }
+  },
+  "home": {
+    "title": "Inicio",
+    "greeting": "Bienvenido, {{name}}",
+    "scope": {
+      "own": "Inicio",
+      "team": "Equipo"
+    },
+    "team": {
+      "wholeTeam": "Equipo completo"
+    },
+    "miDia": {
+      "title": "Mi día",
+      "titleTeam": "Día del equipo",
+      "dispatched": "{{done}} / {{total}} despachados",
+      "onTime": "% despachado a tiempo",
+      "ordersToday": "Pedidos hoy"
+    },
+    "calendar": {
+      "title": "Mi calendario",
+      "titleTeam": "Calendario del equipo"
+    },
+    "pendientes": {
+      "title": "Pendientes",
+      "empty": "No hay pendientes.",
+      "priority": {
+        "alta": "Prioridad alta",
+        "media": "Prioridad media"
+      },
+      "text": {
+        "picking_no_iniciado": "Pedido #{{order}} ({{cliente}}) sin iniciar picking hace {{horas}} horas.",
+        "guia_sin_subir": "Pedido #{{order}} ({{cliente}}) sin subir guía de entrega hace {{dias}} días.",
+        "ajuste_inventario_pendiente": "Ajuste de inventario pendiente en {{bodega}} ({{producto}}) hace {{dias}} días."
+      },
+      "detail": {
+        "title": {
+          "picking_no_iniciado": "Pedido sin iniciar picking",
+          "guia_sin_subir": "Guía de entrega sin subir",
+          "ajuste_inventario_pendiente": "Ajuste de inventario pendiente"
+        },
+        "fields": {
+          "order": "Pedido",
+          "client": "Cliente",
+          "product": "Producto",
+          "warehouse": "Bodega",
+          "requestedBy": "Solicitado por",
+          "status": "Estado"
+        },
+        "status": {
+          "picking_no_iniciado": "Sin iniciar picking hace {{horas}} horas",
+          "guia_sin_subir": "Sin subir guía de entrega hace {{dias}} días",
+          "ajuste_inventario_pendiente": "Pendiente de aprobación hace {{dias}} días"
+        },
+        "action": {
+          "picking_no_iniciado": "Ir al pedido",
+          "guia_sin_subir": "Ir al pedido",
+          "ajuste_inventario_pendiente": "Ir a la solicitud"
+        }
+      }
+    },
+    "despachosUrgentes": {
+      "title": "Despachos urgentes",
+      "empty": "No hay despachos urgentes."
+    },
+    "porRecibir": {
+      "title": "Por recibir",
+      "empty": "No hay mercancía en camino.",
+      "freeZoneBadge": "Zona Libre",
+      "viewOrder": "Ver orden",
+      "table": {
+        "factoryRef": "Ref. fábrica",
+        "product": "Producto",
+        "quantity": "Cantidad",
+        "eta": "Llegada estimada",
+        "providerOrigin": "Proveedor / Origen"
+      }
+    },
+    "estadoPedidos": {
+      "title": "Estado de pedidos",
+      "chips": {
+        "all": "Todos",
+        "urgent": "Urgentes"
+      },
+      "thisWeek": "(esta semana)",
+      "moreFilters": "Más filtros"
+    },
+    "mayorRotacion": {
+      "title": "Mayor rotación",
+      "empty": "Sin movimiento de salidas en los últimos 30 días.",
+      "salidas": "{{count}} salidas",
+      "viewAll": "Ver los {{count}} artículos"
+    },
+    "articulosCriticos": {
+      "title": "Artículos críticos",
+      "empty": "No hay artículos en riesgo de quiebre de stock.",
+      "available": "{{count}} disponibles",
+      "viewAll": "Ver los {{count}} artículos"
+    }
+  },
+  "placeholders": {
+    "verInventario": "Ver inventario",
+    "ordenesZonaLibre": "Órdenes Zona Libre",
+    "devoluciones": "Devoluciones"
+  },
+  "orderStatusPage": {
+    "title": "Status de Pedidos",
+    "subtitle": "{{count}} pedido encontrado",
+    "subtitle_other": "{{count}} pedidos encontrados",
+    "backToOrders": "Volver a Pedidos",
+    "searchPlaceholder": "Buscar por # de pedido, cotización, cliente o vendedor...",
+    "empty": "No hay pedidos con los filtros actuales.",
+    "table": {
+      "orderNumber": "N° pedido",
+      "quoteNumber": "N° cotización",
+      "subclient": "Subcliente",
+      "orderDate": "Fecha de pedido",
+      "seller": "Vendedor"
+    },
+    "detailModal": {
+      "title": "Detalle del pedido #{{number}}",
+      "project": "Proyecto",
+      "designer": "Diseñador",
+      "client": "Cliente",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "statusDate": "Fecha de Estatus",
+      "items": {
+        "image": "Imagen",
+        "publicRef": "Referencia pública",
+        "description": "Descripción",
+        "requested": "Solicitada",
+        "delivered": "Entregado",
+        "pending": "Pendiente"
+      },
+      "viewDocument": "Ver/Descargar"
+    }
+  },
+  "settings": {
+    "title": "Configuración de Bodega",
+    "subtitle": "Umbrales de negocio de Bodega — ajustables sin necesitar un despliegue nuevo",
+    "fields": {
+      "urgenteVentanaDias": {
+        "label": "Ventana de días para \"Urgentes\"",
+        "help": "Pedidos cuya entrega comprometida cae dentro de estos días se marcan como urgentes en el tablero de Pedidos. 0 = solo hoy."
+      },
+      "pendientesPickingHoras": {
+        "label": "Horas sin iniciar picking",
+        "help": "Un pedido asignado que lleva más de estas horas sin iniciar picking aparece en \"Pendientes\" de Inicio."
+      },
+      "pendientesGuiaDias": {
+        "label": "Días sin subir guía de entrega",
+        "help": "Un pedido despachado que lleva más de estos días sin la guía de entrega firmada aparece en \"Pendientes\" de Inicio."
+      },
+      "rotacionVentanaDias": {
+        "label": "Ventana de días para \"Mayor rotación\"",
+        "help": "Días hacia atrás del Kardex considerados al calcular el panel \"Mayor rotación\" de Inicio."
+      },
+      "rotacionTopN": {
+        "label": "Cantidad de artículos en \"Mayor rotación\"",
+        "help": "Cuántos artículos entran en el top de \"Mayor rotación\" de Inicio."
+      },
+      "capacidadConcentracionPct": {
+        "label": "% de concentración para aviso de \"Capacidad por bodega\"",
+        "help": "Cuando una sola bodega concentra este porcentaje o más del inventario total, el reporte \"Capacidad por bodega\" muestra un aviso sugiriendo redistribuir."
+      }
+    },
+    "validation": {
+      "required": "Este campo es obligatorio.",
+      "integer": "Debe ser un número entero.",
+      "range": "Debe estar entre {{min}} y {{max}}."
+    },
+    "save": "Guardar cambios",
+    "saved": "Cambios guardados",
+    "saveError": "No se pudo guardar la configuración",
+    "forbidden": "No tienes acceso a esta pantalla."
+  },
+  "inventory": {
+    "title": "Ver Inventario",
+    "subtitle": "Catálogo de productos administrado por Compras, en modo solo lectura",
+    "tabs": {
+      "products": "Productos",
+      "families": "Familias"
+    },
+    "actions": {
+      "goToOrders": "Ir a ver Órdenes",
+      "newPurchaseOrder": "+ Nueva orden de compra",
+      "requestAdjustment": "Solicitar ajuste",
+      "close": "Cerrar",
+      "confirmArrival": "Confirmar llegada física",
+      "confirmAndNotify": "Confirmar y notificar a Compras"
+    },
+    "kpis": {
+      "total": "Total de productos",
+      "lowStock": "Bajo stock",
+      "outOfStock": "Sin stock",
+      "inAttention": "En atención",
+      "inAttentionHelp": "Alta/media rotación + bajo o sin stock",
+      "totalToServe": "Total por servir"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por referencia o descripción...",
+      "category": "Todas las categorías",
+      "status": "Todos los estados",
+      "rotation": "Todas las rotaciones",
+      "warehouse": "Todas las bodegas",
+      "provider": "Todos los proveedores",
+      "brand": "Todas las marcas",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "todos": "Todos",
+      "en_atencion": "Atención",
+      "inactivos": "Inactivos",
+      "por_ingresar": "Por ingresar"
+    },
+    "status": {
+      "disponible": "Disponible",
+      "bajo_stock": "Bajo stock",
+      "sin_stock": "Sin stock"
+    },
+    "rotation": {
+      "alta": "Alta",
+      "media": "Media",
+      "baja": "Baja",
+      "compra_unica": "Compra única"
+    },
+    "table": {
+      "image": "Imagen",
+      "publicRef": "Ref. pública",
+      "product": "Producto",
+      "category": "Categoría",
+      "rotation": "Rotación",
+      "warehouses": "Bodega(s)",
+      "warehousesCount": "{{count}} bodega",
+      "warehousesCount_other": "{{count}} bodegas",
+      "available": "Disponible",
+      "toServe": "Por servir",
+      "totalStock": "Stock Total",
+      "toReceive": "Por ingresar",
+      "inTransit": "En camino",
+      "minStock": "Stock mínimo",
+      "status": "Estado",
+      "provider": "Proveedor",
+      "action": "Acción"
+    },
+    "empty": "No hay productos con los filtros actuales.",
+    "technicalSpec": {
+      "title": "Ficha técnica",
+      "button": "Ver ficha técnica",
+      "empty": "Ficha técnica no disponible para este producto.",
+      "fields": {
+        "voltage": "Voltaje",
+        "power": "Potencia",
+        "socket_type": "Tipo de casquillo / socket",
+        "color_temperature": "Temperatura de color",
+        "luminous_flux": "Flujo luminoso",
+        "dimensions": "Dimensiones",
+        "weight": "Peso",
+        "material_finish": "Material / acabado",
+        "ip_rating": "Índice de protección (IP)",
+        "estimated_lifespan": "Vida útil estimada",
+        "warranty": "Garantía",
+        "certifications": "Certificaciones"
+      }
+    },
+    "families": {
+      "title": "Familias",
+      "empty": "Esta familia no tiene productos activos.",
+      "productsCount": "{{count}} producto(s)"
+    },
+    "detailModal": {
+      "title": "Detalle del producto",
+      "brand": "Marca",
+      "barcode": "Código de barras",
+      "description": "Descripción",
+      "sectionInfo": "Información del producto",
+      "noCategory": "Sin categoría",
+      "inactiveBanner": "Este producto está marcado como Inactivo por Compras. Bodega no puede reactivarlo.",
+      "familyLabel": "Familia (opcional)",
+      "familyHelp": "Un producto puede no tener familia asignada."
+    },
+    "warehouseModal": {
+      "title": "Bodegas — {{reference}}",
+      "empty": "Este producto no tiene stock en ninguna bodega."
+    },
+    "porServirModal": {
+      "title": "Por servir — {{reference}}",
+      "empty": "No hay clientes o pedidos comprometidos para este producto."
+    },
+    "enCaminoModal": {
+      "title": "En camino — {{reference}}",
+      "empty": "No hay mercancía en camino para este producto.",
+      "order": "Orden #{{id}}",
+      "noDate": "Fecha estimada pendiente"
+    },
+    "confirmArrivalModal": {
+      "qtyDelivered": "Cant. entregada",
+      "success": "Llegada confirmada y Compras notificado.",
+      "errors": {
+        "generic": "No se pudo confirmar la llegada. Intenta de nuevo.",
+        "invalidQuantity": "Ingresa una cantidad válida (mínimo 1) antes de confirmar."
+      },
+      "awaitingCompras": "Ya confirmaste la llegada física — esperando que Compras finalice el ingreso al inventario.",
+      "awaitingComprasDetail": "Llegada física confirmada: {{count}} unidad por {{user}} — esperando que Compras finalice el ingreso al inventario.",
+      "awaitingComprasDetail_other": "Llegada física confirmada: {{count}} unidades por {{user}} — esperando que Compras finalice el ingreso al inventario."
+    }
+  },
+  "zonaLibre": {
+    "warehousesModal": {
+      "subtitle": "Disponibilidad por bodega",
+      "empty": "Sin stock registrado en ninguna bodega."
+    },
+    "newOrder": {
+      "title": "Nueva Orden — Zona Libre",
+      "subtitle": "Selecciona los productos y genera la orden — queda pendiente por aprobar de Compras",
+      "providerRestrictionNotice": "Bodega solo puede generar órdenes del proveedor {{provider}} — para cualquier otro proveedor, la orden debe crearse desde Compras.",
+      "providerMissing": "No hay un proveedor de Zona Libre de Colón configurado. Contacta a un administrador.",
+      "steps": {
+        "provider": "Proveedor",
+        "products": "Productos",
+        "lines": "Productos en esta orden"
+      },
+      "provider": {
+        "fixedBadge": "Proveedor fijo"
+      },
+      "products": {
+        "searchPlaceholder": "Buscar por ref. fábrica, ref. pública o nombre...",
+        "table": {
+          "factoryRef": "Ref. fábrica",
+          "publicRef": "Ref. pública",
+          "product": "Producto",
+          "available": "Disponible",
+          "warehouses": "Bodegas",
+          "unitCost": "Costo unitario",
+          "quantity": "Cantidad a pedir"
+        },
+        "viewWarehouses": "Ver bodegas",
+        "add": "Agregar a la orden",
+        "empty": "No se encontraron productos disponibles de este proveedor.",
+        "errors": {
+          "zeroQuantity": "Escribe una cantidad mayor a 0 antes de agregarlo a la orden."
+        }
+      },
+      "lines": {
+        "product": "Producto",
+        "factoryRef": "Ref. fábrica",
+        "publicRef": "Referencia pública",
+        "quantity": "Cantidad",
+        "unitCost": "Costo",
+        "subtotal": "Subtotal",
+        "remove": "Quitar",
+        "total": "Monto total",
+        "errors": {
+          "invalidQuantity": "Escribe una cantidad válida, mayor a 0."
+        }
+      },
+      "shipping": {
+        "modality": "Modalidad de ingreso",
+        "modalityValue": "Zona Libre",
+        "type": "Tipo de envío",
+        "terrestre": "Terrestre",
+        "aereo": "Aéreo",
+        "maritimo": "Marítimo",
+        "estimatedArrival": "Llegada estimada"
+      },
+      "actions": {
+        "submit": "Guardar orden de compra",
+        "submitEdit": "Guardar cambios"
+      },
+      "errors": {
+        "generic": "No se pudo guardar la orden. Intenta de nuevo."
+      },
+      "success": {
+        "title": "Orden #{{number}} creada",
+        "status": "Estado",
+        "pendingLabel": "Pendiente por aprobar de Yirena (Compras)",
+        "note": "Bodega generó esta orden, pero necesita la aprobación de Compras antes de convertirse en una orden de compra formal y seguir su flujo normal (pago, logística, ingreso).",
+        "goToOrders": "Ir a Ver Órdenes",
+        "another": "¿Necesitas otra orden?",
+        "createNew": "Crear una nueva"
+      },
+      "editTitle": "Editar Orden — Zona Libre #{{number}}",
+      "editSubtitle": "Modifica los productos y datos de envío — solo mientras la orden esté pendiente de aprobar",
+      "editBlocked": "Esta orden ya fue {{status}} y no se puede modificar."
+    },
+    "orders": {
+      "title": "Órdenes de Zona Libre",
+      "subtitle": "Órdenes generadas por Bodega, pendientes por aprobar de Compras",
+      "newOrder": "+ Nueva orden de compra",
+      "chips": {
+        "todas": "Todas",
+        "pendiente": "Por aprobar",
+        "aprobada": "Aprobadas",
+        "rechazada": "Rechazadas"
+      },
+      "table": {
+        "orderNumber": "N° orden",
+        "provider": "Proveedor",
+        "createdAt": "Fecha creada",
+        "products": "Productos",
+        "amount": "Monto",
+        "estimatedArrival": "Llegada estimada",
+        "status": "Estado",
+        "action": "Acción"
+      },
+      "status": {
+        "pendiente": "Por aprobar",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada"
+      },
+      "actions": {
+        "remind": "Recordar",
+        "reminderSent": "Recordatorio enviado a Compras.",
+        "reminderError": "No se pudo enviar el recordatorio. Intenta de nuevo.",
+        "viewReason": "Ver motivo",
+        "followsNormalFlow": "Sigue el flujo normal de Compras",
+        "approve": "Aprobar",
+        "approveError": "No se pudo aprobar la orden. Intenta de nuevo.",
+        "reject": "Rechazar",
+        "rejectError": "No se pudo rechazar la orden. Intenta de nuevo.",
+        "edit": "Editar",
+        "viewDetail": "Ver detalle"
+      },
+      "rejectModal": {
+        "title": "Rechazar orden",
+        "reasonLabel": "Motivo del rechazo",
+        "reasonRequired": "El motivo es obligatorio."
+      },
+      "empty": "No hay órdenes con este estado.",
+      "detailModal": {
+        "title": "Orden #{{number}}",
+        "requestedBy": "Solicitado por",
+        "createdAt": "Fecha de creación",
+        "shippingType": "Tipo de envío",
+        "estimatedArrival": "Llegada estimada",
+        "notes": "Notas",
+        "notesEmpty": "Sin notas.",
+        "lines": "Productos",
+        "total": "Monto total",
+        "approvedBy": "Aprobado por",
+        "rejectedBy": "Rechazado por",
+        "rejectionReason": "Motivo de rechazo"
+      }
+    }
+  },
+  "generalCounts": {
+    "title": "Inventario general",
+    "subtitle": "Conteos físicos completos por bodega — requiere aprobación de Mark",
+    "kardexLink": "Movimientos de inventario",
+    "newPanel": {
+      "title": "Nuevo conteo general",
+      "subtitle": "Selecciona una bodega para empezar el conteo",
+      "warehouseLabel": "Bodega",
+      "warehousePlaceholder": "Selecciona una bodega...",
+      "empty": "Esta bodega no tiene productos registrados.",
+      "table": {
+        "reference": "Ref. pública",
+        "description": "Descripción",
+        "systemQuantity": "Cantidad en sistema",
+        "countedQuantity": "Cantidad contada",
+        "difference": "Diferencia"
+      },
+      "crossWarning": "Ya tiene una solicitud cíclica pendiente ({{date}})",
+      "evaluate": "Evaluar",
+      "submit": "Enviar a aprobación de Mark",
+      "noDifferences": "No hay ninguna diferencia en este conteo — no es necesario enviarlo a aprobación, aunque queda registrado igual como referencia.",
+      "errors": {
+        "missingQuantities": "Escribe la cantidad contada de todos los productos antes de evaluar.",
+        "notEvaluated": "Presiona \"Evaluar\" antes de enviar, para calcular las diferencias de todos los productos.",
+        "createFailed": "No se pudo iniciar el conteo para esta bodega. Intenta de nuevo.",
+        "evaluateFailed": "No se pudo evaluar el conteo. Intenta de nuevo.",
+        "submitFailed": "No se pudo enviar el conteo. Intenta de nuevo."
+      },
+      "cruceModal": {
+        "title": "Solicitudes cíclicas pendientes",
+        "body": "Los siguientes productos ya tienen una solicitud de ajuste cíclico pendiente en Solicitud de ajuste. Si continúas, esas solicitudes se eliminarán y quedarán reemplazadas por este conteo.",
+        "confirm": "Continuar y enviar"
+      },
+      "duplicateModal": {
+        "title": "Uno o más productos ya tienen un conteo sin resolver",
+        "body": "\"{{product}}\" ya tiene una diferencia evaluada del {{date}} (estado: {{status}}) sin aprobar/rechazar por Mark. Si continúas, esa línea quedará reemplazada por este conteo.",
+        "confirm": "Continuar de todos modos"
+      }
+    },
+    "tray": {
+      "title": "Conteos generales",
+      "subtitle": "Historial — aplicado al inventario solo tras aprobación de Mark",
+      "chips": {
+        "todas": "Todas",
+        "pendiente_aprobacion": "Pendientes",
+        "aprobada": "Aprobadas",
+        "rechazada": "Rechazadas"
+      },
+      "table": {
+        "warehouse": "Bodega",
+        "date": "Fecha",
+        "doneBy": "Realizado por",
+        "productsCounted": "Productos contados",
+        "differencesFound": "Diferencias encontradas",
+        "status": "Estado",
+        "action": "Acción"
+      },
+      "status": {
+        "pendiente_evaluacion": "Borrador",
+        "evaluado": "Evaluado",
+        "pendiente_aprobacion": "Pendiente",
+        "aprobada": "Aprobada",
+        "rechazada": "Rechazada",
+        "reemplazada": "Reemplazado"
+      },
+      "actions": {
+        "approve": "Aprobar",
+        "approveLockedTitle": "Solo Mark puede aprobar este conteo.",
+        "reject": "Rechazar",
+        "rejectLockedTitle": "Solo Mark puede rechazar este conteo.",
+        "viewReason": "Ver motivo",
+        "applyAdjustment": "Realizar ajuste",
+        "adjustmentApplied": "Ajuste aplicado",
+        "continue": "Continuar",
+        "delete": "Eliminar",
+        "viewDetail": "Ver detalle"
+      },
+      "empty": "No hay conteos generales con este filtro.",
+      "rejectModal": {
+        "title": "Rechazar conteo general",
+        "placeholder": "Motivo del rechazo...",
+        "required": "Escribe un motivo para rechazar el conteo.",
+        "confirm": "Rechazar"
+      },
+      "deleteModal": {
+        "title": "Eliminar borrador de conteo",
+        "body": "Se eliminará el conteo en borrador de \"{{warehouse}}\" y todo lo capturado hasta ahora. Esta acción no se puede deshacer."
+      },
+      "detailModal": {
+        "title": "Conteo — {{warehouse}}",
+        "doneBy": "Realizado por",
+        "date": "Fecha del conteo",
+        "requestedAt": "Fecha de solicitud de aprobación",
+        "requestedAtEmpty": "Todavía no se envió a aprobación.",
+        "resolvedBy": "Resuelto por",
+        "rejectionReason": "Motivo de rechazo",
+        "lines": "Productos",
+        "product": "Producto",
+        "systemQty": "Cantidad sistema",
+        "countedQty": "Cantidad contada",
+        "difference": "Diferencia",
+        "pendingEvaluation": "Aún sin evaluar."
+      }
+    }
+  },
+  "returns": {
+    "title": "Devoluciones",
+    "subtitle": "Seguimiento de devoluciones de cliente — desde solicitud hasta nota de crédito",
+    "newReturn": "+ Nueva devolución",
+    "chips": {
+      "todas": "Todas",
+      "pendiente": "Pendientes",
+      "esperando_nota_credito": "Esperando nota de crédito",
+      "finalizado": "Finalizadas",
+      "rechazada": "Rechazadas"
+    },
+    "table": {
+      "order": "Pedido",
+      "client": "Cliente",
+      "project": "Proyecto",
+      "products": "Producto(s)",
+      "date": "Fecha",
+      "status": "Estado",
+      "signedDocument": "Doc. firmado",
+      "actionsDetail": "Detalle",
+      "actionsForm": "Formulario",
+      "actionsGuide": "Guía",
+      "actionsDocument": "Documento",
+      "actionsReception": "Recepción",
+      "actionsFinalize": "Nota de crédito"
+    },
+    "status": {
+      "pendiente": "Pendiente",
+      "esperando_nota_credito": "Generada — esperando nota de crédito",
+      "finalizado": "Finalizado",
+      "rechazada": "Rechazada"
+    },
+    "signedDocument": {
+      "yes": "Cargado",
+      "no": "Pendiente"
+    },
+    "productsCell": {
+      "count": "{{count}} productos"
+    },
+    "expandedTable": {
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "reason": "Motivo"
+    },
+    "reasons": {
+      "danado_defectuoso": "Producto dañado / defectuoso",
+      "no_corresponde": "No corresponde a lo pedido",
+      "cliente_cambio_opinion": "Cliente cambió de opinión",
+      "excedente": "Excedente — sobró material",
+      "error_instalacion": "Error en la instalación / medidas",
+      "otra": "Otro (especificar)"
+    },
+    "actions": {
+      "viewDetail": "Ver detalle",
+      "viewForm": "Ver formulario",
+      "viewDeliveryGuide": "Ver guía original",
+      "viewSignedDocument": "Ver documento firmado",
+      "uploadSigned": "Cargar documento firmado",
+      "confirmReception": "Confirmar recepción física",
+      "finalize": "Simular finalización"
+    },
+    "empty": "No hay devoluciones con este estado.",
+    "errors": {
+      "openFormFailed": "No se pudo abrir el formulario. Intenta de nuevo.",
+      "openGuideFailed": "No se pudo abrir la guía de entrega. Intenta de nuevo.",
+      "openSignedDocumentFailed": "No se pudo abrir el documento firmado. Intenta de nuevo.",
+      "finalizeFailed": "No se pudo finalizar la devolución. Intenta de nuevo."
+    },
+    "detailModal": {
+      "title": "Devolución — Pedido {{number}}",
+      "productsTitle": "Productos a devolver",
+      "table": {
+        "product": "Producto",
+        "quantity": "Cantidad",
+        "reason": "Motivo"
+      },
+      "historyTitle": "Historial",
+      "noHistory": "Sin historial disponible.",
+      "history": {
+        "destinationWarehouse": "Bodega destino: {{warehouse}}",
+        "rejectionReason": "Motivo: {{reason}}"
+      }
+    },
+    "uploadModal": {
+      "title": "Cargar documento firmado",
+      "subtitle": "Sube la evidencia de que el cliente firmó el formulario de devolución",
+      "dropzone": "Haz clic para subir foto o documento",
+      "selectedFile": "Archivo seleccionado: {{name}}",
+      "save": "Guardar",
+      "errors": {
+        "required": "Sube el documento firmado antes de guardar.",
+        "tooLarge": "El archivo supera el tamaño máximo de 20 MB.",
+        "invalidType": "Formato no permitido — usa JPG, PNG o PDF.",
+        "uploadFailed": "No se pudo cargar el documento. Intenta de nuevo."
+      }
+    },
+    "receptionModal": {
+      "title": "Confirmar recepción física",
+      "subtitle": "Verifica las cantidades reales antes de sumarlas de vuelta al inventario",
+      "table": {
+        "product": "Producto",
+        "requestedQuantity": "Cant. solicitada",
+        "receivedQuantity": "Cant. real recibida"
+      },
+      "warehouseLabel": "¿A qué bodega entra?",
+      "warehousePlaceholder": "Selecciona una bodega...",
+      "save": "Guardar — entra a inventario",
+      "reject": "Rechazar devolución",
+      "confirmReject": "Confirmar rechazo",
+      "rejectReasonLabel": "Motivo del rechazo",
+      "rejectReasonPlaceholder": "¿Por qué se rechaza esta devolución?",
+      "errors": {
+        "invalidQuantity": "Escribe la cantidad real recibida de cada producto (0 o más).",
+        "warehouseRequired": "Selecciona a qué bodega entra.",
+        "rejectReasonRequired": "Escribe el motivo del rechazo.",
+        "confirmFailed": "No se pudo confirmar la recepción. Intenta de nuevo.",
+        "rejectFailed": "No se pudo rechazar la devolución. Intenta de nuevo."
+      }
+    },
+    "newReturnPage": {
+      "title": "Nueva devolución",
+      "subtitle": "Busca la guía de entrega original — los datos se completan solos",
+      "search": {
+        "title": "1. Buscar guía de entrega original",
+        "placeholder": "Buscar por N° de pedido, cliente o producto...",
+        "empty": "No se encontraron guías de entrega con ese criterio.",
+        "resultMeta": "{{project}} · {{count}} producto(s)",
+        "change": "Cambiar guía"
+      },
+      "details": {
+        "title": "2. Datos de la devolución",
+        "subtitle": "Pedido {{orderNumber}} · {{client}}",
+        "client": "Cliente",
+        "project": "Proyecto",
+        "contactName": "Nombre de quien devuelve",
+        "contactNamePlaceholder": "Ej. Ricardo Aguilar",
+        "contactPhone": "Teléfono de quien devuelve",
+        "contactPhonePlaceholder": "Ej. +507 6220-1145"
+      },
+      "productsTitle": "Productos entregados en esta guía — selecciona los que se devuelven",
+      "table": {
+        "product": "Producto",
+        "factoryRef": "Ref. fábrica",
+        "publicRef": "Ref. pública",
+        "delivered": "Cant. entregada",
+        "quantity": "Cant. a devolver",
+        "reason": "Motivo"
+      },
+      "reasonDetailPlaceholder": "Especifica el motivo...",
+      "save": "Guardar",
+      "errors": {
+        "noOrderSelected": "Busca y selecciona una guía de entrega primero.",
+        "noProductsSelected": "Selecciona al menos un producto para devolver.",
+        "missingContact": "Completa el nombre y teléfono de quien está devolviendo el producto.",
+        "invalidQuantity": "Escribe la cantidad a devolver de cada producto seleccionado.",
+        "quantityExceeded": "La cantidad a devolver no puede superar lo entregado en la guía original.",
+        "missingReasonDetail": "Especifica el motivo cuando eliges \"Otro (especificar)\".",
+        "createFailed": "No se pudo guardar la devolución. Intenta de nuevo."
+      },
+      "success": {
+        "title": "Devolución guardada — Pedido {{number}}",
+        "status": "Estado",
+        "pendingLabel": "Pendiente",
+        "note": "La devolución ya aparece en la bandeja de Devoluciones, donde se sube el documento firmado y se confirma la recepción física.",
+        "goToTray": "Ir a Devoluciones",
+        "another": "¿Otra devolución?",
+        "createNew": "Crear una nueva"
+      }
+    }
+  },
+  "reports": {
+    "title": "Reportes",
+    "viewDetail": "Ver detalle completo",
+    "period": {
+      "month": "Mes",
+      "quarter": "Trimestre",
+      "year": "Año (desde ene 1)"
+    },
+    "productivity": {
+      "title": "Productividad por operativo",
+      "subtitle": "Pedidos gestionados por cada Asistente de Bodega en el período",
+      "empty": "No hay datos de productividad para ese período.",
+      "ordersCount": "{{count}} pedido",
+      "ordersCount_other": "{{count}} pedidos"
+    },
+    "adjustmentAccuracy": {
+      "title": "Precisión de inventario",
+      "subtitle": "Solicitudes de ajuste del período",
+      "empty": "No hay solicitudes de ajuste para ese período.",
+      "approved": "Aprobadas",
+      "rejected": "Rechazadas",
+      "pending": "Pendientes",
+      "ofTotal": "De {{total}} solicitudes totales",
+      "waiting": "Esperando resolución",
+      "motiveColumn": "Motivo del ajuste",
+      "countColumn": "Cantidad de solicitudes"
+    },
+    "warehouseCapacity": {
+      "title": "Capacidad por bodega",
+      "subtitle": "Productos y unidades almacenadas — las 7 bodegas",
+      "stat": "{{products}} productos · {{units}} unidades",
+      "or": "o",
+      "concentrationAlert": "{{warehouse}} concentra la mayoría del inventario ({{percent}}%) — considera redistribuir productos de baja rotación a {{targets}}, que tienen espacio disponible."
+    },
+    "inventorySummary": {
+      "title": "Inventario: rotación y atención",
+      "subtitle": "Resumen — ver detalle completo en Inventario → Ver inventario",
+      "totalProducts": "Total de productos",
+      "activeCatalog": "En catálogo activo",
+      "inAttention": "En atención",
+      "inAttentionSub": "Alta/media rotación + bajo o sin stock",
+      "committed": "Comprometido total",
+      "committedUnits": "{{count}} ud",
+      "committedUnits_other": "{{count}} uds",
+      "committedSub": "Asignado a pedidos en curso"
+    }
+  }
+}

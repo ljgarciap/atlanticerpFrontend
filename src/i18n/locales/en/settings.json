@@ -1,0 +1,70 @@
+{
+  "title": "Settings",
+  "subtitle": "Personal preferences and global system configuration",
+  "saved": "Changes saved",
+  "user": {
+    "title": "User preferences",
+    "subtitle": "Applies to your account only",
+    "language": "Language",
+    "theme": "Theme",
+    "sessionTimeout": "Session timeout"
+  },
+  "global": {
+    "title": "Global settings",
+    "subtitle": "Default values for new users — admins only",
+    "defaultLanguage": "Default language",
+    "defaultTheme": "Default theme",
+    "sessionTimeout": "Default session timeout",
+    "mfaMode": "Two-step verification",
+    "mfaModeDisabled": "Disabled",
+    "mfaModeOptional": "Optional",
+    "mfaModeRequired": "Required",
+    "shareLinksExpiration": "Share link expiration",
+    "shareLinksExpirationSuffix": "days",
+    "shareLinksExpirationSave": "Save",
+    "shareLinksExpirationError": "Enter a value between 1 and 365 days.",
+    "sessionInactivityHours": "Inactivity session expiration",
+    "sessionInactivityHoursSuffix": "hours",
+    "sessionInactivityHoursSave": "Save",
+    "sessionInactivityHoursError": "Enter a value between 1 and 720 hours."
+  },
+  "timeoutOption": "{{min}} minutes",
+  "timeoutOptionHours": "{{min}} minutes ({{hours}}h)",
+  "aiKey": {
+    "title": "AI API Key",
+    "subtitle": "Anthropic Claude credential — superadmin level 10 only",
+    "current": "Current key",
+    "sourceDb": "Stored in database",
+    "sourceEnv": "Using server environment variable",
+    "newKey": "New API Key",
+    "placeholder": "sk-ant-api03-...",
+    "save": "Save key",
+    "saved": "API Key updated successfully",
+    "error": "Key must start with sk-ant- and be at least 20 characters"
+  },
+  "admin": {
+    "title": "System administration",
+    "subtitle": "Superadmin-only operations",
+    "demoCleanup": {
+      "label": "Clear demo data",
+      "description": "Removes all [DEMO] projects and @illuminations.test users. This action cannot be undone.",
+      "confirm": "Are you sure? All demo data will be permanently deleted.",
+      "confirmBtn": "Yes, clear",
+      "cancelBtn": "Cancel",
+      "result": "Removed: {{projects}} projects and {{users}} demo users."
+    },
+    "backup": {
+      "label": "Data backup",
+      "description": "Download a JSON file with all CRM projects, activities, reminders, and contacts.",
+      "download": "Download backup (JSON)"
+    }
+  },
+  "documents": {
+    "title":    "Document upload limit",
+    "subtitle": "Maximum file size for document uploads — superadmin only",
+    "label":    "Maximum per file (MB)",
+    "save":     "Save",
+    "saved":    "Limit updated successfully.",
+    "error":    "Please enter a value between 1 and 500 MB."
+  }
+}

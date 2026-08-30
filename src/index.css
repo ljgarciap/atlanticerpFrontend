@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #fafaf7;
+    color: #1f2937;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  input, select, textarea, button { font-family: inherit; }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-3 py-3 md:py-2 border border-slate-300 rounded-lg text-base md:text-sm transition
+           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+  .label-sm {
+    @apply block text-[13px] font-medium text-slate-700 mb-1;
+  }
+}
+
+/* ── Dark mode global overrides ────────────────────────────────────────────
+   Covers all components that use Tailwind color utilities without needing
+   individual dark: variants on every element.                              */
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Backgrounds */
+html.dark .bg-white       { background-color: #1e293b; }
+html.dark .bg-slate-50    { background-color: #1a2535; }
+html.dark .bg-slate-100   { background-color: #1e2d40; }
+
+/* Text */
+html.dark .text-slate-900 { color: #f1f5f9; }
+html.dark .text-slate-800 { color: #f1f5f9; }
+html.dark .text-slate-700 { color: #e2e8f0; }
+html.dark .text-slate-600 { color: #cbd5e0; }
+html.dark .text-slate-500 { color: #94a3b8; }
+html.dark .text-slate-400 { color: #64748b; }
+
+/* Borders */
+html.dark .border-slate-200 { border-color: #334155; }
+html.dark .border-slate-100 { border-color: #1e293b; }
+html.dark .border-slate-50  { border-color: #1a2535; }
+html.dark .divide-slate-200 > * + * { border-color: #334155; }
+
+/* Shadow adjustments */
+html.dark .shadow-sm  { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4); }
+html.dark .shadow     { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5); }
+html.dark .shadow-md  { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5); }
+html.dark .shadow-lg  { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5); }
+html.dark .shadow-xl  { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5); }
+html.dark .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.7); }
+
+/* Inputs */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #263147;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #64748b; }
+
+html.dark .input-field {
+  background-color: #263147;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+/* Hover state adjustments */
+html.dark .hover\:bg-slate-50:hover { background-color: #263147; }
+html.dark .hover\:bg-slate-100:hover { background-color: #2d3d52; }
+
+/* ── Print: "print only this element" ──────────────────────────────────────
+   SCRUM-391 (REQ-321) — ConsolidatedPickingModal necesita imprimir solo su
+   contenido (tabla consolidada), ocultando sidebar/topbar/tablero de fondo.
+   El resto de las pantallas imprimibles del proyecto (QuoteDocument,
+   ReportsPage) no usan modal — se renderizan en el flujo normal de la página
+   y solo ocultan sus propios controles con `print:hidden`, por eso ese
+   patrón no alcanza acá: el modal está montado como hijo anidado dentro del
+   mismo árbol que Sidebar/TopBar, no puede aislarse con un simple
+   `print:hidden` en el layout sin romper esas otras pantallas.
+   Patrón estándar: se oculta todo con `visibility:hidden` y se revierte en
+   cascada solo dentro de `.print-target` (activado con una clase en <body>
+   mientras el modal está montado, ver `ConsolidatedPickingModal.tsx`). */
+@media print {
+  body.printing-modal * {
+    visibility: hidden;
+  }
+  body.printing-modal .print-target,
+  body.printing-modal .print-target * {
+    visibility: visible;
+  }
+  body.printing-modal .print-target {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+  }
+}
+
+/* ── Documento de cotización — nunca oscuro al imprimir/descargar PDF ───────
+   SCRUM-716: QuoteDocument.tsx es un documento comercial (window.print(), sin
+   librería de PDF en el stack — ver ese componente). Si el vendedor tiene el
+   tema oscuro activo, sin esto se imprimía con fondo oscuro y texto claro —
+   la mayoría de navegadores no imprime el fondo por defecto, así que el
+   resultado real era texto claro sobre papel blanco, ilegible. */
+@media print {
+  html.dark .quote-doc { background-color: #ffffff !important; color: #1f2937 !important; }
+  html.dark .quote-doc .dark\:text-slate-100,
+  html.dark .quote-doc .dark\:text-slate-200,
+  html.dark .quote-doc .dark\:text-slate-300 { color: #1f2937 !important; }
+  html.dark .quote-doc .dark\:border-slate-600,
+  html.dark .quote-doc .dark\:border-slate-700,
+  html.dark .quote-doc .dark\:border-slate-800 { border-color: #cbd5e0 !important; }
+}

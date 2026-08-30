@@ -1,0 +1,1440 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "fiscal": "Configuración Fiscal",
+    "empresa": "Datos de la Empresa",
+    "arqueoCaja": "Arqueo de Caja",
+    "cuentasBancarias": "Cuentas Bancarias",
+    "facturacion": "Facturación",
+    "notasCredito": "Notas crédito y devoluciones",
+    "comisionesMenu": "Comisiones",
+    "comisionesInternas": "Internas",
+    "comisionesExternas": "Externas",
+    "cajaChica": "Caja chica",
+    "reportes": "Reportes"
+  },
+  "fiscal": {
+    "title": "Configuración Fiscal",
+    "subtitle": "Datos fiscales, facturación electrónica y tasas de ITBMS — configuración crítica, exclusiva de Mark",
+    "saveChanges": "Guardar cambios",
+    "confirmSave": "¿Confirmás aplicar estos cambios? La pantalla vuelve a modo solo lectura.",
+    "saveError": "No se pudo guardar la configuración fiscal",
+    "validation": {
+      "required": "Este campo es obligatorio."
+    },
+    "restricted": {
+      "title": "Acceso restringido",
+      "body": "Esta pantalla es exclusiva de Mark."
+    },
+    "datosFiscales": {
+      "title": "Datos fiscales de la empresa",
+      "fields": {
+        "razonSocial": "Razón social",
+        "nombreComercial": "Nombre comercial",
+        "ruc": "RUC",
+        "dv": "DV",
+        "direccionFiscal": "Dirección fiscal",
+        "regimenTributario": "Régimen tributario",
+        "diasCreditoFactura": "Plazo de crédito (días)",
+        "pettyCashMaxIntentosRechazo": "Caja chica — máximo de intentos de rechazo"
+      },
+      "regimen": {
+        "general": "Contribuyente régimen general",
+        "pequeno": "Pequeño contribuyente"
+      }
+    },
+    "facturacionElectronica": {
+      "title": "Facturación electrónica",
+      "fields": {
+        "proveedor": "Proveedor (PAC)",
+        "ambiente": "Ambiente",
+        "estadoConexion": "Estado de conexión",
+        "ultimaSincronizacion": "Última sincronización"
+      },
+      "ambiente": {
+        "production": "Producción",
+        "testing": "Pruebas"
+      },
+      "connectionStatus": {
+        "conectado": "Conectado",
+        "desconectado": "Desconectado"
+      },
+      "neverSynced": "Nunca sincronizado",
+      "docs": {
+        "factura": "Factura de operación habilitada",
+        "notaCredito": "Nota de crédito habilitada"
+      }
+    },
+    "itbms": {
+      "title": "Tasas de ITBMS",
+      "addRate": "+ Agregar tasa",
+      "detailTitle": "Detalle de tasa",
+      "toggleActive": "Activar o desactivar tasa",
+      "fields": {
+        "nombre": "Nombre",
+        "descripcion": "Descripción",
+        "porcentaje": "Porcentaje",
+        "estado": "Estado"
+      },
+      "status": {
+        "active": "Activa",
+        "inactive": "Desactivada"
+      }
+    },
+    "retencion": {
+      "title": "Retenciones a proveedores",
+      "toggleLabel": "Retención automática a proveedores de servicios profesionales (3.5%)",
+      "helpNote": "Distinto a la retención de comisión de arquitectos externos (Comisiones Externas) — aplica solo a pagos a proveedores en Compras."
+    }
+  },
+  "empresa": {
+    "title": "Datos de la Empresa",
+    "subtitle": "Identidad de marca, ubicaciones, contactos generales y configuración regional — exclusivo de Mark",
+    "saveChanges": "Guardar cambios",
+    "confirmSave": "¿Confirmás aplicar estos cambios? La pantalla vuelve a modo solo lectura.",
+    "saveError": "No se pudo guardar los datos de la empresa",
+    "validation": {
+      "required": "Este campo es obligatorio.",
+      "invalidUrl": "Ingresa una URL válida."
+    },
+    "restricted": {
+      "title": "Acceso restringido",
+      "body": "Esta pantalla es exclusiva de Mark."
+    },
+    "identidad": {
+      "title": "Identidad de marca",
+      "logo": "Logo",
+      "logoHelp": "PNG o SVG, preferentemente con fondo transparente.",
+      "changeLogo": "Cambiar logo",
+      "fields": {
+        "nombreComercial": "Nombre comercial",
+        "razonSocial": "Razón social",
+        "descripcionCorta": "Descripción corta",
+        "sitioWeb": "Sitio web"
+      },
+      "readOnlyNote": "Se edita desde Configuración Fiscal.",
+      "redesSociales": {
+        "title": "Redes sociales",
+        "plataforma": "Plataforma",
+        "url": "URL",
+        "add": "+ Agregar red",
+        "empty": "Sin redes sociales agregadas."
+      }
+    },
+    "ubicaciones": {
+      "title": "Ubicaciones",
+      "addButton": "+ Agregar ubicación",
+      "fields": {
+        "nombre": "Nombre",
+        "tipo": "Tipo",
+        "direccion": "Dirección",
+        "estado": "Estado"
+      },
+      "tipos": {
+        "bodega": "Bodega",
+        "showroom": "Showroom",
+        "oficina": "Oficina",
+        "otra": "Otra"
+      },
+      "chips": {
+        "active": "Activas",
+        "inactive": "Inactivas"
+      },
+      "sourceBodegaNote": "Sincronizada con el módulo Bodega — solo lectura acá.",
+      "empty": "No hay ubicaciones en esta pestaña."
+    },
+    "contactos": {
+      "title": "Contactos generales",
+      "addButton": "+ Agregar contacto",
+      "fields": {
+        "area": "Área",
+        "email": "Correo",
+        "telefono": "Teléfono",
+        "estado": "Estado"
+      },
+      "chips": {
+        "active": "Activos",
+        "inactive": "Inactivos"
+      },
+      "empty": "No hay contactos en esta pestaña."
+    },
+    "regional": {
+      "title": "Configuración regional",
+      "fields": {
+        "moneda": "Moneda",
+        "anioFiscal": "Año fiscal",
+        "zonaHoraria": "Zona horaria"
+      },
+      "zonaHorariaOptions": {
+        "americaPanama": "América/Panamá (GMT-5)"
+      }
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva"
+    }
+  },
+  "cuentasBancarias": {
+    "title": "Cuentas Bancarias",
+    "subtitle": "Cuentas de la empresa y movimientos de dinero por cuenta",
+    "addButton": "+ Nueva cuenta",
+    "detail": "Detalle",
+    "detailTitle": "Detalle de cuenta bancaria",
+    "saveError": "No se pudo crear la cuenta bancaria",
+    "saveButton": "Guardar cuenta",
+    "actionError": "No se pudo completar la acción",
+    "empty": "No hay cuentas eliminadas.",
+    "deleteAccount": "Eliminar cuenta",
+    "reactivateAccount": "Reactivar cuenta",
+    "confirmDelete": "El historial de movimientos se conserva y puedes reactivar la cuenta cuando haga falta.",
+    "confirmDeleteButton": "Sí, eliminar",
+    "sinCuentaAsignada": "Sin cuenta asignada",
+    "seleccionarCuenta": "Seleccionar cuenta",
+    "selectAccountPlaceholder": "Elegir cuenta…",
+    "movimientosEmpty": "No hay movimientos para mostrar todavía.",
+    "validation": {
+      "required": "Este campo es obligatorio.",
+      "bancoRequired": "El campo banco es obligatorio.",
+      "digits4": "Ingresa exactamente 4 dígitos."
+    },
+    "fields": {
+      "banco": "Banco",
+      "ultimos4": "Últimos 4 dígitos",
+      "tipoCuenta": "Tipo de cuenta",
+      "moneda": "Moneda",
+      "estado": "Estado",
+      "movimientosCount": "Movimientos en el historial"
+    },
+    "tipos": {
+      "corriente": "Cuenta Corriente",
+      "ahorro": "Cuenta de Ahorro",
+      "tarjeta_credito": "Tarjeta de Crédito"
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Eliminada"
+    },
+    "tabs": {
+      "all": "Todas",
+      "deleted": "Eliminadas"
+    },
+    "movimientos": {
+      "fecha": "Fecha",
+      "tipo": "Tipo",
+      "concepto": "Concepto",
+      "monto": "Monto",
+      "cuenta": "Cuenta"
+    },
+    "movimientoTipos": {
+      "cobro": "Cobro",
+      "devolucion": "Devolución",
+      "comision": "Comisión"
+    }
+  },
+  "facturacion": {
+    "title": "Facturación",
+    "subtitle": "Entregas facturables por proyecto",
+    "crearFactura": "+ Crear Factura",
+    "stats": {
+      "pendientesEntrega": "Pendientes de entrega",
+      "pendientesEntregaSub": "Bodega aún no despacha",
+      "pendientesFacturar": "Pendientes por facturar",
+      "pendientesFacturarSub": "listas para facturar",
+      "facturadasMes": "Facturadas este mes",
+      "montoFacturadoMes": "Monto facturado este mes"
+    },
+    "panel": {
+      "title": "Facturas y entregas por proyecto",
+      "subAgrupado": "Agrupado por proyecto · clic en un proyecto para ver sus entregas",
+      "subPlano": "Vista plana: todas las entregas de todos los proyectos, sin agrupar"
+    },
+    "cartera": {
+      "cobrable": "Cartera cobrable",
+      "incobrable": "Cartera incobrable",
+      "incobrableEmpty": "Todavía no hay facturas marcadas como incobrables."
+    },
+    "vista": {
+      "agrupado": "Agrupado por proyecto",
+      "plano": "Vista plana"
+    },
+    "filtros": {
+      "buscarPlaceholder": "Buscar por cliente, proyecto, N° de pedido o N° de factura...",
+      "todosClientes": "Todos los clientes",
+      "todosProyectos": "Todos los proyectos",
+      "todosEstados": "Todos los estados",
+      "limpiar": "Limpiar filtros"
+    },
+    "columnas": {
+      "entrega": "Entrega / Hito",
+      "factura": "N° Factura",
+      "guiaEntrega": "Guía de Entrega",
+      "cotizacion": "N° Cotización",
+      "monto": "Monto",
+      "fecha": "Fecha",
+      "accion": "Acción"
+    },
+    "estados": {
+      "pendiente-entrega": "Pendiente de entrega",
+      "pendiente-facturar": "Pendiente por facturar",
+      "facturada": "Facturada",
+      "anulada": "Anulada",
+      "pendienteAprobacion": "Pend. aprobación",
+      "incobrable": "Incobrable"
+    },
+    "generarFactura": "Generar factura",
+    "resultCount": "Mostrando {{visible}} de {{total}} entregas",
+    "empty": "No hay entregas que coincidan con los filtros aplicados.",
+    "clienteClickHint": "Ver Estado de Cuenta",
+    "preview": {
+      "title": "Vista previa",
+      "subtitle": "Revisá la factura antes de guardarla — el N° de factura se asigna al confirmar",
+      "total": "Total a facturar",
+      "totalFactura": "Total factura",
+      "totalAPagar": "Total a pagar",
+      "subtotal": "Subtotal",
+      "descuentos": "Descuentos",
+      "itbms": "ITBMS",
+      "saldoAplicado": "Saldo a favor aplicado",
+      "aplicarSaldo": "Aplicar saldo a favor disponible ({{monto}})",
+      "avisoSaldoSoloPrimera": "El saldo a favor solo se aplicará a la primera factura de este lote.",
+      "editar": "Editar selección",
+      "guardar": "Guardar factura(s)",
+      "cancelar": "Cancelar",
+      "error": "No se pudo generar la vista previa",
+      "faltan": "Faltan datos para generar la factura: {{campos}}",
+      "items": {
+        "descripcion": "Descripción",
+        "cantidad": "Cant.",
+        "precioUnitario": "Precio unitario",
+        "subtotal": "Subtotal"
+      }
+    },
+    "crear": {
+      "title": "Crear factura",
+      "subtitle": "Elige cliente y proyecto — el sistema muestra las entregas pendientes por facturar",
+      "clienteLabel": "Cliente",
+      "clienteSelect": "Selecciona un cliente",
+      "sinClientesPendientes": "No hay clientes con entregas pendientes por facturar.",
+      "proyectoLabel": "Proyecto",
+      "proyectoSelectFirst": "Selecciona un cliente primero",
+      "proyectoSelect": "Selecciona un proyecto",
+      "sinPendientes": "Este cliente no tiene entregas pendientes por facturar",
+      "entregasLabel": "Entregas pendientes por facturar:",
+      "verVistaPrevia": "Ver vista previa",
+      "seleccionaEntrega": "Selecciona al menos una entrega para facturar.",
+      "cancelar": "Cancelar"
+    },
+    "exportar": {
+      "label": "Exportar reporte",
+      "pdf": "Exportar como PDF",
+      "excel": "Exportar como Excel"
+    },
+    "confirmError": "No se pudo guardar la factura",
+    "detalle": {
+      "title": "Detalle de entrega",
+      "pasoCotizacion": "Cotización",
+      "pasoFactura": "Factura",
+      "pasoGuiaEntrega": "Guía de Entrega",
+      "pendiente": "Pendiente",
+      "anuladaAviso": "Esta factura fue anulada — ya no es válida.",
+      "datosPago": "Datos de pago",
+      "cuentaPago": "Cuenta número",
+      "responsable": "Responsable",
+      "verPdf": "Ver / Imprimir PDF",
+      "marcarIncobrable": "Marcar como incobrable",
+      "motivoLabel": "Motivo",
+      "motivoPlaceholder": "Explicá por qué se propone incobrable...",
+      "motivoRequerido": "El motivo es obligatorio.",
+      "enviarPropuesta": "Enviar propuesta",
+      "pendienteAprobacionAviso": "Propuesta de incobrable pendiente de aprobación de Mark.",
+      "aprobar": "Aprobar",
+      "rechazar": "Rechazar",
+      "registrarCobro": "Registrar cobro",
+      "cerrar": "Cerrar"
+    },
+    "aging": {
+      "title": "Antigüedad de cartera",
+      "subtitle": "Cartera cobrable agrupada por antigüedad desde la fecha de vencimiento",
+      "rango": "{{desde}}–{{hasta}} días",
+      "masDe": "+{{desde}} días",
+      "cantidad": "{{cantidad}} facturas"
+    }
+  },
+  "cobros": {
+    "title": "Cobros",
+    "registrarButton": "+ Registrar cobro",
+    "stats": {
+      "totalCobrado": "Total cobrado",
+      "numeroCobros": "N° de cobros",
+      "cobroPromedio": "Cobro promedio",
+      "metodoPrincipal": "Método principal",
+      "metodoPrincipalValue": "{{metodo}} — {{porcentaje}}% de los cobros del mes",
+      "sinDatos": "Sin cobros este mes"
+    },
+    "metodos": {
+      "transferencia": "Transferencia",
+      "cheque": "Cheque",
+      "efectivo": "Efectivo",
+      "tarjeta": "Tarjeta",
+      "deposito": "Depósito bancario",
+      "yappy": "Yappy",
+      "link_pago": "Link de pago",
+      "retencion_impuestos": "Retención de impuestos",
+      "ajuste_cuenta": "Ajustes de cuenta"
+    },
+    "registrarModal": {
+      "title": "Registrar nuevo cobro",
+      "clienteLabel": "Cliente",
+      "clientePlaceholder": "Buscar cliente...",
+      "facturasLabel": "Facturas abiertas",
+      "cargandoFacturas": "Cargando facturas...",
+      "sinFacturasPendientes": "Este cliente no tiene facturas pendientes de cobro.",
+      "totalFacturas": "Total de facturas seleccionadas",
+      "aplicarSaldoFavor": "Aplicar saldo a favor disponible ({{monto}}) a este cobro",
+      "saldoFavorAplicadoLine": "Saldo a favor aplicado",
+      "montoRecibidoLabel": "Monto recibido",
+      "metodoPagoLabel": "Método de pago",
+      "cuentaBancariaLabel": "Cuenta bancaria destino",
+      "cuentaBancariaPlaceholder": "Seleccionar cuenta...",
+      "numeroDocumentoRetencionLabel": "N° de documento de retención (DGI)",
+      "comentarioAjusteLabel": "Comentario del ajuste",
+      "comentarioAjusteRequired": "El comentario es obligatorio.",
+      "referenciaLabel": "Referencia / N° de transacción",
+      "referenciaPlaceholder": "Ej. TRF-88213",
+      "comprobanteLabel": "Comprobante de pago (opcional)",
+      "comprobanteDragText": "Arrastra el comprobante aquí o haz clic para seleccionar",
+      "comprobanteHint": "JPG, PNG o PDF · máx. 10MB",
+      "comprobanteRemove": "Quitar",
+      "comprobanteInvalidType": "Solo se aceptan archivos JPG, PNG o PDF.",
+      "comprobanteTooLarge": "El archivo supera el límite de 10MB.",
+      "cancel": "Cancelar",
+      "confirm": "Registrar cobro",
+      "error": "No se pudo registrar el cobro."
+    },
+    "historial": {
+      "title": "Historial de cobros",
+      "subtitle": "Todos los pagos recibidos, aplicados a sus facturas correspondientes · clic en un cobro para ver el detalle",
+      "searchPlaceholder": "Buscar por cliente, factura, recibo o referencia...",
+      "filtroCliente": "Todos los clientes",
+      "filtroMetodo": "Todos los métodos",
+      "filtroEstado": "Todos los estados",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "limpiarFiltros": "Limpiar filtros",
+      "resultCount": "Mostrando {{mostrados}} de {{total}} cobros",
+      "vacio": "No se encontraron cobros con estos filtros.",
+      "columnas": {
+        "fecha": "Fecha",
+        "cliente": "Cliente",
+        "facturas": "Factura(s) aplicada(s)",
+        "monto": "Monto",
+        "metodo": "Método",
+        "estado": "Estado",
+        "registradoPor": "Registrado por",
+        "comprobante": "Comprobante",
+        "recibo": "Recibo"
+      },
+      "conComprobante": "Adjuntado",
+      "sinComprobante": "Sin adjuntar",
+      "estados": {
+        "confirmado": "Confirmado",
+        "esperando_confirmacion": "Esperando confirmación"
+      }
+    },
+    "detalle": {
+      "title": "Detalle del cobro",
+      "montoTotal": "Monto total",
+      "estado": "Estado",
+      "registradoPor": "Registrado por",
+      "referencia": "Referencia / N° transacción",
+      "numeroRecibo": "N° de recibo",
+      "fechaRegistro": "Fecha de registro",
+      "cuentaBancaria": "Cuenta bancaria destino",
+      "saldoFavorAplicado": "Saldo a favor aplicado",
+      "comentarioAjuste": "Comentario del ajuste",
+      "confirmacion": "Confirmación",
+      "confirmadoPorLine": "{{numero}} — confirmado por {{nombre}} el {{fecha}}",
+      "facturasAplicadas": "Factura(s) aplicada(s)",
+      "cerrar": "Cerrar",
+      "error": "No se pudo cargar el detalle del cobro.",
+      "verComprobante": "Ver comprobante",
+      "verRecibo": "Ver recibo",
+      "marcarConfirmado": "Marcar como confirmado",
+      "confirmarError": "No se pudo confirmar el cobro."
+    },
+    "comprobanteModal": {
+      "title": "Comprobante de pago",
+      "sinComprobante": "Este cobro no tiene comprobante adjunto.",
+      "adjuntadoPor": "Adjuntado por {{nombre}} · {{fecha}}",
+      "cerrar": "Cerrar",
+      "error": "No se pudo cargar el comprobante."
+    }
+  },
+  "estadoCuenta": {
+    "title": "Estado de cuenta — Cuentas por cobrar",
+    "subtitle": "Administración & Contabilidad · se abre en pestaña independiente para consulta o impresión",
+    "close": "Cerrar ventana",
+    "busqueda": {
+      "title": "Buscar estado de cuenta",
+      "subclienteLabel": "Subcliente",
+      "subclientePlaceholder": "Selecciona un subcliente",
+      "proyectoLabel": "Proyecto",
+      "proyectoPlaceholder": "Todos los proyectos",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "vistaLabel": "Vista",
+      "vistaAgrupado": "Agrupado por proyecto",
+      "vistaPlana": "Vista plana",
+      "buscar": "Buscar",
+      "limpiar": "Limpiar",
+      "clienteRequerido": "Selecciona un cliente para generar el estado de cuenta."
+    },
+    "vacio": {
+      "mensaje": "Selecciona un cliente (y opcionalmente un rango de fechas) para generar el estado de cuenta."
+    },
+    "resultado": {
+      "metaLine": "{{tarifa}} · {{regimen}} · Términos {{terminos}}",
+      "descargarImprimir": "Descargar / Imprimir",
+      "descargarPdf": "Descargar como PDF",
+      "descargarExcel": "Descargar como Excel",
+      "error": "No se pudo generar el estado de cuenta.",
+      "saldoActual": "Saldo actual",
+      "saldoAFavor": "Saldo a favor del cliente",
+      "pagoA": "Pago a",
+      "cuentaNumero": "Cuenta número",
+      "responsable": "Responsable",
+      "multiplesProyectos": "Este cliente tiene {{count}} proyectos.",
+      "sinProyecto": "Sin proyecto",
+      "subtotalProyecto": "Subtotal del proyecto",
+      "tipoFactura": "Factura",
+      "tipoCobro": "Cobro",
+      "guiaSi": "Sí",
+      "columnas": {
+        "fecha": "Fecha",
+        "proyecto": "Proyecto / Pedido",
+        "numeroFactura": "N° Factura",
+        "concepto": "Concepto",
+        "cotizacion": "N° Cotización",
+        "guiaEntrega": "Guía de Entrega",
+        "debito": "Débito",
+        "credito": "Crédito",
+        "saldo": "Saldo"
+      }
+    },
+    "regimen": {
+      "con_itbms": "Con ITBMS",
+      "sin_itbms": "Sin ITBMS"
+    }
+  },
+  "notasCredito": {
+    "title": "Notas crédito y devoluciones",
+    "subtitle": "Ajustes sobre facturas de clientes ya emitidas · USD",
+    "nuevaNotaButton": "+ Nueva nota",
+    "stats": {
+      "totalAcreditado": "Total acreditado",
+      "numeroNotas": "N° de notas",
+      "pendientesAprobacion": "Pendientes de aprobación",
+      "devolucionesPorGenerar": "Devoluciones por generar",
+      "notaPromedio": "Nota promedio"
+    },
+    "tipos": {
+      "descuento_comercial": "Descuento comercial / cortesía",
+      "anulacion_completa": "Anulación completa de factura",
+      "devolucion_mercancia": "Devolución de mercancía"
+    },
+    "subtiposAnulacion": {
+      "cancelado": "Pedido cancelado — el trabajo no se va a realizar",
+      "correccion": "Corrección de datos — el trabajo sí se entregó, hay que refacturar"
+    },
+    "motivosCorreccion": {
+      "itbms": "Tratamiento de ITBMS incorrecto",
+      "fecha": "Fecha de facturación incorrecta",
+      "ambos": "Ambos"
+    },
+    "formulario": {
+      "title": "Registrar nueva nota",
+      "subtitle": "Nota crédito o devolución sobre una factura ya emitida",
+      "clienteLabel": "Cliente",
+      "clientePlaceholder": "Buscar cliente...",
+      "tipoLabel": "Tipo de nota",
+      "tipoDevolucionReadonly": "Devolución de mercancía (confirmada por Bodega)",
+      "subtipoLabel": "¿Por qué se anula?",
+      "mercanciaRegresaLabel": "¿La mercancía ya entregada debe regresar a Bodega?",
+      "mercanciaRegresaSi": "Sí — ya salió de Bodega y debe reingresar al inventario",
+      "mercanciaRegresaNo": "No — nunca salió de Bodega, o no aplica",
+      "correccionAviso": "La cotización, el pedido y el documento de salida de Bodega no se tocan — el trabajo ya se entregó correctamente, solo se corrige el papel.",
+      "motivoCorreccionLabel": "¿Qué estaba mal?",
+      "motivoCorreccionPlaceholder": "Selecciona un motivo...",
+      "tratamientoActualLabel": "Tratamiento de ITBMS actual (el que tiene la factura hoy)",
+      "tratamientoCorrectoLabel": "Tratamiento correcto",
+      "tratamientoCorrectoPlaceholder": "Selecciona...",
+      "nuevaFechaLabel": "Nueva fecha de factura",
+      "nuevaFechaHint": "La fecha de una factura siempre es la del día en que se genera — no se puede elegir otra, igual que al facturar desde Facturación.",
+      "correccionRevisarButton": "Revisar y continuar",
+      "referenciaLabel": "Referencia (Guía de Entrega / Cotización)",
+      "productosDevueltosLabel": "Productos devueltos",
+      "personaDevuelveLabel": "Persona que devuelve",
+      "proyectoLabel": "Proyecto",
+      "conformidadLabel": "Conformidad del documento firmado",
+      "devolucionAviso": "Bodega ya confirmó el reingreso físico de este producto — solo falta confirmar el monto y generar la nota.",
+      "precargaDatoNoDisponible": "No disponible — Bodega no registra este dato",
+      "facturaOrigenLabel": "Factura de origen",
+      "facturaOrigenPlaceholder": "Selecciona la factura...",
+      "facturaSaldoPendiente": "saldo pendiente",
+      "montoLabel": "Monto",
+      "subtotalLabel": "Subtotal",
+      "itbmsLabel": "ITBMS",
+      "motivoLabel": "Motivo",
+      "fechaLabel": "Fecha",
+      "excedenteAviso": "El monto supera el saldo pendiente de la factura — el excedente",
+      "excedenteSinMovimiento": "La factura nunca fue cobrada — se cancela la deuda, sin ningún movimiento de dinero.",
+      "resultadoDevuelto": "Devolver el dinero al cliente",
+      "resultadoSaldoFavor": "Dejar como saldo a favor del cliente",
+      "cuentaBancariaSalidaLabel": "Cuenta bancaria de salida",
+      "cuentaBancariaSalidaPlaceholder": "Selecciona la cuenta...",
+      "nuevoSaldoPendiente": "Se aplica automáticamente — nuevo saldo pendiente",
+      "umbralAviso": "Esta nota supera el umbral de aprobación — quedará pendiente de aprobación de Mark antes de aplicarse.",
+      "avisoNotificacionCliente": "Al confirmar, se notificará automáticamente al cliente con la Nota de Crédito y su estado de cuenta actualizado. La factura original no se reenvía ni cambia.",
+      "avisoReduccionComision": "Esta nota reducirá la comisión ya calculada del vendedor sobre la factura afectada.",
+      "comprobanteLabel": "Comprobante de soporte",
+      "comprobantePlaceholder": "Adjuntar imagen o PDF...",
+      "comprobanteObligatorioHint": "Obligatorio en este caso (anulación completa o monto superior al umbral).",
+      "comprobanteInvalidType": "El comprobante debe ser una imagen (JPG/PNG) o un PDF.",
+      "comprobanteTooLarge": "El comprobante no puede superar 10MB.",
+      "error": "No se pudo registrar la nota. Intenta de nuevo.",
+      "cancel": "Cancelar",
+      "confirm": "Registrar nota"
+    },
+    "historial": {
+      "title": "Historial de notas",
+      "subtitle": "Notas registradas y devoluciones confirmadas por Bodega pendientes de generar · clic en una fila para ver el detalle",
+      "searchPlaceholder": "Buscar por cliente, factura o número de nota...",
+      "filtroCliente": "Todos los clientes",
+      "filtroTipo": "Todos los tipos",
+      "filtroEstado": "Todos los estados",
+      "limpiarFiltros": "Limpiar filtros",
+      "resultCount": "{{total}} notas",
+      "vacio": "No se encontraron notas con estos filtros.",
+      "filaBodegaLabel": "Confirmada por Bodega",
+      "precargaError": "No se pudo cargar el detalle de esta devolución. Intenta de nuevo.",
+      "columnas": {
+        "fecha": "Fecha",
+        "cliente": "Cliente",
+        "tipo": "Tipo",
+        "factura": "Factura de origen",
+        "monto": "Monto",
+        "estado": "Estado",
+        "registradoPor": "Registrado por"
+      },
+      "estados": {
+        "aplicada": "Aplicada",
+        "pendiente_aprobacion": "Pendiente de aprobación",
+        "pendiente_generar_nota": "Pendiente de generar nota",
+        "rechazada": "Rechazada"
+      }
+    },
+    "detalle": {
+      "title": "Detalle de la nota",
+      "monto": "Monto",
+      "subtotal": "Subtotal",
+      "itbms": "ITBMS",
+      "estado": "Estado",
+      "facturaOrigen": "Factura de origen",
+      "registradoPor": "Registrado por",
+      "cuentaBancariaSalida": "Cuenta bancaria de salida",
+      "aprobadoRechazadoPor": "Aprobado/rechazado por",
+      "motivo": "Motivo",
+      "motivoRechazo": "Motivo del rechazo",
+      "trazabilidadBodegaTitle": "Trazabilidad de Bodega",
+      "cerrar": "Cerrar",
+      "error": "No se pudo cargar el detalle de la nota.",
+      "aprobar": "Aprobar",
+      "rechazar": "Rechazar",
+      "confirmarRechazo": "Confirmar rechazo",
+      "motivoRechazoLabel": "Motivo del rechazo",
+      "motivoRechazoPlaceholder": "Explica por qué se rechaza esta nota...",
+      "motivoRechazoRequerido": "El motivo del rechazo es obligatorio.",
+      "decisionError": "No se pudo procesar la decisión. Intenta de nuevo.",
+      "verComprobante": "Ver comprobante",
+      "verDocumento": "Ver documento"
+    },
+    "comprobanteModal": {
+      "title": "Comprobante de la nota",
+      "sinComprobante": "Esta nota no tiene ningún comprobante adjunto.",
+      "error": "No se pudo cargar el comprobante.",
+      "adjuntadoPor": "Adjuntado por {{nombre}} — {{fecha}}",
+      "cerrar": "Cerrar"
+    },
+    "documentoModal": {
+      "title": "Nota de Crédito",
+      "destinoMonto": "Destino del monto",
+      "resultado": {
+        "aplicadoSaldo": "Aplicado al saldo pendiente",
+        "devuelto": "Devuelto al cliente",
+        "saldoFavor": "Dejado como saldo a favor"
+      },
+      "verFacturaRelacionada": "Ver factura {{numero}}",
+      "descargarPdf": "Descargar PDF"
+    },
+    "correccion": {
+      "title": "Revisión previa",
+      "subtitle": "Revisá todos los datos y la factura nueva antes de confirmar — nada se guarda todavía",
+      "previewError": "No se pudo cargar la revisión previa. Volvé e intentá de nuevo.",
+      "tarjetas": {
+        "facturaOrigen": "Factura a anular",
+        "proyecto": "Proyecto",
+        "cotizacion": "Cotización",
+        "guiaEntrega": "Guía de Entrega",
+        "notaAGenerar": "Nota de crédito a generar",
+        "correccionAplicada": "Corrección aplicada",
+        "motivo": "Motivo"
+      },
+      "verFacturaButton": "Ver factura",
+      "ocultarFacturaButton": "Ocultar factura",
+      "pendienteAprobacionAviso": "Esta corrección supera el umbral de aprobación de Mark — NO se genera ningún documento fiscal todavía. La factura original sigue activa sin cambios hasta que Mark la apruebe.",
+      "volverButton": "Volver y corregir",
+      "confirmarButton": "Confirmar y generar factura nueva",
+      "error": "No se pudo registrar la corrección. Intenta de nuevo."
+    }
+  },
+  "comisionesInternas": {
+    "title": "Comisiones Internas",
+    "subtitle": "Comisión escalonada por vendedor, calculada sobre el total de pedidos cerrados en el mes",
+    "verTramos": "Tabla de comisión escalonada",
+    "exportar": {
+      "label": "Exportar reporte",
+      "pdf": "Exportar como PDF",
+      "excel": "Exportar como Excel"
+    },
+    "stats": {
+      "totalPedidos": "Total pedidos del mes",
+      "totalPedidosSub": "{{count}} vendedor(es) · {{mes}}",
+      "yaPagada": "Ya pagada",
+      "yaPagadaSub": "liquidada en ciclos de nómina",
+      "porPagar": "Por pagar (cliente ya pagó)",
+      "porPagarSub": "se suma al cierre de mes",
+      "pendienteCobro": "Pendiente de cobro",
+      "pendienteCobroSub": "estimado — falta que el cliente pague"
+    },
+    "banner": "Se pagará automáticamente al cierre de mes: {{count}} comisión(es) en estado \"Por pagar\", por {{monto}}.",
+    "filtros": {
+      "mesAnterior": "Mes anterior",
+      "mesSiguiente": "Mes siguiente",
+      "todosVendedores": "Todos los vendedores",
+      "volverMesActual": "Volver al mes actual"
+    },
+    "mesEnCursoAviso": "Este mes está en curso — el % de comisión es provisional y puede subir de tramo hasta que cierre el mes.",
+    "resultCount": "Mostrando {{count}} vendedor(es)",
+    "columnas": {
+      "vendedor": "Vendedor",
+      "totalPedidos": "Total pedidos",
+      "porcentaje": "% comisión",
+      "pagada": "Pagada",
+      "porPagar": "Por pagar",
+      "pendienteCobro": "Pendiente cobro"
+    },
+    "provisional": "provisional",
+    "fijo": "fijo",
+    "arrastrado": "arrastrado de un mes ya cerrado, aún sin cobrar",
+    "sinPedidos": "Sin pedidos registrados todavía.",
+    "vacio": "Sin vendedores para este filtro.",
+    "footnote": "El % de comisión se fija cuando cierra el mes según el total de pedidos del vendedor — no cambia después, aunque el pago del cliente llegue en meses siguientes. Todo se actualiza solo, según lo que se registre en Cobros.",
+    "detalle": {
+      "cliente": "Cliente",
+      "pedido": "N° pedido",
+      "fechaPedido": "Fecha pedido",
+      "factura": "Factura",
+      "fechaFactura": "Fecha factura",
+      "fechaCobro": "Fecha cobro",
+      "totalPedido": "Total pedido",
+      "totalFacturado": "Total facturado",
+      "totalCobrado": "Total cobrado",
+      "notaCredito": "Nota crédito",
+      "comision": "Monto com.",
+      "estado": "Estado",
+      "abonoParcial": "abono parcial",
+      "estimado": "estimado",
+      "sinDato": "—",
+      "compartidoCon": "Compartido con {{nombres}}",
+      "totalProyecto": "total del proyecto"
+    },
+    "estados": {
+      "pendiente_cobro": "Pendiente de cobro",
+      "por_pagar": "Por pagar",
+      "pagado": "Pagada"
+    },
+    "verEstadoCuenta": "Ver estado de cuenta",
+    "estadoCuenta": {
+      "title": "Estado de cuenta de comisiones",
+      "liquidado": "liquidado",
+      "enCurso": "en curso",
+      "pedidosNuevos": "Pedidos nuevos de {{mes}}",
+      "porcentajeAplicado": "% aplicado a {{mes}}",
+      "notaMesCerrado": "Este estado de cuenta muestra solo lo efectivamente pagado en este mes. Lo que sigue pendiente de cobro se ve en el estado de cuenta del mes en curso.",
+      "descuentoNc": "Descuento total por notas crédito",
+      "totalPagadoMes": "Total pagado este mes",
+      "verImprimir": "Ver / Imprimir PDF"
+    },
+    "tramos": {
+      "title": "Tabla de comisión escalonada",
+      "subtitle": "Se aplica sobre el total de pedidos del vendedor en el mes — no por proyecto individual",
+      "columnas": {
+        "rango": "Total de pedidos en el mes",
+        "porcentaje": "% de comisión"
+      },
+      "menosDe": "Menos de {{monto}}",
+      "masDe": "Más de {{monto}}",
+      "rango": "{{desde}} – {{hasta}}",
+      "vacio": "Sin tramos configurados todavía.",
+      "agregar": "Agregar tramo",
+      "confirmarEliminar": "¿Confirmás eliminar este tramo? Afecta el % de comisión de todos los vendedores activos.",
+      "form": {
+        "montoMinimo": "Monto mínimo",
+        "montoMaximo": "Monto máximo",
+        "sinTope": "Sin tope (último tramo)",
+        "porcentaje": "% de comisión"
+      }
+    }
+  },
+  "comisionesExternas": {
+    "title": "Comisiones Externas",
+    "subtitle": "Comisión de 10% por proyectos referidos por arquitectos, alimentada automáticamente desde Ventas & Diseño",
+    "stats": {
+      "comisionGenerada": "Comisión generada",
+      "comisionGeneradaSub": "clientes que ya pagaron",
+      "pagadaTotal": "Pagada (total)",
+      "pagadaTotalSub": "liquidada históricamente",
+      "pagadoEsteMes": "Pagado este mes",
+      "pagadoEsteMesSub": "salida real de caja",
+      "pendienteFactura": "Pendiente de factura del arquitecto",
+      "pendienteFacturaSub": "cliente ya pagó, falta su honorario",
+      "aunNoGenerada": "Aún no generada",
+      "aunNoGeneradaSub": "clientes referidos que no han pagado"
+    },
+    "filtros": {
+      "buscarPlaceholder": "Buscar arquitecto, cliente o proyecto",
+      "todosMeses": "Todos los meses",
+      "todosArquitectos": "Todos los arquitectos",
+      "todosEstados": "Todos los estados",
+      "limpiar": "Limpiar filtros"
+    },
+    "resultCount": "Mostrando {{count}} arquitecto(s)",
+    "columnas": {
+      "arquitecto": "Arquitecto",
+      "empresa": "Empresa",
+      "generada": "Generada",
+      "pagada": "Pagada",
+      "pendiente": "Pendiente"
+    },
+    "editarDatosFiscales": "Datos fiscales",
+    "datosFiscalesFaltantes": "Completar datos fiscales",
+    "proyectosReferidos": "{{count}} proyecto(s) referido(s)",
+    "sinRegimen": "Sin régimen",
+    "sinProyectos": "Sin proyectos registrados todavía.",
+    "vacio": "Sin arquitectos para este filtro.",
+    "footnote": "Cada arquitecto y proyecto nace automáticamente cuando un proyecto tipo \"Arquitecto o Diseñador\" llega a Aprobado en Pipeline. La comisión externa no existe como deuda hasta que el cliente paga. Una vez el cliente paga, queda \"Pendiente de factura del arquitecto\" — necesita subir su cuenta de cobro antes de poder marcarse como pagada.",
+    "detalle": {
+      "cliente": "Cliente",
+      "pedido": "N° pedido",
+      "fechaPedido": "Fecha pedido",
+      "montoProyecto": "Monto proyecto",
+      "comision": "Comisión",
+      "impuesto": "Impuesto",
+      "total": "Total",
+      "estado": "Estado",
+      "cuentaCobro": "Cuenta de cobro",
+      "subir": "Subir",
+      "reemplazar": "Reemplazar",
+      "sinDato": "—",
+      "verDetalle": "Ver detalle"
+    },
+    "detalleModal": {
+      "cobroCliente": "Cobro del cliente",
+      "ruc": "RUC",
+      "completar": "Completar",
+      "porcentajeComision": "% de comisión",
+      "editarPorcentaje": "Editar %",
+      "proponer": "Proponer",
+      "motivoPlaceholder": "Motivo del cambio",
+      "motivoRechazoPlaceholder": "Motivo del rechazo",
+      "propuestaPendiente": "Propuesta de {{porcentaje}}% pendiente de aprobación de Mark — {{motivo}}",
+      "aprobar": "Aprobar",
+      "rechazar": "Rechazar",
+      "faltanDatosFiscales": "Faltan datos fiscales del arquitecto para calcular impuesto y total.",
+      "cuentaPago": "Cuenta de pago",
+      "comprobanteRetencion": "Comprobante de retención",
+      "recordar": "Recordar",
+      "marcarPagado": "Marcar como pagado",
+      "confirmarPago": "¿Confirmás marcar esta comisión como pagada por {{monto}}?",
+      "bloqueoPorcentajePendiente": "Hay un cambio de % pendiente de aprobación de Mark — resolvelo primero.",
+      "bloqueoDatosFiscales": "Faltan los datos fiscales del arquitecto.",
+      "bloqueoCuentaCobro": "Falta subir la cuenta de cobro.",
+      "bloqueoComprobanteRetencion": "Falta subir el comprobante de retención."
+    },
+    "estados": {
+      "aun_no_generada": "Aún no generada",
+      "pendiente_factura_arquitecto": "Pendiente de factura",
+      "pagada": "Pagada"
+    },
+    "regimenes": {
+      "exento": "Exento",
+      "con_itbms": "Con ITBMS (7%)",
+      "retencion_50": "Retención del 50% (3.5%)"
+    },
+    "datosFiscales": {
+      "title": "Completar datos fiscales",
+      "subtitle": "Aplica a todos los proyectos de este arquitecto, presentes y futuros.",
+      "empresaLabel": "Empresa / estudio",
+      "rucLabel": "RUC",
+      "regimenLabel": "Régimen fiscal",
+      "regimenPlaceholder": "Seleccionar régimen",
+      "error": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
+      "cancel": "Cancelar",
+      "save": "Guardar"
+    }
+  },
+  "arqueoCaja": {
+    "title": "Arqueo de Caja",
+    "subtitle": "Movimientos reales y proyección de liquidez",
+    "exportButton": "Exportar reporte",
+    "exportPdf": "Exportar como PDF",
+    "exportExcel": "Exportar como Excel",
+    "exportError": "No se pudo exportar el reporte.",
+    "cards": {
+      "saldoHoy": "Saldo disponible hoy",
+      "saldoHoyBreakdown": "Bancos {{bancos}} + Caja menuda {{cajaMenuda}}",
+      "entradasProyectadas": "Entradas proyectadas",
+      "salidasProyectadas": "Salidas proyectadas",
+      "saldoProyectado": "Saldo proyectado",
+      "hoy": "hoy",
+      "proximosDias": "próximos {{dias}} días",
+      "aDias": "a {{dias}} días",
+      "aHoy": "a hoy"
+    },
+    "toggle": {
+      "proyectado": "Proyectado",
+      "real": "Real (histórico)"
+    },
+    "chips": {
+      "hoy": "Hoy",
+      "dias30": "30 días",
+      "dias90": "90 días"
+    },
+    "proyectado": {
+      "panelSubtitle": "Entradas desde Facturación y salidas desde Comisiones y Notas crédito pendientes, según fecha de vencimiento",
+      "entradasTitle": "Entradas esperadas (Facturación)",
+      "salidasTitle": "Salidas esperadas (Comisiones + Notas crédito)",
+      "netoLabel": "Flujo neto proyectado",
+      "sinEntradas": "Sin entradas esperadas en esta ventana",
+      "sinSalidas": "Sin salidas esperadas en esta ventana",
+      "vencidoHace": "Vencido {{dias}}d",
+      "vencePronto": "En {{dias}}d",
+      "tipos": {
+        "comision_interna": "Comisión interna",
+        "comision_externa": "Comisión externa",
+        "nota_credito": "Nota crédito"
+      },
+      "footnote": "* Las entradas y salidas proyectadas se calculan automáticamente desde las facturas abiertas de Facturación y desde Comisiones/Notas crédito pendientes, según su fecha esperada — no se capturan a mano en esta pantalla."
+    },
+    "real": {
+      "panelSubtitle": "Movimientos reales de caja, ya ocurridos, con saldo acumulado",
+      "columnas": {
+        "fecha": "Fecha",
+        "concepto": "Concepto",
+        "origen": "Origen",
+        "entrada": "Entrada",
+        "salida": "Salida",
+        "saldoAcumulado": "Saldo acumulado"
+      },
+      "origenes": {
+        "cobro": "Cobros",
+        "devolucion": "Notas crédito",
+        "comision": "Comisiones"
+      },
+      "sinMovimientos": "Sin movimientos en esta ventana."
+    },
+    "arqueoDelDia": {
+      "title": "Arqueo del día",
+      "columnas": {
+        "concepto": "Concepto",
+        "monto": "Monto",
+        "observaciones": "Observaciones"
+      },
+      "observacionPlaceholder": "Observación...",
+      "sinMovimientos": "Sin movimientos registrados este día.",
+      "totalCobrado": "Total cobrado hoy",
+      "totalNotasCredito": "Notas crédito y devoluciones de dinero",
+      "totalNeto": "Total neto del día",
+      "observacionGeneralTitle": "Observación general del día",
+      "observacionGeneralPlaceholder": "Ej. Sábado, poco movimiento por feriado...",
+      "conciliacionNote": "La conciliación contra el banco se gestiona en Cuentas Bancarias, no aquí.",
+      "descargarResumen": "Descargar resumen",
+      "atrasadoAviso": "El arqueo del {{fecha}} no quedó cerrado — ciérralo antes de poder trabajar el de hoy ({{fechaHoy}}).",
+      "cerradoAviso": "Este arqueo ya está {{estado}} — sus observaciones y movimientos no se pueden editar.",
+      "cerrar": {
+        "boton": "Cerrar arqueo del día",
+        "modalTitle": "Cerrar arqueo del día",
+        "numero": "N° de arqueo",
+        "fecha": "Fecha",
+        "avisoRetenciones": "{{count}} retención(es) sin la constancia del cliente todavía — igual se puede cerrar, la constancia se sube después.",
+        "confirmBody": "Al confirmar, el arqueo pasa al historial como \"Pendiente de aprobación de Gerencia\" y ya no se puede editar.",
+        "confirmar": "Confirmar cierre",
+        "error": "No se pudo cerrar el arqueo."
+      }
+    },
+    "estados": {
+      "abierto": "abierto",
+      "pendiente_aprobacion": "pendiente de aprobación de Gerencia",
+      "aprobado": "aprobado por Gerencia"
+    },
+    "retenciones": {
+      "title": "Ajustes / Retención",
+      "subtitle": "La retención ya cuenta como pago completo de la factura — pero el cliente debe entregar la constancia de retención para poder sustentarlo fiscalmente.",
+      "columnas": {
+        "cliente": "Cliente",
+        "motivo": "Motivo",
+        "monto": "Monto",
+        "constancia": "Constancia"
+      },
+      "pendiente": "Pendiente",
+      "subir": "Subir constancia",
+      "reemplazar": "Reemplazar"
+    },
+    "historial": {
+      "title": "Historial de arqueos cerrados",
+      "sinArqueos": "Todavía no hay arqueos cerrados.",
+      "pendientesAviso": "{{count}} arqueo(s) pendiente(s) de aprobación de Gerencia",
+      "columnas": {
+        "numero": "N°",
+        "fecha": "Fecha",
+        "totalNeto": "Total neto",
+        "aprobacion": "Aprobación Gerencia",
+        "realizadoPor": "Realizado por"
+      },
+      "pendiente": "Pendiente",
+      "aprobadoPor": "Aprobado por {{nombre}}",
+      "ver": "Ver",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente",
+      "detalleTitle": "Arqueo N° {{numero}}",
+      "detalleError": "No se pudo cargar el detalle de este arqueo.",
+      "cerradoPor": "Cerrado por {{nombre}}",
+      "aprobar": "Aprobar",
+      "aprobarError": "No se pudo aprobar el arqueo."
+    },
+    "restricted": {
+      "yaneth": "Tu rol solo tiene acceso al Arqueo del día. Las vistas Proyectada y Real (30/90 días) están disponibles para Felix, Mark y Gerencia.",
+      "dailyCount": "El Arqueo del día está disponible solo para Felix y Yaneth."
+    }
+  },
+  "cajaChica": {
+    "title": "Caja chica",
+    "subtitle": "Registro de gastos menores para reembolso, con aprobación de Gerencia",
+    "nuevoGasto": "Nuevo gasto",
+    "generarReporte": "Generar reporte",
+    "tabs": {
+      "pendientes": "Pendientes",
+      "pendientesSub": "{{count}} gasto(s) sin reportar",
+      "reportes": "Reportes",
+      "reportesSub": "{{count}} generado(s)",
+      "reportesSubSinAprobar": "{{count}} generado(s) · {{sinAprobar}} sin aprobar",
+      "rechazados": "Rechazados",
+      "rechazadosSub": "{{count}} línea(s)"
+    },
+    "estados": {
+      "pendiente": "Pendiente",
+      "rechazado_temporal": "Rechazado (1/2)",
+      "reabierto": "Reabierto",
+      "rechazado_permanente": "Rechazado permanente"
+    },
+    "estadosReporte": {
+      "pendiente_aprobacion": "Pendiente de aprobación",
+      "finalizado": "Finalizado",
+      "rechazado": "Rechazado"
+    },
+    "formasPago": {
+      "transferencia": "Transferencia",
+      "efectivo": "Efectivo",
+      "cheque": "Cheque",
+      "yappy": "Yappy"
+    },
+    "pendientesPanel": {
+      "subtitle": "Gastos ya registrados, agrupados por solicitante — listos para incluirse en el próximo reporte",
+      "vacio": "No hay gastos pendientes de reporte.",
+      "columnas": {
+        "fecha": "Fecha",
+        "proveedor": "Proveedor",
+        "descripcion": "Descripción",
+        "montoBruto": "M. Bruto",
+        "itbms": "ITBMS",
+        "total": "Total",
+        "estado": "Estado",
+        "soporte": "Soporte"
+      },
+      "subtotal": "Subtotal — {{solicitante}}",
+      "totalGeneral": "Total general",
+      "verSoportes": "Ver ({{count}})",
+      "footnote": "El Monto Bruto y el ITBMS se escriben tal como aparecen en el recibo o factura del gasto — no se calculan, son montos de terceros. El Total sí se calcula solo (Bruto + ITBMS)."
+    },
+    "nuevoGastoModal": {
+      "title": "Registrar nuevo(s) gasto(s)",
+      "subtitle": "Puedes agregar varias líneas de distintos solicitantes en un solo registro",
+      "agregarLinea": "+ Agregar otra línea",
+      "quitarLinea": "Quitar",
+      "lineaTitle": "Línea {{numero}}",
+      "fecha": "Fecha",
+      "solicitante": "Solicitante",
+      "solicitantePlaceholder": "Selecciona...",
+      "proveedor": "Proveedor",
+      "descripcion": "Descripción",
+      "montoBruto": "Monto bruto",
+      "itbms": "ITBMS",
+      "itbmsHint": "Escribe 0 si no aplica",
+      "foto": "Foto del recibo",
+      "fotoRequerida": "Falta la foto del recibo en esta línea.",
+      "fotoInvalidType": "El archivo debe ser una imagen o un PDF.",
+      "fotoTooLarge": "El archivo no puede superar los 10MB.",
+      "camposRequeridos": "Completa todos los campos de esta línea.",
+      "cancel": "Cancelar",
+      "confirm": "Guardar gasto(s)",
+      "error": "No se pudo(n) guardar el/los gasto(s)."
+    },
+    "generarReporteModal": {
+      "step1Title": "Seleccionar gastos para el reporte",
+      "step1Subtitle": "Todo viene marcado por defecto — desmarca lo que quieras dejar para el próximo corte",
+      "step2Title": "Forma de pago del reembolso",
+      "step2Subtitle": "{{count}} gasto(s) seleccionados · Total {{total}}",
+      "formaPagoLabel": "Forma de pago",
+      "formaPagoPlaceholder": "Selecciona...",
+      "seleccionVaciaError": "Selecciona al menos un gasto para incluir en el reporte.",
+      "formaPagoRequeridaError": "Selecciona la forma de pago antes de generar el reporte.",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "continuar": "Continuar",
+      "confirmar": "Generar reporte",
+      "error": "No se pudo generar el reporte.",
+      "successTitle": "Reporte {{numero}} generado"
+    },
+    "reportesPanel": {
+      "subtitle": "Haz clic en \"Ver\" para abrir el detalle de cualquier reporte",
+      "vacio": "Aún no se ha generado ningún reporte.",
+      "columnas": {
+        "numero": "N°",
+        "fechaCreacion": "Fecha creación",
+        "total": "Total",
+        "estado": "Estado",
+        "realizadoPor": "Realizado por"
+      },
+      "ver": "Ver"
+    },
+    "detalleReporteModal": {
+      "title": "Detalle del reporte {{numero}}",
+      "realizadoPor": "Realizado por {{nombre}}",
+      "aprobadoPor": "Aprobado por {{nombre}} el {{fecha}}",
+      "formaPago": "Forma de pago: {{formaPago}}",
+      "aprobarConfirm": "¿Aprobar el reporte {{numero}} por un total de {{total}}? Esta acción no se puede revertir desde esta pantalla.",
+      "aprobar": "Aprobar reporte",
+      "aprobarError": "No se pudo aprobar el reporte.",
+      "descargar": "Descargar",
+      "cerrar": "Cerrar",
+      "rechazar": "Rechazar",
+      "rechazarReporte": "Rechazar reporte completo",
+      "motivoRechazoLineaLabel": "Motivo del rechazo de esta línea (obligatorio)",
+      "motivoRechazoReporteLabel": "Motivo del rechazo del reporte completo (obligatorio, aplica a todas sus líneas)",
+      "motivoRechazoRequerido": "El motivo es obligatorio.",
+      "confirmarRechazo": "Confirmar rechazo",
+      "rechazarError": "No se pudo rechazar.",
+      "reporteRechazadoBody": "Este reporte fue rechazado — sus líneas volvieron a Pendientes o pasaron a Rechazados según su historial de intentos."
+    },
+    "rechazadosPanel": {
+      "subtitle": "Líneas rechazadas 2 veces — se conserva su historial y se pueden reabrir",
+      "vacio": "No hay líneas rechazadas permanentemente.",
+      "columnas": {
+        "solicitante": "Solicitante",
+        "intentos": "Intentos"
+      }
+    },
+    "detalleLineaModal": {
+      "title": "Detalle del gasto",
+      "error": "No se pudo cargar el detalle de este gasto.",
+      "editarError": "No se pudieron guardar los cambios.",
+      "reabrirError": "No se pudo reabrir este gasto.",
+      "agregarSoporteError": "No se pudo agregar el soporte. Intenta de nuevo.",
+      "montos": "Monto Bruto / ITBMS / Total",
+      "soportes": "Soportes",
+      "sinSoportes": "Sin soportes adjuntos.",
+      "agregarSoporte": "Agregar soporte",
+      "ver": "Ver",
+      "historial": "Historial",
+      "historialRechazo": "Rechazo",
+      "historialReapertura": "Reapertura",
+      "motivoRequerido": "El motivo es obligatorio.",
+      "motivoReaperturaLabel": "Motivo para reabrir este gasto (obligatorio)",
+      "motivoReaperturaPlaceholder": "Explica por qué corresponde reabrir este gasto...",
+      "editar": "Editar",
+      "guardarCambios": "Guardar cambios",
+      "reabrir": "Reabrir",
+      "confirmarReapertura": "Confirmar reapertura",
+      "solicitante": "Solicitante",
+      "solicitanteNoEditable": "no editable",
+      "reporteFinalizado": "Reporte finalizado — ya no editable"
+    },
+    "soporteModal": {
+      "error": "No se pudo cargar el soporte.",
+      "cerrar": "Cerrar"
+    }
+  },
+  "reportes": {
+    "title": "Reportes",
+    "subtitle": "Panorama visual para tomar decisiones — haz clic en cualquier tarjeta para ver el detalle completo",
+    "verEnFacturacion": "Ver en Facturación",
+    "periodo": {
+      "hoy": "Hoy",
+      "dias3m": "3 meses",
+      "dias6m": "6 meses",
+      "anio": "Año"
+    },
+    "felixCommission": {
+      "title": "Comisión por gestión de cartera +90 días — Felix",
+      "subtitle": "A mayor cartera vencida cobrada, mayor comisión — en vivo, lo que va del mes",
+      "cobradoMes": "Cobrado de cartera +90 días (mes actual)",
+      "rangoActual": "Rango actual",
+      "comision": "Comisión para Felix (a la fecha)",
+      "tramoRango": "{{desde}} – {{hasta}} → {{pct}}%",
+      "tramoDesde": "Más de {{desde}} → {{pct}}%",
+      "rangoActualTag": "Rango actual",
+      "footnote": "A mayor cartera vencida (+90 días) cobrada, mayor comisión — incentivo por buena gestión de cobro. Es un dato en vivo: puede seguir subiendo mientras avanza el mes — el corte que define la comisión definitiva es el día 30. Se reinicia en $0 cada mes."
+    },
+    "cartera": {
+      "title": "Cartera por cobrar",
+      "subtitle": "Antigüedad de saldos — total {{total}}",
+      "rango": "{{desde}}-{{hasta}} días",
+      "rangoMas": "+{{desde}} días"
+    },
+    "cartera90": {
+      "title": "Cobrado de cartera +90 días",
+      "subtitle": "En lo que va del mes — cierre el día 30",
+      "detalle": "{{pendiente}} aún pendiente de ese mismo rango"
+    },
+    "ventas": {
+      "title": "Ventas",
+      "subtituloHoy": "Total facturado hoy",
+      "subtituloPeriodo": "Total facturado por mes",
+      "hoyLabel": "Hoy",
+      "promedioMesAnterior": "Promedio diario del mes anterior",
+      "vsMesAnterior": "vs. mes anterior"
+    },
+    "arqueoCaja": {
+      "title": "Arqueo de Caja",
+      "subtitle": "Flujo neto por mes (entradas − salidas)",
+      "ver": "Ver Arqueo de Caja",
+      "entradasMenosSalidas": "{{entradas}} entradas − {{salidas}} salidas",
+      "saldoHoy": "Saldo disponible hoy",
+      "proyectado30": "Proyectado a 30 días"
+    },
+    "comisiones": {
+      "title": "Comisiones",
+      "subtitle": "Internas vs. externas por mes",
+      "internas": "Internas",
+      "externas": "Externas",
+      "verInternas": "Ver Comisiones Internas",
+      "verExternas": "Ver Comisiones Externas"
+    },
+    "notasCredito": {
+      "title": "Notas de crédito y devoluciones",
+      "subtitle": "Distribución por motivo — mes actual",
+      "ver": "Ver Notas"
+    },
+    "mensualCliente": {
+      "volver": "Volver a Reportes",
+      "tituloDia": "Reporte mensual por cliente",
+      "subtituloDia": "Facturas y cobros de un cliente específico, filtrado por rango de fechas",
+      "tituloAcumulado": "Mensual por cliente — acumulado",
+      "subtituloAcumulado": "Facturas y cobros de un cliente específico, agrupados por año y mes",
+      "cliente": "Cliente",
+      "clientePlaceholder": "Selecciona un cliente...",
+      "todosLosClientes": "Todos los clientes",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "filtrar": "Filtrar",
+      "limpiar": "Limpiar",
+      "descargar": "Descargar reporte (Excel)",
+      "sinDatosParaDescargar": "Selecciona un cliente con datos en el rango de fechas antes de descargar.",
+      "seleccionaCliente": "Selecciona un cliente para ver su reporte.",
+      "sinRegistros": "No hay registros de este cliente en el rango de fechas seleccionado.",
+      "registros": "Registros",
+      "totalFacturado": "Total facturado",
+      "totalCobrado": "Cobrado",
+      "totalPendiente": "Pendiente",
+      "totalPeriodo": "Total del período",
+      "pendientesTitle": "Pendientes de cobro (sin método de pago todavía)",
+      "columnas": {
+        "fecha": "Fecha",
+        "anio": "Año",
+        "mes": "Mes",
+        "num": "Núm.",
+        "importe": "Importe",
+        "media": "Media",
+        "transferencia": "Transferencia",
+        "cheque": "Cheque",
+        "efectivo": "Efectivo",
+        "yappy": "Yappy",
+        "otros": "Otros",
+        "totalCaja": "Total Caja"
+      }
+    },
+    "libroFacturas": {
+      "volver": "Volver a Reportes",
+      "title": "Libro de facturas",
+      "subtitle": "Todas las facturas y notas de crédito emitidas, en orden cronológico",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "tipo": "Tipo",
+      "tipoTodos": "Todos",
+      "tipoSoloFacturas": "Solo facturas",
+      "tipoSoloNotas": "Solo notas de crédito",
+      "filtrar": "Filtrar",
+      "limpiar": "Limpiar",
+      "descargar": "Descargar reporte (Excel)",
+      "sinDatosParaDescargar": "No hay documentos para descargar con el filtro actual.",
+      "sinDocumentos": "No hay documentos en el rango seleccionado.",
+      "facturas": "Facturas",
+      "notasCredito": "Notas de crédito",
+      "baseImponible": "Base imponible",
+      "itbms": "ITBMS",
+      "total": "Total",
+      "totalPeriodo": "Total del período",
+      "columnas": {
+        "fecha": "Fecha",
+        "ruc": "RUC",
+        "cliente": "Cliente",
+        "tipo": "Tipo",
+        "motivo": "Motivo",
+        "documento": "N° Documento",
+        "baseImponible": "Base Imponible",
+        "porcentaje": "%",
+        "itbms": "Cuota ITBMS",
+        "total": "Total"
+      }
+    },
+    "ventasMedioPago": {
+      "volver": "Volver a Reportes",
+      "title": "Mensual por cliente — ventas por medio de pago",
+      "subtitle": "Cada factura cobrada, con su desglose fiscal y el método de pago utilizado",
+      "cliente": "Cliente",
+      "clientePlaceholder": "Todos",
+      "todos": "Todos",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "filtrar": "Filtrar",
+      "limpiar": "Limpiar",
+      "descargar": "Descargar reporte (Excel)",
+      "sinDatosParaDescargar": "No hay facturas para descargar con el filtro actual.",
+      "sinFacturas": "No hay facturas en el rango/cliente seleccionado.",
+      "facturasCobradas": "Facturas cobradas",
+      "baseImponible": "Base imponible",
+      "itbms": "ITBMS",
+      "total": "Total",
+      "totalPeriodo": "Total del período",
+      "pendientesTitle": "Pendientes de cobro (sin método de pago todavía)",
+      "columnas": {
+        "fecha": "Fecha",
+        "cliente": "Cliente",
+        "documento": "N° Documento",
+        "baseImponible": "Base Imponible",
+        "itbms": "ITBMS",
+        "total": "Total"
+      },
+      "metodos": {
+        "transferencia": "Transferencia",
+        "cheque": "Cheque",
+        "efectivo": "Efectivo",
+        "tarjeta": "Tarjeta",
+        "depositoBancario": "Depósito bancario",
+        "yappy": "Yappy",
+        "linkPago": "Link de pago",
+        "retencionImpuestos": "Retención de impuestos",
+        "ajustesCuenta": "Ajustes de cuenta"
+      }
+    },
+    "subReportes": {
+      "mensualCliente": {
+        "title": "Reporte mensual por cliente",
+        "subtitle": "Facturas y cobros de un cliente, día por día"
+      },
+      "acumulado": {
+        "title": "Mensual por cliente — acumulado",
+        "subtitle": "Lo mismo, agrupado por año y mes"
+      },
+      "libroFacturas": {
+        "title": "Libro de facturas",
+        "subtitle": "Todas las facturas y notas de crédito, en orden cronológico"
+      },
+      "ventasMedioPago": {
+        "title": "Ventas por medio de pago",
+        "subtitle": "Cada factura con su desglose fiscal y el método de pago usado"
+      }
+    }
+  },
+  "home": {
+    "header": {
+      "saludo": "Bienvenido, {{nombre}}",
+      "saludoGenerico": "Bienvenido",
+      "subtitulo": "{{fecha}} · tienes {{reunionesTexto}} y {{pendientesTexto}} hoy",
+      "reunionesCount_one": "{{count}} reunión",
+      "reunionesCount_other": "{{count}} reuniones",
+      "pendientesCount_one": "{{count}} pendiente",
+      "pendientesCount_other": "{{count}} pendientes"
+    },
+    "resumenMes": {
+      "title": "Resumen del mes",
+      "cobradoMes": "cobrado en el mes a la fecha",
+      "cuentasAlDia": {
+        "label": "Cuentas al día",
+        "sub": "vs. con mora"
+      },
+      "carteraPorCobrar": {
+        "label": "Cartera por cobrar",
+        "sub": "solo cartera cobrable — {{incobrable}} incobrable ya excluidos"
+      },
+      "ventasAyer": {
+        "label": "Ventas de ayer",
+        "sub": "{{count}} ventas · {{fecha}}",
+        "verReporte": "Ver reporte completo"
+      },
+      "comisionesInternas": {
+        "label": "Comisiones internas",
+        "sub": "por pagar este mes"
+      },
+      "comisionesExternas": {
+        "label": "Comisiones externas",
+        "sub": "por pagar este mes"
+      }
+    },
+    "calendar": {
+      "title": "Mi calendario",
+      "viewFull": "Ver calendario completo"
+    },
+    "pendientes": {
+      "title": "Pendientes",
+      "empty": "Sin pendientes"
+    },
+    "vencidosPorVencer": {
+      "title": "Vencidos y por vencer",
+      "vencidos": {
+        "title": "Vencidos",
+        "empty": "Sin facturas vencidas",
+        "texto": "Vencida hace {{dias}} días"
+      },
+      "porVencer": {
+        "title": "Por vencer",
+        "empty": "Sin facturas por vencer",
+        "texto": "Vence en {{dias}} días",
+        "hoy": "Vence hoy"
+      }
+    },
+    "antiguedad": {
+      "title": "Antigüedad de cuentas por cobrar"
+    }
+  }
+}

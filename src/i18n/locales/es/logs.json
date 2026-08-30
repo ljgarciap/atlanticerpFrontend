@@ -1,0 +1,50 @@
+{
+  "title": "Logs",
+  "subtitle": "Historial de auditoría de todos los módulos — quién hizo qué y cuándo",
+  "filters": {
+    "module": "Módulo",
+    "allModules": "Todos los módulos",
+    "tipo": "Tipo",
+    "allTipos": "Todos",
+    "cambioDato": "Cambio de dato",
+    "accion": "Acción",
+    "entityType": "Tipo de entidad",
+    "entityId": "ID de entidad",
+    "userId": "Usuario (ID)",
+    "from": "Desde",
+    "to": "Hasta",
+    "clear": "Limpiar filtros"
+  },
+  "table": {
+    "date": "Fecha",
+    "user": "Usuario",
+    "module": "Módulo",
+    "tipo": "Tipo",
+    "action": "Acción",
+    "entity": "Entidad",
+    "changes": "Cambios",
+    "empty": "Sin actividad registrada",
+    "systemUser": "Sistema"
+  },
+  "module": {
+    "ai": "IA",
+    "auth": "Autenticación",
+    "bodega": "Bodega",
+    "compras": "Compras",
+    "crm": "CRM",
+    "security": "Seguridad",
+    "servicios": "Servicios",
+    "settings": "Configuración",
+    "ventas_diseno": "Ventas & Diseño"
+  },
+  "action": {
+    "created": "Creó",
+    "updated": "Editó",
+    "deleted": "Eliminó"
+  },
+  "pagination": {
+    "page": "Página {{current}} de {{last}}",
+    "prev": "Anterior",
+    "next": "Siguiente"
+  }
+}

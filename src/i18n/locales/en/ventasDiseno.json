@@ -1,0 +1,730 @@
+{
+  "nav": {
+    "module": "Sales & Design",
+    "home": "Home",
+    "pipeline": "Pipeline",
+    "clients": "Clients",
+    "quote": "Quote",
+    "quotesList": "Quotes",
+    "pedidos": "Orders",
+    "reports": "Reports",
+    "auditLog": "History"
+  },
+  "scope": {
+    "own": "Home",
+    "team": "Team"
+  },
+  "filters": {
+    "all": "All",
+    "finalStage": "Final Stage",
+    "stagnant": "Stagnant",
+    "orderByDays": "Sort by days",
+    "orderByValue": "Sort by value"
+  },
+  "stages": {
+    "lead": "Lead",
+    "design": "Design",
+    "quote": "Quote",
+    "proposal": "Proposal",
+    "approved": "Approved",
+    "lost": "Lost"
+  },
+  "kanban": {
+    "empty": "No projects",
+    "emptyStagnant": "No stagnant projects",
+    "stagnantTooltip": "No movement for {{days}} days",
+    "actions": {
+      "catalog": "Catalog",
+      "newProject": "+ New Project",
+      "newQuote": "+ New quote",
+      "newQuoteUnavailable": "Available once Quote is implemented",
+      "orderStatus": "Order status"
+    }
+  },
+  "tag": {
+    "design": "Design",
+    "quote": "Quote",
+    "both": "Both"
+  },
+  "contactRole": {
+    "client": "Client",
+    "architect": "Architect",
+    "other": "Other"
+  },
+  "fileType": {
+    "design": "Design files",
+    "proposal": "Proposal files",
+    "signed_quote": "Signed quote",
+    "approval_proof": "Approval proof",
+    "photo": "Photo"
+  },
+  "modal": {
+    "name": "Project name",
+    "tag": "Tag",
+    "masterClient": "Master Client",
+    "subClient": "Sub Client",
+    "owner": "Owner",
+    "daysInStage": "Days in stage",
+    "amount": "Amount",
+    "amountNote": "Defined in Quotes",
+    "workedArea": "Worked area (m²)",
+    "undefined": "Not defined yet",
+    "deliveryType": "Estimated delivery date",
+    "deliverySingle": "Single",
+    "deliveryPartial": "Partial",
+    "deliveryTbd": "To be defined",
+    "deliveryDates": "Delivery date(s)",
+    "observations": "Observations",
+    "files": "Files",
+    "noFilesYet": "No files uploaded yet",
+    "contacts": "Contacts",
+    "noContacts": "No contacts registered",
+    "contactName": "Name",
+    "missingArchitect": "Missing Architect contact",
+    "notEditableLost": "This project is Lost — not editable. Use Reactivate (move to Lead) from the board.",
+    "notEditableApproved": "Only a user with special permission can edit an already Approved project.",
+    "createNew": "+ Create \"{{query}}\"",
+    "createError": "Could not create. Check the data and try again.",
+    "subClientTaxId": "Tax ID",
+    "reactivate": "Reactivate (move to Lead)",
+    "moveToNext": "Move to {{stage}}",
+    "markAsLost": "Mark as Lost",
+    "createQuote": "Create quote",
+    "viewProjectQuotes": "View quotes for this project",
+    "stageChangeError": "Could not move the card to a new stage.",
+    "stageChangeMissingContact": "This Lead has no contacts registered. Add at least one before continuing.",
+    "stageChangeMissingMasterClient": "Missing a linked Master Client. Search or create one to continue.",
+    "stageChangeMissingSubClient": "Missing a linked Sub-client. Search or create one to continue.",
+    "createQuoteMissingArea": "Missing worked area. Fill it in before creating the quote.",
+    "createQuoteMissingFile": "Missing at least one design file. Upload one to continue.",
+    "uploadFileError": "Could not upload the file. Check the file type and try again.",
+    "fileView": "View",
+    "fileDownload": "Download",
+    "fileUrlError": "Could not open the file. Please try again.",
+    "saveError": "Could not save. Check the data and try again.",
+    "newProject": {
+      "title": "New Project",
+      "typeLead": "Lead",
+      "typeDesign": "Design",
+      "name": "Project name",
+      "noContactsWarning": "This sub client has no contacts registered. Click again to continue anyway.",
+      "photo": "Photo",
+      "designFiles": "Design files",
+      "save": "Save",
+      "confirmSave": "Confirm and create"
+    }
+  },
+  "category": {
+    "a_walkin": "A · WalkIn",
+    "b_architect_designer": "B · Architect or Designer",
+    "c_bidding": "C · Bidding",
+    "d_referred": "D · Referred",
+    "none": "Not set",
+    "codeA": "A",
+    "codeB": "B",
+    "codeC": "C",
+    "codeD": "D"
+  },
+  "catalog": {
+    "pageTitle": "Catalog",
+    "pageSubtitle": "Browse the catalog's products and families — to add an item to a quote, use the search inside Quote.",
+    "searchButton": "Search catalog",
+    "searchPlaceholder": "Search by reference or description...",
+    "fuzzyBanner": "No exact matches — showing approximate results",
+    "empty": "No results",
+    "brand": "Brand",
+    "available": "Available",
+    "unlimited": "Unlimited",
+    "selectProduct": "Select product",
+    "remove": "Remove",
+    "insufficientStock": "You don't have the units needed, this product requires a purchase. Missing {{count}} unit(s).",
+    "tabSearch": "Search",
+    "tabFamilies": "Families",
+    "familyProductsCount": "{{count}} products",
+    "familiesEmpty": "No families configured",
+    "selectAllProducts": "Select products"
+  },
+  "catalogScreen": {
+    "resultsCount_one": "{{count}} product",
+    "resultsCount_other": "{{count}} products",
+    "actions": {
+      "inventoryCompras": "Purchasing Inventory",
+      "inventoryBodega": "Warehouse Inventory",
+      "sendSelected": "Send selected",
+      "sendFull": "Send full catalog"
+    },
+    "selectAll": "Select all",
+    "selectedCount_one": "{{count}} selected",
+    "selectedCount_other": "{{count}} selected",
+    "view": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by reference, name, description, family or category...",
+      "allCategories": "All categories",
+      "allFamilies": "All families",
+      "stockAll": "With or without stock",
+      "stockWith": "With available stock",
+      "stockWithout": "Out of stock"
+    },
+    "empty": "No results for the current filters.",
+    "list": {
+      "photo": "Photo",
+      "factoryReference": "Factory reference",
+      "publicReference": "Public reference",
+      "name": "Name",
+      "product": "Product",
+      "category": "Category",
+      "price": "Price",
+      "available": "Available",
+      "technicalSheet": "Technical sheet"
+    },
+    "stock": {
+      "available": "Available: {{count}} units",
+      "unavailable": "No stock available",
+      "availableCompact": "{{count}} units",
+      "unavailableCompact": "Out of stock",
+      "incoming": "+{{count}} incoming"
+    },
+    "badge": {
+      "ok": "Sheet",
+      "missing": "No sheet"
+    },
+    "detail": {
+      "name": "Name",
+      "price": "Price",
+      "category": "Category",
+      "family": "Family",
+      "available": "Available",
+      "technicalSheetTitle": "Technical sheet",
+      "technicalSheetLoaded": "Technical sheet uploaded",
+      "viewDocument": "View document",
+      "viewDocumentError": "Could not open the document.",
+      "missingWarning": "This product has no technical sheet uploaded. It's required before offering it formally.",
+      "uploadButton": "+ Upload technical sheet",
+      "close": "Close"
+    },
+    "upload": {
+      "title": "Upload technical sheet",
+      "hint": "Allowed formats: PDF, PNG, JPG.",
+      "noFile": "Select a file first.",
+      "save": "Save",
+      "success": "Technical sheet uploaded.",
+      "error": "Could not upload the technical sheet."
+    },
+    "sendSuccess": "Catalog sent. The PDF download has started.",
+    "sendError": "Could not generate the catalog PDF."
+  },
+  "priceType": {
+    "public": "Public Price",
+    "project": "Project Price",
+    "special": "Special Price",
+    "partner": "Partner Price",
+    "premium": "Premium Rate",
+    "none": "Not set",
+    "partnerLocked": "Only Mark can assign Partner Price."
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "{{count}} clients",
+    "staleFilter": "No contact +60 days",
+    "table": {
+      "name": "Name",
+      "types": "Type(s)",
+      "activeProjects": "Active projects",
+      "lostProjects": "Lost projects",
+      "totalProjects": "Total projects",
+      "totalAmount": "$ Total projects",
+      "closedAmount": "$ Total closed",
+      "lastContact": "Last contact",
+      "actions": "Actions",
+      "quote": "Quote",
+      "viewProjects": "View projects",
+      "newQuote": "+ New quote",
+      "empty": "No clients",
+      "daysAgo": "{{days}} days",
+      "never": "No contact registered"
+    },
+    "actions": {
+      "catalog": "Catalog",
+      "createClient": "+ Create client",
+      "newQuote": "+ New quote"
+    },
+    "detail": {
+      "priceType": "Price Type",
+      "subClients": "Sub Clients",
+      "newSubClient": "+ New sub client",
+      "viewProjects": "View projects",
+      "category": "Category",
+      "taxId": "Tax ID",
+      "deliveryAddress": "Delivery address",
+      "contacts": "Contacts",
+      "addContact": "+ Add contact",
+      "editContact": "Edit",
+      "newQuote": "+ New quote",
+      "newQuoteUnavailable": "Available once Quote is implemented"
+    },
+    "createModal": {
+      "titleClient": "Create client",
+      "titleSubClient": "New sub client — {{master}}",
+      "masterClient": "Master Client",
+      "businessName": "Sub Client (Business Name)",
+      "deliveryAddress": "Delivery address",
+      "taxId": "Tax ID",
+      "category": "Category",
+      "priceType": "Price type",
+      "contacts": "Contacts",
+      "addAnotherContact": "+ Add another contact",
+      "requiredNote": "These fields are required and each contact needs at least a phone or email. This can't be saved without it.",
+      "leadRuleNote": "This client will be automatically added as a Lead in Pipeline.",
+      "saveClient": "Save client",
+      "saveSubClient": "Save sub client",
+      "removeContact": "Remove"
+    },
+    "projectsModal": {
+      "title": "Projects for {{name}}",
+      "subClient": "Sub Client",
+      "project": "Project",
+      "stage": "Stage",
+      "amount": "Amount",
+      "empty": "No projects"
+    }
+  },
+  "quotesList": {
+    "title": "Quotes",
+    "newQuote": "+ New quote",
+    "summary": {
+      "pending": "Total pending quoted",
+      "approved": "Approved",
+      "lost": "Lost",
+      "conversion": "Conversion rate"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by folio, client or project…",
+      "allStages": "All",
+      "clear": "Clear filters",
+      "approximate": "No exact matches — showing approximate results"
+    },
+    "table": {
+      "folio": "Quote",
+      "masterClient": "Master Client",
+      "subClient": "Sub Client",
+      "project": "Project",
+      "amount": "Amount",
+      "stage": "Stage",
+      "priceType": "Price type",
+      "owner": "Owner",
+      "date": "Date",
+      "status": "Status",
+      "action": "Action",
+      "view": "View quote",
+      "empty": "No quotes yet",
+      "noStage": "—"
+    },
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "approved": "Approved"
+    },
+    "viewer": {
+      "title": "Quote",
+      "close": "Close",
+      "edit": "Edit"
+    }
+  },
+  "quote": {
+    "ruc": "Tax ID / National ID",
+    "project": "Project",
+    "description": "Description",
+    "designer": "Designer in charge",
+    "architect": "Architect",
+    "addExistingContact": "Add existing contact",
+    "addNewContact": "+ Add new contact",
+    "saveBeforeContacts": "Save the quote before adding contacts — the Sub Client hasn't been saved yet.",
+    "fillOrderHint": {
+      "needsMasterClient": "First search or create a Master Client.",
+      "needsSubClient": "First search or create a Master Client and Sub Client."
+    },
+    "priceTypeGeneral": "General price type",
+    "pricingConfig": {
+      "toggle": "Configure formulas",
+      "title": "Price Type formulas",
+      "subtitle": "Percentages and divisors used to calculate Project/Special/Partner/Premium from Public.",
+      "projectDiscount": "Project Price discount (%)",
+      "specialAdditional": "Special Price additional discount (%)",
+      "partnerDivisor": "Partner Price divisor (cost ÷ N)",
+      "premiumDivisor": "Premium Rate divisor (cost ÷ N)",
+      "minMargin": "Minimum margin (%)"
+    },
+    "discountMode": "Discount mode",
+    "discountByLine": "By line",
+    "discountGlobal": "Global",
+    "parts": "Line groups",
+    "noParts": "No line groups yet",
+    "newPartName": "Line group name",
+    "addPart": "+ Add line group",
+    "subtotal": "Grand subtotal",
+    "item": {
+      "reference": "Reference",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "cost": "Cost",
+      "costHint": "Only used to calculate Premium Rate (cost ÷ 0.65)",
+      "premiumIgnoresManualPrice": "Doesn't apply with Premium Rate (calculated from cost)",
+      "discount": "Discount %",
+      "priceType": "Price type",
+      "total": "Total",
+      "useGeneral": "Use general",
+      "addItem": "+ Add item",
+      "subtotal": "Subtotal",
+      "editPrice": "Edit price",
+      "catalogPriceReference": "Catalog price",
+      "newPrice": "New price"
+    },
+    "observations": "Observations",
+    "observationsAutoNote": "Delivery date(s) and, if applicable, the installation note are added automatically to the final document.",
+    "includesInstallation": "This quote includes installation",
+    "conditions": "Conditions",
+    "conditionsLocked": "This text was set when the quote was created. To change it for new quotes, use Configure conditions.",
+    "conditionsConfig": {
+      "toggle": "Configure conditions",
+      "title": "Default conditions",
+      "subtitle": "This text is copied to every new quote from now on — already-generated quotes keep their own."
+    },
+    "totals": {
+      "title": "Totals",
+      "discount": "Discount",
+      "net": "Net",
+      "itbms": "ITBMS (7%)",
+      "grandTotal": "Total"
+    },
+    "validation": {
+      "check": "Check quote",
+      "complete": "The quote has all required fields complete.",
+      "missing": "Missing information"
+    },
+    "saveDraft": "Save draft",
+    "generate": "Save and generate quote",
+    "draftSaved": "Draft saved. You can pick it up again anytime.",
+    "view": {
+      "form": "Form",
+      "preview": "Preview",
+      "external": "External view",
+      "unavailable": "Available after generating the quote"
+    },
+    "edit": "Edit",
+    "viewForm": "View form",
+    "save": "Save",
+    "saved": "Saved",
+    "saveConfirmModal": {
+      "title": "Save quote",
+      "body": "You are about to save this quote as its final version. Once saved, the quote will be registered in the system and used in Pipeline, Quotes, Reports, CRM Dashboard, and the corresponding indicators. Review all information carefully before continuing.",
+      "confirm": "Save"
+    },
+    "exitWithoutSavingModal": {
+      "title": "Exit without saving",
+      "body": "You are about to leave this quote without saving it. If you continue, you will lose the changes you made and the quote will not be registered in the system.",
+      "confirm": "Exit without saving"
+    },
+    "marginWarningModal": {
+      "title": "Minimum margin warning",
+      "body": "This quote has one or more products and/or an overall margin below the {{percent}}% minimum allowed. Affected items have been highlighted for review. These changes may affect business profitability. Do you want to continue anyway?",
+      "confirm": "Continue"
+    },
+    "belowMinMargin": {
+      "item": "This product fell below the minimum allowed margin ({{percent}}%)",
+      "global": "The discounts and adjustments applied leave the quote's overall margin below the minimum allowed ({{percent}}%). Review discounts or prices before continuing."
+    },
+    "downloadPdf": "Download PDF",
+    "returnToPipeline": "Back to Pipeline"
+  },
+  "document": {
+    "folio": "Quote No.",
+    "date": "Date",
+    "contact": "Contact",
+    "clientSignature": "Client signature",
+    "checkPayableTo": "Check payable to",
+    "achPayments": "ACH payments",
+    "achAccount": "CTA CORRIENTE BANCO GENERAL N° 03-01-01-074455-4",
+    "companyName": "ILLUMINATIONS USA CORP",
+    "companyFooter": "ILLUMINATIONS USA CORP - Calle 57 Este, Times Square Plaza - Obarrio (Ciudad de Panamá) · Tel.: +507 269-8051 / +507 269-1828 · info@illuminations.com.pa · www.illuminationslatam.com",
+    "versions": {
+      "title": "Versions of this project",
+      "version": "No.",
+      "folio": "Folio",
+      "date": "Generated on",
+      "generatedBy": "Generated by",
+      "total": "Total",
+      "view": "View this version",
+      "useAsBase": "Use as base for a new version",
+      "useAsBaseError": "Could not create the new version.",
+      "newVersion": "New version"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "period": {
+      "month": "Month",
+      "quarter": "Quarter",
+      "year": "Year"
+    },
+    "surface": {
+      "title": "Worked area",
+      "subtitle": "Approved projects for the period"
+    },
+    "bestClients": {
+      "title": "Best clients",
+      "subtitle": "$ Approved for the period",
+      "empty": "No data yet",
+      "view": "View in Pipeline"
+    },
+    "goals": {
+      "title": "Goals",
+      "subtitle": "Real history (last 6 months) vs. configured Goal",
+      "goal": "Goal",
+      "bar": "Sold",
+      "noGoal": "No Goal configured yet",
+      "currentMonth": "Current month (in progress)"
+    },
+    "topVendors": {
+      "title": "Top vendors",
+      "subtitle": "Team scope only",
+      "current": "Current month",
+      "alert": "{{months}} consecutive months below ${{threshold}}",
+      "alertBadge": "{{months}} months below target"
+    },
+    "commissions": {
+      "title": "Commissions",
+      "subtitle": "Monthly tiered rate over Approved deals",
+      "paid": "Paid",
+      "pending": "Pending",
+      "finalStage": "Final Stage",
+      "cohortsTitle": "Monthly detail",
+      "vendor": "Vendor",
+      "month": "Month",
+      "total": "Total",
+      "percent": "%",
+      "commission": "Commission",
+      "status": "Status",
+      "markPaid": "Mark as paid",
+      "statusPaid": "Paid",
+      "statusPending": "Pending",
+      "empty": "No closed commissions yet"
+    },
+    "forecast": {
+      "title": "Forecast",
+      "subtitle": "Team scope only",
+      "bestCase": "Best case",
+      "bestCaseSub": "Everything open, unadjusted",
+      "weighted": "Weighted",
+      "weightedSub": "Adjusted by stage probability",
+      "committed": "Committed",
+      "committedSub": "Proposal stage only",
+      "closed": "Already closed",
+      "closedSub": "Real approved",
+      "meta": "Period goal",
+      "metaSub": "run-rate",
+      "remaining": "Left to reach the goal",
+      "reached": "Goal reached!",
+      "probabilityNote": "Quote {{quote}}% · Proposal {{proposal}}%",
+      "barClosed": "Already closed",
+      "barProjected": "Already closed + weighted pipeline (projected)",
+      "pctOfGoal": "{{pct}}% of goal",
+      "noteCovers": "The weighted pipeline (${{amount}}) would be enough to cover the gap.",
+      "noteNotCovers": "The weighted pipeline (${{amount}}) is not enough to cover the gap (${{remaining}}) — more business needs to be generated.",
+      "noteMetaReached": "The period goal is already reached with what's actually closed (no need for the open pipeline).",
+      "tableStage": "Stage",
+      "tableProjects": "Projects",
+      "tableOpenAmount": "Open $",
+      "tableProbability": "Probability",
+      "tableWeightedAmount": "Weighted $"
+    },
+    "config": {
+      "toggle": "Settings",
+      "goalsTitle": "Goal per vendor",
+      "goalsSub": "Manually configured value — not an automatic average",
+      "vendor": "Vendor",
+      "goal": "Goal",
+      "goalPlus": "Goal Plus",
+      "save": "Save",
+      "saved": "Saved",
+      "settingsTitle": "Alert and forecast parameters",
+      "lowSalesThreshold": "Low sales threshold ($)",
+      "lowSalesMonths": "Consecutive months to alert",
+      "quoteProbability": "Quote probability (%)",
+      "proposalProbability": "Proposal probability (%)"
+    }
+  },
+  "home": {
+    "subtitle": "Today you have {{events}} meetings and {{pendientes}} pending items",
+    "wholeTeam": "Whole team",
+    "newQuoteUnavailable": "Available once Quote is implemented",
+    "performance": {
+      "title": "My performance",
+      "goal": "Period goal",
+      "progress": "Period progress",
+      "unavailable": "Available once Quote is implemented",
+      "noGoal": "No goal configured",
+      "commission": "Commission generated",
+      "viewCommissions": "View commission detail"
+    },
+    "calendar": {
+      "title": "My calendar",
+      "fullTitle": "Full calendar",
+      "view": { "day": "Day", "week": "Week", "month": "Month" },
+      "events": "events",
+      "noEvents": "No events",
+      "viewFull": "View full calendar",
+      "untitled": "(untitled)",
+      "sourceUnavailable": "Couldn't connect to Outlook right now — some events may be missing."
+    },
+    "pendientes": {
+      "title": "Pending",
+      "empty": "Nothing pending",
+      "more": "+ {{count}} more pending",
+      "listTitle": "Pending — full list",
+      "detailTitle": "Pending item detail",
+      "priority": "Priority",
+      "priorityLevel": { "high": "High", "medium": "Medium" },
+      "suggestion": "Suggested action",
+      "go": "Go",
+      "text": {
+        "no_contact": "{{client}} not contacted for {{days}} days",
+        "missing_architect": "Missing Architect contact — {{client}}"
+      }
+    },
+    "finalStage": {
+      "title": "Final Stage",
+      "empty": "No projects in Proposal",
+      "nextStepLabel": "Next step",
+      "nextStep": "In Proposal for {{days}} days"
+    },
+    "pipelineSummary": {
+      "title": "Project pipeline"
+    }
+  },
+  "auditLog": {
+    "title": "History & audit trail",
+    "subtitle": "Who did what and when, across Pipeline, Clients and Quotes",
+    "filters": {
+      "entityType": "Entity type",
+      "entityId": "Entity ID",
+      "userId": "User",
+      "from": "From",
+      "to": "To",
+      "clear": "Clear filters",
+      "allTypes": "All"
+    },
+    "table": {
+      "date": "Date",
+      "user": "User",
+      "action": "Action",
+      "entity": "Entity",
+      "changes": "Changes",
+      "empty": "No activity recorded",
+      "systemUser": "System"
+    },
+    "action": {
+      "created": "Created",
+      "updated": "Edited",
+      "deleted": "Deleted"
+    },
+    "entityType": {
+      "pipeline_card": "Pipeline card",
+      "pipeline_card_contact": "Card contact",
+      "pipeline_card_file": "File",
+      "master_client": "Master Client",
+      "sub_client": "Sub Client",
+      "sub_client_contact": "Sub Client contact",
+      "quote": "Quote",
+      "quote_part": "Part",
+      "quote_item": "Item",
+      "architect": "Architect"
+    },
+    "pagination": {
+      "page": "Page {{current}} of {{last}}",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "subtitle": "Approved quotes — quoted margin vs. real invoiced margin",
+    "actions": {
+      "catalog": "Catalog",
+      "viewQuotes": "View quotes"
+    },
+    "settings": {
+      "toggle": "Configure threshold",
+      "title": "Margin threshold",
+      "subtitle": "Percentage points of drop above which an order is marked \"Margin dropped\"",
+      "threshold": "Threshold (percentage points)"
+    },
+    "summary": {
+      "total": "Total orders",
+      "totalSub": "Quotes in Approved",
+      "variance": "With margin variance",
+      "varianceSub": "real cost different from quoted",
+      "quotedAvg": "Avg. quoted margin",
+      "quotedAvgSub": "of all orders",
+      "invoicedAvg": "Avg. invoiced margin",
+      "invoicedAvgSub": "{{count}} of {{total}} fully invoiced",
+      "invoicedAvgEmpty": "—"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by client, project or folio...",
+      "allStatuses": "All statuses",
+      "clear": "Clear filters",
+      "approximate": "No exact matches — showing the closest results"
+    },
+    "status": {
+      "pendiente": "Pending purchase",
+      "igual": "No variance",
+      "bajo": "Margin dropped",
+      "mejoro": "Margin improved"
+    },
+    "table": {
+      "folio": "Order",
+      "masterClient": "Client",
+      "project": "Project",
+      "amount": "Amount",
+      "approvedAt": "Approval date",
+      "quotedMargin": "Quoted margin",
+      "invoicedMargin": "Invoiced margin",
+      "status": "Status",
+      "action": "Action",
+      "viewDetail": "View detail",
+      "empty": "No orders match this search.",
+      "partialSuffix": "(partial)",
+      "pendingValue": "—"
+    },
+    "detail": {
+      "title": "Order detail",
+      "headerSub": "{{project}} · Approved on {{date}} · {{owner}}",
+      "amount": "Order amount",
+      "quotedMarginTotal": "Total quoted margin",
+      "invoicedMarginTotal": "Total invoiced margin",
+      "pendingCount": "{{count}} of {{total}} product(s) not purchased yet",
+      "allInvoiced": "All products already invoiced",
+      "alertDrop": "This order's real margin came in below what was quoted ({{quoted}} → {{invoiced}}). Purchase costs were higher than expected.",
+      "alertImprove": "This order's real margin came in better than quoted ({{quoted}} → {{invoiced}}).",
+      "table": {
+        "reference": "Ref.",
+        "description": "Description",
+        "quantity": "Qty.",
+        "unitPrice": "Sale price",
+        "quotedCost": "Quoted cost",
+        "quotedMargin": "Quoted margin",
+        "invoicedCost": "Invoiced cost",
+        "invoicedMargin": "Invoiced margin",
+        "diff": "Difference",
+        "total": "TOTAL",
+        "pending": "Pending purchase",
+        "noVariance": "No variance",
+        "pendingValue": "—"
+      }
+    }
+  }
+}

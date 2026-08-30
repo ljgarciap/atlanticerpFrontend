@@ -1,0 +1,20 @@
+{
+  "title": "Uso de IA",
+  "subtitle": "Consumo de tokens y costo estimado de cada llamada a Claude, por usuario y módulo.",
+  "empty": "Todavía no hay consumo registrado.",
+  "unknownUser": "Usuario desconocido",
+  "totals": {
+    "currentMonth": "Mes actual",
+    "allTime": "Histórico",
+    "tokens": "{{input}} in / {{output}} out"
+  },
+  "table": {
+    "date": "Fecha",
+    "requestedBy": "Usuario",
+    "module": "Módulo",
+    "document": "Documento",
+    "model": "Modelo",
+    "tokens": "Tokens (in/out)",
+    "cost": "Costo"
+  }
+}

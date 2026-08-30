@@ -1,0 +1,330 @@
+{
+  "nav": {
+    "security": "Seguridad",
+    "users": "Usuarios",
+    "levels": "Niveles de seguridad",
+    "departments": "Departamentos",
+    "alerts": "Alertas de seguridad",
+    "notificationRules": "Reglas de notificación",
+    "roles": "Roles"
+  },
+  "alerts": {
+    "title": "Alertas de seguridad",
+    "subtitle": "Anomalías detectadas por el análisis diario — ninguna acción se ejecuta sin tu confirmación",
+    "empty": "No hay alertas para este filtro.",
+    "affectedUser": "Usuario afectado",
+    "userUnknown": "No identificado",
+    "reviewedBy": "Revisado por {{name}}",
+    "filters": {
+      "pending": "Pendientes",
+      "confirmed": "Confirmadas",
+      "dismissed": "Descartadas",
+      "all": "Todas"
+    },
+    "severity": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "confirmed": "Confirmada",
+      "dismissed": "Descartada"
+    },
+    "actions": {
+      "confirmBlock": "Confirmar bloqueo",
+      "dismiss": "Descartar",
+      "unblock": "Reactivar usuario"
+    }
+  },
+  "levels": {
+    "title": "Niveles de seguridad",
+    "subtitle": "Define los niveles de acceso 1-10 del sistema",
+    "editTitle": "Editar nivel de seguridad",
+    "descriptions": {
+      "1":  "Solo acceso de lectura. No puede crear, editar ni eliminar registros.",
+      "2":  "Puede ver y crear registros. No puede editar ni eliminar.",
+      "3":  "Puede ver, crear y editar registros. No puede eliminar ni exportar.",
+      "4":  "Gestión completa de registros, incluida la exportación. No puede gestionar usuarios.",
+      "5":  "Nivel por defecto. Gestión completa de registros más visibilidad limitada de usuarios.",
+      "6":  "Puede gestionar usuarios dentro de su departamento.",
+      "7":  "Puede gestionar usuarios y configurar grupos de seguridad y departamentos.",
+      "8":  "Acceso completo a todos los módulos, más gestión de configuración global.",
+      "9":  "Administrador del sistema. Todos los permisos excepto acciones exclusivas de superadmin.",
+      "10": "Acceso sin restricciones. Exclusivo del rol superadmin. Puede asignar cualquier nivel."
+    },
+    "table": {
+      "columns": {
+        "level": "Nivel",
+        "name": "Nombre",
+        "description": "Descripción",
+        "permissions": "Permisos",
+        "status": "Estado",
+        "actions": "Acciones"
+      }
+    },
+    "form": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "permissions": "Permisos habilitados",
+      "superAdminLocked": "Nivel 10 — Super Admin no es editable",
+      "superadminWarning": "Los permisos del nivel 10 (Super Admin) no se pueden modificar."
+    },
+    "actions": {
+      "edit": "Editar",
+      "activate": "Activar",
+      "deactivate": "Desactivar"
+    },
+    "messages": {
+      "updateSuccess": "Nivel actualizado correctamente",
+      "activateSuccess": "Nivel activado",
+      "deactivateSuccess": "Nivel desactivado"
+    },
+    "permissionsMatrix": {
+      "action": "Permisos",
+      "title": "Matriz de permisos por módulo",
+      "module": "Módulo",
+      "canEdit": "Crear/Editar",
+      "canApprove": "Aprobar"
+    }
+  },
+  "users": {
+    "title": "Usuarios activos",
+    "hierarchyGuardTooltip": "No puedes gestionar usuarios de nivel igual o superior al tuyo",
+    "tabs": {
+      "active": "Activos",
+      "inactive": "Inactivos"
+    },
+    "inactiveTitle": "Usuarios inactivos",
+    "table": {
+      "columns": {
+        "fullName": "Nombre completo",
+        "email": "Email",
+        "phone": "Teléfono",
+        "roles": "Roles",
+        "role": "Rol",
+        "department": "Departamento",
+        "status": "Estado",
+        "actions": "Acciones"
+      }
+    },
+    "filters": {
+      "allRoles": "Todos los roles"
+    },
+    "form": {
+      "titleCreate": "Nuevo usuario",
+      "titleEdit": "Editar usuario",
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "email": "Email",
+      "password": "Contraseña",
+      "passwordHint": "Si se deja en blanco, la contraseña por defecto será el correo electrónico del usuario.",
+      "phone": "Teléfono",
+      "department": "Departamento",
+      "securityLevel": "Nivel de seguridad",
+      "notes": "Notas",
+      "noDepartment": "Sin departamento",
+      "noLevel": "Sin nivel",
+      "baseRole": "Rol base",
+      "noRole": "Selecciona un rol...",
+      "additionalRoles": "Roles adicionales",
+      "additionalRolesHint": "Excepción de superadmin — un usuario puede tener más de un rol además del base",
+      "summary": {
+        "baseRole": "Rol base",
+        "additionalRoles": "Roles adicionales",
+        "flags": "Excepciones",
+        "none": "ninguno"
+      },
+      "flags": {
+        "title": "Permisos transversales",
+        "approveLargeAmounts": "Aprobar montos >$5,000",
+        "manageUsers": "Gestionar usuarios"
+      },
+      "extraPermissions": "Permisos adicionales",
+      "extraPermissionsHint": "Permisos individuales extra, además de los del nivel de seguridad",
+      "permLabels": {
+        "crm.read":       "CRM — Ver",
+        "crm.write":      "CRM — Crear",
+        "crm.edit":       "CRM — Editar",
+        "crm.delete":     "CRM — Eliminar",
+        "reports.read":   "Reportes — Ver",
+        "reports.export": "Reportes — Exportar",
+        "ai.use":         "IA — Usar",
+        "security.users":  "Seguridad — Usuarios",
+        "security.levels": "Seguridad — Niveles",
+        "settings.global": "Configuración global",
+        "superadmin.all":  "Superadmin — Todo"
+      }
+    },
+    "actions": {
+      "create": "Nuevo usuario",
+      "edit": "Editar",
+      "deactivate": "Desactivar",
+      "activate": "Activar",
+      "view": "Ver",
+      "resetMfa": "Resetear MFA",
+      "visibility": "Permisos de navegación",
+      "bulkVisibility": "Visibilidad de módulos (UAT)"
+    },
+    "visibility": {
+      "title": "Permisos de navegación",
+      "subtitle": "Excepciones para esta persona, por encima de la visibilidad de su rol. Un módulo o ítem sin marcar acá hereda lo que ya tiene el rol."
+    },
+    "bulkVisibility": {
+      "title": "Visibilidad de módulos por etapa de UAT",
+      "subtitle": "Oculta o restaura módulos y accesos para TODOS los usuarios no-superadmin de una sola vez — útil para ir liberando módulos por etapa. Superadmin nunca se ve afectado. No cambia ningún permiso real, solo qué aparece en el menú. El cambio se aplica la próxima vez que cada usuario inicie sesión o refresque su sesión.",
+      "modulesGroup": "Módulos",
+      "catalogGroup": "Otros accesos",
+      "catalogInventoryCompras": "Catálogo — Inventario de Compras",
+      "catalogInventoryBodega": "Catálogo — Inventario de Bodega",
+      "configuracion": "Configuración",
+      "helper": "El checkbox marca qué se va a incluir en la próxima acción (Ocultar/Restaurar) — no es el estado actual. El estado real de cada uno se muestra en la etiqueta Oculto/Visible.",
+      "stateHidden": "Oculto",
+      "stateVisible": "Visible",
+      "hide": "Ocultar para todos",
+      "restore": "Restaurar para todos",
+      "hideSuccess": "Ocultado: {{items}}.",
+      "restoreSuccess": "Restaurado: {{items}}.",
+      "noChanges": "Sin cambios — lo seleccionado ya estaba en ese estado.",
+      "selectAtLeastOne": "Elegí al menos un módulo o acceso antes de aplicar."
+    },
+    "messages": {
+      "createSuccess": "Usuario creado correctamente",
+      "updateSuccess": "Usuario actualizado correctamente",
+      "deactivateSuccess": "Usuario desactivado",
+      "activateSuccess": "Usuario activado",
+      "deactivateConfirm": "¿Desactivar este usuario? No podrá iniciar sesión hasta ser reactivado.",
+      "resetMfaConfirm": "¿Resetear la verificación en dos pasos de {{name}}? Quedará sin MFA hasta que vuelva a activarlo desde su perfil."
+    },
+    "pending": {
+      "tabLabel": "Pendientes",
+      "title": "Solicitudes de acceso pendientes",
+      "empty": "No hay solicitudes pendientes",
+      "columns": {
+        "name": "Nombre",
+        "email": "Email",
+        "department": "Área",
+        "requested": "Solicitud",
+        "actions": "Acciones"
+      },
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "rejectConfirm": "¿Rechazar esta solicitud? El usuario será eliminado permanentemente.",
+      "approveTitle": "Aprobar solicitud",
+      "approveSubtitle": "Asigna un rol y nivel de seguridad para activar la cuenta.",
+      "role": "Rol",
+      "selectRole": "Selecciona un rol...",
+      "securityLevel": "Nivel de seguridad",
+      "selectLevel": "Selecciona un nivel...",
+      "confirmApprove": "Aprobar y activar",
+      "approving": "Aprobando...",
+      "messages": {
+        "approved": "Cuenta aprobada correctamente",
+        "rejected": "Solicitud rechazada"
+      }
+    }
+  },
+  "roles": {
+    "title": "Roles",
+    "subtitle": "Catálogo de roles y visibilidad por módulo (ADR-006)",
+    "system": "Sistema",
+    "table": {
+      "columns": {
+        "name": "Rol",
+        "key": "Clave",
+        "defaultLevel": "Nivel por defecto"
+      }
+    },
+    "actions": {
+      "create": "+ Nuevo rol",
+      "visibility": "Visibilidad"
+    },
+    "deleteConfirm": "¿Borrar el rol \"{{name}}\"? Los usuarios que lo tengan asignado quedan sin rol base.",
+    "form": {
+      "titleCreate": "Nuevo rol",
+      "titleEdit": "Editar rol",
+      "key": "Clave",
+      "keyFormat": "Solo minúsculas, números y guion bajo, debe empezar con letra",
+      "keyImmutable": "La clave no se puede editar una vez creado el rol",
+      "name": "Nombre",
+      "defaultLevel": "Nivel de seguridad por defecto",
+      "noDefaultLevel": "Sin nivel por defecto"
+    },
+    "modules": {
+      "ventas_diseno": "Ventas & Diseño",
+      "compras": "Compras",
+      "bodega": "Bodega",
+      "servicios": "Servicios",
+      "admin_contab": "Admin. & Contabilidad",
+      "gerencia": "Gerencia",
+      "operaciones": "Operaciones"
+    },
+    "visibility": {
+      "title": "Visibilidad por módulo",
+      "viewNone": "Ninguno",
+      "viewReadonly": "Solo lectura",
+      "viewFull": "Completo",
+      "viewTeam": "Ve equipo"
+    }
+  },
+  "departments": {
+    "title": "Departamentos",
+    "table": {
+      "empty": "Sin departamentos",
+      "columns": {
+        "name": "Nombre",
+        "status": "Estado",
+        "actions": "Acciones"
+      }
+    },
+    "form": {
+      "titleCreate": "Nuevo departamento",
+      "titleEdit": "Editar departamento",
+      "name": "Nombre"
+    },
+    "actions": {
+      "create": "Nuevo departamento"
+    },
+    "messages": {
+      "createSuccess": "Departamento creado",
+      "updateSuccess": "Departamento actualizado"
+    }
+  },
+  "notificationRules": {
+    "title": "Reglas de notificación",
+    "actions": { "create": "Nueva regla" },
+    "table": {
+      "name": "Nombre",
+      "trigger": "Disparador",
+      "channels": "Canales",
+      "status": "Estado",
+      "empty": "Sin reglas configuradas"
+    },
+    "form": {
+      "name": "Nombre",
+      "namePlaceholder": "Ej. Avisar a Gerencia cuando un proyecto se cierra",
+      "model": "Modelo",
+      "event": "Evento",
+      "field": "Campo",
+      "anyEvent": "Cualquier evento (sin condición de campo)",
+      "operator": "Operador",
+      "value": "Valor de comparación",
+      "recipientType": "Destinatarios",
+      "recipientValue": "Elegir",
+      "channels": "Canales"
+    },
+    "events": {
+      "created": "Se crea",
+      "updated": "Se actualiza"
+    },
+    "recipientTypes": {
+      "user": "Usuarios específicos",
+      "role": "Rol completo",
+      "projectAssignees": "Asignados del proyecto"
+    },
+    "channels": {
+      "in_app": "In-app (campana)",
+      "email": "Email"
+    }
+  }
+}

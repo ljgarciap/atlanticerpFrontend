@@ -1,0 +1,70 @@
+{
+  "title": "Configuración",
+  "subtitle": "Preferencias personales y configuración global del sistema",
+  "saved": "Cambios guardados",
+  "user": {
+    "title": "Preferencias de usuario",
+    "subtitle": "Se aplican solo a tu cuenta",
+    "language": "Idioma",
+    "theme": "Tema",
+    "sessionTimeout": "Tiempo de sesión"
+  },
+  "global": {
+    "title": "Configuración global",
+    "subtitle": "Valores por defecto para usuarios nuevos — solo administradores",
+    "defaultLanguage": "Idioma por defecto",
+    "defaultTheme": "Tema por defecto",
+    "sessionTimeout": "Tiempo de sesión por defecto",
+    "mfaMode": "Verificación en dos pasos",
+    "mfaModeDisabled": "Desactivada",
+    "mfaModeOptional": "Opcional",
+    "mfaModeRequired": "Obligatoria",
+    "shareLinksExpiration": "Expiración de links compartidos",
+    "shareLinksExpirationSuffix": "días",
+    "shareLinksExpirationSave": "Guardar",
+    "shareLinksExpirationError": "Ingresa un valor entre 1 y 365 días.",
+    "sessionInactivityHours": "Expiración de sesión por inactividad",
+    "sessionInactivityHoursSuffix": "horas",
+    "sessionInactivityHoursSave": "Guardar",
+    "sessionInactivityHoursError": "Ingresa un valor entre 1 y 720 horas."
+  },
+  "timeoutOption": "{{min}} minutos",
+  "timeoutOptionHours": "{{min}} minutos ({{hours}}h)",
+  "aiKey": {
+    "title": "API Key de IA",
+    "subtitle": "Credencial de Anthropic Claude — solo superadmin nivel 10",
+    "current": "Clave actual",
+    "sourceDb": "Guardada en base de datos",
+    "sourceEnv": "Usando variable de entorno del servidor",
+    "newKey": "Nueva API Key",
+    "placeholder": "sk-ant-api03-...",
+    "save": "Guardar clave",
+    "saved": "API Key actualizada correctamente",
+    "error": "La clave debe comenzar con sk-ant- y tener al menos 20 caracteres"
+  },
+  "admin": {
+    "title": "Administración del sistema",
+    "subtitle": "Operaciones exclusivas de superadmin",
+    "demoCleanup": {
+      "label": "Limpiar datos demo",
+      "description": "Elimina todos los proyectos [DEMO] y usuarios @illuminations.test. Esta acción no se puede deshacer.",
+      "confirm": "¿Estás seguro? Se eliminarán todos los datos de demostración permanentemente.",
+      "confirmBtn": "Sí, limpiar",
+      "cancelBtn": "Cancelar",
+      "result": "Eliminados: {{projects}} proyectos y {{users}} usuarios demo."
+    },
+    "backup": {
+      "label": "Respaldo de datos",
+      "description": "Descarga un archivo JSON con todos los proyectos, actividades, recordatorios y contactos del CRM.",
+      "download": "Descargar respaldo (JSON)"
+    }
+  },
+  "documents": {
+    "title":    "Límite de documentos",
+    "subtitle": "Tamaño máximo por archivo para la carga de documentos — solo superadmin",
+    "label":    "Máximo por archivo (MB)",
+    "save":     "Guardar",
+    "saved":    "Límite actualizado correctamente.",
+    "error":    "Ingresa un valor entre 1 y 500 MB."
+  }
+}

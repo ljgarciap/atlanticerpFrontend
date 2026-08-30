@@ -1,0 +1,1438 @@
+{
+  "nav": {
+    "home": "Home",
+    "fiscal": "Fiscal Configuration",
+    "empresa": "Company Profile",
+    "arqueoCaja": "Cash Count",
+    "cuentasBancarias": "Bank Accounts",
+    "facturacion": "Invoicing",
+    "notasCredito": "Credit Notes & Returns",
+    "comisionesMenu": "Commissions",
+    "comisionesInternas": "Internal",
+    "comisionesExternas": "External",
+    "cajaChica": "Petty cash",
+    "reportes": "Reports"
+  },
+  "fiscal": {
+    "title": "Fiscal Configuration",
+    "subtitle": "Fiscal data, electronic invoicing and ITBMS rates — critical configuration, exclusive to Mark",
+    "saveChanges": "Save changes",
+    "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
+    "saveError": "Could not save the fiscal configuration",
+    "validation": {
+      "required": "This field is required."
+    },
+    "restricted": {
+      "title": "Restricted access",
+      "body": "This screen is exclusive to Mark."
+    },
+    "datosFiscales": {
+      "title": "Company fiscal data",
+      "fields": {
+        "razonSocial": "Legal name",
+        "nombreComercial": "Trade name",
+        "ruc": "RUC",
+        "dv": "DV",
+        "direccionFiscal": "Fiscal address",
+        "regimenTributario": "Tax regime",
+        "diasCreditoFactura": "Credit term (days)",
+        "pettyCashMaxIntentosRechazo": "Petty cash — max. rejection attempts"
+      },
+      "regimen": {
+        "general": "General regime taxpayer",
+        "pequeno": "Small taxpayer"
+      }
+    },
+    "facturacionElectronica": {
+      "title": "Electronic invoicing",
+      "fields": {
+        "proveedor": "Provider (PAC)",
+        "ambiente": "Environment",
+        "estadoConexion": "Connection status",
+        "ultimaSincronizacion": "Last sync"
+      },
+      "ambiente": {
+        "production": "Production",
+        "testing": "Testing"
+      },
+      "connectionStatus": {
+        "conectado": "Connected",
+        "desconectado": "Disconnected"
+      },
+      "neverSynced": "Never synced",
+      "docs": {
+        "factura": "Operation invoice enabled",
+        "notaCredito": "Credit note enabled"
+      }
+    },
+    "itbms": {
+      "title": "ITBMS rates",
+      "addRate": "+ Add rate",
+      "detailTitle": "Rate detail",
+      "toggleActive": "Toggle rate active",
+      "fields": {
+        "nombre": "Name",
+        "descripcion": "Description",
+        "porcentaje": "Percentage",
+        "estado": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "retencion": {
+      "title": "Provider withholdings",
+      "toggleLabel": "Automatic withholding for professional service providers (3.5%)",
+      "helpNote": "Different from the external architect commission withholding (External Commissions) — applies only to Purchasing provider payments."
+    }
+  },
+  "empresa": {
+    "title": "Company Profile",
+    "subtitle": "Brand identity, locations, general contacts and regional settings — exclusive to Mark",
+    "saveChanges": "Save changes",
+    "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
+    "saveError": "Could not save the company profile",
+    "validation": {
+      "required": "This field is required.",
+      "invalidUrl": "Enter a valid URL."
+    },
+    "restricted": {
+      "title": "Restricted access",
+      "body": "This screen is exclusive to Mark."
+    },
+    "identidad": {
+      "title": "Brand identity",
+      "logo": "Logo",
+      "logoHelp": "PNG or SVG, preferably with a transparent background.",
+      "changeLogo": "Change logo",
+      "fields": {
+        "nombreComercial": "Trade name",
+        "razonSocial": "Legal name",
+        "descripcionCorta": "Short description",
+        "sitioWeb": "Website"
+      },
+      "readOnlyNote": "Edited from Fiscal Configuration.",
+      "redesSociales": {
+        "title": "Social media",
+        "plataforma": "Platform",
+        "url": "URL",
+        "add": "+ Add social",
+        "empty": "No social media added."
+      }
+    },
+    "ubicaciones": {
+      "title": "Locations",
+      "addButton": "+ Add location",
+      "fields": {
+        "nombre": "Name",
+        "tipo": "Type",
+        "direccion": "Address",
+        "estado": "Status"
+      },
+      "tipos": {
+        "bodega": "Warehouse",
+        "showroom": "Showroom",
+        "oficina": "Office",
+        "otra": "Other"
+      },
+      "chips": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "sourceBodegaNote": "Synced from the Warehouse module — read-only here.",
+      "empty": "No locations in this tab."
+    },
+    "contactos": {
+      "title": "General contacts",
+      "addButton": "+ Add contact",
+      "fields": {
+        "area": "Area",
+        "email": "Email",
+        "telefono": "Phone",
+        "estado": "Status"
+      },
+      "chips": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "empty": "No contacts in this tab."
+    },
+    "regional": {
+      "title": "Regional settings",
+      "fields": {
+        "moneda": "Currency",
+        "anioFiscal": "Fiscal year",
+        "zonaHoraria": "Time zone"
+      },
+      "zonaHorariaOptions": {
+        "americaPanama": "America/Panama (GMT-5)"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "cuentasBancarias": {
+    "title": "Bank Accounts",
+    "subtitle": "Company accounts and money movements per account",
+    "addButton": "+ New account",
+    "detail": "Detail",
+    "detailTitle": "Bank account detail",
+    "saveError": "Could not create the bank account",
+    "actionError": "Could not complete the action",
+    "empty": "No deleted accounts.",
+    "deleteAccount": "Delete account",
+    "reactivateAccount": "Reactivate account",
+    "confirmDelete": "The movement history is kept and you can reactivate the account whenever needed.",
+    "confirmDeleteButton": "Yes, delete",
+    "sinCuentaAsignada": "No account assigned",
+    "seleccionarCuenta": "Select account",
+    "selectAccountPlaceholder": "Choose account…",
+    "movimientosEmpty": "No movements to show yet.",
+    "validation": {
+      "required": "This field is required.",
+      "digits4": "Enter exactly 4 digits."
+    },
+    "fields": {
+      "banco": "Bank",
+      "ultimos4": "Last 4 digits",
+      "tipoCuenta": "Account type",
+      "moneda": "Currency",
+      "estado": "Status",
+      "movimientosCount": "Movements in history"
+    },
+    "tipos": {
+      "corriente": "Checking Account",
+      "ahorro": "Savings Account",
+      "tarjeta_credito": "Credit Card"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Deleted"
+    },
+    "tabs": {
+      "all": "All",
+      "deleted": "Deleted"
+    },
+    "movimientos": {
+      "fecha": "Date",
+      "tipo": "Type",
+      "concepto": "Concept",
+      "monto": "Amount",
+      "cuenta": "Account"
+    },
+    "movimientoTipos": {
+      "cobro": "Payment received",
+      "devolucion": "Refund",
+      "comision": "Commission"
+    }
+  },
+  "facturacion": {
+    "title": "Invoicing",
+    "subtitle": "Invoiceable deliveries by project",
+    "crearFactura": "+ Create Invoice",
+    "stats": {
+      "pendientesEntrega": "Pending delivery",
+      "pendientesEntregaSub": "Warehouse hasn't dispatched yet",
+      "pendientesFacturar": "Pending invoice",
+      "pendientesFacturarSub": "ready to invoice",
+      "facturadasMes": "Invoiced this month",
+      "montoFacturadoMes": "Amount invoiced this month"
+    },
+    "panel": {
+      "title": "Invoices and deliveries by project",
+      "subAgrupado": "Grouped by project · click a project to see its deliveries",
+      "subPlano": "Flat view: all deliveries from all projects, ungrouped"
+    },
+    "cartera": {
+      "cobrable": "Collectible",
+      "incobrable": "Uncollectible",
+      "incobrableEmpty": "No invoices marked as uncollectible yet."
+    },
+    "vista": {
+      "agrupado": "Grouped by project",
+      "plano": "Flat view"
+    },
+    "filtros": {
+      "buscarPlaceholder": "Search by client, project, order # or invoice #...",
+      "todosClientes": "All clients",
+      "todosProyectos": "All projects",
+      "todosEstados": "All statuses",
+      "limpiar": "Clear filters"
+    },
+    "columnas": {
+      "entrega": "Delivery / Milestone",
+      "factura": "Invoice #",
+      "guiaEntrega": "Delivery Note",
+      "cotizacion": "Quote #",
+      "monto": "Amount",
+      "fecha": "Date",
+      "accion": "Action"
+    },
+    "estados": {
+      "pendiente-entrega": "Pending delivery",
+      "pendiente-facturar": "Pending invoice",
+      "facturada": "Invoiced",
+      "anulada": "Voided",
+      "pendienteAprobacion": "Pend. approval",
+      "incobrable": "Uncollectible"
+    },
+    "generarFactura": "Generate invoice",
+    "resultCount": "Showing {{visible}} of {{total}} deliveries",
+    "empty": "No deliveries match the applied filters.",
+    "clienteClickHint": "View Account Statement",
+    "preview": {
+      "title": "Preview",
+      "subtitle": "Review the invoice before saving — the invoice number is assigned on confirm",
+      "total": "Total to invoice",
+      "totalFactura": "Invoice total",
+      "totalAPagar": "Total due",
+      "subtotal": "Subtotal",
+      "descuentos": "Discounts",
+      "itbms": "ITBMS",
+      "saldoAplicado": "Credit balance applied",
+      "aplicarSaldo": "Apply available credit balance ({{monto}})",
+      "avisoSaldoSoloPrimera": "The credit balance will only be applied to the first invoice of this batch.",
+      "editar": "Edit selection",
+      "guardar": "Save invoice(s)",
+      "cancelar": "Cancel",
+      "error": "Could not generate the preview",
+      "faltan": "Missing data to generate the invoice: {{campos}}",
+      "items": {
+        "descripcion": "Description",
+        "cantidad": "Qty.",
+        "precioUnitario": "Unit price",
+        "subtotal": "Subtotal"
+      }
+    },
+    "crear": {
+      "title": "Create invoice",
+      "subtitle": "Pick a client and project — the system shows deliveries pending invoice",
+      "clienteLabel": "Client",
+      "clienteSelect": "Select a client",
+      "sinClientesPendientes": "No clients have deliveries pending invoice.",
+      "proyectoLabel": "Project",
+      "proyectoSelectFirst": "Select a client first",
+      "proyectoSelect": "Select a project",
+      "sinPendientes": "This client has no deliveries pending invoice",
+      "entregasLabel": "Deliveries pending invoice:",
+      "verVistaPrevia": "See preview",
+      "seleccionaEntrega": "Select at least one delivery to invoice.",
+      "cancelar": "Cancel"
+    },
+    "exportar": {
+      "label": "Export report",
+      "pdf": "Export as PDF",
+      "excel": "Export as Excel"
+    },
+    "confirmError": "Could not save the invoice",
+    "detalle": {
+      "title": "Delivery detail",
+      "pasoCotizacion": "Quote",
+      "pasoFactura": "Invoice",
+      "pasoGuiaEntrega": "Delivery Note",
+      "pendiente": "Pending",
+      "anuladaAviso": "This invoice was voided — it's no longer valid.",
+      "datosPago": "Payment details",
+      "cuentaPago": "Account number",
+      "responsable": "Responsible",
+      "verPdf": "View / Print PDF",
+      "marcarIncobrable": "Mark as uncollectible",
+      "motivoLabel": "Reason",
+      "motivoPlaceholder": "Explain why this is proposed as uncollectible...",
+      "motivoRequerido": "A reason is required.",
+      "enviarPropuesta": "Send proposal",
+      "pendienteAprobacionAviso": "Uncollectible proposal pending Mark's approval.",
+      "aprobar": "Approve",
+      "rechazar": "Reject",
+      "registrarCobro": "Record payment",
+      "cerrar": "Close"
+    },
+    "aging": {
+      "title": "Accounts receivable aging",
+      "subtitle": "Collectible accounts grouped by age from the due date",
+      "rango": "{{desde}}–{{hasta}} days",
+      "masDe": "+{{desde}} days",
+      "cantidad": "{{cantidad}} invoices"
+    }
+  },
+  "cobros": {
+    "title": "Payments",
+    "registrarButton": "+ Register payment",
+    "stats": {
+      "totalCobrado": "Total collected",
+      "numeroCobros": "N° of payments",
+      "cobroPromedio": "Average payment",
+      "metodoPrincipal": "Main method",
+      "metodoPrincipalValue": "{{metodo}} — {{porcentaje}}% of this month's payments",
+      "sinDatos": "No payments this month"
+    },
+    "metodos": {
+      "transferencia": "Transfer",
+      "cheque": "Check",
+      "efectivo": "Cash",
+      "tarjeta": "Card",
+      "deposito": "Bank deposit",
+      "yappy": "Yappy",
+      "link_pago": "Payment link",
+      "retencion_impuestos": "Tax withholding",
+      "ajuste_cuenta": "Account adjustment"
+    },
+    "registrarModal": {
+      "title": "Register new payment",
+      "clienteLabel": "Client",
+      "clientePlaceholder": "Search client...",
+      "facturasLabel": "Open invoices",
+      "cargandoFacturas": "Loading invoices...",
+      "sinFacturasPendientes": "This client has no invoices pending payment.",
+      "totalFacturas": "Total selected invoices",
+      "aplicarSaldoFavor": "Apply available credit balance ({{monto}}) to this payment",
+      "saldoFavorAplicadoLine": "Credit balance applied",
+      "montoRecibidoLabel": "Amount received",
+      "metodoPagoLabel": "Payment method",
+      "cuentaBancariaLabel": "Destination bank account",
+      "cuentaBancariaPlaceholder": "Select account...",
+      "numeroDocumentoRetencionLabel": "Withholding document N° (DGI)",
+      "comentarioAjusteLabel": "Adjustment comment",
+      "comentarioAjusteRequired": "The comment is required.",
+      "referenciaLabel": "Reference / Transaction N°",
+      "referenciaPlaceholder": "E.g. TRF-88213",
+      "comprobanteLabel": "Payment proof (optional)",
+      "comprobanteDragText": "Drag the proof here or click to select",
+      "comprobanteHint": "JPG, PNG or PDF · max. 10MB",
+      "comprobanteRemove": "Remove",
+      "comprobanteInvalidType": "Only JPG, PNG or PDF files are accepted.",
+      "comprobanteTooLarge": "The file exceeds the 10MB limit.",
+      "cancel": "Cancel",
+      "confirm": "Register payment",
+      "error": "Could not register the payment."
+    },
+    "historial": {
+      "title": "Payment history",
+      "subtitle": "All payments received, applied to their corresponding invoices · click a payment to see the detail",
+      "searchPlaceholder": "Search by client, invoice, receipt or reference...",
+      "filtroCliente": "All clients",
+      "filtroMetodo": "All methods",
+      "filtroEstado": "All statuses",
+      "desde": "From",
+      "hasta": "To",
+      "limpiarFiltros": "Clear filters",
+      "resultCount": "Showing {{mostrados}} of {{total}} payments",
+      "vacio": "No payments found with these filters.",
+      "columnas": {
+        "fecha": "Date",
+        "cliente": "Client",
+        "facturas": "Applied invoice(s)",
+        "monto": "Amount",
+        "metodo": "Method",
+        "estado": "Status",
+        "registradoPor": "Registered by",
+        "comprobante": "Proof",
+        "recibo": "Receipt"
+      },
+      "conComprobante": "Attached",
+      "sinComprobante": "Not attached",
+      "estados": {
+        "confirmado": "Confirmed",
+        "esperando_confirmacion": "Awaiting confirmation"
+      }
+    },
+    "detalle": {
+      "title": "Payment detail",
+      "montoTotal": "Total amount",
+      "estado": "Status",
+      "registradoPor": "Registered by",
+      "referencia": "Reference / Transaction N°",
+      "numeroRecibo": "Receipt N°",
+      "fechaRegistro": "Registration date",
+      "cuentaBancaria": "Destination bank account",
+      "saldoFavorAplicado": "Credit balance applied",
+      "comentarioAjuste": "Adjustment comment",
+      "confirmacion": "Confirmation",
+      "confirmadoPorLine": "{{numero}} — confirmed by {{nombre}} on {{fecha}}",
+      "facturasAplicadas": "Applied invoice(s)",
+      "cerrar": "Close",
+      "error": "Could not load the payment detail.",
+      "verComprobante": "View payment proof",
+      "verRecibo": "View receipt",
+      "marcarConfirmado": "Mark as confirmed",
+      "confirmarError": "Could not confirm the payment."
+    },
+    "comprobanteModal": {
+      "title": "Payment proof",
+      "sinComprobante": "This payment has no proof of payment attached.",
+      "adjuntadoPor": "Attached by {{nombre}} · {{fecha}}",
+      "cerrar": "Close",
+      "error": "Could not load the proof of payment."
+    }
+  },
+  "estadoCuenta": {
+    "title": "Account statement — Accounts receivable",
+    "subtitle": "Administration & Accounting · opens in an independent tab for review or printing",
+    "close": "Close window",
+    "busqueda": {
+      "title": "Search account statement",
+      "subclienteLabel": "Sub-client",
+      "subclientePlaceholder": "Select a sub-client",
+      "proyectoLabel": "Project",
+      "proyectoPlaceholder": "All projects",
+      "desde": "From",
+      "hasta": "To",
+      "vistaLabel": "View",
+      "vistaAgrupado": "Grouped by project",
+      "vistaPlana": "Flat view",
+      "buscar": "Search",
+      "limpiar": "Clear",
+      "clienteRequerido": "Select a client to generate the account statement."
+    },
+    "vacio": {
+      "mensaje": "Select a client (and optionally a date range) to generate the account statement."
+    },
+    "resultado": {
+      "metaLine": "{{tarifa}} · {{regimen}} · Terms {{terminos}}",
+      "descargarImprimir": "Download / Print",
+      "descargarPdf": "Download as PDF",
+      "descargarExcel": "Download as Excel",
+      "error": "Could not generate the account statement.",
+      "saldoActual": "Current balance",
+      "saldoAFavor": "Client's credit balance",
+      "pagoA": "Pay to",
+      "cuentaNumero": "Account number",
+      "responsable": "Responsible",
+      "multiplesProyectos": "This client has {{count}} projects.",
+      "sinProyecto": "No project",
+      "subtotalProyecto": "Project subtotal",
+      "tipoFactura": "Invoice",
+      "tipoCobro": "Payment",
+      "guiaSi": "Yes",
+      "columnas": {
+        "fecha": "Date",
+        "proyecto": "Project / Order",
+        "numeroFactura": "Invoice N°",
+        "concepto": "Concept",
+        "cotizacion": "Quote N°",
+        "guiaEntrega": "Delivery Note",
+        "debito": "Debit",
+        "credito": "Credit",
+        "saldo": "Balance"
+      }
+    },
+    "regimen": {
+      "con_itbms": "With ITBMS",
+      "sin_itbms": "Without ITBMS"
+    }
+  },
+  "notasCredito": {
+    "title": "Credit notes & returns",
+    "subtitle": "Adjustments on already-issued client invoices · USD",
+    "nuevaNotaButton": "+ New note",
+    "stats": {
+      "totalAcreditado": "Total credited",
+      "numeroNotas": "N° of notes",
+      "pendientesAprobacion": "Pending approval",
+      "devolucionesPorGenerar": "Returns to generate",
+      "notaPromedio": "Average note"
+    },
+    "tipos": {
+      "descuento_comercial": "Commercial discount / courtesy",
+      "anulacion_completa": "Full invoice voiding",
+      "devolucion_mercancia": "Merchandise return"
+    },
+    "subtiposAnulacion": {
+      "cancelado": "Order cancelled — the work will not be carried out",
+      "correccion": "Data correction — the work was delivered, needs re-invoicing"
+    },
+    "motivosCorreccion": {
+      "itbms": "Incorrect ITBMS treatment",
+      "fecha": "Incorrect invoice date",
+      "ambos": "Both"
+    },
+    "formulario": {
+      "title": "Register new note",
+      "subtitle": "Credit note or return on an already-issued invoice",
+      "clienteLabel": "Client",
+      "clientePlaceholder": "Search client...",
+      "tipoLabel": "Note type",
+      "tipoDevolucionReadonly": "Merchandise return (confirmed by Warehouse)",
+      "subtipoLabel": "Why is it being voided?",
+      "mercanciaRegresaLabel": "Does the already-delivered merchandise need to return to Warehouse?",
+      "mercanciaRegresaSi": "Yes — it left Warehouse and must re-enter inventory",
+      "mercanciaRegresaNo": "No — it never left Warehouse, or doesn't apply",
+      "correccionAviso": "The quote, order, and Warehouse delivery note are not touched — the work was already delivered correctly, only the paperwork is being corrected.",
+      "motivoCorreccionLabel": "What was wrong?",
+      "motivoCorreccionPlaceholder": "Select a reason...",
+      "tratamientoActualLabel": "Current ITBMS treatment (what the invoice has today)",
+      "tratamientoCorrectoLabel": "Correct treatment",
+      "tratamientoCorrectoPlaceholder": "Select...",
+      "nuevaFechaLabel": "New invoice date",
+      "nuevaFechaHint": "An invoice's date is always the day it's generated — it can't be picked, same as when invoicing from Invoicing.",
+      "correccionRevisarButton": "Review and continue",
+      "referenciaLabel": "Reference (Delivery Note / Quote)",
+      "productosDevueltosLabel": "Returned products",
+      "personaDevuelveLabel": "Person returning",
+      "proyectoLabel": "Project",
+      "conformidadLabel": "Signed conformity document",
+      "devolucionAviso": "Warehouse already confirmed the physical re-entry of this product — only the amount and note generation are left.",
+      "precargaDatoNoDisponible": "Not available — Warehouse doesn't record this data",
+      "facturaOrigenLabel": "Source invoice",
+      "facturaOrigenPlaceholder": "Select the invoice...",
+      "facturaSaldoPendiente": "outstanding balance",
+      "montoLabel": "Amount",
+      "subtotalLabel": "Subtotal",
+      "itbmsLabel": "ITBMS",
+      "motivoLabel": "Reason",
+      "fechaLabel": "Date",
+      "excedenteAviso": "The amount exceeds the invoice's outstanding balance — the surplus",
+      "excedenteSinMovimiento": "The invoice was never collected — the debt is cancelled, no money moves.",
+      "resultadoDevuelto": "Refund the customer",
+      "resultadoSaldoFavor": "Leave as customer credit balance",
+      "cuentaBancariaSalidaLabel": "Outgoing bank account",
+      "cuentaBancariaSalidaPlaceholder": "Select the account...",
+      "nuevoSaldoPendiente": "Applied automatically — new outstanding balance",
+      "umbralAviso": "This note exceeds the approval threshold — it will stay pending Mark's approval before it's applied.",
+      "avisoNotificacionCliente": "On confirmation, the customer will automatically be notified with the Credit Note and their updated account statement. The original invoice is not resent or changed.",
+      "avisoReduccionComision": "This note will reduce the salesperson's already-calculated commission on the affected invoice.",
+      "comprobanteLabel": "Supporting receipt",
+      "comprobantePlaceholder": "Attach image or PDF...",
+      "comprobanteObligatorioHint": "Required in this case (full void or amount above the threshold).",
+      "comprobanteInvalidType": "The receipt must be an image (JPG/PNG) or a PDF.",
+      "comprobanteTooLarge": "The receipt can't exceed 10MB.",
+      "error": "Couldn't register the note. Try again.",
+      "cancel": "Cancel",
+      "confirm": "Register note"
+    },
+    "historial": {
+      "title": "Notes history",
+      "subtitle": "Registered notes and Warehouse-confirmed returns pending generation · click a row to see the detail",
+      "searchPlaceholder": "Search by client, invoice, or note number...",
+      "filtroCliente": "All clients",
+      "filtroTipo": "All types",
+      "filtroEstado": "All statuses",
+      "limpiarFiltros": "Clear filters",
+      "resultCount": "{{total}} notes",
+      "vacio": "No notes found with these filters.",
+      "filaBodegaLabel": "Confirmed by Warehouse",
+      "precargaError": "Couldn't load this return's detail. Try again.",
+      "columnas": {
+        "fecha": "Date",
+        "cliente": "Client",
+        "tipo": "Type",
+        "factura": "Source invoice",
+        "monto": "Amount",
+        "estado": "Status",
+        "registradoPor": "Registered by"
+      },
+      "estados": {
+        "aplicada": "Applied",
+        "pendiente_aprobacion": "Pending approval",
+        "pendiente_generar_nota": "Pending note generation",
+        "rechazada": "Rejected"
+      }
+    },
+    "detalle": {
+      "title": "Note detail",
+      "monto": "Amount",
+      "subtotal": "Subtotal",
+      "itbms": "ITBMS",
+      "estado": "Status",
+      "facturaOrigen": "Source invoice",
+      "registradoPor": "Registered by",
+      "cuentaBancariaSalida": "Outgoing bank account",
+      "aprobadoRechazadoPor": "Approved/rejected by",
+      "motivo": "Reason",
+      "motivoRechazo": "Rejection reason",
+      "trazabilidadBodegaTitle": "Warehouse traceability",
+      "cerrar": "Close",
+      "error": "Couldn't load the note detail.",
+      "aprobar": "Approve",
+      "rechazar": "Reject",
+      "confirmarRechazo": "Confirm rejection",
+      "motivoRechazoLabel": "Rejection reason",
+      "motivoRechazoPlaceholder": "Explain why this note is being rejected...",
+      "motivoRechazoRequerido": "The rejection reason is required.",
+      "decisionError": "Couldn't process the decision. Try again.",
+      "verComprobante": "View receipt",
+      "verDocumento": "View document"
+    },
+    "comprobanteModal": {
+      "title": "Note receipt",
+      "sinComprobante": "This note has no attached receipt.",
+      "error": "Couldn't load the receipt.",
+      "adjuntadoPor": "Attached by {{nombre}} — {{fecha}}",
+      "cerrar": "Close"
+    },
+    "documentoModal": {
+      "title": "Credit Note",
+      "destinoMonto": "Amount destination",
+      "resultado": {
+        "aplicadoSaldo": "Applied to pending balance",
+        "devuelto": "Returned to client",
+        "saldoFavor": "Left as credit balance"
+      },
+      "verFacturaRelacionada": "View invoice {{numero}}",
+      "descargarPdf": "Download PDF"
+    },
+    "correccion": {
+      "title": "Preview",
+      "subtitle": "Review all the data and the new invoice before confirming — nothing is saved yet",
+      "previewError": "Couldn't load the preview. Go back and try again.",
+      "tarjetas": {
+        "facturaOrigen": "Invoice to void",
+        "proyecto": "Project",
+        "cotizacion": "Quote",
+        "guiaEntrega": "Delivery note",
+        "notaAGenerar": "Credit note to generate",
+        "correccionAplicada": "Correction applied",
+        "motivo": "Reason"
+      },
+      "verFacturaButton": "View invoice",
+      "ocultarFacturaButton": "Hide invoice",
+      "pendienteAprobacionAviso": "This correction exceeds Mark's approval threshold — NO fiscal document is generated yet. The original invoice stays active, unchanged, until Mark approves it.",
+      "volverButton": "Go back and edit",
+      "confirmarButton": "Confirm and generate new invoice",
+      "error": "Couldn't register the correction. Try again."
+    }
+  },
+  "comisionesInternas": {
+    "title": "Internal Commissions",
+    "subtitle": "Tiered commission per salesperson, calculated on total orders closed in the month",
+    "verTramos": "Tiered commission table",
+    "exportar": {
+      "label": "Export report",
+      "pdf": "Export as PDF",
+      "excel": "Export as Excel"
+    },
+    "stats": {
+      "totalPedidos": "Total orders this month",
+      "totalPedidosSub": "{{count}} salesperson(s) · {{mes}}",
+      "yaPagada": "Already paid",
+      "yaPagadaSub": "settled in payroll cycles",
+      "porPagar": "Due (client already paid)",
+      "porPagarSub": "added at month close",
+      "pendienteCobro": "Pending collection",
+      "pendienteCobroSub": "estimated — client hasn't paid yet"
+    },
+    "banner": "Will be paid automatically at month close: {{count}} commission(s) in \"Due\" status, for {{monto}}.",
+    "filtros": {
+      "mesAnterior": "Previous month",
+      "mesSiguiente": "Next month",
+      "todosVendedores": "All salespeople",
+      "volverMesActual": "Back to current month"
+    },
+    "mesEnCursoAviso": "This month is still open — the commission % is provisional and may move up a tier before month close.",
+    "resultCount": "Showing {{count}} salesperson(s)",
+    "columnas": {
+      "vendedor": "Salesperson",
+      "totalPedidos": "Total orders",
+      "porcentaje": "% commission",
+      "pagada": "Paid",
+      "porPagar": "Due",
+      "pendienteCobro": "Pending collection"
+    },
+    "provisional": "provisional",
+    "fijo": "fixed",
+    "arrastrado": "carried over from a closed month, still uncollected",
+    "sinPedidos": "No orders registered yet.",
+    "vacio": "No salespeople for this filter.",
+    "footnote": "The commission % is fixed when the month closes based on the salesperson's total orders — it never changes afterward, even if the client's payment arrives in a later month. Everything updates automatically based on what's registered in Collections.",
+    "detalle": {
+      "cliente": "Client",
+      "pedido": "Order #",
+      "fechaPedido": "Order date",
+      "factura": "Invoice",
+      "fechaFactura": "Invoice date",
+      "fechaCobro": "Payment date",
+      "totalPedido": "Order total",
+      "totalFacturado": "Invoiced total",
+      "totalCobrado": "Collected",
+      "notaCredito": "Credit note",
+      "comision": "Commission amt.",
+      "estado": "Status",
+      "abonoParcial": "partial payment",
+      "estimado": "estimated",
+      "sinDato": "—",
+      "compartidoCon": "Shared with {{nombres}}",
+      "totalProyecto": "total project"
+    },
+    "estados": {
+      "pendiente_cobro": "Pending collection",
+      "por_pagar": "Due",
+      "pagado": "Paid"
+    },
+    "verEstadoCuenta": "View account statement",
+    "estadoCuenta": {
+      "title": "Commission account statement",
+      "liquidado": "settled",
+      "enCurso": "in progress",
+      "pedidosNuevos": "New orders for {{mes}}",
+      "porcentajeAplicado": "% applied to {{mes}}",
+      "notaMesCerrado": "This account statement shows only what was actually paid this month. What's still pending collection is shown in the current month's account statement.",
+      "descuentoNc": "Total discount from credit notes",
+      "totalPagadoMes": "Total paid this month",
+      "verImprimir": "View / Print PDF"
+    },
+    "tramos": {
+      "title": "Tiered commission table",
+      "subtitle": "Applies to the salesperson's total orders for the month — not per individual project",
+      "columnas": {
+        "rango": "Total orders in the month",
+        "porcentaje": "% commission"
+      },
+      "menosDe": "Less than {{monto}}",
+      "masDe": "More than {{monto}}",
+      "rango": "{{desde}} – {{hasta}}",
+      "vacio": "No tiers configured yet.",
+      "agregar": "Add tier",
+      "confirmarEliminar": "Confirm deleting this tier? It affects the commission % for all active salespeople.",
+      "form": {
+        "montoMinimo": "Minimum amount",
+        "montoMaximo": "Maximum amount",
+        "sinTope": "No cap (last tier)",
+        "porcentaje": "% commission"
+      }
+    }
+  },
+  "comisionesExternas": {
+    "title": "External Commissions",
+    "subtitle": "10% commission on architect-referred projects, fed automatically from Sales & Design",
+    "stats": {
+      "comisionGenerada": "Commission generated",
+      "comisionGeneradaSub": "clients who already paid",
+      "pagadaTotal": "Paid (total)",
+      "pagadaTotalSub": "paid historically",
+      "pagadoEsteMes": "Paid this month",
+      "pagadoEsteMesSub": "real cash outflow",
+      "pendienteFactura": "Pending architect invoice",
+      "pendienteFacturaSub": "client already paid, awaiting invoice",
+      "aunNoGenerada": "Not yet generated",
+      "aunNoGeneradaSub": "referred clients who haven't paid"
+    },
+    "filtros": {
+      "buscarPlaceholder": "Search architect, client or project",
+      "todosMeses": "All months",
+      "todosArquitectos": "All architects",
+      "todosEstados": "All statuses",
+      "limpiar": "Clear filters"
+    },
+    "resultCount": "Showing {{count}} architect(s)",
+    "columnas": {
+      "arquitecto": "Architect",
+      "empresa": "Company",
+      "generada": "Generated",
+      "pagada": "Paid",
+      "pendiente": "Pending"
+    },
+    "editarDatosFiscales": "Fiscal data",
+    "datosFiscalesFaltantes": "Complete fiscal data",
+    "proyectosReferidos": "{{count}} referred project(s)",
+    "sinRegimen": "No regime",
+    "sinProyectos": "No projects registered yet.",
+    "vacio": "No architects for this filter.",
+    "footnote": "Each architect and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending architect invoice\" — the architect's receipt must be uploaded before it can be marked paid.",
+    "detalle": {
+      "cliente": "Client",
+      "pedido": "Order #",
+      "fechaPedido": "Order date",
+      "montoProyecto": "Project amount",
+      "comision": "Commission",
+      "impuesto": "Tax",
+      "total": "Total",
+      "estado": "Status",
+      "cuentaCobro": "Invoice / receipt",
+      "subir": "Upload",
+      "reemplazar": "Replace",
+      "sinDato": "—",
+      "verDetalle": "View detail"
+    },
+    "detalleModal": {
+      "cobroCliente": "Client payment",
+      "ruc": "Tax ID",
+      "completar": "Complete",
+      "porcentajeComision": "Commission %",
+      "editarPorcentaje": "Edit %",
+      "proponer": "Propose",
+      "motivoPlaceholder": "Reason for the change",
+      "motivoRechazoPlaceholder": "Reason for rejection",
+      "propuestaPendiente": "{{porcentaje}}% proposal pending Mark's approval — {{motivo}}",
+      "aprobar": "Approve",
+      "rechazar": "Reject",
+      "faltanDatosFiscales": "The architect's fiscal data is missing to calculate tax and total.",
+      "cuentaPago": "Payment account",
+      "comprobanteRetencion": "Withholding receipt",
+      "recordar": "Remind",
+      "marcarPagado": "Mark as paid",
+      "confirmarPago": "Confirm marking this commission as paid for {{monto}}?",
+      "bloqueoPorcentajePendiente": "There's a % change pending Mark's approval — resolve it first.",
+      "bloqueoDatosFiscales": "The architect's fiscal data is missing.",
+      "bloqueoCuentaCobro": "The invoice / receipt hasn't been uploaded yet.",
+      "bloqueoComprobanteRetencion": "The withholding receipt hasn't been uploaded yet."
+    },
+    "estados": {
+      "aun_no_generada": "Not yet generated",
+      "pendiente_factura_arquitecto": "Pending invoice",
+      "pagada": "Paid"
+    },
+    "regimenes": {
+      "exento": "Exempt",
+      "con_itbms": "With ITBMS (7%)",
+      "retencion_50": "50% withholding (3.5%)"
+    },
+    "datosFiscales": {
+      "title": "Complete fiscal data",
+      "subtitle": "Applies to all of this architect's projects, present and future.",
+      "empresaLabel": "Company / studio",
+      "rucLabel": "Tax ID (RUC)",
+      "regimenLabel": "Tax regime",
+      "regimenPlaceholder": "Select regime",
+      "error": "Could not save. Check the data and try again.",
+      "cancel": "Cancel",
+      "save": "Save"
+    }
+  },
+  "arqueoCaja": {
+    "title": "Cash Count",
+    "subtitle": "Real cash movements and liquidity projection",
+    "exportButton": "Export report",
+    "exportPdf": "Export as PDF",
+    "exportExcel": "Export as Excel",
+    "exportError": "Could not export the report.",
+    "cards": {
+      "saldoHoy": "Available balance today",
+      "saldoHoyBreakdown": "Banks {{bancos}} + Petty cash {{cajaMenuda}}",
+      "entradasProyectadas": "Projected inflows",
+      "salidasProyectadas": "Projected outflows",
+      "saldoProyectado": "Projected balance",
+      "hoy": "today",
+      "proximosDias": "next {{dias}} days",
+      "aDias": "at {{dias}} days",
+      "aHoy": "as of today"
+    },
+    "toggle": {
+      "proyectado": "Projected",
+      "real": "Real (history)"
+    },
+    "chips": {
+      "hoy": "Today",
+      "dias30": "30 days",
+      "dias90": "90 days"
+    },
+    "proyectado": {
+      "panelSubtitle": "Inflows from Invoicing and outflows from Commissions and pending Credit Notes, by expected date",
+      "entradasTitle": "Expected inflows (Invoicing)",
+      "salidasTitle": "Expected outflows (Commissions + Credit Notes)",
+      "netoLabel": "Projected net flow",
+      "sinEntradas": "No expected inflows in this window",
+      "sinSalidas": "No expected outflows in this window",
+      "vencidoHace": "Overdue {{dias}}d",
+      "vencePronto": "In {{dias}}d",
+      "tipos": {
+        "comision_interna": "Internal commission",
+        "comision_externa": "External commission",
+        "nota_credito": "Credit note"
+      },
+      "footnote": "* Projected inflows and outflows are calculated automatically from open Invoicing invoices and pending Commissions/Credit Notes, by their expected date — nothing is entered by hand on this screen."
+    },
+    "real": {
+      "panelSubtitle": "Real cash movements, already occurred, with running balance",
+      "columnas": {
+        "fecha": "Date",
+        "concepto": "Description",
+        "origen": "Origin",
+        "entrada": "In",
+        "salida": "Out",
+        "saldoAcumulado": "Running balance"
+      },
+      "origenes": {
+        "cobro": "Payments",
+        "devolucion": "Credit notes",
+        "comision": "Commissions"
+      },
+      "sinMovimientos": "No movements in this window."
+    },
+    "arqueoDelDia": {
+      "title": "Daily cash count",
+      "columnas": {
+        "concepto": "Description",
+        "monto": "Amount",
+        "observaciones": "Notes"
+      },
+      "observacionPlaceholder": "Note...",
+      "sinMovimientos": "No movements recorded today.",
+      "totalCobrado": "Total collected today",
+      "totalNotasCredito": "Credit notes and cash refunds",
+      "totalNeto": "Net total for the day",
+      "observacionGeneralTitle": "General note for the day",
+      "observacionGeneralPlaceholder": "E.g. Saturday, slow due to holiday...",
+      "conciliacionNote": "Bank reconciliation is handled in Bank Accounts, not here.",
+      "descargarResumen": "Download summary",
+      "atrasadoAviso": "The {{fecha}} cash count was never closed — close it before you can work on today's ({{fechaHoy}}).",
+      "cerradoAviso": "This cash count is already {{estado}} — its notes and movements can no longer be edited.",
+      "cerrar": {
+        "boton": "Close daily cash count",
+        "modalTitle": "Close daily cash count",
+        "numero": "Count N°",
+        "fecha": "Date",
+        "avisoRetenciones": "{{count}} withholding(s) still missing the client's certificate — you can still close, the certificate can be uploaded later.",
+        "confirmBody": "Once confirmed, the cash count moves to the history as \"Pending Management approval\" and can no longer be edited.",
+        "confirmar": "Confirm closing",
+        "error": "Could not close the cash count."
+      }
+    },
+    "estados": {
+      "abierto": "open",
+      "pendiente_aprobacion": "pending Management approval",
+      "aprobado": "approved by Management"
+    },
+    "retenciones": {
+      "title": "Adjustments / Withholding",
+      "subtitle": "The withholding already counts as a full payment of the invoice — but the client must provide the withholding certificate to support it fiscally.",
+      "columnas": {
+        "cliente": "Client",
+        "motivo": "Reason",
+        "monto": "Amount",
+        "constancia": "Certificate"
+      },
+      "pendiente": "Pending",
+      "subir": "Upload certificate",
+      "reemplazar": "Replace"
+    },
+    "historial": {
+      "title": "History of closed cash counts",
+      "sinArqueos": "No closed cash counts yet.",
+      "pendientesAviso": "{{count}} cash count(s) pending Management approval",
+      "columnas": {
+        "numero": "No.",
+        "fecha": "Date",
+        "totalNeto": "Net total",
+        "aprobacion": "Management approval",
+        "realizadoPor": "Done by"
+      },
+      "pendiente": "Pending",
+      "aprobadoPor": "Approved by {{nombre}}",
+      "ver": "View",
+      "anterior": "Previous",
+      "siguiente": "Next",
+      "detalleTitle": "Cash count No. {{numero}}",
+      "detalleError": "Could not load this cash count's detail.",
+      "cerradoPor": "Closed by {{nombre}}",
+      "aprobar": "Approve",
+      "aprobarError": "Could not approve the cash count."
+    },
+    "restricted": {
+      "yaneth": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Felix, Mark and Management.",
+      "dailyCount": "The Daily cash count is available only to Felix and Yaneth."
+    }
+  },
+  "cajaChica": {
+    "title": "Petty cash",
+    "subtitle": "Minor expense log for reimbursement, with Management approval",
+    "nuevoGasto": "New expense",
+    "generarReporte": "Generate report",
+    "tabs": {
+      "pendientes": "Pending",
+      "pendientesSub": "{{count}} unreported expense(s)",
+      "reportes": "Reports",
+      "reportesSub": "{{count}} generated",
+      "reportesSubSinAprobar": "{{count}} generated · {{sinAprobar}} unapproved",
+      "rechazados": "Rejected",
+      "rechazadosSub": "{{count}} line(s)"
+    },
+    "estados": {
+      "pendiente": "Pending",
+      "rechazado_temporal": "Rejected (1/2)",
+      "reabierto": "Reopened",
+      "rechazado_permanente": "Permanently rejected"
+    },
+    "estadosReporte": {
+      "pendiente_aprobacion": "Pending approval",
+      "finalizado": "Finalized",
+      "rechazado": "Rejected"
+    },
+    "formasPago": {
+      "transferencia": "Transfer",
+      "efectivo": "Cash",
+      "cheque": "Check",
+      "yappy": "Yappy"
+    },
+    "pendientesPanel": {
+      "subtitle": "Expenses already registered, grouped by requester — ready to be included in the next report",
+      "vacio": "No expenses pending a report.",
+      "columnas": {
+        "fecha": "Date",
+        "proveedor": "Provider",
+        "descripcion": "Description",
+        "montoBruto": "Gross amount",
+        "itbms": "ITBMS",
+        "total": "Total",
+        "estado": "Status",
+        "soporte": "Receipt"
+      },
+      "subtotal": "Subtotal — {{solicitante}}",
+      "totalGeneral": "Grand total",
+      "verSoportes": "View ({{count}})",
+      "footnote": "The Gross Amount and ITBMS are entered exactly as they appear on the receipt or invoice — they are not calculated, they are third-party amounts. The Total is calculated automatically (Gross + ITBMS)."
+    },
+    "nuevoGastoModal": {
+      "title": "Register new expense(s)",
+      "subtitle": "You can add several lines from different requesters in a single registration",
+      "agregarLinea": "+ Add another line",
+      "quitarLinea": "Remove",
+      "lineaTitle": "Line {{numero}}",
+      "fecha": "Date",
+      "solicitante": "Requester",
+      "solicitantePlaceholder": "Select...",
+      "proveedor": "Provider",
+      "descripcion": "Description",
+      "montoBruto": "Gross amount",
+      "itbms": "ITBMS",
+      "itbmsHint": "Enter 0 if not applicable",
+      "foto": "Receipt photo",
+      "fotoRequerida": "This line is missing the receipt photo.",
+      "fotoInvalidType": "The file must be an image or a PDF.",
+      "fotoTooLarge": "The file cannot exceed 10MB.",
+      "camposRequeridos": "Complete all fields for this line.",
+      "cancel": "Cancel",
+      "confirm": "Save expense(s)",
+      "error": "Could not save the expense(s)."
+    },
+    "generarReporteModal": {
+      "step1Title": "Select expenses for the report",
+      "step1Subtitle": "Everything is checked by default — uncheck anything you want to leave for the next cutoff",
+      "step2Title": "Reimbursement payment method",
+      "step2Subtitle": "{{count}} expense(s) selected · Total {{total}}",
+      "formaPagoLabel": "Payment method",
+      "formaPagoPlaceholder": "Select...",
+      "seleccionVaciaError": "Select at least one expense to include in the report.",
+      "formaPagoRequeridaError": "Select the payment method before generating the report.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "continuar": "Continue",
+      "confirmar": "Generate report",
+      "error": "Could not generate the report.",
+      "successTitle": "Report {{numero}} generated"
+    },
+    "reportesPanel": {
+      "subtitle": "Click \"View\" to open any report's detail",
+      "vacio": "No reports have been generated yet.",
+      "columnas": {
+        "numero": "No.",
+        "fechaCreacion": "Creation date",
+        "total": "Total",
+        "estado": "Status",
+        "realizadoPor": "Created by"
+      },
+      "ver": "View"
+    },
+    "detalleReporteModal": {
+      "title": "Report {{numero}} detail",
+      "realizadoPor": "Created by {{nombre}}",
+      "aprobadoPor": "Approved by {{nombre}} on {{fecha}}",
+      "formaPago": "Payment method: {{formaPago}}",
+      "aprobarConfirm": "Approve report {{numero}} for a total of {{total}}? This action cannot be reverted from this screen.",
+      "aprobar": "Approve report",
+      "aprobarError": "Could not approve the report.",
+      "descargar": "Download",
+      "cerrar": "Close",
+      "rechazar": "Reject",
+      "rechazarReporte": "Reject entire report",
+      "motivoRechazoLineaLabel": "Reason for rejecting this line (required)",
+      "motivoRechazoReporteLabel": "Reason for rejecting the entire report (required, applies to all its lines)",
+      "motivoRechazoRequerido": "The reason is required.",
+      "confirmarRechazo": "Confirm rejection",
+      "rechazarError": "Could not reject.",
+      "reporteRechazadoBody": "This report was rejected — its lines went back to Pending or moved to Rejected, depending on their attempt history."
+    },
+    "rechazadosPanel": {
+      "subtitle": "Lines rejected twice — history is kept and they can be reopened",
+      "vacio": "No permanently rejected lines.",
+      "columnas": {
+        "solicitante": "Requester",
+        "intentos": "Attempts"
+      }
+    },
+    "detalleLineaModal": {
+      "title": "Expense detail",
+      "error": "Could not load this expense's detail.",
+      "editarError": "Could not save the changes.",
+      "reabrirError": "Could not reopen this expense.",
+      "agregarSoporteError": "Could not add the receipt. Please try again.",
+      "montos": "Gross Amount / ITBMS / Total",
+      "soportes": "Receipts",
+      "sinSoportes": "No receipts attached.",
+      "agregarSoporte": "Add receipt",
+      "ver": "View",
+      "historial": "History",
+      "historialRechazo": "Rejection",
+      "historialReapertura": "Reopening",
+      "motivoRequerido": "The reason is required.",
+      "motivoReaperturaLabel": "Reason for reopening this expense (required)",
+      "motivoReaperturaPlaceholder": "Explain why this expense should be reopened...",
+      "editar": "Edit",
+      "guardarCambios": "Save changes",
+      "reabrir": "Reopen",
+      "confirmarReapertura": "Confirm reopening",
+      "solicitante": "Requester",
+      "solicitanteNoEditable": "not editable",
+      "reporteFinalizado": "Finalized report — no longer editable"
+    },
+    "soporteModal": {
+      "error": "Could not load the receipt.",
+      "cerrar": "Close"
+    }
+  },
+  "reportes": {
+    "title": "Reports",
+    "subtitle": "Visual overview for decision-making — click any card to see the full detail",
+    "verEnFacturacion": "View in Invoicing",
+    "periodo": {
+      "hoy": "Today",
+      "dias3m": "3 months",
+      "dias6m": "6 months",
+      "anio": "Year"
+    },
+    "felixCommission": {
+      "title": "Commission for +90-day past-due collections — Felix",
+      "subtitle": "The more past-due receivables collected, the higher the commission — live, month to date",
+      "cobradoMes": "+90-day receivables collected (current month)",
+      "rangoActual": "Current tier",
+      "comision": "Commission for Felix (to date)",
+      "tramoRango": "{{desde}} – {{hasta}} → {{pct}}%",
+      "tramoDesde": "Over {{desde}} → {{pct}}%",
+      "rangoActualTag": "Current tier",
+      "footnote": "The more past-due receivables (+90 days) collected, the higher the commission — an incentive for good collection management. This is a live figure: it can keep rising through the month — the cutoff that defines the final commission is the 30th. It resets to $0 every month."
+    },
+    "cartera": {
+      "title": "Receivables",
+      "subtitle": "Aging of balances — total {{total}}",
+      "rango": "{{desde}}-{{hasta}} days",
+      "rangoMas": "+{{desde}} days"
+    },
+    "cartera90": {
+      "title": "+90-day receivables collected",
+      "subtitle": "Month to date — closes on the 30th",
+      "detalle": "{{pendiente}} still pending from that same range"
+    },
+    "ventas": {
+      "title": "Sales",
+      "subtituloHoy": "Total invoiced today",
+      "subtituloPeriodo": "Total invoiced by month",
+      "hoyLabel": "Today",
+      "promedioMesAnterior": "Previous month's daily average",
+      "vsMesAnterior": "vs. previous month"
+    },
+    "arqueoCaja": {
+      "title": "Cash Count",
+      "subtitle": "Net cash flow by month (inflows − outflows)",
+      "ver": "View Cash Count",
+      "entradasMenosSalidas": "{{entradas}} inflows − {{salidas}} outflows",
+      "saldoHoy": "Balance available today",
+      "proyectado30": "Projected in 30 days"
+    },
+    "comisiones": {
+      "title": "Commissions",
+      "subtitle": "Internal vs. external by month",
+      "internas": "Internal",
+      "externas": "External",
+      "verInternas": "View Internal Commissions",
+      "verExternas": "View External Commissions"
+    },
+    "notasCredito": {
+      "title": "Credit notes and returns",
+      "subtitle": "Breakdown by reason — current month",
+      "ver": "View Credit Notes"
+    },
+    "mensualCliente": {
+      "volver": "Back to Reports",
+      "tituloDia": "Monthly report by client",
+      "subtituloDia": "Invoices and collections for a specific client, filtered by date range",
+      "tituloAcumulado": "Monthly by client — accumulated",
+      "subtituloAcumulado": "Invoices and collections for a specific client, grouped by year and month",
+      "cliente": "Client",
+      "clientePlaceholder": "Select a client...",
+      "todosLosClientes": "All clients",
+      "desde": "From",
+      "hasta": "To",
+      "filtrar": "Filter",
+      "limpiar": "Clear",
+      "descargar": "Download report (Excel)",
+      "sinDatosParaDescargar": "Select a client with data in the date range before downloading.",
+      "seleccionaCliente": "Select a client to see their report.",
+      "sinRegistros": "No records for this client in the selected date range.",
+      "registros": "Records",
+      "totalFacturado": "Total invoiced",
+      "totalCobrado": "Collected",
+      "totalPendiente": "Pending",
+      "totalPeriodo": "Period total",
+      "pendientesTitle": "Pending collection (no payment method yet)",
+      "columnas": {
+        "fecha": "Date",
+        "anio": "Year",
+        "mes": "Month",
+        "num": "No.",
+        "importe": "Amount",
+        "media": "Average",
+        "transferencia": "Transfer",
+        "cheque": "Check",
+        "efectivo": "Cash",
+        "yappy": "Yappy",
+        "otros": "Other",
+        "totalCaja": "Total"
+      }
+    },
+    "libroFacturas": {
+      "volver": "Back to Reports",
+      "title": "Invoice Book",
+      "subtitle": "All invoices and credit notes issued, in chronological order",
+      "desde": "From",
+      "hasta": "To",
+      "tipo": "Type",
+      "tipoTodos": "All",
+      "tipoSoloFacturas": "Invoices only",
+      "tipoSoloNotas": "Credit notes only",
+      "filtrar": "Filter",
+      "limpiar": "Clear",
+      "descargar": "Download report (Excel)",
+      "sinDatosParaDescargar": "There are no documents to download with the current filter.",
+      "sinDocumentos": "There are no documents in the selected range.",
+      "facturas": "Invoices",
+      "notasCredito": "Credit notes",
+      "baseImponible": "Taxable base",
+      "itbms": "ITBMS",
+      "total": "Total",
+      "totalPeriodo": "Period total",
+      "columnas": {
+        "fecha": "Date",
+        "ruc": "Tax ID",
+        "cliente": "Client",
+        "tipo": "Type",
+        "motivo": "Reason",
+        "documento": "Document No.",
+        "baseImponible": "Taxable Base",
+        "porcentaje": "%",
+        "itbms": "ITBMS Amount",
+        "total": "Total"
+      }
+    },
+    "ventasMedioPago": {
+      "volver": "Back to Reports",
+      "title": "Monthly by Client — Sales by Payment Method",
+      "subtitle": "Each collected invoice, with its tax breakdown and the payment method used",
+      "cliente": "Client",
+      "clientePlaceholder": "All",
+      "todos": "All",
+      "desde": "From",
+      "hasta": "To",
+      "filtrar": "Filter",
+      "limpiar": "Clear",
+      "descargar": "Download report (Excel)",
+      "sinDatosParaDescargar": "There are no invoices to download with the current filter.",
+      "sinFacturas": "There are no invoices in the selected range/client.",
+      "facturasCobradas": "Collected invoices",
+      "baseImponible": "Taxable base",
+      "itbms": "ITBMS",
+      "total": "Total",
+      "totalPeriodo": "Period total",
+      "pendientesTitle": "Pending collection (no payment method yet)",
+      "columnas": {
+        "fecha": "Date",
+        "cliente": "Client",
+        "documento": "Document No.",
+        "baseImponible": "Taxable Base",
+        "itbms": "ITBMS",
+        "total": "Total"
+      },
+      "metodos": {
+        "transferencia": "Transfer",
+        "cheque": "Check",
+        "efectivo": "Cash",
+        "tarjeta": "Card",
+        "depositoBancario": "Bank deposit",
+        "yappy": "Yappy",
+        "linkPago": "Payment link",
+        "retencionImpuestos": "Tax withholding",
+        "ajustesCuenta": "Account adjustments"
+      }
+    },
+    "subReportes": {
+      "mensualCliente": {
+        "title": "Monthly report by client",
+        "subtitle": "Invoices and collections for a client, day by day"
+      },
+      "acumulado": {
+        "title": "Monthly by client — accumulated",
+        "subtitle": "Same data, grouped by year and month"
+      },
+      "libroFacturas": {
+        "title": "Invoice ledger",
+        "subtitle": "All invoices and credit notes, in chronological order"
+      },
+      "ventasMedioPago": {
+        "title": "Sales by payment method",
+        "subtitle": "Each invoice with its tax breakdown and payment method used"
+      }
+    }
+  },
+  "home": {
+    "header": {
+      "saludo": "Welcome, {{nombre}}",
+      "saludoGenerico": "Welcome",
+      "subtitulo": "{{fecha}} · you have {{reunionesTexto}} and {{pendientesTexto}} today",
+      "reunionesCount_one": "{{count}} meeting",
+      "reunionesCount_other": "{{count}} meetings",
+      "pendientesCount_one": "{{count}} pending item",
+      "pendientesCount_other": "{{count}} pending items"
+    },
+    "resumenMes": {
+      "title": "Month summary",
+      "cobradoMes": "collected this month to date",
+      "cuentasAlDia": {
+        "label": "Accounts up to date",
+        "sub": "vs. overdue"
+      },
+      "carteraPorCobrar": {
+        "label": "Receivables",
+        "sub": "collectible receivables only — {{incobrable}} uncollectible already excluded"
+      },
+      "ventasAyer": {
+        "label": "Yesterday's sales",
+        "sub": "{{count}} sales · {{fecha}}",
+        "verReporte": "View full report"
+      },
+      "comisionesInternas": {
+        "label": "Internal commissions",
+        "sub": "due this month"
+      },
+      "comisionesExternas": {
+        "label": "External commissions",
+        "sub": "due this month"
+      }
+    },
+    "calendar": {
+      "title": "My calendar",
+      "viewFull": "View full calendar"
+    },
+    "pendientes": {
+      "title": "Pending",
+      "empty": "No pending items"
+    },
+    "vencidosPorVencer": {
+      "title": "Overdue and upcoming",
+      "vencidos": {
+        "title": "Overdue",
+        "empty": "No overdue invoices",
+        "texto": "Overdue {{dias}} days"
+      },
+      "porVencer": {
+        "title": "Upcoming",
+        "empty": "No upcoming invoices",
+        "texto": "Due in {{dias}} days",
+        "hoy": "Due today"
+      }
+    },
+    "antiguedad": {
+      "title": "Accounts receivable aging"
+    }
+  }
+}

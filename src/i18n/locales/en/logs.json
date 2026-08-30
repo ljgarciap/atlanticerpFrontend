@@ -1,0 +1,50 @@
+{
+  "title": "Logs",
+  "subtitle": "Audit history across all modules — who did what and when",
+  "filters": {
+    "module": "Module",
+    "allModules": "All modules",
+    "tipo": "Type",
+    "allTipos": "All",
+    "cambioDato": "Data change",
+    "accion": "Action",
+    "entityType": "Entity type",
+    "entityId": "Entity ID",
+    "userId": "User (ID)",
+    "from": "From",
+    "to": "To",
+    "clear": "Clear filters"
+  },
+  "table": {
+    "date": "Date",
+    "user": "User",
+    "module": "Module",
+    "tipo": "Type",
+    "action": "Action",
+    "entity": "Entity",
+    "changes": "Changes",
+    "empty": "No activity recorded",
+    "systemUser": "System"
+  },
+  "module": {
+    "ai": "AI",
+    "auth": "Authentication",
+    "bodega": "Warehouse",
+    "compras": "Purchasing",
+    "crm": "CRM",
+    "security": "Security",
+    "servicios": "Services",
+    "settings": "Settings",
+    "ventas_diseno": "Sales & Design"
+  },
+  "action": {
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted"
+  },
+  "pagination": {
+    "page": "Page {{current}} of {{last}}",
+    "prev": "Previous",
+    "next": "Next"
+  }
+}

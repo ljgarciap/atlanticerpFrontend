@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mockup — Gerencia · Vista ejecutiva</title>
+<style>
+:root {
+  --bg-page: #fafaf7;
+  --bg-surface: #ffffff;
+  --bg-soft: #f7f5ef;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-soft: #f1efe9;
+  --border: #e7e4dc;
+  --teal: #5BA5A0;
+  --teal-deep: #3D7E7A;
+  --teal-soft: #E3F0EE;
+  --lime: #B5D88A;
+  --green: #7AB87A;
+  --amber: #D9A441;
+  --amber-soft: #FBF1DF;
+  --red: #D2685A;
+  --red-soft: #FBEAE6;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+.mockup-frame { display: flex; min-height: 100vh; }
+
+/* ---------- SIDEBAR ---------- */
+aside.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 22px 8px;
+}
+.sidebar-logo span.word {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  color: #2a2520;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 3px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-item:hover { background: var(--bg-soft); color: var(--text-primary); }
+.nav-item.active { background: var(--teal-soft); color: var(--teal-deep); }
+.nav-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--bg-soft);
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nav-icon svg { width: 17px; height: 17px; stroke: var(--text-tertiary); }
+.nav-item.active .nav-icon svg { stroke: white; }
+.nav-item.active .nav-icon { background: var(--teal); color: white; }
+.sidebar-foot {
+  margin-top: auto;
+  padding: 10px 8px 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 14px;
+}
+
+/* ---------- MAIN ---------- */
+main.main-area { flex: 1; min-width: 0; }
+header.topbar {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.module-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.module-sub { font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.3px; text-transform: uppercase; margin-top: 2px; }
+.user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--teal); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 500; font-size: 12px;
+}
+.user-role { background: var(--bg-soft); color: var(--text-secondary); padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.user-role.gerencia-role { background: var(--teal-soft); color: var(--teal-deep); }
+
+nav.subtabs {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 8px 28px;
+  display: flex;
+  gap: 4px;
+}
+.subtab {
+  padding: 7px 13px; border-radius: 8px; font-size: 12.5px; font-weight: 500;
+  color: var(--text-tertiary); cursor: pointer;
+}
+.subtab:hover { color: var(--text-primary); background: var(--bg-soft); }
+.subtab.active { color: var(--text-primary); background: var(--bg-soft); }
+
+.content { padding: 26px 28px 40px; max-width: 1280px; }
+
+.content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.welcome-title { font-size: 20px; font-weight: 500; color: var(--text-primary); letter-spacing: -0.01em; }
+.welcome-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+.actions { display: flex; gap: 8px; }
+.btn {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+.btn-primary { background: var(--teal); color: white; border-color: var(--teal); }
+.btn-secondary { background: var(--bg-surface); color: var(--text-primary); }
+
+/* grid rows */
+.row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.row-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.stat-grid-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.budget-line { margin-bottom: 14px; }
+.budget-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px; }
+.budget-amount { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.budget-target { font-size: 12px; color: var(--text-tertiary); }
+.budget-track { height: 6px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; }
+.budget-fill { height: 100%; background: var(--teal); border-radius: 6px; }
+.stat-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.panel-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.pill-toggle { display: flex; gap: 4px; background: var(--bg-soft); border-radius: 8px; padding: 3px; }
+.pill { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; color: var(--text-tertiary); cursor: pointer; }
+.pill.active { background: var(--bg-surface); color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+/* metas/comisiones */
+.goal-amounts { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+.goal-current { font-size: 24px; font-weight: 500; color: var(--text-primary); }
+.goal-target { font-size: 13px; color: var(--text-tertiary); }
+.progress-track { height: 8px; background: var(--bg-soft); border-radius: 8px; overflow: hidden; margin-bottom: 6px; }
+.progress-fill { height: 100%; background: var(--teal); border-radius: 8px; }
+.goal-meta { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 16px; }
+.commission-row {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border-soft); padding-top: 14px;
+}
+.commission-label { font-size: 12px; color: var(--text-secondary); }
+.commission-value { font-size: 18px; font-weight: 500; color: var(--teal-deep); }
+.commission-note { font-size: 10.5px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* calendario */
+.cal-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border-soft); }
+.cal-item:last-child { border-bottom: none; }
+.cal-time { font-size: 11.5px; color: var(--text-tertiary); width: 48px; flex-shrink: 0; padding-top: 1px; }
+.cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); margin-top: 5px; flex-shrink: 0; }
+.cal-text { font-size: 12.5px; color: var(--text-primary); font-weight: 500; }
+.cal-loc { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.commission-eye {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+}
+.commission-eye:hover .commission-value { color: var(--teal); text-decoration: underline; }
+.cal-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 7px;
+  white-space: nowrap; margin-left: 8px;
+}
+.cal-tag.llamada { background: #E6F1FB; color: #0C447C; }
+.cal-tag.visita { background: var(--teal-soft); color: var(--teal-deep); }
+.cal-tag.almuerzo { background: var(--bg-soft); color: var(--text-secondary); }
+.cal-tag.entrega { background: var(--amber-soft); color: #92600f; }
+.cal-row-top { display: flex; align-items: center; justify-content: space-between; }
+.sync-tag { font-size: 10.5px; color: var(--text-tertiary); display: flex; align-items: center; gap: 5px; }
+
+/* pendientes */
+.task-item { display: flex; align-items: flex-start; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--border-soft); }
+.task-item:last-child { border-bottom: none; }
+.task-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.task-dot.high { background: var(--red); }
+.task-dot.mid { background: var(--amber); }
+.task-text { font-size: 12.5px; color: var(--text-primary); }
+.task-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.badge-count {
+  background: var(--red-soft); color: #9a3f30;
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+}
+
+/* por cerrar */
+.deal-card {
+  border: 1px solid var(--border-soft); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.deal-card:last-child { margin-bottom: 0; }
+.deal-name { font-size: 12.5px; font-weight: 500; color: var(--text-primary); }
+.deal-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.deal-value { font-size: 13px; font-weight: 500; color: var(--teal-deep); white-space: nowrap; }
+.fire-tag { background: var(--amber-soft); color: #92600f; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 8px; white-space: nowrap; }
+
+/* pipeline */
+.filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip.active { background: var(--teal-soft); border-color: var(--teal-soft); color: var(--teal-deep); }
+.chip.warn { color: #9a5a14; }
+.chip.warn.active { background: var(--amber-soft); border-color: var(--amber-soft); color: #92600f; }
+.chip-icon-btn {
+  width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer;
+  font-size: 14px;
+}
+.stage-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.stage-card { background: var(--bg-soft); border-radius: 12px; padding: 14px 12px; }
+.stage-name { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
+.stage-count { font-size: 22px; font-weight: 500; color: var(--text-primary); line-height: 1; }
+.stage-value { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+.stage-card.lost { opacity: 0.65; }
+.footnote { font-size: 10.5px; color: var(--text-tertiary); margin-top: 14px; }
+
+/* stat cards (resumen del mes) */
+.stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.stat-card { background: var(--bg-soft); border-radius: 12px; padding: 13px 14px; position: relative; }
+.stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; }
+.stat-value { font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.stat-sub { font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px; }
+.stat-value.warn { color: #9a5a14; }
+.stat-value.danger { color: #9a3f30; }
+.stat-link {
+  position: absolute; top: 12px; right: 12px; cursor: pointer;
+  color: var(--text-tertiary); display: flex; align-items: center;
+}
+.stat-link svg { width: 15px; height: 15px; }
+.stat-link:hover { color: var(--teal-deep); }
+
+/* supplier tag */
+.supplier-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 7px;
+  white-space: nowrap; background: var(--bg-soft); color: var(--text-secondary);
+}
+.supplier-tag.colon { background: var(--amber-soft); color: #92600f; }
+
+/* reorder table */
+.reorder-table { width: 100%; border-collapse: collapse; }
+.reorder-table th {
+  text-align: left; font-size: 11px; font-weight: 500; color: var(--text-tertiary);
+  padding: 0 10px 10px; border-bottom: 1px solid var(--border-soft);
+}
+.reorder-table td {
+  padding: 11px 10px; font-size: 12.5px; color: var(--text-primary);
+  border-bottom: 1px solid var(--border-soft);
+}
+.reorder-table tr:last-child td { border-bottom: none; }
+.stock-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.stock-bar-track { width: 70px; height: 6px; background: var(--border-soft); border-radius: 6px; overflow: hidden; }
+.stock-bar-fill { height: 100%; border-radius: 6px; }
+.row-btn {
+  font-size: 11.5px; font-weight: 500; color: var(--teal-deep); background: var(--teal-soft);
+  border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit;
+}
+.scope-toggle { display: flex; gap: 4px; background: var(--bg-soft); border-radius: 8px; padding: 3px; margin-top: 10px; width: fit-content; }
+.scope-pill { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-tertiary); cursor: pointer; }
+.scope-pill.active { background: var(--bg-surface); color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+.subtab-dropdown { position: relative; }
+.subtab-dropdown:hover .dropdown-panel { display: block; }
+.dropdown-panel {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1); padding: 6px; min-width: 200px; z-index: 50;
+}
+.dropdown-item { padding: 8px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+.dropdown-item:hover { background: var(--bg-soft); color: var(--text-primary); }
+
+.stat-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.subsection-label {
+  font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase;
+  letter-spacing: 0.4px; margin: 12px 0 8px;
+}
+.subsection-label:first-child { margin-top: 0; }
+.subsection-label.danger { color: #9a3f30; }
+.subsection-label.warn { color: #9a5a14; }
+
+.comm-table { width: 100%; border-collapse: collapse; }
+.comm-table th {
+  text-align: left; font-size: 11px; font-weight: 500; color: var(--text-tertiary);
+  padding: 0 10px 10px; border-bottom: 1px solid var(--border-soft);
+}
+.comm-table td {
+  padding: 11px 10px; font-size: 12.5px; color: var(--text-primary);
+  border-bottom: 1px solid var(--border-soft);
+}
+.comm-table tr:last-child td { border-bottom: none; }
+.status-pill { font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 8px; }
+.status-pill.pendiente { background: var(--amber-soft); color: #92600f; }
+.status-pill.pagado { background: var(--teal-soft); color: var(--teal-deep); }
+
+.assumption-note {
+  font-size: 11px; color: #92600f; background: var(--amber-soft);
+  padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+}
+.type-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 7px; white-space: nowrap; }
+.type-tag.instalacion { background: #E6F1FB; color: #0C447C; }
+.type-tag.garantia { background: var(--amber-soft); color: #92600f; }
+.type-tag.reclamo { background: var(--red-soft); color: #9a3f30; }
+.route-num {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--teal-soft); color: var(--teal-deep);
+  font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.route-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.route-item:last-child { border-bottom: none; }
+.route-time { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* big KPIs */
+.big-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.big-kpi { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 18px 20px; }
+.big-kpi-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
+.big-kpi-value { font-size: 28px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.big-kpi-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+
+/* module health cards */
+.module-health-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.module-health-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
+.module-health-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.module-health-card {
+  background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg);
+  padding: 16px 16px; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s;
+}
+.module-health-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-1px); }
+.module-health-icon {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--teal-soft); color: var(--teal-deep);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+}
+.module-health-icon svg { width: 16px; height: 16px; stroke: var(--teal-deep); }
+.module-health-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+.module-health-metric { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-top: 1px solid var(--border-soft); }
+.module-health-metric:first-of-type { border-top: none; }
+.module-health-metric-label { font-size: 11px; color: var(--text-secondary); }
+.module-health-metric-value { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.module-health-metric-value.warn { color: #9a5a14; }
+.module-health-metric-value.danger { color: #9a3f30; }
+
+.mh-card-v2 { text-align: center; }
+.mh-header-v2 { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.mh-gauge-wrap { position: relative; width: 116px; height: 116px; margin: 0 auto 14px; }
+.mh-gauge { width: 100%; height: 100%; transform: rotate(-90deg); }
+.mh-gauge-bg { fill: none; stroke: var(--bg-soft); stroke-width: 7; }
+.mh-gauge-fg { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dasharray 0.3s; }
+.mh-gauge-fg.teal { stroke: var(--teal); }
+.mh-gauge-fg.amber { stroke: var(--amber); }
+.mh-gauge-fg.red { stroke: var(--red); }
+.mh-gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 14px; }
+.mh-gauge-value { font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.mh-gauge-label { font-size: 9.5px; color: var(--text-tertiary); text-align: center; margin-top: 4px; line-height: 1.25; }
+.mh-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.mh-chip { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+.mh-chip.teal { background: var(--teal-soft); color: var(--teal-deep); }
+.mh-chip.amber { background: var(--amber-soft); color: #92600f; }
+.mh-chip.red { background: var(--red-soft); color: #9a3f30; }
+.mh-chip.gray { background: var(--bg-soft); color: var(--text-secondary); }
+
+.mh-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.mh-bar-row:last-child { margin-bottom: 0; }
+.mh-bar-label { font-size: 11.5px; color: var(--text-secondary); width: 118px; flex-shrink: 0; text-align: left; }
+.mh-bar-track { flex: 1; height: 8px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; }
+.mh-bar-fill { height: 100%; border-radius: 6px; }
+.mh-bar-fill.teal { background: var(--teal); }
+.mh-bar-fill.amber { background: var(--amber); }
+.mh-bar-fill.red { background: var(--red); }
+.mh-bar-fill.gray { background: #c7c4ba; }
+.mh-bar-value { font-size: 12.5px; font-weight: 600; color: var(--text-primary); width: 64px; text-align: right; flex-shrink: 0; }
+
+/* facturación day-by-day */
+.fact-filter-row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.fact-field { display: flex; flex-direction: column; gap: 4px; }
+.fact-field label { font-size: 10.5px; color: var(--text-tertiary); font-weight: 500; }
+.fact-input, .fact-select {
+  padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; font-family: inherit; color: var(--text-secondary); background: var(--bg-surface); cursor: pointer;
+}
+.fact-clear {
+  padding: 8px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500;
+  color: var(--text-secondary); background: var(--bg-surface); cursor: pointer; font-family: inherit; margin-left: auto;
+}
+.fact-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+.fact-kpi { background: var(--bg-soft); border-radius: 12px; padding: 13px 14px; cursor: pointer; position: relative; }
+.fact-kpi:hover { background: var(--teal-soft); }
+.fact-kpi-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; }
+.fact-kpi-value { font-size: 19px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.fact-kpi-sub { font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px; }
+.fact-chart-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+.fact-bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 130px; padding-top: 8px; }
+.fact-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; cursor: pointer; }
+.fact-bar-stack { width: 100%; display: flex; align-items: flex-end; justify-content: center; height: 100%; }
+.fact-bar-seg { width: 62%; border-radius: 3px 3px 0 0; min-height: 3px; background: var(--teal); transition: opacity 0.15s; }
+.fact-bar-col:hover .fact-bar-seg { opacity: 0.75; }
+.fact-bar-label { font-size: 9.5px; color: var(--text-tertiary); }
+.fact-bar-value { font-size: 9.5px; font-weight: 600; color: var(--text-secondary); }
+.fact-detail-link { font-size: 11px; font-weight: 500; color: var(--teal-deep); display: flex; align-items: center; gap: 4px; cursor: pointer; margin-top: 4px; }
+.fact-detail-link svg { width: 12px; height: 12px; }
+
+/* agenda del dia (bodega / servicios) */
+.agenda-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+.agenda-card { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 18px 20px; }
+.agenda-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.agenda-title-row { display: flex; align-items: center; gap: 10px; }
+.agenda-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--teal-soft); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; }
+.agenda-icon svg { width: 16px; height: 16px; }
+.agenda-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.agenda-sub { font-size: 10.5px; color: var(--text-tertiary); margin-top: 1px; }
+.agenda-see-detail { font-size: 11.5px; font-weight: 500; color: var(--teal-deep); background: var(--teal-soft); border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
+.agenda-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border-soft); cursor: pointer; }
+.agenda-item:last-child { border-bottom: none; }
+.agenda-item:hover { background: var(--bg-soft); margin: 0 -8px; padding: 9px 8px; border-radius: 8px; }
+.agenda-time { font-size: 11px; color: var(--text-tertiary); width: 44px; flex-shrink: 0; padding-top: 1px; }
+.agenda-text { font-size: 12.5px; font-weight: 500; color: var(--text-primary); }
+.agenda-loc { font-size: 10.5px; color: var(--text-tertiary); margin-top: 1px; }
+</style>
+</head>
+<body>
+<div class="mockup-frame">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="30" height="30" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-label="Illuminations">
+        <circle cx="36" cy="40" r="20" fill="#4FA85A" opacity="0.92"/>
+        <circle cx="48" cy="22" r="20" fill="#9DCC4D"/>
+        <circle cx="30" cy="52" r="20" fill="#1F8F88"/>
+      </svg>
+      <span class="word">ILLUMINATIONS</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"/><path d="M14.5 15.2c2.5.3 4.5 2 4.5 4.8"/></svg>
+        </div>
+        CRM
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l3.6-1 11-11-2.6-2.6-11 11z"/><path d="M14 6.4 17.6 10"/><path d="M20.5 6.5l-3-3"/></svg>
+        </div>
+        Ventas &amp; Diseño
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
+        </div>
+        Compras
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/><path d="M3 8.5V16l9 4.5 9-4.5V8.5"/><path d="M12 13v7.5"/></svg>
+        </div>
+        Bodega
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 12h6"/><path d="M9 15h6"/><path d="M9 18h3"/></svg>
+        </div>
+        Admin. &amp; Contab.
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3 3 0 0 0-4.2 4.2L3 18l3 3 7.5-7.5a3 3 0 0 0 4.2-4.2l-2.6-2.6Z"/></svg>
+        </div>
+        Servicios
+      </div>
+      <div class="nav-item active">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"/><path d="M10 20V7"/><path d="M16 20v-9"/><path d="M20 20V4"/></svg>
+        </div>
+        Gerencia
+      </div>
+    </div>
+    <div class="sidebar-foot">AtlanticERP · v1 mockup</div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div>
+        <div class="module-title">Gerencia</div>
+        <div class="module-sub">Vista ejecutiva</div>
+      </div>
+      <div class="user-info">
+        <span class="user-role gerencia-role">Gerencia</span>
+        <div class="user-avatar">DM</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <div class="content-header">
+        <div>
+          <div class="welcome-title">Bienvenido, David</div>
+          <div class="welcome-sub">Viernes 26 de junio · pulso general del negocio</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary">Exportar reporte</button>
+        </div>
+      </div>
+
+      <div class="big-kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="big-kpi" style="position:relative; cursor:pointer;" title="Ver detalle de variación de margen">
+          <div class="big-kpi-label">Variación margen facturado vs. cotizado</div>
+          <div class="big-kpi-value" style="color:#9a3f30;">-2.8 pts</div>
+          <div class="big-kpi-sub">Este mes: 41.2% real vs. 44.0% cotizado</div>
+          <div class="stat-link" style="top:18px; right:20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+        <div class="big-kpi" style="position:relative; cursor:pointer;" title="Ver reporte de cuentas por cobrar">
+          <div class="big-kpi-label">CxC al día</div>
+          <div class="big-kpi-value">$31,768</div>
+          <div class="big-kpi-sub">76% del total en CxC ($41,800)</div>
+          <div class="stat-link" style="top:18px; right:20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+        <div class="big-kpi" style="position:relative; cursor:pointer;" title="Ver detalle de proyectos activos">
+          <div class="big-kpi-label">Proyectos activos</div>
+          <div class="big-kpi-value">63</div>
+          <div class="big-kpi-sub">en todos los módulos</div>
+          <div class="stat-link" style="top:18px; right:20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Facturación</div>
+            <div class="panel-sub">Resumen — haz clic en cualquier dato o barra para ver el detalle completo por vendedor y cliente</div>
+          </div>
+        </div>
+
+        <div class="fact-filter-row">
+          <div class="fact-field">
+            <label>Desde</label>
+            <input class="fact-input" type="text" value="01 ene 2026">
+          </div>
+          <div class="fact-field">
+            <label>Hasta</label>
+            <input class="fact-input" type="text" value="26 jun 2026">
+          </div>
+          <div class="fact-field">
+            <label>Vendedor</label>
+            <select class="fact-select">
+              <option>Todos los vendedores</option>
+              <option>Carlos Ruiz</option>
+              <option>Lucía Fernández</option>
+            </select>
+          </div>
+          <div class="fact-field">
+            <label>Cliente</label>
+            <select class="fact-select">
+              <option>Todos los clientes</option>
+              <option>Torres Pacífico</option>
+              <option>Hotel Riu</option>
+              <option>Grupo Vitrio</option>
+            </select>
+          </div>
+          <button class="fact-clear" onclick="alert('Filtros restablecidos.')">Limpiar filtro</button>
+        </div>
+
+        <div class="fact-kpi-row">
+          <div class="fact-kpi" onclick="alert('Navegaría a Facturación → detalle anual, con desglose por vendedor y cliente.')">
+            <div class="fact-kpi-label">Facturado este año</div>
+            <div class="fact-kpi-value">$3,240,000</div>
+            <div class="fact-kpi-sub">54% de la meta anual $6M</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Facturación → detalle de junio, con desglose por vendedor y cliente.')">
+            <div class="fact-kpi-label">Facturado este mes</div>
+            <div class="fact-kpi-value">$612,000</div>
+            <div class="fact-kpi-sub">Junio 2026</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Facturación → margen anual detallado.')">
+            <div class="fact-kpi-label">Margen del año</div>
+            <div class="fact-kpi-value" style="color:var(--teal-deep);">38.5%</div>
+            <div class="fact-kpi-sub">$1,247,400 de utilidad bruta</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Facturación → margen de junio detallado.')">
+            <div class="fact-kpi-label">Margen del mes</div>
+            <div class="fact-kpi-value" style="color:var(--teal-deep);">41.2%</div>
+            <div class="fact-kpi-sub">$252,144 de utilidad bruta</div>
+          </div>
+        </div>
+
+        <div class="fact-chart-title">Facturado por mes — 2026</div>
+        <div class="fact-bar-chart">
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de enero.')"><div class="fact-bar-value">$410k</div><div class="fact-bar-stack" style="height:61%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Ene</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de febrero.')"><div class="fact-bar-value">$455k</div><div class="fact-bar-stack" style="height:68%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Feb</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de marzo.')"><div class="fact-bar-value">$530k</div><div class="fact-bar-stack" style="height:79%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Mar</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de abril.')"><div class="fact-bar-value">$495k</div><div class="fact-bar-stack" style="height:74%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Abr</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de mayo.')"><div class="fact-bar-value">$538k</div><div class="fact-bar-stack" style="height:80%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">May</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Facturación → detalle de junio.')"><div class="fact-bar-value" style="color:var(--teal-deep); font-weight:700;">$612k</div><div class="fact-bar-stack" style="height:100%;"><div class="fact-bar-seg" style="height:100%; background:var(--teal-deep);"></div></div><div class="fact-bar-label">Jun</div></div>
+        </div>
+        <div class="fact-detail-link" onclick="alert('Navegaría a la pantalla completa de Facturación, con desglose por vendedor y por cliente.')">
+          Ver detalle completo por vendedor y cliente
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Proyectos</div>
+            <div class="panel-sub">Resumen — haz clic en cualquier dato o barra para ver el detalle completo por vendedor y cliente</div>
+          </div>
+        </div>
+
+        <div class="fact-filter-row">
+          <div class="fact-field">
+            <label>Desde</label>
+            <input class="fact-input" type="text" value="01 ene 2026">
+          </div>
+          <div class="fact-field">
+            <label>Hasta</label>
+            <input class="fact-input" type="text" value="26 jun 2026">
+          </div>
+          <div class="fact-field">
+            <label>Vendedor</label>
+            <select class="fact-select">
+              <option>Todos los vendedores</option>
+              <option>Carlos Ruiz</option>
+              <option>Lucía Fernández</option>
+            </select>
+          </div>
+          <div class="fact-field">
+            <label>Cliente</label>
+            <select class="fact-select">
+              <option>Todos los clientes</option>
+              <option>Torres Pacífico</option>
+              <option>Hotel Riu</option>
+              <option>Grupo Vitrio</option>
+            </select>
+          </div>
+          <button class="fact-clear" onclick="alert('Filtros restablecidos.')">Limpiar filtro</button>
+        </div>
+
+        <div class="fact-kpi-row">
+          <div class="fact-kpi" onclick="alert('Navegaría a Proyectos → detalle anual, con desglose por vendedor y cliente.')">
+            <div class="fact-kpi-label">Proyectos cerrados este año</div>
+            <div class="fact-kpi-value">$3,850,000</div>
+            <div class="fact-kpi-sub">142 proyectos cerrados</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Proyectos → detalle de junio, con desglose por vendedor y cliente.')">
+            <div class="fact-kpi-label">Proyectos cerrados este mes</div>
+            <div class="fact-kpi-value">$687,000</div>
+            <div class="fact-kpi-sub">23 proyectos cerrados · Junio 2026</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Proyectos → margen cotizado anual detallado.')">
+            <div class="fact-kpi-label">Margen del año</div>
+            <div class="fact-kpi-value" style="color:var(--teal-deep);">41.8%</div>
+            <div class="fact-kpi-sub">$1,609,300 de utilidad cotizada</div>
+          </div>
+          <div class="fact-kpi" onclick="alert('Navegaría a Proyectos → margen cotizado de junio detallado.')">
+            <div class="fact-kpi-label">Margen del mes</div>
+            <div class="fact-kpi-value" style="color:var(--teal-deep);">44.0%</div>
+            <div class="fact-kpi-sub">$302,280 de utilidad cotizada</div>
+          </div>
+        </div>
+
+        <div class="fact-chart-title">Proyectos cerrados por mes — 2026</div>
+        <div class="fact-bar-chart">
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de enero.')"><div class="fact-bar-value">$460k</div><div class="fact-bar-stack" style="height:67%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Ene</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de febrero.')"><div class="fact-bar-value">$510k</div><div class="fact-bar-stack" style="height:74%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Feb</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de marzo.')"><div class="fact-bar-value">$595k</div><div class="fact-bar-stack" style="height:87%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Mar</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de abril.')"><div class="fact-bar-value">$555k</div><div class="fact-bar-stack" style="height:81%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">Abr</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de mayo.')"><div class="fact-bar-value">$605k</div><div class="fact-bar-stack" style="height:88%;"><div class="fact-bar-seg" style="height:100%;"></div></div><div class="fact-bar-label">May</div></div>
+          <div class="fact-bar-col" onclick="alert('Navegaría a Proyectos → detalle de junio.')"><div class="fact-bar-value" style="color:var(--teal-deep); font-weight:700;">$687k</div><div class="fact-bar-stack" style="height:100%;"><div class="fact-bar-seg" style="height:100%; background:var(--teal-deep);"></div></div><div class="fact-bar-label">Jun</div></div>
+        </div>
+        <div class="fact-detail-link" onclick="alert('Navegaría a la pantalla completa de Proyectos, con desglose por vendedor y por cliente.')">
+          Ver detalle completo por vendedor y cliente
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <div class="row-summary">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Aprobaciones por validar</div>
+              <div class="panel-sub">Requieren visto bueno de Gerencia</div>
+            </div>
+          </div>
+          <div class="route-item">
+            <div class="route-num">1</div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Orden de compra #1156 — LightCorp</div>
+                <span class="type-tag instalacion">Compras</span>
+              </div>
+              <div class="cal-loc">Monto fuera de rango habitual: $28,400</div>
+            </div>
+          </div>
+          <div class="route-item">
+            <div class="route-num">2</div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Descuento especial — Constructora del Istmo</div>
+                <span class="type-tag garantia">Ventas</span>
+              </div>
+              <div class="cal-loc">15% sobre cotización, fuera de política estándar</div>
+            </div>
+          </div>
+          <div class="route-item">
+            <div class="route-num">3</div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Gasto no presupuestado — Reparación vehículo</div>
+                <span class="type-tag reclamo">Admin.</span>
+              </div>
+              <div class="cal-loc">$1,850, fuera de presupuesto operativo</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Mi calendario</div>
+              <div class="panel-sub sync-tag">Sincronizado con Outlook</div>
+            </div>
+            <div class="pill-toggle">
+              <div class="pill active">Día</div>
+              <div class="pill">Semana</div>
+              <div class="pill">Mes</div>
+            </div>
+          </div>
+          <div class="cal-item">
+            <div class="cal-time">9:00</div>
+            <div class="cal-dot" style="background:#378ADD;"></div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Reunión semanal — Andrés, Luis, Daniela</div>
+                <span class="cal-tag llamada">Reunión</span>
+              </div>
+              <div class="cal-loc">Avance del proyecto AtlanticERP</div>
+            </div>
+          </div>
+          <div class="cal-item">
+            <div class="cal-time">11:00</div>
+            <div class="cal-dot" style="background:var(--teal);"></div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Llamada — Banco Nacional</div>
+                <span class="cal-tag llamada">Llamada</span>
+              </div>
+              <div class="cal-loc">Línea de crédito operativa</div>
+            </div>
+          </div>
+          <div class="cal-item">
+            <div class="cal-time">1:00</div>
+            <div class="cal-dot" style="background:#9ca3af;"></div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Almuerzo</div>
+                <span class="cal-tag almuerzo">Almuerzo</span>
+              </div>
+              <div class="cal-loc">—</div>
+            </div>
+          </div>
+          <div class="cal-item">
+            <div class="cal-time">3:00</div>
+            <div class="cal-dot" style="background:var(--amber);"></div>
+            <div style="flex:1;">
+              <div class="cal-row-top">
+                <div class="cal-text">Revisión mensual con equipo contable externo</div>
+                <span class="cal-tag entrega">Reunión</span>
+              </div>
+              <div class="cal-loc">Resultados de junio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="panel-title" style="margin-bottom:14px;">Salud por módulo</div>
+
+      <div class="module-health-row-2">
+        <div class="module-health-card">
+          <div class="module-health-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l3.6-1 11-11-2.6-2.6-11 11z"/><path d="M14 6.4 17.6 10"/></svg>
+          </div>
+          <div class="module-health-title">Ventas &amp; Diseño</div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">En Final Stage</span>
+            <span class="module-health-metric-value">3</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Estancados</span>
+            <span class="module-health-metric-value warn">4</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Monto cotizado en el mes</span>
+            <span class="module-health-metric-value">$940,500</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Monto cotizado aprobado del mes</span>
+            <span class="module-health-metric-value">$687,000</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Pipeline total</span>
+            <span class="module-health-metric-value">$1.7M</span>
+          </div>
+        </div>
+
+        <div class="module-health-card">
+          <div class="module-health-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 12h6"/><path d="M9 15h6"/></svg>
+          </div>
+          <div class="module-health-title">Admin. &amp; Contab.</div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">CxC total</span>
+            <span class="module-health-metric-value warn">$41,800</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">CxP total</span>
+            <span class="module-health-metric-value">$29,600</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Cuentas al día</span>
+            <span class="module-health-metric-value">76%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-health-row-3">
+        <div class="module-health-card">
+          <div class="module-health-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
+          </div>
+          <div class="module-health-title">Compras</div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Órdenes críticas</span>
+            <span class="module-health-metric-value danger">3</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Bajo stock sin ordenar</span>
+            <span class="module-health-metric-value warn">12</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Próximas a llegar</span>
+            <span class="module-health-metric-value">8</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Cantidad de pedidos</span>
+            <span class="module-health-metric-value">37</span>
+          </div>
+        </div>
+
+        <div class="module-health-card">
+          <div class="module-health-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/><path d="M3 8.5V16l9 4.5 9-4.5V8.5"/><path d="M12 13v7.5"/></svg>
+          </div>
+          <div class="module-health-title">Bodega</div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Despachos urgentes</span>
+            <span class="module-health-metric-value warn">3</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Despachos atrasados</span>
+            <span class="module-health-metric-value danger">2</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Despachado a tiempo</span>
+            <span class="module-health-metric-value">91%</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Completados hoy</span>
+            <span class="module-health-metric-value">9 / 14</span>
+          </div>
+        </div>
+
+        <div class="module-health-card">
+          <div class="module-health-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3 3 0 0 0-4.2 4.2L3 18l3 3 7.5-7.5a3 3 0 0 0 4.2-4.2l-2.6-2.6Z"/></svg>
+          </div>
+          <div class="module-health-title">Servicios</div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Sin responder</span>
+            <span class="module-health-metric-value warn">3</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Resuelto 1ra visita</span>
+            <span class="module-health-metric-value">68%</span>
+          </div>
+          <div class="module-health-metric">
+            <span class="module-health-metric-label">Completados este mes</span>
+            <span class="module-health-metric-value">34</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agenda-grid">
+        <div class="agenda-card">
+          <div class="agenda-head">
+            <div class="agenda-title-row">
+              <div class="agenda-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/><path d="M3 8.5V16l9 4.5 9-4.5V8.5"/><path d="M12 13v7.5"/></svg></div>
+              <div>
+                <div class="agenda-title">Agenda de Bodega — hoy</div>
+                <div class="agenda-sub">4 entregas programadas</div>
+              </div>
+            </div>
+            <button class="agenda-see-detail" onclick="alert('Navegaría a Bodega → Rutas de entrega del día.')">Ver detalle</button>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Bodega → detalle de esta entrega.')">
+            <div class="agenda-time">8:00</div>
+            <div>
+              <div class="agenda-text">Entrega — Torres Pacífico, Bodega Norte</div>
+              <div class="agenda-loc">Reflectores LED exterior · Camión 1</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Bodega → detalle de esta entrega.')">
+            <div class="agenda-time">10:15</div>
+            <div>
+              <div class="agenda-text">Entrega — Hotel Riu, Lobby y piscina</div>
+              <div class="agenda-loc">Iluminación exterior, fase 2 · Camión 1</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Bodega → detalle de esta entrega.')">
+            <div class="agenda-time">1:00</div>
+            <div>
+              <div class="agenda-text">Recolección — Devolución Ferretería Central</div>
+              <div class="agenda-loc">Material sobrante de instalación · Camión 2</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Bodega → detalle de esta entrega.')">
+            <div class="agenda-time">3:30</div>
+            <div>
+              <div class="agenda-text">Entrega — Grupo Vitrio, Fachada LED</div>
+              <div class="agenda-loc">Segundo lote de perfiles · Camión 2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="agenda-card">
+          <div class="agenda-head">
+            <div class="agenda-title-row">
+              <div class="agenda-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3 3 0 0 0-4.2 4.2L3 18l3 3 7.5-7.5a3 3 0 0 0 4.2-4.2l-2.6-2.6Z"/></svg></div>
+              <div>
+                <div class="agenda-title">Agenda de Servicios — hoy</div>
+                <div class="agenda-sub">5 visitas asignadas</div>
+              </div>
+            </div>
+            <button class="agenda-see-detail" onclick="alert('Navegaría a Servicios → Inicio, Rutas del día.')">Ver detalle</button>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Servicios → detalle de este ticket.')">
+            <div class="agenda-time">8:30</div>
+            <div>
+              <div class="agenda-text">Torres Pacífico — Instalación</div>
+              <div class="agenda-loc">Apto 14B, Lobby · Ricardo Moreno</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Servicios → detalle de este ticket.')">
+            <div class="agenda-time">10:30</div>
+            <div>
+              <div class="agenda-text">Residencia Costa del Este — Inspección de garantía</div>
+              <div class="agenda-loc">Falla intermitente · Ricardo Moreno</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Servicios → detalle de este ticket.')">
+            <div class="agenda-time">1:30</div>
+            <div>
+              <div class="agenda-text">Hotel Riu — Instalación</div>
+              <div class="agenda-loc">Iluminación exterior, fase 2 · Ricardo Moreno</div>
+            </div>
+          </div>
+          <div class="agenda-item" onclick="alert('Navegaría a Servicios → detalle de este ticket.')">
+            <div class="agenda-time">4:00</div>
+            <div>
+              <div class="agenda-text">Constructora del Istmo — Reclamo</div>
+              <div class="agenda-loc">Instalación incompleta · Ricardo Moreno</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

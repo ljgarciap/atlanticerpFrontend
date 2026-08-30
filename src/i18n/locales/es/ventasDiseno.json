@@ -1,0 +1,730 @@
+{
+  "nav": {
+    "module": "Ventas & Diseño",
+    "home": "Inicio",
+    "pipeline": "Pipeline",
+    "clients": "Clientes",
+    "quote": "Cotización",
+    "quotesList": "Cotizaciones",
+    "pedidos": "Pedidos",
+    "reports": "Reportes",
+    "auditLog": "Historial"
+  },
+  "scope": {
+    "own": "Inicio",
+    "team": "Equipo"
+  },
+  "filters": {
+    "all": "Todos",
+    "finalStage": "Final Stage",
+    "stagnant": "Estancados",
+    "orderByDays": "Ordenar por días",
+    "orderByValue": "Ordenar por valor"
+  },
+  "stages": {
+    "lead": "Lead",
+    "design": "Diseño",
+    "quote": "Cotización",
+    "proposal": "Propuesta",
+    "approved": "Aprobado",
+    "lost": "Perdido"
+  },
+  "kanban": {
+    "empty": "Sin proyectos",
+    "emptyStagnant": "Sin proyectos estancados",
+    "stagnantTooltip": "Sin movimiento hace {{days}} días",
+    "actions": {
+      "catalog": "Catálogo",
+      "newProject": "+ Nuevo Proyecto",
+      "newQuote": "+ Nueva cotización",
+      "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
+      "orderStatus": "Status de pedidos"
+    }
+  },
+  "tag": {
+    "design": "Diseño",
+    "quote": "Cotización",
+    "both": "Ambos"
+  },
+  "contactRole": {
+    "client": "Cliente",
+    "architect": "Arquitecto",
+    "other": "Otro"
+  },
+  "fileType": {
+    "design": "Archivos de diseño",
+    "proposal": "Archivos de propuesta",
+    "signed_quote": "Cotización firmada",
+    "approval_proof": "Comprobante de aprobación",
+    "photo": "Foto"
+  },
+  "modal": {
+    "name": "Nombre del proyecto",
+    "tag": "Etiqueta",
+    "masterClient": "Cliente Master",
+    "subClient": "Subcliente",
+    "owner": "Responsable",
+    "daysInStage": "Días en etapa",
+    "amount": "Valor",
+    "amountNote": "Se define en Cotizaciones",
+    "workedArea": "Superficie trabajada (m²)",
+    "undefined": "Sin definir aún",
+    "deliveryType": "Fecha estimada de entrega",
+    "deliverySingle": "Única",
+    "deliveryPartial": "Parcial",
+    "deliveryTbd": "Por definir",
+    "deliveryDates": "Fecha(s) de entrega",
+    "observations": "Observaciones",
+    "files": "Archivos",
+    "noFilesYet": "Sin archivos cargados aún",
+    "contacts": "Contactos",
+    "noContacts": "Sin contactos registrados",
+    "contactName": "Nombre",
+    "missingArchitect": "Falta contacto Arquitecto",
+    "notEditableLost": "Este proyecto está en Perdido — no es editable. Usa Reactivar (mover a Lead) desde el tablero.",
+    "notEditableApproved": "Solo un usuario con permiso especial puede editar un proyecto ya Aprobado.",
+    "createNew": "+ Crear \"{{query}}\"",
+    "createError": "No se pudo crear. Revisá los datos e intentá de nuevo.",
+    "subClientTaxId": "RUC",
+    "reactivate": "Reactivar (mover a Lead)",
+    "moveToNext": "Mover a {{stage}}",
+    "markAsLost": "Marcar como Perdido",
+    "createQuote": "Crear cotización",
+    "viewProjectQuotes": "Ver cotizaciones de este proyecto",
+    "stageChangeError": "No se pudo mover la tarjeta de etapa.",
+    "stageChangeMissingContact": "Este Lead no tiene contactos registrados. Agregá al menos uno antes de continuar.",
+    "stageChangeMissingMasterClient": "Falta vincular un Cliente Master. Busca o crea uno para continuar.",
+    "stageChangeMissingSubClient": "Falta vincular un Subcliente. Busca o crea uno para continuar.",
+    "createQuoteMissingArea": "Falta la superficie trabajada. Completala antes de crear la cotización.",
+    "createQuoteMissingFile": "Falta al menos un archivo de diseño. Cargá uno para continuar.",
+    "uploadFileError": "No se pudo cargar el archivo. Revisá el tipo de archivo e intentá de nuevo.",
+    "fileView": "Ver",
+    "fileDownload": "Descargar",
+    "fileUrlError": "No se pudo abrir el archivo. Intentá de nuevo.",
+    "saveError": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
+    "newProject": {
+      "title": "Nuevo Proyecto",
+      "typeLead": "Lead",
+      "typeDesign": "Diseño",
+      "name": "Nombre del proyecto",
+      "noContactsWarning": "Este subcliente no tiene contactos registrados. Haz clic de nuevo para continuar igual.",
+      "photo": "Foto",
+      "designFiles": "Archivos de diseño",
+      "save": "Guardar",
+      "confirmSave": "Confirmar y crear"
+    }
+  },
+  "category": {
+    "a_walkin": "A · WalkIn",
+    "b_architect_designer": "B · Arquitecto o Diseñador",
+    "c_bidding": "C · Licitación",
+    "d_referred": "D · Referido",
+    "none": "Sin definir",
+    "codeA": "A",
+    "codeB": "B",
+    "codeC": "C",
+    "codeD": "D"
+  },
+  "catalog": {
+    "pageTitle": "Catálogo",
+    "pageSubtitle": "Consultá los productos y familias del catálogo — para agregar un ítem a una cotización, usá el buscador dentro de Cotización.",
+    "searchButton": "Buscar en catálogo",
+    "searchPlaceholder": "Buscar por referencia o descripción...",
+    "fuzzyBanner": "No hay coincidencias exactas — mostrando resultados aproximados",
+    "empty": "Sin resultados",
+    "brand": "Marca",
+    "available": "Disponible",
+    "unlimited": "Sin límite",
+    "selectProduct": "Seleccionar producto",
+    "remove": "Quitar",
+    "insufficientStock": "No tienes las unidades necesarias, este producto requiere compra. Faltan {{count}} unidad(es).",
+    "tabSearch": "Buscar",
+    "tabFamilies": "Familias",
+    "familyProductsCount": "{{count}} productos",
+    "familiesEmpty": "No hay familias configuradas",
+    "selectAllProducts": "Seleccionar productos"
+  },
+  "catalogScreen": {
+    "resultsCount_one": "{{count}} producto",
+    "resultsCount_other": "{{count}} productos",
+    "actions": {
+      "inventoryCompras": "Inventario de Compras",
+      "inventoryBodega": "Inventario de Bodega",
+      "sendSelected": "Enviar seleccionados",
+      "sendFull": "Enviar catálogo completo"
+    },
+    "selectAll": "Seleccionar todo",
+    "selectedCount_one": "{{count}} seleccionado",
+    "selectedCount_other": "{{count}} seleccionados",
+    "view": {
+      "grid": "Cuadrícula",
+      "list": "Lista"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por referencia, nombre, descripción, familia o categoría...",
+      "allCategories": "Todas las categorías",
+      "allFamilies": "Todas las familias",
+      "stockAll": "Con o sin stock",
+      "stockWith": "Con stock disponible",
+      "stockWithout": "Sin stock"
+    },
+    "empty": "Sin resultados para los filtros actuales.",
+    "list": {
+      "photo": "Foto",
+      "factoryReference": "Referencia de fábrica",
+      "publicReference": "Referencia pública",
+      "name": "Nombre",
+      "product": "Producto",
+      "category": "Categoría",
+      "price": "Precio",
+      "available": "Disponible",
+      "technicalSheet": "Ficha técnica"
+    },
+    "stock": {
+      "available": "Disponible: {{count}} unidades",
+      "unavailable": "Sin stock disponible",
+      "availableCompact": "{{count}} unid.",
+      "unavailableCompact": "Sin stock",
+      "incoming": "+{{count}} en camino"
+    },
+    "badge": {
+      "ok": "Ficha",
+      "missing": "Sin ficha"
+    },
+    "detail": {
+      "name": "Nombre",
+      "price": "Precio",
+      "category": "Categoría",
+      "family": "Familia",
+      "available": "Disponible",
+      "technicalSheetTitle": "Ficha técnica",
+      "technicalSheetLoaded": "Ficha técnica cargada",
+      "viewDocument": "Ver documento",
+      "viewDocumentError": "No se pudo abrir el documento.",
+      "missingWarning": "Este producto no tiene ficha técnica cargada. Es obligatoria antes de poder ofrecerlo formalmente.",
+      "uploadButton": "+ Cargar ficha técnica",
+      "close": "Cerrar"
+    },
+    "upload": {
+      "title": "Cargar ficha técnica",
+      "hint": "Formatos permitidos: PDF, PNG, JPG.",
+      "noFile": "Selecciona un archivo primero.",
+      "save": "Guardar",
+      "success": "Ficha técnica cargada.",
+      "error": "No se pudo cargar la ficha técnica."
+    },
+    "sendSuccess": "Catálogo enviado. La descarga del PDF comenzó.",
+    "sendError": "No se pudo generar el PDF del catálogo."
+  },
+  "priceType": {
+    "public": "Precio Público",
+    "project": "Precio Proyecto",
+    "special": "Precio Especial",
+    "partner": "Precio Socio",
+    "premium": "Tarifa Premium",
+    "none": "Sin definir",
+    "partnerLocked": "Solo Mark puede asignar Precio Socio."
+  },
+  "clients": {
+    "title": "Clientes",
+    "subtitle": "{{count}} clientes",
+    "staleFilter": "Sin contacto +60 días",
+    "table": {
+      "name": "Nombre",
+      "types": "Tipo(s)",
+      "activeProjects": "Proyectos activos",
+      "lostProjects": "Proyectos perdidos",
+      "totalProjects": "Proyectos totales",
+      "totalAmount": "$ Total proyectos",
+      "closedAmount": "$ Total cerrado",
+      "lastContact": "Último contacto",
+      "actions": "Acciones",
+      "quote": "Cotizar",
+      "viewProjects": "Ver proyectos",
+      "newQuote": "+ Nueva cotización",
+      "empty": "Sin clientes",
+      "daysAgo": "{{days}} días",
+      "never": "Sin contacto registrado"
+    },
+    "actions": {
+      "catalog": "Catálogo",
+      "createClient": "+ Crear cliente",
+      "newQuote": "+ Nueva cotización"
+    },
+    "detail": {
+      "priceType": "Tipo de Precio",
+      "subClients": "Subclientes",
+      "newSubClient": "+ Nuevo subcliente",
+      "viewProjects": "Ver proyectos",
+      "category": "Categoría",
+      "taxId": "RUC",
+      "deliveryAddress": "Dirección de entrega",
+      "contacts": "Contactos",
+      "addContact": "+ Agregar contacto",
+      "editContact": "Editar",
+      "newQuote": "+ Nueva cotización",
+      "newQuoteUnavailable": "Disponible cuando Cotización esté implementada"
+    },
+    "createModal": {
+      "titleClient": "Crear cliente",
+      "titleSubClient": "Nuevo subcliente — {{master}}",
+      "masterClient": "Cliente Master",
+      "businessName": "Subcliente (Razón Social)",
+      "deliveryAddress": "Dirección de entrega",
+      "taxId": "RUC",
+      "category": "Categoría",
+      "priceType": "Tipo de precio",
+      "contacts": "Contactos",
+      "addAnotherContact": "+ Agregar otro contacto",
+      "requiredNote": "Estos campos son obligatorios y deben tener al menos un teléfono o correo por contacto. Sin esto no se puede guardar.",
+      "leadRuleNote": "Este cliente se agregará automáticamente como Lead en Pipeline.",
+      "saveClient": "Guardar cliente",
+      "saveSubClient": "Guardar subcliente",
+      "removeContact": "Quitar"
+    },
+    "projectsModal": {
+      "title": "Proyectos de {{name}}",
+      "subClient": "Subcliente",
+      "project": "Proyecto",
+      "stage": "Etapa",
+      "amount": "Valor",
+      "empty": "Sin proyectos"
+    }
+  },
+  "quotesList": {
+    "title": "Cotizaciones",
+    "newQuote": "+ Nueva cotización",
+    "summary": {
+      "pending": "Total cotizado vigente",
+      "approved": "Aprobado",
+      "lost": "Perdido",
+      "conversion": "Tasa de conversión"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por folio, cliente o proyecto…",
+      "allStages": "Todas",
+      "clear": "Limpiar filtros",
+      "approximate": "No hay coincidencias exactas — mostrando resultados aproximados"
+    },
+    "table": {
+      "folio": "Cotización",
+      "masterClient": "Cliente Master",
+      "subClient": "Subcliente",
+      "project": "Proyecto",
+      "amount": "Monto",
+      "stage": "Etapa",
+      "priceType": "Tipo de precio",
+      "owner": "Responsable",
+      "date": "Fecha",
+      "status": "Estado",
+      "action": "Acción",
+      "view": "Ver cotización",
+      "empty": "Sin cotizaciones todavía",
+      "noStage": "—"
+    },
+    "status": {
+      "draft": "Borrador",
+      "sent": "Enviada",
+      "approved": "Aprobada"
+    },
+    "viewer": {
+      "title": "Cotización",
+      "close": "Cerrar",
+      "edit": "Editar"
+    }
+  },
+  "quote": {
+    "ruc": "RUC / Cédula",
+    "project": "Proyecto",
+    "description": "Descripción",
+    "designer": "Diseñador a cargo",
+    "architect": "Arquitecto",
+    "addExistingContact": "Agregar contacto existente",
+    "addNewContact": "+ Agregar contacto nuevo",
+    "saveBeforeContacts": "Guarda la cotización antes de agregar contactos — el Subcliente todavía no está guardado.",
+    "fillOrderHint": {
+      "needsMasterClient": "Primero escribe o busca Cliente Master.",
+      "needsSubClient": "Primero escribe o busca Cliente Master y Subcliente."
+    },
+    "priceTypeGeneral": "Tipo de precio general",
+    "pricingConfig": {
+      "toggle": "Configurar fórmulas",
+      "title": "Fórmulas de Tipo de Precio",
+      "subtitle": "Porcentajes y divisores usados para calcular Proyecto/Especial/Socio/Premium a partir de Público.",
+      "projectDiscount": "Descuento Precio Proyecto (%)",
+      "specialAdditional": "Descuento adicional Precio Especial (%)",
+      "partnerDivisor": "Divisor Precio Socio (costo ÷ N)",
+      "premiumDivisor": "Divisor Tarifa Premium (costo ÷ N)",
+      "minMargin": "Margen mínimo (%)"
+    },
+    "discountMode": "Modo de descuento",
+    "discountByLine": "Por línea",
+    "discountGlobal": "Global",
+    "parts": "Partidas",
+    "noParts": "Sin partidas todavía",
+    "newPartName": "Nombre de la partida",
+    "addPart": "+ Agregar partida",
+    "subtotal": "Subtotal general",
+    "item": {
+      "reference": "Referencia",
+      "description": "Descripción",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "cost": "Costo",
+      "costHint": "Solo se usa para calcular Tarifa Premium (costo ÷ 0.65)",
+      "premiumIgnoresManualPrice": "No aplica con Tarifa Premium (se calcula desde el costo)",
+      "discount": "Descuento %",
+      "priceType": "Tipo de precio",
+      "total": "Total",
+      "useGeneral": "Usar el general",
+      "addItem": "+ Agregar ítem",
+      "subtotal": "Subtotal",
+      "editPrice": "Editar precio",
+      "catalogPriceReference": "Precio de catálogo",
+      "newPrice": "Nuevo precio"
+    },
+    "observations": "Observaciones",
+    "observationsAutoNote": "La(s) fecha(s) de entrega y, si corresponde, la nota de instalación se agregan automáticamente al documento final.",
+    "includesInstallation": "Esta cotización incluye instalación",
+    "conditions": "Condiciones",
+    "conditionsLocked": "Este texto se definió al crear la cotización. Para cambiarlo en las cotizaciones nuevas, usá Configurar condiciones.",
+    "conditionsConfig": {
+      "toggle": "Configurar condiciones",
+      "title": "Condiciones por defecto",
+      "subtitle": "Este texto se copia a toda cotización nueva desde ahora — las cotizaciones ya generadas conservan el suyo."
+    },
+    "totals": {
+      "title": "Totales",
+      "discount": "Descuento",
+      "net": "Neto",
+      "itbms": "ITBMS (7%)",
+      "grandTotal": "Total"
+    },
+    "validation": {
+      "check": "Verificar cotización",
+      "complete": "La cotización tiene todos los campos obligatorios completos.",
+      "missing": "Falta información"
+    },
+    "saveDraft": "Guardar borrador",
+    "generate": "Guardar y generar cotización",
+    "draftSaved": "Borrador guardado. Puedes retomarlo cuando quieras.",
+    "view": {
+      "form": "Formulario",
+      "preview": "Vista previa",
+      "external": "Vista externa",
+      "unavailable": "Disponible después de generar la cotización"
+    },
+    "edit": "Editar",
+    "viewForm": "Ver formulario",
+    "save": "Guardar",
+    "saved": "Guardada",
+    "saveConfirmModal": {
+      "title": "Guardar cotización",
+      "body": "Está a punto de guardar esta cotización como versión definitiva. Una vez guardada, la cotización quedará registrada en el sistema y será utilizada en el Pipeline, Cotizaciones, Reportes, Dashboard CRM e indicadores correspondientes. Revise cuidadosamente toda la información antes de continuar.",
+      "confirm": "Guardar"
+    },
+    "exitWithoutSavingModal": {
+      "title": "Salir sin guardar",
+      "body": "Está a punto de salir de esta cotización sin guardarla. Si continúa, perderá los cambios realizados y la cotización no quedará registrada en el sistema.",
+      "confirm": "Salir sin guardar"
+    },
+    "marginWarningModal": {
+      "title": "Advertencia de margen mínimo",
+      "body": "La cotización contiene uno o más productos y/o un margen global por debajo del mínimo permitido del {{percent}}%. Los elementos afectados han sido resaltados para facilitar su revisión. Estos cambios pueden afectar la rentabilidad del negocio. ¿Desea continuar de todas formas?",
+      "confirm": "Continuar"
+    },
+    "belowMinMargin": {
+      "item": "Este producto quedó por debajo del margen mínimo permitido ({{percent}}%)",
+      "global": "Los descuentos y ajustes aplicados dejan el margen total de la cotización por debajo del mínimo permitido ({{percent}}%). Revise los descuentos o precios antes de continuar."
+    },
+    "downloadPdf": "Descargar PDF",
+    "returnToPipeline": "Volver a Pipeline"
+  },
+  "document": {
+    "folio": "Cotización N°",
+    "date": "Fecha",
+    "contact": "Contacto",
+    "clientSignature": "Firma del cliente",
+    "checkPayableTo": "Cheque a nombre de",
+    "achPayments": "Pagos por ACH",
+    "achAccount": "CTA CORRIENTE BANCO GENERAL N° 03-01-01-074455-4",
+    "companyName": "ILLUMINATIONS USA CORP",
+    "companyFooter": "ILLUMINATIONS USA CORP - Calle 57 Este, Times Square Plaza - Obarrio (Ciudad de Panamá) · Tel.: +507 269-8051 / +507 269-1828 · info@illuminations.com.pa · www.illuminationslatam.com",
+    "versions": {
+      "title": "Versiones de este proyecto",
+      "version": "N.º",
+      "folio": "Folio",
+      "date": "Fecha de generación",
+      "generatedBy": "Generado por",
+      "total": "Total",
+      "view": "Ver esta versión",
+      "useAsBase": "Usar como base para nueva versión",
+      "useAsBaseError": "No se pudo crear la nueva versión.",
+      "newVersion": "Nueva versión"
+    }
+  },
+  "reports": {
+    "title": "Reportes",
+    "period": {
+      "month": "Mes",
+      "quarter": "Trimestre",
+      "year": "Año"
+    },
+    "surface": {
+      "title": "Superficie trabajada",
+      "subtitle": "Proyectos Aprobados del período"
+    },
+    "bestClients": {
+      "title": "Mejores clientes",
+      "subtitle": "$ Aprobado del período",
+      "empty": "Sin datos todavía",
+      "view": "Ver en Pipeline"
+    },
+    "goals": {
+      "title": "Metas",
+      "subtitle": "Historial real (últimos 6 meses) vs. Meta configurada",
+      "goal": "Meta",
+      "bar": "Vendido",
+      "noGoal": "Sin Meta configurada todavía",
+      "currentMonth": "Mes en curso (parcial)"
+    },
+    "topVendors": {
+      "title": "Top de vendedores",
+      "subtitle": "Solo alcance Equipo",
+      "current": "Mes actual",
+      "alert": "{{months}} meses consecutivos por debajo de ${{threshold}}",
+      "alertBadge": "{{months}} meses bajo umbral"
+    },
+    "commissions": {
+      "title": "Comisiones",
+      "subtitle": "Escalonada mensual sobre pedidos Aprobados",
+      "paid": "Pagadas",
+      "pending": "Por Pagar",
+      "finalStage": "Final Stage",
+      "cohortsTitle": "Detalle por mes",
+      "vendor": "Vendedor",
+      "month": "Mes",
+      "total": "Total",
+      "percent": "%",
+      "commission": "Comisión",
+      "status": "Estado",
+      "markPaid": "Marcar como pagada",
+      "statusPaid": "Pagada",
+      "statusPending": "Pendiente",
+      "empty": "Sin comisiones cerradas todavía"
+    },
+    "forecast": {
+      "title": "Forecast",
+      "subtitle": "Solo alcance Equipo",
+      "bestCase": "Mejor caso",
+      "bestCaseSub": "Todo lo abierto, sin ajustar",
+      "weighted": "Ponderado",
+      "weightedSub": "Ajustado por probabilidad de etapa",
+      "committed": "Comprometido",
+      "committedSub": "Solo lo que está en Propuesta",
+      "closed": "Ya cerrado",
+      "closedSub": "Aprobado real",
+      "meta": "Meta del período",
+      "metaSub": "run-rate",
+      "remaining": "Falta para la meta",
+      "reached": "¡Meta superada!",
+      "probabilityNote": "Cotización {{quote}}% · Propuesta {{proposal}}%",
+      "barClosed": "Ya cerrado",
+      "barProjected": "Ya cerrado + Ponderado del pipeline (proyectado)",
+      "pctOfGoal": "{{pct}}% de la meta",
+      "noteCovers": "El Ponderado del pipeline (${{amount}}) alcanzaría para cubrir lo que falta.",
+      "noteNotCovers": "El Ponderado del pipeline (${{amount}}) no alcanza para cubrir lo que falta (${{remaining}}) — hace falta generar más negocio.",
+      "noteMetaReached": "La meta del período ya está superada con lo realmente cerrado (sin necesitar nada del pipeline abierto).",
+      "tableStage": "Etapa",
+      "tableProjects": "Proyectos",
+      "tableOpenAmount": "$ abierto",
+      "tableProbability": "Probabilidad",
+      "tableWeightedAmount": "$ ponderado"
+    },
+    "config": {
+      "toggle": "Configuración",
+      "goalsTitle": "Meta por vendedor",
+      "goalsSub": "Valor configurado a mano — no es un promedio automático",
+      "vendor": "Vendedor",
+      "goal": "Meta",
+      "goalPlus": "Meta Plus",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "settingsTitle": "Parámetros de alerta y forecast",
+      "lowSalesThreshold": "Umbral de ventas bajas ($)",
+      "lowSalesMonths": "Meses consecutivos para alertar",
+      "quoteProbability": "Probabilidad Cotización (%)",
+      "proposalProbability": "Probabilidad Propuesta (%)"
+    }
+  },
+  "home": {
+    "subtitle": "Hoy tienes {{events}} reuniones y {{pendientes}} pendientes",
+    "wholeTeam": "Equipo completo",
+    "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
+    "performance": {
+      "title": "Mi desempeño",
+      "goal": "Meta del período",
+      "progress": "Avance del período",
+      "unavailable": "Disponible cuando Cotización esté implementada",
+      "noGoal": "Sin meta configurada",
+      "commission": "Comisión generada",
+      "viewCommissions": "Ver detalle de comisiones"
+    },
+    "calendar": {
+      "title": "Mi calendario",
+      "fullTitle": "Calendario completo",
+      "view": { "day": "Día", "week": "Semana", "month": "Mes" },
+      "events": "eventos",
+      "noEvents": "Sin eventos",
+      "viewFull": "Ver calendario completo",
+      "untitled": "(sin título)",
+      "sourceUnavailable": "No se pudo conectar con Outlook en este momento — algunos eventos pueden faltar."
+    },
+    "pendientes": {
+      "title": "Pendientes",
+      "empty": "Sin pendientes",
+      "more": "+ {{count}} pendientes más",
+      "listTitle": "Pendientes — detalle completo",
+      "detailTitle": "Detalle del pendiente",
+      "priority": "Prioridad",
+      "priorityLevel": { "high": "Alta", "medium": "Media" },
+      "suggestion": "Acción sugerida",
+      "go": "Ir",
+      "text": {
+        "no_contact": "{{client}} sin contactar hace {{days}} días",
+        "missing_architect": "Falta contacto Arquitecto — {{client}}"
+      }
+    },
+    "finalStage": {
+      "title": "Final Stage",
+      "empty": "Sin proyectos en Propuesta",
+      "nextStepLabel": "Próximo paso",
+      "nextStep": "En Propuesta hace {{days}} días"
+    },
+    "pipelineSummary": {
+      "title": "Pipeline de proyectos"
+    }
+  },
+  "auditLog": {
+    "title": "Historial y auditoría",
+    "subtitle": "Quién hizo qué cambio y cuándo, en Pipeline, Clientes y Cotizaciones",
+    "filters": {
+      "entityType": "Tipo de entidad",
+      "entityId": "ID de entidad",
+      "userId": "Usuario",
+      "from": "Desde",
+      "to": "Hasta",
+      "clear": "Limpiar filtros",
+      "allTypes": "Todos"
+    },
+    "table": {
+      "date": "Fecha",
+      "user": "Usuario",
+      "action": "Acción",
+      "entity": "Entidad",
+      "changes": "Cambios",
+      "empty": "Sin actividad registrada",
+      "systemUser": "Sistema"
+    },
+    "action": {
+      "created": "Creó",
+      "updated": "Editó",
+      "deleted": "Eliminó"
+    },
+    "entityType": {
+      "pipeline_card": "Tarjeta de Pipeline",
+      "pipeline_card_contact": "Contacto de tarjeta",
+      "pipeline_card_file": "Archivo",
+      "master_client": "Cliente Master",
+      "sub_client": "Subcliente",
+      "sub_client_contact": "Contacto de subcliente",
+      "quote": "Cotización",
+      "quote_part": "Partida",
+      "quote_item": "Ítem",
+      "architect": "Arquitecto"
+    },
+    "pagination": {
+      "page": "Página {{current}} de {{last}}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    }
+  },
+  "orders": {
+    "title": "Pedidos",
+    "subtitle": "Cotizaciones aprobadas — margen cotizado vs. margen real facturado",
+    "actions": {
+      "catalog": "Catálogo",
+      "viewQuotes": "Ver cotizaciones"
+    },
+    "settings": {
+      "toggle": "Configurar umbral",
+      "title": "Umbral de margen",
+      "subtitle": "Puntos porcentuales de caída a partir de los cuales un pedido se marca como \"Margen bajó\"",
+      "threshold": "Umbral (puntos porcentuales)"
+    },
+    "summary": {
+      "total": "Total de pedidos",
+      "totalSub": "Cotizaciones en Aprobado",
+      "variance": "Con variación de margen",
+      "varianceSub": "costo real distinto al cotizado",
+      "quotedAvg": "Margen cotizado promedio",
+      "quotedAvgSub": "de todos los pedidos",
+      "invoicedAvg": "Margen facturado promedio",
+      "invoicedAvgSub": "{{count}} de {{total}} ya facturados por completo",
+      "invoicedAvgEmpty": "—"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por cliente, proyecto o folio...",
+      "allStatuses": "Todos los estados",
+      "clear": "Borrar filtros",
+      "approximate": "No hay coincidencias exactas — mostrando los resultados más parecidos"
+    },
+    "status": {
+      "pendiente": "Pendiente de compra",
+      "igual": "Sin variación",
+      "bajo": "Margen bajó",
+      "mejoro": "Margen mejoró"
+    },
+    "table": {
+      "folio": "Pedido",
+      "masterClient": "Cliente",
+      "project": "Proyecto",
+      "amount": "Monto",
+      "approvedAt": "Fecha aprobación",
+      "quotedMargin": "Margen cotizado",
+      "invoicedMargin": "Margen facturado",
+      "status": "Estado",
+      "action": "Acción",
+      "viewDetail": "Ver detalle",
+      "empty": "No hay pedidos que coincidan con la búsqueda.",
+      "partialSuffix": "(parcial)",
+      "pendingValue": "—"
+    },
+    "detail": {
+      "title": "Detalle del pedido",
+      "headerSub": "{{project}} · Aprobado el {{date}} · {{owner}}",
+      "amount": "Monto del pedido",
+      "quotedMarginTotal": "Margen total cotizado",
+      "invoicedMarginTotal": "Margen total facturado",
+      "pendingCount": "{{count}} de {{total}} producto(s) sin comprar todavía",
+      "allInvoiced": "Todos los productos ya facturados",
+      "alertDrop": "El margen real de este pedido quedó por debajo de lo cotizado ({{quoted}} → {{invoiced}}). Costos de compra más altos de lo esperado.",
+      "alertImprove": "El margen real de este pedido quedó mejor que lo cotizado ({{quoted}} → {{invoiced}}).",
+      "table": {
+        "reference": "Ref.",
+        "description": "Descripción",
+        "quantity": "Cant.",
+        "unitPrice": "Precio venta",
+        "quotedCost": "Costo cotizado",
+        "quotedMargin": "Margen cotizado",
+        "invoicedCost": "Costo facturado",
+        "invoicedMargin": "Margen facturado",
+        "diff": "Diferencia",
+        "total": "TOTAL",
+        "pending": "Pendiente de compra",
+        "noVariance": "Sin variación",
+        "pendingValue": "—"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "title": "AI Usage",
+  "subtitle": "Token consumption and estimated cost of every Claude call, by user and module.",
+  "empty": "No usage recorded yet.",
+  "unknownUser": "Unknown user",
+  "totals": {
+    "currentMonth": "Current month",
+    "allTime": "All time",
+    "tokens": "{{input}} in / {{output}} out"
+  },
+  "table": {
+    "date": "Date",
+    "requestedBy": "User",
+    "module": "Module",
+    "document": "Document",
+    "model": "Model",
+    "tokens": "Tokens (in/out)",
+    "cost": "Cost"
+  }
+}

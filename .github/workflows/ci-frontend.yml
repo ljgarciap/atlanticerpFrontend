@@ -1,0 +1,257 @@
+# =============================================================================
+# AtlanticERP Frontend — CI/CD
+#
+# CI:  TypeScript check (tsc) + Vite build + Vitest.
+#      Corre en todo push y en toda PR a cualquier rama.
+#
+# CD:  rsync de dist/ al EC2 correspondiente vía SSH.
+#      dev    → EC2_DEV_HOST  (dev.atlanticerp.ai)   — solo en push a `dev`
+#      test   → EC2_TEST_HOST (test.atlanticerp.ai)  — solo en push a `test`
+#      master → EC2_PROD_HOST (atlanticerp.ai)        — solo en push a `master`
+#
+# Secrets requeridos (GitHub → Settings → Secrets and variables → Actions):
+#   EC2_DEV_HOST    — IP del EC2 de dev   (dev.atlanticerp.ai)
+#   EC2_TEST_HOST   — IP del EC2 de test  (test.atlanticerp.ai)
+#   EC2_PROD_HOST   — IP del EC2 de prod  (atlanticerp.ai)
+#   EC2_SSH_KEY     — Clave privada SSH (PEM); el par público debe estar
+#                     en /home/ubuntu/.ssh/authorized_keys de cada EC2.
+#
+# GitHub Environments a configurar (Settings → Environments):
+#   dev   — sin protección (deploy automático en cada push a `dev`)
+#   test  — sin protección (deploy automático en cada push a `test`)
+#   prod  — añadir "Required reviewers: Luis" antes de activar
+# =============================================================================
+
+name: CI/CD Frontend
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — CI: Vitest + Vite build (tsc incluido en el build)
+  # ─────────────────────────────────────────────────────────────────────────────
+  ci:
+    name: CI — Build + Tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Node 20 LTS: soportado por Vite 5, Vitest 1.x y disponible en las AMIs
+      # Ubuntu 22.04 de los EC2. `cache: 'npm'` acelera instalaciones posteriores.
+      - name: Configurar Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # --frozen-lockfile garantiza reproducibilidad exacta del package-lock.json.
+      - name: Instalar dependencias npm
+        run: npm ci
+
+      # Vitest corre ANTES del build para detectar fallos de lógica primero.
+      # Si no existen tests todavía, Vitest sale con código 0 (no falla el CI).
+      # --coverage: solo visibilidad por ahora (sin thresholds), fase 1 del
+      # tracking de coverage, ver SCRUM-50. El umbral se fija cuando haya un
+      # número base real.
+      - name: Vitest (tests unitarios + coverage)
+        run: npm run test:coverage
+
+      - name: Subir reporte de coverage como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage/
+          retention-days: 14
+
+      # "npm run build" ejecuta "tsc && vite build" (ver package.json).
+      # tsc valida tipos TypeScript; vite build produce dist/ con los estáticos
+      # optimizados. Si tsc falla, el build falla aquí antes del rsync.
+      # El plugin versionJson escribe dist/version.json con { ts: <epoch> }
+      # para que useDevLiveReload detecte nuevos deploys y recargue el navegador.
+      - name: Build Vite (tsc + bundle)
+        run: npm run build
+
+      # Aserción explícita: si dist/ está vacío por algún bug de config, falla
+      # el CI antes de enviar un rsync vacío al EC2.
+      - name: Verificar dist/
+        run: |
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "ERROR: dist/ no existe o está vacío después del build."
+            exit 1
+          fi
+          echo "dist/ OK — $(find dist -type f | wc -l) archivos generados."
+
+      # dist/ se sube como artifact para que los jobs de CD lo descarguen sin
+      # re-buildear. Retención de 1 día: el CD corre inmediatamente.
+      - name: Subir dist/ como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — CD dev: rsync a dev.atlanticerp.ai (solo en push a `dev`)
+  # ─────────────────────────────────────────────────────────────────────────────
+  deploy-dev:
+    name: CD — Deploy dev.atlanticerp.ai
+    needs: ci
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    environment:
+      name: dev
+      url: https://dev.atlanticerp.ai
+
+    steps:
+      - name: Descargar dist/
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+
+      - name: Instalar rsync
+        run: sudo apt-get install -y rsync
+
+      - name: Preparar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_DEV_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      # rsync en lugar de scp porque transfiere solo los archivos que cambiaron
+      # y --delete elimina assets obsoletos del servidor.
+      # /var/www/static/ es el directorio que el contenedor nginx monta como
+      # /var/www/frontend (ver infra/nginx/default.conf del backend).
+      - name: rsync dist/ → EC2 (dev)
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            dist/ \
+            ubuntu@"${{ secrets.EC2_DEV_HOST }}":/var/www/static/
+
+      # nginx -s reload es graceful: recarga la config sin cerrar conexiones activas.
+      # El path al compose usa /var/www/backend (donde el repo está clonado en EC2).
+      - name: Recargar nginx en EC2 (dev)
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              ubuntu@"${{ secrets.EC2_DEV_HOST }}" \
+              "docker compose -f /var/www/backend/infra/docker-compose.qa.yml \
+               exec -T nginx nginx -s reload"
+
+      - name: Limpiar clave SSH
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — CD test: rsync a test.atlanticerp.ai (solo en push a `test`)
+  # ─────────────────────────────────────────────────────────────────────────────
+  deploy-test:
+    name: CD — Deploy test.atlanticerp.ai
+    needs: ci
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/test'
+    environment:
+      name: test
+      url: https://test.atlanticerp.ai
+
+    steps:
+      - name: Descargar dist/
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+
+      - name: Instalar rsync
+        run: sudo apt-get install -y rsync
+
+      - name: Preparar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_TEST_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: rsync dist/ → EC2 (test)
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            dist/ \
+            ubuntu@"${{ secrets.EC2_TEST_HOST }}":/var/www/static/
+
+      - name: Recargar nginx en EC2 (test)
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              ubuntu@"${{ secrets.EC2_TEST_HOST }}" \
+              "docker compose -f /var/www/backend/infra/docker-compose.qa.yml \
+               exec -T nginx nginx -s reload"
+
+      - name: Limpiar clave SSH
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 4 — CD prod: rsync a atlanticerp.ai (solo en push a `master`)
+  # ─────────────────────────────────────────────────────────────────────────────
+  # IMPORTANTE: antes de activar deploys a prod, configurar el Environment `prod`
+  # en GitHub con "Required reviewers: Luis" para exigir aprobación manual.
+  deploy-prod:
+    name: CD — Deploy atlanticerp.ai (PRODUCCIÓN)
+    needs: ci
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment:
+      name: prod
+      url: https://atlanticerp.ai
+
+    steps:
+      - name: Descargar dist/
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+
+      - name: Instalar rsync
+        run: sudo apt-get install -y rsync
+
+      - name: Preparar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_PROD_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: rsync dist/ → EC2 (prod)
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            dist/ \
+            ubuntu@"${{ secrets.EC2_PROD_HOST }}":/var/www/static/
+
+      # prod usa docker-compose.prod.yml
+      - name: Recargar nginx en EC2 (prod)
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              ubuntu@"${{ secrets.EC2_PROD_HOST }}" \
+              "docker compose -f /var/www/backend/infra/docker-compose.prod.yml \
+               exec -T nginx nginx -s reload"
+
+      - name: Limpiar clave SSH
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

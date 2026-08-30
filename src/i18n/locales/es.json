@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "AtlanticERP",
+    "brand": "ILLUMINATIONS",
+    "module": "ATLANTICERP",
+    "nav": {
+      "dashboard": "Dashboard",
+      "pipeline": "Pipeline",
+      "projects": "Lista de Proyectos"
+    },
+    "actions": {
+      "logout": "Cerrar sesión",
+      "newProject": "+ Nuevo Proyecto",
+      "login": "Iniciar sesión",
+      "loggingIn": "Iniciando sesión..."
+    },
+    "labels": {
+      "email": "Email",
+      "password": "Contraseña",
+      "loading": "Cargando...",
+      "loadingProjects": "Cargando proyectos..."
+    },
+    "roles": {
+      "gerencia": "Gerencia",
+      "disenador": "Diseñador",
+      "lider": "Supervisor",
+      "electrico": "Electricista"
+    }
+  }
+}

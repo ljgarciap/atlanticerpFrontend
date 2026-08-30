@@ -1,0 +1,330 @@
+{
+  "nav": {
+    "security": "Security",
+    "users": "Users",
+    "levels": "Security Levels",
+    "departments": "Departments",
+    "alerts": "Security Alerts",
+    "notificationRules": "Notification Rules",
+    "roles": "Roles"
+  },
+  "alerts": {
+    "title": "Security Alerts",
+    "subtitle": "Anomalies detected by the daily analysis — no action runs without your confirmation",
+    "empty": "No alerts for this filter.",
+    "affectedUser": "Affected user",
+    "userUnknown": "Unidentified",
+    "reviewedBy": "Reviewed by {{name}}",
+    "filters": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "dismissed": "Dismissed",
+      "all": "All"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "dismissed": "Dismissed"
+    },
+    "actions": {
+      "confirmBlock": "Confirm block",
+      "dismiss": "Dismiss",
+      "unblock": "Unblock user"
+    }
+  },
+  "levels": {
+    "title": "Security Levels",
+    "subtitle": "Define system access levels 1-10",
+    "editTitle": "Edit security level",
+    "descriptions": {
+      "1":  "View access only. Cannot create, edit or delete any record.",
+      "2":  "Can view and create records. Cannot edit or delete.",
+      "3":  "Can view, create and edit records. Cannot delete or export.",
+      "4":  "Full record management including export. Cannot manage users.",
+      "5":  "Default level. Full record management plus limited user visibility.",
+      "6":  "Can manage users within their department.",
+      "7":  "Can manage users and configure security groups and departments.",
+      "8":  "Full access to all modules plus global settings management.",
+      "9":  "System administrator. All permissions except superadmin-exclusive actions.",
+      "10": "Unrestricted access. Exclusive to superadmin role. Can assign any level."
+    },
+    "table": {
+      "columns": {
+        "level": "Level",
+        "name": "Name",
+        "description": "Description",
+        "permissions": "Permissions",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "permissions": "Enabled permissions",
+      "superAdminLocked": "Level 10 — Super Admin is not editable",
+      "superadminWarning": "Level 10 (Super Admin) permissions cannot be modified."
+    },
+    "actions": {
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "messages": {
+      "updateSuccess": "Level updated successfully",
+      "activateSuccess": "Level activated",
+      "deactivateSuccess": "Level deactivated"
+    },
+    "permissionsMatrix": {
+      "action": "Permissions",
+      "title": "Module permissions matrix",
+      "module": "Module",
+      "canEdit": "Create/Edit",
+      "canApprove": "Approve"
+    }
+  },
+  "users": {
+    "title": "Active users",
+    "hierarchyGuardTooltip": "You cannot manage users at or above your own level",
+    "inactiveTitle": "Inactive users",
+    "tabs": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "columns": {
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "roles": "Roles",
+        "role": "Role",
+        "department": "Department",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "filters": {
+      "allRoles": "All roles"
+    },
+    "form": {
+      "titleCreate": "New user",
+      "titleEdit": "Edit user",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "If left blank, the default password will be the user's email address.",
+      "phone": "Phone",
+      "department": "Department",
+      "securityLevel": "Security level",
+      "notes": "Notes",
+      "noDepartment": "No department",
+      "noLevel": "No level",
+      "baseRole": "Base role",
+      "noRole": "Select a role...",
+      "additionalRoles": "Additional roles",
+      "additionalRolesHint": "Superadmin exception — a user can hold more than one role besides the base",
+      "summary": {
+        "baseRole": "Base role",
+        "additionalRoles": "Additional roles",
+        "flags": "Exceptions",
+        "none": "none"
+      },
+      "flags": {
+        "title": "Cross-cutting permissions",
+        "approveLargeAmounts": "Approve amounts >$5,000",
+        "manageUsers": "Manage users"
+      },
+      "extraPermissions": "Extra permissions",
+      "extraPermissionsHint": "Individual grants on top of the security level's permissions",
+      "permLabels": {
+        "crm.read":       "CRM — View",
+        "crm.write":      "CRM — Create",
+        "crm.edit":       "CRM — Edit",
+        "crm.delete":     "CRM — Delete",
+        "reports.read":   "Reports — View",
+        "reports.export": "Reports — Export",
+        "ai.use":         "AI — Use",
+        "security.users":  "Security — Users",
+        "security.levels": "Security — Levels",
+        "settings.global": "Global settings",
+        "superadmin.all":  "Superadmin — All"
+      }
+    },
+    "actions": {
+      "create": "New user",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "view": "View",
+      "resetMfa": "Reset MFA",
+      "visibility": "Navigation permissions",
+      "bulkVisibility": "Module visibility (UAT)"
+    },
+    "visibility": {
+      "title": "Navigation permissions",
+      "subtitle": "Exceptions for this person, on top of their role's visibility. A module or item left unchecked here inherits whatever the role already has."
+    },
+    "bulkVisibility": {
+      "title": "Module visibility by UAT stage",
+      "subtitle": "Hides or restores modules and access for ALL non-superadmin users at once — useful for rolling out modules stage by stage. Superadmin is never affected. Doesn't change any real permission, only what shows in the menu. Takes effect the next time each user logs in or refreshes their session.",
+      "modulesGroup": "Modules",
+      "catalogGroup": "Other access",
+      "catalogInventoryCompras": "Catalog — Purchasing Inventory",
+      "catalogInventoryBodega": "Catalog — Warehouse Inventory",
+      "configuracion": "Settings",
+      "helper": "The checkbox marks what will be included in the next action (Hide/Restore) — it is not the current state. Each row's real state shows in the Hidden/Visible label.",
+      "stateHidden": "Hidden",
+      "stateVisible": "Visible",
+      "hide": "Hide for everyone",
+      "restore": "Restore for everyone",
+      "hideSuccess": "Hidden: {{items}}.",
+      "restoreSuccess": "Restored: {{items}}.",
+      "noChanges": "No changes — the selection was already in that state.",
+      "selectAtLeastOne": "Pick at least one module or access before applying."
+    },
+    "messages": {
+      "createSuccess": "User created successfully",
+      "updateSuccess": "User updated successfully",
+      "deactivateSuccess": "User deactivated",
+      "activateSuccess": "User activated",
+      "deactivateConfirm": "Deactivate this user? They will not be able to log in until reactivated.",
+      "resetMfaConfirm": "Reset two-step verification for {{name}}? They will have no MFA until they re-enable it from their profile."
+    },
+    "pending": {
+      "tabLabel": "Pending",
+      "title": "Pending access requests",
+      "empty": "No pending requests",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "department": "Area",
+        "requested": "Requested",
+        "actions": "Actions"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectConfirm": "Reject this request? The user will be permanently deleted.",
+      "approveTitle": "Approve request",
+      "approveSubtitle": "Assign a role and security level to activate the account.",
+      "role": "Role",
+      "selectRole": "Select a role...",
+      "securityLevel": "Security level",
+      "selectLevel": "Select a level...",
+      "confirmApprove": "Approve & activate",
+      "approving": "Approving...",
+      "messages": {
+        "approved": "Account approved successfully",
+        "rejected": "Request rejected"
+      }
+    }
+  },
+  "roles": {
+    "title": "Roles",
+    "subtitle": "Role catalog and module visibility (ADR-006)",
+    "system": "System",
+    "table": {
+      "columns": {
+        "name": "Role",
+        "key": "Key",
+        "defaultLevel": "Default level"
+      }
+    },
+    "actions": {
+      "create": "+ New role",
+      "visibility": "Visibility"
+    },
+    "deleteConfirm": "Delete role \"{{name}}\"? Users assigned to it will be left without a base role.",
+    "form": {
+      "titleCreate": "New role",
+      "titleEdit": "Edit role",
+      "key": "Key",
+      "keyFormat": "Lowercase letters, numbers and underscore only, must start with a letter",
+      "keyImmutable": "The key cannot be edited once the role is created",
+      "name": "Name",
+      "defaultLevel": "Default security level",
+      "noDefaultLevel": "No default level"
+    },
+    "modules": {
+      "ventas_diseno": "Sales & Design",
+      "compras": "Purchasing",
+      "bodega": "Warehouse",
+      "servicios": "Services",
+      "admin_contab": "Admin & Accounting",
+      "gerencia": "Management",
+      "operaciones": "Operations"
+    },
+    "visibility": {
+      "title": "Module visibility",
+      "viewNone": "None",
+      "viewReadonly": "Read only",
+      "viewFull": "Full",
+      "viewTeam": "Views team"
+    }
+  },
+  "departments": {
+    "title": "Departments",
+    "table": {
+      "empty": "No departments",
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "form": {
+      "titleCreate": "New department",
+      "titleEdit": "Edit department",
+      "name": "Name"
+    },
+    "actions": {
+      "create": "New department"
+    },
+    "messages": {
+      "createSuccess": "Department created",
+      "updateSuccess": "Department updated"
+    }
+  },
+  "notificationRules": {
+    "title": "Notification Rules",
+    "actions": { "create": "New rule" },
+    "table": {
+      "name": "Name",
+      "trigger": "Trigger",
+      "channels": "Channels",
+      "status": "Status",
+      "empty": "No rules configured"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "E.g. Notify Management when a project closes",
+      "model": "Model",
+      "event": "Event",
+      "field": "Field",
+      "anyEvent": "Any event (no field condition)",
+      "operator": "Operator",
+      "value": "Comparison value",
+      "recipientType": "Recipients",
+      "recipientValue": "Choose",
+      "channels": "Channels"
+    },
+    "events": {
+      "created": "Is created",
+      "updated": "Is updated"
+    },
+    "recipientTypes": {
+      "user": "Specific users",
+      "role": "Whole role",
+      "projectAssignees": "Project assignees"
+    },
+    "channels": {
+      "in_app": "In-app (bell)",
+      "email": "Email"
+    }
+  }
+}

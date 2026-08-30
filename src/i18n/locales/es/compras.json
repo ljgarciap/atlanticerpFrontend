@@ -1,0 +1,1129 @@
+{
+  "home": {
+    "greeting": "Hola, {{name}}",
+    "subtitle": "Hoy tienes {{meetings}} reuniones y {{pendientes}} pendientes",
+    "actions": {
+      "providers": "Proveedores",
+      "newOrder": "+ Nueva orden de compra"
+    },
+    "resumenMes": {
+      "title": "Resumen del mes",
+      "comprado": "Comprado en {{month}}",
+      "onTime": "Entregado a tiempo",
+      "onTimeUnavailable": "Sin datos",
+      "delayed": "Productos retrasados",
+      "lowStock": "Bajo stock",
+      "outOfStock": "Sin stock"
+    },
+    "calendar": {
+      "title": "Mi calendario",
+      "view": {
+        "day": "Día",
+        "week": "Semana",
+        "month": "Mes"
+      },
+      "noEvents": "Sin eventos",
+      "viewFull": "Ver calendario completo"
+    },
+    "pendientes": {
+      "title": "Pendientes",
+      "empty": "Sin pendientes",
+      "viewAll": "Ver todas",
+      "text": {
+        "orden_sin_aprobar": "Orden #{{id}} sin aprobar hace {{days}} días",
+        "llegada_vencida": "Orden #{{id}} — {{days}} días sobre el lead time"
+      },
+      "detailTitle": "Detalle del pendiente",
+      "priority": "Severidad",
+      "priorityLevel": {
+        "alta": "Alta",
+        "media": "Media"
+      },
+      "suggestion": "Acción sugerida",
+      "provider": "Proveedor",
+      "amount": "Monto"
+    },
+    "ordenesCriticas": {
+      "title": "Órdenes críticas",
+      "empty": "Sin órdenes críticas",
+      "viewAll": "Ver todas",
+      "detailTitle": "Detalle de la orden",
+      "motivo": "Motivo",
+      "provider": "Proveedor",
+      "amount": "Monto"
+    },
+    "estadoCompras": {
+      "title": "Estado de compras"
+    },
+    "porReordenar": {
+      "title": "Por reordenar",
+      "empty": "Nada por reordenar",
+      "stock": "Stock",
+      "reorderPoint": "Punto de reorden",
+      "provider": "Proveedor sugerido",
+      "generateOrder": "Generar orden"
+    },
+    "viewOrder": "Ver orden"
+  },
+  "nav": {
+    "module": "Compras",
+    "home": "Inicio",
+    "providers": "Proveedores",
+    "orders": "Ver Órdenes",
+    "newOrder": "Nueva Orden",
+    "logistics": "Logística & Envío",
+    "goodsReceipts": "Ver registros de ingreso",
+    "agencies": "Agencias de Liquidación",
+    "payments": "Pagos a Proveedores",
+    "claims": "Garantías & Reclamos",
+    "replacements": "Comparación de Referencias",
+    "reports": "Reportes",
+    "ordersMenu": "Órdenes",
+    "catalogStockMenu": "Catálogo y Stock",
+    "paymentsMenu": "Pagos"
+  },
+  "providers": {
+    "title": "Proveedores",
+    "subtitle": "{{count}} proveedores",
+    "actions": {
+      "create": "Agregar proveedor"
+    },
+    "kpis": {
+      "total": "Total de proveedores",
+      "averageRating": "Calificación promedio",
+      "lowRating": "Calificación baja",
+      "categories": "Categorías activas"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar proveedor…",
+      "allCategories": "Todas las categorías",
+      "lowRatingChip": "Calificación baja",
+      "ratingMin": "Calificación mín.",
+      "ratingMax": "Calificación máx.",
+      "clear": "Limpiar filtros"
+    },
+    "table": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "contact": "Contacto",
+      "rating": "Calificación",
+      "lastPurchase": "Última compra",
+      "actions": "Ver detalle",
+      "empty": "Sin proveedores registrados",
+      "notRated": "Sin calificar",
+      "noPurchases": "Sin compras registradas aún",
+      "noContact": "Sin contacto registrado"
+    }
+  },
+  "providerForm": {
+    "titleCreate": "Nuevo proveedor",
+    "titleEdit": "Editar proveedor",
+    "titleDetail": "Detalle del proveedor",
+    "sections": {
+      "general": "Información general",
+      "contact": "Contacto",
+      "bank": "Datos bancarios"
+    },
+    "fields": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "currency": "Moneda",
+      "isActive": "Activo",
+      "contactName": "Nombre de contacto",
+      "whatsapp": "WhatsApp",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "address": "Dirección",
+      "country": "País",
+      "bankName": "Banco",
+      "bankAccountNumber": "Cuenta / IBAN",
+      "bankSwift": "SWIFT (si aplica)",
+      "bankBeneficiary": "Beneficiario"
+    },
+    "category": {
+      "locales": "Locales",
+      "zona_libre": "Zona Libre",
+      "china": "China",
+      "europa": "Europa",
+      "online": "Online"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio",
+      "categoryRequired": "La categoría es obligatoria",
+      "countryRequired": "El país es obligatorio",
+      "contactRequired": "Ingresa al menos un medio de contacto (WhatsApp, teléfono o correo)"
+    },
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "edit": "Editar"
+    },
+    "errors": {
+      "generic": "No se pudo guardar el proveedor. Intentá de nuevo."
+    }
+  },
+  "newOrder": {
+    "title": "Nueva Orden",
+    "steps": {
+      "provider": "Proveedor",
+      "products": "Productos",
+      "lines": "Líneas de la orden",
+      "done": "Orden creada"
+    },
+    "provider": {
+      "searchPlaceholder": "Buscar proveedor…",
+      "newProvider": "+ Nuevo proveedor",
+      "change": "Cambiar proveedor",
+      "changeWarning": "Cambiar de proveedor reinicia los productos ya agregados."
+    },
+    "products": {
+      "searchPlaceholder": "Buscar producto del catálogo…",
+      "newProduct": "+ Producto nuevo",
+      "add": "Agregar",
+      "empty": "Este proveedor todavía no tiene productos en el catálogo."
+    },
+    "newProduct": {
+      "title": "Producto nuevo",
+      "name": "Nombre del producto",
+      "reference": "Referencia pública",
+      "factoryReference": "Referencia de fábrica",
+      "description": "Descripción",
+      "brand": "Marca",
+      "priceFull": "Precio de lista",
+      "cost": "Costo",
+      "reorderPoint": "Punto de reorden",
+      "category": "Categoría",
+      "categories": {
+        "candelabros_colgantes": "Candelabros y Colgantes",
+        "iluminacion_techo": "Iluminación de Techo",
+        "apliques_pared": "Apliques de Pared",
+        "iluminacion_bano": "Iluminación de Baño",
+        "iluminacion_exterior": "Iluminación Exterior",
+        "lamparas_piso_mesa": "Lámparas de Piso y Mesa",
+        "iluminacion_empotrada": "Iluminación Empotrada",
+        "bombillos": "Bombillos"
+      },
+      "rotation": "Rotación esperada",
+      "rotations": {
+        "alta": "Alta",
+        "media": "Media",
+        "baja": "Baja",
+        "unica": "Compra única"
+      },
+      "additionalCost": "Costo adicional estimado (importación, flete, etc.)",
+      "additionalCostMonto": "$ monto",
+      "additionalCostPorcentaje": "% del costo",
+      "additionalCostEstimate": "Estimado: {{amount}} por unidad",
+      "validation": {
+        "duplicateReference": "Esta referencia pública ya está en uso",
+        "duplicateFactoryReference": "Esta referencia ya existe para este proveedor"
+      }
+    },
+    "lines": {
+      "product": "Producto",
+      "factoryRef": "Ref. fábrica",
+      "publicRef": "Referencia pública",
+      "quantity": "Cantidad",
+      "unitCost": "Costo unitario",
+      "subtotal": "Subtotal",
+      "project": "Proyecto",
+      "projectNone": "Ninguno (stock)",
+      "projectSearchPlaceholder": "Buscar pedido aprobado…",
+      "remove": "Quitar",
+      "empty": "Todavía no agregaste productos a esta orden.",
+      "total": "Total de la orden"
+    },
+    "modality": {
+      "label": "Modalidad",
+      "directo": "Directo",
+      "zonaLibre": "Zona Libre"
+    },
+    "shipping": {
+      "type": "Tipo de envío",
+      "typeAereo": "Aéreo",
+      "typeMaritimo": "Marítimo",
+      "typeTerrestre": "Terrestre",
+      "whoPays": "¿Quién paga el envío?",
+      "whoPaysIlluminations": "Illuminations",
+      "whoPaysCliente": "Cliente",
+      "cost": "Costo del envío aéreo",
+      "estimatedArrival": "Llegada estimada",
+      "markApprovalNotice": "Esta orden quedará pendiente de aprobación de Mark (envío aéreo pagado por Illuminations)."
+    },
+    "actions": {
+      "next": "Siguiente",
+      "back": "Atrás",
+      "submit": "Crear orden",
+      "approve": "Aprobar orden"
+    },
+    "success": {
+      "title": "Orden creada",
+      "message": "La orden #{{id}} quedó registrada en \"Por aprobar\".",
+      "requiresApproval": "Esta orden requiere la aprobación de Mark antes de avanzar."
+    },
+    "errors": {
+      "generic": "No se pudo crear la orden. Revisá los datos e intentá de nuevo."
+    }
+  },
+  "orders": {
+    "title": "Ver Órdenes",
+    "subtitle": "{{count}} órdenes",
+    "originServicios": "Origen: Servicios",
+    "actions": {
+      "create": "+ Nueva orden",
+      "edit": "Editar orden",
+      "advance": "Avanzar estado",
+      "advanceTo": "Avanzar a: {{status}}",
+      "advanceRemainderTo": "Completar etapa del remanente: {{status}}",
+      "advanceRemainderCta": "Completar etapa del remanente",
+      "confirmPendingReceiptsCta": "Ingresar a Inventario",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "viewPdf": "Ver PDF",
+      "viewOrderPdf": "Ver Orden (PDF)",
+      "sendEmail": "Enviar por correo",
+      "liquidate": "Liquidar",
+      "changeAgency": "Cambiar empresa"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por N.º de orden o proveedor…",
+      "allProviders": "Todos los proveedores",
+      "allStatuses": "Todos los estados",
+      "allCreators": "Todos los responsables",
+      "projectPlaceholder": "Buscar proyecto…",
+      "clearProject": "Quitar proyecto",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "all": "Todas",
+      "critical": "Críticas",
+      "zonaLibre": "Zona Libre"
+    },
+    "table": {
+      "id": "Orden",
+      "provider": "Proveedor",
+      "status": "Estado",
+      "modality": "Modalidad",
+      "shippingType": "Tipo de envío",
+      "orderDate": "Fecha de orden",
+      "estimatedArrival": "Llegada estimada",
+      "paymentDate": "Fecha de pago",
+      "total": "Total",
+      "shippingCost": "Costo de envío",
+      "project": "Proyecto asignado",
+      "projectNone": "Ninguno (stock)",
+      "projectMultiple": "{{count}} proyectos",
+      "reception": "Recepción",
+      "responsible": "Responsable",
+      "actions": "Acciones",
+      "empty": "Sin órdenes registradas",
+      "critical": "Crítica"
+    },
+    "projectBreakdown": {
+      "title": "Desglose por proyecto — Orden #{{id}}",
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "project": "Proyecto"
+    },
+    "status": {
+      "por_aprobar": "Por aprobar",
+      "pendiente_liquidar": "Pendiente por liquidar",
+      "pendienteLiquidarDirecto": "Pendiente",
+      "pendienteLiquidarZonaLibre": "Por liquidar",
+      "ordenado": "Ordenado",
+      "en_transito": "En tránsito",
+      "en_aduana": "En aduana",
+      "en_transito_local": "En tránsito local",
+      "recibido": "Recibido"
+    },
+    "detail": {
+      "title": "Orden #{{id}}",
+      "markBlocked": "Esta orden requiere la aprobación de Mark antes de poder avanzar.",
+      "markApproved": "Aprobada por {{name}}",
+      "pendingRemainder": "Recepción parcial — lo ya recibido quedó registrado. El remanente sigue en etapa \"{{stage}}\" y su flujo continúa con normalidad; solo el paso final de esta orden a \"Recibido\" queda pendiente hasta registrar el ingreso de ese remanente.",
+      "editOnlyWhilePending": "Solo se puede editar una orden mientras está \"Por aprobar\".",
+      "includeCost": "Incluir costo",
+      "emailSent": "Correo enviado",
+      "moreActions": "Más acciones",
+      "liquidatingWith": "Liquidando con: {{agency}}",
+      "liquidationAgencyNone": "Sin asignar",
+      "agencySearchPlaceholder": "Buscar agencia…",
+      "newAgency": "+ Agencia nueva",
+      "newAgencyPlaceholder": "Nombre de la agencia",
+      "summary": {
+        "provider": "Proveedor",
+        "status": "Estado",
+        "orderDate": "Fecha de orden",
+        "estimatedArrival": "Llegada estimada",
+        "responsible": "Responsable",
+        "project": "Proyecto asignado",
+        "modality": "Modalidad de ingreso",
+        "shippingType": "Tipo de envío",
+        "paymentDate": "Fecha de pago"
+      },
+      "payments": {
+        "title": "Pagos a Proveedores",
+        "status": "Estado de pago",
+        "statusValue": {
+          "pendiente": "Pendiente",
+          "parcial": "Pago parcial",
+          "completo": "Pago completo"
+        },
+        "paid": "Pagado",
+        "balance": "Saldo pendiente",
+        "requestPayment": "Enviar a pago",
+        "registerPayment": "Registrar pago",
+        "requestAmountChange": "Cambiar monto",
+        "amount": "Monto",
+        "newAmount": "Nuevo monto",
+        "registerError": "No se pudo registrar el pago.",
+        "requestAmountChangeError": "No se pudo solicitar el cambio de monto.",
+        "pendingAmountChange": "Cambio de monto pendiente: ${{amount}} — esperando aprobación de Mark",
+        "pendingAmountChangeBlocksActions": "Mientras esta aprobación esté pendiente, no se puede enviar a pago ni registrar un pago.",
+        "approveAmountChange": "Aprobar cambio",
+        "approveAmountChangeError": "No se pudo aprobar el cambio de monto.",
+        "rejectAmountChange": "Rechazar cambio",
+        "rejectAmountChangeError": "No se pudo rechazar el cambio de monto.",
+        "history": "Historial de pagos",
+        "historyEmpty": "Todavía no hay pagos registrados.",
+        "viewProof": "Ver comprobante",
+        "livePreview": {
+          "partial": "Pago parcial — se registrarán ${{amount}} y quedarán ${{remaining}} pendientes.",
+          "complete": "Pago completo — el saldo quedará en $0.00.",
+          "exceedsBalance": "Ese monto supera el saldo pendiente (${{balance}})."
+        }
+      },
+      "providerConfirmation": {
+        "title": "Confirmación del proveedor",
+        "empty": "Todavía no se subió la confirmación del proveedor.",
+        "viewDocument": "Ver documento",
+        "upload": "Subir confirmación del proveedor",
+        "replace": "Reemplazar documento",
+        "uploading": "Subiendo…",
+        "blockedByApproval": "El documento de confirmación del proveedor podrá adjuntarse una vez la Orden de Compra haya sido aprobada."
+      }
+    },
+    "errors": {
+      "advanceGeneric": "No se pudo avanzar el estado de la orden.",
+      "advanceRemainderGeneric": "No se pudo avanzar la etapa del remanente.",
+      "confirmPendingReceiptsGeneric": "No se pudo confirmar el ingreso a Inventario.",
+      "approveGeneric": "No se pudo aprobar la orden.",
+      "updateGeneric": "No se pudo guardar la edición de la orden.",
+      "sendEmailGeneric": "No se pudo enviar el correo. Verificá que el proveedor tenga un correo registrado.",
+      "liquidateGeneric": "No se pudo asignar la agencia de liquidación."
+    }
+  },
+  "logistics": {
+    "title": "Logística",
+    "subtitle": "{{count}} envíos en movimiento",
+    "chips": {
+      "all": "Todas",
+      "retrasados": "Retrasados"
+    },
+    "filters": {
+      "allProviders": "Todos los proveedores",
+      "searchPlaceholder": "Buscar por N.º de orden, proveedor o proyecto…",
+      "allCreators": "Todos los responsables",
+      "projectPlaceholder": "Buscar proyecto…",
+      "clearProject": "Quitar proyecto",
+      "clear": "Limpiar filtros"
+    },
+    "card": {
+      "responsible": "Responsable",
+      "modality": "Modalidad",
+      "shippingType": "Tipo de envío",
+      "status": "Estado",
+      "estimatedArrival": "Llegada estimada",
+      "completeStage": "Completar etapa actual",
+      "noNextStage": "Sin siguiente etapa",
+      "markBlocked": "Requiere aprobación de Mark",
+      "goodsReceiptLink": "Ingreso de mercancía",
+      "pending": "Pendiente"
+    },
+    "timeline": {
+      "stepLabel": {
+        "salioDeOrigen": "Salió de origen"
+      },
+      "current": "En curso"
+    },
+    "shippingInfo": {
+      "container": "Número de contenedor",
+      "carrier": "Naviera / transportista",
+      "actualArrival": "Llegada real"
+    },
+    "documents": {
+      "title": "Documentos del envío",
+      "upload": "Subir",
+      "empty": "Sin documentos subidos",
+      "category": {
+        "factura_comercial": "Factura comercial",
+        "declaracion_nacionalizacion": "Declaración de nacionalización",
+        "permiso_importacion": "Permiso de importación",
+        "bl": "BL (conocimiento de embarque)",
+        "confirmacion_proveedor": "Confirmación del proveedor",
+        "otro": "Otro"
+      },
+      "alreadyUploaded": "{{category}} (subido)"
+    },
+    "providerConfirmation": {
+      "validate": "Validar",
+      "revalidate": "Volver a validar",
+      "validating": "Validando…",
+      "matches": "Coincide con la orden",
+      "discrepanciesTitle": "Discrepancias encontradas",
+      "expectedVsFound": "esperado {{expected}}, encontrado {{found}}",
+      "field": {
+        "producto": "Producto",
+        "cantidad": "Cantidad",
+        "costo_unitario": "Costo unitario",
+        "costo_total": "Costo total"
+      },
+      "confidence": "Confianza",
+      "confidenceLevel": {
+        "alta": "Alta",
+        "media": "Media",
+        "baja": "Baja"
+      },
+      "errorGeneric": "No se pudo validar el documento. Intenta de nuevo."
+    },
+    "empty": "No hay envíos en movimiento",
+    "errors": {
+      "shippingInfoGeneric": "No se pudo guardar el dato del envío.",
+      "documentGeneric": "No se pudo subir el documento."
+    }
+  },
+  "reception": {
+    "status": {
+      "pendiente": "Pendiente",
+      "parcial": "Recibido parcial",
+      "completo": "Recibido completo"
+    },
+    "receivedOf": "{{received}} de {{expected}}"
+  },
+  "goodsReceipts": {
+    "title": "Ver registros de ingreso",
+    "searchPlaceholder": "Buscar por proveedor, orden o producto…",
+    "empty": "Sin ingresos registrados",
+    "actions": {
+      "new": "+ Nuevo ingreso"
+    },
+    "table": {
+      "date": "Fecha",
+      "provider": "Proveedor",
+      "order": "Orden",
+      "lines": "Líneas",
+      "units": "Unidades totales",
+      "orderStatus": "Estado de la orden"
+    },
+    "detail": {
+      "title": "Ingreso #{{id}}",
+      "edit": "Corregir este ingreso",
+      "locked": "Esta orden ya llegó a \"Recibido\" — este ingreso no se puede corregir."
+    },
+    "wizard": {
+      "title": "Ingreso de Mercancía",
+      "editTitle": "Corregir ingreso",
+      "notEditable": "Esta orden ya llegó a \"Recibido\" — este ingreso no se puede corregir.",
+      "steps": {
+        "invoice": "Adjuntar factura (opcional)",
+        "order": "Orden vinculada",
+        "lines": "Productos"
+      },
+      "invoice": {
+        "fileLabel": "Factura o proforma (PDF, imagen, Excel o CSV)",
+        "detectButton": "Detectar automáticamente",
+        "detecting": "Detectando…",
+        "detectedBadge": "Detectado",
+        "detectedSummary": "Factura adjunta: {{filename}} — orden y productos detectados automáticamente.",
+        "attachedSummary": "Factura adjunta: {{filename}}",
+        "alreadyProcessed": "Esta factura ya había sido procesada antes y su orden ya no acepta más ingresos.",
+        "noMatch": "No se pudo detectar automáticamente ninguna orden ni producto en este documento — elegí la orden manualmente abajo.",
+        "partialDetection": "Se detectaron algunos productos, pero {{count}} no se pudieron reconocer — revisá y completá con el buscador de abajo.",
+        "errors": {
+          "generic": "No se pudo procesar la factura. Intentá de nuevo."
+        }
+      },
+      "order": {
+        "searchPlaceholder": "Buscar orden por número o proveedor…",
+        "change": "Cambiar"
+      },
+      "origin": {
+        "local": "Proveedor local",
+        "internacional": "Proveedor no local"
+      },
+      "costing": {
+        "localNote": "Proveedor local: el ITBMS (7%) se calcula automáticamente por línea.",
+        "importCostTotal": "Costo de importación",
+        "freightTotal": "Flete",
+        "handlingTotal": "Manejo",
+        "otherCostsTotal": "Otros"
+      },
+      "lines": {
+        "warehouse": "Bodega",
+        "costTotal": "Costo total",
+        "remove": "Quitar",
+        "empty": "Elegí una orden para precargar sus productos esperados.",
+        "addProduct": "+ Agregar producto"
+      },
+      "errors": {
+        "generic": "No se pudo guardar el ingreso. Revisá los datos e intentá de nuevo."
+      },
+      "actions": {
+        "save": "Guardar ingreso"
+      },
+      "partial": {
+        "title": "Estado de lo pendiente",
+        "receivedOfExpected": "Llegaron {{received}} de {{expected}} esperadas",
+        "remainderStatus": "¿En qué estado queda lo pendiente?",
+        "remainder": {
+          "ordenado": "Ordenado",
+          "salio_de_origen": "Salió de origen",
+          "en_transito": "En tránsito",
+          "en_aduana": "En aduana",
+          "en_transito_local": "En tránsito local"
+        }
+      },
+      "success": {
+        "title": "Ingreso registrado",
+        "message": "El ingreso #{{id}} se guardó correctamente.",
+        "viewInventory": "Ver en Inventario (Por ingresar)",
+        "correct": "Corregir ingreso",
+        "registerAnother": "Registrar otro ingreso"
+      }
+    }
+  },
+  "settings": {
+    "toggle": "Ajustes de Compras",
+    "title": "Ajustes de Compras",
+    "subtitle": "Umbral configurable usado para marcar proveedores con calificación baja.",
+    "lowRatingThreshold": "Umbral de calificación baja",
+    "claimAttentionDays": "Días para marcar un reclamo en atención",
+    "replacementMarginThreshold": "Umbral de margen para escalar solicitud de sustituto",
+    "similarityFormula": "Fórmula de % de similitud (Buscar en catálogo)",
+    "similarityWeightText": "Peso — texto",
+    "similarityWeightPrice": "Peso — precio",
+    "similarityWeightMargin": "Peso — margen",
+    "similarityOtherCategoryPenalty": "Penalización por otra categoría",
+    "similarityMinThreshold": "Umbral mínimo para mostrar candidato",
+    "similarityWeightsSumWarning": "Los pesos de texto, precio y margen deberían sumar 100 (suma actual: {{sum}}).",
+    "invalid": "Ingresa un número entre 0 y 100.",
+    "saveError": "No se pudo guardar el ajuste. Intentá de nuevo."
+  },
+  "inventory": {
+    "title": "Inventario - {{name}}",
+    "headerSubtitle": "Vista de consulta · Bodega es dueño del dato, aquí no se edita",
+    "subtitle": "{{count}} productos",
+    "tabs": {
+      "products": "Productos",
+      "families": "Familias"
+    },
+    "toggle": {
+      "compras": "Compras",
+      "ventas": "Ventas & Diseño"
+    },
+    "kpis": {
+      "total": "Total de productos",
+      "lowStock": "Bajo stock",
+      "outOfStock": "Sin stock",
+      "inAttention": "En atención",
+      "totalValue": "Valor total del inventario"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar producto…",
+      "clear": "Limpiar filtros",
+      "warehousesAll": "Todas las bodegas",
+      "warehousesCount": "Bodegas ({{count}})",
+      "selectAllWarehouses": "Seleccionar todas",
+      "clearWarehouses": "Limpiar selección",
+      "warehousesEmpty": "No hay bodegas registradas",
+      "removeWarehouse": "Quitar {{name}}"
+    },
+    "chips": {
+      "todos": "Todos",
+      "en_atencion": "En atención",
+      "inactivos": "Inactivos",
+      "por_ingresar": "Por ingresar"
+    },
+    "table": {
+      "image": "Imagen",
+      "reference": "Referencia",
+      "description": "Producto",
+      "category": "Categoría",
+      "rotation": "Rotación",
+      "warehouses": "Bodega(s)",
+      "warehousesCount_one": "{{count}} Bodega",
+      "warehousesCount_other": "{{count}} Bodegas",
+      "price": "Precio de venta",
+      "cost": "Costo",
+      "importCost": "Costo de importación",
+      "freightCost": "Flete",
+      "handlingCost": "Manejo Local",
+      "otherCost": "Otros Costo",
+      "costTotal": "Costo Total",
+      "margin": "Margen",
+      "provider": "Proveedor",
+      "stock": "Stock total",
+      "disponible": "Disponible",
+      "porServir": "Por servir",
+      "porIngresar": "Por ingresar",
+      "enCamino": "En camino",
+      "reorderPoint": "Stock mínimo",
+      "estado": "Estado",
+      "actions": "Acciones",
+      "empty": "No hay productos registrados"
+    },
+    "estado": {
+      "disponible": "Disponible",
+      "bajo_stock": "Bajo stock",
+      "sin_stock": "Sin stock"
+    },
+    "actions": {
+      "providers": "Proveedores",
+      "create": "+ Crear nuevo producto",
+      "createOrder": "+ Nueva orden de compra",
+      "edit": "Editar",
+      "editGeneral": "Editar información",
+      "editPricing": "Editar precios",
+      "confirm": "Confirmar",
+      "activate": "Reactivar",
+      "deactivate": "Marcar como inactivo",
+      "viewWarehouses": "Ver bodegas",
+      "generateOrder": "Generar orden",
+      "confirmPending": "Ingresar a Inventario",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "close": "Cerrar"
+    },
+    "detail": {
+      "title": "Detalle del producto",
+      "generalDataSection": "Datos generales",
+      "generalSection": "Información general",
+      "productInfoSection": "Información del producto",
+      "pricingSection": "Precios",
+      "reference": "Referencia pública",
+      "factoryReference": "Referencia de fábrica",
+      "description": "Descripción",
+      "brand": "Marca",
+      "category": "Categoría",
+      "barcode": "Código de barras",
+      "photoUrl": "URL de foto",
+      "priceFull": "Precio de venta",
+      "cost": "Costo",
+      "importCost": "Costo de importación",
+      "freightCost": "Flete",
+      "handlingCost": "Manejo",
+      "otherCost": "Otros",
+      "costTotal": "Costo Total",
+      "margin": "Margen",
+      "reorderPoint": "Stock mínimo",
+      "provider": "Proveedor",
+      "rotation": "Rotación",
+      "name": "Nombre del producto",
+      "family": "Familia",
+      "familyNone": "Sin familia",
+      "familyHelp": "Escribe el mismo nombre en varios productos para agruparlos en la vista \"Familias\".",
+      "familyPlaceholder": "Busca o escribe un nombre nuevo…",
+      "familyCreate": "+ Crear familia \"{{name}}\"",
+      "familyChange": "Cambiar",
+      "familyCreateError": "No se pudo crear la familia.",
+      "checkingReference": "Verificando disponibilidad…",
+      "confirmSave": "Vas a guardar: costo total {{cost}}, precio {{price}}, margen {{margin}}%. ¿Confirmás?",
+      "confirmSaveGeneral": "Vas a guardar: nombre \"{{name}}\", referencia {{reference}}, descripción \"{{description}}\", marca {{brand}}, familia {{family}}. ¿Confirmás?",
+      "technicalSheetDocSection": "Ficha técnica",
+      "technicalSheetDoc": {
+        "upload": "Cargar ficha técnica",
+        "replace": "Reemplazar",
+        "fileLabel": "Archivo (PDF, PNG o JPG)",
+        "linkPlaceholder": "o pegá un link externo…",
+        "saveLink": "Guardar link"
+      }
+    },
+    "rotation": {
+      "alta": "Alta",
+      "media": "Media",
+      "baja": "Baja",
+      "unica": "Compra única"
+    },
+    "create": {
+      "title": "Crear nuevo producto",
+      "subtitle": "Se agrega directamente al catálogo de Inventario",
+      "generalSection": "Datos generales",
+      "name": "Nombre del producto",
+      "costsSection": "Costos",
+      "optional": "opcional",
+      "additionalCostHint": "Es un estimado — se reemplaza solo cuando llegue el Ingreso de Mercancía real de este producto.",
+      "initialStock": "Stock inicial",
+      "initialStockHint": "Si el producto todavía no ha llegado, déjalo en 0 y usa \"Ingreso de Mercancía\" cuando llegue.",
+      "technicalSheetRequiredHint": "Obligatorio para crear el producto — sube un archivo o pega un link antes de continuar.",
+      "warehouse": "Bodega",
+      "submit": "Crear producto",
+      "discardWarning": "Al salir se perderá toda la información registrada."
+    },
+    "warehouseStock": {
+      "title": "Stock por bodega",
+      "empty": "Sin stock registrado en ninguna bodega"
+    },
+    "orderPrefill": {
+      "pendingWarning": "Este producto ya tiene {{quantity}} unidades en camino.",
+      "suggestedQuantity": "Cantidad sugerida: {{quantity}}",
+      "continue": "Continuar a Nueva Orden",
+      "noProvider": "Este producto no tiene proveedor asignado en el Catálogo — asignalo antes de generar una orden."
+    },
+    "pendingInventory": {
+      "warning": "Este producto tiene {{quantity}} unidades \"Por ingresar\" sin confirmar.",
+      "confirmError": "No se pudieron confirmar las unidades pendientes. Intentá de nuevo.",
+      "bodegaPending": "Pendiente de confirmación de llegada física por Bodega.",
+      "bodegaConfirmed": "Bodega confirmó la llegada física: {{count}} unidad. Confirmado por: {{user}}. Pendiente ingreso al inventario por Compras.",
+      "bodegaConfirmed_other": "Bodega confirmó la llegada física: {{count}} unidades. Confirmado por: {{user}}. Pendiente ingreso al inventario por Compras."
+    },
+    "families": {
+      "title": "Familias",
+      "subtitle": "Conjuntos de productos que se instalan/venden juntos para armar una sola lámpara o sistema — la misma lógica de \"familias\" que se usa en Nueva Cotización (Ventas & Diseño).",
+      "productCount": "{{count}} producto(s)",
+      "totalValue": "Valor total",
+      "totalValueLabel": "Valor total (costo × stock)",
+      "generatePurchase": "Generar compra",
+      "generated": "Se crearon {{count}} órdenes, una por proveedor.",
+      "generateError": "No se pudo generar la compra. Intentá de nuevo.",
+      "empty": "Esta familia no tiene productos.",
+      "emptyList": "No hay familias creadas todavía."
+    },
+    "technicalSpec": {
+      "title": "Ficha técnica",
+      "button": "Ver ficha técnica",
+      "empty": "Ficha técnica no disponible para este producto.",
+      "fields": {
+        "voltage": "Voltaje",
+        "power": "Potencia",
+        "socket_type": "Tipo de casquillo / socket",
+        "color_temperature": "Temperatura de color",
+        "luminous_flux": "Flujo luminoso",
+        "dimensions": "Dimensiones",
+        "weight": "Peso",
+        "material_finish": "Material / acabado",
+        "ip_rating": "Índice de protección (IP)",
+        "estimated_lifespan": "Vida útil estimada",
+        "warranty": "Garantía",
+        "certifications": "Certificaciones"
+      }
+    },
+    "errors": {
+      "generic": "No se pudo guardar el producto. Revisá los datos e intentá de nuevo.",
+      "duplicateReference": "Ya existe un producto con esa referencia."
+    }
+  },
+  "agencies": {
+    "title": "Agencias de Liquidación",
+    "subtitle": "{{count}} agencias",
+    "kpis": {
+      "pendingBalance": "Agencias con saldo pendiente",
+      "totalPending": "Total por pagar",
+      "totalPaid": "Total pagado",
+      "projectsPending": "Proyectos por liquidar (todas las agencias)"
+    },
+    "table": {
+      "name": "Agencia",
+      "liquidated": "Liquidadas",
+      "pending": "Por liquidar",
+      "toPay": "$ por pagar",
+      "paid": "$ pagado",
+      "balance": "saldo {{amount}}",
+      "lastPayment": "Último pago",
+      "nextPayment": "Próximo pago",
+      "noDate": "—",
+      "actions": "Acciones",
+      "empty": "No hay agencias de liquidación registradas."
+    },
+    "footnote": "\"$ por pagar\" y \"$ pagado\" son cargados a mano por Compras — todavía no hay un flujo automático de registro de pago a agencias definido.",
+    "detail": {
+      "back": "Volver a Agencias",
+      "contactsTitle": "Contactos",
+      "addContact": "+ Agregar contacto",
+      "paymentTitle": "Situación de pago",
+      "paymentEdit": "Editar",
+      "paymentForm": {
+        "toPay": "$ por pagar",
+        "paid": "$ pagado",
+        "lastPaymentDate": "Fecha de último pago",
+        "nextPaymentDate": "Fecha de próximo pago",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "error": "No se pudo guardar la situación de pago."
+      },
+      "ordersTitle": "Pedidos con esta agencia",
+      "ordersEmpty": "Esta agencia todavía no tiene pedidos asignados.",
+      "liquidationStatusHeader": "Estado de liquidación",
+      "liquidationStatus": {
+        "liquidada": "Liquidada",
+        "por_liquidar": "Por liquidar"
+      },
+      "contactForm": {
+        "name": "Nombre",
+        "phone": "Teléfono",
+        "email": "Correo",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "deleteContact": {
+        "title": "Quitar contacto",
+        "confirm": "¿Quitar a {{name}} de los contactos de esta agencia?",
+        "lastContactError": "No se puede quitar el único contacto de la agencia."
+      }
+    }
+  },
+  "payments": {
+    "title": "Pagos a Proveedores",
+    "subtitle": "{{count}} órdenes pendientes de pago",
+    "empty": "No hay órdenes pendientes de pago.",
+    "kpis": {
+      "totalPending": "Total por pagar",
+      "sinEnviar": "Sin enviar a pago",
+      "porPagar": "Por pagar",
+      "parcial": "Pagado parcial",
+      "completo": "Pagado completo"
+    },
+    "filters": {
+      "all": "Todas",
+      "searchPlaceholder": "Buscar por N° de orden, proveedor o proyecto…",
+      "allProviders": "Todos los proveedores",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "sin_enviar": "Sin enviar",
+      "por_pagar": "Por pagar",
+      "parcial": "Pagado parcial",
+      "completo": "Pagado completo"
+    },
+    "table": {
+      "id": "N° de orden",
+      "orderStatus": "Estado de la orden",
+      "orderAmount": "Monto de la orden",
+      "amountToPay": "Monto a pagar",
+      "paid": "Pagado",
+      "balance": "Saldo",
+      "responsible": "Responsable"
+    }
+  },
+  "claims": {
+    "title": "Garantías y Reclamos",
+    "actions": {
+      "create": "+ Nuevo reclamo"
+    },
+    "kpis": {
+      "total": "Total de reclamos",
+      "reportedInReview": "Reportados / En revisión",
+      "resolvedThisMonth": "Resueltos este mes",
+      "disputedAmount": "Monto en disputa"
+    },
+    "status": {
+      "en_revision": "En revisión",
+      "resuelto": "Resuelto"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por reclamo, proveedor o producto…",
+      "allProviders": "Todos los proveedores",
+      "allResolutions": "Todas las resoluciones",
+      "clear": "Limpiar filtros"
+    },
+    "chips": {
+      "all": "Todas",
+      "todos": "Todos",
+      "atencion": "Atención",
+      "reportado": "Reportado",
+      "en_revision": "En revisión",
+      "resuelto": "Resuelto"
+    },
+    "table": {
+      "code": "N° reclamo",
+      "order": "Orden asociada",
+      "provider": "Proveedor",
+      "product": "Producto",
+      "resolutionType": "Tipo de resolución",
+      "reportedDate": "Fecha reportado",
+      "serviceTicket": "Ticket Servicios",
+      "amount": "Monto",
+      "status": "Estado",
+      "attention": "⚠ Atención",
+      "empty": "No hay reclamos registrados."
+    },
+    "new": {
+      "title": "Nuevo reclamo",
+      "searchOrder": "Buscar orden por número o proveedor…",
+      "products": "Productos afectados",
+      "ordered": "pedido: {{qty}}",
+      "unitsOrderedNote": "De {{qty}} unidades pedidas en esta orden",
+      "affectedQuantity": "Unidades afectadas",
+      "disputedAmount": "Monto en disputa",
+      "description": "Descripción del problema",
+      "expectedResolution": "Tipo de resolución",
+      "expectedResolutionPlaceholder": "Selecciona una opción…",
+      "error": "No se pudo crear el reclamo.",
+      "serviceTicket": "Ticket de Servicios",
+      "noServiceTickets": "No hay tickets de Servicios asociados a esta orden.",
+      "maxExceeded": "El máximo permitido para este producto es {{max}}."
+    },
+    "resolutionTypes": {
+      "reposicion": "Reposición",
+      "nota_credito_favor": "Nota de crédito (Crédito a favor)",
+      "nota_credito_reembolso": "Nota de crédito (Reembolso)",
+      "envio_repuestos": "Envío de repuestos",
+      "negado": "Negado"
+    },
+    "detail": {
+      "title": "Reclamo",
+      "headerSubtitle": "{{product}} ({{qty}} unidades afectadas)",
+      "viewOrder": "Ver Orden asociada",
+      "order": "Orden asociada",
+      "reportedDate": "Fecha reportado",
+      "serviceTicket": "Ticket Servicios",
+      "noServiceTickets": "Sin ticket asociado.",
+      "unitsCount": "{{qty}} uds",
+      "expectedResolution": "Resolución esperada",
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "amount": "Monto",
+      "photos": "Fotos adjuntas",
+      "photosEmpty": "Sin fotos todavía.",
+      "viewPhoto": "Ver foto",
+      "uploadPhoto": "+ Subir foto",
+      "viewPdf": "Ver PDF",
+      "downloadPdf": "Descargar PDF del reclamo",
+      "statusHistory": "Historial de estado",
+      "historyCreated": "Creado — {{status}}",
+      "historyChanged": "{{from}} → {{to}}",
+      "pending": "Pendiente",
+      "stages": {
+        "reportado": "Reportado",
+        "en_revision": "En revisión",
+        "resuelto": "Resuelto"
+      }
+    }
+  },
+  "replacements": {
+    "title": "Comparación de Referencias",
+    "tabs": {
+      "search": "Buscar sustituto",
+      "requests": "Solicitudes"
+    },
+    "chips": {
+      "all": "Todas"
+    },
+    "status": {
+      "pendiente": "Pendiente",
+      "pendiente_gerencia": "Pendiente Gerencia",
+      "aprobada": "Aprobada",
+      "rechazada": "Rechazada"
+    },
+    "table": {
+      "original": "Producto original",
+      "proposed": "Sustituto propuesto",
+      "project": "Proyecto",
+      "status": "Estado",
+      "empty": "No hay solicitudes de reemplazo registradas."
+    },
+    "actions": {
+      "generateOrder": "Generar orden",
+      "viewOrder": "Ver orden generada",
+      "generateRequest": "Generar solicitud"
+    },
+    "errors": {
+      "generateGeneric": "No se pudo generar la orden.",
+      "createRequestGeneric": "No se pudo generar la solicitud.",
+      "searchGeneric": "No se pudo completar la búsqueda."
+    },
+    "search": {
+      "originalLabel": "Producto a reemplazar",
+      "originalPlaceholder": "Buscar producto…",
+      "originalChange": "Cambiar",
+      "methodLabel": "Método de búsqueda",
+      "methodCatalog": "Buscar en catálogo",
+      "methodPhoto": "Subir foto",
+      "methodDatasheet": "Subir ficha técnica",
+      "familyLabel": "Familia de producto",
+      "familyPlaceholder": "Selecciona una familia…",
+      "catalogPlaceholder": "Buscar por nombre o categoría…",
+      "fileLabel": "Archivo",
+      "searchButton": "Buscar",
+      "searching": "Buscando…",
+      "resultsEmpty": "No se encontró ningún producto para reemplazar.",
+      "resultsLoading": "Buscando…",
+      "resultsTable": {
+        "product": "Producto candidato",
+        "category": "Categoría",
+        "stock": "Stock disponible",
+        "price": "Precio",
+        "cost": "Costo",
+        "similarity": "% de similitud",
+        "actions": "Acciones"
+      },
+      "chooseOriginalFirst": "Selecciona primero el producto a reemplazar.",
+      "chooseFamilyRequired": "Selecciona una familia de producto.",
+      "chooseFileRequired": "Selecciona un archivo."
+    },
+    "generateModal": {
+      "title": "Generar solicitud de sustituto",
+      "original": "Producto original",
+      "proposed": "Sustituto propuesto",
+      "margin": "Margen estimado",
+      "project": "Proyecto de venta",
+      "projectPlaceholder": "Selecciona un proyecto de venta…",
+      "projectRequired": "Selecciona un proyecto de venta.",
+      "submit": "Generar solicitud",
+      "cancel": "Cancelar",
+      "success": "Solicitud generada correctamente."
+    }
+  },
+  "reports": {
+    "title": "Reportes",
+    "empty": "Sin datos en este período.",
+    "period": {
+      "month": "Mes",
+      "quarter": "Trimestre",
+      "year": "Año"
+    },
+    "purchasedByPeriod": {
+      "title": "Comprado por período"
+    },
+    "opportunity": {
+      "title": "Oportunidad de compra",
+      "aTiempo": "A tiempo",
+      "aDemanda": "A demanda",
+      "tarde": "Tarde",
+      "warning": "50% o más de las órdenes de este período fueron reactivas — revisá el punto de reorden de los productos de rotación alta.",
+      "empty": "Sin órdenes clasificadas en este período. Esta métrica solo cuenta órdenes creadas después de activar esta función — las anteriores no tienen el dato de stock necesario para clasificarlas."
+    },
+    "providerRating": {
+      "title": "Calificación de proveedores",
+      "purchased": "Comprado",
+      "onTime": "% a tiempo",
+      "complete": "% completas",
+      "claims": "Reclamos",
+      "rating": "Calificación",
+      "unrated": "Sin calificar"
+    },
+    "claims": {
+      "title": "Reclamos: tasa y estado",
+      "rate": "Tasa",
+      "ranking": "Proveedores con más reclamos"
+    },
+    "inventory": {
+      "title": "Inventario: rotación y atención",
+      "total": "Productos activos",
+      "attention": "En atención",
+      "lowStock": "Bajo stock",
+      "outOfStock": "Sin stock"
+    },
+    "liquidation": {
+      "title": "Liquidación de importaciones",
+      "subtitle": "Legalización y proceso de ingreso a Panamá · basado en órdenes Ordenado / En tránsito / Recibido",
+      "liquidated": "Liquidados",
+      "liquidatedHint": "Ya pasaron por aduana",
+      "porLiquidar": "Por liquidar",
+      "porLiquidarHint": "Ordenadas, aún no llegan a aduana",
+      "percent": "% Liquidado",
+      "percentHint": "Del total de órdenes en proceso",
+      "ranking": "Top agencias aduanales por liquidaciones gestionadas",
+      "footnote": "* \"Liquidado\" = la orden ya completó la legalización/nacionalización de aduana en Panamá (equivalente al paso \"En aduana\" completado en Logística y envío)."
+    }
+  }
+}

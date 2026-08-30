@@ -1,0 +1,914 @@
+{
+  "nav": {
+    "module": "Servicios",
+    "home": "Inicio",
+    "tickets": "Tickets",
+    "ticketsList": "Listado de Tickets",
+    "technicians": "Técnicos",
+    "techniciansInternal": "Técnicos internos",
+    "techniciansExternal": "Técnicos externos",
+    "toolsAndSupplies": "Insumos y Herramientas",
+    "reports": "Reportes",
+    "settings": "Ajustes",
+    "quotesHistory": "Cotizaciones"
+  },
+  "comingSoon": "Próximamente",
+  "home": {
+    "title": "Inicio de Servicios",
+    "greeting": "Bienvenido, {{name}}",
+    "greetingFallback": "Bienvenido",
+    "subtitle": "{{fecha}} · tienes {{visitasText}} y {{pendientesText}} hoy",
+    "subtitleVisitas_one": "{{count}} visita",
+    "subtitleVisitas_other": "{{count}} visitas",
+    "subtitlePendientes_one": "{{count}} pendiente",
+    "subtitlePendientes_other": "{{count}} pendientes",
+    "quickActions": {
+      "agenda": "Agenda"
+    },
+    "calendar": {
+      "title": "Mi calendario"
+    },
+    "routes": {
+      "title": "Rutas del día",
+      "empty": "No hay visitas agendadas para hoy.",
+      "seeFullAgenda": "Ver agenda completa",
+      "navigate": "Waze / Maps"
+    },
+    "pending": {
+      "title": "Pendientes",
+      "empty": "No hay pendientes en este momento.",
+      "viewTicket": "Ver ticket"
+    },
+    "indicators": {
+      "title": "Indicadores del mes",
+      "days": "días",
+      "firstVisitRate": "Resuelto 1ra visita",
+      "avgResolutionTime": "Tiempo prom. resolución",
+      "installationsRevenue": "Ingresos por instalaciones",
+      "installations": {
+        "label": "Instalaciones completadas este mes",
+        "metaSource": {
+          "manual_default": "Meta de referencia (sin historial suficiente todavía).",
+          "calculated": "Meta calculada automáticamente según el historial reciente.",
+          "manual_override": "Meta ajustada manualmente por Gerencia para este mes."
+        }
+      },
+      "goalModal": {
+        "title": "Ajustar meta de instalaciones",
+        "warning": "El ajuste aplica solo al mes en curso. Los meses siguientes vuelven a calcularse automáticamente.",
+        "valueLabel": "Meta de instalaciones del mes",
+        "valueInvalid": "Ingresa un número entero mayor o igual a 0.",
+        "cancel": "Cancelar",
+        "confirm": "Guardar",
+        "error": "No se pudo guardar la meta. Intentá de nuevo."
+      }
+    },
+    "sinResponder": {
+      "title": "Servicios sin responder",
+      "subtitle": "Requieren contacto con el cliente",
+      "empty": "No hay servicios sin responder en este momento.",
+      "reportedDaysAgo_one": "Reportado hace {{count}} día",
+      "reportedDaysAgo_other": "Reportado hace {{count}} días"
+    },
+    "insumosPendientes": {
+      "title": "Insumos y herramientas pendientes",
+      "empty": "No hay insumos ni herramientas pendientes en este momento.",
+      "columns": {
+        "repuesto": "Repuesto",
+        "ticket": "Ticket asociado",
+        "solicitado": "Solicitado",
+        "llegadaEstimada": "Llegada estimada"
+      },
+      "solicitadoHaceDias_one": "Hace {{count}} día",
+      "solicitadoHaceDias_other": "Hace {{count}} días",
+      "llegadaPorConfirmar": "Por confirmar",
+      "viewTicket": "Ver ticket"
+    },
+    "estadoTickets": {
+      "title": "Estado de tickets",
+      "seeAll": "Ver todos los tickets",
+      "chips": {
+        "all": "Todos",
+        "installation": "Instalaciones",
+        "warranty": "Garantías",
+        "claim": "Reclamos",
+        "retrofit": "Retrofit"
+      },
+      "closedThisMonth": "este mes"
+    }
+  },
+  "technicians": {
+    "internal": {
+      "title": "Técnicos internos",
+      "addButton": "+ Nuevo técnico",
+      "views": {
+        "team": "Equipo",
+        "agenda": "Agenda equipo"
+      },
+      "status": {
+        "available": "Disponible",
+        "en_route": "En ruta",
+        "on_site": "Ocupado",
+        "off": "Fuera"
+      },
+      "specialty": {
+        "general": "General",
+        "warranty": "Garantías"
+      },
+      "card": {
+        "loading": "Cargando...",
+        "visitsToday": "Visitas hoy",
+        "firstVisitRate": "% 1ra visita",
+        "tools": "Herramientas",
+        "commission": "Comisión del mes",
+        "commissionResult": "Ver comisión"
+      },
+      "visitsModal": {
+        "title": "Visitas hoy — {{nombre}}",
+        "loading": "Cargando...",
+        "empty": "Sin visitas hoy"
+      },
+      "detailModal": {
+        "especialidad": "Especialidad",
+        "telefono": "Teléfono",
+        "email": "Email"
+      },
+      "createModal": {
+        "title": "Nuevo técnico interno",
+        "nombre": "Nombre",
+        "especialidad": "Especialidad",
+        "telefono": "Teléfono",
+        "email": "Email",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "error": "No se pudo registrar el técnico."
+      },
+      "agenda": {
+        "filterLabel": "Filtrar por técnico",
+        "allTechnicians": "Todos",
+        "loading": "Cargando...",
+        "noVisits": "Sin visitas hoy — se puede asignar carga",
+        "noVisitsPeriod": "Sin visitas en este periodo",
+        "previousPeriod": "Periodo anterior",
+        "nextPeriod": "Periodo siguiente"
+      },
+      "stats": {
+        "activeToday": "Activos hoy",
+        "activeTodayValue": "{{active}} de {{total}} registrados",
+        "visitsToday": "Visitas hoy",
+        "firstVisitAvg": "Promedio 1ra visita"
+      },
+      "commissionModal": {
+        "title": "Comisión del mes — {{nombre}}",
+        "loading": "Cargando...",
+        "pending": "Pendiente de captura",
+        "satisfaccion": "Promedio encuesta de satisfacción (1-5)",
+        "puntualidad": "Incidencias de puntualidad/asistencia",
+        "actitud": "Calificación de actitud (1-5)",
+        "licenciaMedica": "¿Licencia médica mayor a 5 días hábiles este mes?",
+        "save": "Guardar captura",
+        "saved": "Captura guardada",
+        "error": "No se pudo guardar la captura.",
+        "slaSection": "SLA por tipo de ticket (días hábiles)",
+        "slaTypes": {
+          "claim": "Reclamos",
+          "warranty": "Garantías",
+          "installation": "Instalaciones",
+          "retrofit": "Retrofit"
+        },
+        "slaSave": "Guardar SLA",
+        "slaSaved": "SLA actualizado",
+        "previousMonth": "Mes anterior",
+        "nextMonth": "Mes siguiente",
+        "calidad": "Calidad del trabajo técnico (%, captura manual)"
+      },
+      "commissionResult": {
+        "title": "Comisión del mes — {{nombre}}",
+        "loading": "Cargando...",
+        "pending": "Sin captura para este período todavía.",
+        "total": "Total del mes",
+        "breakdown": "Desglose por criterio",
+        "criteria": {
+          "calidad": "Calidad del trabajo técnico",
+          "satisfaccion": "Satisfacción del cliente",
+          "sla": "Cumplimiento de tiempos (SLA)",
+          "puntualidad": "Puntualidad y asistencia",
+          "actitud": "Actitud y disposición"
+        },
+        "weight": "Peso",
+        "obtained": "% obtenido",
+        "amount": "Monto",
+        "licenciaMedicaNote": "Licencia médica activa este mes — el peso de Puntualidad se redistribuyó entre los demás criterios.",
+        "close": "Cerrar"
+      }
+    },
+    "external": {
+      "title": "Técnicos externos",
+      "addButton": "+ Agregar técnico externo",
+      "searchPlaceholder": "Buscar por nombre...",
+      "chips": {
+        "all": "Todos",
+        "active": "Activos",
+        "inactive": "Inactivos"
+      },
+      "table": {
+        "loading": "Cargando...",
+        "empty": "No hay técnicos externos registrados.",
+        "columns": {
+          "nombre": "Nombre",
+          "empresa": "Empresa",
+          "especialidad": "Especialidad",
+          "telefono": "Teléfono",
+          "tarifa": "Tarifa",
+          "proyectosActivos": "Proyectos activos",
+          "estado": "Estado",
+          "detail": "Ver ficha"
+        }
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "createModal": {
+        "title": "Agregar técnico externo",
+        "nombre": "Nombre",
+        "empresa": "Empresa",
+        "especialidad": "Especialidad",
+        "telefono": "Teléfono",
+        "email": "Email",
+        "tarifaDia": "Tarifa por día",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "error": "No se pudo registrar el técnico externo."
+      },
+      "detail": {
+        "title": "Ficha del técnico",
+        "loading": "Cargando...",
+        "tarifaSection": "Tarifa por día",
+        "showTarifa": "Mostrar tarifa",
+        "tarifaError": "No se pudo actualizar la tarifa.",
+        "estadoError": "No se pudo actualizar el estado.",
+        "assignedProjects": "Proyectos / tickets asignados",
+        "noAssignedProjects": "Aún no tiene proyectos asignados",
+        "assignedProjectsCount": "{{count}} proyecto(s) asignado(s)",
+        "assignedProjectsColumns": {
+          "ticket": "Ticket",
+          "cliente": "Cliente",
+          "cotizacion": "Cotización",
+          "dias": "Días",
+          "costoDia": "Costo/día",
+          "margen": "Margen",
+          "precioFinal": "Precio final",
+          "estado": "Estado"
+        },
+        "deactivateWarning": "Este técnico tiene {{count}} proyecto(s) activo(s) — ¿de todas formas quieres inactivarlo?",
+        "deactivateConfirm": "Sí, inactivar",
+        "deactivate": "Inactivar",
+        "activate": "Reactivar"
+      }
+    }
+  },
+  "toolsAndSupplies": {
+    "title": "Insumos y Herramientas",
+    "description": "Esta pantalla llega en un batch próximo.",
+    "views": {
+      "tools": "Herramientas",
+      "supplies": "Insumos"
+    },
+    "supplies": {
+      "title": "Insumos",
+      "description": "Esta pantalla llega en un batch próximo."
+    },
+    "kardexButton": "Movimiento de herramientas"
+  },
+  "tools": {
+    "addButton": "+ Agregar herramienta",
+    "searchPlaceholder": "Buscar por nombre, código o persona asignada...",
+    "filters": {
+      "allEstados": "Todos los estados",
+      "allAssigned": "Todos",
+      "bodega": "En bodega de herramientas",
+      "assignedLabel": "Filtrar por asignado",
+      "estadoLabel": "Filtrar por estado"
+    },
+    "table": {
+      "loading": "Cargando...",
+      "empty": "Sin herramientas para este filtro",
+      "groupHeader": "{{count}} unidad(es) ({{summary}})",
+      "groupHeaderEmpty": "0 unidad(es)",
+      "columns": {
+        "codigo": "Código",
+        "assignedTo": "Asignado a",
+        "estado": "Estado",
+        "desde": "Desde",
+        "actions": "Acciones"
+      },
+      "bodega": "En bodega de herramientas",
+      "pendingBadge": "Solicitado a Felix ({{cantidad}})",
+      "responsableIncidente": "Responsable: {{nombre}}",
+      "receiveButton": "Recibida",
+      "requestButton": "Solicitar",
+      "estadoChangeError": "No se pudo actualizar el estado.",
+      "assignmentChangeError": "No se pudo actualizar la asignación.",
+      "receiveError": "No se pudo confirmar la recepción."
+    },
+    "estados": {
+      "good": "Buen estado",
+      "damaged": "Dañada",
+      "worn": "Desgaste",
+      "lost": "Perdida"
+    },
+    "createModal": {
+      "title": "Agregar herramienta",
+      "nombre": "Nombre",
+      "cantidad": "Cantidad",
+      "cancel": "Cancelar",
+      "save": "Solicitar",
+      "error": "No se pudo registrar la solicitud."
+    },
+    "purchaseModal": {
+      "title": "Solicitar reposición",
+      "subtitle": "{{nombre}}",
+      "cantidad": "Cantidad",
+      "cancel": "Cancelar",
+      "save": "Solicitar",
+      "error": "No se pudo registrar la solicitud."
+    },
+    "detalleModal": {
+      "title": "Marcar como {{estado}}",
+      "detalleLabel": "Detalle del incidente",
+      "detallePlaceholder": "Describe qué pasó...",
+      "detalleRequired": "El detalle es obligatorio.",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    }
+  },
+  "insumos": {
+    "addButton": "+ Agregar insumo",
+    "table": {
+      "loading": "Cargando...",
+      "empty": "Sin insumos registrados",
+      "columns": {
+        "factoryReference": "Referencia de fábrica",
+        "description": "Nombre",
+        "disponible": "Disponible",
+        "minimo": "Mínimo",
+        "estado": "Estado",
+        "actions": "Acciones"
+      },
+      "requestButton": "Solicitar",
+      "disponibleNegativoTooltip": "Disponible negativo — el consumo registrado supera el stock que había. Revisar el Kardex de este insumo."
+    },
+    "estados": {
+      "ok": "OK",
+      "bajo_minimo": "Bajo mínimo"
+    },
+    "solicitudPendiente": "Solicitud pendiente",
+    "requestModal": {
+      "title": "Solicitar insumo",
+      "subtitle": "{{descripcion}}",
+      "cantidad": "Cantidad",
+      "cancel": "Cancelar",
+      "save": "Solicitar",
+      "error": "No se pudo registrar la solicitud."
+    },
+    "createModal": {
+      "searchTitle": "Buscar insumo en catálogo",
+      "searchEmpty": "Sin resultados. El insumo debe existir primero en el catálogo de Compras.",
+      "title": "Agregar insumo",
+      "minimo": "Mínimo deseado",
+      "cantidadInicial": "Cantidad inicial a solicitar",
+      "back": "Atrás",
+      "save": "Agregar",
+      "error": "No se pudo registrar el insumo."
+    }
+  },
+  "toolKardex": {
+    "close": "Cerrar",
+    "title": "Movimiento de herramientas",
+    "subtitle": "Historial de movimientos de herramientas (por unidad física). Solo lectura.",
+    "filters": {
+      "herramienta": "Filtrar por herramienta",
+      "responsable": "Filtrar por responsable",
+      "allHerramientas": "Todas las herramientas",
+      "allResponsables": "Todos",
+      "allTipos": "Todos los tipos",
+      "clear": "Limpiar filtros"
+    },
+    "tipos": {
+      "ingreso": "Ingreso",
+      "damaged": "Dañada",
+      "worn": "Desgaste",
+      "lost": "Perdida"
+    },
+    "table": {
+      "fecha": "Fecha",
+      "herramienta": "Herramienta",
+      "codigo": "Código",
+      "tipo": "Tipo",
+      "cantidad": "Cantidad",
+      "detalle": "Detalle",
+      "realizadoPor": "Realizado por",
+      "saldoInicial": "Saldo inicial",
+      "saldoResultante": "Saldo resultante"
+    },
+    "empty": "Sin movimientos para este filtro"
+  },
+  "reports": {
+    "title": "Reportes de Servicios",
+    "description": "Panorama del mes, distribución de tickets y biblioteca de documentos.",
+    "empty": "Sin datos para este período.",
+    "panorama": {
+      "completed": {
+        "label": "Servicios completados",
+        "sub": "de {{total}} tickets del mes"
+      },
+      "firstVisit": {
+        "label": "Resuelto en primera visita",
+        "sub": "Porcentaje de tickets resueltos sin retorno"
+      },
+      "avgResolution": {
+        "label": "Tiempo promedio de resolución",
+        "sub": "Todos los tipos de ticket",
+        "days": "días"
+      },
+      "pendingReports": {
+        "label": "Informes pendientes",
+        "sub": "informes de inspección y hojas de reclamo esperando generarse"
+      }
+    },
+    "installations": {
+      "quoted": "Instalaciones cotizadas",
+      "completed": "Instalaciones realizadas",
+      "quotedSub": "{{monto}} en cotizaciones generadas este mes",
+      "completedSub": "{{monto}} en instalaciones resueltas/cerradas este mes"
+    },
+    "distributionByType": {
+      "title": "Distribución por tipo de servicio"
+    },
+    "distributionByTechnician": {
+      "title": "Distribución por técnico"
+    },
+    "yearly": {
+      "title": "Servicios completados en el año"
+    },
+    "commission": {
+      "title": "Comisión — Carlos Vergara"
+    },
+    "library": {
+      "title": "Biblioteca de documentos",
+      "searchPlaceholder": "Buscar por N° ticket, cliente o técnico",
+      "allTypes": "Todos los documentos",
+      "allStatuses": "Todos los estados",
+      "loading": "Cargando...",
+      "empty": "No se encontraron documentos.",
+      "unassigned": "Sin asignar",
+      "viewTicket": "Ver ticket",
+      "type": {
+        "inspection_report": "Informe de inspección",
+        "claim_sheet": "Hoja de reclamo"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "completed": "Completado"
+      },
+      "columns": {
+        "ticket": "N° Ticket",
+        "cliente": "Cliente",
+        "tipo": "Tipo de documento",
+        "tecnico": "Técnico",
+        "fecha": "Fecha",
+        "estado": "Estado",
+        "detail": "Ver"
+      }
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "views": {
+      "table": "Tabla",
+      "board": "Tablero"
+    },
+    "table": {
+      "columns": {
+        "numero": "N° Ticket",
+        "client": "Cliente",
+        "type": "Tipo",
+        "subtype": "Subtipo",
+        "technician": "Técnico",
+        "status": "Estado",
+        "quote": "Cotización",
+        "inspectionReport": "Informe de inspección",
+        "reported": "Reportado",
+        "scheduled": "Fecha agendada",
+        "detail": "Detalle"
+      },
+      "empty": "Sin tickets para este filtro",
+      "unassigned": "Sin asignar",
+      "notScheduled": "Sin agendar",
+      "viewDetail": "Ver detalle"
+    },
+    "stats": {
+      "abiertos": "Tickets abiertos",
+      "abiertosSub": "de {{total}} totales",
+      "cotizaciones": "Cotizaciones por generar",
+      "cotizacionesSub": "tickets esperando presupuesto",
+      "informes": "Informes por generar",
+      "informesSub": "inspecciones y reclamos sin documento",
+      "sinAgendar": "Sin agendar",
+      "sinAgendarSub": "hace más de {{dias}} días"
+    },
+    "quotesHistory": {
+      "button": "Ver cotizaciones",
+      "title": "Historial de cotizaciones",
+      "searchPlaceholder": "Buscar por N° cotización, N° ticket o cliente",
+      "chips": {
+        "all": "Todas"
+      },
+      "table": {
+        "columns": {
+          "numero": "N° Cotización",
+          "ticket": "N° Ticket",
+          "cliente": "Cliente",
+          "fecha": "Fecha",
+          "total": "Total",
+          "estado": "Estado",
+          "detail": "Ver documento"
+        },
+        "empty": "Sin cotizaciones para este filtro",
+        "loading": "Cargando..."
+      }
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por N° ticket, cliente o técnico",
+      "allTypes": "Todos los tipos",
+      "allTechnicians": "Todos los técnicos",
+      "allStatuses": "Todos los estados",
+      "statusLabel": "Filtrar por estado",
+      "clear": "Limpiar filtros",
+      "showing": "Mostrando {{shown}} de {{total}} tickets"
+    },
+    "types": {
+      "installation": "Instalación",
+      "warranty": "Garantía",
+      "claim": "Reclamo",
+      "retrofit": "Retrofit"
+    },
+    "subtypes": {
+      "installation": "Instalación",
+      "inspection": "Inspección",
+      "warranty_generic": "Garantía general",
+      "replacement_inspection": "Inspección de reemplazo"
+    },
+    "statuses": {
+      "reported": "Reportado",
+      "scheduled": "Agendado",
+      "on_site": "En sitio",
+      "resolved": "Resuelto",
+      "closed": "Cerrado",
+      "cancelled": "Cancelado"
+    },
+    "quote": {
+      "notApplicable": "No aplica",
+      "locked": "Bloqueada",
+      "lockedTooltip": "Bloqueada: falta completar el informe de inspección",
+      "generate": "Generar cotización",
+      "draft": "Borrador",
+      "sent": "Enviada",
+      "approved": "Aprobada",
+      "rejected": "Rechazada"
+    },
+    "inspectionReport": {
+      "notApplicable": "No aplica",
+      "generate": "Generar informe",
+      "pending": "Pendiente",
+      "completed": "Completado",
+      "modalTitle": "Informe de Inspección",
+      "numeroInforme": "N° de informe",
+      "numeroPending": "(se asigna al guardar)",
+      "ticket": "Ticket",
+      "cliente": "Cliente",
+      "proyecto": "Proyecto",
+      "direccion": "Dirección",
+      "switchToUpload": "¿Ya tienes el informe? Súbelo aquí",
+      "switchToForm": "Volver al formulario",
+      "fecha": "Fecha de inspección",
+      "tecnico": "Técnico responsable",
+      "horaInicio": "Hora de inicio",
+      "horaFin": "Hora de fin",
+      "hallazgosSection": "Hallazgos de la inspección",
+      "productoGenerico": "Producto",
+      "cantidadReclamadaInline": "Cantidad reclamada: {{count}}",
+      "noFields": "No aplica para este tipo de ticket",
+      "extraFindingLabel": "Hallazgo adicional {{n}}",
+      "addExtraFinding": "+ Agregar hallazgo adicional",
+      "materialesSection": "Materiales / insumos utilizados",
+      "materialNombre": "Insumo / herramienta",
+      "materialVinculado": "· vinculado a insumo trackeado",
+      "materialCantidad": "Cantidad",
+      "addMaterial": "+ Agregar material usado",
+      "fotosAntesSection": "Fotos — Antes",
+      "fotosDespuesSection": "Fotos — Después",
+      "noPhotos": "Sin fotos",
+      "conclusion": "Conclusión",
+      "requiereSeguimiento": "¿Requiere seguimiento?",
+      "proximosPasos": "Próximos pasos",
+      "firmaTecnico": "Firma del técnico responsable",
+      "firmaCliente": "Firma / acuse de recibido del cliente",
+      "firmaPendiente": "Pendiente de firma",
+      "yes": "Sí",
+      "no": "No",
+      "uploadSection": "Subir informe existente",
+      "viewCurrentFile": "Ver archivo actual",
+      "attachFile": "+ Adjuntar archivo (PDF o imagen)",
+      "save": "Guardar informe",
+      "saveError": "No se pudo guardar el informe. Intenta de nuevo.",
+      "printBlank": "Ver plantilla en blanco",
+      "printFull": "Ver / Imprimir",
+      "pdfError": "No se pudo generar el PDF. Intenta de nuevo.",
+      "viewOnMobile": "Ver en móvil",
+      "mobile": {
+        "backToForm": "Volver al formulario",
+        "formTitle": "Informe de Inspección — {{numero}}",
+        "signatureTitle": "Firma del cliente",
+        "signatureName": "Firma / acuse de recibido del cliente",
+        "signatureNameRequired": "Ingresa el nombre de quien firma antes de continuar.",
+        "continueToSign": "Continuar a firmar",
+        "signHere": "Firmá dentro del recuadro",
+        "clearSignature": "Limpiar firma",
+        "confirmSignature": "Firmar",
+        "signedAt": "Firmado el {{fecha}}",
+        "savingReport": "Guardando informe...",
+        "saveError": "No se pudo guardar el informe.",
+        "saved": "Informe completado y firmado.",
+        "alreadySigned": "Este informe ya fue firmado por el cliente y no puede volver a firmarse.",
+        "notAllowed": "No tienes acceso a este informe.",
+        "backToTicket": "Volver al ticket"
+      }
+    },
+    "claimSheet": {
+      "fieldLabel": "Hoja de Reclamo",
+      "generate": "Generar Hoja de Reclamo",
+      "completed": "Completada",
+      "modalTitle": "Hoja de Reclamo",
+      "print": "Ver / Imprimir",
+      "section1": "1. Datos del reclamante",
+      "section2": "2. Producto(s) reclamado(s)",
+      "section3": "3. Descripción del problema y diagnóstico",
+      "section4": "4. Firma del responsable",
+      "cliente": "Cliente",
+      "contacto": "Contacto",
+      "email": "Email",
+      "direccion": "Dirección",
+      "noProductos": "Sin productos registrados",
+      "proyecto": "Proyecto",
+      "responsable": "Responsable",
+      "cantidadReclamo": "Cant. reclamo",
+      "cantidadRecibida": "Cant. recibida",
+      "cantidadPendiente": "Cant. pendiente",
+      "fechaReclamo": "Fecha del reclamo",
+      "descripcionProblema": "Descripción del problema",
+      "diagnostico": "Diagnóstico",
+      "diagnosticoPlaceholder": "Selecciona un diagnóstico",
+      "diagnosticos": {
+        "defectuoso": "Defectuoso",
+        "no_procede": "No procede el reclamo",
+        "uso_inadecuado": "Uso inadecuado",
+        "pendiente_evaluacion": "Pendiente de evaluación"
+      },
+      "firmaResponsable": "Firma del responsable",
+      "firmaPendiente": "Pendiente de firma",
+      "lockedNotice": "Esta Hoja de Reclamo ya fue completada y no puede editarse.",
+      "save": "Guardar Hoja de Reclamo",
+      "saveError": "No se pudo guardar la Hoja de Reclamo. Intenta de nuevo.",
+      "pdfError": "No se pudo generar el PDF. Intenta de nuevo."
+    },
+    "quoteModal": {
+      "title": "Cotización de Servicio",
+      "cliente": "Cliente",
+      "contacto": "Contacto",
+      "direccion": "Dirección",
+      "readyToGenerate": "Este ticket todavía no tiene una cotización — genera la primera.",
+      "numeroPending": "(se asigna al guardar)",
+      "blockedByInspection": "No se puede generar la cotización hasta que el Informe de Inspección esté Completado o No aplique.",
+      "generate": "Generar cotización",
+      "generateNew": "Generar nueva cotización",
+      "generateError": "No se pudo generar la cotización. Intenta de nuevo.",
+      "itemsSection": "Ítems",
+      "noItems": "Sin ítems todavía",
+      "itemTypes": {
+        "product": "Producto",
+        "labor": "Mano de obra",
+        "subcontracted": "Subcontratado"
+      },
+      "customReference": "Otro (referencia libre, sin catálogo)",
+      "description": "Descripción",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "pickProduct": "Elegir producto del catálogo",
+      "pickTechnician": "Elegir técnico externo",
+      "diasCotizados": "Días cotizados",
+      "marginPercentPlaceholder": "Margen % (por defecto {{percent}}%)",
+      "margin": "Margen",
+      "costReference": "Costo de referencia",
+      "addItem": "Agregar ítem",
+      "saveItem": "Guardar ítem",
+      "itemError": "No se pudo guardar el ítem. Intenta de nuevo.",
+      "itemDeleteError": "No se pudo eliminar el ítem. Intenta de nuevo.",
+      "observations": "Observaciones",
+      "subtotal": "Subtotal",
+      "discountPercent": "Descuento (%)",
+      "itbms": "ITBMS ({{percent}}%)",
+      "total": "Total",
+      "save": "Guardar",
+      "saved": "Cotización guardada.",
+      "saveError": "No se pudo guardar la cotización. Intenta de nuevo.",
+      "send": "Enviar al cliente",
+      "sendError": "No se pudo enviar la cotización. Intenta de nuevo.",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "decideError": "No se pudo registrar la decisión. Intenta de nuevo.",
+      "print": "Ver/Imprimir",
+      "pdfError": "No se pudo descargar el documento. Intenta de nuevo.",
+      "historySection": "Historial de cotizaciones",
+      "historyCurrent": "Vigente",
+      "pdfViewerTitle": "Cotización {{numero}}",
+      "pdfDownload": "Descargar"
+    },
+    "actions": {
+      "schedule": "Agendar",
+      "reschedule": "Reagendar",
+      "cancelTicket": "Cancelar ticket",
+      "print": "Ver/Imprimir"
+    },
+    "requirements": {
+      "catalog": {
+        "casco": "Casco de seguridad",
+        "botas": "Botas de seguridad",
+        "guantes": "Guantes de seguridad",
+        "gafas": "Gafas de protección",
+        "chaleco": "Chaleco reflectivo",
+        "arnes": "Arnés de seguridad",
+        "escaleraEstandar": "Escalera estándar",
+        "escaleraAltura": "Escalera doble altura",
+        "andamio": "Andamio",
+        "plataforma": "Plataforma elevadora",
+        "permisoAltura": "Permiso de trabajo en altura",
+        "corteEnergia": "Corte de energía previo (LOTO)",
+        "accesoEdificio": "Autorización de acceso al edificio",
+        "estacionamiento": "Permiso de estacionamiento",
+        "horarioRestringido": "Horario restringido",
+        "herramientaEsp": "Herramienta especializada",
+        "dosTecnicos": "Requiere 2 técnicos",
+        "induccionSeguridad": "Inducción de seguridad del cliente"
+      },
+      "addOther": "+ Agregar otro",
+      "removeOther": "Quitar",
+      "otherPlaceholder": "Describe el requerimiento y presiona Enter",
+      "none": "Ninguno aplica"
+    },
+    "create": {
+      "newTicket": "Nuevo ticket",
+      "title": "Nuevo ticket",
+      "descripcion": "Breve descripción",
+      "descripcionPlaceholder": "Ej: Apto 14B — Lobby",
+      "clienteSection": "Cliente",
+      "clienteMaster": "Cliente Master",
+      "proyectoPlaceholder": "— Elegir proyecto —",
+      "sinProyectos": "Este subcliente aún no tiene proyectos registrados en Ventas & Diseño.",
+      "sinSeleccionar": "Sin seleccionar",
+      "contactoNombre": "Contacto — nombre",
+      "contactoTelefono": "Contacto — teléfono",
+      "productosSection": "Productos reclamados / afectados (opcional)",
+      "cantidadReclamada": "Cantidad reclamada",
+      "quitarProducto": "Quitar producto",
+      "buscarProducto": "Buscar producto en inventario",
+      "searchMasterTitle": "Buscar Cliente Master",
+      "searchMasterEmpty": "Sin resultados. El cliente debe existir primero en Ventas & Diseño.",
+      "searchSubTitle": "Buscar Subcliente",
+      "searchSubEmpty": "Este cliente no tiene subclientes registrados.",
+      "searchProductTitle": "Buscar producto en inventario",
+      "searchProductEmpty": "Sin resultados, o ya agregaste todos los que coinciden.",
+      "searchProductEmptyByProject": "Sin resultados — solo se muestran productos entregados a este proyecto.",
+      "attachments": {
+        "add": "Agregar adjunto",
+        "remove": "Quitar adjunto",
+        "maxFilesError": "Máximo {{max}} archivos adjuntos por ticket.",
+        "extensionError": "Ese tipo de archivo no está permitido.",
+        "sizeError": "El archivo supera el máximo de {{max}} MB.",
+        "uploadError": "No se pudo subir \"{{name}}\" — el ticket se creó igual, sin ese adjunto."
+      },
+      "submit": "Crear ticket",
+      "error": "No se pudo crear el ticket"
+    },
+    "cancelModal": {
+      "title": "Cancelar ticket {{numero}}",
+      "warning": "Esta acción se puede revertir después cambiando el estado manualmente.",
+      "motivoLabel": "Motivo de cancelación",
+      "motivoPlaceholder": "Explica por qué se cancela este ticket",
+      "motivoRequired": "El motivo de cancelación es obligatorio",
+      "confirm": "Confirmar cancelación",
+      "cancel": "Volver",
+      "error": "No se pudo cancelar el ticket"
+    },
+    "detail": {
+      "title": "Ticket {{numero}}",
+      "edit": "Editar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "fields": {
+        "tipo": "Tipo de servicio",
+        "subtipo": "Subtipo",
+        "cliente": "Cliente",
+        "clienteMaster": "Cliente Master",
+        "subcliente": "Subcliente",
+        "email": "Email de contacto",
+        "proyecto": "Proyecto asociado",
+        "contacto": "Contacto",
+        "tipoInstalacion": "Tipo de instalación",
+        "direccion": "Dirección completa",
+        "fechaServicio": "Fecha y hora de servicio",
+        "horario": "Horario de trabajo / visita",
+        "requerimientos": "Requerimientos especiales",
+        "productos": "Productos reclamados / afectados",
+        "productosNotApplicable": "No aplica para este tipo de ticket",
+        "informe": "Informe de inspección",
+        "cotizacion": "Cotización de servicio",
+        "observaciones": "Observaciones",
+        "adjuntos": "Fotos, videos o archivos adjuntos",
+        "adjuntosEmpty": "Sin adjuntos",
+        "cancellationReason": "Motivo de cancelación"
+      },
+      "tipoInstalacionValues": {
+        "internal": "Interna",
+        "subcontracted": "Subcontratada"
+      },
+      "reschedule": {
+        "title": "Cita reagendada",
+        "previousDate": "Fecha anterior",
+        "previousTime": "Hora anterior",
+        "newDate": "Nueva fecha",
+        "newTime": "Nueva hora",
+        "motivo": "Motivo"
+      },
+      "technicianUnassignedWarning": "El técnico asignado no atiende este nuevo tipo de servicio — el ticket quedó \"Sin asignar\", usa Reagendar para elegir uno válido.",
+      "saveError": "No se pudo guardar el ticket",
+      "loadError": "No se pudo cargar el detalle del ticket",
+      "pdfError": "No se pudo generar el PDF",
+      "attachmentUrlError": "No se pudo abrir el adjunto",
+      "addProduct": "+ Agregar producto",
+      "addAttachment": "+ Agregar archivo",
+      "removeProduct": "Quitar producto",
+      "productQty": "Cantidad: {{qty}}",
+      "productLockedTooltip": "Ya tiene recepción registrada — no se puede editar ni quitar",
+      "productError": "No se pudo actualizar el producto",
+      "attachmentUploadError": "No se pudo subir el archivo"
+    },
+    "schedule": {
+      "title": "Agendar visita",
+      "titleReschedule": "Reagendar visita",
+      "technician": "Técnico",
+      "technicianPlaceholder": "Selecciona un técnico",
+      "date": "Fecha",
+      "time": "Hora",
+      "motivo": "Motivo del reagendamiento",
+      "motivoPlaceholder": "Explica por qué se reagenda esta visita",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "error": "No se pudo agendar el ticket",
+      "requiredFields": "Técnico, fecha y hora son obligatorios",
+      "requiredFieldsReschedule": "Técnico, fecha, hora y motivo son obligatorios"
+    },
+    "status": {
+      "changeError": "No se pudo cambiar el estado del ticket",
+      "readOnlyTooltip": "Solo el Líder de Servicios puede cambiar el estado"
+    },
+    "board": {
+      "empty": "Sin tickets",
+      "columns": {
+        "reported": "Reportado",
+        "scheduled": "Agendado",
+        "on_site": "En sitio",
+        "resolved": "Resuelto",
+        "closed": "Cerrado",
+        "cancelled": "Cancelado"
+      }
+    }
+  },
+  "settings": {
+    "title": "Ajustes de Servicios",
+    "loading": "Cargando...",
+    "groups": {
+      "operacion": "Operación",
+      "sla": "SLA por tipo de ticket",
+      "comision": "Comisión — Plan de Bonificación",
+      "cotizacion": "Cotización de Servicio"
+    },
+    "save": "Guardar cambios",
+    "saved": "Ajustes actualizados.",
+    "error": "No se pudo guardar. Verificá los valores.",
+    "readOnlyNote": "Solo Gerencia puede editar estos valores.",
+    "unsavedChanges": "Hay cambios sin guardar."
+  }
+}

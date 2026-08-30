@@ -1,0 +1,430 @@
+{
+  "nav": {
+    "module":      "CRM",
+    "dashboard":   "CRM Dashboard",
+    "projectList": "Project List",
+    "directory": "Directory",
+    "catalog":   "Catalog",
+    "reports":   "Reports",
+    "team":      "Team"
+  },
+  "stages": {
+    "lead":       "Lead",
+    "diseno":     "In Design",
+    "cotizacion": "In Quotation",
+    "propuesta":  "Proposal Sent",
+    "cerrado":    "Closed",
+    "perdido":    "Lost"
+  },
+  "activityTypes": {
+    "llamada":  "Call",
+    "email":    "Email",
+    "reunion":  "Meeting",
+    "whatsapp": "WhatsApp",
+    "visita":   "Visit",
+    "otro":     "Other"
+  },
+  "urgency": {
+    "ok":      "On track",
+    "proximo": "Due soon",
+    "vencido": "Overdue"
+  },
+  "freshness": {
+    "recent": "Recent",
+    "stale":  "Stale",
+    "cold":   "Cold"
+  },
+  "areas": {
+    "residencial":    "Residential",
+    "comercial":      "Commercial",
+    "corporativo":    "Corporate",
+    "hotelero":       "Hospitality",
+    "industrial":     "Industrial",
+    "educativo":      "Educational",
+    "salud":          "Healthcare",
+    "restaurante":    "Restaurant",
+    "retail":         "Retail",
+    "espacioPublico": "Public Space",
+    "otro":           "Other"
+  },
+  "dialux": {
+    "all":  "With or without DIALUX",
+    "only": "DIALUX only",
+    "none": "No DIALUX"
+  },
+  "filters": {
+    "search":            "Search project...",
+    "searchPipeline":    "Search project, contact, owner...",
+    "stage":             "Stage",
+    "urgency":           "Urgency",
+    "freshness":         "Activity",
+    "area":              "Area",
+    "tipo":              "Type",
+    "despacho":          "Office",
+    "user":              "Owner",
+    "allStages":         "All stages",
+    "allTypes":          "All types",
+    "allAreas":          "All areas",
+    "allLocations":      "All locations",
+    "allUsers":          "All users",
+    "allDespachos":      "All offices",
+    "designOrQuotation": "Design and/or Quotation",
+    "clearAll":          "Clear filters",
+    "activeFiltersSuffix": "with active filters",
+    "resultCount_one":   "{{count}} project",
+    "resultCount_other": "{{count}} projects"
+  },
+  "project": {
+    "nombre":       "Project Name *",
+    "contacto":     "Contact name",
+    "email":        "Email",
+    "celular":      "Mobile",
+    "encargado":    "Owner",
+    "developer":    "Developer / Real estate",
+    "arquitecto":   "Architect",
+    "tipo":         "What does the client request? *",
+    "dialux":       "Includes DIALux (lighting calculation)",
+    "area":         "Area / Type",
+    "despacho":     "Office",
+    "ubicacion":    "Location",
+    "fechaEntrega": "Delivery date",
+    "valor":        "Estimated value (USD)",
+    "notas":        "Notes / next steps",
+    "assignees":    "Assignees",
+    "newProject":   "New Project",
+    "editProject":  "Edit Project",
+    "stage":        "Stage",
+    "save":         "Save Project",
+    "saving":       "Saving...",
+    "daysOverdue":  "{{days}}d overdue",
+    "today":        "today",
+    "tipoRadio": {
+      "diseno":     "Design Only",
+      "cotizacion": "Quotation Only",
+      "ambos":      "Design + Quotation"
+    }
+  },
+  "activity": {
+    "title":            "Activities",
+    "timeline":         "Client Log",
+    "logNew":           "+ Log new activity",
+    "new":              "New activity",
+    "tipo":             "Type",
+    "fecha":            "Date",
+    "notas":            "Notes",
+    "siguiente":        "Next follow-up",
+    "noActivity":       "No activities logged",
+    "notasPlaceholder": "What was discussed? Commitments, objections, next steps...",
+    "add":              "+ Add to history",
+    "followup":         "Follow-up:"
+  },
+  "reminder": {
+    "title":            "Reminders",
+    "new":              "+ Add",
+    "tipo":             "Type",
+    "fecha":            "Date",
+    "nota":             "Note",
+    "done":             "Done",
+    "pending":          "Pending",
+    "notaPlaceholder":  "Optional...",
+    "hint":             "Schedule the next action with this client.",
+    "savedWithProject": "Will be saved together with the project",
+    "types": {
+      "none":       "— No reminder —",
+      "llamada":    "Call",
+      "email":      "Send email",
+      "whatsapp":   "WhatsApp",
+      "reunion":    "Meeting",
+      "visita":     "Visit",
+      "cotizacion": "Send quotation",
+      "diseno":     "Send design",
+      "otro":       "Other"
+    }
+  },
+  "modal": {
+    "sectionInfo":       "Information",
+    "sectionContact":    "Contact",
+    "sectionProject":    "Project",
+    "sectionAssignees":  "Assignees",
+    "sectionActivities": "Activities",
+    "sectionReminders":  "Reminders"
+  },
+  "tipo": {
+    "diseno":     "Design",
+    "cotizacion": "Quotation",
+    "ambos":      "Design + Quotation"
+  },
+  "tipoBadge": {
+    "diseno":     "Design",
+    "cotizacion": "Quot.",
+    "ambos":      "D+Q"
+  },
+  "empty": {
+    "noProjects":  "No projects",
+    "noMatches":   "No results for current filters",
+    "createFirst": "Create the first project using the button above"
+  },
+  "ai": {
+    "title":             "AI Assistant",
+    "summarize":         "Summarize project",
+    "suggest":           "Suggest actions",
+    "draft":             "Draft message",
+    "intentPlaceholder": "Intent (e.g. post-meeting follow-up, closing proposal...)",
+    "analyzing":         "Analyzing with AI...",
+    "result":            "Result"
+  },
+  "kanban": {
+    "empty": "No projects"
+  },
+  "dashboard": {
+    "title":             "CRM Dashboard",
+    "myTitle":           "My Dashboard — {{name}}",
+    "subtitle":          "Summary of all team projects",
+    "byStage":           "Projects by stage",
+    "byType":            "By request type",
+    "activePipeline":    "Active pipeline",
+    "activePipelineSub": "USD in open projects",
+    "closed":            "Closed (won)",
+    "closedSub":         "USD won",
+    "reminders":         "Pending reminders",
+    "noReminders":       "No pending reminders",
+    "tagLabels": {
+      "design": "Design",
+      "quote":  "Quotation",
+      "both":   "Design + Quotation"
+    },
+    "untaggedNote_one":   "{{count}} untagged, not included",
+    "untaggedNote_other": "{{count}} untagged, not included",
+    "overdueTitle_one":   "{{count}} project with an overdue proposal (over 15 days without a response)",
+    "overdueTitle_other": "{{count}} projects with an overdue proposal (over 15 days without a response)",
+    "coldTitle_one":      "{{count}} client without recent contact (+15 days)",
+    "coldTitle_other":    "{{count}} clients without recent contact (+15 days)",
+    "remindSuccess":      "Reminder sent to: {{summary}}. Each owner only received their own overdue projects — no client was contacted directly.",
+    "remindAlreadySent":  "A reminder was already sent today to each owner of the overdue proposals.",
+    "remindError":        "There are no overdue proposals to remind.",
+    "loadError":          "Error loading the Dashboard.",
+    "noTagged":           "No tagged projects",
+    "viewMore":           "View more",
+    "daysOverdue":        "days without a response",
+    "daysCold":           "days without contact"
+  },
+  "projectsList": {
+    "title":    "Project List",
+    "subtitle": "Your projects in table format, to scan several at once",
+    "resultsCount_one":   "{{count}} project",
+    "resultsCount_other": "{{count}} projects",
+    "totalCount_one":     "{{count}} project in total",
+    "totalCount_other":   "{{count}} projects in total",
+    "filters": {
+      "searchPlaceholder": "Search by project or client...",
+      "allStages":         "All stages",
+      "allTags":           "All tags",
+      "allOwners":         "All owners",
+      "clear":             "Clear filters"
+    },
+    "table": {
+      "project":     "Project",
+      "client":      "Client",
+      "stage":       "Stage",
+      "tag":         "Tag",
+      "owner":       "Owner",
+      "value":       "Value",
+      "area":        "Worked area",
+      "daysInStage": "Days in stage",
+      "delivery":    "Delivery date",
+      "files":       "Files",
+      "empty":       "No results for the current filters"
+    },
+    "actions": {
+      "exportCsv": "Export CSV"
+    }
+  },
+  "reports": {
+    "title":             "Monthly Reports",
+    "allTeam":           "Whole team",
+    "analyzeButton":     "Executive analysis",
+    "exportCsv":         "Export CSV",
+    "printPdf":          "Print / PDF",
+    "loadError":         "Error loading the report.",
+    "aiTitle":           "AI Executive Analysis",
+    "monthlyLabel":      "Monthly report",
+    "generatedLabel":    "Generated",
+    "activityBreakdown": "Activity breakdown for the month",
+    "teamPerformance":   "Designer performance in {{month}}",
+    "newProjects":       "New projects registered in {{month}} ({{count}})",
+    "noActivity":        "No activity recorded in {{month}}",
+    "activitiesSuffix": "activities",
+    "wonSuffix":        "won",
+    "kpi": {
+      "leadsNuevos":    "New leads",
+      "cerrados":       "Closed",
+      "perdidos":       "Lost",
+      "tasaCierre":     "Close rate",
+      "actividades":    "Activities",
+      "documentos":     "Documents",
+      "potencial":      "potential",
+      "ganado":         "won",
+      "perdidoSub":     "lost",
+      "tasaCierreSub":  "Closed / (Closed + Lost)",
+      "actividadesSub": "calls, emails, meetings",
+      "documentosSub":  "quotes, designs, presentations"
+    },
+    "teamTable": {
+      "disenador":   "Designer",
+      "leads":       "Leads",
+      "cerrados":    "Closed",
+      "perdidos":    "Lost",
+      "pctCierre":   "% Close",
+      "cierre":      "Close",
+      "actividades": "Activities",
+      "docs":        "Docs",
+      "ganado":      "$ Won",
+      "potencial":   "$ Potential"
+    },
+    "projectsTable": {
+      "fecha":     "Date",
+      "proyecto":  "Project",
+      "cliente":   "Client",
+      "tipo":      "Type",
+      "ubicacion": "Location",
+      "etapa":     "Stage",
+      "equipo":    "Team",
+      "valor":     "Value"
+    },
+    "log": {
+      "title":    "Full log for {{month}} ({{count}} activities)",
+      "fecha":    "Date",
+      "tipo":     "Type",
+      "usuario":  "User",
+      "proyecto": "Project / Client",
+      "resumen":  "Summary"
+    }
+  },
+  "directory": {
+    "title":              "Contact Directory",
+    "addContact":         "+ Add contact",
+    "importFromProjects": "Import from projects",
+    "importing":          "Importing...",
+    "exportCsv":          "Export CSV",
+    "searchPlaceholder":  "Search name...",
+    "modal": {
+      "titleCreate": "New contact",
+      "titleEdit":   "Edit contact",
+      "saving":      "Saving...",
+      "deleting":    "Deleting..."
+    },
+    "form": {
+      "nombre":            "Name *",
+      "tipo":              "Type *",
+      "email":             "Email",
+      "telefono":          "Phone",
+      "empresa":           "Company",
+      "notas":             "Notes",
+      "empresaPlaceholder":"Company or organization",
+      "notasPlaceholder":  "Notes..."
+    },
+    "types": {
+      "developer":  "Developers",
+      "arquitecto": "Architects",
+      "encargado":  "Managers",
+      "contacto":   "Contacts / Clients"
+    },
+    "uniqueOfType": "Unique {{type}}",
+    "emptyOfType":  "No {{type}} registered yet.",
+    "table": {
+      "nombre":         "Name",
+      "proyectos":      "Projects",
+      "areas":          "Work areas",
+      "ubicaciones":    "Locations",
+      "valorTotal":     "$ Total",
+      "valorCerrado":   "$ Closed",
+      "ultimoContacto": "Last contact",
+      "acciones":       "Actions"
+    },
+    "kpi": {
+      "proyectos": "Total projects",
+      "valor":     "Historic value",
+      "cerrado":   "Closed (won)"
+    },
+    "loading":       "Loading...",
+    "save":          "Save",
+    "guardar":       "Save to directory",
+    "verProyectos":  "View projects",
+    "deleteTitle":   "Delete contact",
+    "deleteConfirm": "Delete {{name}}? This action cannot be undone."
+  },
+  "team": {
+    "title":        "Team",
+    "loading":      "Loading team...",
+    "loadError":    "Error loading team.",
+    "empty":        "No team members with assigned projects.",
+    "viewPipeline": "View pipeline",
+    "vencidos":     "Overdue",
+    "activo":       "Active",
+    "ganado":       "Won"
+  },
+  "alerts": {
+    "overdueTitle_one":   "{{count}} project with an overdue proposal",
+    "overdueTitle_other": "{{count}} projects with an overdue proposal",
+    "upcomingTitle_one":   "{{count}} project due in 3 days",
+    "upcomingTitle_other": "{{count}} projects due in 3 days",
+    "coldTitle_one":   "{{count}} client without recent contact (+21 days)",
+    "coldTitle_other": "{{count}} clients without recent contact (+21 days)",
+    "sendReminders": "Send reminders",
+    "mailSubjectOverdue_one":   "[URGENT] {{count}} overdue proposal - CRM",
+    "mailSubjectOverdue_other": "[URGENT] {{count}} overdue proposals - CRM",
+    "mailSubjectUpcoming_one":   "[ALERT] {{count}} proposal due in 3 days",
+    "mailSubjectUpcoming_other": "[ALERT] {{count}} proposals due in 3 days",
+    "mailIntroOverdue":  "Summary of projects with an OVERDUE proposal:",
+    "mailIntroUpcoming": "Summary of projects with a proposal due soon:",
+    "mailClient":        "Client",
+    "mailDesigners":     "Designers",
+    "mailStage":         "Stage",
+    "mailDate":          "Date",
+    "mailOverdueBy":       "Overdue {{days}}d",
+    "mailDaysRemaining":   "{{days}}d remaining",
+    "mailActionRequired": "Action required: update the status or contact the client.",
+    "mailSignature":      "CRM Illuminations"
+  },
+  "document": {
+    "title":       "Documents",
+    "upload":      "Upload file",
+    "uploading":   "Uploading...",
+    "noDocuments": "No documents attached",
+    "saveFirst":   "Save the project to attach files.",
+    "history":     "Version history",
+    "noHistory":   "No previous versions",
+    "download":    "Download",
+    "delete":      "Delete",
+    "hint":        "Maximum {{max}} MB per file",
+    "errorSize":   "File exceeds the {{max}} MB limit",
+    "categorias": {
+      "cotizacion":   "Quote",
+      "diseno":       "Design",
+      "presentacion": "Presentation",
+      "plano":        "Blueprint",
+      "render":       "Render",
+      "ficha":        "Spec sheet",
+      "modelo_3d":    "3D Model",
+      "otro":         "Other"
+    }
+  },
+  "shareLink": {
+    "buttonTitle":  "Share",
+    "modalTitle":   "Share document",
+    "generate":     "Generate new link",
+    "generating":   "Generating...",
+    "copy":         "Copy",
+    "copied":       "Copied",
+    "expiresAt":    "Expires: {{date}}",
+    "revoke":       "Revoke",
+    "revoking":     "Revoking...",
+    "statusActive": "Active",
+    "statusRevoked": "Revoked",
+    "statusExpired": "Expired",
+    "newLinkReady": "Link generated — copy it now",
+    "copyNowWarning": "For security, you won't be able to see it again once you close this modal.",
+    "noLinks":      "You haven't generated any link for this document yet.",
+    "close":        "Close"
+  }
+}

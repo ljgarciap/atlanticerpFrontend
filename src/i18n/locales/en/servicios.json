@@ -1,0 +1,914 @@
+{
+  "nav": {
+    "module": "Services",
+    "home": "Home",
+    "tickets": "Tickets",
+    "ticketsList": "Tickets List",
+    "technicians": "Technicians",
+    "techniciansInternal": "Internal technicians",
+    "techniciansExternal": "External technicians",
+    "toolsAndSupplies": "Tools & Supplies",
+    "reports": "Reports",
+    "settings": "Settings",
+    "quotesHistory": "Quotes"
+  },
+  "comingSoon": "Coming soon",
+  "home": {
+    "title": "Services Home",
+    "greeting": "Welcome, {{name}}",
+    "greetingFallback": "Welcome",
+    "subtitle": "{{fecha}} · you have {{visitasText}} and {{pendientesText}} today",
+    "subtitleVisitas_one": "{{count}} visit",
+    "subtitleVisitas_other": "{{count}} visits",
+    "subtitlePendientes_one": "{{count}} pending item",
+    "subtitlePendientes_other": "{{count}} pending items",
+    "quickActions": {
+      "agenda": "Agenda"
+    },
+    "calendar": {
+      "title": "My calendar"
+    },
+    "routes": {
+      "title": "Today's routes",
+      "empty": "No visits scheduled for today.",
+      "seeFullAgenda": "See full agenda",
+      "navigate": "Waze / Maps"
+    },
+    "pending": {
+      "title": "Pending",
+      "empty": "No pending items right now.",
+      "viewTicket": "View ticket"
+    },
+    "indicators": {
+      "title": "Monthly indicators",
+      "days": "days",
+      "firstVisitRate": "Resolved on 1st visit",
+      "avgResolutionTime": "Avg. resolution time",
+      "installationsRevenue": "Installations revenue",
+      "installations": {
+        "label": "Installations completed this month",
+        "metaSource": {
+          "manual_default": "Reference goal (not enough history yet).",
+          "calculated": "Goal calculated automatically from recent history.",
+          "manual_override": "Goal manually adjusted by Management for this month."
+        }
+      },
+      "goalModal": {
+        "title": "Adjust installations goal",
+        "warning": "This adjustment applies only to the current month. Future months are recalculated automatically.",
+        "valueLabel": "Monthly installations goal",
+        "valueInvalid": "Enter an integer greater than or equal to 0.",
+        "cancel": "Cancel",
+        "confirm": "Save",
+        "error": "Could not save the goal. Please try again."
+      }
+    },
+    "sinResponder": {
+      "title": "Unanswered services",
+      "subtitle": "Require contacting the client",
+      "empty": "No unanswered services right now.",
+      "reportedDaysAgo_one": "Reported {{count}} day ago",
+      "reportedDaysAgo_other": "Reported {{count}} days ago"
+    },
+    "insumosPendientes": {
+      "title": "Pending supplies & tools",
+      "empty": "No pending supplies or tools right now.",
+      "columns": {
+        "repuesto": "Part",
+        "ticket": "Related ticket",
+        "solicitado": "Requested",
+        "llegadaEstimada": "Estimated arrival"
+      },
+      "solicitadoHaceDias_one": "{{count}} day ago",
+      "solicitadoHaceDias_other": "{{count}} days ago",
+      "llegadaPorConfirmar": "To be confirmed",
+      "viewTicket": "View ticket"
+    },
+    "estadoTickets": {
+      "title": "Ticket status",
+      "seeAll": "See all tickets",
+      "chips": {
+        "all": "All",
+        "installation": "Installations",
+        "warranty": "Warranties",
+        "claim": "Claims",
+        "retrofit": "Retrofit"
+      },
+      "closedThisMonth": "this month"
+    }
+  },
+  "technicians": {
+    "internal": {
+      "title": "Internal technicians",
+      "addButton": "+ New technician",
+      "views": {
+        "team": "Team",
+        "agenda": "Team agenda"
+      },
+      "status": {
+        "available": "Available",
+        "en_route": "En route",
+        "on_site": "Busy",
+        "off": "Off"
+      },
+      "specialty": {
+        "general": "General",
+        "warranty": "Warranty"
+      },
+      "card": {
+        "loading": "Loading...",
+        "visitsToday": "Visits today",
+        "firstVisitRate": "1st-visit %",
+        "tools": "Tools",
+        "commission": "Monthly commission",
+        "commissionResult": "View commission"
+      },
+      "visitsModal": {
+        "title": "Today's visits — {{nombre}}",
+        "loading": "Loading...",
+        "empty": "No visits today"
+      },
+      "detailModal": {
+        "especialidad": "Specialty",
+        "telefono": "Phone",
+        "email": "Email"
+      },
+      "createModal": {
+        "title": "New internal technician",
+        "nombre": "Name",
+        "especialidad": "Specialty",
+        "telefono": "Phone",
+        "email": "Email",
+        "cancel": "Cancel",
+        "save": "Save",
+        "error": "Could not register the technician."
+      },
+      "agenda": {
+        "filterLabel": "Filter by technician",
+        "allTechnicians": "All",
+        "loading": "Loading...",
+        "noVisits": "No visits today — available for more work",
+        "noVisitsPeriod": "No visits in this period",
+        "previousPeriod": "Previous period",
+        "nextPeriod": "Next period"
+      },
+      "stats": {
+        "activeToday": "Active today",
+        "activeTodayValue": "{{active}} of {{total}} registered",
+        "visitsToday": "Visits today",
+        "firstVisitAvg": "1st-visit average"
+      },
+      "commissionModal": {
+        "title": "Monthly commission — {{nombre}}",
+        "loading": "Loading...",
+        "pending": "Pending capture",
+        "satisfaccion": "Satisfaction survey average (1-5)",
+        "puntualidad": "Punctuality/attendance incidents",
+        "actitud": "Attitude rating (1-5)",
+        "licenciaMedica": "Medical leave over 5 business days this month?",
+        "save": "Save capture",
+        "saved": "Capture saved",
+        "error": "Could not save the capture.",
+        "slaSection": "SLA by ticket type (business days)",
+        "slaTypes": {
+          "claim": "Claims",
+          "warranty": "Warranty",
+          "installation": "Installations",
+          "retrofit": "Retrofit"
+        },
+        "slaSave": "Save SLA",
+        "slaSaved": "SLA updated",
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "calidad": "Technical work quality (%, manual entry)"
+      },
+      "commissionResult": {
+        "title": "Commission for the month — {{nombre}}",
+        "loading": "Loading...",
+        "pending": "No capture for this period yet.",
+        "total": "Total for the month",
+        "breakdown": "Breakdown by criterion",
+        "criteria": {
+          "calidad": "Technical work quality",
+          "satisfaccion": "Customer satisfaction",
+          "sla": "Turnaround compliance (SLA)",
+          "puntualidad": "Punctuality and attendance",
+          "actitud": "Attitude and disposition"
+        },
+        "weight": "Weight",
+        "obtained": "% obtained",
+        "amount": "Amount",
+        "licenciaMedicaNote": "Medical leave active this month — Punctuality's weight was redistributed among the other criteria.",
+        "close": "Close"
+      }
+    },
+    "external": {
+      "title": "External technicians",
+      "addButton": "+ Add external technician",
+      "searchPlaceholder": "Search by name...",
+      "chips": {
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "loading": "Loading...",
+        "empty": "No external technicians registered.",
+        "columns": {
+          "nombre": "Name",
+          "empresa": "Company",
+          "especialidad": "Specialty",
+          "telefono": "Phone",
+          "tarifa": "Rate",
+          "proyectosActivos": "Active projects",
+          "estado": "Status",
+          "detail": "View profile"
+        }
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "createModal": {
+        "title": "Add external technician",
+        "nombre": "Name",
+        "empresa": "Company",
+        "especialidad": "Specialty",
+        "telefono": "Phone",
+        "email": "Email",
+        "tarifaDia": "Rate per day",
+        "cancel": "Cancel",
+        "save": "Save",
+        "error": "Could not register the external technician."
+      },
+      "detail": {
+        "title": "Technician profile",
+        "loading": "Loading...",
+        "tarifaSection": "Rate per day",
+        "showTarifa": "Show rate",
+        "tarifaError": "Could not update the rate.",
+        "estadoError": "Could not update the status.",
+        "assignedProjects": "Assigned projects / tickets",
+        "noAssignedProjects": "No assigned projects yet",
+        "assignedProjectsCount": "{{count}} assigned project(s)",
+        "assignedProjectsColumns": {
+          "ticket": "Ticket",
+          "cliente": "Client",
+          "cotizacion": "Quote",
+          "dias": "Days",
+          "costoDia": "Cost/day",
+          "margen": "Margin",
+          "precioFinal": "Final price",
+          "estado": "Status"
+        },
+        "deactivateWarning": "This technician has {{count}} active project(s) — do you still want to deactivate them?",
+        "deactivateConfirm": "Yes, deactivate",
+        "deactivate": "Deactivate",
+        "activate": "Reactivate"
+      }
+    }
+  },
+  "toolsAndSupplies": {
+    "title": "Tools & Supplies",
+    "description": "This screen ships in an upcoming batch.",
+    "views": {
+      "tools": "Tools",
+      "supplies": "Supplies"
+    },
+    "supplies": {
+      "title": "Supplies",
+      "description": "This screen ships in an upcoming batch."
+    },
+    "kardexButton": "Tool movements"
+  },
+  "tools": {
+    "addButton": "+ Add tool",
+    "searchPlaceholder": "Search by name, code or assigned person...",
+    "filters": {
+      "allEstados": "All statuses",
+      "allAssigned": "All",
+      "bodega": "In tool storage",
+      "assignedLabel": "Filter by assigned",
+      "estadoLabel": "Filter by status"
+    },
+    "table": {
+      "loading": "Loading...",
+      "empty": "No tools for this filter",
+      "groupHeader": "{{count}} unit(s) ({{summary}})",
+      "groupHeaderEmpty": "0 unit(s)",
+      "columns": {
+        "codigo": "Code",
+        "assignedTo": "Assigned to",
+        "estado": "Status",
+        "desde": "Since",
+        "actions": "Actions"
+      },
+      "bodega": "In tool storage",
+      "pendingBadge": "Requested from Felix ({{cantidad}})",
+      "responsableIncidente": "Responsible: {{nombre}}",
+      "receiveButton": "Received",
+      "requestButton": "Request",
+      "estadoChangeError": "Could not update the status.",
+      "assignmentChangeError": "Could not update the assignment.",
+      "receiveError": "Could not confirm the receipt."
+    },
+    "estados": {
+      "good": "Good condition",
+      "damaged": "Damaged",
+      "worn": "Worn",
+      "lost": "Lost"
+    },
+    "createModal": {
+      "title": "Add tool",
+      "nombre": "Name",
+      "cantidad": "Quantity",
+      "cancel": "Cancel",
+      "save": "Request",
+      "error": "Could not register the request."
+    },
+    "purchaseModal": {
+      "title": "Request replenishment",
+      "subtitle": "{{nombre}}",
+      "cantidad": "Quantity",
+      "cancel": "Cancel",
+      "save": "Request",
+      "error": "Could not register the request."
+    },
+    "detalleModal": {
+      "title": "Mark as {{estado}}",
+      "detalleLabel": "Incident detail",
+      "detallePlaceholder": "Describe what happened...",
+      "detalleRequired": "Detail is required.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    }
+  },
+  "insumos": {
+    "addButton": "+ Add supply",
+    "table": {
+      "loading": "Loading...",
+      "empty": "No supplies registered",
+      "columns": {
+        "factoryReference": "Factory reference",
+        "description": "Name",
+        "disponible": "Available",
+        "minimo": "Minimum",
+        "estado": "Status",
+        "actions": "Actions"
+      },
+      "requestButton": "Request",
+      "disponibleNegativoTooltip": "Negative available stock — recorded consumption exceeds what was in stock. Review this supply's Kardex."
+    },
+    "estados": {
+      "ok": "OK",
+      "bajo_minimo": "Below minimum"
+    },
+    "solicitudPendiente": "Request pending",
+    "requestModal": {
+      "title": "Request supply",
+      "subtitle": "{{descripcion}}",
+      "cantidad": "Quantity",
+      "cancel": "Cancel",
+      "save": "Request",
+      "error": "Could not register the request."
+    },
+    "createModal": {
+      "searchTitle": "Search supply in catalog",
+      "searchEmpty": "No results. The supply must exist in the Purchasing catalog first.",
+      "title": "Add supply",
+      "minimo": "Desired minimum",
+      "cantidadInicial": "Initial quantity to request",
+      "back": "Back",
+      "save": "Add",
+      "error": "Could not register the supply."
+    }
+  },
+  "toolKardex": {
+    "close": "Close",
+    "title": "Tool movements",
+    "subtitle": "Tool movement history (per physical unit). Read-only.",
+    "filters": {
+      "herramienta": "Filter by tool",
+      "responsable": "Filter by responsible",
+      "allHerramientas": "All tools",
+      "allResponsables": "All",
+      "allTipos": "All types",
+      "clear": "Clear filters"
+    },
+    "tipos": {
+      "ingreso": "Intake",
+      "damaged": "Damaged",
+      "worn": "Worn",
+      "lost": "Lost"
+    },
+    "table": {
+      "fecha": "Date",
+      "herramienta": "Tool",
+      "codigo": "Code",
+      "tipo": "Type",
+      "cantidad": "Quantity",
+      "detalle": "Detail",
+      "realizadoPor": "Done by",
+      "saldoInicial": "Opening balance",
+      "saldoResultante": "Closing balance"
+    },
+    "empty": "No movements for this filter"
+  },
+  "reports": {
+    "title": "Services Reports",
+    "description": "Monthly overview, ticket distribution and document library.",
+    "empty": "No data for this period.",
+    "panorama": {
+      "completed": {
+        "label": "Services completed",
+        "sub": "of {{total}} tickets this month"
+      },
+      "firstVisit": {
+        "label": "Resolved on first visit",
+        "sub": "Percentage of tickets resolved without a return visit"
+      },
+      "avgResolution": {
+        "label": "Average resolution time",
+        "sub": "All ticket types",
+        "days": "days"
+      },
+      "pendingReports": {
+        "label": "Pending reports",
+        "sub": "inspection reports and claim sheets awaiting generation"
+      }
+    },
+    "installations": {
+      "quoted": "Installations quoted",
+      "completed": "Installations completed",
+      "quotedSub": "{{monto}} in quotes generated this month",
+      "completedSub": "{{monto}} in installations resolved/closed this month"
+    },
+    "distributionByType": {
+      "title": "Distribution by service type"
+    },
+    "distributionByTechnician": {
+      "title": "Distribution by technician"
+    },
+    "yearly": {
+      "title": "Services completed this year"
+    },
+    "commission": {
+      "title": "Commission — Carlos Vergara"
+    },
+    "library": {
+      "title": "Document library",
+      "searchPlaceholder": "Search by ticket #, client or technician",
+      "allTypes": "All documents",
+      "allStatuses": "All statuses",
+      "loading": "Loading...",
+      "empty": "No documents found.",
+      "unassigned": "Unassigned",
+      "viewTicket": "View ticket",
+      "type": {
+        "inspection_report": "Inspection report",
+        "claim_sheet": "Claim sheet"
+      },
+      "status": {
+        "pending": "Pending",
+        "completed": "Completed"
+      },
+      "columns": {
+        "ticket": "Ticket #",
+        "cliente": "Client",
+        "tipo": "Document type",
+        "tecnico": "Technician",
+        "fecha": "Date",
+        "estado": "Status",
+        "detail": "View"
+      }
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "views": {
+      "table": "Table",
+      "board": "Board"
+    },
+    "table": {
+      "columns": {
+        "numero": "Ticket #",
+        "client": "Client",
+        "type": "Type",
+        "subtype": "Subtype",
+        "technician": "Technician",
+        "status": "Status",
+        "quote": "Quote",
+        "inspectionReport": "Inspection Report",
+        "reported": "Reported",
+        "scheduled": "Scheduled date",
+        "detail": "Detail"
+      },
+      "empty": "No tickets for this filter",
+      "unassigned": "Unassigned",
+      "notScheduled": "Not scheduled",
+      "viewDetail": "View detail"
+    },
+    "stats": {
+      "abiertos": "Open tickets",
+      "abiertosSub": "of {{total}} total",
+      "cotizaciones": "Quotes to generate",
+      "cotizacionesSub": "tickets awaiting a quote",
+      "informes": "Reports to generate",
+      "informesSub": "inspections and claims without a document",
+      "sinAgendar": "Not scheduled",
+      "sinAgendarSub": "over {{dias}} days ago"
+    },
+    "quotesHistory": {
+      "button": "View quotes",
+      "title": "Quote history",
+      "searchPlaceholder": "Search by quote #, ticket # or customer",
+      "chips": {
+        "all": "All"
+      },
+      "table": {
+        "columns": {
+          "numero": "Quote #",
+          "ticket": "Ticket #",
+          "cliente": "Customer",
+          "fecha": "Date",
+          "total": "Total",
+          "estado": "Status",
+          "detail": "View document"
+        },
+        "empty": "No quotes for this filter",
+        "loading": "Loading..."
+      }
+    },
+    "filters": {
+      "searchPlaceholder": "Search by ticket #, client or technician",
+      "allTypes": "All types",
+      "allTechnicians": "All technicians",
+      "allStatuses": "All statuses",
+      "statusLabel": "Filter by status",
+      "clear": "Clear filters",
+      "showing": "Showing {{shown}} of {{total}} tickets"
+    },
+    "types": {
+      "installation": "Installation",
+      "warranty": "Warranty",
+      "claim": "Claim",
+      "retrofit": "Retrofit"
+    },
+    "subtypes": {
+      "installation": "Installation",
+      "inspection": "Inspection",
+      "warranty_generic": "General warranty",
+      "replacement_inspection": "Replacement inspection"
+    },
+    "statuses": {
+      "reported": "Reported",
+      "scheduled": "Scheduled",
+      "on_site": "On site",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "quote": {
+      "notApplicable": "N/A",
+      "locked": "Locked",
+      "lockedTooltip": "Locked: the inspection report needs to be completed first",
+      "generate": "Generate quote",
+      "draft": "Draft",
+      "sent": "Sent",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "inspectionReport": {
+      "notApplicable": "Not applicable",
+      "generate": "Generate report",
+      "pending": "Pending",
+      "completed": "Completed",
+      "modalTitle": "Inspection Report",
+      "numeroInforme": "Report #",
+      "numeroPending": "(assigned on save)",
+      "ticket": "Ticket",
+      "cliente": "Client",
+      "proyecto": "Project",
+      "direccion": "Address",
+      "switchToUpload": "Already have the report? Upload it here",
+      "switchToForm": "Back to the form",
+      "fecha": "Inspection date",
+      "tecnico": "Responsible technician",
+      "horaInicio": "Start time",
+      "horaFin": "End time",
+      "hallazgosSection": "Inspection findings",
+      "productoGenerico": "Product",
+      "cantidadReclamadaInline": "Claimed quantity: {{count}}",
+      "noFields": "Not applicable for this ticket type",
+      "extraFindingLabel": "Additional finding {{n}}",
+      "addExtraFinding": "+ Add additional finding",
+      "materialesSection": "Materials / supplies used",
+      "materialNombre": "Supply / tool",
+      "materialVinculado": "· linked to tracked supply",
+      "materialCantidad": "Quantity",
+      "addMaterial": "+ Add material used",
+      "fotosAntesSection": "Photos — Before",
+      "fotosDespuesSection": "Photos — After",
+      "noPhotos": "No photos",
+      "conclusion": "Conclusion",
+      "requiereSeguimiento": "Requires follow-up?",
+      "proximosPasos": "Next steps",
+      "firmaTecnico": "Responsible technician signature",
+      "firmaCliente": "Client signature / acknowledgment",
+      "firmaPendiente": "Pending signature",
+      "yes": "Yes",
+      "no": "No",
+      "uploadSection": "Upload existing report",
+      "viewCurrentFile": "View current file",
+      "attachFile": "+ Attach file (PDF or image)",
+      "save": "Save report",
+      "saveError": "Could not save the report. Please try again.",
+      "printBlank": "View blank template",
+      "printFull": "View / Print",
+      "pdfError": "Could not generate the PDF. Please try again.",
+      "viewOnMobile": "View on mobile",
+      "mobile": {
+        "backToForm": "Back to form",
+        "formTitle": "Inspection Report — {{numero}}",
+        "signatureTitle": "Client signature",
+        "signatureName": "Client signature / acknowledgment name",
+        "signatureNameRequired": "Enter the signer's name before continuing.",
+        "continueToSign": "Continue to sign",
+        "signHere": "Sign inside the box",
+        "clearSignature": "Clear signature",
+        "confirmSignature": "Sign",
+        "signedAt": "Signed on {{fecha}}",
+        "savingReport": "Saving report...",
+        "saveError": "Could not save the report.",
+        "saved": "Report completed and signed.",
+        "alreadySigned": "This report was already signed by the client and cannot be signed again.",
+        "notAllowed": "You don't have access to this report.",
+        "backToTicket": "Back to ticket"
+      }
+    },
+    "claimSheet": {
+      "fieldLabel": "Claim Sheet",
+      "generate": "Generate Claim Sheet",
+      "completed": "Completed",
+      "modalTitle": "Claim Sheet",
+      "print": "View / Print",
+      "section1": "1. Claimant details",
+      "section2": "2. Claimed product(s)",
+      "section3": "3. Problem description and diagnosis",
+      "section4": "4. Responsible party's signature",
+      "cliente": "Customer",
+      "contacto": "Contact",
+      "email": "Email",
+      "direccion": "Address",
+      "noProductos": "No products registered",
+      "proyecto": "Project",
+      "responsable": "Responsible party",
+      "cantidadReclamo": "Claimed qty.",
+      "cantidadRecibida": "Received qty.",
+      "cantidadPendiente": "Pending qty.",
+      "fechaReclamo": "Claim date",
+      "descripcionProblema": "Problem description",
+      "diagnostico": "Diagnosis",
+      "diagnosticoPlaceholder": "Select a diagnosis",
+      "diagnosticos": {
+        "defectuoso": "Defective",
+        "no_procede": "Claim does not apply",
+        "uso_inadecuado": "Improper use",
+        "pendiente_evaluacion": "Pending evaluation"
+      },
+      "firmaResponsable": "Responsible party's signature",
+      "firmaPendiente": "Pending signature",
+      "lockedNotice": "This Claim Sheet has already been completed and can no longer be edited.",
+      "save": "Save Claim Sheet",
+      "saveError": "Could not save the Claim Sheet. Please try again.",
+      "pdfError": "Could not generate the PDF. Please try again."
+    },
+    "quoteModal": {
+      "title": "Service Quote",
+      "cliente": "Customer",
+      "contacto": "Contact",
+      "direccion": "Address",
+      "readyToGenerate": "This ticket doesn't have a quote yet — generate the first one.",
+      "numeroPending": "(assigned on save)",
+      "blockedByInspection": "The quote can't be generated until the Inspection Report is Completed or Not applicable.",
+      "generate": "Generate quote",
+      "generateNew": "Generate new quote",
+      "generateError": "Could not generate the quote. Please try again.",
+      "itemsSection": "Items",
+      "noItems": "No items yet",
+      "itemTypes": {
+        "product": "Product",
+        "labor": "Labor",
+        "subcontracted": "Subcontracted"
+      },
+      "customReference": "Other (free reference, no catalog)",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "pickProduct": "Pick a catalog product",
+      "pickTechnician": "Pick an external technician",
+      "diasCotizados": "Quoted days",
+      "marginPercentPlaceholder": "Margin % (default {{percent}}%)",
+      "margin": "Margin",
+      "costReference": "Reference cost",
+      "addItem": "Add item",
+      "saveItem": "Save item",
+      "itemError": "Could not save the item. Please try again.",
+      "itemDeleteError": "Could not delete the item. Please try again.",
+      "observations": "Observations",
+      "subtotal": "Subtotal",
+      "discountPercent": "Discount (%)",
+      "itbms": "VAT ({{percent}}%)",
+      "total": "Total",
+      "save": "Save",
+      "saved": "Quote saved.",
+      "saveError": "Could not save the quote. Please try again.",
+      "send": "Send to customer",
+      "sendError": "Could not send the quote. Please try again.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "decideError": "Could not record the decision. Please try again.",
+      "print": "View/Print",
+      "pdfError": "Could not download the document. Please try again.",
+      "historySection": "Quote history",
+      "historyCurrent": "Current",
+      "pdfViewerTitle": "Quote {{numero}}",
+      "pdfDownload": "Download"
+    },
+    "actions": {
+      "schedule": "Schedule",
+      "reschedule": "Reschedule",
+      "cancelTicket": "Cancel ticket",
+      "print": "View/Print"
+    },
+    "requirements": {
+      "catalog": {
+        "casco": "Hard hat",
+        "botas": "Safety boots",
+        "guantes": "Safety gloves",
+        "gafas": "Safety glasses",
+        "chaleco": "Reflective vest",
+        "arnes": "Safety harness",
+        "escaleraEstandar": "Standard ladder",
+        "escaleraAltura": "Double-height ladder",
+        "andamio": "Scaffolding",
+        "plataforma": "Aerial work platform",
+        "permisoAltura": "Working-at-height permit",
+        "corteEnergia": "Prior power cutoff (LOTO)",
+        "accesoEdificio": "Building access authorization",
+        "estacionamiento": "Parking permit",
+        "horarioRestringido": "Restricted schedule",
+        "herramientaEsp": "Specialized tooling",
+        "dosTecnicos": "Requires 2 technicians",
+        "induccionSeguridad": "Client safety induction"
+      },
+      "addOther": "+ Add another",
+      "removeOther": "Remove",
+      "otherPlaceholder": "Describe the requirement and press Enter",
+      "none": "None apply"
+    },
+    "create": {
+      "newTicket": "New ticket",
+      "title": "New ticket",
+      "descripcion": "Brief description",
+      "descripcionPlaceholder": "E.g.: Apt 14B — Lobby",
+      "clienteSection": "Client",
+      "clienteMaster": "Master Client",
+      "proyectoPlaceholder": "— Choose project —",
+      "sinProyectos": "This sub-client has no projects registered in Sales & Design yet.",
+      "sinSeleccionar": "Not selected",
+      "contactoNombre": "Contact — name",
+      "contactoTelefono": "Contact — phone",
+      "productosSection": "Claimed / affected products (optional)",
+      "cantidadReclamada": "Claimed quantity",
+      "quitarProducto": "Remove product",
+      "buscarProducto": "Search product in inventory",
+      "searchMasterTitle": "Search Master Client",
+      "searchMasterEmpty": "No results. The client must already exist in Sales & Design.",
+      "searchSubTitle": "Search Sub-client",
+      "searchSubEmpty": "This client has no sub-clients registered.",
+      "searchProductTitle": "Search product in inventory",
+      "searchProductEmpty": "No results, or you already added everything that matches.",
+      "searchProductEmptyByProject": "No results — only products delivered to this project are shown.",
+      "attachments": {
+        "add": "Add attachment",
+        "remove": "Remove attachment",
+        "maxFilesError": "Maximum {{max}} attachments per ticket.",
+        "extensionError": "That file type is not allowed.",
+        "sizeError": "The file exceeds the {{max}} MB limit.",
+        "uploadError": "Could not upload \"{{name}}\" — the ticket was created anyway, without that attachment."
+      },
+      "submit": "Create ticket",
+      "error": "Could not create the ticket"
+    },
+    "cancelModal": {
+      "title": "Cancel ticket {{numero}}",
+      "warning": "This action can be reverted later by changing the status manually.",
+      "motivoLabel": "Cancellation reason",
+      "motivoPlaceholder": "Explain why this ticket is being cancelled",
+      "motivoRequired": "Cancellation reason is required",
+      "confirm": "Confirm cancellation",
+      "cancel": "Back",
+      "error": "Could not cancel the ticket"
+    },
+    "detail": {
+      "title": "Ticket {{numero}}",
+      "edit": "Edit",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "close": "Close",
+      "fields": {
+        "tipo": "Service type",
+        "subtipo": "Subtype",
+        "cliente": "Client",
+        "clienteMaster": "Master client",
+        "subcliente": "Sub-client",
+        "email": "Contact email",
+        "proyecto": "Associated project",
+        "contacto": "Contact",
+        "tipoInstalacion": "Installation type",
+        "direccion": "Full address",
+        "fechaServicio": "Service date and time",
+        "horario": "Work / visit schedule",
+        "requerimientos": "Special requirements",
+        "productos": "Claimed / affected products",
+        "productosNotApplicable": "Not applicable for this ticket type",
+        "informe": "Inspection report",
+        "cotizacion": "Service quote",
+        "observaciones": "Observations",
+        "adjuntos": "Photos, videos or attachments",
+        "adjuntosEmpty": "No attachments",
+        "cancellationReason": "Cancellation reason"
+      },
+      "tipoInstalacionValues": {
+        "internal": "Internal",
+        "subcontracted": "Subcontracted"
+      },
+      "reschedule": {
+        "title": "Rescheduled visit",
+        "previousDate": "Previous date",
+        "previousTime": "Previous time",
+        "newDate": "New date",
+        "newTime": "New time",
+        "motivo": "Reason"
+      },
+      "technicianUnassignedWarning": "The assigned technician doesn't cover this new service type — the ticket is now \"Unassigned\", use Reschedule to pick a valid one.",
+      "pdfError": "Could not generate the PDF",
+      "attachmentUrlError": "Could not open the attachment",
+      "saveError": "Could not save the ticket",
+      "loadError": "Could not load the ticket detail",
+      "addProduct": "+ Add product",
+      "addAttachment": "+ Add file",
+      "removeProduct": "Remove product",
+      "productQty": "Quantity: {{qty}}",
+      "productLockedTooltip": "Already has a recorded receipt — cannot be edited or removed",
+      "productError": "Could not update the product",
+      "attachmentUploadError": "Could not upload the file"
+    },
+    "schedule": {
+      "title": "Schedule visit",
+      "titleReschedule": "Reschedule visit",
+      "technician": "Technician",
+      "technicianPlaceholder": "Select a technician",
+      "date": "Date",
+      "time": "Time",
+      "motivo": "Reason for rescheduling",
+      "motivoPlaceholder": "Explain why this visit is being rescheduled",
+      "save": "Save",
+      "cancel": "Cancel",
+      "error": "Could not schedule the ticket",
+      "requiredFields": "Technician, date and time are required",
+      "requiredFieldsReschedule": "Technician, date, time and reason are required"
+    },
+    "status": {
+      "changeError": "Could not change the ticket status",
+      "readOnlyTooltip": "Only the Services Lead can change the status"
+    },
+    "board": {
+      "empty": "No tickets",
+      "columns": {
+        "reported": "Reported",
+        "scheduled": "Scheduled",
+        "on_site": "On site",
+        "resolved": "Resolved",
+        "closed": "Closed",
+        "cancelled": "Cancelled"
+      }
+    }
+  },
+  "settings": {
+    "title": "Servicios Settings",
+    "loading": "Loading...",
+    "groups": {
+      "operacion": "Operations",
+      "sla": "SLA by ticket type",
+      "comision": "Commission — Bonus Plan",
+      "cotizacion": "Service Quote"
+    },
+    "save": "Save changes",
+    "saved": "Settings updated.",
+    "error": "Could not save. Check the values.",
+    "readOnlyNote": "Only Management can edit these values.",
+    "unsavedChanges": "You have unsaved changes."
+  }
+}
