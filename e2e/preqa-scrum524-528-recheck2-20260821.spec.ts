@@ -12,7 +12,7 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const FELIX = 'conta@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()

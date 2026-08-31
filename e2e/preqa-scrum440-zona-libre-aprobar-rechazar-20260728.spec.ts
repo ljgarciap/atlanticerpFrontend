@@ -18,10 +18,10 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const YIRENA_EMAIL = 'gerencia2@atlantic.com.pa'
-const YIRENA_PASS = 'gerencia2@atlantic.com.pa'
-const ALMACEN_EMAIL = 'almacen@atlantic.com.pa'
-const ALMACEN_PASS = 'almacen@atlantic.com.pa'
+const YIRENA_EMAIL = 'lidercompras@test.com'
+const YIRENA_PASS = 'lidercompras@test.com'
+const ALMACEN_EMAIL = 'liderbodega@test.com'
+const ALMACEN_PASS = 'liderbodega@test.com'
 
 async function login(page: Page, email: string, password: string) {
   await page.goto(`${BASE}/login`)

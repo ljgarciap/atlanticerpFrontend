@@ -4,8 +4,8 @@ import { test, expect, Page, Locator } from '@playwright/test'
  * Fase 4 — Servicios, Batch 9 (REQ-244/278/279, SCRUM-307/348/349, 2026-08-11).
  * Password default = email. Fixtures locales creadas por Pre-QA en esta sesión (ver
  * docs/pre-qa/ de esta fecha):
- *   T95 = REC-2026-0001 (claim, técnico=Pedro Santos, COMPLETADA por este mismo Pre-QA)
- *   T96 = REC-2026-0002 (claim, técnico=Carlos Vergara, COMPLETADA — sesión anterior)
+ *   T95 = REC-2026-0001 (claim, técnico=Tecnico Servicios Test 2, COMPLETADA por este mismo Pre-QA)
+ *   T96 = REC-2026-0002 (claim, técnico=Tecnico Servicios Test, COMPLETADA — sesión anterior)
  *   T97 = REC-2026-0003 (claim, cancelled, COMPLETADA, CON 1 producto — usar para precarga)
  *   T101 = REC-2026-0004 (claim, SIN técnico asignado — usado por Pre-QA para el test de doble
  *          submit concurrente por API, terminó COMPLETADO — no usar para "sin hoja")
@@ -19,10 +19,10 @@ import { test, expect, Page, Locator } from '@playwright/test'
  *   T88  = INS-2026-0002 (installation/inspection, técnico=Agustín, informe NO completado — botón blanco)
  *   T89  = INS-2026-0003 (installation/inspection, técnico=Carlos, informe COMPLETADO — botón lleno)
  */
-const AARON    = 'servicio@atlantic.com.pa'
-const PEDRO    = 'santopedro181994@gmail.com'
-const AGUSTIN  = 'agustinrodriguez141985@gmail.com'
-const DANIELA  = 'daniela@atlantic.com.pa'
+const AARON    = 'liderservicios@test.com'
+const PEDRO    = 'tecnicoservicios2@test.com'
+const AGUSTIN  = 'tecnicoservicios3@test.com'
+const DANIELA  = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')
@@ -121,7 +121,7 @@ test('SCRUM-348 RN6 — técnico SÍ asignado puede editar y completar', async (
   // feedback_e2e_permanent_tests_must_self_seed.md) para que la re-corrida no choque con el
   // estado dejado por la corrida anterior.
   const superLogin = await page.request.post('/api/auth/login', {
-    data: { email: 'luis.garcia@atlantic.com.pa', password: 'luis.garcia@atlantic.com.pa' },
+    data: { email: 'superadmin2@test.com', password: 'superadmin2@test.com' },
   })
   const { token: superToken } = await superLogin.json()
 

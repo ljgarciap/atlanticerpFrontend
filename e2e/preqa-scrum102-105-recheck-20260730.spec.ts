@@ -14,8 +14,8 @@ const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
 test('las tarjetas resumen de Neil muestran montos reales, no $0/0%', async ({ page }) => {
   await page.goto(`${BASE}/login`)
-  await page.locator('input[type="email"]').fill('neil.quiel@atlantic.com.pa')
-  await page.locator('input[type="password"]').fill('neil.quiel@atlantic.com.pa')
+  await page.locator('input[type="email"]').fill('vendedordisenador2@test.com')
+  await page.locator('input[type="password"]').fill('vendedordisenador2@test.com')
   await page.getByRole('button', { name: /iniciar sesión|login/i }).click()
   await page.waitForTimeout(2000)
 

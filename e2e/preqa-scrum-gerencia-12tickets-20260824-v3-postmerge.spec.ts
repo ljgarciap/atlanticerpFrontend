@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // copy/labels y wiring — el spec v2 (16 tests) quedó con selectores del texto viejo, por eso este
 // spec nuevo verifica contra el estado real post-deploy en vez de reciclar aserciones stale.
 
-const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -128,7 +128,7 @@ test('SCRUM-171 — CONFIRMADO ARREGLADO: "Ver detalle" de Bodega ahora navega a
 })
 
 test('MEDIO#9 — CONFIRMADO ARREGLADO: un rol sin acceso ahora es redirigido fuera de /gerencia (antes se quedaba con pantalla de error)', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa') // Vendedor/Diseñador, sin permiso gerencia.view
+  await login(page, 'vendedordisenador2@test.com') // Vendedor/Diseñador, sin permiso gerencia.view
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   expect(page.url()).not.toContain('/gerencia') // RequirePermission ahora sí redirige
@@ -160,7 +160,7 @@ test('SCRUM-161/162 — Whil (no es Mark Approver) ve "Solo para aprobadores", n
 
 test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Mark Approver global, no "cada tipo con su propio rol autorizado" (Mark/David/Whil)', async ({ page }) => {
   // No es un bug de comportamiento — es una verificación de que el modelo implementado
-  // (ComprasSettings.mark_approver_user_id, un único aprobador) sigue sin ser el que describe el
+  // (ComprasSettings.primary_approver_user_id, un único aprobador) sigue sin ser el que describe el
   // ticket (RN1: "cada tipo de solicitud tiene un rol autorizado"; RN2: "el listado se filtra
   // según quién inició sesión" — implica varios aprobadores posibles, uno por tipo). Documentado
   // acá para que quede trazable en el spec, no solo en el reporte .md.

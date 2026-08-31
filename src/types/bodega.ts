@@ -29,7 +29,7 @@ export interface WarehouseProductRow {
   ubicacion:          string | null
   description:        string
   categoria:          string | null
-  /** Mejora SCRUM-752 RN3 (Daniela Amaya 2026-08-13) — unidades REALES de esta bodega puntual,
+  /** Mejora SCRUM-752 RN3 (Gerencia Test 2026-08-13) — unidades REALES de esta bodega puntual,
    * a diferencia de `disponible`/`stock_total` que son globales de toda la empresa. */
   unidades_en_bodega: number
   disponible:         number
@@ -162,7 +162,7 @@ export type AdjustmentTipo = 'Sumar' | 'Restar'
 export type AdjustmentEstado = 'Pendiente' | 'Aprobada' | 'Rechazada' | 'Reemplazada'
 
 /**
- * SCRUM-428 (corrección de Daniela Amaya 2026-08-13) — Motivo pasa de texto libre a un
+ * SCRUM-428 (corrección de Gerencia Test 2026-08-13) — Motivo pasa de texto libre a un
  * desplegable con exactamente estas 6 opciones (texto literal del comentario de Jira, ver
  * i18n bodega.adjustments.newModal.reasons.* para la etiqueta mostrada). `OTRO_ESPECIFICAR`
  * habilita el uso del campo Descripción para especificar, pero Descripción sigue sin ser
@@ -203,7 +203,7 @@ export interface AdjustmentRequestLine {
 export interface AdjustmentRequestListResponse {
   data: AdjustmentRequestLine[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
-  // SCRUM-429 — si el usuario actual es "Mark" (mark_approver_user_id) para Aprobar/Rechazar.
+  // SCRUM-429 — si el usuario actual es "Mark" (primary_approver_user_id) para Aprobar/Rechazar.
   // El frontend no puede derivarlo solo (es una persona configurable, no un rol en el JWT).
   can_approve: boolean
 }
@@ -224,7 +224,7 @@ export interface AdjustmentRequestLineDraft {
   tipo:         AdjustmentTipo
   cantidad:     number
   motivo:       AdjustmentMotivo | ''
-  // SCRUM-428 (corrección de Daniela Amaya 2026-08-13) — 2 campos nuevos, ambos opcionales:
+  // SCRUM-428 (corrección de Gerencia Test 2026-08-13) — 2 campos nuevos, ambos opcionales:
   // Descripción (texto libre, también usado para detallar cuando motivo="otro") y Responsable
   // (texto libre, persona relacionada con el ajuste). Ninguno bloquea el envío de la solicitud.
   descripcion?: string
@@ -714,7 +714,7 @@ export interface BodegaInventoryKpis {
 export interface BodegaArrivalConfirmation {
   pending_bodega_action: boolean
   awaiting_compras:      boolean
-  /** Rebote REQ-427 (Daniela Amaya 2026-08-13) — cantidad y usuario reales de la confirmación,
+  /** Rebote REQ-427 (Gerencia Test 2026-08-13) — cantidad y usuario reales de la confirmación,
    * para que la nota de espera no sea un genérico "esperando a Compras". `confirmed_by_name` es
    * `null` cuando `awaiting_compras` es `false` (nadie confirmó todavía). */
   confirmed_quantity:    number
@@ -731,7 +731,7 @@ export interface BodegaInventoryRow {
    */
   photo_url:           string | null
   factory_reference:   string | null
-  /** Rebote REQ-361/SCRUM-431 (Daniela Amaya 2026-08-13) — el backend ya distingue `name` (nombre
+  /** Rebote REQ-361/SCRUM-431 (Gerencia Test 2026-08-13) — el backend ya distingue `name` (nombre
    * real del producto, SCRUM-237/240) de `description` (texto libre aparte); el tipo nunca había
    * declarado `name`, así que el modal terminaba mostrando `description` como si fuera el nombre. */
   name:                string
@@ -812,7 +812,7 @@ export interface BodegaInventoryFamilyListItem {
 }
 
 /**
- * REQ-418 (rebote de Daniela Amaya 2026-08-12) — antes solo traía 4 campos livianos
+ * REQ-418 (rebote de Gerencia Test 2026-08-12) — antes solo traía 4 campos livianos
  * (id/reference/description/stock_quantity), insuficiente para el criterio de aceptación: "el
  * detalle expandido de una familia debe mostrar la MISMA tabla de 14 columnas que la vista
  * Productos". Se amplía a la forma completa de `BodegaInventoryRow` — mismo shape, para que
@@ -925,7 +925,7 @@ export interface OrderConsolidatedPickingItem {
   catalog_product_id: number | null
   reference:          string | null
   description:        string | null
-  /** Corrección 2026-08-11 (Daniela Amaya, SCRUM-391) — columna obligatoria agregada tanto en
+  /** Corrección 2026-08-11 (Gerencia Test, SCRUM-391) — columna obligatoria agregada tanto en
    * pantalla como en impresión (ver `PickingConsolidationService`). */
   location:           string | null
   qty_requested:       number
@@ -1190,7 +1190,7 @@ export interface GeneralCountRow {
 export interface GeneralCountListResponse {
   data: GeneralCountRow[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
-  // SCRUM-463 — si el usuario actual es "Mark" (mark_approver_user_id) para Aprobar/Rechazar.
+  // SCRUM-463 — si el usuario actual es "Mark" (primary_approver_user_id) para Aprobar/Rechazar.
   // El frontend no puede derivarlo solo (es una persona configurable, no un rol en el JWT).
   can_approve: boolean
 }
@@ -1221,7 +1221,7 @@ export interface GeneralCountCreatePayload {
 }
 
 /** 409 de `POST /general-counts` o `POST /general-counts/{id}/submit` (SCRUM-797, rebote de
- * Daniela Amaya 2026-08-27) — un elemento por PRODUCTO en conflicto (ya no un conteo único por
+ * Gerencia Test 2026-08-27) — un elemento por PRODUCTO en conflicto (ya no un conteo único por
  * bodega completa), para que el frontend arme el modal de confirmación con la lista real. */
 export interface GeneralCountDuplicateWarning {
   catalog_product_id: number

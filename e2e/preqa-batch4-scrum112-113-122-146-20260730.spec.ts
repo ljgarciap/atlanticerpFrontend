@@ -74,7 +74,7 @@ test.describe('SCRUM-112 — Top de vendedores (badge siempre visible)', () => {
     // Sin hover: getByText ya exige que el texto esté en el DOM visible, no solo en title=
     await expect(badges.first()).toBeVisible()
 
-    // layout: nombre largo (Kayra Milena Estrada / Juan Manuel Brustein) no debe desbordar la card
+    // layout: nombre largo (Vendedor Disenador Test / Vendedor Disenador Test 8) no debe desbordar la card
     const panel = page.locator('text=Top de vendedores').locator('..').locator('..')
     await page.screenshot({ path: 'e2e/.tmp/preqa-b4/112-3-badges-visible.png', fullPage: true })
 
@@ -329,8 +329,8 @@ test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, compl
     await gotoReports(page)
     await page.getByRole('main').getByRole('button', { name: 'Configuración' }).click()
     await page.waitForTimeout(700)
-    await expect(page.getByText('Juan Manuel Brustein')).toBeVisible()
-    await expect(page.getByText('Anelhys Nuez')).toBeVisible()
+    await expect(page.getByText('Vendedor Disenador Test 8')).toBeVisible()
+    await expect(page.getByText('Vendedor Disenador Test 6')).toBeVisible()
     await page.screenshot({ path: 'e2e/.tmp/preqa-b4/146-1-config-roster.png', fullPage: true })
   })
 
@@ -340,8 +340,8 @@ test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, compl
     await page.getByRole('main').getByRole('button', { name: 'Configuración' }).click()
     await page.waitForTimeout(700)
     const roster = [
-      'Juan Manuel Brustein', 'Bernardo Gomez', 'Paola Gutierrez', 'Idmar Hernandez',
-      'Neil Quiel', 'Kayra Milena Estrada', 'Maria F. Bonvini', 'Maribel Gauthier', 'Vanessa Villareal',
+      'Vendedor Disenador Test 8', 'Vendedor Disenador Test 9', 'Vendedor Disenador Test 5', 'Vendedor Disenador Test 10',
+      'Vendedor Disenador Test 2', 'Vendedor Disenador Test', 'Vendedor Disenador Test 3', 'Vendedor Disenador Test 7', 'Vendedor Disenador Test 4',
     ]
     for (const name of roster) {
       await expect(page.getByText(name)).toBeVisible()

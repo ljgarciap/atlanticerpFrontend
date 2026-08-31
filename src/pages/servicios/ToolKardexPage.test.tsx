@@ -31,7 +31,7 @@ function makeTool(overrides: Partial<Tool> = {}): Tool {
 
 function makeTechnician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 1, user_id: 1, nombre: 'Carlos Vergara', telefono: null, email: null,
+    id: 1, user_id: 1, nombre: 'Tecnico Servicios Test', telefono: null, email: null,
     especialidad: 'general', color: '#000', has_bonus_plan: false, estado: 'available',
     visitas_hoy: 0, herramientas_asignadas: 0, pct_resuelto_primera_visita: null,
     tiempo_promedio_minutos: null,
@@ -61,7 +61,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.tools.list.mockResolvedValue([makeTool({ id: 1, nombre: 'Escalera de tijera' }), makeTool({ id: 2, nombre: 'Taladro', codigo_unico: 'HER-002' })])
-  mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ id: 2, nombre: 'Felix' }), makeTechnician({ id: 3, nombre: 'Carlos Vergara' })])
+  mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ id: 2, nombre: 'Felix' }), makeTechnician({ id: 3, nombre: 'Tecnico Servicios Test' })])
 })
 
 describe('ToolKardexPage — REQ-276 kardex de herramientas, solo lectura (con cantidad/saldo, SCRUM-779)', () => {
@@ -74,7 +74,7 @@ describe('ToolKardexPage — REQ-276 kardex de herramientas, solo lectura (con c
   it('muestra herramienta, código, detalle y responsable de cada movimiento', async () => {
     mockedApi.toolMovements.list.mockResolvedValue([
       makeEntry({ id: 1, tipo: 'ingreso', tool_nombre: 'Escalera de tijera', tool_codigo_unico: 'HER-001' }),
-      makeEntry({ id: 2, tipo: 'damaged', tool_nombre: 'Taladro', tool_codigo_unico: 'HER-002', user_nombre: 'Carlos Vergara' }),
+      makeEntry({ id: 2, tipo: 'damaged', tool_nombre: 'Taladro', tool_codigo_unico: 'HER-002', user_nombre: 'Tecnico Servicios Test' }),
     ])
     renderPage()
 
@@ -83,7 +83,7 @@ describe('ToolKardexPage — REQ-276 kardex de herramientas, solo lectura (con c
     expect(table.getByText('HER-001')).toBeInTheDocument()
     expect(table.getByText('Taladro')).toBeInTheDocument()
     expect(table.getByText('HER-002')).toBeInTheDocument()
-    expect(table.getByText('Carlos Vergara')).toBeInTheDocument()
+    expect(table.getByText('Tecnico Servicios Test')).toBeInTheDocument()
   })
 
   it('muestra cantidad, saldo inicial y saldo resultante de cada movimiento', async () => {

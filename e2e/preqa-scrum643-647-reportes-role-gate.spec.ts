@@ -15,8 +15,8 @@ import { test, expect, Page } from '@playwright/test'
 // routes/admin-contab.php) -- el gap era solo de frontend. Fix: RequireRole anidado dentro de
 // RequirePermission en App.tsx, mismo patron ya usado en /crm/dashboard (SCRUM-674, 2026-07-31).
 
-const FELIX = 'conta@atlantic.com.pa'
-const DESIGNER = 'neil.quiel@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const DESIGNER = 'vendedordisenador2@test.com'
 
 async function login(page: Page, email: string): Promise<boolean> {
   await page.context().clearCookies()

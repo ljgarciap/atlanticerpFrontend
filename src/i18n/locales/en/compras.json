@@ -248,7 +248,7 @@
       "whoPaysCliente": "Client",
       "cost": "Air shipping cost",
       "estimatedArrival": "Estimated arrival",
-      "markApprovalNotice": "This order will require Mark's approval (air shipping paid by Atlantic)."
+      "approvalNotice": "This order will require the configured approver's approval (air shipping paid by Atlantic)."
     },
     "actions": {
       "next": "Next",
@@ -259,7 +259,7 @@
     "success": {
       "title": "Order created",
       "message": "Order #{{id}} was registered as \"Pending approval\".",
-      "requiresApproval": "This order requires Mark's approval before it can move forward."
+      "requiresApproval": "This order requires the configured approver's approval before it can move forward."
     },
     "errors": {
       "generic": "Could not create the order. Please check the data and try again."
@@ -338,7 +338,7 @@
     },
     "detail": {
       "title": "Order #{{id}}",
-      "markBlocked": "This order requires Mark's approval before it can advance.",
+      "markBlocked": "This order requires the configured approver's approval before it can advance.",
       "markApproved": "Approved by {{name}}",
       "pendingRemainder": "Partial receipt — what was already received is saved. The remainder is still at stage \"{{stage}}\" and its flow continues normally; only this order's final step to \"Received\" stays pending until that remainder is registered.",
       "editOnlyWhilePending": "An order can only be edited while it's \"Pending approval\".",
@@ -378,7 +378,7 @@
         "newAmount": "New amount",
         "registerError": "Could not register the payment.",
         "requestAmountChangeError": "Could not request the amount change.",
-        "pendingAmountChange": "Pending amount change: ${{amount}} — waiting for Mark's approval",
+        "pendingAmountChange": "Pending amount change: ${{amount}} — waiting for the configured approver's approval",
         "pendingAmountChangeBlocksActions": "While this approval is pending, payments can't be requested or registered.",
         "approveAmountChange": "Approve change",
         "approveAmountChangeError": "Could not approve the amount change.",
@@ -436,7 +436,7 @@
       "estimatedArrival": "Estimated arrival",
       "completeStage": "Complete current stage",
       "noNextStage": "No next stage",
-      "markBlocked": "Requires Mark's approval",
+      "markBlocked": "Requires the configured approver's approval",
       "goodsReceiptLink": "Goods receipt",
       "pending": "Pending"
     },

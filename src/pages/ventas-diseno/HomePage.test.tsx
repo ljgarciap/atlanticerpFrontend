@@ -136,7 +136,7 @@ describe('VentasDisenoHomePage', () => {
     expect(screen.getByText('Priorizar el contacto.')).toBeInTheDocument()
   })
 
-  it('SCRUM-67 (hallazgo QA Daniela Amaya) — "+N pendientes más" abre el listado completo con drill-down al detalle', async () => {
+  it('SCRUM-67 (hallazgo QA Gerencia Test) — "+N pendientes más" abre el listado completo con drill-down al detalle', async () => {
     const pendientes = Array.from({ length: 5 }, (_, i) => ({
       type: 'no_contact' as const, priority: 'medium' as const, card_id: i + 1,
       client: `Cliente ${i + 1}`, project: `Proyecto ${i + 1}`, assignee: 'Ana Diaz',

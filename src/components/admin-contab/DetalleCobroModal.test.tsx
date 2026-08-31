@@ -31,7 +31,7 @@ function makeDetail(overrides: Partial<PaymentDetail> = {}): PaymentDetail {
     metodo_pago: 'efectivo', referencia: 'TRF-88213', bank_account_id: 1, numero_documento_retencion: null,
     comentario_ajuste: null, estado: 'confirmado', created_at: '2026-07-02T00:00:00Z',
     cliente: 'Grupo Sensei', metodo_pago_label: 'Efectivo',
-    registrado_por: 'Felix Campos', bank_account: 'Banco General — Cuenta Corriente', tiene_comprobante: false,
+    registrado_por: 'Contabilidad Test', bank_account: 'Banco General — Cuenta Corriente', tiene_comprobante: false,
     total_facturas: 6200, confirmacion: null,
     facturas: [
       { invoice_id: 1, numero: 'F-0001', monto_aplicado: 4000 },
@@ -116,7 +116,7 @@ describe('DetalleCobroModal — REQ-473/475 (Batch 7)', () => {
     mockedApi.payments.detail.mockResolvedValue(makeDetail({ estado: 'esperando_confirmacion' }))
     mockedApi.payments.confirm.mockResolvedValue(makeDetail({
       estado: 'confirmado',
-      confirmacion: { numero_confirmacion: 'CONF-001', confirmado_por: 'Felix Campos', confirmado_at: '2026-07-05T00:00:00Z' },
+      confirmacion: { numero_confirmacion: 'CONF-001', confirmado_por: 'Contabilidad Test', confirmado_at: '2026-07-05T00:00:00Z' },
     }))
     renderModal()
 

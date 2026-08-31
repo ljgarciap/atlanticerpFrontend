@@ -43,7 +43,7 @@ function makeSettings(overrides: Partial<FiscalSettings> = {}): FiscalSettings {
     pac_doc_factura_habilitado: true,
     pac_doc_nota_credito_habilitado: false,
     retencion_proveedores_activa: true,
-    mark_approver_user_id: 1,
+    primary_approver_user_id: 1,
     dias_credito_factura: 30,
     petty_cash_max_intentos_rechazo: 2,
     ...overrides,
@@ -157,7 +157,7 @@ describe('FiscalConfigPage', () => {
   it('gate de 403: muestra "acceso restringido" en vez del formulario', async () => {
     const forbidden = new AxiosError('Forbidden', '403', undefined, undefined, {
       status: 403, statusText: 'Forbidden', headers: new AxiosHeaders(), config: { headers: new AxiosHeaders() },
-      data: { message: 'Esta pantalla es exclusiva de Mark.' },
+      data: { message: 'Esta pantalla es exclusiva del aprobador configurado.' },
     })
     mockedApi.fiscalSettings.get.mockRejectedValue(forbidden)
 

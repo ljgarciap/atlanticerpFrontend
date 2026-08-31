@@ -13,7 +13,7 @@ interface Props {
  * aprobado no lo muestra inline) sin perder la funcionalidad: mismo `PurchaseOrderPaymentsPanel`
  * (mismos hooks/mutations de src/hooks/useCompras.ts), ahora dentro de un modal.
  *
- * SCRUM-252 (hallazgo de Daniela Amaya 2026-08-09) — el modal se veía cortado: el botón de
+ * SCRUM-252 (hallazgo de Gerencia Test 2026-08-09) — el modal se veía cortado: el botón de
  * cerrar estaba posicionado `absolute -top-2 -right-2` (fuera del padding box del contenedor con
  * `overflow-y-auto`), así que quedaba recortado por el propio scroll en vez de flotar visible
  * sobre el contenido. Reestructurado para que el botón viva DENTRO del área con scroll (mismo

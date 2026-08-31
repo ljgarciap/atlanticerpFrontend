@@ -24,8 +24,8 @@ const CARLOS_USER_ID = 18
 
 function technician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 1, user_id: CARLOS_USER_ID, nombre: 'Carlos Vergara', telefono: null,
-    email: 'carlos@atlantic.com.pa', especialidad: 'general', color: '#3B82F6',
+    id: 1, user_id: CARLOS_USER_ID, nombre: 'Tecnico Servicios Test', telefono: null,
+    email: 'tecnicoservicios@test.com', especialidad: 'general', color: '#3B82F6',
     has_bonus_plan: true, estado: 'off', visitas_hoy: 0, herramientas_asignadas: 0,
     pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
     ...overrides,
@@ -49,7 +49,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.internalTechnicians.list.mockResolvedValue([
     technician(),
-    technician({ id: 2, user_id: 19, nombre: 'Pedro Santos', has_bonus_plan: false }),
+    technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
   ])
   mockedApi.reportes.comisionCarlosVergara.mockResolvedValue({
     capture: { year: 2026, month: 8, licencia_medica: false },
@@ -60,7 +60,7 @@ beforeEach(() => {
 
 // REQ-285 RN2 — la sección es exclusiva de Gerencia y del propio técnico con plan de bonificación.
 // El gate ya se rompió una vez (Pre-QA 2026-08-12: el frontend resolvía "quién es Carlos" por
-// `nombre === 'Carlos Vergara'`, así que renombrarlo en Técnicos Internos le ocultaba su propia
+// `nombre === 'Tecnico Servicios Test'`, así que renombrarlo en Técnicos Internos le ocultaba su propia
 // comisión aunque el backend lo siguiera autorizando por `has_bonus_plan`) — por eso vive acá como
 // test permanente, no como verificación manual.
 describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () => {
@@ -75,7 +75,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
   it('el técnico con plan de bonificación ve su propia sección aunque le hayan cambiado el nombre', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([
       technician({ nombre: 'Carlos A. Vergara' }),
-      technician({ id: 2, user_id: 19, nombre: 'Pedro Santos', has_bonus_plan: false }),
+      technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
     ])
     setUser('tecnico_servicios', CARLOS_USER_ID)
     renderSection()

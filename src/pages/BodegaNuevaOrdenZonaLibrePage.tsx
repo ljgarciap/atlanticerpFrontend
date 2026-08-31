@@ -324,7 +324,7 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
                       {t('bodega:zonaLibre.newOrder.products.viewWarehouses')}
                     </button>
                   </td>
-                  {/* SCRUM-436 (rebote de Daniela Amaya 2026-08-13, RN2 — aplica a todo campo
+                  {/* SCRUM-436 (rebote de Gerencia Test 2026-08-13, RN2 — aplica a todo campo
                       numérico monetario, no solo al carrito) */}
                   <td className="py-2 text-slate-600">${formatMoney(p.cost ?? 0)}</td>
                   <td className="py-2">
@@ -403,7 +403,7 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
                         )}
                       </div>
                     ) : (
-                      // SCRUM-436 (rebote de Daniela Amaya 2026-08-13) — separador de miles
+                      // SCRUM-436 (rebote de Gerencia Test 2026-08-13) — separador de miles
                       // también en Cantidad (RN1/Escenario 2: cantidades grandes agrupadas).
                       formatInt(line.quantity)
                     )}

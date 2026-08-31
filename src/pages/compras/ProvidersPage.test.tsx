@@ -104,7 +104,7 @@ describe('ProvidersPage', () => {
     expect(screen.getByText('compras:providerForm.titleCreate')).toBeInTheDocument()
   })
 
-  // SCRUM-186 (2026-08-06, hallazgo Daniela Amaya): columnas realineadas al mockup — Contacto
+  // SCRUM-186 (2026-08-06, hallazgo Gerencia Test): columnas realineadas al mockup — Contacto
   // reemplaza Moneda, "Editar" pasa a "Ver detalle" y abre el modal de solo-lectura, no el drawer.
   it('muestra la columna Contacto y "Ver detalle" abre el modal de solo-lectura', async () => {
     mockedComprasApi.providers.get.mockResolvedValue({

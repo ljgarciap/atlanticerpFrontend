@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Pre-QA — rebote SCRUM-431 (Daniela Amaya 2026-08-13): reescritura del modal "Detalle del
+// Pre-QA — rebote SCRUM-431 (Gerencia Test 2026-08-13): reescritura del modal "Detalle del
 // producto" (Bodega > Ver Inventario) en 2 bloques exactos del mockup, con toda la fila
 // clickeable. Esta pantalla ya tuvo hallazgos reales en el Pre-QA original (2026-07-23, RN1 —
 // sin aviso de inactivo; RN2 — etiqueta "Familia" reusada de "Categoría") — se promueve a spec

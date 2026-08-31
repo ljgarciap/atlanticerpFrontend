@@ -8,10 +8,10 @@ test.describe.configure({ mode: 'serial' })
 // Password LOCAL = email para todos los usuarios (distinto de dev/test.atlanticerp.ai).
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 
-const FELIX = 'conta@atlantic.com.pa'
-const YANETH = 'asistente@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
-const DANIELA = 'daniela@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const YANETH = 'asistenteadministrativa@test.com'
+const MARK = 'gerencia3@test.com'
+const DANIELA = 'gerencia@test.com'
 
 async function login(page: Page, email: string): Promise<void> {
   await page.context().clearCookies()
@@ -261,7 +261,7 @@ test('REQ-529 — Descargar resumen desde el historial (ya aprobado) genera PDF 
 
 test('Chequeo cruzado de permisos — un rol sin acceso a Admin&Cont recibe 403, no 200/500', async ({ request }) => {
   // Reuse Felix login just to get a valid backend, but hit endpoints as an unauthenticated actor is
-  // already covered elsewhere — here we specifically re-verify approve requires mark_only even with
+  // already covered elsewhere — here we specifically re-verify approve requires primary_approver_only even with
   // a well-formed but wrong-role token is already covered above (Yaneth/Daniela). Skipped duplicate.
   test.skip(true, 'cubierto arriba con Yaneth/Daniela')
 })

@@ -32,7 +32,7 @@ function makeAttachment(overrides: Partial<PaymentAttachmentDetail> = {}): Payme
     url: 'https://s3.example.com/comprobante.pdf?sig=abc',
     nombre_archivo: 'comprobante.pdf',
     mime_type: 'application/pdf',
-    uploaded_by: 'Felix Campos',
+    uploaded_by: 'Contabilidad Test',
     created_at: '2026-06-18T00:00:00Z',
     ...overrides,
   }
@@ -57,7 +57,7 @@ describe('VerComprobanteModal — REQ-472', () => {
     renderModal()
 
     expect(await screen.findByTitle('comprobante.pdf')).toBeInTheDocument()
-    expect(screen.getByText(/adjuntadoPor.*Felix Campos/)).toBeInTheDocument()
+    expect(screen.getByText(/adjuntadoPor.*Contabilidad Test/)).toBeInTheDocument()
   })
 
   it('con un comprobante de imagen, previsualiza con <img> en vez de <iframe>', async () => {

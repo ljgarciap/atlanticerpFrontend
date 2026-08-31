@@ -64,7 +64,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
+    id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
     role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }
@@ -192,7 +192,7 @@ describe('ServiciosHomePage', () => {
     const visita = {
       ticket_id: 1, numero: 'INS-2026-0001', hora: '09:00', tipo: 'installation' as const,
       cliente: 'Grupo Delta', descripcion: null, direccion: 'Calle 50', contacto: 'Juan Pérez',
-      telefono: '6000-0000', tecnico: { id: 1, nombre: 'Carlos Vergara', color: '#3B82F6' },
+      telefono: '6000-0000', tecnico: { id: 1, nombre: 'Tecnico Servicios Test', color: '#3B82F6' },
     }
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       rutas_dia: { visitas: [visita], total: 8, has_more: true },

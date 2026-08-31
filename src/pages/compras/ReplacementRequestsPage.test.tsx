@@ -97,7 +97,7 @@ describe('ReplacementRequestsPage', () => {
     expect(screen.getByText('$18.00')).toBeInTheDocument()
   })
 
-  it('SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — columnas Categoría y % de similitud siempre presentes, sin columna de Costo', async () => {
+  it('SCRUM-246 (rebote de Gerencia Test 2026-08-09) — columnas Categoría y % de similitud siempre presentes, sin columna de Costo', async () => {
     renderPage()
     await goToSearchTab()
     await pickOriginal()

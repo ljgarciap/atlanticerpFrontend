@@ -34,7 +34,7 @@ test('SCRUM-383→386 — asignar picker, iniciar picking, completar la Hoja de 
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
 
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 
@@ -55,7 +55,7 @@ test('SCRUM-383→386 — asignar picker, iniciar picking, completar la Hoja de 
   await page.screenshot({ path: 'e2e/.tmp/scrum383-02-picker-required.png' })
 
   // Elige a Apolonio González (único Picker real sembrado, `ayudante_general_bodega`) y confirma.
-  await page.getByTestId('assign-picker-select-42').selectOption({ label: 'Apolonio Gonzalez' })
+  await page.getByTestId('assign-picker-select-42').selectOption({ label: 'Ayudante General Bodega Test' })
   await page.getByTestId('assign-picker-confirm-42').click()
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/scrum383-03-picking-pendiente.png', fullPage: true })

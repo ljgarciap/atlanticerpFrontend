@@ -185,7 +185,7 @@ export default function VentasDisenoReportsPage() {
       {isLoading || !summary ? (
         <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
       ) : (
-        // SCRUM-720 (Daniela Amaya, REQ-072 complemento) — el grid de 2 columnas dejaba
+        // SCRUM-720 (Gerencia Test, REQ-072 complemento) — el grid de 2 columnas dejaba
         // huecos cuando una tarjeta quedaba más baja que la otra; cada tarjeta pasa a
         // ocupar el ancho completo en su propia fila (solo layout, sin tocar datos/lógica).
         <div className="flex flex-col gap-3">

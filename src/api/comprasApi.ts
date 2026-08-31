@@ -45,7 +45,7 @@ export interface PurchaseOrderListParams {
   chip?:               'critical' | 'zona_libre'
   // REQ-151 — solo envíos "en movimiento" (Ordenado→Recibido), usado por la pantalla Logística.
   active_shipments?:    boolean
-  // REQ-187 (SCRUM-250, hallazgo de Daniela Amaya) — pantalla Pagos a Proveedores. 'pendiente' se
+  // REQ-187 (SCRUM-250, hallazgo de Gerencia Test) — pantalla Pagos a Proveedores. 'pendiente' se
   // dividió en 'sin_enviar'/'por_pagar'.
   payment_pending?:     boolean
   payment_status?:      'sin_enviar' | 'por_pagar' | 'parcial' | 'completo'
@@ -154,7 +154,7 @@ export const comprasApi = {
     approveAmountChange: (id: number): Promise<{ total_amount: number }> =>
       api.patch<{ total_amount: number }>(`/compras/orders/${id}/approve-amount-change`).then(r => r.data),
 
-    // SCRUM-252 (hallazgo de Daniela Amaya) — "Rechazar cambio", solo Mark.
+    // SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Mark.
     rejectAmountChange: (id: number): Promise<{ total_amount: number }> =>
       api.patch<{ total_amount: number }>(`/compras/orders/${id}/reject-amount-change`).then(r => r.data),
   },
@@ -322,7 +322,7 @@ export const comprasApi = {
     confirmPending: (id: number): Promise<ConfirmPendingResponse> =>
       api.post<ConfirmPendingResponse>(`/compras/goods-receipts/products/${id}/confirm-pending`).then(r => r.data),
 
-    // SCRUM-237 (REQ-174, hallazgo de Daniela Amaya) — validación de unicidad de referencia
+    // SCRUM-237 (REQ-174, hallazgo de Gerencia Test) — validación de unicidad de referencia
     // pública EN VIVO, mientras se escribe.
     checkReference: (reference: string, excludeId?: number): Promise<{ available: boolean; message?: string }> =>
       api.get<{ available: boolean; message?: string }>('/compras/inventory/check-reference', {
@@ -395,7 +395,7 @@ export const comprasApi = {
   },
 
   claims: {
-    // SCRUM-257 (hallazgo de Daniela Amaya) — chip de estado, proveedor, tipo de resolución y
+    // SCRUM-257 (hallazgo de Gerencia Test) — chip de estado, proveedor, tipo de resolución y
     // búsqueda de texto libre, combinables.
     list: (params: ClaimListParams = {}): Promise<PurchaseOrderClaimListResponse> =>
       api.get<PurchaseOrderClaimListResponse>('/compras/claims', { params }).then(r => r.data),
@@ -409,7 +409,7 @@ export const comprasApi = {
     updateStatus: (id: number, status: 'en_revision' | 'resuelto'): Promise<{ status: string }> =>
       api.patch<{ status: string }>(`/compras/claims/${id}/status`, { status }).then(r => r.data),
 
-    // SCRUM-259 (REQ-196, hallazgo de Daniela Amaya) — "Tipo de resolución" editable desde el detalle.
+    // SCRUM-259 (REQ-196, hallazgo de Gerencia Test) — "Tipo de resolución" editable desde el detalle.
     updateResolution: (id: number, expectedResolution: string): Promise<PurchaseOrderClaimDetail> =>
       api.patch<PurchaseOrderClaimDetail>(`/compras/claims/${id}/resolution`, { expected_resolution: expectedResolution }).then(r => r.data),
 

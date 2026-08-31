@@ -45,7 +45,7 @@ interface Props {
    *  approval_threshold`, Configuración Fiscal). `undefined` mientras el resumen del mes no cargó
    *  todavía — el banner y el gate de comprobante obligatorio quedan inactivos hasta entonces
    *  (nunca asumen un umbral por defecto en el frontend). */
-  markApprovalThreshold?: number
+  primaryApprovalThreshold?: number
   onClose: () => void
   onRegistered: () => void
   /** Batch 12 (REQ-488/489) — "Corrección de datos" no registra directo: pide revisión previa +
@@ -63,7 +63,7 @@ interface Props {
  * el POST que registra la nota. Batch 12 (SCRUM-565→570, REQ-488→490) conecta "Corrección de
  * datos" a la revisión previa real en vez del hint "próximamente".
  */
-export default function RegistrarNotaCreditoModal({ devolucionPrecargada, markApprovalThreshold, onClose, onRegistered, onRequestCorreccionPreview }: Props) {
+export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primaryApprovalThreshold, onClose, onRegistered, onRequestCorreccionPreview }: Props) {
   const { t } = useTranslation('adminContab')
   const esDevolucion = devolucionPrecargada != null
 
@@ -208,7 +208,7 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, markAp
   const hayExcedente = excedente > 0
 
   // REQ-482 RN2/RN3 — umbral parejo para los 3 tipos, recalculado en tiempo real con el monto.
-  const superaUmbral = markApprovalThreshold !== undefined && monto > markApprovalThreshold
+  const superaUmbral = primaryApprovalThreshold !== undefined && monto > primaryApprovalThreshold
 
   // REQ-487 RN1/RN2 — obligatorio en Anulación completa (cualquier monto) o al superar el umbral,
   // EXCEPTO en modo Devolución, donde nunca es obligatorio (RN2 pisa a RN1).

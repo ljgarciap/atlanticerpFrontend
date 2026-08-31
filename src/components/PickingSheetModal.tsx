@@ -251,7 +251,7 @@ export default function PickingSheetModal({ orderId, onClose }: Props) {
               </div>
 
               <div className="overflow-x-auto mb-4">
-                {/* SCRUM-385 (rebote de Daniela Amaya 2026-08-13, con imagen) — la corrección
+                {/* SCRUM-385 (rebote de Gerencia Test 2026-08-13, con imagen) — la corrección
                     anterior (2026-08-11) repartía el ancho como PORCENTAJES de `w-full`: dentro
                     del modal (max-w-3xl, ~768px) esos porcentajes daban columnas más angostas que
                     el contenido de ancho fijo que llevan adentro (el input de "Alistada" es

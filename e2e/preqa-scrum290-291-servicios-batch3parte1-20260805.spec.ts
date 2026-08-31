@@ -4,8 +4,8 @@ import { test, expect, Page } from '@playwright/test'
  * Fase 4 — Servicios, Batch 3 parte 1 (REQ-227 Cancelar ticket / SCRUM-290, REQ-228 Ver/Imprimir
  * PDF / SCRUM-291). Password default = email (BusinessRoleUserSeeder).
  */
-const LIDER_SERVICIOS = 'servicio@atlantic.com.pa'
-const TECNICO_SERVICIOS = 'carlos@atlantic.com.pa'
+const LIDER_SERVICIOS = 'liderservicios@test.com'
+const TECNICO_SERVICIOS = 'tecnicoservicios@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

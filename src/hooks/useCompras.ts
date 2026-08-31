@@ -293,7 +293,7 @@ export function useUploadClaimPhoto(claimId: number) {
   })
 }
 
-// SCRUM-259 (hallazgo de Daniela Amaya 2026-08-10) — "Descargar PDF del reclamo", no "Ver PDF":
+// SCRUM-259 (hallazgo de Gerencia Test 2026-08-10) — "Descargar PDF del reclamo", no "Ver PDF":
 // dispara una descarga real de archivo (backend ya manda Content-Disposition: attachment), en
 // vez de abrir el PDF en una pestaña/ventana nueva.
 export function useDownloadClaimPdf() {
@@ -386,7 +386,7 @@ export function useApproveAmountChange(orderId: number) {
   })
 }
 
-// SCRUM-252 (hallazgo de Daniela Amaya) — "Rechazar cambio", solo Mark.
+// SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Mark.
 export function useRejectAmountChange(orderId: number) {
   const qc = useQueryClient()
   return useMutation({
@@ -607,7 +607,7 @@ export function useConfirmPendingInventory() {
   })
 }
 
-// SCRUM-237 (REQ-174, hallazgo de Daniela Amaya) — "Ficha técnica" como documento.
+// SCRUM-237 (REQ-174, hallazgo de Gerencia Test) — "Ficha técnica" como documento.
 export function useUploadInventoryTechnicalSheet() {
   const qc = useQueryClient()
   return useMutation({

@@ -5,14 +5,14 @@ import { test, expect, type Page } from '@playwright/test'
  * Metas seguía mostrando "Sin Meta configurada todavía" para todos los usuarios. Hipótesis:
  * ya resuelto por el fix de SCRUM-146 (2026-07-29/30, VentasDisenoSalesGoalsSeeder + goalsIndex()
  * corregido para usar HomeService::vendors()) — ese trabajo ya se cherry-pickeó a test.atlanticerp.ai.
- * Corre contra test.atlanticerp.ai (mismo entorno donde Daniela probó) con Paola Gutierrez, una de
+ * Corre contra test.atlanticerp.ai (mismo entorno donde Daniela probó) con Vendedor Disenador Test 5, una de
  * las 9 vendedoras reales con Meta sembrada.
  */
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://test.atlanticerp.ai'
-const PAOLA_EMAIL = 'paola@atlantic.com.pa'
-const PAOLA_PASS  = 'paola@atlantic.com.pa'
+const PAOLA_EMAIL = 'vendedordisenador5@test.com'
+const PAOLA_PASS  = 'vendedordisenador5@test.com'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)

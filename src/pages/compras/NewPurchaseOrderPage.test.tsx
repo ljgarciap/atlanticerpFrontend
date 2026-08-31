@@ -114,7 +114,7 @@ describe('NewPurchaseOrderPage', () => {
       id: 99, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Designer',
       status: 'por_aprobar',
       next_status: 'ordenado', is_critical: false, modality: 'directo', estimated_arrival_date: null,
-      requires_mark_approval: false, blocked_by_mark_approval: false, approved_by: null,
+      requires_primary_approval: false, blocked_by_primary_approval: false, approved_by: null,
       approved_by_name: null,
       total_amount: 12, currency: 'USD',
       sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,

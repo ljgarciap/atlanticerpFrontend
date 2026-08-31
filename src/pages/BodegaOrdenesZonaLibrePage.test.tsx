@@ -90,7 +90,7 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     expect(navigateMock).toHaveBeenCalledWith('/bodega/ordenes-zona-libre/nueva')
   })
 
-  // SCRUM-442 (rebote de Daniela Amaya 2026-08-13) — la columna Monto debe llevar separador de
+  // SCRUM-442 (rebote de Gerencia Test 2026-08-13) — la columna Monto debe llevar separador de
   // miles (formatMoney), mismo gap que el carrito de Nueva Orden Zona Libre (SCRUM-436).
   it('rebote 2026-08-13 — la columna Monto usa separador de miles', async () => {
     mockedApi.zonaLibre.requests.list.mockResolvedValue({

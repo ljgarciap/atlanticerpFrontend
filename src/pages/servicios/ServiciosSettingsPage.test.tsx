@@ -35,7 +35,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
+    id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
     role: 'superadmin', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }

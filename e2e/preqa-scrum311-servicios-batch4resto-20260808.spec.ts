@@ -6,8 +6,8 @@ import path from 'path'
  * stack local (Docker :8090 + Vite :5173).
  *
  * Cuentas reales (password = email):
- *  - servicio@atlantic.com.pa (lider_servicios) — puede crear tickets, adjuntar.
- *  - carlos@atlantic.com.pa   (tecnico_servicios) — NO puede crear tickets ni adjuntar.
+ *  - liderservicios@test.com (lider_servicios) — puede crear tickets, adjuntar.
+ *  - tecnicoservicios@test.com   (tecnico_servicios) — NO puede crear tickets ni adjuntar.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -53,7 +53,7 @@ async function fillMinimumRequired(page: Page, descripcion: string) {
 }
 
 test('1. RN2 — extensión no permitida (.exe) rechazada con mensaje visible en UI', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
   await page.screenshot({ path: `${DL_DIR}/01a-modal-open.png`, fullPage: true })
@@ -69,7 +69,7 @@ test('1. RN2 — extensión no permitida (.exe) rechazada con mensaje visible en
 })
 
 test('2. RN2 — archivo mayor al máximo configurado (16MB > 15MB) rechazado con mensaje visible', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
 
@@ -83,7 +83,7 @@ test('2. RN2 — archivo mayor al máximo configurado (16MB > 15MB) rechazado co
 })
 
 test('3. RN2 — límite de cantidad configurado server-side (bajado a 2) se respeta aunque el cliente permita más, y el rechazo se ve en la UI', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
 
@@ -114,7 +114,7 @@ test('3. RN2 — límite de cantidad configurado server-side (bajado a 2) se res
 })
 
 test('4. Crear ticket SIN observaciones y SIN adjuntos — RN1 ambos opcionales, no bloquea el submit', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
 
@@ -133,7 +133,7 @@ test('4. Crear ticket SIN observaciones y SIN adjuntos — RN1 ambos opcionales,
 })
 
 test('5a. Permisos — Carlos (tecnico_servicios) NO tiene el botón "Nuevo ticket"', async ({ page }) => {
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/05a-carlos-tabla.png`, fullPage: true })
 
@@ -141,7 +141,7 @@ test('5a. Permisos — Carlos (tecnico_servicios) NO tiene el botón "Nuevo tick
 })
 
 test('5b. Permisos API directa — Carlos, POST /tickets/{id}/attachments → 403', async ({ page }) => {
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   const token = await page.evaluate(() => localStorage.getItem('accessToken') ?? '')
   expect(token).toBeTruthy()
 
@@ -162,7 +162,7 @@ test('5b. Permisos API directa — Carlos, POST /tickets/{id}/attachments → 40
 })
 
 test('6. Recargar a mitad del formulario con adjuntos ya cargados — no debe romper la app', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
 
@@ -181,7 +181,7 @@ test('6. Recargar a mitad del formulario con adjuntos ya cargados — no debe ro
 })
 
 test('7. Adjuntar el mismo archivo dos veces (mismo picker) — confirmar comportamiento', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await openCreateModal(page)
 
@@ -197,7 +197,7 @@ test('7. Adjuntar el mismo archivo dos veces (mismo picker) — confirmar compor
 })
 
 test('9. Ticket pre-existente (creado antes de este batch) sin observaciones/adjuntos — detalle no se rompe', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const eyeButtons = page.locator('button[title="Ver detalle"]')

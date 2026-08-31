@@ -8,8 +8,8 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const SUPERADMIN = 'andres.loi@atlantic.com.pa'
-const MANAGEMENT_NO_SUPERADMIN = 'daniela@atlantic.com.pa'
+const SUPERADMIN = 'superadmin@test.com'
+const MANAGEMENT_NO_SUPERADMIN = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()

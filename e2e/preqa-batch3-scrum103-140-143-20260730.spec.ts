@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test'
  * - id 205 = COT-2026-0087, designer (own), document_status 'sent', sales_project sin
  *   PipelineCard vinculada -> pipeline_card_id debe ser null (no originada de Pipeline).
  * - id 159 = draft de designer, sin master_client/sub_client/folio -> 0 items, 0 contactos.
- * - id 156 = draft de Idmar Hernandez (equipo), management puede verla en scope Team.
+ * - id 156 = draft de Vendedor Disenador Test 10 (equipo), management puede verla en scope Team.
  * - id 149 = COT-2026-0082, sent, de Idmar (equipo) -> para confirmar Editar ausente en no-draft.
  */
 test.describe.configure({ mode: 'serial' })

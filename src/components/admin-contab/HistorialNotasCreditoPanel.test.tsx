@@ -31,7 +31,7 @@ const mockedApi = vi.mocked(adminContabApi, true)
 const NOTA_REAL: NotaCreditoHistorialRow = {
   id: 1, tipo: 'descuento_comercial', subtipo_anulacion: null, numero: 'NC-0001',
   cliente: 'Grupo Sensei', master_client_id: 1, estado: 'aplicada', monto: 500,
-  fecha: '2026-08-20', factura_origen_numero: 'F-0001', registrado_por: 'Felix Campos',
+  fecha: '2026-08-20', factura_origen_numero: 'F-0001', registrado_por: 'Contabilidad Test',
   devolucion_bodega_id: null, customer_return_id: null,
 }
 

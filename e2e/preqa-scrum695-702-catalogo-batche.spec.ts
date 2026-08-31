@@ -7,7 +7,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const SELLER_EMAIL = 'neil.quiel@atlantic.com.pa'
+const SELLER_EMAIL = 'vendedordisenador2@test.com'
 
 async function login(page: Page, email: string, password: string = email) {
   await page.goto('/login')

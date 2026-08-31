@@ -31,7 +31,7 @@ const mockedStore = vi.mocked(useAuthStore)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Araúz', email: 'servicio@atlantic.com.pa',
+    id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
     role: 'lider_servicios', role_id: 1, permissions: [], modules: {}, flags: {},
     security_level: 6, language: 'es',
     ...overrides,
@@ -65,16 +65,16 @@ function renderHeader() {
 describe('ServiciosHomeHeader (REQ-206 / SCRUM-269)', () => {
   // Escenario 1 — saludo correcto: nombre de pila únicamente, sin apellido.
   it('muestra "Bienvenido, {nombre de pila}" sin apellido (RN1)', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ first_name: 'Aaron', last_name: 'Araúz' }) } as never)
+    mockedStore.mockReturnValue({ user: makeUser({ first_name: 'Lider Servicios', last_name: 'Test' }) } as never)
     mockedApi.internalTechnicians.stats.mockResolvedValue(makeTeamStats())
     mockedApi.tickets.stats.mockResolvedValue(makeTicketStats())
 
     renderHeader()
 
     await waitFor(() => {
-      expect(screen.getByText('home.greeting:Aaron')).toBeInTheDocument()
+      expect(screen.getByText('home.greeting:Lider Servicios')).toBeInTheDocument()
     })
-    expect(screen.queryByText(/Araúz/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Test$/)).not.toBeInTheDocument()
   })
 
   // Escenario 2 — resumen del día: visitas del equipo + pendientes de equipo, sin importar el rol.

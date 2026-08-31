@@ -31,7 +31,7 @@ test('un rol sin acceso a Compras (vendedor_disenador) no ve el módulo en el si
 })
 
 test('el formulario de Proveedores tiene un selector de Origen (local/internacional) — B2, Senior Review 2026-07-16', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa', 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com', 'lidercompras@test.com')
   await page.goto('/compras/proveedores')
   await page.getByRole('button', { name: /agregar proveedor/i }).click()
 

@@ -304,7 +304,7 @@ describe('Sidebar — menú de Servicios en el sidebar, con "Técnicos" desplega
 
 describe('Sidebar — colapso por grupo (SCRUM-58)', () => {
   // SCRUM-711 3ra vuelta — este test codificaba el comportamiento VIEJO (grupo arranca
-  // expandido) que era exactamente el bug reportado por Mark Bekhar. Se corrige para reflejar
+  // expandido) que era exactamente el bug reportado por Gerencia Test 3. Se corrige para reflejar
   // el AC real: colapsado por default, clic para abrir, otro clic para cerrar de nuevo.
   it('el grupo arranca colapsado; un clic en el header lo abre, otro clic lo vuelve a cerrar', () => {
     useAuthStore.setState({ user: baseUser({
@@ -325,7 +325,7 @@ describe('Sidebar — colapso por grupo (SCRUM-58)', () => {
   })
 })
 
-// SCRUM-711 3ra vuelta — reproduce el escenario exacto del video (Mark Bekhar, 2026-07-31):
+// SCRUM-711 3ra vuelta — reproduce el escenario exacto del video (Gerencia Test 3, 2026-07-31):
 // login real y fresco (sin localStorage previo, sin flags de migración de rondas anteriores),
 // usuario real (no demo). Ningún grupo debe mostrar sus submenús hasta un clic explícito.
 describe('Sidebar — ningún submenú expandido en un login fresco (SCRUM-711, hallazgo real)', () => {
@@ -338,9 +338,9 @@ describe('Sidebar — ningún submenú expandido en un login fresco (SCRUM-711, 
   it('con acceso a Ventas & Diseño y Configuración, ambos grupos nacen sin sus items visibles', () => {
     useAuthStore.setState({ user: baseUser({
       id: 42,
-      email: 'mbekhar@atlantic.com.pa',
-      first_name: 'Mark',
-      last_name: 'Bekhar',
+      email: 'gerencia3@test.com',
+      first_name: 'Gerencia',
+      last_name: 'Test 3',
       role: 'management',
       permissions: ['security.users'],
       modules: { ventas_diseno: noModule({ view: true }) },

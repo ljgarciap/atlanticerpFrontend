@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Pre-QA — SCRUM-767 (mejora nueva/corrección, Daniela Amaya 2026-08-15): los archivos cargados
+// Pre-QA — SCRUM-767 (mejora nueva/corrección, Gerencia Test 2026-08-15): los archivos cargados
 // en el detalle de una tarjeta de Pipeline quedaban guardados pero funcionalmente inaccesibles
 // (ningún onClick/href). Backend nuevo (`GET .../files/{fileId}/url`, no existía) + frontend
 // (Ver inline / Descargar, antes texto estático). Se promueve a spec permanente por tratarse de

@@ -1000,7 +1000,7 @@
   },
   "generalCounts": {
     "title": "Inventario general",
-    "subtitle": "Conteos físicos completos por bodega — requiere aprobación de Mark",
+    "subtitle": "Conteos físicos completos por bodega — requiere aprobación del aprobador configurado",
     "kardexLink": "Movimientos de inventario",
     "newPanel": {
       "title": "Nuevo conteo general",
@@ -1017,7 +1017,7 @@
       },
       "crossWarning": "Ya tiene una solicitud cíclica pendiente ({{date}})",
       "evaluate": "Evaluar",
-      "submit": "Enviar a aprobación de Mark",
+      "submit": "Enviar a aprobación del aprobador configurado",
       "noDifferences": "No hay ninguna diferencia en este conteo — no es necesario enviarlo a aprobación, aunque queda registrado igual como referencia.",
       "errors": {
         "missingQuantities": "Escribe la cantidad contada de todos los productos antes de evaluar.",
@@ -1033,13 +1033,13 @@
       },
       "duplicateModal": {
         "title": "Uno o más productos ya tienen un conteo sin resolver",
-        "body": "\"{{product}}\" ya tiene una diferencia evaluada del {{date}} (estado: {{status}}) sin aprobar/rechazar por Mark. Si continúas, esa línea quedará reemplazada por este conteo.",
+        "body": "\"{{product}}\" ya tiene una diferencia evaluada del {{date}} (estado: {{status}}) sin aprobar/rechazar por el aprobador configurado. Si continúas, esa línea quedará reemplazada por este conteo.",
         "confirm": "Continuar de todos modos"
       }
     },
     "tray": {
       "title": "Conteos generales",
-      "subtitle": "Historial — aplicado al inventario solo tras aprobación de Mark",
+      "subtitle": "Historial — aplicado al inventario solo tras aprobación del aprobador configurado",
       "chips": {
         "todas": "Todas",
         "pendiente_aprobacion": "Pendientes",
@@ -1065,9 +1065,9 @@
       },
       "actions": {
         "approve": "Aprobar",
-        "approveLockedTitle": "Solo Mark puede aprobar este conteo.",
+        "approveLockedTitle": "Solo el aprobador configurado puede aprobar este conteo.",
         "reject": "Rechazar",
-        "rejectLockedTitle": "Solo Mark puede rechazar este conteo.",
+        "rejectLockedTitle": "Solo el aprobador configurado puede rechazar este conteo.",
         "viewReason": "Ver motivo",
         "applyAdjustment": "Realizar ajuste",
         "adjustmentApplied": "Ajuste aplicado",

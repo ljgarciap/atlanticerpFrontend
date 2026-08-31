@@ -314,7 +314,7 @@ export default function GoodsReceiptWizardPage() {
       </h1>
 
       {/* Paso 0 — Adjuntar factura + detección automática (REQ-161/ADR-SCRUM224).
-          SCRUM-224 (rebote de Daniela Amaya 2026-08-12, con video) — el input de archivo y el
+          SCRUM-224 (rebote de Gerencia Test 2026-08-12, con video) — el input de archivo y el
           botón "Detectar automáticamente" solo se renderizaban cuando `orderId === null`. Eso
           rompía el caso real de uso: al entrar desde Logística (REQ-157, `GoodsReceiptPrefillState`)
           la orden YA viene preseleccionada, así que esta sección colapsaba al branch

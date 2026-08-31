@@ -16,7 +16,7 @@ test('SCRUM-501 — Kanban Pedidos muestra los pedidos sembrados en sus etapas r
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
 
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1500)
 
@@ -31,7 +31,7 @@ test('SCRUM-501 — Kanban Pedidos muestra los pedidos sembrados en sus etapas r
 })
 
 test('SCRUM-501 — pedido En picking abre con picking parcial (3 ramas)', async ({ page }) => {
-  await login(page, 'apolonio.gonzalez@atlantic.com.pa')
+  await login(page, 'ayudantegeneralbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1500)
 
@@ -43,7 +43,7 @@ test('SCRUM-501 — pedido En picking abre con picking parcial (3 ramas)', async
 })
 
 test('SCRUM-670 — Nueva Orden Zona Libre ya no sale vacía (productos sembrados)', async ({ page }) => {
-  await login(page, 'logistica@atlantic.com.pa')
+  await login(page, 'asistentebodega@test.com')
   await page.goto('/bodega/ordenes-zona-libre/nueva')
   await page.waitForTimeout(1500)
 
@@ -55,7 +55,7 @@ test('SCRUM-670 — Nueva Orden Zona Libre ya no sale vacía (productos sembrado
 })
 
 test('SCRUM-670 — Bandeja de Órdenes Zona Libre muestra los 3 estados', async ({ page }) => {
-  await login(page, 'logistica@atlantic.com.pa')
+  await login(page, 'asistentebodega@test.com')
   await page.goto('/bodega/ordenes-zona-libre')
   await page.waitForTimeout(1500)
 

@@ -62,7 +62,7 @@ describe('AiUsagePage', () => {
         estimated_cost_usd: 0.0075,
         document_name: 'factura-123.pdf',
         status: 'completed',
-        requested_by: { id: 7, name: 'Yirena Teng' },
+        requested_by: { id: 7, name: 'Lider Compras Test' },
       }],
       totals: {
         current_month: { input_tokens: 1000, output_tokens: 300, estimated_cost_usd: 0.0075 },
@@ -72,7 +72,7 @@ describe('AiUsagePage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Yirena Teng')).toBeInTheDocument()
+    expect(await screen.findByText('Lider Compras Test')).toBeInTheDocument()
     expect(screen.getByText('Detección de factura')).toBeInTheDocument()
     expect(screen.getByText('factura-123.pdf')).toBeInTheDocument()
     expect(screen.getAllByText('$0.0075').length).toBeGreaterThan(0)

@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test'
 // `bodega.read` en la ruta (no solo escondido en el sidebar).
 //
 // Corre contra dev.atlanticerp.ai (BASE_URL), no contra un stack local — mismos datos que usará
-// marly.rangel al validar. `almacen@atlantic.com.pa` (Esteban Cardenas, lider_bodega) es el
+// marly.rangel al validar. `liderbodega@test.com` (Lider Bodega Test, lider_bodega) es el
 // usuario real con bodega.read; `designer@atlantic.test` es el usuario demo SIN bodega.read
 // usado también por `BodegaReportsControllerTest::test_reportes_requieren_bodega_read` (403 a
 // nivel API) — acá se verifica el mismo gate a nivel de ruta de React Router.
@@ -23,7 +23,7 @@ async function login(page, email: string, password: string) {
 test('Reportes — Jefe de Bodega ve las 4 tarjetas con datos reales, sin errores de consola', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1500)
 
@@ -36,7 +36,7 @@ test('Reportes — Jefe de Bodega ve las 4 tarjetas con datos reales, sin errore
 })
 
 test('SCRUM-490 — label de período sincronizado con el botón activo, sin desfase visible', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 
@@ -57,7 +57,7 @@ test('SCRUM-490 — label de período sincronizado con el botón activo, sin des
 test('SCRUM-490 — cambios de período en ráfaga no dejan las tarjetas en loading colgado', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 
@@ -75,7 +75,7 @@ test('SCRUM-490 — cambios de período en ráfaga no dejan las tarjetas en load
 })
 
 test('SCRUM-495 — clic en el subtítulo (no en el ícono) navega igual, toda la superficie es clickeable', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 
@@ -86,7 +86,7 @@ test('SCRUM-495 — clic en el subtítulo (no en el ícono) navega igual, toda l
 })
 
 test('SCRUM-495 — doble clic no dispara doble navegación / no rompe el historial', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 
@@ -101,7 +101,7 @@ test('SCRUM-495 — doble clic no dispara doble navegación / no rompe el histor
 })
 
 test('SCRUM-495 — navegación por teclado (Enter/Space) sobre la tarjeta enfocada', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 
@@ -129,7 +129,7 @@ test('SCRUM-495 — navegación por teclado (Enter/Space) sobre la tarjeta enfoc
 test('SCRUM-490 — recargar a mitad de un cambio de período no rompe la pantalla (vuelve al default)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa', 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1000)
 

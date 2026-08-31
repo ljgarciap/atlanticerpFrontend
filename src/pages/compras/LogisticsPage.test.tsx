@@ -58,8 +58,8 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     id: 42, provider_id: 1, provider_name: 'LightCorp', provider_origin: 'internacional', origin_module: null, created_by_name: 'Ana',
     status: 'en_transito', next_status: 'en_aduana', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
-    estimated_arrival_date: '2026-08-01', requires_mark_approval: false,
-    blocked_by_mark_approval: false, approved_by: null, approved_by_name: null, total_amount: 1000, currency: 'USD',
+    estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
+    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 1000, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-05T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -530,7 +530,7 @@ describe('LogisticsPage — botón de avance solo para Compras (REQ-154 RN7)', (
 // SCRUM-208 (rediseño 2026-08-15, docs/architecture/scrum208-recepcion-parcial-rediseno.md) —
 // antes de este fix, esta pantalla nunca deshabilitaba "Completar etapa" cuando el paso final era
 // "Recibido" con remanente pendiente, ni mostraba el error del 422 resultante — el botón quedaba
-// clickeable "sin generar ninguna acción" (reporte real de Daniela Amaya, con video adjunto en
+// clickeable "sin generar ninguna acción" (reporte real de Gerencia Test, con video adjunto en
 // SCRUM-208). Endpoint `advance-remainder` todavía sin contraparte real en el backend al momento
 // de este commit — estos tests cubren solo el contrato/comportamiento del frontend.
 describe('LogisticsPage — remanente pendiente (SCRUM-208, rediseño 2026-08-15)', () => {

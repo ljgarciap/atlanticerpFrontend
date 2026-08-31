@@ -46,8 +46,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockToast()
   mockedApi.technicians.internalOptions.mockResolvedValue([
-    { id: 5, first_name: 'Carlos', last_name: 'Vergara' },
-    { id: 7, first_name: 'Pedro', last_name: 'Santos' },
+    { id: 5, first_name: 'Tecnico Servicios', last_name: 'Test' },
+    { id: 7, first_name: 'Tecnico Servicios', last_name: 'Test 2' },
   ])
 })
 
@@ -64,7 +64,7 @@ describe('TicketScheduleModal', () => {
     const saveBtn = await screen.findByText('tickets.schedule.save')
     expect(saveBtn).toBeDisabled()
 
-    await screen.findByText('Carlos Vergara')
+    await screen.findByText('Tecnico Servicios Test')
     fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
     expect(saveBtn).toBeDisabled()
 
@@ -82,7 +82,7 @@ describe('TicketScheduleModal', () => {
     await screen.findByText('tickets.schedule.save')
     // El select de técnico se popula async (useQuery) — esperar a que la opción real exista
     // antes de disparar el change, o el value="5" no matchea ninguna <option> todavía.
-    await screen.findByText('Carlos Vergara')
+    await screen.findByText('Tecnico Servicios Test')
     fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
     fireEvent.change(document.querySelector('input[type="date"]')!, { target: { value: '2026-08-10' } })
     fireEvent.change(document.querySelector('input[type="time"]')!, { target: { value: '09:00' } })
@@ -108,7 +108,7 @@ describe('TicketScheduleModal', () => {
     await screen.findByText('tickets.schedule.save')
     // El select de técnico se popula async (useQuery) — esperar a que la opción real exista
     // antes de disparar el change, o el value="5" no matchea ninguna <option> todavía.
-    await screen.findByText('Carlos Vergara')
+    await screen.findByText('Tecnico Servicios Test')
     fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
     fireEvent.change(document.querySelector('input[type="date"]')!, { target: { value: '2026-08-10' } })
     fireEvent.change(document.querySelector('input[type="time"]')!, { target: { value: '09:00' } })
@@ -129,7 +129,7 @@ describe('TicketScheduleModal', () => {
       renderModal({ isReschedule: true })
 
       const saveBtn = await screen.findByText('tickets.schedule.save')
-      await screen.findByText('Carlos Vergara')
+      await screen.findByText('Tecnico Servicios Test')
       fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
       fireEvent.change(document.querySelector('input[type="date"]')!, { target: { value: '2026-08-10' } })
       fireEvent.change(document.querySelector('input[type="time"]')!, { target: { value: '09:00' } })
@@ -144,7 +144,7 @@ describe('TicketScheduleModal', () => {
       mockedApi.tickets.schedule.mockResolvedValue({} as never)
       renderModal({ isReschedule: true })
 
-      await screen.findByText('Carlos Vergara')
+      await screen.findByText('Tecnico Servicios Test')
       fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
       fireEvent.change(document.querySelector('input[type="date"]')!, { target: { value: '2026-08-10' } })
       fireEvent.change(document.querySelector('input[type="time"]')!, { target: { value: '09:00' } })
@@ -160,7 +160,7 @@ describe('TicketScheduleModal', () => {
       mockedApi.tickets.schedule.mockResolvedValue({} as never)
       renderModal({ isReschedule: false })
 
-      await screen.findByText('Carlos Vergara')
+      await screen.findByText('Tecnico Servicios Test')
       fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '5' } })
       fireEvent.change(document.querySelector('input[type="date"]')!, { target: { value: '2026-08-10' } })
       fireEvent.change(document.querySelector('input[type="time"]')!, { target: { value: '09:00' } })

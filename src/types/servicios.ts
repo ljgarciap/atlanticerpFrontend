@@ -442,7 +442,7 @@ export interface InternalTechnicianTeamStats {
   promedio_primera_visita:   number | null
 }
 
-// REQ-292 — captura mensual de comisión (hoy solo Carlos Vergara tiene plan activo). `null` =
+// REQ-292 — captura mensual de comisión (hoy solo Tecnico Servicios Test tiene plan activo). `null` =
 // "Pendiente de captura" (RN6).
 export interface CommissionCapture {
   year:                       number
@@ -1002,7 +1002,7 @@ export interface ReportsCompletadosAnioItem {
   total:     number
 }
 
-// REQ-286 — comisión de Carlos Vergara en Reportes, SOLO LECTURA. Reusa el tipo ya existente de
+// REQ-286 — comisión de Tecnico Servicios Test en Reportes, SOLO LECTURA. Reusa el tipo ya existente de
 // Batch 10 (`TechnicianCommissionResult`) — mismo shape que devuelve
 // GET /internal-technicians/{id}/commission, este endpoint solo evita exponer el id del técnico
 // en la URL. `null` = sin captura del período (mismo criterio que TechnicianCommissionResult).

@@ -15,7 +15,7 @@
   },
   "fiscal": {
     "title": "Fiscal Configuration",
-    "subtitle": "Fiscal data, electronic invoicing and ITBMS rates — critical configuration, exclusive to Mark",
+    "subtitle": "Fiscal data, electronic invoicing and ITBMS rates — critical configuration, exclusive to the configured approver",
     "saveChanges": "Save changes",
     "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
     "saveError": "Could not save the fiscal configuration",
@@ -24,7 +24,7 @@
     },
     "restricted": {
       "title": "Restricted access",
-      "body": "This screen is exclusive to Mark."
+      "body": "This screen is exclusive to the configured approver."
     },
     "datosFiscales": {
       "title": "Company fiscal data",
@@ -89,7 +89,7 @@
   },
   "empresa": {
     "title": "Company Profile",
-    "subtitle": "Brand identity, locations, general contacts and regional settings — exclusive to Mark",
+    "subtitle": "Brand identity, locations, general contacts and regional settings — exclusive to the configured approver",
     "saveChanges": "Save changes",
     "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
     "saveError": "Could not save the company profile",
@@ -99,7 +99,7 @@
     },
     "restricted": {
       "title": "Restricted access",
-      "body": "This screen is exclusive to Mark."
+      "body": "This screen is exclusive to the configured approver."
     },
     "identidad": {
       "title": "Brand identity",
@@ -344,7 +344,7 @@
       "motivoPlaceholder": "Explain why this is proposed as uncollectible...",
       "motivoRequerido": "A reason is required.",
       "enviarPropuesta": "Send proposal",
-      "pendienteAprobacionAviso": "Uncollectible proposal pending Mark's approval.",
+      "pendienteAprobacionAviso": "Uncollectible proposal pending the configured approver's approval.",
       "aprobar": "Approve",
       "rechazar": "Reject",
       "registrarCobro": "Record payment",
@@ -591,7 +591,7 @@
       "cuentaBancariaSalidaLabel": "Outgoing bank account",
       "cuentaBancariaSalidaPlaceholder": "Select the account...",
       "nuevoSaldoPendiente": "Applied automatically — new outstanding balance",
-      "umbralAviso": "This note exceeds the approval threshold — it will stay pending Mark's approval before it's applied.",
+      "umbralAviso": "This note exceeds the approval threshold — it will stay pending the configured approver's approval before it's applied.",
       "avisoNotificacionCliente": "On confirmation, the customer will automatically be notified with the Credit Note and their updated account statement. The original invoice is not resent or changed.",
       "avisoReduccionComision": "This note will reduce the salesperson's already-calculated commission on the affected invoice.",
       "comprobanteLabel": "Supporting receipt",
@@ -689,7 +689,7 @@
       },
       "verFacturaButton": "View invoice",
       "ocultarFacturaButton": "Hide invoice",
-      "pendienteAprobacionAviso": "This correction exceeds Mark's approval threshold — NO fiscal document is generated yet. The original invoice stays active, unchanged, until Mark approves it.",
+      "pendienteAprobacionAviso": "This correction exceeds the configured approval threshold — NO fiscal document is generated yet. The original invoice stays active, unchanged, until the configured approver approves it.",
       "volverButton": "Go back and edit",
       "confirmarButton": "Confirm and generate new invoice",
       "error": "Couldn't register the correction. Try again."
@@ -855,7 +855,7 @@
       "proponer": "Propose",
       "motivoPlaceholder": "Reason for the change",
       "motivoRechazoPlaceholder": "Reason for rejection",
-      "propuestaPendiente": "{{porcentaje}}% proposal pending Mark's approval — {{motivo}}",
+      "propuestaPendiente": "{{porcentaje}}% proposal pending the configured approver's approval — {{motivo}}",
       "aprobar": "Approve",
       "rechazar": "Reject",
       "faltanDatosFiscales": "The architect's fiscal data is missing to calculate tax and total.",
@@ -864,7 +864,7 @@
       "recordar": "Remind",
       "marcarPagado": "Mark as paid",
       "confirmarPago": "Confirm marking this commission as paid for {{monto}}?",
-      "bloqueoPorcentajePendiente": "There's a % change pending Mark's approval — resolve it first.",
+      "bloqueoPorcentajePendiente": "There's a % change pending the configured approver's approval — resolve it first.",
       "bloqueoDatosFiscales": "The architect's fiscal data is missing.",
       "bloqueoCuentaCobro": "The invoice / receipt hasn't been uploaded yet.",
       "bloqueoComprobanteRetencion": "The withholding receipt hasn't been uploaded yet."
@@ -1021,7 +1021,7 @@
       "aprobarError": "Could not approve the cash count."
     },
     "restricted": {
-      "yaneth": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Felix, Mark and Management.",
+      "restrictedRole": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Accounting, the configured approver and Management.",
       "dailyCount": "The Daily cash count is available only to Felix and Yaneth."
     }
   },

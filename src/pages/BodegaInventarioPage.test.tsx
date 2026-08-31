@@ -198,7 +198,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
   })
 
   it('SCRUM-418 — toggle Productos/Familias muestra la pestaña de Familias como acordeón, sin botón de generar compra, con la misma tabla de 14 columnas que Productos', async () => {
-    // SCRUM-418 (rebote de Daniela Amaya 2026-08-12) — el detalle de familia ahora es la MISMA
+    // SCRUM-418 (rebote de Gerencia Test 2026-08-12) — el detalle de familia ahora es la MISMA
     // forma que BodegaInventoryRow (ver docblock de BodegaInventoryFamilyProductRow), no el shape
     // reducido de 4 campos de antes.
     mockedApi.inventory.families.get.mockResolvedValue({
@@ -367,7 +367,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
   })
 })
 
-// Rebote REQ-361/SCRUM-431 (Daniela Amaya 2026-08-13) — reescritura del modal a 2 bloques exactos
+// Rebote REQ-361/SCRUM-431 (Gerencia Test 2026-08-13) — reescritura del modal a 2 bloques exactos
 // del mockup, con toda la fila clickeable (antes solo el nombre, sin señal visual).
 describe('BodegaInventarioPage — Detalle de producto en 2 bloques (rebote SCRUM-431)', () => {
   it('Escenario 1 — toda la fila es clickeable, no solo la referencia/descripción', async () => {
@@ -467,11 +467,11 @@ describe('BodegaInventarioPage — Confirmar llegada física (SCRUM-427)', () =>
     expect(screen.queryByText('bodega:inventory.actions.confirmArrival')).not.toBeInTheDocument()
   })
 
-  // Rebote REQ-427 (Daniela Amaya 2026-08-13) — la nota debe mostrar cantidad + quién confirmó.
+  // Rebote REQ-427 (Gerencia Test 2026-08-13) — la nota debe mostrar cantidad + quién confirmó.
   it('muestra la nota de espera con cantidad y usuario cuando confirmed_by_name viene informado', async () => {
     mockedApi.inventory.list.mockResolvedValue(listResponse({
       data: [makeRow({ arrival_confirmation: {
-        pending_bodega_action: false, awaiting_compras: true, confirmed_quantity: 4, confirmed_by_name: 'Esteban Cardenas',
+        pending_bodega_action: false, awaiting_compras: true, confirmed_quantity: 4, confirmed_by_name: 'Lider Bodega Test',
       } })],
     }))
     renderPage()
@@ -480,7 +480,7 @@ describe('BodegaInventarioPage — Confirmar llegada física (SCRUM-427)', () =>
     fireEvent.click(screen.getByText('REF-1'))
 
     await waitFor(() => expect(
-      screen.getByText('bodega:inventory.confirmArrivalModal.awaitingComprasDetail count=4,user=Esteban Cardenas'),
+      screen.getByText('bodega:inventory.confirmArrivalModal.awaitingComprasDetail count=4,user=Lider Bodega Test'),
     ).toBeInTheDocument())
     expect(screen.queryByText('bodega:inventory.actions.confirmArrival')).not.toBeInTheDocument()
   })

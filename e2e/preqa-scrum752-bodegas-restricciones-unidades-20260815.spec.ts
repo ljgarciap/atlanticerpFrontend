@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Pre-QA — SCRUM-752 (mejora nueva, Daniela Amaya 2026-08-13): columna "Unidades en [bodega]",
+// Pre-QA — SCRUM-752 (mejora nueva, Gerencia Test 2026-08-13): columna "Unidades en [bodega]",
 // tope real al reubicar, y exclusión total de Zona Libre (ni como destino ni con ninguna acción
 // en su propia tabla).
 const BASE = 'http://localhost:5173'

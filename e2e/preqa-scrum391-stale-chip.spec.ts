@@ -20,13 +20,13 @@ async function login(page, email: string) {
 test('SCRUM-391 — picker deja de tener en_picking mientras se usa el modal', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
   await page.getByRole('button', { name: /imprimir picking del día/i }).click()
   await page.waitForTimeout(500)
-  await page.getByRole('button', { name: 'Apolonio Gonzalez' }).click()
+  await page.getByRole('button', { name: 'Ayudante General Bodega Test' }).click()
   await page.waitForTimeout(800)
   await expect(page.getByTestId('picking-orders-count')).toContainText('2')
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click()
@@ -44,7 +44,7 @@ test('SCRUM-391 — picker deja de tener en_picking mientras se usa el modal', a
   await page.waitForTimeout(500)
   await page.screenshot({ path: 'e2e/.tmp/scrum391-stale-chip-reopened.png' })
 
-  const chip = page.getByRole('button', { name: 'Apolonio Gonzalez' })
+  const chip = page.getByRole('button', { name: 'Ayudante General Bodega Test' })
   const chipStillThere = await chip.count()
   console.log('SCRUM-391 stale-chip: sigue apareciendo Apolonio como chip?', chipStillThere > 0)
 

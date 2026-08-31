@@ -92,7 +92,7 @@ export default function BodegaOrdenesZonaLibrePage() {
                   {new Date(row.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{row.products_summary}</td>
-                {/* SCRUM-442 (rebote de Daniela Amaya 2026-08-13) — separador de miles con el
+                {/* SCRUM-442 (rebote de Gerencia Test 2026-08-13) — separador de miles con el
                     mismo helper compartido (`formatMoney`, ya usado en el resto del sistema) en
                     vez de `toFixed(2)` directo, mismo gap que la columna Monto del carrito de
                     Nueva Orden Zona Libre (SCRUM-436). */}

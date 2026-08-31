@@ -10,7 +10,7 @@ const PERIOD: ReportPeriodInfo = {
   granularity: 'month', label: 'Agosto 2026', start: '2026-08-01', end: '2026-08-31', is_current: true,
 }
 
-// SCRUM-268 (corrección de Daniela Amaya, 2026-08-11) — el panel "Liquidación de importaciones"
+// SCRUM-268 (corrección de Gerencia Test, 2026-08-11) — el panel "Liquidación de importaciones"
 // no tenía test dedicado (ReportsPage.tsx entero no lo tenía). Cubre solo ese panel: los otros
 // paneles de la página (chart de compras por período, oportunidad, rating, reclamos, inventario)
 // se mockean con lo mínimo para que la página renderice sin crashear.
@@ -25,7 +25,7 @@ vi.mock('react-i18next', () => ({
 
 // Chart.js necesita un <canvas> real (getContext) que jsdom no implementa — mismo criterio que
 // el resto del proyecto usa para librerías visuales de terceros en tests (ver
-// ventas-diseno/ReportsPage.test.tsx). SCRUM-263 (rebote de Daniela Amaya) — el mock captura las
+// ventas-diseno/ReportsPage.test.tsx). SCRUM-263 (rebote de Gerencia Test) — el mock captura las
 // `options` recibidas para poder asertar sobre la config real de grid/ejes, no solo que el chart
 // se montó.
 let lastChartOptions: Record<string, unknown> | undefined
@@ -181,7 +181,7 @@ describe('ReportsPage — panel "Liquidación de importaciones" (SCRUM-268)', ()
 })
 
 describe('ReportsPage — panel "Comprado por período" (SCRUM-263)', () => {
-  it('rebote 2026-08-12 de Daniela Amaya — saca las líneas de grilla verticales Y horizontales, apoyándose en los datalabels $ del plugin propio', async () => {
+  it('rebote 2026-08-12 de Gerencia Test — saca las líneas de grilla verticales Y horizontales, apoyándose en los datalabels $ del plugin propio', async () => {
     renderPage()
 
     await waitFor(() => expect(screen.getByTestId('mock-chart')).toBeInTheDocument())

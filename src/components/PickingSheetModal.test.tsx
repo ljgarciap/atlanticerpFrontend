@@ -33,8 +33,8 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
     vendedor: 'Mark',
-    asistente: 'Mariano Sandoval',
-    picker: 'Apolonio Gonzalez',
+    asistente: 'Asistente Bodega Test 2',
+    picker: 'Ayudante General Bodega Test',
     repartidor: null,
     fecha_entrega_comprometida: '2026-08-01',
     is_atrasado: false,
@@ -102,14 +102,14 @@ describe('PickingSheetModal', () => {
     expect(left).toHaveTextContent('Torre Azul')
 
     const right = screen.getByTestId('picking-sheet-meta-right')
-    expect(right).toHaveTextContent('Apolonio Gonzalez')
-    expect(right).toHaveTextContent('Mariano Sandoval')
+    expect(right).toHaveTextContent('Ayudante General Bodega Test')
+    expect(right).toHaveTextContent('Asistente Bodega Test 2')
     expect(right).toHaveTextContent('Mark')
     // El campo combinado "Cliente / Proyecto" ya no existe como tal.
     expect(screen.queryByText('bodega:pedidos.pickingSheetModal.meta.client')).not.toBeInTheDocument()
   })
 
-  // SCRUM-385 (rebote de Daniela Amaya 2026-08-13, con imagen) — la corrección de 2026-08-11
+  // SCRUM-385 (rebote de Gerencia Test 2026-08-13, con imagen) — la corrección de 2026-08-11
   // usaba anchos en PORCENTAJE de `w-full`, que dentro del modal daban columnas más angostas que
   // el contenido de ancho fijo que llevan adentro (input de Alistada w-20, de Observación w-40) —
   // el contenido se salía de su celda y se montaba sobre la columna vecina. El fix real usa un

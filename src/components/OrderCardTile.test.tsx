@@ -75,7 +75,7 @@ beforeEach(() => {
   // de "Asignar Repartidor" SCRUM-396) — este test no necesita distinguir el `role` pedido, solo
   // que `useTeamMembersByRole` resuelva la lista.
   mockedUseTeamMembersByRole.mockReturnValue({
-    data: { data: [{ id: 10, name: 'Apolonio Gonzalez' }, { id: 20, name: 'Otro Miembro' }] },
+    data: { data: [{ id: 10, name: 'Ayudante General Bodega Test' }, { id: 20, name: 'Otro Miembro' }] },
   } as unknown as ReturnType<typeof useTeamMembersByRole>)
   mockedUseAssignCourier.mockReturnValue({ mutate: assignCourierMutateMock, isPending: false } as unknown as ReturnType<typeof useAssignCourier>)
   mockedUseDispatchOrder.mockReturnValue({ mutate: dispatchOrderMutateMock, isPending: false } as unknown as ReturnType<typeof useDispatchOrder>)
@@ -95,7 +95,7 @@ function order(overrides: Partial<OrderCard> = {}): OrderCard {
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
     vendedor: 'Mark',
-    asistente: 'Mariano Sandoval',
+    asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: null,
     fecha_entrega_comprometida: '2026-08-01',
@@ -504,7 +504,7 @@ describe('OrderCardTile', () => {
   })
 
   it('SCRUM-398 (REQ-328) — "Despachar" dispara useDispatchOrder con el orderId, sin formulario', () => {
-    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Gary Arrocha', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
+    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Transporte Test', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
 
     fireEvent.click(screen.getByTestId('dispatch-button-22'))
 
@@ -512,14 +512,14 @@ describe('OrderCardTile', () => {
   })
 
   it('Lote 4 (SCRUM-396) — con repartidor ya asignado, muestra "Cambiar repartidor" además de "Despachar"', () => {
-    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Gary Arrocha', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
+    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Transporte Test', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
 
     expect(screen.getByTestId('dispatch-button-22')).toBeInTheDocument()
     expect(screen.getByTestId('change-courier-button-22')).toBeInTheDocument()
   })
 
   it('Lote 4 (SCRUM-396) — "Cambiar repartidor" reabre el mismo formulario/mutation que "Asignar Repartidor" y oculta Despachar mientras está abierto', () => {
-    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Gary Arrocha', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
+    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Transporte Test', id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
 
     fireEvent.click(screen.getByTestId('change-courier-button-22'))
 
@@ -540,7 +540,7 @@ describe('OrderCardTile', () => {
     dispatchOrderMutateMock.mockImplementation((_orderId, { onError }) => {
       onError({ isAxiosError: true, response: { status: 422, data: { message: 'Falta la factura de Administración.', errors: { order: ['Falta la factura de Administración.'] } } } })
     })
-    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Gary Arrocha', invoice_ready: false, id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
+    render(<OrderCardTile order={order({ stage: 'por_despachar', repartidor: 'Transporte Test', invoice_ready: false, id: 22 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
 
     // El botón "Despachar" está habilitado pese a `invoice_ready: false` — el bloqueo real
     // ocurre al recibir el 422 real del backend, no antes.
@@ -567,7 +567,7 @@ describe('OrderCardTile', () => {
   })
 
   it('SCRUM-399 (REQ-329) — "Confirmar Guía Firmada" (Despachado) abre el modal de subida', () => {
-    render(<OrderCardTile order={order({ stage: 'despachado', repartidor: 'Gary Arrocha', id: 24 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
+    render(<OrderCardTile order={order({ stage: 'despachado', repartidor: 'Transporte Test', id: 24 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />)
 
     expect(screen.queryByTestId('signed-guide-modal')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('bodega:pedidos.actionButton.despachado'))

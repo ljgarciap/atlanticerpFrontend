@@ -50,8 +50,8 @@ function makeProductivity(overrides: Partial<BodegaProductivityReport> = {}): Bo
     period: { key: 'month', from: '2026-07-01', to: '2026-07-27' },
     has_data: true,
     data: [
-      { assistant_id: 1, assistant_name: 'Mariano Sandoval', orders_count: 34, percent_of_top: 100 },
-      { assistant_id: 2, assistant_name: 'Osvaldo Santos', orders_count: 27, percent_of_top: 79.4 },
+      { assistant_id: 1, assistant_name: 'Asistente Bodega Test 2', orders_count: 34, percent_of_top: 100 },
+      { assistant_id: 2, assistant_name: 'Asistente Bodega Test', orders_count: 27, percent_of_top: 79.4 },
     ],
     ...overrides,
   }
@@ -115,7 +115,7 @@ describe('BodegaReportesPage', () => {
   it('renderiza las 4 tarjetas con datos', async () => {
     renderPage()
 
-    expect(await screen.findByText('Mariano Sandoval')).toBeInTheDocument()
+    expect(await screen.findByText('Asistente Bodega Test 2')).toBeInTheDocument()
     expect(screen.getByText('Producto dañado / roto')).toBeInTheDocument()
     expect(screen.getByText('Bodega Central')).toBeInTheDocument()
     expect(screen.getByText('52')).toBeInTheDocument()
@@ -123,7 +123,7 @@ describe('BodegaReportesPage', () => {
 
   it('el selector de período recalcula los 4 reportes a la vez (RN1 REQ-420)', async () => {
     renderPage()
-    await screen.findByText('Mariano Sandoval')
+    await screen.findByText('Asistente Bodega Test 2')
 
     expect(mockedApi.reports.productivity).toHaveBeenCalledWith('month')
 
@@ -142,7 +142,7 @@ describe('BodegaReportesPage', () => {
     renderPage()
 
     expect(await screen.findByText('bodega:reports.productivity.empty')).toBeInTheDocument()
-    expect(screen.queryByText('Mariano Sandoval')).not.toBeInTheDocument()
+    expect(screen.queryByText('Asistente Bodega Test 2')).not.toBeInTheDocument()
   })
 
   it('Capacidad por bodega — muestra el aviso de concentración cuando viene del backend', async () => {
@@ -176,7 +176,7 @@ describe('BodegaReportesPage', () => {
 
   it('REQ-425 — cada tarjeta navega a su pantalla específica al hacer clic', async () => {
     renderPage()
-    await screen.findByText('Mariano Sandoval')
+    await screen.findByText('Asistente Bodega Test 2')
 
     fireEvent.click(screen.getByText('bodega:reports.productivity.title'))
     expect(navigateMock).toHaveBeenLastCalledWith('/bodega/pedidos')
@@ -193,7 +193,7 @@ describe('BodegaReportesPage', () => {
 
   it('SCRUM-490 — el label de período se muestra bajo el título y cambia al seleccionar otro período', async () => {
     renderPage()
-    await screen.findByText('Mariano Sandoval')
+    await screen.findByText('Asistente Bodega Test 2')
 
     // Verifica que el label de mes está presente inicialmente (ej: "julio de 2026")
     // Busca específicamente en el párrafo de clase "mt-1" (que es donde está el label)

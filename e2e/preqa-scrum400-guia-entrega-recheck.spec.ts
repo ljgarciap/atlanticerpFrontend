@@ -25,7 +25,7 @@ async function openGuideFor(page, orderId: number) {
 test('Escenario 1 — guía sin firmar (Order 125) muestra espacio de firma en blanco', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await openGuideFor(page, 125)
 
   const sig = page.getByTestId('guide-signature')
@@ -44,7 +44,7 @@ test('Escenario 1 — guía sin firmar (Order 125) muestra espacio de firma en b
 test('Escenario 2 — guía firmada (Order 126) muestra receptor, no repartidor', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await openGuideFor(page, 126)
 
   const sig = page.getByTestId('guide-signature')
@@ -55,7 +55,7 @@ test('Escenario 2 — guía firmada (Order 126) muestra receptor, no repartidor'
 
   const bodyText = await page.locator('body').innerText()
   console.log('ORDER126_HAS_DOLLAR_SIGN=', bodyText.includes('$'))
-  console.log('ORDER126_CONTAINS_COURIER_NAME=', bodyText.includes('Gary Arrocha'))
+  console.log('ORDER126_CONTAINS_COURIER_NAME=', bodyText.includes('Transporte Test'))
   console.log('ORDER126_CONTAINS_RECEIVER_NAME=', bodyText.includes('Maria Fernandez'))
 
   expect(errors).toEqual([])
@@ -64,7 +64,7 @@ test('Escenario 2 — guía firmada (Order 126) muestra receptor, no repartidor'
 test('Adversarial — Order 127 con 3 documentos guia_entrega, el de mayor id SIN firmar', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await openGuideFor(page, 127)
 
   const sig = page.getByTestId('guide-signature')
@@ -80,7 +80,7 @@ test('Adversarial — Order 127 con 3 documentos guia_entrega, el de mayor id SI
 })
 
 test('Descarga del PDF — Order 126 (firmada) descarga el documento correcto', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await openGuideFor(page, 126)
 
   let downloadApiUrl: string | null = null
@@ -106,7 +106,7 @@ test('Rol sin permiso bodega.read no puede ver el board de Pedidos', async ({ pa
   page.on('response', res => {
     if (res.url().includes('/api/bodega/orders') && !res.url().includes('assistant-load')) ordersApiStatus = res.status()
   })
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
   await page.screenshot({ path: 'e2e/.tmp/scrum400-recheck-role-sin-permiso.png', fullPage: true })
@@ -118,7 +118,7 @@ test('Rol sin permiso bodega.read no puede ver el board de Pedidos', async ({ pa
 test('Recargar a mitad del modal abierto no crashea', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await openGuideFor(page, 126)
   await page.reload()
   await page.waitForTimeout(1200)

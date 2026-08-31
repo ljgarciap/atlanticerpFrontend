@@ -76,9 +76,9 @@ export default function ComisionesInternasPage() {
 
   // Bug real de Pre-QA (Visual Review, 2026-08-25): `admin_contab.edit` también es true para
   // Felix, que no es Mark — el CRUD de tramos (POST/PUT/DELETE .../tiers) está gateado por
-  // `mark_only` en el backend, así que Felix veía editar/eliminar/agregar en el modal y se
+  // `primary_approver_only` en el backend, así que Felix veía editar/eliminar/agregar en el modal y se
   // encontraba con un 403 al guardar. `puede_editar_tramos` es el cómputo server-side
-  // (`current_user_id === mark_approver_user_id`), mismo criterio que `puede_decidir_incobrable`
+  // (`current_user_id === primary_approver_user_id`), mismo criterio que `puede_decidir_incobrable`
   // en Facturación — el frontend nunca decide por su cuenta quién es Mark.
   const canEditTiers = summary?.puede_editar_tramos === true
   const mesActual = currentMonthKey()

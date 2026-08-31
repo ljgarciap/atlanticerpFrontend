@@ -37,7 +37,7 @@ const mockedUseAuthStore = vi.mocked(useAuthStore)
 function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderDetail {
   return {
     id: 12, provider_id: 1, provider_name: 'LightCorp', status: 'ordenado',
-    modality: 'directo', requires_mark_approval: false, approved_by: null, approved_by_name: null,
+    modality: 'directo', requires_primary_approval: false, approved_by: null, approved_by_name: null,
     total_amount: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-08-01T00:00:00Z', status_changed_at: '2026-08-01T00:00:00Z',
@@ -54,7 +54,7 @@ function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderD
 function makeSettings(overrides: Partial<ComprasSettings> = {}): ComprasSettings {
   return {
     low_rating_threshold: 3, claim_attention_days: 7, replacement_margin_threshold: 20,
-    mark_approver_user_id: 99,
+    primary_approver_user_id: 99,
     ...overrides,
   } as unknown as ComprasSettings
 }
@@ -117,13 +117,13 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
   })
 
   it('"Aprobar cambio"/"Rechazar cambio" solo se muestran a Mark', async () => {
-    mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ mark_approver_user_id: 99 }))
+    mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ primary_approver_user_id: 99 }))
     mockedUseAuthStore.mockReturnValue(1 as never) // usuario logueado (id 1) NO es Mark (99)
 
     renderPanel(makeOrder({ pending_amount_change: 150, amount_change_requested_by: 1 }))
 
     await waitFor(() => expect(screen.getByText(/pendingAmountChange amount/)).toBeInTheDocument())
-    // Esperar a que compras/settings resuelva (isMark depende de mark_approver_user_id real, no
+    // Esperar a que compras/settings resuelva (isMark depende de primary_approver_user_id real, no
     // se evalúa antes de tener la respuesta) antes de confirmar la ausencia de los botones.
     await waitFor(() => expect(mockedComprasApi.settings.get).toHaveBeenCalled())
     await waitFor(() => expect(screen.queryByText('compras:orders.detail.payments.approveAmountChange')).not.toBeInTheDocument())
@@ -131,7 +131,7 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
   })
 
   it('Mark sí ve "Aprobar cambio"/"Rechazar cambio" y puede rechazar', async () => {
-    mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ mark_approver_user_id: 99 }))
+    mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ primary_approver_user_id: 99 }))
     mockedUseAuthStore.mockReturnValue(99 as never) // usuario logueado ES Mark
     mockedComprasApi.orders.rejectAmountChange.mockResolvedValue({ total_amount: 100 })
 

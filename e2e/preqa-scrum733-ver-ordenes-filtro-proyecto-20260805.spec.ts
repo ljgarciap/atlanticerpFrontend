@@ -16,7 +16,7 @@ import { execSync } from 'node:child_process'
  * `preqa-scrum214-215-216-logistica-20260805.spec.ts` — nunca IDs hardcodeados, `infra/test.sh`
  * comparte la misma Postgres que el stack local y la vacía entre corridas.
  */
-const LIDER_COMPRAS = 'gerencia2@atlantic.com.pa'
+const LIDER_COMPRAS = 'lidercompras@test.com'
 const SIN_PERMISO = 'designer@atlantic.test'
 const STAMP = Date.now()
 

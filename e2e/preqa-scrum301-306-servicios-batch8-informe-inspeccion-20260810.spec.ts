@@ -5,15 +5,15 @@ import { test, expect, Page } from '@playwright/test'
  * Password default = email (BusinessRoleUserSeeder). Fixtures locales usadas (ver
  * memory/project_sesion_20260810_batch8_informe_inspeccion.md y docs/pre-qa/ de esta sesión):
  *   T82 = INS-2026-0001 (installation, SIN técnico asignado)
- *   T84 = INS-2026-0003 (installation/inspection, técnico=Carlos Vergara)
- *   T86 = GAR-2026-0001 (warranty_generic, técnico=Miguel Castillo, 1 producto asociado)
- *   T93 = RET-2026-0001 (retrofit, técnico=Pedro Santos, 1 producto asociado)
- *   T94 = RET-2026-0002 (retrofit, técnico=Carlos Vergara, SIN producto)
+ *   T84 = INS-2026-0003 (installation/inspection, técnico=Tecnico Servicios Test)
+ *   T86 = GAR-2026-0001 (warranty_generic, técnico=Garantias Servicios Test, 1 producto asociado)
+ *   T93 = RET-2026-0001 (retrofit, técnico=Tecnico Servicios Test 2, 1 producto asociado)
+ *   T94 = RET-2026-0002 (retrofit, técnico=Tecnico Servicios Test, SIN producto)
  */
-const AARON   = 'servicio@atlantic.com.pa'
-const MIGUEL  = 'garantias@atlantic.com.pa'
-const CARLOS  = 'carlos@atlantic.com.pa'
-const DANIELA = 'daniela@atlantic.com.pa'
+const AARON   = 'liderservicios@test.com'
+const MIGUEL  = 'garantiasservicios@test.com'
+const CARLOS  = 'tecnicoservicios@test.com'
+const DANIELA = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')
@@ -41,14 +41,14 @@ async function openInspectionReport(page: Page) {
 
 test('SCRUM-301 — RN4 precarga de técnico responsable en informe NUEVO', async ({ page }) => {
   await login(page, AARON)
-  await openTicketByNumero(page, 'GAR-2026-0001') // T86, técnico ya asignado = Miguel Castillo
+  await openTicketByNumero(page, 'GAR-2026-0001') // T86, técnico ya asignado = Garantias Servicios Test
   await openInspectionReport(page)
   await page.screenshot({ path: 'test-results/scrum301-precarga-tecnico.png' })
 
   const tecnicoSelect = page.getByRole('combobox', { name: 'Técnico responsable' })
   await expect(tecnicoSelect).toHaveValue(/.+/)
   const selectedLabel = await tecnicoSelect.locator('option:checked').textContent()
-  expect(selectedLabel).toContain('Miguel Castillo')
+  expect(selectedLabel).toContain('Garantias Servicios Test')
 
   // RN1/RN2 SCRUM-302 — con producto asociado en Garantías (no Retrofit): Diagnóstico + Observación específica.
   await expect(page.getByText('Diagnóstico', { exact: true })).toBeVisible()

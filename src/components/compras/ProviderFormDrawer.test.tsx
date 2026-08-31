@@ -6,7 +6,7 @@ import { comprasApi } from '@/api/comprasApi'
 import type { ProviderDetail } from '@/types/compras'
 
 // SCRUM-189 (REQ-126, 2026-07-30) — el form divergía del mockup real
-// `2G__Compras_Proveedores.html` (hallazgo de Daniela Amaya): `origin` (REQ-141) no es un campo
+// `2G__Compras_Proveedores.html` (hallazgo de Gerencia Test): `origin` (REQ-141) no es un campo
 // del mockup, se deriva de `category` en el backend; `category` pasa a ser un select de 5
 // valores fijos en vez de texto libre; se agregan whatsapp/dirección/país y
 // swift/beneficiario, y se quitan bank_account_type/notes (no existen en el mockup).
@@ -58,7 +58,7 @@ describe('ProviderFormDrawer — categoría (REQ-126, SCRUM-189)', () => {
 
     await screen.findByText('compras:providerForm.titleCreate')
     fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: 'Nuevo Proveedor' } })
-    // SCRUM-189 (2026-08-06, hallazgo Daniela Amaya): al crear, category/country/1 contacto
+    // SCRUM-189 (2026-08-06, hallazgo Gerencia Test): al crear, category/country/1 contacto
     // pasan a obligatorios — sin esto el submit no llega a llamar la mutación.
     fireEvent.change(document.querySelector('select[name="category"]') as HTMLSelectElement, { target: { value: 'locales' } })
     fireEvent.change(document.querySelector('input[name="country"]') as HTMLInputElement, { target: { value: 'Panamá' } })

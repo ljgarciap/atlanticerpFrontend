@@ -77,7 +77,7 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
   const [generalError, setGeneralError] = useState<string | null>(null)
   const [warehousesForItem, setWarehousesForItem] = useState<OrderItemDetail | null>(null)
 
-  // SCRUM-393 (rebote de Daniela Amaya 2026-08-11 — modal "titila y se mueve", no se puede
+  // SCRUM-393 (rebote de Gerencia Test 2026-08-11 — modal "titila y se mueve", no se puede
   // interactuar) — `order?.items ?? []` armaba un array NUEVO en cada render (referencia
   // distinta aunque el contenido fuera el mismo), así que el efecto de abajo dependía de un
   // valor inestable. `useMemo` lo estabiliza mientras `order` no cambie de verdad.
@@ -188,7 +188,7 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
     )
   }
 
-  // SCRUM-393 (rebote de Daniela Amaya 2026-08-11, causa raíz confirmada por revisión de código —
+  // SCRUM-393 (rebote de Gerencia Test 2026-08-11, causa raíz confirmada por revisión de código —
   // sin poder reproducir el video adjunto, no hay herramienta de reproducción de video disponible
   // acá): `OrderCardTile` renderiza este modal como hijo DIRECTO de su tarjeta raíz, que tiene
   // `hover:-translate-y-px` (un `transform` CSS). Cualquier ancestro con `transform` se vuelve el

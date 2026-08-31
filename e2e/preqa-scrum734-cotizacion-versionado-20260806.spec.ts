@@ -12,10 +12,10 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const VENDEDOR_SIN_PERMISO = 'milena.e@grupolafayette.com'
-const OTRO_VENDEDOR_SIN_PERMISO = 'neil.quiel@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
-const MANAGEMENT = 'daniela@atlantic.com.pa'
+const VENDEDOR_SIN_PERMISO = 'vendedordisenador@test.com'
+const OTRO_VENDEDOR_SIN_PERMISO = 'vendedordisenador2@test.com'
+const MARK = 'gerencia3@test.com'
+const MANAGEMENT = 'gerencia@test.com'
 
 const STAMP = Date.now()
 

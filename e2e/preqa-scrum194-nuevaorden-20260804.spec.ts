@@ -4,7 +4,7 @@ import { test, expect, Page } from '@playwright/test'
  * SCRUM-194 (REQ-131) — "+ Producto nuevo" dentro de Nueva Orden de Compras.
  * Smoke test permanente: este gate (validación de referencia duplicada) ya se rompió una vez
  * (QA rechazó 2026-07-17), volvió a fallar 2026-07-30 (colisión entre 2 líneas nuevas del mismo
- * payload) y volvió a reportarse 2026-08-04 (Daniela Amaya) — se promueve a e2e/ permanente por
+ * payload) y volvió a reportarse 2026-08-04 (Gerencia Test) — se promueve a e2e/ permanente por
  * regla de CLAUDE.md ("smoke tests que verifican un gate que ya se rompió una vez no se borran").
  *
  * Todos los escenarios corren en UN solo test con test.step() -- si se separan en test() distintos,
@@ -15,7 +15,7 @@ import { test, expect, Page } from '@playwright/test'
  *
  * password default = email (BusinessRoleUserSeeder).
  */
-const EMAIL = 'gerencia2@atlantic.com.pa'
+const EMAIL = 'lidercompras@test.com'
 const STAMP = Date.now()
 
 async function login(page: Page) {

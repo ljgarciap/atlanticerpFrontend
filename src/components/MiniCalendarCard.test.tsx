@@ -35,10 +35,10 @@ describe('MiniCalendarCard', () => {
     render(
       <MiniCalendarCard
         view="day" today={today} showOwner
-        events={[makeEvent('2026-07-21T14:30:00', { owner_name: 'Idmar Hernandez' })]}
+        events={[makeEvent('2026-07-21T14:30:00', { owner_name: 'Vendedor Disenador Test 10' })]}
       />,
     )
-    expect(screen.getByText(/Idmar Hernandez/)).toBeInTheDocument()
+    expect(screen.getByText(/Vendedor Disenador Test 10/)).toBeInTheDocument()
   })
 
   it('vista Día con showOwner y sin owner_name resuelto — cae al email', () => {
@@ -46,10 +46,10 @@ describe('MiniCalendarCard', () => {
     render(
       <MiniCalendarCard
         view="day" today={today} showOwner
-        events={[makeEvent('2026-07-21T14:30:00', { owner_email: 'idmar@atlantic.com.pa', owner_name: null })]}
+        events={[makeEvent('2026-07-21T14:30:00', { owner_email: 'vendedordisenador10@test.com', owner_name: null })]}
       />,
     )
-    expect(screen.getByText(/idmar@atlantic\.com\.pa/)).toBeInTheDocument()
+    expect(screen.getByText(/vendedordisenador10@test\.com/)).toBeInTheDocument()
   })
 
   it('vista Día sin showOwner (scope own) — no muestra el owner', () => {
@@ -57,10 +57,10 @@ describe('MiniCalendarCard', () => {
     render(
       <MiniCalendarCard
         view="day" today={today}
-        events={[makeEvent('2026-07-21T14:30:00', { owner_name: 'Idmar Hernandez' })]}
+        events={[makeEvent('2026-07-21T14:30:00', { owner_name: 'Vendedor Disenador Test 10' })]}
       />,
     )
-    expect(screen.queryByText(/Idmar Hernandez/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Vendedor Disenador Test 10/)).not.toBeInTheDocument()
   })
 
   it('vista Día vacía muestra el mensaje de sin eventos, no una grilla', () => {

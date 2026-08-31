@@ -14,7 +14,7 @@ async function login(page, email: string, password: string = email) {
 }
 
 test('SCRUM-407 — botón desde Pedidos navega a Status y "Volver a Pedidos" regresa', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -31,7 +31,7 @@ test('SCRUM-407 — botón desde Pedidos navega a Status y "Volver a Pedidos" re
 })
 
 test('SCRUM-412 — botón desde Pipeline (Ventas & Diseño) navega al MISMO lugar', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto('/ventas-diseno/pipeline')
   await page.waitForTimeout(1000)
 
@@ -42,7 +42,7 @@ test('SCRUM-412 — botón desde Pipeline (Ventas & Diseño) navega al MISMO lug
 })
 
 test('SCRUM-408 — columnas en orden RN1 + búsqueda filtra a una sola fila', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
 
@@ -66,7 +66,7 @@ test('SCRUM-408 — columnas en orden RN1 + búsqueda filtra a una sola fila', a
 })
 
 test('SCRUM-408/413 — familia de 2 tarjetas consolida en UNA fila (no una por tarjeta)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
 
@@ -77,7 +77,7 @@ test('SCRUM-408/413 — familia de 2 tarjetas consolida en UNA fila (no una por 
 })
 
 test('SCRUM-409/410 — modal detalle: datos generales, Fecha de Estatus = hoy, y cálculo de pendiente (10 solicitadas/6 entregadas => 4 pendientes)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
 
@@ -88,7 +88,7 @@ test('SCRUM-409/410 — modal detalle: datos generales, Fecha de Estatus = hoy, 
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'e2e/.tmp/scrum409-410-detail-modal.png', fullPage: true })
 
-  await expect(page.locator('body')).toContainText('Neil Quiel') // Diseñador
+  await expect(page.locator('body')).toContainText('Vendedor Disenador Test 2') // Diseñador
   await expect(page.locator('body')).toContainText('PreQA Familia 2 Tarjetas') // Proyecto
   await expect(page.locator('body')).toContainText('Contacto PreQA')
   await expect(page.locator('body')).toContainText('6000-1234')
@@ -104,7 +104,7 @@ test('SCRUM-409/410 — modal detalle: datos generales, Fecha de Estatus = hoy, 
 })
 
 test('SCRUM-410 Escenario 2 — familia de 3 tarjetas, completamente entregada => Pendiente 0 en todas', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
 
@@ -129,7 +129,7 @@ test('SCRUM-411 — Ver/Descargar dispara la generación real del documento (200
   // lo que cierra la page auxiliar de Playwright antes de poder leer su URL final de forma
   // confiable — se verifica en su lugar la respuesta real de red del endpoint que lo dispara.
   // El contenido/paleta del PDF ya se verificó descargándolo directo (ver reporte de Pre-QA).
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
 
@@ -149,7 +149,7 @@ test('SCRUM-411 — Ver/Descargar dispara la generación real del documento (200
 })
 
 test('SCRUM-412 RN2 — vendedor ve SOLO sus propios pedidos, no los de otro vendedor', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/scrum412-neil-own-orders.png', fullPage: true })
@@ -160,7 +160,7 @@ test('SCRUM-412 RN2 — vendedor ve SOLO sus propios pedidos, no los de otro ven
 })
 
 test('SCRUM-412 RN3 — solo consulta, sin ningún control de edición visible para Ventas & Diseño', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.locator('tbody tr').first().click()
@@ -186,7 +186,7 @@ test('Foco de ruptura — rol sin bodega.read ni ventas_diseno.read es redirigid
 test('Foco de ruptura — recargar con el modal de detalle abierto no rompe la pantalla', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.locator('tbody tr').first().click()
@@ -200,7 +200,7 @@ test('Foco de ruptura — recargar con el modal de detalle abierto no rompe la p
 })
 
 test('Foco de ruptura — búsqueda vacía/con espacios no rompe ni filtra de más', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   const search = page.locator('input[type="text"]')
@@ -216,7 +216,7 @@ test('Foco de ruptura — doble clic en una fila no abre 2 modales ni duplica ll
   page.on('request', req => {
     if (/\/orders\/status\/\d+$/.test(req.url())) detailCalls.push(req.url())
   })
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   const search = page.locator('input[type="text"]')
@@ -236,7 +236,7 @@ test('Foco de ruptura — doble clic en una fila no abre 2 modales ni duplica ll
 })
 
 test('Regla SCRUM-56 — sin emoji visible en la pantalla ni en el modal', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.locator('tbody tr').first().click()

@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test'
  * scrum122720), frontend on :5173 (Vite dev, proxy already wired to :8091) — NOT
  * the main infra-* stack.
  *
- * SCRUM-122 (Daniela Amaya): Architect directory was global — any architect
+ * SCRUM-122 (Gerencia Test): Architect directory was global — any architect
  * showed up regardless of the quote's Master Client/Sub-client. Now mirrors the
  * Sales Project pattern exactly: architects.sub_client_id (nullable FK, legacy
  * NULL rows stay invisible by design), GET .../architects requires sub_client_id
@@ -18,11 +18,11 @@ import { test, expect, type Page } from '@playwright/test'
  * Project; selecting/creating an architect sends the current sub_client_id
  * automatically.
  *
- * SCRUM-720 (Daniela Amaya): Reports panel 2-column grid left gaps when card
+ * SCRUM-720 (Gerencia Test): Reports panel 2-column grid left gaps when card
  * heights differed — switched to a single full-width column, visual-only (no
  * data/logic/filter/calc change).
  *
- * Real account (neil.quiel@atlantic.com.pa / same as email password, per
+ * Real account (vendedordisenador2@test.com / same as email password, per
  * CoreUserSeeder default) — *@atlantic.test demo accounts are gone from the
  * roster (project rule, 2026-07-30). Serial — same CrowdSec/ModSecurity false
  * timeout rationale as other Pre-QA specs in this repo, even though this run
@@ -36,8 +36,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:5173'
-const EMAIL = 'neil.quiel@atlantic.com.pa'
-const PASS  = 'neil.quiel@atlantic.com.pa'
+const EMAIL = 'vendedordisenador2@test.com'
+const PASS  = 'vendedordisenador2@test.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)

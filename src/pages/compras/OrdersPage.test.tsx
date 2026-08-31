@@ -57,7 +57,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     // REQ-140 (SCRUM-203) — "Tipo de envío"/"Costo de envío"/"Fecha de pago", ausentes de la
     // tabla principal hasta este ticket (gap real vs. mockup 2A/Excel de requerimientos).
     shipping_type: null, shipping_cost: null,
-    estimated_arrival_date: null, requires_mark_approval: false, blocked_by_mark_approval: false,
+    estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
     approved_by: null, approved_by_name: null, total_amount: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-01T00:00:00Z',
@@ -290,7 +290,7 @@ describe('OrdersPage — deep-link ?chip= desde Inicio de Compras (REQ-112)', ()
   })
 })
 
-// SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Daniela Amaya): "Pendiente/Por liquidar" es un único
+// SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Gerencia Test): "Pendiente/Por liquidar" es un único
 // estado interno, pero la columna Estado debe mostrar un texto distinto según la modalidad.
 describe('OrdersPage — etiqueta de estado por modalidad (SCRUM-204)', () => {
   it('pendiente_liquidar en modalidad directo muestra "Pendiente", no el texto combinado', async () => {

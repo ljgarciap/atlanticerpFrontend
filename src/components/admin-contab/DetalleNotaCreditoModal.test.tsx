@@ -36,7 +36,7 @@ function makeDetalle(overrides: Partial<NotaCreditoDetalle> = {}): NotaCreditoDe
     cliente: 'Grupo Sensei', master_client_id: 1, monto: 500, subtotal: 467.29, itbms: 32.71,
     estado: 'aplicada', resultado: 'aplicado_saldo',
     motivo: 'Descuento comercial acordado', motivo_rechazo: null, tiene_comprobante: true,
-    fecha: '2026-08-20', registrado_por: 'Felix Campos', aprobado_por: null, fecha_decision: null,
+    fecha: '2026-08-20', registrado_por: 'Contabilidad Test', aprobado_por: null, fecha_decision: null,
     factura_origen_id: 10, factura_origen_numero: 'F-0001', factura_origen_order_id: 55,
     factura_nueva_numero: null, factura_nueva_order_id: null, motivo_correccion: null, nuevo_tratamiento_itbms: null,
     nueva_fecha_factura: null, puede_aprobar_rechazar: false,
@@ -93,12 +93,12 @@ describe('DetalleNotaCreditoModal — REQ-493', () => {
       devolucion_bodega_id: 42,
       bodega_trazabilidad: {
         return_number: 'HS-3402',
-        historial: [{ step: 'finalized', label: 'Devolución finalizada', at: '2026-08-20', by: 'Carlos Vergara' }],
+        historial: [{ step: 'finalized', label: 'Devolución finalizada', at: '2026-08-20', by: 'Tecnico Servicios Test' }],
       },
     }))
     renderModal()
     expect(await screen.findByText(/notasCredito\.detalle\.trazabilidadBodegaTitle/)).toBeInTheDocument()
-    expect(screen.getByText(/Carlos Vergara/)).toBeInTheDocument()
+    expect(screen.getByText(/Tecnico Servicios Test/)).toBeInTheDocument()
   })
 
   it('RN4 — sin estado pendiente_aprobacion, no aparecen Aprobar/Rechazar', async () => {

@@ -409,7 +409,7 @@ export const ventasDisenoApi = {
     get: (id: number): Promise<CatalogProductFamilyDetail> =>
       api.get<CatalogProductFamilyDetail>(`/ventas-diseno/catalog-product-families/${id}`).then(r => r.data),
 
-    // SCRUM-237/240 (rebote de Daniela Amaya 2026-08-12) — creación-por-nombre, antes inexistente
+    // SCRUM-237/240 (rebote de Gerencia Test 2026-08-12) — creación-por-nombre, antes inexistente
     // (solo había list/get). Usado por FamilyCombobox (src/components/compras/FamilyCombobox.tsx),
     // compartido entre el modal de edición (SCRUM-237) y el de creación (SCRUM-240) de producto.
     // TODO: backend batch4 — endpoint todavía no existe en el backend real al momento de este

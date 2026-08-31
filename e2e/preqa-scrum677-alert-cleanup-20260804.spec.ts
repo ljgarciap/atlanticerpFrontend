@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Pre-QA — SCRUM-677 (REQ-597), fix "alerta de dato faltante queda pegada permanentemente"
- * (commit 0abbf69, dev local). Reportado dos veces por Daniela Amaya (2026-08-03/04, con video
+ * (commit 0abbf69, dev local). Reportado dos veces por Gerencia Test (2026-08-03/04, con video
  * adjunto 11663) — stageError/quoteGateError en PipelineCardModal.tsx solo se limpiaban en el
  * onSuccess de SU PROPIA mutación de origen (changeStageMutation / handleCreateQuoteClick),
  * nunca cuando el dato faltante se resolvía por otra vía (Editar→Guardar, subir archivo,
@@ -18,11 +18,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  *
  * Nota de entorno (doc obligatoria — ver instrucción del ticket "si falla, documentá qué
  * funcionó"): el login sugerido para este ticket en la memoria del proyecto era
- * idmar@atlantic.com.pa ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
+ * vendedordisenador10@test.com ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
  * Postgres LOCAL de esta sesión, VentasDisenoDemoSeeder resuelve el rol "designer" seedeado a
- * neil.quiel@atlantic.com.pa (no a idmar, que localmente no tiene ninguna tarjeta propia
+ * vendedordisenador2@test.com (no a idmar, que localmente no tiene ninguna tarjeta propia
  * tras `tenants:artisan db:seed`). Se usó neil.quiel (Vendedor/Diseñador real) y
- * daniela@atlantic.com.pa (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
+ * gerencia@test.com (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
  * ambas cuentas reales, no demo, password = mismo email, mismo patrón que el resto de
  * atlanticerp-frontend/e2e/.
  */
@@ -50,7 +50,7 @@ const errBanner = (page: Page) =>
 test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER vía que resuelva el dato', () => {
   test('Diseño → Crear cotización: falta superficie, se resuelve vía Editar/Guardar (escenario EXACTO de Daniela)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await openCard(page, 'PreQA Lead 677')
 
     // Gate 1: falta superficie trabajada.
@@ -105,7 +105,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
 
   test('Cotización → Mover a Propuesta: 2 gates distintos en secuencia, cada banner se limpia sin mezclarse', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'daniela@atlantic.com.pa')
+    await login(page, 'gerencia@test.com')
     await openCard(page, '[DEMO] Amenidades Delta')
 
     await page.getByRole('button', { name: /Mover a Propuesta/ }).click()
@@ -139,7 +139,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
 
   test('Lead → Crear cotización: falta contacto, se resuelve agregando un contacto (no reintentando el botón)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await openCard(page, 'PreQA SubClient 677')
 
     await page.getByRole('button', { name: 'Crear cotización' }).click()

@@ -22,7 +22,7 @@ import type { ReportsPeriodParams } from '@/types/servicios'
  * `period` es un único estado compartido por los primeros 5 paneles (Panorama del mes,
  * Instalaciones cotizadas vs. realizadas, Distribución por tipo, Distribución por técnico,
  * Servicios completados en el año — este último usa solo `period.year`). La sección de comisión
- * de Carlos Vergara (REQ-286) tiene su propia navegación de período (calcada del modal de
+ * de Tecnico Servicios Test (REQ-286) tiene su propia navegación de período (calcada del modal de
  * resultado de comisión de Batch 10) y la biblioteca de documentos (REQ-280) no tiene período.
  */
 export default function ServiciosReportsPage() {

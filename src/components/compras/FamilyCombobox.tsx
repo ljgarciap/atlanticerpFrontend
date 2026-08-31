@@ -5,7 +5,7 @@ import { isAxiosError } from 'axios'
 import { comprasApi } from '@/api/comprasApi'
 
 /**
- * SCRUM-237/240 (rebote de Daniela Amaya 2026-08-12) — combobox de Familia compartido entre el
+ * SCRUM-237/240 (rebote de Gerencia Test 2026-08-12) — combobox de Familia compartido entre el
  * modal de edición de producto (InventarioPage ProductDetailModal, SCRUM-237) y el de creación
  * (InventarioPage CreateProductModal, SCRUM-240): escribir un nombre que no existe todavía
  * ofrece "+ Crear familia "X"", que la crea vía el endpoint nuevo y la deja seleccionada de una —

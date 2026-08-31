@@ -50,7 +50,7 @@ async function driveToInventoryReview(page, orderId: number, orderNumber: string
   const card = page.getByTestId(`order-card-${orderId}`)
   await expect(card).toBeVisible()
   await card.getByRole('button', { name: /asignar picker/i }).click()
-  await page.getByTestId(`assign-picker-select-${orderId}`).selectOption({ label: 'Apolonio Gonzalez' })
+  await page.getByTestId(`assign-picker-select-${orderId}`).selectOption({ label: 'Ayudante General Bodega Test' })
   await page.getByTestId(`assign-picker-confirm-${orderId}`).click()
   await page.waitForTimeout(900)
 
@@ -95,7 +95,7 @@ test.describe.configure({ mode: 'serial' })
 
 test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   test('control de no-regresión — tarjeta picking_pendiente NORMAL sigue mostrando "Iniciar/Continuar Picking", nunca "Revisar Inventario"', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -116,7 +116,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('rol Picker (ayudante_general_bodega) — el botón "Revisar Inventario" no aparece nunca, y el endpoint responde 403 directo', async ({ page }) => {
-    await login(page, 'apolonio.gonzalez@atlantic.com.pa')
+    await login(page, 'ayudantegeneralbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -144,7 +144,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('rol Courier/Repartidor (transporte) — el botón "Revisar Inventario" no aparece nunca, y el endpoint responde 403 directo', async ({ page }) => {
-    await login(page, 'arrochagary@gmail.com')
+    await login(page, 'transporte@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -165,7 +165,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('SCRUM-387 + RN1 — picking parcial genera la Revisión, y "todo encontrado" la manda directo a En picking sin volver a la cola', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -220,7 +220,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('SCRUM-388 RN2 — "nada encontrado" mueve la tarjeta a Asignado marcada sin stock', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -254,7 +254,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('SCRUM-388 RN3 — escenario mixto genera 2 tarjetas (En picking + Asignado sin stock) SIN recargar manualmente', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 
@@ -317,7 +317,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('recargar con el modal de Revisión abierto a mitad de llenado no rompe al reabrir', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 

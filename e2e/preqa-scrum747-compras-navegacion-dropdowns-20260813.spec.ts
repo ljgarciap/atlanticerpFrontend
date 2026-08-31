@@ -19,7 +19,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
  * spec.md y atlanticerp/docs/architecture/scrum742-743-746-747-748-diseno.md (sección SCRUM-747).
  *
  * Cuenta real (password = email, ver memory/feedback_testing_uses_real_users_not_demo.md):
- *  - gerencia2@atlantic.com.pa (Yirena Teng, lider_compras — también con bodega.read, que
+ *  - lidercompras@test.com (Lider Compras Test, lider_compras — también con bodega.read, que
  *    trae su PROPIO dropdown "Inventario" en la sección Bodega. Todas las verificaciones de acá
  *    se scopean al contenedor de la sección "Compras · Inventario" (ver getComprasGroup) para no
  *    confundir ese "Inventario" de Bodega con el que ahora vive dentro de "Catálogo y Stock").
@@ -64,7 +64,7 @@ async function openComprasSection(page: Page): Promise<Locator> {
 }
 
 test('1. Escenario 1 — estructura principal: exactamente 7 accesos de nivel superior, en orden', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/inicio`)
   await page.waitForTimeout(1500)
   const comprasGroup = await openComprasSection(page)
@@ -78,7 +78,7 @@ test('1. Escenario 1 — estructura principal: exactamente 7 accesos de nivel su
 })
 
 test('2. Escenario 2 — dropdown "Órdenes" despliega exactamente 3 hijos: Ver Órdenes, Nueva Orden, Logística & Envío', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/inicio`)
   await page.waitForTimeout(1500)
   const comprasGroup = await openComprasSection(page)
@@ -94,7 +94,7 @@ test('2. Escenario 2 — dropdown "Órdenes" despliega exactamente 3 hijos: Ver 
 })
 
 test('3. Escenario 3 — dropdown "Catálogo y Stock" despliega exactamente 3 hijos: Inventario, Ver registros de ingreso, Comparación de Referencias', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/inicio`)
   await page.waitForTimeout(1500)
   const comprasGroup = await openComprasSection(page)
@@ -113,7 +113,7 @@ test('3. Escenario 3 — dropdown "Catálogo y Stock" despliega exactamente 3 hi
 })
 
 test('4. Escenario 4 — dropdown "Pagos" despliega exactamente 2 hijos: Pagos a Proveedores, Agencias de Liquidación', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/inicio`)
   await page.waitForTimeout(1500)
   const comprasGroup = await openComprasSection(page)
@@ -128,7 +128,7 @@ test('4. Escenario 4 — dropdown "Pagos" despliega exactamente 2 hijos: Pagos a
 })
 
 test('5. Escenario 5 (RN6) — en pantalla de un hijo, el dropdown padre queda marcado activo y el hijo resaltado dentro', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/ordenes/nueva`)
   await page.waitForTimeout(1500)
   // No hace falta scopear a comprasGroup acá: "Órdenes"/"Ver Órdenes"/"Nueva Orden"/"Logística &
@@ -159,7 +159,7 @@ test('5. Escenario 5 (RN6) — en pantalla de un hijo, el dropdown padre queda m
 })
 
 test('6. Escenario 6 (RN5) — ningún ítem hijo de un dropdown aparece duplicado como acceso independiente de nivel superior', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/inicio`)
   await page.waitForTimeout(1500)
   const comprasGroup = await openComprasSection(page)
@@ -188,7 +188,7 @@ test('6. Escenario 6 (RN5) — ningún ítem hijo de un dropdown aparece duplica
 })
 
 test('7. Escenario 7 (RN8) — la estructura de 7 accesos es idéntica entre distintas pantallas de Compras', async ({ page }) => {
-  await login(page, 'gerencia2@atlantic.com.pa')
+  await login(page, 'lidercompras@test.com')
 
   const topLevelLabels = ['Inicio', 'Órdenes', 'Catálogo y Stock', 'Pagos', 'Proveedores', 'Garantías & Reclamos', 'Reportes']
   const screens = ['/compras/inicio', '/compras/proveedores', '/compras/reportes']

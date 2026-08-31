@@ -198,7 +198,7 @@ export default function ArqueoCajaPage() {
             </div>
           </div>
         ) : (
-          <p className="text-[11px] text-slate-400 mb-4">{t('adminContab:arqueoCaja.restricted.yaneth')}</p>
+          <p className="text-[11px] text-slate-400 mb-4">{t('adminContab:arqueoCaja.restricted.restrictedRole')}</p>
         )}
 
         {view === 'proyectado' && canProjectedReal && (

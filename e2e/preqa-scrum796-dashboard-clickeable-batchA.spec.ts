@@ -18,8 +18,8 @@ import { execSync } from 'node:child_process'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const MGMT_EMAIL = 'whil@atlantic.com.pa'
-const MGMT_PASS = 'whil@atlantic.com.pa'
+const MGMT_EMAIL = 'gerencia5@test.com'
+const MGMT_PASS = 'gerencia5@test.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)
@@ -116,7 +116,7 @@ test.describe('SCRUM-796 secc. 4 — top-3 + "Ver más" + navegación puntual', 
     const tinker = `
       \\App\\Shared\\Multitenancy\\Tenant::first()->makeCurrent();
       $master = \\App\\Modules\\VentasDiseno\\Models\\MasterClient::firstOrCreate(['name' => 'SCRUM796 Cliente Ver Mas']);
-      $owner = \\App\\Models\\User::where('email', 'whil@atlantic.com.pa')->first();
+      $owner = \\App\\Models\\User::where('email', 'gerencia5@test.com')->first();
       for ($i = 1; $i <= 4; $i++) {
         $project = \\App\\Modules\\VentasDiseno\\Models\\SalesProject::firstOrCreate(['name' => "SCRUM796 VerMas Proyecto $i"]);
         \\App\\Modules\\VentasDiseno\\Models\\PipelineCard::updateOrCreate(

@@ -4,10 +4,10 @@ import { test, expect, Page } from '@playwright/test'
 // Contra dev.atlanticerp.ai (backend ac2a712, frontend c9d4084). Ver docs/reviews/scrum575-579-batch14-comisiones-internas-20260825.md
 // y docs/adr/ADR-SCRUM575-579-batch14-comisiones-internas.md (§3 — alcance vs Batch 15).
 
-const FELIX = 'conta@atlantic.com.pa' // Lider Admin&Cont
-const MARK = 'mbekhar@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com' // Lider Admin&Cont
+const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
-const VENDEDOR = 'milena.e@grupolafayette.com'
+const VENDEDOR = 'vendedordisenador@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -107,7 +107,7 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
 
   // Expandir la primera fila de vendedor con datos reales (columna "Total pedidos" != USD 0.00)
   // y confirmar el detalle a nivel de pedido
-  const idmarRow = page.getByRole('cell', { name: 'Idmar Hernandez' })
+  const idmarRow = page.getByRole('cell', { name: 'Vendedor Disenador Test 10' })
   await idmarRow.scrollIntoViewIfNeeded()
   await page.waitForTimeout(300)
   await idmarRow.click({ timeout: 8000 })

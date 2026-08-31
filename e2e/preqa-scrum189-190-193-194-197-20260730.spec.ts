@@ -2,20 +2,20 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * Pre-QA + Visual Review en vivo — SCRUM-189/190/192/193/194/197 (Compras/Proveedores +
- * Nueva Orden), re-implementados 2026-07-30 tras hallazgos de Daniela Amaya contra los mockups
+ * Nueva Orden), re-implementados 2026-07-30 tras hallazgos de Gerencia Test contra los mockups
  * reales 2G__Compras_Proveedores.html / 2H__Compras_NuevaOrden.html.
  *
  * Corre contra dev.atlanticerp.ai. Serial a propósito: CrowdSec/ModSecurity dispara falsos timeouts
  * con logins en paralelo desde la misma IP (ver CLAUDE.md, Epic 11).
  *
- * Usuario real de Compras (lider_compras): Yirena Teng, gerencia2@atlantic.com.pa —
+ * Usuario real de Compras (lider_compras): Lider Compras Test, lidercompras@test.com —
  * password default = email (BusinessRoleUserSeeder).
  */
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
-const COMPRAS_PASS = 'gerencia2@atlantic.com.pa'
+const COMPRAS_EMAIL = 'lidercompras@test.com'
+const COMPRAS_PASS = 'lidercompras@test.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)

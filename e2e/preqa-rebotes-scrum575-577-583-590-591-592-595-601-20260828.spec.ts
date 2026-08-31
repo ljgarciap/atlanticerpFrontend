@@ -9,9 +9,9 @@ import { test, expect, Page } from '@playwright/test'
 // DATOS DE PRUEBA" (no bugs de código) — verificamos que `admincont:seed-rebotes-qa` (corrido
 // contra dev.atlanticerp.ai el mismo día) efectivamente deja cada escenario visible/alcanzable.
 
-const MARK = 'mbekhar@atlantic.com.pa'
+const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
-const FELIX = 'conta@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -85,7 +85,7 @@ test('SCRUM-583 — proyecto compartido entre 2 vendedores visible en Comisiones
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(800)
 
-  const neilRow = page.locator('table tbody tr', { hasText: 'Neil Quiel' }).first()
+  const neilRow = page.locator('table tbody tr', { hasText: 'Vendedor Disenador Test 2' }).first()
   await expect(neilRow).toBeVisible({ timeout: 5000 })
   await neilRow.click()
   await page.waitForTimeout(600)

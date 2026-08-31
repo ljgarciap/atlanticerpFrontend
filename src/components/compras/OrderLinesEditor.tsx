@@ -44,7 +44,7 @@ export interface OrderDraft {
 }
 
 export function emptyOrderDraft(): OrderDraft {
-  // SCRUM-197 (REQ-134, hallazgo de Daniela Amaya 2026-07-30): "Tipo de envío" no debe tener un
+  // SCRUM-197 (REQ-134, hallazgo de Gerencia Test 2026-07-30): "Tipo de envío" no debe tener un
   // estado "Sin especificar" — siempre uno de los 3 valores reales. 'terrestre' como default más
   // conservador (no dispara el aviso de aprobación de Mark, exclusivo de Aéreo).
   return {
@@ -53,7 +53,7 @@ export function emptyOrderDraft(): OrderDraft {
   }
 }
 
-export function draftRequiresMarkApproval(draft: OrderDraft): boolean {
+export function draftRequiresPrimaryApproval(draft: OrderDraft): boolean {
   return draft.shippingType === 'aereo' && draft.whoPaysShipping === 'atlantic'
 }
 
@@ -151,7 +151,7 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
   const removeLine = (key: string) => onChange({ ...draft, lines: draft.lines.filter(l => l.key !== key) })
 
   const total = draftTotal(draft)
-  const requiresMarkApproval = draftRequiresMarkApproval(draft)
+  const requiresPrimaryApproval = draftRequiresPrimaryApproval(draft)
 
   return (
     <>
@@ -283,9 +283,9 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
             )}
           </div>
 
-          {requiresMarkApproval && (
+          {requiresPrimaryApproval && (
             <p className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs">
-              {t('compras:newOrder.shipping.markApprovalNotice')}
+              {t('compras:newOrder.shipping.approvalNotice')}
             </p>
           )}
 

@@ -269,7 +269,7 @@ function RowActionCells({ row, onViewDetail, onUpload, onConfirmReception }: {
     })
   }
 
-  // SCRUM-478 (rebote de Daniela Amaya 2026-08-16) — el documento firmado se podía subir pero no
+  // SCRUM-478 (rebote de Gerencia Test 2026-08-16) — el documento firmado se podía subir pero no
   // había forma de verlo/descargarlo después.
   function handleViewSignedDocument() {
     setError(null)

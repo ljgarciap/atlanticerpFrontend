@@ -509,7 +509,7 @@ export default function QuotePage() {
       : Promise.reject(new Error('no sub client')),
     [subClient],
   )
-  // SCRUM-122 (Daniela Amaya, 2026-08-02) — el directorio de Arquitectos pasó de
+  // SCRUM-122 (Gerencia Test, 2026-08-02) — el directorio de Arquitectos pasó de
   // global a acotado al Subcliente elegido, mismo patrón que Proyecto arriba.
   const searchArchitects = useCallback(
     (q: string) => subClient
@@ -860,7 +860,7 @@ export default function QuotePage() {
                   <p className="mt-1 text-xs text-slate-400">{t('ventasDiseno:quote.fillOrderHint.needsSubClient')}</p>
                 )}
                 {/* SCRUM-122 — antes solo se mostraba el nombre del arquitecto seleccionado;
-                    Daniela Amaya (QA) reportó que teléfono/correo "están escondidos". Mismo
+                    Gerencia Test (QA) reportó que teléfono/correo "están escondidos". Mismo
                     estilo visual que la sección de Contactos más abajo. Gracioso si el
                     arquitecto es viejo y no tiene ninguno de los dos cargado.
                     SCRUM-734 (RN8.4/8.5) — editable in-place, actualiza el registro real. */}

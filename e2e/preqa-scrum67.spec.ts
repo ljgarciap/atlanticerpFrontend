@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-// SCRUM-67 (hallazgo QA Daniela Amaya, 2026-07-20) — el mock abre un listado completo de
+// SCRUM-67 (hallazgo QA Gerencia Test, 2026-07-20) — el mock abre un listado completo de
 // pendientes antes del drill-down al detalle; el "+N más" no tenía ningún onClick, así que no
 // había forma de ver el resto una vez pasados los primeros 3. Gate promovido a e2e/ por regla
 // del proyecto (smoke tests que verifican un hallazgo ya roto una vez no se borran).

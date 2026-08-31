@@ -16,7 +16,7 @@ const RESOLUTION_TYPES = [
 ] as const
 
 /**
- * SCRUM-257/258 (REQ-194/195, hallazgo de Daniela Amaya 2026-08-09) — Garantías y Reclamos.
+ * SCRUM-257/258 (REQ-194/195, hallazgo de Gerencia Test 2026-08-09) — Garantías y Reclamos.
  * KPIs nuevos (Total/Reportados-En revisión/Resueltos este mes/Monto en disputa), filtros
  * (texto libre, proveedor, tipo de resolución) combinables, chips con la nomenclatura exacta del
  * requerimiento ("Todos", no "Todas"; se agrega "Reportado" — ver nota sobre esta ambigüedad más
@@ -201,7 +201,7 @@ function ClaimRow({ claim, onView }: { claim: PurchaseOrderClaimSummary; onView:
           : '—'}
       </td>
       <td className="px-4 py-3">
-        {/* SCRUM-258 (hallazgo de Daniela Amaya) — un único selector, sirve como display Y como
+        {/* SCRUM-258 (hallazgo de Gerencia Test) — un único selector, sirve como display Y como
             edición inline a la vez (nunca se duplica visualmente el estado). */}
         <select
           value={claim.status}

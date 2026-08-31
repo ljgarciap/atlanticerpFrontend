@@ -248,7 +248,7 @@
       "whoPaysCliente": "Cliente",
       "cost": "Costo del envío aéreo",
       "estimatedArrival": "Llegada estimada",
-      "markApprovalNotice": "Esta orden quedará pendiente de aprobación de Mark (envío aéreo pagado por Atlantic)."
+      "approvalNotice": "Esta orden quedará pendiente de aprobación del aprobador configurado (envío aéreo pagado por Atlantic)."
     },
     "actions": {
       "next": "Siguiente",
@@ -259,7 +259,7 @@
     "success": {
       "title": "Orden creada",
       "message": "La orden #{{id}} quedó registrada en \"Por aprobar\".",
-      "requiresApproval": "Esta orden requiere la aprobación de Mark antes de avanzar."
+      "requiresApproval": "Esta orden requiere la aprobación del aprobador configurado antes de avanzar."
     },
     "errors": {
       "generic": "No se pudo crear la orden. Revisá los datos e intentá de nuevo."
@@ -338,7 +338,7 @@
     },
     "detail": {
       "title": "Orden #{{id}}",
-      "markBlocked": "Esta orden requiere la aprobación de Mark antes de poder avanzar.",
+      "markBlocked": "Esta orden requiere la aprobación del aprobador configurado antes de poder avanzar.",
       "markApproved": "Aprobada por {{name}}",
       "pendingRemainder": "Recepción parcial — lo ya recibido quedó registrado. El remanente sigue en etapa \"{{stage}}\" y su flujo continúa con normalidad; solo el paso final de esta orden a \"Recibido\" queda pendiente hasta registrar el ingreso de ese remanente.",
       "editOnlyWhilePending": "Solo se puede editar una orden mientras está \"Por aprobar\".",
@@ -378,7 +378,7 @@
         "newAmount": "Nuevo monto",
         "registerError": "No se pudo registrar el pago.",
         "requestAmountChangeError": "No se pudo solicitar el cambio de monto.",
-        "pendingAmountChange": "Cambio de monto pendiente: ${{amount}} — esperando aprobación de Mark",
+        "pendingAmountChange": "Cambio de monto pendiente: ${{amount}} — esperando aprobación del aprobador configurado",
         "pendingAmountChangeBlocksActions": "Mientras esta aprobación esté pendiente, no se puede enviar a pago ni registrar un pago.",
         "approveAmountChange": "Aprobar cambio",
         "approveAmountChangeError": "No se pudo aprobar el cambio de monto.",
@@ -436,7 +436,7 @@
       "estimatedArrival": "Llegada estimada",
       "completeStage": "Completar etapa actual",
       "noNextStage": "Sin siguiente etapa",
-      "markBlocked": "Requiere aprobación de Mark",
+      "markBlocked": "Requiere aprobación del aprobador configurado",
       "goodsReceiptLink": "Ingreso de mercancía",
       "pending": "Pendiente"
     },

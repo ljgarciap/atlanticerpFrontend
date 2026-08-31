@@ -125,7 +125,7 @@ describe('CompanyProfilePage', () => {
   it('gate de 403: muestra "acceso restringido" en vez del formulario', async () => {
     const forbidden = new AxiosError('Forbidden', '403', undefined, undefined, {
       status: 403, statusText: 'Forbidden', headers: new AxiosHeaders(), config: { headers: new AxiosHeaders() },
-      data: { message: 'Esta pantalla es exclusiva de Mark.' },
+      data: { message: 'Esta pantalla es exclusiva del aprobador configurado.' },
     })
     mockedApi.companyProfile.get.mockRejectedValue(forbidden)
 

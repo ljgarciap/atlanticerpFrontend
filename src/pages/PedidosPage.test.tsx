@@ -76,7 +76,7 @@ function card(overrides: Partial<OrderCard> = {}): OrderCard {
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
     vendedor: 'Mark',
-    asistente: 'Mariano Sandoval',
+    asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: null,
     fecha_entrega_comprometida: '2026-08-01',
@@ -112,8 +112,8 @@ function boardResponse(cards: OrderCard[]): OrderBoardResponse {
 }
 
 const ASSISTANTS: AssistantLoad[] = [
-  { assistant_id: 1, assistant_name: 'Mariano Sandoval', orders_count: 7, percent_of_total: 70 },
-  { assistant_id: 2, assistant_name: 'Osvaldo Santos', orders_count: 3, percent_of_total: 30 },
+  { assistant_id: 1, assistant_name: 'Asistente Bodega Test 2', orders_count: 7, percent_of_total: 70 },
+  { assistant_id: 2, assistant_name: 'Asistente Bodega Test', orders_count: 3, percent_of_total: 30 },
 ]
 
 function renderPage(initialEntries: string[] = ['/bodega/pedidos']) {
@@ -231,8 +231,8 @@ describe('PedidosPage', () => {
   it('no muestra el aviso de desbalance con un reparto equitativo', () => {
     mockedUseAssistantLoad.mockReturnValue({
       data: { data: [
-        { assistant_id: 1, assistant_name: 'Mariano Sandoval', orders_count: 5, percent_of_total: 50 },
-        { assistant_id: 2, assistant_name: 'Osvaldo Santos', orders_count: 5, percent_of_total: 50 },
+        { assistant_id: 1, assistant_name: 'Asistente Bodega Test 2', orders_count: 5, percent_of_total: 50 },
+        { assistant_id: 2, assistant_name: 'Asistente Bodega Test', orders_count: 5, percent_of_total: 50 },
       ] },
     } as ReturnType<typeof useAssistantLoad>)
     mockedUseOrdersBoard.mockReturnValue({ data: boardResponse([]), isLoading: false } as ReturnType<typeof useOrdersBoard>)

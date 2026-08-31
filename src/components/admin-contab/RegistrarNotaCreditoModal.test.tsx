@@ -344,7 +344,7 @@ describe('RegistrarNotaCreditoModal — REQ-484 auto-aplicación y excedente', (
 
 describe('RegistrarNotaCreditoModal — REQ-482 banner de umbral de aprobación', () => {
   it('no aparece con el monto por debajo del umbral', async () => {
-    renderModal({ markApprovalThreshold: 5000 })
+    renderModal({ primaryApprovalThreshold: 5000 })
     await selectClient()
     await selectFactura(11)
     const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
@@ -353,7 +353,7 @@ describe('RegistrarNotaCreditoModal — REQ-482 banner de umbral de aprobación'
   })
 
   it('aparece en tiempo real en cuanto el monto supera el umbral', async () => {
-    renderModal({ markApprovalThreshold: 5000 })
+    renderModal({ primaryApprovalThreshold: 5000 })
     await selectClient()
     await selectFactura(11)
     const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
@@ -364,7 +364,7 @@ describe('RegistrarNotaCreditoModal — REQ-482 banner de umbral de aprobación'
 
 describe('RegistrarNotaCreditoModal — REQ-487 comprobante de soporte', () => {
   it('obligatorio en Anulación completa sin importar el monto — bloquea el submit sin adjuntarlo', async () => {
-    renderModal({ markApprovalThreshold: 5000 })
+    renderModal({ primaryApprovalThreshold: 5000 })
     await selectClient()
     fireEvent.change(screen.getByDisplayValue('notasCredito.tipos.descuento_comercial'), {
       target: { value: 'anulacion_completa' },
@@ -376,7 +376,7 @@ describe('RegistrarNotaCreditoModal — REQ-487 comprobante de soporte', () => {
   })
 
   it('obligatorio cuando el monto supera el umbral (Descuento comercial)', async () => {
-    renderModal({ markApprovalThreshold: 5000 })
+    renderModal({ primaryApprovalThreshold: 5000 })
     await selectClient()
     await selectFactura(10)
     const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
@@ -385,7 +385,7 @@ describe('RegistrarNotaCreditoModal — REQ-487 comprobante de soporte', () => {
   })
 
   it('NUNCA obligatorio en modo Devolución, incluso superando el umbral', () => {
-    renderModal({ devolucionPrecargada: DEVOLUCION, markApprovalThreshold: 1 })
+    renderModal({ devolucionPrecargada: DEVOLUCION, primaryApprovalThreshold: 1 })
     expect(screen.queryByText('notasCredito.formulario.comprobanteObligatorioHint')).not.toBeInTheDocument()
   })
 })

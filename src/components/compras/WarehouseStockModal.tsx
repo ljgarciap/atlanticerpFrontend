@@ -10,7 +10,7 @@ interface Props {
 }
 
 /**
- * SCRUM-244 (REQ-181, rebote de Daniela Amaya 2026-08-16): el clic en "N Bodegas" abría
+ * SCRUM-244 (REQ-181, rebote de Gerencia Test 2026-08-16): el clic en "N Bodegas" abría
  * `ProductDetailModal` completo — la sección "Bodega" existe ahí, pero recién más abajo del
  * modal general, así que quien clickea puntualmente el badge de bodegas termina en el modal
  * "equivocado" (Detalle del producto en vez de Detalle por bodega). Modal dedicado y compacto,

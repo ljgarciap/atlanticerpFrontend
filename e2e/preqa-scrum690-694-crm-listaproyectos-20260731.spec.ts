@@ -14,9 +14,9 @@ import { test, expect, type Page } from '@playwright/test'
  * ejercicio confirmó que el backend ignora el intento de bypass incluso si la UI lo permitiera.
  *
  * Cuentas reales (nunca demo — regla dura del proyecto), password = email:
- * - Neil Quiel (Vendedor/Diseñador): neil.quiel@atlantic.com.pa
- * - Vanessa Villareal (Vendedor/Diseñador, otro dueño): vanessa@atlantic.com.pa
- * - Daniela Amaya (Gerencia): daniela@atlantic.com.pa
+ * - Vendedor Disenador Test 2 (Vendedor/Diseñador): vendedordisenador2@test.com
+ * - Vendedor Disenador Test 4 (Vendedor/Diseñador, otro dueño): vendedordisenador4@test.com
+ * - Gerencia Test (Gerencia): gerencia@test.com
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -31,7 +31,7 @@ async function login(page: Page, email: string) {
 
 test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () => {
   test('Vendedor (Neil) ve solo sus propios proyectos, sin toggle ni filtro Responsable', async ({ page }) => {
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -49,7 +49,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
   })
 
   test('Gerencia (Daniela) ve el toggle Inicio/Equipo y el filtro Responsable funcional', async ({ page }) => {
-    await login(page, 'daniela@atlantic.com.pa')
+    await login(page, 'gerencia@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -60,8 +60,8 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
 
     // En "Equipo" ve proyectos de Neil, Vanessa y el owner demo — no solo los suyos.
     // (celdas de tabla, no las <option> del selector de Responsable, que también matchean por texto)
-    await expect(page.getByRole('cell', { name: 'Neil Quiel' }).first()).toBeVisible()
-    await expect(page.getByRole('cell', { name: 'Vanessa Villareal' })).toBeVisible()
+    await expect(page.getByRole('cell', { name: 'Vendedor Disenador Test 2' }).first()).toBeVisible()
+    await expect(page.getByRole('cell', { name: 'Vendedor Disenador Test 4' })).toBeVisible()
 
     await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/02-daniela-equipo.png', fullPage: true })
   })
@@ -69,7 +69,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
 
 test.describe('SCRUM-691 — filtros, buscador y mensaje de sin resultados', () => {
   test('búsqueda sin coincidencias muestra el mensaje exacto, no una tabla vacía silenciosa', async ({ page }) => {
-    await login(page, 'daniela@atlantic.com.pa')
+    await login(page, 'gerencia@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -81,7 +81,7 @@ test.describe('SCRUM-691 — filtros, buscador y mensaje de sin resultados', () 
   })
 
   test('la búsqueda filtra en tiempo real, sin botón "Buscar"', async ({ page }) => {
-    await login(page, 'daniela@atlantic.com.pa')
+    await login(page, 'gerencia@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -98,7 +98,7 @@ test.describe('SCRUM-691 — filtros, buscador y mensaje de sin resultados', () 
 
 test.describe('SCRUM-692 — click en fila navega a Pipeline con highlight', () => {
   test('clic en una fila navega a Pipeline con ?card= y no a otra pantalla', async ({ page }) => {
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -111,7 +111,7 @@ test.describe('SCRUM-692 — click en fila navega a Pipeline con highlight', () 
 
 test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas exactas', () => {
   test('exportar con scope Mías (Neil) descarga solo sus filas, 10 columnas sin RUC/teléfono', async ({ page }) => {
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -141,7 +141,7 @@ test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas e
 
 test.describe('SCRUM-694 — "+ Nuevo Proyecto" abre el modal de creación en Pipeline', () => {
   test('clic en "+ Nuevo Proyecto" navega a Pipeline y abre el modal automáticamente', async ({ page }) => {
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
@@ -155,7 +155,7 @@ test.describe('SCRUM-694 — "+ Nuevo Proyecto" abre el modal de creación en Pi
 
 test.describe('SCRUM-691 — paginación no queda en una página fuera de rango al cambiar filtros', () => {
   test('cambiar de página y luego aplicar un filtro nuevo vuelve a página 1', async ({ page }) => {
-    await login(page, 'daniela@atlantic.com.pa')
+    await login(page, 'gerencia@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 

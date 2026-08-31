@@ -11,7 +11,7 @@ export interface PaginationMeta {
 export type ProviderOrigin = 'local' | 'internacional'
 
 // REQ-126 (mockup 2G__Compras_Proveedores.html) — 5 valores fijos, no texto libre. Realineado
-// 2026-07-30 (SCRUM-189, hallazgo de Daniela Amaya) — `origin` se deriva de esto server-side,
+// 2026-07-30 (SCRUM-189, hallazgo de Gerencia Test) — `origin` se deriva de esto server-side,
 // ya no es un campo propio del form.
 export type ProviderCategory = 'locales' | 'zona_libre' | 'china' | 'europa' | 'online'
 
@@ -120,8 +120,8 @@ export interface PurchaseOrderSummary {
   shipping_type:               ShippingType | null
   shipping_cost:                number | null
   estimated_arrival_date:      string | null
-  requires_mark_approval:      boolean
-  blocked_by_mark_approval:    boolean
+  requires_primary_approval:      boolean
+  blocked_by_primary_approval:    boolean
   approved_by:                number | null
   // SCRUM-206 — nombre real de quien aprobó, para no mostrar un texto fijo tipo "Aprobada por Mark".
   approved_by_name:            string | null
@@ -226,7 +226,7 @@ export interface ClaimListParams {
   per_page?:             number | 'all'
 }
 
-// SCRUM-257 (hallazgo de Daniela Amaya 2026-08-09) — 4 KPIs nuevos, reemplazan el "summary"
+// SCRUM-257 (hallazgo de Gerencia Test 2026-08-09) — 4 KPIs nuevos, reemplazan el "summary"
 // anterior (Total/En revisión/Resuelto/Atención): Atención sigue existiendo como bandera por
 // fila (needs_attention) y como chip de filtro, ya no como KPI aparte.
 export interface PurchaseOrderClaimListResponse {
@@ -336,7 +336,7 @@ export interface SubstituteSearchResult {
   stock_quantity:          number | null
   similarity_percent:      number
   reasoning:                string
-  // SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — Categoría, columna nueva en la tabla de
+  // SCRUM-246 (rebote de Gerencia Test 2026-08-09) — Categoría, columna nueva en la tabla de
   // resultados de Sustitutos (mismo campo que ComprasCatalogProduct.category). Confirmado en
   // Lote 4 (2026-08-17): `ReplacementSearchController::show()` ya lo expone.
   category?:                CatalogProductCategory | null
@@ -367,7 +367,7 @@ export interface PurchaseOrderListResponse {
   // real SIEMPRE los manda) solo para no forzar a todos los fixtures de test de las otras
   // pantallas que comparten este mismo endpoint (Ver Órdenes, Logística) a rellenarlos.
   filters: { creators: { id: number; name: string }[]; providers?: { id: number; name: string }[] }
-  // SCRUM-250 (hallazgo de Daniela Amaya) — solo viene con `payment_pending=1`; null en el resto
+  // SCRUM-250 (hallazgo de Gerencia Test) — solo viene con `payment_pending=1`; null en el resto
   // de pantallas que comparten este mismo endpoint (Ver Órdenes, Logística).
   payment_kpis?: PaymentKpis | null
 }
@@ -445,7 +445,7 @@ export interface ComprasCatalogProduct {
   cost:                  number | null
   stock_quantity:        number | null
   reorder_point:          number | null
-  // SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — Categoría, columna nueva en la tabla de
+  // SCRUM-246 (rebote de Gerencia Test 2026-08-09) — Categoría, columna nueva en la tabla de
   // resultados de Sustitutos. Confirmado en Lote 4 (2026-08-17): `CatalogProductSearchController::
   // format()` ya lo expone.
   category?:              CatalogProductCategory | null
@@ -466,7 +466,7 @@ export interface ApprovedProject {
 export interface ComprasSettings {
   low_rating_threshold: number
   // SCRUM-206 — quién es "Mark" para el gate de aprobación (REQ-143), configurable.
-  mark_approver_user_id: number | null
+  primary_approver_user_id: number | null
   // SCRUM-257 (REQ-194) — días "En revisión" antes de marcar un reclamo con la bandera de atención.
   claim_attention_days: number
   // SCRUM-247 (REQ-184) — margen del sustituto propuesto por debajo del cual la solicitud escala a Mark.
@@ -639,7 +639,7 @@ export interface InventoryWarehouseRow {
 interface InventoryProductBase {
   id:              number
   reference:       string
-  // SCRUM-237/240 (rebote de Daniela Amaya 2026-08-12) — columna nueva, separada de
+  // SCRUM-237/240 (rebote de Gerencia Test 2026-08-12) — columna nueva, separada de
   // `description`: antes `description` hacía doble función de "nombre visible" y "descripción",
   // así que editar la Descripción cambiaba el nombre del producto en toda la app. Opcional en el
   // tipo mientras el backend del batch no esté desplegado — usar `productDisplayName()`
@@ -649,7 +649,7 @@ interface InventoryProductBase {
   description:     string
   brand:           string | null
   photo_url:       string | null
-  // SCRUM-234/238 (hallazgo de Daniela Amaya 2026-08-09) — Categoría, Rotación, Stock mínimo y
+  // SCRUM-234/238 (hallazgo de Gerencia Test 2026-08-09) — Categoría, Rotación, Stock mínimo y
   // Bodega(s) pasan a ser visibles en AMBOS modos (antes solo en modo Compras completo).
   category:        string | null
   rotation:        InventoryRotation | null
@@ -711,7 +711,7 @@ export interface InventoryProduct extends InventoryProductBase {
   // SCRUM-425 — solo viene en el detalle (GET /compras/inventory/{id}); productos creados antes
   // de esta feature responden `null`, nunca 12 campos vacíos.
   technical_spec?:      TechnicalSpec | null
-  /** Rebote REQ-427 (Daniela Amaya 2026-08-13) — estado de "Confirmar llegada física" de Bodega
+  /** Rebote REQ-427 (Gerencia Test 2026-08-13) — estado de "Confirmar llegada física" de Bodega
    * para este producto. Solo viene en el detalle (`show()`), igual que `technical_spec` arriba;
    * `undefined`/`null` en el listado (`index()`) — nunca se pide ahí para no pagar 1 query extra
    * por fila. */
@@ -806,7 +806,7 @@ export interface InventoryProductPayload {
   reorder_point?:       number | null
   provider_id?:          number | null
   rotation?:             InventoryRotation | null
-  // SCRUM-240 (corrección de Daniela Amaya, 2026-08-12) — "Stock inicial (opcional)" reemplaza
+  // SCRUM-240 (corrección de Gerencia Test, 2026-08-12) — "Stock inicial (opcional)" reemplaza
   // stock_quantity/warehouse_id (una sola bodega) por una entrada opcional POR bodega. Los 2
   // campos viejos se mantienen para no romper otros consumidores del tipo, pero
   // CreateProductModal ya no los usa.
@@ -849,7 +849,7 @@ export interface ConfirmPendingResponse {
   confirmed_units: number
 }
 
-// SCRUM-237 (REQ-174, hallazgo de Daniela Amaya) — "Ficha técnica" como documento (archivo o
+// SCRUM-237 (REQ-174, hallazgo de Gerencia Test) — "Ficha técnica" como documento (archivo o
 // link externo), distinto de `TechnicalSpec` (12 campos estructurados, SCRUM-425/426).
 export interface InventoryTechnicalSheetResponse {
   id:                            number
@@ -928,7 +928,7 @@ export interface PurchaseOpportunityResponse {
   show_warning:       boolean
 }
 
-// SCRUM-268 (corrección de Daniela Amaya, 2026-08-11) — `total_imports` desaparece (el panel ya
+// SCRUM-268 (corrección de Gerencia Test, 2026-08-11) — `total_imports` desaparece (el panel ya
 // no muestra un indicador de "Importaciones" total); `por_liquidar_count` es nuevo. Ver docblock
 // de `ComprasReportsController::liquidationImports()` para el universo (excluye órdenes que no
 // llegaron a "Ordenado") y la ambigüedad documentada sobre la definición exacta de "Liquidado".
@@ -942,7 +942,7 @@ export interface LiquidationImportsResponse {
 
 // ── SCRUM-220→230 (REQ-157/159/162→167) — Ingreso de Mercancía ────────────────
 
-// `ordenado` agregado 2026-08-07 (Pre-QA, SCRUM-208 — hallazgo real del rebote de Daniela Amaya):
+// `ordenado` agregado 2026-08-07 (Pre-QA, SCRUM-208 — hallazgo real del rebote de Gerencia Test):
 // las etapas del remanente deben cubrir "desde ordenado en adelante", ver nota en
 // atlanticerp-backend PurchaseOrder::REMAINDER_STATUSES.
 export const REMAINDER_STATUSES = ['ordenado', 'salio_de_origen', 'en_transito', 'en_aduana', 'en_transito_local'] as const

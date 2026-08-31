@@ -93,7 +93,7 @@ describe('SolicitudAjustePage', () => {
   })
 
   /**
-   * SCRUM-429 (rebote de Daniela Amaya 2026-08-13) — Bodega solicita, Mark aprueba: antes
+   * SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Bodega solicita, Mark aprueba: antes
    * Aprobar/Rechazar quedaban visibles/clicables para CUALQUIER perfil de Bodega en una fila
    * Pendiente (el backend ya rechazaba con 403 a quien no fuera Mark, pero sin ninguna señal en
    * el botón). Ahora se ocultan por completo cuando `can_approve` es false.
@@ -143,7 +143,7 @@ describe('SolicitudAjustePage', () => {
     })
   })
 
-  // SCRUM-447 (rebote de Daniela Amaya 2026-08-13) — "Producto" mostraba la referencia en vez del
+  // SCRUM-447 (rebote de Gerencia Test 2026-08-13) — "Producto" mostraba la referencia en vez del
   // nombre; ahora hay una columna "Ref. fábrica" nueva al inicio con la referencia, y "Producto"
   // muestra solo el nombre.
   it('rebote 2026-08-13 — columna "Ref. fábrica" nueva con la referencia, "Producto" muestra solo el nombre', async () => {
@@ -241,7 +241,7 @@ describe('SolicitudAjustePage', () => {
     await waitFor(() => expect(addButton.closest('button')).toBeDisabled())
   })
 
-  it('SCRUM-428 (corrección de Daniela Amaya 2026-08-13) — Motivo es un desplegable con exactamente 6 opciones fijas, ya no texto libre', async () => {
+  it('SCRUM-428 (corrección de Gerencia Test 2026-08-13) — Motivo es un desplegable con exactamente 6 opciones fijas, ya no texto libre', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
       data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],

@@ -55,7 +55,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
+    id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
     role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }
@@ -65,7 +65,7 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
   return {
     id: 1, numero: 'INS-2026-0001', tipo: 'installation', subtipo: 'installation',
     tipo_instalacion: 'internal', cliente: 'Grupo Delta', descripcion: 'Instalación de lámparas',
-    estado: 'reported', internal_technician: { id: 5, first_name: 'Carlos', last_name: 'Vergara' },
+    estado: 'reported', internal_technician: { id: 5, first_name: 'Tecnico Servicios', last_name: 'Test' },
     quote_status: 'pending', quote_amount: null, inspection_report_status: 'pending',
     scheduled_at: null, created_at: '2026-08-01T10:00:00Z',
     ...overrides,
@@ -87,8 +87,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   useAuthStore.setState({ user: makeUser() })
   mockedApi.technicians.internalOptions.mockResolvedValue([
-    { id: 5, first_name: 'Carlos', last_name: 'Vergara' },
-    { id: 6, first_name: 'Miguel', last_name: 'Castillo' },
+    { id: 5, first_name: 'Tecnico Servicios', last_name: 'Test' },
+    { id: 6, first_name: 'Garantias Servicios', last_name: 'Test' },
   ])
   // REQ-222 (Batch 2) — TicketsPage ahora siempre monta TicketStatCards; default razonable para
   // no repetir este mock en cada test que no le importa el contenido de las tarjetas.
@@ -196,7 +196,7 @@ describe('TicketsPage — REQ-217 filtros', () => {
   it('el buscador filtra por N° ticket, cliente o técnico (contiene, case-insensitive) combinando con los selects', async () => {
     mockedApi.tickets.list.mockResolvedValue([
       makeTicket({ id: 1, numero: 'INS-2026-0001', cliente: 'Grupo Delta' }),
-      makeTicket({ id: 2, numero: 'GAR-2026-0002', cliente: 'Torre Azul', internal_technician: { id: 6, first_name: 'Miguel', last_name: 'Castillo' } }),
+      makeTicket({ id: 2, numero: 'GAR-2026-0002', cliente: 'Torre Azul', internal_technician: { id: 6, first_name: 'Garantias Servicios', last_name: 'Test' } }),
     ])
     renderPage()
 

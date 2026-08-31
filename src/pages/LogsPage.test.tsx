@@ -32,7 +32,7 @@ function makeEntry(overrides: Partial<AuditLogEntry> = {}): AuditLogEntry {
     entity_id: '42',
     old_values: { estado: 'reported' },
     new_values: { estado: 'scheduled' },
-    user: { id: 1, name: 'Aaron Leis' },
+    user: { id: 1, name: 'Lider Servicios Test' },
     created_at: '2026-08-25T12:00:00Z',
     ...overrides,
   }
@@ -71,7 +71,7 @@ describe('LogsPage', () => {
     mockedApi.list.mockResolvedValue(makeResult({ data: [makeEntry()] }))
     renderPage()
 
-    expect(await screen.findByText('Aaron Leis')).toBeInTheDocument()
+    expect(await screen.findByText('Lider Servicios Test')).toBeInTheDocument()
     // Ambos textos también aparecen como <option> de sus respectivos <select> de filtro.
     expect(screen.getAllByText('logs:module.servicios').length).toBeGreaterThanOrEqual(2)
     expect(screen.getAllByText('logs:filters.cambioDato').length).toBeGreaterThanOrEqual(2)

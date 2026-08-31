@@ -123,7 +123,7 @@ describe('VentasDisenoPipelinePage', () => {
     expect(screen.getByText('Grupo Delta')).toBeInTheDocument()
   })
 
-  // SCRUM-75 — hallazgo de Daniela Amaya (2026-07-21): la etiqueta se guardaba bien pero nunca
+  // SCRUM-75 — hallazgo de Gerencia Test (2026-07-21): la etiqueta se guardaba bien pero nunca
   // se pintaba en la tarjeta del tablero, solo dentro del modal de edición.
   it('muestra la etiqueta del proyecto en la tarjeta cuando está definida', async () => {
     mockedApi.pipeline.list.mockResolvedValue([

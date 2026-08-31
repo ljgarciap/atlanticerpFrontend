@@ -11,7 +11,7 @@ import { test, expect, type Page } from '@playwright/test'
  * phone/email. Fix renders them as secondary text under the Arquitecto picker,
  * same visual pattern as the Contacts list (`text-slate-400`, "·" separator).
  *
- * Uses a REAL account (neil.quiel@atlantic.com.pa, password = email per
+ * Uses a REAL account (vendedordisenador2@test.com, password = email per
  * CoreUserSeeder default, unchanged) — *@atlantic.test demo accounts were
  * removed from the roster (project rule, 2026-07-30).
  *
@@ -43,8 +43,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:5173'
-const EMAIL = 'neil.quiel@atlantic.com.pa'
-const PASS  = 'neil.quiel@atlantic.com.pa'
+const EMAIL = 'vendedordisenador2@test.com'
+const PASS  = 'vendedordisenador2@test.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)

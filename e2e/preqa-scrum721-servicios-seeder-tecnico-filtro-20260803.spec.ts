@@ -7,9 +7,9 @@ import { test, expect, type Page } from '@playwright/test'
  * Corre contra dev.atlanticerp.ai REAL (recién deployado, CI/CD verde).
  *
  * Cuentas reales (password = email):
- *  - servicio@atlantic.com.pa      (lider_servicios) — puede cambiar estado.
- *  - carlos@atlantic.com.pa        (tecnico_servicios) — NO puede cambiar estado.
- *  - milena.e@grupolafayette.com        (vendedor_disenador) — solo lectura en Servicios.
+ *  - liderservicios@test.com      (lider_servicios) — puede cambiar estado.
+ *  - tecnicoservicios@test.com        (tecnico_servicios) — NO puede cambiar estado.
+ *  - vendedordisenador@test.com        (vendedor_disenador) — solo lectura en Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -36,7 +36,7 @@ async function apiLogin(request: any, email: string): Promise<string> {
 }
 
 test('1. Aaron — tabla de Tickets muestra los 14 [DEMO], NO "0 de 0"', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/01-tabla-seeder.png`, fullPage: true })
 
@@ -50,7 +50,7 @@ test('1. Aaron — tabla de Tickets muestra los 14 [DEMO], NO "0 de 0"', async (
 })
 
 test('2. Select "Técnico" tiene 4 opciones reales (no vacío)', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const tecnicoSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /técnico/i }) })
@@ -59,9 +59,9 @@ test('2. Select "Técnico" tiene 4 opciones reales (no vacío)', async ({ page }
   console.log('[SCRUM-721] Opciones del select Técnico:', JSON.stringify(optionsText))
   await page.screenshot({ path: `${DL_DIR}/02-select-tecnico-opciones.png`, fullPage: true })
 
-  // NOTA Pre-QA: el nombre real en BD es "Agustin Rodriguez" sin tildes (confirmado vía API cruda),
+  // NOTA Pre-QA: el nombre real en BD es "Tecnico Servicios Test 3" sin tildes (confirmado vía API cruda),
   // pese a que el ticket/spec lo nombra "Agustín Rodríguez" — hallazgo menor de datos, no bloqueante.
-  const expected = ['Carlos Vergara', 'Pedro Santos', 'Agustin Rodriguez', 'Miguel Castillo']
+  const expected = ['Tecnico Servicios Test', 'Tecnico Servicios Test 2', 'Tecnico Servicios Test 3', 'Garantias Servicios Test']
   for (const name of expected) {
     expect(optionsText.some((o) => o.includes(name)), `falta "${name}" en el select`).toBe(true)
   }
@@ -77,14 +77,14 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
     }
   })
 
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const rowsBefore = await page.locator('table tbody tr').count()
 
   const tecnicoSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /técnico/i } ) })
   const optionsText = await tecnicoSelect.locator('option').allTextContents()
-  const targetOption = optionsText.find((o) => o.includes('Carlos Vergara'))
+  const targetOption = optionsText.find((o) => o.includes('Tecnico Servicios Test'))
   console.log('[SCRUM-721] Filtrando por:', targetOption)
   await tecnicoSelect.selectOption({ label: targetOption! })
   await page.waitForTimeout(1200)
@@ -107,7 +107,7 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
 })
 
 test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente) BLOQUEA el cierre', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
@@ -138,7 +138,7 @@ test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente
 })
 
 test('5. REQ-218 — Oficinas Grupo Melo (Garantía, on_site, cotización enviada no aprobada) BLOQUEA el cierre', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
@@ -163,7 +163,7 @@ test('5. REQ-218 — Oficinas Grupo Melo (Garantía, on_site, cotización enviad
 })
 
 test('6. Tablero — las 6 columnas tienen tarjetas (antes vacías)', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await page.getByRole('button', { name: /tablero/i }).click()
   await page.waitForTimeout(1200)
@@ -193,7 +193,7 @@ test('6. Tablero — las 6 columnas tienen tarjetas (antes vacías)', async ({ p
 })
 
 test('7. Carlos (técnico interno) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
-  const token = await apiLogin(request, 'carlos@atlantic.com.pa')
+  const token = await apiLogin(request, 'tecnicoservicios@test.com')
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }
 
   const list = await request.get(`${BASE}/api/servicios/tickets`, { headers })
@@ -208,7 +208,7 @@ test('7. Carlos (técnico interno) — API directa: 403 al intentar cambiar esta
 })
 
 test('8. Carlos (técnico interno) — UI: select de estado deshabilitado', async ({ page }) => {
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/09-carlos-tabla.png`, fullPage: true })
 
@@ -220,7 +220,7 @@ test('8. Carlos (técnico interno) — UI: select de estado deshabilitado', asyn
 })
 
 test('9. Milena (vendedor_disenador) — puede VER tabla + filtro técnico (4 opciones), NO puede editar', async ({ page }) => {
-  await login(page, 'milena.e@grupolafayette.com')
+  await login(page, 'vendedordisenador@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/10-milena-tabla.png`, fullPage: true })
 
@@ -249,7 +249,7 @@ test('10. Endpoint /servicios/technicians/internal SIN token -> 401', async ({ r
 })
 
 test('11. Endpoint /servicios/technicians/internal CON token servicios.read -> 200 + 4 técnicos', async ({ request }) => {
-  const token = await apiLogin(request, 'milena.e@grupolafayette.com')
+  const token = await apiLogin(request, 'vendedordisenador@test.com')
   const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
   const r = await request.get(`${BASE}/api/servicios/technicians/internal?fields=options`, { headers })
   console.log('[SCRUM-721] GET technicians/internal con Milena (servicios.read) -> HTTP', r.status())

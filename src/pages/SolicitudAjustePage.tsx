@@ -96,7 +96,7 @@ export default function SolicitudAjustePage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              {/* SCRUM-447 (rebote de Daniela Amaya 2026-08-13) — nueva columna "Ref. fábrica" al
+              {/* SCRUM-447 (rebote de Gerencia Test 2026-08-13) — nueva columna "Ref. fábrica" al
                   inicio de la tabla (RN1); "Producto" pasa a mostrar solo el nombre, ver <td>
                   abajo. */}
               <Th>{t('bodega:adjustments.table.factoryReference')}</Th>
@@ -130,7 +130,7 @@ export default function SolicitudAjustePage() {
                   line.id === highlightLineId ? 'bg-amber-50 ring-1 ring-inset ring-amber-300' : '',
                 ].join(' ')}
               >
-                {/* SCRUM-447 (rebote de Daniela Amaya 2026-08-13) — "Ref. fábrica" columna nueva
+                {/* SCRUM-447 (rebote de Gerencia Test 2026-08-13) — "Ref. fábrica" columna nueva
                     con la referencia (antes mezclada dentro de "Producto"); "Producto" pasa a
                     mostrar solo el nombre (`description`), nunca la referencia. */}
                 <td className="px-4 py-3 text-slate-600">{line.producto.reference ?? '—'}</td>
@@ -150,7 +150,7 @@ export default function SolicitudAjustePage() {
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{new Date(line.fecha).toLocaleDateString()}</td>
                 <td className="px-4 py-3"><EstadoBadge estado={line.estado} /></td>
                 <td className="px-4 py-3">
-                  {/* SCRUM-429 (rebote de Daniela Amaya 2026-08-13) — Aprobar/Rechazar quedaban
+                  {/* SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Aprobar/Rechazar quedaban
                       visibles/clicables para CUALQUIER perfil de Bodega (Bodega solicita, Mark
                       aprueba — el backend ya rechazaba con 403 a quien no fuera Mark, pero el
                       botón no daba ninguna señal de eso). `can_approve` (si el usuario actual ES
@@ -442,7 +442,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
       { catalogProductId: selectedProduct.id, lines: lines as AdjustmentRequestLineDraft[], confirmReplace },
       {
         onSuccess: onClose,
-        // SCRUM-429 (rebote de Daniela Amaya 2026-08-17) — sin onError, un submit fallido no
+        // SCRUM-429 (rebote de Gerencia Test 2026-08-17) — sin onError, un submit fallido no
         // mostraba nada: ni confirmación ni error, el usuario se quedaba sin saber qué pasó.
         // Mismo patrón que PickingSheetModal.tsx: primer error de validación del backend, o el
         // mensaje general si no es un 422 con `errors`.
@@ -544,7 +544,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
               onChange={e => updateLine(i, { cantidad: Number(e.target.value) })}
               className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm mb-2"
             />
-            {/* SCRUM-428 (corrección de Daniela Amaya 2026-08-13) — Motivo pasa de texto libre a
+            {/* SCRUM-428 (corrección de Gerencia Test 2026-08-13) — Motivo pasa de texto libre a
                 desplegable obligatorio con exactamente 6 opciones fijas; el usuario ya no puede
                 escribir un motivo arbitrario. */}
             <label className="block text-xs font-semibold text-slate-600 mb-1">

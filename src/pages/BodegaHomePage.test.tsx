@@ -39,7 +39,7 @@ const mockedStore = vi.mocked(useAuthStore)
 
 function makeSummary(overrides: Partial<BodegaHomeSummary> = {}): BodegaHomeSummary {
   return {
-    saludo:              { nombre: 'Mariano Sandoval', fecha: '2026-07-23', resumen: '' },
+    saludo:              { nombre: 'Asistente Bodega Test 2', fecha: '2026-07-23', resumen: '' },
     mi_dia:              { asignados_hoy: 0, despachados_hoy: 0, percent_despachado_hoy: null, percent_a_tiempo: null },
     mi_calendario:       { events_today_count: 0 },
     pendientes:          { count: 0, items: [] },
@@ -69,19 +69,19 @@ beforeEach(() => {
   mockedApi.home.team.mockResolvedValue({ data: [] })
   mockedApi.calendar.list.mockResolvedValue({ data: [], source_unavailable: false })
   mockedStore.mockReturnValue({
-    user: { id: 1, first_name: 'Mariano', last_name: 'Sandoval', modules: { bodega: { view: true, view_team: false, edit: false, approve: false } } },
+    user: { id: 1, first_name: 'Asistente Bodega', last_name: 'Test 2', modules: { bodega: { view: true, view_team: false, edit: false, approve: false } } },
   } as never)
 })
 
 describe('BodegaHomePage', () => {
   it('saluda con el nombre real del usuario en sesión (REQ-294)', async () => {
     renderPage()
-    expect(await screen.findByText('bodega:home.greeting:Mariano Sandoval')).toBeInTheDocument()
+    expect(await screen.findByText('bodega:home.greeting:Asistente Bodega Test 2')).toBeInTheDocument()
   })
 
   it('muestra el resumen de una línea que viene del backend', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
-      saludo: { nombre: 'Mariano Sandoval', fecha: '2026-07-23', resumen: 'Tienes 3 pedidos asignados y 2 pendientes hoy.' },
+      saludo: { nombre: 'Asistente Bodega Test 2', fecha: '2026-07-23', resumen: 'Tienes 3 pedidos asignados y 2 pendientes hoy.' },
     }))
     renderPage()
     expect(await screen.findByText('Tienes 3 pedidos asignados y 2 pendientes hoy.')).toBeInTheDocument()
@@ -95,21 +95,21 @@ describe('BodegaHomePage', () => {
 
   it('muestra el toggle Equipo y "Equipo completo" seleccionado por defecto (REQ-295/296)', async () => {
     mockedStore.mockReturnValue({
-      user: { id: 2, first_name: 'Esteban', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
+      user: { id: 2, first_name: 'Lider Bodega', last_name: 'Test', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
     } as never)
-    mockedApi.home.team.mockResolvedValue({ data: [{ id: 10, name: 'Osvaldo Santos' }] })
+    mockedApi.home.team.mockResolvedValue({ data: [{ id: 10, name: 'Asistente Bodega Test' }] })
 
     renderPage()
     expect(await screen.findByText('bodega:home.scope.team')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('bodega:home.scope.team'))
-    expect(await screen.findByText('Osvaldo Santos')).toBeInTheDocument()
+    expect(await screen.findByText('Asistente Bodega Test')).toBeInTheDocument()
     expect(screen.getByText('bodega:home.team.wholeTeam')).toBeInTheDocument()
   })
 
   it('SCRUM-797 RN1 — un Líder de Bodega (view_team) arranca en Inicio con scope "team" sin tocar el toggle', async () => {
     mockedStore.mockReturnValue({
-      user: { id: 2, first_name: 'Esteban', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
+      user: { id: 2, first_name: 'Lider Bodega', last_name: 'Test', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
     } as never)
 
     renderPage()

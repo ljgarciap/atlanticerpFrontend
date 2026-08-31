@@ -42,9 +42,9 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const FELIX = 'conta@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
-const NEIL = 'neil.quiel@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const MARK = 'gerencia3@test.com'
+const NEIL = 'vendedordisenador2@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -147,7 +147,7 @@ test('REQ-449 RN1/RN2 -- bloque de pago completo (Cuenta numero/Responsable) + a
   await expect(modal.getByText(/Cuenta pago|Cuenta número/i)).toBeVisible()
   await expect(modal.getByText('Banco PreQA Test ****4321')).toBeVisible()
   await expect(modal.getByText(/Responsable/i)).toBeVisible()
-  await expect(modal.getByText('Felix Campos')).toBeVisible()
+  await expect(modal.getByText('Contabilidad Test')).toBeVisible()
 
   // RN2 -- ambos montos visibles: Total factura (tachado) $500 y Total a pagar $350.
   await expect(modal.getByText('Total factura')).toBeVisible()
@@ -171,7 +171,7 @@ test('REQ-449 RN1/RN2 -- bloque de pago completo (Cuenta numero/Responsable) + a
   expect(text).toContain('Cuenta número')
   expect(text).toContain('Banco PreQA Test ****4321')
   expect(text).toContain('Responsable')
-  expect(text).toContain('Felix Campos')
+  expect(text).toContain('Contabilidad Test')
   expect(text).toContain('Total a pagar')
   expect(text).not.toMatch(/ANULADA/)
 

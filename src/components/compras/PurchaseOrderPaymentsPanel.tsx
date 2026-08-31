@@ -43,18 +43,18 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   const payments = paymentsData?.data ?? []
   const balance = order.total_amount - order.paid_amount
   const canRequestAmountChange = payments.length === 0 && order.pending_amount_change === null
-  // SCRUM-252 (hallazgo de Daniela Amaya) — gate REAL, no solo informativo: mientras haya un
+  // SCRUM-252 (hallazgo de Gerencia Test) — gate REAL, no solo informativo: mientras haya un
   // cambio de monto pendiente de aprobación, "Enviar a pago" y "Registrar pago" quedan
   // bloqueados (el backend ya lo rechaza con 422; acá se deshabilitan antes de intentarlo).
   const hasPendingAmountChange = order.pending_amount_change !== null
-  // SCRUM-252 — "Aprobar/Rechazar cambio" solo para Mark. Si no hay mark_approver_user_id
+  // SCRUM-252 — "Aprobar/Rechazar cambio" solo para Mark. Si no hay primary_approver_user_id
   // configurado todavía, el backend tampoco lo exige (mismo criterio que approveAmountChange()
   // del lado del servidor) — se deja visible para no bloquear un entorno sin ese ajuste hecho.
   // Mientras no se sepa con certeza quién es Mark (settings todavía cargando), el botón
   // sensible queda OCULTO por defecto en vez de mostrarse de más un instante — más seguro que
   // arriesgar un falso "sí sos Mark" mientras la respuesta no llegó.
   const isMark = settings !== undefined
-    && (settings.mark_approver_user_id == null || settings.mark_approver_user_id === currentUserId)
+    && (settings.primary_approver_user_id == null || settings.primary_approver_user_id === currentUserId)
 
   // SCRUM-252 — validación en vivo mientras se escribe el monto a registrar.
   const liveAmount = Number(amount || 0)
@@ -103,7 +103,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
         <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs mb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: order.pending_amount_change?.toFixed(2) })}</span>
-            {/* SCRUM-252 (hallazgo de Daniela Amaya) — "Aprobar/Rechazar cambio" SOLO para Mark;
+            {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Mark;
                 Yirena (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
             {isMark && (
               <div className="flex gap-2">
@@ -181,7 +181,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
           >
             {t('common:actions.save')}
           </Button>
-          {/* SCRUM-252 (hallazgo de Daniela Amaya) — resultado del pago EN VIVO mientras se
+          {/* SCRUM-252 (hallazgo de Gerencia Test) — resultado del pago EN VIVO mientras se
               escribe el monto, sin esperar a guardar. */}
           {livePreview && (
             <p className={`w-full text-xs ${livePreview.kind === 'exceeds' ? 'text-red-500' : 'text-slate-600'}`}>

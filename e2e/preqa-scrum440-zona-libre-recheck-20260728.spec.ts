@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * SCRUM-440 (REQ-370) — Pre-QA re-check 2026-07-28, "Ciclo de vida completo de una orden Zona
- * Libre". Re-abierto por marly (2026-07-25/26): Yirena (gerencia2@atlantic.com.pa,
+ * Libre". Re-abierto por marly (2026-07-25/26): Yirena (lidercompras@test.com,
  * lider_compras) no podía entrar a /bodega/ordenes-zona-libre (la redirigía al dashboard) — sin
  * acceso, no podía ejecutar el Escenario 2 (aprobación) desde la UI.
  *
@@ -38,10 +38,10 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const YIRENA_EMAIL = 'gerencia2@atlantic.com.pa'
-const YIRENA_PASS  = 'gerencia2@atlantic.com.pa'
-const ALMACEN_EMAIL = 'almacen@atlantic.com.pa'
-const ALMACEN_PASS  = 'almacen@atlantic.com.pa'
+const YIRENA_EMAIL = 'lidercompras@test.com'
+const YIRENA_PASS  = 'lidercompras@test.com'
+const ALMACEN_EMAIL = 'liderbodega@test.com'
+const ALMACEN_PASS  = 'liderbodega@test.com'
 
 async function login(page: Page, email: string, password: string) {
   await page.goto(`${BASE}/login`)

@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // fixtures originales de familia/por_despachar de SCRUM-501 ya habían sido consumidos/avanzados
 // por verificaciones previas de Senior Review).
 
-const ESTEBAN = 'almacen@atlantic.com.pa' // Jefe de Bodega (lider_bodega)
-const OSVALDO = 'logistica@atlantic.com.pa' // Asistente de Bodega
+const ESTEBAN = 'liderbodega@test.com' // Jefe de Bodega (lider_bodega)
+const OSVALDO = 'asistentebodega@test.com' // Asistente de Bodega
 
 const SOLO_ORDER_ID = 16
 const FAMILY_ROOT_ID = 17
@@ -50,7 +50,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
     await assignBtn.click()
     await page.waitForTimeout(300)
 
-    await card.getByTestId(`assign-courier-select-${SOLO_ORDER_ID}`).selectOption({ label: 'Gary Arrocha' })
+    await card.getByTestId(`assign-courier-select-${SOLO_ORDER_ID}`).selectOption({ label: 'Transporte Test' })
     await card.getByTestId(`assign-courier-confirm-${SOLO_ORDER_ID}`).click()
     await page.waitForTimeout(1000)
 
@@ -61,7 +61,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
     await page.screenshot({ path: path.join(__dirname, '.tmp', 'scrum396-asistente-403.png') })
   })
 
-  test('RN1 (camino feliz) — Esteban (Jefe de Bodega) sí puede asignar; select incluye a Gary Arrocha real', async ({ page }) => {
+  test('RN1 (camino feliz) — Esteban (Jefe de Bodega) sí puede asignar; select incluye a Transporte Test real', async ({ page }) => {
     await login(page, ESTEBAN)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)
@@ -72,9 +72,9 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
     const select = card.getByTestId(`assign-courier-select-${SOLO_ORDER_ID}`)
     const optionTexts = await select.locator('option').allInnerTexts()
     console.log('SCRUM396_COURIER_SELECT_OPTIONS=', JSON.stringify(optionTexts))
-    expect(optionTexts.join(' ')).toContain('Gary Arrocha')
+    expect(optionTexts.join(' ')).toContain('Transporte Test')
 
-    await select.selectOption({ label: 'Gary Arrocha' })
+    await select.selectOption({ label: 'Transporte Test' })
     await card.getByTestId(`assign-courier-confirm-${SOLO_ORDER_ID}`).click()
     await page.waitForTimeout(1200)
     await page.screenshot({ path: path.join(__dirname, '.tmp', 'scrum396-esteban-ok.png'), fullPage: true })
@@ -107,7 +107,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
 
     await rootCard.getByTestId(`assign-courier-button-${FAMILY_ROOT_ID}`).click()
     await page.waitForTimeout(400)
-    await rootCard.getByTestId(`assign-courier-select-${FAMILY_ROOT_ID}`).selectOption({ label: 'Gary Arrocha' })
+    await rootCard.getByTestId(`assign-courier-select-${FAMILY_ROOT_ID}`).selectOption({ label: 'Transporte Test' })
     await rootCard.getByTestId(`assign-courier-confirm-${FAMILY_ROOT_ID}`).click()
     await page.waitForTimeout(1200)
 
@@ -248,11 +248,11 @@ test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guí
     const modal = page.getByTestId('signed-guide-modal')
     await expect(modal).toBeVisible()
 
-    // "Quien entrego" preseleccionado con el repartidor ya asignado (Gary Arrocha).
+    // "Quien entrego" preseleccionado con el repartidor ya asignado (Transporte Test).
     const courierSelect = modal.getByTestId('signed-guide-courier-select')
     const selectedText = await courierSelect.evaluate((el: HTMLSelectElement) => el.options[el.selectedIndex]?.text)
     console.log('SCRUM399_PRESELECTED_COURIER=', selectedText)
-    expect(selectedText).toContain('Gary Arrocha')
+    expect(selectedText).toContain('Transporte Test')
 
     // Intentar confirmar sin nombre de quien recibio ni archivo -> bloqueado.
     await modal.getByTestId('signed-guide-confirm').click()
@@ -300,7 +300,7 @@ test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guí
     const text = await sig.innerText()
     console.log('SCRUM400_SIGNATURE_TEXT=', JSON.stringify(text))
     expect(text).toContain('Maria Fernandez')
-    expect(text).not.toContain('Gary Arrocha')
+    expect(text).not.toContain('Transporte Test')
 
     const bodyText = await page.locator('body').innerText()
     expect(bodyText.includes('$')).toBe(false) // RN1 — nunca precios en la guia

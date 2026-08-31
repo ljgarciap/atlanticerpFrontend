@@ -23,7 +23,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
   return {
     id: 23, order_number: '2301', order_type: 'pedido', stage: 'packing',
     proyecto: 'Torre Azul', cliente: 'Constructora Pacífico', vendedor: 'Mark',
-    asistente: 'Mariano Sandoval', picker: 'Apolonio Gonzalez', repartidor: null,
+    asistente: 'Asistente Bodega Test 2', picker: 'Ayudante General Bodega Test', repartidor: null,
     fecha_entrega_comprometida: '2026-08-01', is_atrasado: false, is_sin_stock: false,
     eta_proveedor: null, invoice_ready: false,
     family: { sequence_in_family: null, total_in_family: null, badge: null },
@@ -175,7 +175,7 @@ describe('RegisterDeliveryModal', () => {
     expect(screen.getByTestId('register-delivery-available-101')).toHaveTextContent('0')
   })
 
-  it('SCRUM-393 (rebote de Daniela Amaya 2026-08-11) — se renderiza vía portal, fuera de un ancestro con transform (evita el bug de containing-block que hacía titilar/mover el modal)', () => {
+  it('SCRUM-393 (rebote de Gerencia Test 2026-08-11) — se renderiza vía portal, fuera de un ancestro con transform (evita el bug de containing-block que hacía titilar/mover el modal)', () => {
     // Reproduce la estructura real: OrderCardTile envuelve este modal en una tarjeta con
     // `hover:-translate-y-px` (transform CSS) — cualquier ancestro con transform se vuelve el
     // containing block de sus descendientes `position: fixed`, así que sin portal el modal

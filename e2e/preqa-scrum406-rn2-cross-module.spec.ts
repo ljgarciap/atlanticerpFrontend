@@ -59,7 +59,7 @@ async function login(page, email: string) {
 // tarjeta VR-9001 en el tablero de Pedidos deja de mostrar "Sin stock"/ETA.
 test('SCRUM-406 RN2 — avanzar PO real a Recibido y verificar la tarjeta VR-9001 en Bodega', async ({ page }) => {
   // Paso 1 — estado ANTES, con un actor de Bodega real (lider_compras no tiene bodega.view).
-  await login(page, 'almacen@atlantic.com.pa') // lider_bodega
+  await login(page, 'liderbodega@test.com') // lider_bodega
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -70,7 +70,7 @@ test('SCRUM-406 RN2 — avanzar PO real a Recibido y verificar la tarjeta VR-900
 
   // Paso 2 — avanzar la PO real hasta Recibido con el actor de Compras real, vía el botón real
   // (en_transito -> en_aduana -> en_transito_local -> recibido).
-  await login(page, 'gerencia2@atlantic.com.pa') // lider_compras
+  await login(page, 'lidercompras@test.com') // lider_compras
   await page.goto('/compras/ordenes/18')
   await page.waitForTimeout(1000)
   for (let i = 0; i < 4; i++) {
@@ -88,7 +88,7 @@ test('SCRUM-406 RN2 — avanzar PO real a Recibido y verificar la tarjeta VR-900
   // Paso 3 — volver al tablero de Bodega (actor real de Bodega) SIN esperar 30s completos, para
   // verificar si la tarjeta se actualiza "automáticamente" (RN2) o si sigue mostrando "Sin
   // stock"/ETA sin que nadie en Bodega haya tocado nada.
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
   const cardAfter = page.locator('[data-testid^="order-card-"]', { hasText: 'VR-9001' })

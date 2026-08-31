@@ -15,7 +15,7 @@ function claimErrorMessage(err: unknown, fallback: string): string {
   return data?.message ?? fallback
 }
 
-// SCRUM-260 (hallazgo de Daniela Amaya 2026-08-10) — "Tipo de resolución" deja de ser texto
+// SCRUM-260 (hallazgo de Gerencia Test 2026-08-10) — "Tipo de resolución" deja de ser texto
 // libre, mismas 5 opciones fijas que PurchaseOrderClaim::RESOLUTION_TYPES en el backend.
 const RESOLUTION_TYPES = [
   'reposicion', 'nota_credito_favor', 'nota_credito_reembolso', 'envio_repuestos', 'negado',
@@ -56,7 +56,7 @@ export default function NewClaimModal({ onClose, onCreated }: Props) {
     })
   }
 
-  // SCRUM-260 (rebote de Daniela Amaya 2026-08-12) — "Unidades afectadas" volvía a permitir
+  // SCRUM-260 (rebote de Gerencia Test 2026-08-12) — "Unidades afectadas" volvía a permitir
   // superar la cantidad pedida: `max={l.quantity}` en el <input type="number"> es solo una
   // afordancia de los botones de incremento/decremento del navegador, NUNCA bloquea un valor
   // tipeado o pegado a mano — y `canSubmit` solo validaba `> 0`, sin comparar contra la cantidad
@@ -88,7 +88,7 @@ export default function NewClaimModal({ onClose, onCreated }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      {/* SCRUM-260 (rebote de Daniela Amaya 2026-08-12) — modal chico, insuficiente para el
+      {/* SCRUM-260 (rebote de Gerencia Test 2026-08-12) — modal chico, insuficiente para el
           buscador de productos: ancho ampliado (max-w-lg → max-w-2xl) y el listado de resultados
           de abajo pasa de `overflow-hidden` (que RECORTABA resultados fuera de vista, invisibles
           sin scroll) a `max-h + overflow-y-auto` real.

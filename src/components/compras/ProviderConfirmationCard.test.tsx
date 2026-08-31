@@ -5,7 +5,7 @@ import ProviderConfirmationCard from './ProviderConfirmationCard'
 import { comprasApi } from '@/api/comprasApi'
 import type { PurchaseOrderDocument } from '@/types/compras'
 
-// SCRUM-211/REQ-148 (2026-08-06, hallazgo Daniela Amaya + mockup 2A__Compras_Ordenes.html): el
+// SCRUM-211/REQ-148 (2026-08-06, hallazgo Gerencia Test + mockup 2A__Compras_Ordenes.html): el
 // card de solo-lectura de SCRUM-218 resolvía visibilidad, no la carga real que pide el mockup
 // dentro del modal de detalle de orden. RN1 bloquea mientras la orden está "Por aprobar"; RN4
 // permite reemplazar el documento en cualquier momento posterior.

@@ -11,9 +11,9 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const MARK_EMAIL = 'mbekhar@atlantic.com.pa'
+const APPROVER_EMAIL = 'gerencia3@test.com'
 const MARK_PASS  = 'B1n4X_2026?'
-const DANIELA_EMAIL = 'daniela@atlantic.com.pa'
+const DANIELA_EMAIL = 'gerencia@test.com'
 const DANIELA_PASS  = 'B1n4X_2026?'
 
 async function login(page: Page, email: string, pass: string) {
@@ -34,7 +34,7 @@ test('sin el permiso edit.conditions no se ve el botón Configurar condiciones, 
 })
 
 test('con el permiso, cambiar el default global aplica solo a cotizaciones nuevas', async ({ page }) => {
-  await login(page, MARK_EMAIL, MARK_PASS)
+  await login(page, APPROVER_EMAIL, MARK_PASS)
   await page.goto(`${BASE}/ventas-diseno/quotes`)
   await page.waitForTimeout(2000)
 

@@ -17,7 +17,7 @@ import { execSync } from 'node:child_process'
  * cotización sin confirmar, y confirmar en Pipeline que ambas terminan como
  * tarjetas independientes.
  */
-const VENDEDOR = 'neil.quiel@atlantic.com.pa'
+const VENDEDOR = 'vendedordisenador2@test.com'
 const STAMP = Date.now()
 
 interface Fixture {

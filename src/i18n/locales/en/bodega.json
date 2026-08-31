@@ -1000,7 +1000,7 @@
   },
   "generalCounts": {
     "title": "General inventory",
-    "subtitle": "Full physical counts by warehouse — requires Mark's approval",
+    "subtitle": "Full physical counts by warehouse — requires the configured approver's approval",
     "kardexLink": "Inventory movements",
     "newPanel": {
       "title": "New general count",
@@ -1017,7 +1017,7 @@
       },
       "crossWarning": "Already has a pending cyclical request ({{date}})",
       "evaluate": "Evaluate",
-      "submit": "Send for Mark's approval",
+      "submit": "Send for the configured approver's approval",
       "noDifferences": "There is no difference in this count — it doesn't need to be sent for approval, though it is still recorded as a reference.",
       "errors": {
         "missingQuantities": "Enter the counted quantity for every product before evaluating.",
@@ -1033,13 +1033,13 @@
       },
       "duplicateModal": {
         "title": "One or more products already have an unresolved count",
-        "body": "\"{{product}}\" already has an evaluated difference from {{date}} (status: {{status}}) still unapproved/unrejected by Mark. If you continue, that line will be replaced by this count.",
+        "body": "\"{{product}}\" already has an evaluated difference from {{date}} (status: {{status}}) still unapproved/unrejected by the configured approver. If you continue, that line will be replaced by this count.",
         "confirm": "Continue anyway"
       }
     },
     "tray": {
       "title": "General counts",
-      "subtitle": "History — only applied to inventory after Mark's approval",
+      "subtitle": "History — only applied to inventory after the configured approver's approval",
       "chips": {
         "todas": "All",
         "pendiente_aprobacion": "Pending",
@@ -1065,9 +1065,9 @@
       },
       "actions": {
         "approve": "Approve",
-        "approveLockedTitle": "Only Mark can approve this count.",
+        "approveLockedTitle": "Only the configured approver can approve this count.",
         "reject": "Reject",
-        "rejectLockedTitle": "Only Mark can reject this count.",
+        "rejectLockedTitle": "Only the configured approver can reject this count.",
         "viewReason": "View reason",
         "applyAdjustment": "Apply adjustment",
         "adjustmentApplied": "Adjustment applied",

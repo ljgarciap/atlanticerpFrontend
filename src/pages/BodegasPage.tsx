@@ -270,7 +270,7 @@ export default function BodegasPage() {
                   <td className="px-4 py-3"><EstadoBadge estado={row.estado} /></td>
                   <td className="px-4 py-3 text-slate-600">{row.proveedor ?? '—'}</td>
                   <td className="px-4 py-3">
-                    {/* Mejora SCRUM-752 RN2 (Daniela Amaya 2026-08-13) — antes esta celda mostraba
+                    {/* Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — antes esta celda mostraba
                         un "Ver detalle" deshabilitado en bodegas modo "pendiente" (Zona Libre); el
                         rebote pide que no exista NINGUNA acción ahí, ni "Reubicar" ni "Ver
                         detalle" — celda vacía. */}
@@ -376,7 +376,7 @@ function RelocateModal({ row, currentWarehouseId, warehouses, onClose }: {
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Mejora SCRUM-752 RN1 (Daniela Amaya 2026-08-13) — Zona Libre ('pendiente', sin ubicación
+  // Mejora SCRUM-752 RN1 (Gerencia Test 2026-08-13) — Zona Libre ('pendiente', sin ubicación
   // física) nunca debe aparecer como destino de reubicación.
   const destinationOptions = warehouses.filter(w => w.id !== currentWarehouseId && w.modo_detalle !== 'pendiente')
   const originWarehouse = warehouses.find(w => w.id === currentWarehouseId)
@@ -490,15 +490,15 @@ const RELOCATION_CHIPS: RelocationEstadoFilter[] = ['todas', 'pendiente', 'aprob
  * porque este componente se desmonta al cerrar el modal (`{showRequestsModal && <...>}` en el
  * padre) y el `useState('todas')` de acá arranca de cero en cada apertura.
  *
- * SCRUM-458 (rebote de Daniela Amaya 2026-08-13, con imagen) — Aprobar/Rechazar quedaban
+ * SCRUM-458 (rebote de Gerencia Test 2026-08-13, con imagen) — Aprobar/Rechazar quedaban
  * visibles y clicables para CUALQUIER perfil de Bodega (ej. Esteban, Líder de Bodega), aunque el
  * backend ya devolvía 403 real al intentarlo — la restricción quedaba solo aplicada, no
  * comunicada, violando REQ-388 PERMISOS ("Exclusivo de Mark"). Ahora se ocultan (no solo se
  * deshabilitan) cuando el actor no es Mark, reusando el mismo criterio ya probado en
  * `PurchaseOrderPaymentsPanel.tsx` (SCRUM-252): "Mark" es
- * `compras_settings.mark_approver_user_id` (compartido entre Compras y Bodega — confirmado en el
+ * `compras_settings.primary_approver_user_id` (compartido entre Compras y Bodega — confirmado en el
  * hallazgo de Pre-QA de este mismo ticket, 2026-07-25) comparado contra `user.id` del JWT. Con
- * `mark_approver_user_id` sin configurar todavía, el backend tampoco lo exige — se deja visible
+ * `primary_approver_user_id` sin configurar todavía, el backend tampoco lo exige — se deja visible
  * para no bloquear un entorno sin ese ajuste hecho. Mientras `settings` está cargando, los
  * botones quedan OCULTOS por defecto (más seguro que mostrar de más un instante).
  */
@@ -508,7 +508,7 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
   const [rejectingId, setRejectingId] = useState<number | null>(null)
-  // SCRUM-459 (rebote de Daniela Amaya 2026-08-13) — "Ver motivo" era texto estático con solo un
+  // SCRUM-459 (rebote de Gerencia Test 2026-08-13) — "Ver motivo" era texto estático con solo un
   // `title` (tooltip al pasar el mouse, invisible en touch/sin hover) — ahora abre un modal real
   // con el `motivo_rechazo` real de esa fila.
   const [viewingReason, setViewingReason] = useState<string | null>(null)
@@ -520,7 +520,7 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
   const { data: settings } = useComprasSettings()
   const currentUserId = useAuthStore(s => s.user?.id)
   const isMark = settings !== undefined
-    && (settings.mark_approver_user_id == null || settings.mark_approver_user_id === currentUserId)
+    && (settings.primary_approver_user_id == null || settings.primary_approver_user_id === currentUserId)
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -635,7 +635,7 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-/** SCRUM-459 (REQ-389, rebote de Daniela Amaya 2026-08-13) — el motivo ya viaja en la propia fila
+/** SCRUM-459 (REQ-389, rebote de Gerencia Test 2026-08-13) — el motivo ya viaja en la propia fila
  * (`RelocationRequest.motivo_rechazo`), sin necesidad de un fetch aparte (a diferencia de
  * `ReasonModal` de `BodegaOrdenesZonaLibrePage.tsx`, que sí lo pide por id). */
 function RelocationReasonModal({ reason, onClose }: { reason: string; onClose: () => void }) {

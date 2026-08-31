@@ -142,7 +142,7 @@ export default function NewPurchaseOrderPage() {
         lines: buildLinesPayload(draft),
       })
       setCreatedOrderId(order.id)
-      setCreatedRequiresApproval(order.requires_mark_approval)
+      setCreatedRequiresApproval(order.requires_primary_approval)
     } catch {
       // error mostrado inline via mutation state
     }

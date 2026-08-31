@@ -14,7 +14,7 @@ function mutationErrorMessage(err: unknown, fallback: string): string {
 /**
  * SCRUM-184 (REQ-121) — hallazgo MEDIO de Pre-QA 2026-07-16: `low_rating_threshold` ya era
  * paramétrico en el backend (`compras_settings`) y el permiso `compras.settings.configure` ya
- * estaba concedido de verdad a Yirena Teng vía SpecialPermissionSeeder, pero no existía ninguna
+ * estaba concedido de verdad a Lider Compras Test vía SpecialPermissionSeeder, pero no existía ninguna
  * pantalla para usarlo — solo API a mano. Mismo patrón que
  * `PricingSettingsPanel`/`ReportsConfigPanel` (Ventas & Diseño): panel colapsable dentro de la
  * página, gateado por permiso, sin ruta nueva.

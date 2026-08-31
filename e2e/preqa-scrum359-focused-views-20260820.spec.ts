@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test'
  * (Marly, 2026-08-20) sobre el Kardex mostrando el sidebar/topbar completo. Fix: FocusedViewShell
  * (sin Sidebar/TopBar) para estas 2 rutas, commit ffa921e, desplegado a dev.atlanticerp.ai.
  *
- * Cuenta real (password = email): servicio@atlantic.com.pa (Aaron Leis, lider_servicios).
+ * Cuenta real (password = email): liderservicios@test.com (Aaron Leis, lider_servicios).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -27,7 +27,7 @@ async function login(page: Page, email: string) {
 test('1. Kardex vía "Movimiento de herramientas" (pestaña nueva) — sin sidebar, con botón Cerrar', async ({ page, context }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
 
@@ -48,7 +48,7 @@ test('1. Kardex vía "Movimiento de herramientas" (pestaña nueva) — sin sideb
 test('2. Kardex vía URL directa — sin sidebar (mismo criterio, sin depender del origen de navegación)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/02-kardex-url-directa.png`, fullPage: true })
@@ -61,7 +61,7 @@ test('2. Kardex vía URL directa — sin sidebar (mismo criterio, sin depender d
 test('4. Informe móvil (ticket RET-2026-0001, id 12, on_site/pending) — sin sidebar, back propio de la página intacto', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tickets/12/inspection-report/movil`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/03-informe-movil-sin-sidebar.png`, fullPage: true })
@@ -74,7 +74,7 @@ test('4. Informe móvil (ticket RET-2026-0001, id 12, on_site/pending) — sin s
 })
 
 test('3. Insumos y Herramientas (pantalla principal) — el sidebar SIGUE apareciendo, no se rompió el resto de la app', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
   // Sidebar se monta 2 veces en el DOM (drawer móvil + columna desktop, una oculta por CSS según

@@ -29,7 +29,7 @@ export default function VentasDisenoHomePage() {
   const [calendarInitialDate, setCalendarInitialDate] = useState<Date | undefined>(undefined)
   const [pipelineChip, setPipelineChip] = useState<PipelineChip>('all')
   const [pendienteDetail, setPendienteDetail] = useState<Pendiente | null>(null)
-  // SCRUM-67 (hallazgo QA Daniela Amaya, 2026-07-20) — el mock (openPendientesModal) abre un
+  // SCRUM-67 (hallazgo QA Gerencia Test, 2026-07-20) — el mock (openPendientesModal) abre un
   // listado completo antes del drill-down al detalle; acá el "+N más" no tenía ningún onClick.
   const [showPendientesList, setShowPendientesList] = useState(false)
   const [finalStageDetail, setFinalStageDetail] = useState<FinalStageItem | null>(null)

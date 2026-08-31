@@ -231,7 +231,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
   const advanceRemainder = useAdvanceRemainderPurchaseOrder()
   const confirmPendingReceipts = useConfirmPendingOrderReceipts()
   const updateShipping = useUpdateShippingInfo()
-  // SCRUM-208 (2026-08-06/12, rebotes de Daniela Amaya) — mismo gate puntual que OrderDetailPage:
+  // SCRUM-208 (2026-08-06/12, rebotes de Gerencia Test) — mismo gate puntual que OrderDetailPage:
   // `pending_remainder_status` solo bloquea de verdad el paso final a "Recibido". Antes de este
   // fix, este botón quedaba clickeable en ese caso puntual y el 422 resultante no se mostraba en
   // ningún lado (esta pantalla nunca renderizaba `advance.isError`) — el video de Daniela
@@ -333,7 +333,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
       {/* SCRUM-208 (rediseño 2026-08-15, docs/architecture/scrum208-recepcion-parcial-rediseno.md)
           — mismo aviso accionable que OrderDetailPage.tsx: antes era puramente informativo acá y
           el botón "Completar etapa" de abajo quedaba clickeable sin gatearlo, disparando un 422
-          silencioso (el video de Daniela Amaya, "no genera ninguna acción", es exactamente esto —
+          silencioso (el video de Gerencia Test, "no genera ninguna acción", es exactamente esto —
           esta pantalla nunca renderizaba `advance.isError`). 2 botones: "Ingresar a Inventario"
           (root cause real de su reporte — la parte recibida no aparecía en Inventario porque nada
           la confirmaba hasta que la orden ENTERA llegaba a Recibido) y "Completar etapa del
@@ -411,7 +411,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
         </label>
       </div>
 
-      {order.blocked_by_mark_approval ? (
+      {order.blocked_by_primary_approval ? (
         <p className="text-xs text-amber-600 mb-2">{t('compras:logistics.card.markBlocked')}</p>
       ) : order.next_status !== null ? (
         // REQ-154 RN2/RN7 — el botón desaparece por completo (no disabled, no en el DOM) cuando

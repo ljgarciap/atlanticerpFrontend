@@ -56,7 +56,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   const [editingContactId, setEditingContactId] = useState<number | null>(null)
   const [editDraft, setEditDraft] = useState({ name: '', role: 'client' as ContactRole, phone: '', email: '' })
 
-  // SCRUM-78 — hallazgo de Daniela Amaya en validación (2026-07-21): el formulario quedaba
+  // SCRUM-78 — hallazgo de Gerencia Test en validación (2026-07-21): el formulario quedaba
   // editable apenas se abría la tarjeta, sin ningún gate — riesgo de cambiar/borrar algo por
   // accidente. El mockup abre siempre en modo vista (campos de solo lectura) con un botón
   // "Editar" explícito que recién ahí habilita el formulario ya existente.
@@ -131,7 +131,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       // faltaba para el gate de avance de etapa (ej. Cliente Master, superficie
       // trabajada). stageError/quoteGateError quedaban pegados en pantalla
       // porque solo se limpiaban en el onSuccess de SU PROPIA mutación — nunca
-      // al completar el dato por otra vía. Ver reporte de Daniela Amaya
+      // al completar el dato por otra vía. Ver reporte de Gerencia Test
       // (2026-08-03/04).
       setStageError(null)
       setQuoteGateError(null)

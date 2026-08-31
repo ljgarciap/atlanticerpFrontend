@@ -29,10 +29,10 @@ test.describe.configure({ mode: 'serial' })
 // pero quedó con estado='aprobado' (inválido) en Bodega, no 'aprobada' — dato real de dev.atlanticerp.ai
 // dejado en este estado como evidencia, pendiente de corrección junto con el fix.
 
-const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'gerencia3@test.com' // Mark Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
-const TECH_SUPERADMIN = 'lujogarpin78@gmail.com' // password real = default (email)
+const TECH_SUPERADMIN = 'superadmin3@test.com' // password real = default (email)
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   // Defensivo (agregado v7 — ver feedback_preqa_crowdsec_no_paralelo): CrowdSec puede tardar en

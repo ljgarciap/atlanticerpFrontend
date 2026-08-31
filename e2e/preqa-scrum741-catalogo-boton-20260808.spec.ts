@@ -7,8 +7,8 @@ import { test, expect, type Page } from '@playwright/test'
  * (localhost:5173 -> proxy /api -> localhost:8090), cambios sin commitear en dev.
  *
  * Cuenta real (password = email, ver project_roster_usuarios_reales_atlanticerp.md):
- *  - neil.quiel@atlantic.com.pa (vendedor_disenador) — tiene ventas_diseno.read.
- *  - carlos@atlantic.com.pa (tecnico_servicios) — NO tiene ventas_diseno.read, usado para
+ *  - vendedordisenador2@test.com (vendedor_disenador) — tiene ventas_diseno.read.
+ *  - tecnicoservicios@test.com (tecnico_servicios) — NO tiene ventas_diseno.read, usado para
  *    el check negativo del punto 5.
  */
 test.describe.configure({ mode: 'serial' })
@@ -26,7 +26,7 @@ async function login(page: Page, email: string) {
 test('1. Inicio -> Catálogo navega y carga sin error', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(String(e)))
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto(`${BASE}/ventas-diseno/home`)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum741/01-home-antes.png', fullPage: true })
@@ -54,7 +54,7 @@ test('1. Inicio -> Catálogo navega y carga sin error', async ({ page }) => {
 test('2. Cotizaciones -> Catálogo navega y carga sin error; Nueva cotización sigue viva', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(String(e)))
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto(`${BASE}/ventas-diseno/quotes-list`)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum741/02-quotes-antes.png', fullPage: true })
@@ -79,7 +79,7 @@ test('2. Cotizaciones -> Catálogo navega y carga sin error; Nueva cotización s
 test('3. Reportes -> Catálogo navega y carga sin error; toggle de configuración (si visible) sigue vivo', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(String(e)))
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await page.goto(`${BASE}/ventas-diseno/reports`)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum741/03-reports-antes.png', fullPage: true })
@@ -108,7 +108,7 @@ test('3. Reportes -> Catálogo navega y carga sin error; toggle de configuració
 })
 
 test('4. /ventas-diseno/catalog sigue exigiendo ventas_diseno.read — cuenta sin el permiso no entra', async ({ page }) => {
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   await page.goto(`${BASE}/ventas-diseno/catalog`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum741/04-catalog-sin-permiso.png', fullPage: true })

@@ -12,7 +12,7 @@ interface Props {
 }
 
 /**
- * SCRUM-211/REQ-148 (2026-08-06 — hallazgo Daniela Amaya, mockup 2A__Compras_Ordenes.html
+ * SCRUM-211/REQ-148 (2026-08-06 — hallazgo Gerencia Test, mockup 2A__Compras_Ordenes.html
  * adjuntado el mismo día). El card de solo-lectura de SCRUM-218 (2026-08-06 temprano, "duplicar
  * sin agregar subida") resolvía el gap de VISIBILIDAD pero no el de FUNCIONALIDAD: el mockup real
  * de Ver Órdenes tiene su propia carga/reemplazo (`#oc-input`) dentro del modal de detalle, no

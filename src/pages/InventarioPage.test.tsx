@@ -142,7 +142,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('compras:inventory.toggle.ventas')).toBeInTheDocument()
   })
 
-  // Bug real de producción (2026-08-18, reportado por lider_compras/gerencia2@atlantic.com.pa):
+  // Bug real de producción (2026-08-18, reportado por lider_compras/lidercompras@test.com):
   // `TypeError: Cannot read properties of null (reading 'toLocaleString')` al cargar Inventario.
   // Causa raíz: `catalog_products.cost` es nullable en BD (3674/11632 filas NULL en prod, tras el
   // sync de migración ICG) y el chequeo `p.cost !== undefined` no cubre `null` — dejaba pasar
@@ -540,7 +540,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   })
 
   /**
-   * SCRUM-240 (corrección de Daniela Amaya, 2026-08-09) — REEMPLAZA el bloque de 4 tests que
+   * SCRUM-240 (corrección de Gerencia Test, 2026-08-09) — REEMPLAZA el bloque de 4 tests que
    * existían acá ("crear producto envía el payload correcto", "bloquea el guardado si falta un
    * campo técnico", "referencia duplicada...", "defensa en profundidad ficha técnica..."): el
    * modal se reescribió por completo (campos/orden/obligatoriedad nuevos, ver docblock de
@@ -609,7 +609,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        // SCRUM-240 (rebote de Daniela Amaya 2026-08-12) — Nombre y Descripción ya no comparten
+        // SCRUM-240 (rebote de Gerencia Test 2026-08-12) — Nombre y Descripción ya no comparten
         // columna: "Lámpara nueva" va a `name`, `description` queda vacío (no se llenó en este test).
         reference: 'REF-1', factory_reference: 'FAB-1', name: 'Lámpara nueva', description: '',
         brand: 'Marca X', barcode: '7501234567890', category: 'bombillos',
@@ -625,7 +625,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     )
   })
 
-  it('SCRUM-240 (rebote de Daniela Amaya 2026-08-12) — Nombre y Descripción son campos independientes, ambos se envían por separado', async () => {
+  it('SCRUM-240 (rebote de Gerencia Test 2026-08-12) — Nombre y Descripción son campos independientes, ambos se envían por separado', async () => {
     mockedComprasApi.inventory.create.mockResolvedValue(makeProduct())
     await openCreateModalAndSelectProvider()
 

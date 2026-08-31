@@ -13,13 +13,13 @@ async function login(page, email: string) {
 test('SCRUM-391 — seleccionar picker, verificar consolidado sumado + doble clic Imprimir + picker que dejó de tener en_picking', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
   await page.getByRole('button', { name: /imprimir picking del día/i }).click()
   await page.waitForTimeout(500)
-  await page.getByRole('button', { name: 'Apolonio Gonzalez' }).click()
+  await page.getByRole('button', { name: 'Ayudante General Bodega Test' }).click()
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'e2e/.tmp/scrum391-consolidated-loaded.png', fullPage: true })
 

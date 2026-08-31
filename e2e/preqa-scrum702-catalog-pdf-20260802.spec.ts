@@ -6,8 +6,8 @@ import { execSync } from 'node:child_process'
  * stock (seleccionados / catálogo completo). Corre contra dev.atlanticerp.ai (ya pusheado+desplegado).
  *
  * Cuentas reales (password = email, ver project_roster_usuarios_reales_atlanticerp.md):
- *  - neil.quiel@atlantic.com.pa (vendedor_disenador) — tiene ventas_diseno.read.
- *  - carlos@atlantic.com.pa (tecnico_servicios) — NO tiene ventas_diseno.read, confirmado
+ *  - vendedordisenador2@test.com (vendedor_disenador) — tiene ventas_diseno.read.
+ *  - tecnicoservicios@test.com (tecnico_servicios) — NO tiene ventas_diseno.read, confirmado
  *    por curl directo (403) antes de este spec.
  */
 test.describe.configure({ mode: 'serial' })
@@ -29,7 +29,7 @@ async function gotoCatalog(page: Page) {
 }
 
 test('1. Modo completo con filtro activo (buscador) — PDF trae TODO, ignora el filtro visual (RN4)', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await gotoCatalog(page)
 
   // Confirmar el total sin filtro primero.
@@ -56,7 +56,7 @@ test('1. Modo completo con filtro activo (buscador) — PDF trae TODO, ignora el
 })
 
 test('2. Modo completo enviando product_ids de todas formas — backend los ignora (RN4 end-to-end)', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await gotoCatalog(page)
 
   // Seleccionar 2 productos (esto pobla `selected`), después clickear "completo" en vez de
@@ -78,7 +78,7 @@ test('2. Modo completo enviando product_ids de todas formas — backend los igno
 })
 
 test('3. Seleccionados sin nada marcado — botón disabled', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await gotoCatalog(page)
 
   const btn = page.getByRole('button', { name: /enviar seleccionados/i })
@@ -87,7 +87,7 @@ test('3. Seleccionados sin nada marcado — botón disabled', async ({ page }) =
 })
 
 test('4. Seleccionados con N productos — PDF trae exactamente esos N', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await gotoCatalog(page)
 
   await page.locator('input[type="checkbox"]').nth(1).check()
@@ -109,7 +109,7 @@ test('4. Seleccionados con N productos — PDF trae exactamente esos N', async (
 })
 
 test('5. Doble clic rápido en "Enviar catálogo completo" — solo 1 descarga', async ({ page }) => {
-  await login(page, 'neil.quiel@atlantic.com.pa')
+  await login(page, 'vendedordisenador2@test.com')
   await gotoCatalog(page)
 
   const btn = page.getByRole('button', { name: /enviar cat[aá]logo completo/i })
@@ -130,7 +130,7 @@ test('6. Rol sin ventas_diseno.read — endpoint responde 401/403, no solo botó
   // Acá confirmamos también el comportamiento en navegador: login exitoso, pero sin acceso a
   // la pantalla/al endpoint.
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'carlos@atlantic.com.pa', password: 'carlos@atlantic.com.pa' },
+    data: { email: 'tecnicoservicios@test.com', password: 'tecnicoservicios@test.com' },
   })
   expect(loginRes.ok()).toBeTruthy()
   const { token } = await loginRes.json()
@@ -143,7 +143,7 @@ test('6. Rol sin ventas_diseno.read — endpoint responde 401/403, no solo botó
   expect([401, 403]).toContain(pdfRes.status())
 
   // Y en navegador: la pantalla de Catálogo no debería ni cargar datos para este rol.
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   await gotoCatalog(page)
   await page.screenshot({ path: `${DL_DIR}/06-carlos-sin-permiso.png`, fullPage: true })
 })
@@ -161,7 +161,7 @@ test('7. Producto inactivo — NUNCA aparece, ni en modo completo', async ({ pag
     console.log('[SCRUM-702] Marcando producto id=4 (SPOT-EMP-011) como inactivo temporalmente...')
     psql("UPDATE catalog_products SET is_active=false WHERE id=4;")
 
-    await login(page, 'neil.quiel@atlantic.com.pa')
+    await login(page, 'vendedordisenador2@test.com')
     await gotoCatalog(page)
     await page.locator('input[placeholder]').first().fill('SPOT-EMP-011')
     await page.waitForTimeout(1000)

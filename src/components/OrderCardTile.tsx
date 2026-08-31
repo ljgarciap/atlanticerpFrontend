@@ -256,7 +256,7 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
           stock agrupadas en una sola sección con su título, en vez de badges sueltos regados por
           la tarjeta. "ENTREGA PARCIAL" + "ENTREGA X DE Y" (SCRUM-389/388, misma lógica de familia,
           `FamilyService`/`OrderBoardService::cardPayload()` — nunca reimplementada acá) viajan
-          juntas, tal como pide el ejemplo de Daniela Amaya. */}
+          juntas, tal como pide el ejemplo de Gerencia Test. */}
       {(order.is_sin_stock || order.family.badge) && (
         <div className="mb-2" data-testid="order-alerts">
           <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400 mb-1">
@@ -363,7 +363,7 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
           {order.fecha_entrega_comprometida ?? t('bodega:pedidos.card.noDeliveryDate')}
         </span>
 
-        {/* SCRUM-396 (rebote de Daniela Amaya 2026-08-17) — flex-wrap: con "Despachar" +
+        {/* SCRUM-396 (rebote de Gerencia Test 2026-08-17) — flex-wrap: con "Despachar" +
             "Cambiar repartidor" visibles a la vez (etapa "Por despachar" con repartidor ya
             asignado), sin wrap el botón nuevo se salía del borde derecho de la tarjeta en vez de
             pasar a una segunda línea. La parte funcional del ticket ya estaba correcta, esto es

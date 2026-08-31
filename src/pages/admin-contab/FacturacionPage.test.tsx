@@ -456,13 +456,13 @@ describe('FacturacionPage', () => {
   it('REQ-449 RN1: muestra el bloque de datos de pago (cuenta número + responsable) cuando el backend lo trae', async () => {
     mockedApi.invoices.detail.mockResolvedValueOnce(makeDetail({
       estado: 'facturada', numero_factura: 'F-2201', total: 5650,
-      cuenta_pago: 'Banco General ****4321', responsable: 'Felix Campos',
+      cuenta_pago: 'Banco General ****4321', responsable: 'Contabilidad Test',
     }))
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:facturacion.vista.plano'))
     fireEvent.click(await screen.findByText('PED-2026-000102'))
     expect(await screen.findByText(/Banco General \*\*\*\*4321/)).toBeInTheDocument()
-    expect(screen.getByText(/Felix Campos/)).toBeInTheDocument()
+    expect(screen.getByText(/Contabilidad Test/)).toBeInTheDocument()
   })
 
   it('REQ-449 Escenario 2: factura anulada muestra el aviso visual', async () => {

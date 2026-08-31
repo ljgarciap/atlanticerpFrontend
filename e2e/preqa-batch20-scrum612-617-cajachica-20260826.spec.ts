@@ -9,9 +9,9 @@ test.describe.configure({ mode: 'serial' })
 // docs/visual-review/caja-chica-batch20-2026-08-26.md para el detalle completo.
 const BASE = 'http://localhost:5173'
 
-const FELIX = 'conta@atlantic.com.pa'
-const YANETH = 'asistente@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const YANETH = 'asistenteadministrativa@test.com'
+const MARK = 'gerencia3@test.com'
 const MARK_PASSWORD = MARK
 
 async function login(page: Page, email: string, password?: string): Promise<void> {

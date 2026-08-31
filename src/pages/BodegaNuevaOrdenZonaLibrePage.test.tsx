@@ -152,7 +152,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
     expect(screen.getByText('$135.00')).toBeInTheDocument()
   })
 
-  // SCRUM-436 (rebote de Daniela Amaya 2026-08-13) — Cantidad/Costo/Subtotal/Monto total deben
+  // SCRUM-436 (rebote de Gerencia Test 2026-08-13) — Cantidad/Costo/Subtotal/Monto total deben
   // llevar separador de miles (formatMoney/formatInt de src/lib/money.ts), no solo decimales.
   it('rebote 2026-08-13 — Cantidad/Costo/Subtotal/Monto total del carrito usan separador de miles', async () => {
     mockedComprasApi.products.search.mockResolvedValue({

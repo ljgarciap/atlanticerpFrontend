@@ -398,7 +398,7 @@ export const adminContabApi = {
     // Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Mark, comprobante, documento formal,
     // factura relacionada. Ver ADR-SCRUM571-574.
 
-    // REQ-494 — mismo patrón que `invoices.decideUncollectible()`, bajo `mark_only` del lado del
+    // REQ-494 — mismo patrón que `invoices.decideUncollectible()`, bajo `primary_approver_only` del lado del
     // backend (no un chequeo de rol distinto acá, el 403 real lo decide el servidor).
     decide: (id: number, payload: NotaCreditoDecisionPayload): Promise<NotaCreditoDetalle> =>
       api.put<NotaCreditoDetalle>(`/admin-contab/notas-credito/${id}/decision`, payload).then(r => r.data),
@@ -537,7 +537,7 @@ export const adminContabApi = {
     proposePercent: (pipelineCardId: number, data: ProposePercentPayload): Promise<{ porcentaje_pendiente: number }> =>
       api.post<{ porcentaje_pendiente: number }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/propose`, data).then(r => r.data),
 
-    // REQ-516 RN4 — exclusivo de Mark, 403 para cualquier otro rol (mismo gate `mark_only`).
+    // REQ-516 RN4 — exclusivo de Mark, 403 para cualquier otro rol (mismo gate `primary_approver_only`).
     decidePercent: (pipelineCardId: number, data: DecidePercentPayload): Promise<{ porcentaje_aprobado: number | null }> =>
       api.post<{ porcentaje_aprobado: number | null }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/decide`, data).then(r => r.data),
 
@@ -607,7 +607,7 @@ export const adminContabApi = {
     historyDetail: (id: number): Promise<DailyCashCount> =>
       api.get<DailyCashCount>(`/admin-contab/cash-position/history/${id}`).then(r => r.data),
 
-    // REQ-528 RN2/RN4 — exclusivo Mark (`mark_only` en el backend). 409 si el arqueo ya no está
+    // REQ-528 RN2/RN4 — exclusivo Mark (`primary_approver_only` en el backend). 409 si el arqueo ya no está
     // `pendiente_aprobacion` (aprobado por otra sesión mientras el modal estaba abierto).
     approve: (id: number): Promise<DailyCashCount> =>
       api.post<DailyCashCount>(`/admin-contab/cash-position/history/${id}/approve`).then(r => r.data),
@@ -715,7 +715,7 @@ export const adminContabApi = {
       }).then(r => r.data)
     },
 
-    // REQ-541 — exclusivo Mark (gate real en el backend, `mark_only`). Respuesta angosta a
+    // REQ-541 — exclusivo Mark (gate real en el backend, `primary_approver_only`). Respuesta angosta a
     // propósito, ver docblock de RejectPettyCashExpenseResponse.
     rejectExpense: (id: number, motivo: string): Promise<RejectPettyCashExpenseResponse> =>
       api.put<RejectPettyCashExpenseResponse>(`/admin-contab/petty-cash/expenses/${id}/reject`, { motivo }).then(r => r.data),

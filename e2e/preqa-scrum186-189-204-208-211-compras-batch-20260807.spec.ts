@@ -1,7 +1,7 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test'
 
 /**
- * Pre-QA adversarial — 2026-08-07, batch de 5 tickets rebotados por Daniela Amaya el 2026-08-06
+ * Pre-QA adversarial — 2026-08-07, batch de 5 tickets rebotados por Gerencia Test el 2026-08-06
  * mientras estaban en Dev Testing: SCRUM-186 (REQ-123, tabla+modal Proveedores), SCRUM-189
  * (REQ-126 RN1, obligatorios al crear proveedor), SCRUM-204 (REQ-141, ciclo de estados + etiqueta
  * por modalidad), SCRUM-208 (REQ-145/165, visibilidad de recepción parcial + gate de "Recibido"
@@ -19,14 +19,14 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const LIDER_COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
-const LIDER_COMPRAS_PASS  = 'gerencia2@atlantic.com.pa'
-// Nota: mbekhar@atlantic.com.pa (Mark, Gerencia — único aprobador real) NO se usa en esta
+const LIDER_COMPRAS_EMAIL = 'lidercompras@test.com'
+const LIDER_COMPRAS_PASS  = 'lidercompras@test.com'
+// Nota: gerencia3@test.com (Mark, Gerencia — único aprobador real) NO se usa en esta
 // suite — su cuenta real en dev.atlanticerp.ai ya no tiene el password por defecto (mismo gap
 // documentado en el Pre-QA de SCRUM-211 del 2026-08-01), y no corresponde adivinarlo/forzarlo.
 // Ver notas en los tests de SCRUM-204/SCRUM-211 sobre cómo se cubrió el criterio sin su login.
-const BODEGA_EMAIL        = 'almacen@atlantic.com.pa'
-const BODEGA_PASS         = 'almacen@atlantic.com.pa'
+const BODEGA_EMAIL        = 'liderbodega@test.com'
+const BODEGA_PASS         = 'liderbodega@test.com'
 
 const STAMP = Date.now()
 
@@ -329,7 +329,7 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     // Login de Mark con password real no disponible acá (cuenta de Gerencia real, sin password
     // por defecto — mismo gap ya documentado en el Pre-QA de SCRUM-211 del 2026-08-01: "no tengo
     // password válido de ninguna cuenta real de Gerencia"). El comportamiento de
-    // `isBlockedByMarkApproval()`/`approve()` en sí es funcionalidad YA existente (no parte de
+    // `isBlockedByPrimaryApproval()`/`approve()` en sí es funcionalidad YA existente (no parte de
     // este batch) y está cubierta por la suite backend completa (1646/1646 verde tras este
     // cambio, incluye PurchaseOrderLifecycleTest) — acá solo se verifica el bloqueo, que SÍ es
     // parte del batch (REQ-141/143 interactúan con el estado inicial nuevo).

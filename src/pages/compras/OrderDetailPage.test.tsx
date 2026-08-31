@@ -66,8 +66,8 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     id: 42, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Ana',
     status: 'ordenado', next_status: 'en_transito', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
-    estimated_arrival_date: '2026-08-01', requires_mark_approval: false,
-    blocked_by_mark_approval: false, approved_by: null, approved_by_name: null, total_amount: 500, currency: 'USD',
+    estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
+    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 500, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-05T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -236,7 +236,7 @@ describe('OrderDetailPage', () => {
   it('muestra el botón de aprobación de Mark cuando la orden lo requiere y bloquea Avanzar (REQ-143)', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
-      requires_mark_approval: true, blocked_by_mark_approval: true, approved_by: null,
+      requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,
     }))
     renderPage()
 
@@ -248,7 +248,7 @@ describe('OrderDetailPage', () => {
   it('aprobar la orden llama a la mutación de aprobación (REQ-143)', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
-      requires_mark_approval: true, blocked_by_mark_approval: true, approved_by: null,
+      requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,
     }))
     mockedComprasApi.orders.approve.mockResolvedValue(makeDetail({ approved_by: 9 }))
     renderPage()
@@ -263,7 +263,7 @@ describe('OrderDetailPage', () => {
     mockAuthState(['compras.read'])
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
-      requires_mark_approval: true, blocked_by_mark_approval: true, approved_by: null,
+      requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,
     }))
     renderPage()
 
@@ -294,14 +294,14 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail())
     mockedComprasApi.orders.advance.mockRejectedValue({
       isAxiosError: true,
-      response: { status: 422, data: { message: 'Esta orden requiere la aprobación de Mark antes de avanzar.' } },
+      response: { status: 422, data: { message: 'Esta orden requiere la aprobación del aprobador configurado antes de avanzar.' } },
     })
     renderPage()
 
     await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.actions.advanceTo'))
 
-    expect(await screen.findByText('Esta orden requiere la aprobación de Mark antes de avanzar.')).toBeInTheDocument()
+    expect(await screen.findByText('Esta orden requiere la aprobación del aprobador configurado antes de avanzar.')).toBeInTheDocument()
     expect(screen.queryByText('compras:orders.errors.advanceGeneric')).toBeNull()
   })
 
@@ -316,7 +316,7 @@ describe('OrderDetailPage', () => {
     expect(await screen.findByText('compras:orders.errors.advanceGeneric')).toBeInTheDocument()
   })
 
-  // SCRUM-208 (REQ-145, 2026-08-06 — hallazgo Daniela Amaya): `pending_remainder_status` existía
+  // SCRUM-208 (REQ-145, 2026-08-06 — hallazgo Gerencia Test): `pending_remainder_status` existía
   // en la API pero nunca se renderizaba — la orden se veía "completa" aunque quedara mercancía
   // pendiente en otra etapa.
   it('muestra el aviso de remanente pendiente cuando pending_remainder_status no es null', async () => {
@@ -337,7 +337,7 @@ describe('OrderDetailPage', () => {
     expect(screen.queryByText('compras:orders.detail.pendingRemainder')).toBeNull()
   })
 
-  // SCRUM-208 (2026-08-07, segundo hallazgo de Daniela Amaya sobre el fix del 2026-08-06): el
+  // SCRUM-208 (2026-08-07, segundo hallazgo de Gerencia Test sobre el fix del 2026-08-06): el
   // gate de negocio en sí (bloquear el paso final a "Recibido" hasta que el remanente se reciba)
   // es correcto y está pedido en su propio AC — el problema real era que el botón "Avanzar a:
   // Recibido" seguía clickeable en ese caso, así que el usuario disparaba un 422 ya sabido y
@@ -486,7 +486,7 @@ describe('OrderDetailPage — confirmar pendientes a Inventario (SCRUM-208, redi
 })
 
 describe('OrderDetailPage', () => {
-  // SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Daniela Amaya): "Pendiente/Por liquidar" es un
+  // SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Gerencia Test): "Pendiente/Por liquidar" es un
   // único estado interno, pero el texto mostrado depende de la modalidad de la orden.
   it('estado pendiente_liquidar en modalidad directo muestra la etiqueta "Pendiente"', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
@@ -517,18 +517,18 @@ describe('OrderDetailPage', () => {
   it('muestra el mensaje real del backend si el 403 de aprobación indica que no soy Mark', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
-      requires_mark_approval: true, blocked_by_mark_approval: true, approved_by: null,
+      requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,
     }))
     mockedComprasApi.orders.approve.mockRejectedValue({
       isAxiosError: true,
-      response: { status: 403, data: { message: 'Solo Mark puede aprobar esta orden.' } },
+      response: { status: 403, data: { message: 'Solo el aprobador configurado puede aprobar esta orden.' } },
     })
     renderPage()
 
     await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.actions.approve'))
 
-    expect(await screen.findByText('Solo Mark puede aprobar esta orden.')).toBeInTheDocument()
+    expect(await screen.findByText('Solo el aprobador configurado puede aprobar esta orden.')).toBeInTheDocument()
   })
 
   // ── SCRUM-210 (REQ-147, alcance reducido) ────────────────────────────────────────────────

@@ -10,7 +10,7 @@ import { buildSchema, PROVIDER_CATEGORIES, type ProviderFormData } from './Provi
 import type { ProviderCategory } from '@/types/compras'
 
 /**
- * SCRUM-186 (REQ-123, 2026-08-06 — hallazgo Daniela Amaya): la tabla de Proveedores diverge del
+ * SCRUM-186 (REQ-123, 2026-08-06 — hallazgo Gerencia Test): la tabla de Proveedores diverge del
  * mockup `2G__Compras_Proveedores.html` — columnas distintas y "Editar" pasaba los campos a modo
  * edición de inmediato. El flujo esperado es: "Ver detalle" abre un modal en solo-lectura;
  * "Editar" (dentro del modal) habilita los campos editables; "Guardar" persiste y vuelve a

@@ -122,7 +122,7 @@ export default function OrderDetailPage() {
   }
 
   const canEdit = order.status === 'por_aprobar' && canManageOrder
-  // SCRUM-208 (2026-08-07, segundo hallazgo de Daniela Amaya) — el único paso que
+  // SCRUM-208 (2026-08-07, segundo hallazgo de Gerencia Test) — el único paso que
   // `pending_remainder_status` bloquea de verdad es el AVANCE FINAL a "Recibido" (ver
   // `PurchaseOrderController::advance()`); cualquier otra etapa intermedia nunca estuvo
   // bloqueada por esto. Deshabilitar el botón solo en ese caso puntual, en vez de dejar que
@@ -244,7 +244,7 @@ export default function OrderDetailPage() {
           </SummaryField>
         </div>
 
-        {order.requires_mark_approval && (
+        {order.requires_primary_approval && (
           <div className={`px-3 py-2 rounded-lg text-xs mb-3 ${order.approved_by !== null ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
             {order.approved_by !== null
               ? t('compras:orders.detail.markApproved', { name: order.approved_by_name ?? '—' })
@@ -252,11 +252,11 @@ export default function OrderDetailPage() {
           </div>
         )}
 
-        {/* SCRUM-208 (2026-08-06, hallazgo Daniela Amaya): el `status` de la orden podía llegar a
+        {/* SCRUM-208 (2026-08-06, hallazgo Gerencia Test): el `status` de la orden podía llegar a
             "Recibido" mostrando el flujo completo, sin ningún indicio de que una recepción parcial
             dejó mercancía pendiente en otra etapa (`pending_remainder_status`, REQ-165).
 
-            SCRUM-208 (2026-08-07, segundo hallazgo de Daniela Amaya sobre el fix anterior) — el gate
+            SCRUM-208 (2026-08-07, segundo hallazgo de Gerencia Test sobre el fix anterior) — el gate
             en sí (bloquear el paso final a "Recibido" hasta que el 100% de las líneas llegó) es
             correcto y está pedido explícitamente en su propio AC ("la orden solo se considera
             completamente finalizada cuando todas sus líneas hayan alcanzado Recibido"); lo que
@@ -267,7 +267,7 @@ export default function OrderDetailPage() {
             aduana→En tránsito local) nunca estuvo bloqueado por `pending_remainder_status` (ver
             `PurchaseOrderController::advance()`, el gate solo dispara si `$next ===
             STATUS_RECIBIDO`). Fix: el botón se deshabilita directamente en este caso (mismo patrón
-            que `blocked_by_mark_approval` un poco más abajo) en vez de dejar que el usuario dispare
+            que `blocked_by_primary_approval` un poco más abajo) en vez de dejar que el usuario dispare
             un 422 que ya sabemos que va a fallar, y el aviso se reformula para dejar explícito que
             lo ya recibido queda guardado y que el resto del flujo de la orden no se ve afectado. */}
         {/* SCRUM-208 (rediseño 2026-08-15, docs/architecture/scrum208-recepcion-parcial-rediseno.md)
@@ -338,7 +338,7 @@ export default function OrderDetailPage() {
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex gap-2 flex-wrap">
-            {order.requires_mark_approval && order.approved_by === null && canApprove && (
+            {order.requires_primary_approval && order.approved_by === null && canApprove && (
               <Button loading={approve.isPending} onClick={handleApprove}>
                 {t('compras:newOrder.actions.approve')}
               </Button>
@@ -348,7 +348,7 @@ export default function OrderDetailPage() {
             {order.next_status !== null && canManageOrder && (
               <Button
                 variant="outline"
-                disabled={order.blocked_by_mark_approval || blockedFromReceivingByRemainder}
+                disabled={order.blocked_by_primary_approval || blockedFromReceivingByRemainder}
                 loading={advance.isPending}
                 onClick={handleAdvance}
               >

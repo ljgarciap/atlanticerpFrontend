@@ -267,7 +267,7 @@ function ProductsTab({ previewVentas }: {
         )}
       </div>
 
-      {/* SCRUM-234/238 (hallazgo de Daniela Amaya 2026-08-09) — estructura de columnas completa
+      {/* SCRUM-234/238 (hallazgo de Gerencia Test 2026-08-09) — estructura de columnas completa
           del mockup, en el orden que pide el requerimiento. Categoría/Rotación/Bodega(s)/Stock
           mínimo/Proveedor/Por ingresar/En camino pasan a verse en AMBOS modos (decisión de Luis
           2026-08-14, revierte la lectura de REQ-172 PERMISOS del 2026-08-11 — esos 3 campos no son
@@ -365,7 +365,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   const [handlingCost, setHandlingCost] = useState('')
   const [otherCost, setOtherCost] = useState('')
   const [priceFull, setPriceFull] = useState('')
-  // SCRUM-237 (hallazgo de Daniela Amaya 2026-08-09) — Stock mínimo/Rotación se MUESTRAN ahora en
+  // SCRUM-237 (hallazgo de Gerencia Test 2026-08-09) — Stock mínimo/Rotación se MUESTRAN ahora en
   // "Datos generales" (solo lectura, sin botón de editar propio, tal como pide el mockup), pero
   // se mantienen editables acá, dentro del formulario de Precios — no existe hoy ninguna otra
   // pantalla que los edite ("se alimenta de otras pantallas" en la spec no tiene una pantalla real
@@ -378,7 +378,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   // RN4 (REQ-174) — "Información del producto" y "Precios" son 2 secciones independientes, cada
   // una con su propio Editar/Cancelar/Guardar y su propia confirmación antes de aplicar.
   const [editingGeneral, setEditingGeneral] = useState(false)
-  // SCRUM-237 (rebote de Daniela Amaya 2026-08-12) — "Nombre del producto" y "Descripción" pasan
+  // SCRUM-237 (rebote de Gerencia Test 2026-08-12) — "Nombre del producto" y "Descripción" pasan
   // a ser 2 campos totalmente independientes: antes de este ticket ambos leían/escribían la
   // misma columna (`description`), así que editar la Descripción cambiaba el nombre visible del
   // producto en toda la app (tablas, título de este mismo modal, etc.). Ver
@@ -549,7 +549,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
         <div className="flex items-start justify-between mb-4">
           <div>
             {/* SCRUM-237/238 — nombre del producto como título + categoría como subtítulo
-                (hallazgo de Daniela Amaya 2026-08-09). `detail.title` se mantiene como texto
+                (hallazgo de Gerencia Test 2026-08-09). `detail.title` se mantiene como texto
                 accesible (sr-only) — varios tests/QA ya lo usan como señal de "el modal abrió". */}
             <h2 className="text-base font-bold text-slate-900">
               <span className="sr-only">{t('compras:inventory.detail.title')}</span>
@@ -580,7 +580,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
           <Field label={t('compras:inventory.table.enCamino')} value={product.en_camino ?? 0} />
         </div>
 
-        {/* SCRUM-238 (rebote de Daniela Amaya 2026-08-12, comparado contra el mockup real
+        {/* SCRUM-238 (rebote de Gerencia Test 2026-08-12, comparado contra el mockup real
             "Detalle mockup.png" adjunto al ticket) — en modo restringido "Información del
             producto" va ANTES que "Precios", con "Ver ficha técnica" agrupado dentro de esa
             sección (no flotando debajo). El código de las 2 secciones no cambia, solo el orden en
@@ -683,7 +683,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
 
           const productInfoSection = (
             <>
-              {/* SCRUM-237 (hallazgo de Daniela Amaya 2026-08-09) — sección "Información del producto"
+              {/* SCRUM-237 (hallazgo de Gerencia Test 2026-08-09) — sección "Información del producto"
                   (antes "Información general"): Categoría/Código de barras nuevos, orden de campos del
                   mockup, Ficha técnica (documento) al final de la sección. Modo restringido conserva la
                   estructura simple ya validada por QA (SCRUM-238): solo lectura, sin Categoría/Código
@@ -820,7 +820,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
             : <>{pricingSection}{productInfoSection}</>
         })()}
 
-        {/* SCRUM-237 (hallazgo de Daniela Amaya) — "Ficha técnica" como DOCUMENTO (archivo o
+        {/* SCRUM-237 (hallazgo de Gerencia Test) — "Ficha técnica" como DOCUMENTO (archivo o
             link), distinta del bloque de 12 campos estructurados de arriba (ver comentario del
             ticket sobre esta ambigüedad de nombres: 2 conceptos llamados "ficha técnica" en el
             mismo modal). Solo modo Compras — el mockup de Ventas & Diseño no la pide.
@@ -912,7 +912,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
             {t('compras:inventory.pendingInventory.warning', { quantity: product.por_ingresar })}
           </p>
         )}
-        {/* Rebote REQ-427 (Daniela Amaya 2026-08-13) — el detalle de Compras debe reflejar si
+        {/* Rebote REQ-427 (Gerencia Test 2026-08-13) — el detalle de Compras debe reflejar si
             Bodega ya reportó la llegada física, con cantidad y usuario, o si sigue pendiente. */}
         {!restricted && (product.por_ingresar ?? 0) > 0 && (
           product.bodega_confirmation?.awaiting_compras ? (
@@ -1022,7 +1022,7 @@ function Field({ label, value }: { label: string; value: string | number }) {
 const PRODUCT_ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica']
 
 /**
- * SCRUM-240 (REQ-177) — reescritura completa (corrección de Daniela Amaya 2026-08-09/mockup
+ * SCRUM-240 (REQ-177) — reescritura completa (corrección de Gerencia Test 2026-08-09/mockup
  * `2C__Compras_Inventario.html#modal-crear-producto`), actualizada 2026-08-15 tras el rebote del
  * 2026-08-12 (ver memoria `project_estrategia_batch4_compras_bodega_20260815.md`). Decisiones de
  * alcance documentadas acá y en el comentario de Jira del ticket, no resueltas en silencio:
@@ -1033,7 +1033,7 @@ const PRODUCT_ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica'
  *    ver `src/lib/catalogProduct.ts`). Ambos se mandan por separado en el payload.
  *    // TODO: backend batch4 — worktree de Backend Dev en paralelo, columna `name` todavía no
  *    desplegada acá al momento de este commit; reconciliar en Senior Review.
- * 2. "Familia" — RESUELTO 2026-08-15: el rebote de Daniela Amaya en 237/240 confirmó que sí hace
+ * 2. "Familia" — RESUELTO 2026-08-15: el rebote de Gerencia Test en 237/240 confirmó que sí hace
  *    falta poder crear una familia escribiendo un nombre nuevo — `FamilyCombobox`
  *    (`src/components/compras/FamilyCombobox.tsx`, compartido con la edición en
  *    ProductDetailModal más arriba) ofrece "+ Crear familia" cuando el texto no matchea ninguna
@@ -1066,7 +1066,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
 
   // ── Datos generales ──
   const [name, setName] = useState('')
-  // SCRUM-240 (rebote de Daniela Amaya 2026-08-12) — "Descripción" pasa a ser un campo propio,
+  // SCRUM-240 (rebote de Gerencia Test 2026-08-12) — "Descripción" pasa a ser un campo propio,
   // independiente de "Nombre del producto" (antes el modal solo tenía el campo Nombre, que
   // escribía a la única columna `description` existente — ver docblock de este componente).
   const [description, setDescription] = useState('')
@@ -1120,7 +1120,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
 
   const requestClose = () => { if (hasAnyData) setConfirmDiscard(true); else onClose() }
 
-  // SCRUM-426 (rebote de Daniela Amaya 2026-08-13) — la ficha técnica (archivo O link) vuelve a
+  // SCRUM-426 (rebote de Gerencia Test 2026-08-13) — la ficha técnica (archivo O link) vuelve a
   // ser obligatoria para poder crear el producto, ahora forzada también en backend (ver
   // StoreInventoryProductRequest) — esto ya no es solo un candado de UI.
   const hasTechnicalSheet = fichaFile !== null || fichaLink.trim() !== ''
@@ -1190,7 +1190,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
             <input id="cp-name" value={name} onChange={e => setName(e.target.value)} className={inputCls} />
           </div>
 
-          {/* SCRUM-240 (rebote de Daniela Amaya 2026-08-12) — "Descripción" propia, independiente
+          {/* SCRUM-240 (rebote de Gerencia Test 2026-08-12) — "Descripción" propia, independiente
               del Nombre (mismo mockup que pedía un textarea largo aparte, ver docblock arriba). */}
           <div>
             <label htmlFor="cp-description" className="block text-xs font-semibold text-slate-600 mb-1">
@@ -1262,7 +1262,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          {/* SCRUM-240 (rebote de Daniela Amaya 2026-08-12) — combobox de Familia compartido con
+          {/* SCRUM-240 (rebote de Gerencia Test 2026-08-12) — combobox de Familia compartido con
               la edición (ProductDetailModal): permite crear una familia nueva escribiendo su
               nombre, no solo elegir entre las ya existentes. */}
           <FamilyCombobox id="cp-family" value={familyId} onChange={setFamilyId} />

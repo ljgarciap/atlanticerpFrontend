@@ -6,9 +6,9 @@ import { test, expect, Page } from '@playwright/test'
  * SCRUM-362 (REQ-292 captura mensual de comisión + SLA por tipo).
  * Password default = email (BusinessRoleUserSeeder).
  */
-const LIDER_SERVICIOS = 'servicio@atlantic.com.pa'
-const TECNICO_SERVICIOS = 'carlos@atlantic.com.pa'
-const MANAGEMENT = 'daniela@atlantic.com.pa'
+const LIDER_SERVICIOS = 'liderservicios@test.com'
+const TECNICO_SERVICIOS = 'tecnicoservicios@test.com'
+const MANAGEMENT = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')
@@ -20,7 +20,7 @@ async function login(page: Page, email: string) {
 
 async function gotoTechnicians(page: Page) {
   await page.goto('/servicios/tecnicos')
-  await page.waitForSelector('text=Carlos Vergara')
+  await page.waitForSelector('text=Tecnico Servicios Test')
 }
 
 test('SCRUM-324 — REQ-261 tarjetas de estadísticas generales', async ({ page }) => {
@@ -41,20 +41,20 @@ test('SCRUM-326 — REQ-262 toggle Equipo/Agenda no pierde datos ni recarga visi
   await page.screenshot({ path: 'test-results/scrum326-00-agenda-view.png' })
 
   await page.getByText('Equipo', { exact: true }).click()
-  // Si los datos ya estaban cacheados, "Carlos Vergara" debe aparecer YA, sin loading intermedio.
-  await expect(page.getByText('Carlos Vergara')).toBeVisible({ timeout: 1000 })
+  // Si los datos ya estaban cacheados, "Tecnico Servicios Test" debe aparecer YA, sin loading intermedio.
+  await expect(page.getByText('Tecnico Servicios Test')).toBeVisible({ timeout: 1000 })
   await page.screenshot({ path: 'test-results/scrum326-01-back-to-team.png' })
 })
 
-test('SCRUM-362 — has_bonus_plan gate: botón Comisión solo visible en Carlos Vergara', async ({ page }) => {
+test('SCRUM-362 — has_bonus_plan gate: botón Comisión solo visible en Tecnico Servicios Test', async ({ page }) => {
   await login(page, LIDER_SERVICIOS)
   await gotoTechnicians(page)
 
   await expect(page.getByText('Comisión del mes')).toBeVisible()
 
-  // Miguel Castillo / Pedro Santos deben aparecer en pantalla, pero sin botón de Comisión.
-  await expect(page.getByText('Miguel Castillo')).toBeVisible()
-  await expect(page.getByText('Pedro Santos')).toBeVisible()
+  // Garantias Servicios Test / Tecnico Servicios Test 2 deben aparecer en pantalla, pero sin botón de Comisión.
+  await expect(page.getByText('Garantias Servicios Test')).toBeVisible()
+  await expect(page.getByText('Tecnico Servicios Test 2')).toBeVisible()
 
   const commissionButtons = await page.getByText('Comisión del mes').count()
   expect(commissionButtons).toBe(1)

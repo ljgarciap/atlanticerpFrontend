@@ -5,7 +5,7 @@ import ProviderDetailModal from './ProviderDetailModal'
 import { comprasApi } from '@/api/comprasApi'
 import type { ProviderDetail } from '@/types/compras'
 
-// SCRUM-186 (REQ-123, 2026-08-06 — hallazgo Daniela Amaya): "Ver detalle" abre un modal en
+// SCRUM-186 (REQ-123, 2026-08-06 — hallazgo Gerencia Test): "Ver detalle" abre un modal en
 // solo-lectura; "Editar" habilita los campos; "Guardar" persiste y vuelve a solo-lectura;
 // "Cancelar" descarta cambios sin guardar. Última compra/Calificación son siempre solo-lectura.
 

@@ -465,7 +465,7 @@ describe('TicketDetailModal — historial de reagendamientos (SCRUM-804)', () =>
           previous_scheduled_at: '2026-08-10T14:00:00Z', previous_scheduled_ends_at: null,
           new_scheduled_at: '2026-08-15T09:00:00Z', new_scheduled_ends_at: null,
           motivo: 'Cliente pidió mover la visita.',
-          rescheduled_by: { id: 9, first_name: 'Aaron', last_name: 'Leis' },
+          rescheduled_by: { id: 9, first_name: 'Lider Servicios', last_name: 'Test' },
           created_at: '2026-08-10T16:00:00Z',
         },
       ],

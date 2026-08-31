@@ -82,7 +82,7 @@ export default function BodegaInventarioPage() {
             {t('bodega:inventory.actions.goToOrders')}
           </Button>
           {/*
-            SCRUM-433 (REQ-345, rebote de Daniela Amaya 2026-08-13, con video) — "+ Nueva orden de
+            SCRUM-433 (REQ-345, rebote de Gerencia Test 2026-08-13, con video) — "+ Nueva orden de
             compra" navegaba a la BANDEJA de Órdenes Zona Libre (`/bodega/ordenes-zona-libre`),
             una parada intermedia: el usuario tenía que volver a pulsar el botón propio de esa
             bandeja para recién ahí llegar al formulario real. RN1: debe ir DIRECTO al formulario
@@ -285,7 +285,7 @@ function ProductsTab() {
 }
 
 /**
- * SCRUM-418 (REQ-418, rebote de Daniela Amaya 2026-08-12) — extraída de `ProductsTab` para que
+ * SCRUM-418 (REQ-418, rebote de Gerencia Test 2026-08-12) — extraída de `ProductsTab` para que
  * el acordeón de "Familias" (`FamiliesTab` más abajo) reuse EXACTAMENTE la misma tabla de 14
  * columnas (mismo componente, no una segunda implementación que pudiera desincronizarse) al
  * expandir una familia. Dueña de sus propios modales (detalle/bodegas/por servir/en camino/
@@ -478,7 +478,7 @@ function ProductDetailModal({ row, onClose }: { row: BodegaInventoryRow; onClose
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <Card variant="modal" className="w-full max-w-lg max-h-[90vh] overflow-y-auto p-5">
-        {/* Rebote REQ-361/SCRUM-431 (Daniela Amaya 2026-08-13) — el título genérico "Detalle del
+        {/* Rebote REQ-361/SCRUM-431 (Gerencia Test 2026-08-13) — el título genérico "Detalle del
             producto" se reemplaza por el nombre real + categoría (Bloque 1 del mockup), con el
             botón de cerrar alineado a la derecha del nombre. */}
         <div className="flex items-start justify-between mb-1">
@@ -787,7 +787,7 @@ function ConfirmArrivalForm({ productId, onDone }: { productId: number; onDone: 
  * costo/valor total en ningún caso (a diferencia del modo `restricted` opcional de la misma
  * pestaña en Compras).
  *
- * SCRUM-418 (rebote de Daniela Amaya 2026-08-12) — reescrita como ACORDEÓN: antes clickear una
+ * SCRUM-418 (rebote de Gerencia Test 2026-08-12) — reescrita como ACORDEÓN: antes clickear una
  * familia reemplazaba TODA la vista por un "back + lista plana sin encabezados" (se sentía como
  * navegar a otra pantalla, aunque técnicamente fuera el mismo componente sin cambio de ruta). Ahora
  * la lista de familias se mantiene siempre visible; clickear una expande/colapsa su detalle en el

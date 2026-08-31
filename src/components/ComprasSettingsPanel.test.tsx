@@ -23,7 +23,7 @@ const mockedApi = vi.mocked(comprasApi, true)
 
 function makeSettings(overrides: Partial<ComprasSettings> = {}): ComprasSettings {
   return {
-    low_rating_threshold: 40, mark_approver_user_id: null, claim_attention_days: 7,
+    low_rating_threshold: 40, primary_approver_user_id: null, claim_attention_days: 7,
     replacement_margin_threshold: 15,
     similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
     similarity_other_category_penalty: 30, similarity_min_threshold: 25,

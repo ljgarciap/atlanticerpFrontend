@@ -185,7 +185,7 @@ describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
   })
 
   it('REQ-165 (Pre-QA 2026-08-07, SCRUM-208) — el selector de remanente ofrece "ordenado" además de las 4 etapas de envío', async () => {
-    // Hallazgo real del rebote de Daniela Amaya (SCRUM-208, 2026-08-06): el AC pide que las
+    // Hallazgo real del rebote de Gerencia Test (SCRUM-208, 2026-08-06): el AC pide que las
     // etapas de selección cubran "desde ordenado en adelante" — el selector solo tenía las 4
     // etapas de envío (salió de origen/en tránsito/en aduana/en tránsito local), sin ninguna
     // opción para un remanente que todavía no salió del proveedor.
@@ -252,7 +252,7 @@ describe('GoodsReceiptWizardPage — Paso 0, detección de factura (SCRUM-224)',
     expect(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder')).toBeInTheDocument()
   })
 
-  // SCRUM-224 (rebote de Daniela Amaya 2026-08-12, con video) — al entrar desde Logística
+  // SCRUM-224 (rebote de Gerencia Test 2026-08-12, con video) — al entrar desde Logística
   // (REQ-157, orden ya preseleccionada via location.state), el input de archivo y el botón
   // "Detectar automáticamente" desaparecían por completo (el branch `orderId === null` se volvía
   // falso de entrada) — el usuario solo podía adjuntar una factura si primero pulsaba "Cambiar"

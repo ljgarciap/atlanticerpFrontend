@@ -6,8 +6,8 @@ import { test, expect, Page } from '@playwright/test'
 // barras del gráfico. Verifica en vivo contra dev.atlanticerp.ai cuáles hallazgos de
 // docs/pre-qa/gerencia-epic-12tickets-20260824-v4-final.md siguen vigentes tras ese fix.
 
-const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'gerencia3@test.com' // Mark Approver real
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -128,7 +128,7 @@ test('SCRUM-160 Escenario 1 — sigue OK: etiquetas y orden correctos (cerrados 
 })
 
 // ── SCRUM-161/162 — Aprobaciones ────────────────────────────────────────────
-test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un único Mark Approver global (ComprasSettings.mark_approver_user_id), no un rol autorizado por tipo', async ({ page }) => {
+test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un único Mark Approver global (ComprasSettings.primary_approver_user_id), no un rol autorizado por tipo', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)

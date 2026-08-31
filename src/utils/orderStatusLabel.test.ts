@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { orderStatusLabel } from './orderStatusLabel'
 import type { TFunction } from 'i18next'
 
-// SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Daniela Amaya): "Pendiente/Por liquidar" es un único
+// SCRUM-204 (REQ-141, 2026-08-06 — hallazgo Gerencia Test): "Pendiente/Por liquidar" es un único
 // estado interno, pero el texto depende de la modalidad de la orden.
 const t = ((key: string) => key) as TFunction
 

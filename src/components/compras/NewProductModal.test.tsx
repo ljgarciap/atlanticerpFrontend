@@ -127,7 +127,7 @@ describe('NewProductModal — precheck de referencia duplicada (SCRUM-194, REQ-1
     }))
   })
 
-  // SCRUM-768 (hallazgo de Daniela Amaya 2026-08-16) — el backend rebotaba 422
+  // SCRUM-768 (hallazgo de Gerencia Test 2026-08-16) — el backend rebotaba 422
   // "lines.0.new_product.name es obligatorio" porque este modal nunca mandaba `name`, un campo
   // propio desde SCRUM-237/240 (antes se escribía todo a `description`). Regresión cubierta acá
   // para que no vuelva a colarse.

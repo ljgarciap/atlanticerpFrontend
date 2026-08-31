@@ -18,10 +18,10 @@ test.describe.configure({ mode: 'serial' })
 // seguro correr el spec repetidas veces sin colisionar con datos de corridas previas.
 const BASE = 'http://localhost:8090'
 
-const FELIX = 'conta@atlantic.com.pa'
-const YANETH = 'asistente@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
-const DANIELA = 'daniela@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const YANETH = 'asistenteadministrativa@test.com'
+const MARK = 'gerencia3@test.com'
+const DANIELA = 'gerencia@test.com'
 
 const RUN_ID = Date.now().toString()
 

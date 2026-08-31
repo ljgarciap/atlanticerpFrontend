@@ -319,7 +319,7 @@ function PipelineCardTile({ card, highlighted, onClick }: { card: PipelineCard; 
             {card.sales_project.name}
           </p>
         </div>
-        {/* SCRUM-75 — hallazgo de Daniela Amaya en validación (2026-07-21): la etiqueta
+        {/* SCRUM-75 — hallazgo de Gerencia Test en validación (2026-07-21): la etiqueta
             (Diseño/Cotización/Ambos) se guardaba y persistía bien, pero nunca se pintaba en la
             tarjeta del tablero — solo estaba dentro del modal de edición. */}
         {card.sales_project.tag && (

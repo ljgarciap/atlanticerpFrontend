@@ -34,12 +34,12 @@ function makeResult(overrides: Partial<PaymentHistorialResult> = {}): PaymentHis
       {
         id: 1, numero_recibo: 'REC-006', fecha: '2026-06-28T00:00:00Z', cliente: 'Hotel Riu',
         facturas: ['F-0010'], monto_recibido: 500, metodo_pago: 'link_pago', estado: 'esperando_confirmacion',
-        referencia: 'LINK-88213', registrado_por: 'Felix Campos', tiene_comprobante: true,
+        referencia: 'LINK-88213', registrado_por: 'Contabilidad Test', tiene_comprobante: true,
       },
       {
         id: 2, numero_recibo: 'REC-005', fecha: '2026-06-18T00:00:00Z', cliente: 'Grupo Sensei',
         facturas: ['F-0009'], monto_recibido: 4000, metodo_pago: 'transferencia', estado: 'confirmado',
-        referencia: 'TRF-77410', registrado_por: 'Felix Campos', tiene_comprobante: false,
+        referencia: 'TRF-77410', registrado_por: 'Contabilidad Test', tiene_comprobante: false,
       },
     ],
     ...overrides,

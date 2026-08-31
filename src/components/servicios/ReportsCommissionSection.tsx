@@ -24,15 +24,15 @@ function periodLabel(period: { year: number; month: number }, locale: string): s
 }
 
 /**
- * REQ-286 — sección "Comisión — Carlos Vergara" en Reportes, SOLO LECTURA. UI de total+desglose y
+ * REQ-286 — sección "Comisión — Tecnico Servicios Test" en Reportes, SOLO LECTURA. UI de total+desglose y
  * navegación de período calcadas de InternalTechnicianCommissionResultModal.tsx (Batch 10), pero
- * sin id de técnico en la URL — el backend resuelve "Carlos Vergara" del lado servidor (único con
+ * sin id de técnico en la URL — el backend resuelve "Tecnico Servicios Test" del lado servidor (único con
  * plan de comisión activo hoy).
  *
  * Gate en 2 pasos porque este panel no tiene el id del técnico a mano como sí lo tiene
  * InternalTechniciansPage (`canViewCommissionResultFor`): Gerencia/superadmin siempre califican;
  * cualquier otro usuario califica solo si su cuenta está linkeada (`user_id`) al perfil de
- * "Carlos Vergara" en internal_technicians — mismo query key ya cacheado por TanStack Query en
+ * "Tecnico Servicios Test" en internal_technicians — mismo query key ya cacheado por TanStack Query en
  * InternalTechniciansPage (`servicios-internal-technicians`), no se duplica la llamada de red.
  * Si no califica: no se renderiza nada Y la query de comisión nunca se dispara (`enabled: false`).
  */

@@ -23,7 +23,7 @@ vi.mock('@/api/bodegaApi', () => ({
   },
 }))
 
-// SCRUM-458 — "Mark" (`compras_settings.mark_approver_user_id`) es un concepto compartido entre
+// SCRUM-458 — "Mark" (`compras_settings.primary_approver_user_id`) es un concepto compartido entre
 // Compras y Bodega (mismo patrón ya probado en PurchaseOrderPaymentsPanel.test.tsx).
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: { settings: { get: vi.fn() } },
@@ -82,9 +82,9 @@ beforeEach(() => {
   mockedVentasDisenoApi.catalogProductFamilies.list.mockResolvedValue({ data: [] })
   mockedBodegaApi.relocations.list.mockResolvedValue(EMPTY_RELOCATIONS)
   mockedBodegaApi.warehouses.locations.list.mockResolvedValue({ data: [] })
-  // Default: `mark_approver_user_id` sin configurar todavía — Aprobar/Rechazar quedan visibles
+  // Default: `primary_approver_user_id` sin configurar todavía — Aprobar/Rechazar quedan visibles
   // para no bloquear un entorno sin ese ajuste hecho (mismo default que PurchaseOrderPaymentsPanel).
-  mockedComprasApi.settings.get.mockResolvedValue({ mark_approver_user_id: null } as never)
+  mockedComprasApi.settings.get.mockResolvedValue({ primary_approver_user_id: null } as never)
   mockedUseAuthStore.mockReturnValue(1 as never)
 })
 
@@ -101,7 +101,7 @@ describe('BodegasPage', () => {
     await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
   })
 
-  // Mejora SCRUM-752 RN2 (Daniela Amaya 2026-08-13) — rebote sobre el comportamiento anterior
+  // Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — rebote sobre el comportamiento anterior
   // (Visual Review 2026-07-24): antes esta celda mostraba "Ver detalle" deshabilitado en bodegas
   // modo "pendiente" (Zona Libre); ahora no debe existir NINGUNA acción, ni "Reubicar" ni
   // "Ver detalle" — celda vacía.
@@ -330,7 +330,7 @@ describe('BodegasPage', () => {
     expect(mockedBodegaApi.relocations.reject).not.toHaveBeenCalled()
   })
 
-  // SCRUM-458 (rebote de Daniela Amaya 2026-08-13) — Aprobar/Rechazar quedaban visibles para
+  // SCRUM-458 (rebote de Gerencia Test 2026-08-13) — Aprobar/Rechazar quedaban visibles para
   // CUALQUIER perfil de Bodega (ej. Esteban, Líder de Bodega), aunque el backend ya bloqueaba con
   // 403. Ahora deben OCULTARSE (no solo deshabilitarse) para quien no es Mark.
   it('rebote 2026-08-13 — Aprobar/Rechazar quedan ocultos para un perfil de Bodega que no es Mark', async () => {
@@ -347,7 +347,7 @@ describe('BodegasPage', () => {
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
     // Mark es el usuario 99 — el actor logueado (mockedUseAuthStore, default id 1) no lo es.
-    mockedComprasApi.settings.get.mockResolvedValue({ mark_approver_user_id: 99 } as never)
+    mockedComprasApi.settings.get.mockResolvedValue({ primary_approver_user_id: 99 } as never)
 
     renderPage()
     fireEvent.click(await screen.findByText('bodega:warehouses.relocationRequests.openButton'))
@@ -371,7 +371,7 @@ describe('BodegasPage', () => {
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
-    mockedComprasApi.settings.get.mockResolvedValue({ mark_approver_user_id: 1 } as never)
+    mockedComprasApi.settings.get.mockResolvedValue({ primary_approver_user_id: 1 } as never)
     mockedUseAuthStore.mockReturnValue(1 as never)
 
     renderPage()
@@ -381,7 +381,7 @@ describe('BodegasPage', () => {
     expect(screen.getByText('bodega:warehouses.relocationRequests.actions.reject')).toBeInTheDocument()
   })
 
-  // SCRUM-459 (rebote de Daniela Amaya 2026-08-13) — "Ver motivo" era texto estático (solo
+  // SCRUM-459 (rebote de Gerencia Test 2026-08-13) — "Ver motivo" era texto estático (solo
   // tooltip vía `title`), sin ninguna interacción real.
   it('rebote 2026-08-13 — "Ver motivo" es clickeable y muestra el motivo real del rechazo', async () => {
     mockedBodegaApi.warehouses.list.mockResolvedValue({ data: WAREHOUSES })

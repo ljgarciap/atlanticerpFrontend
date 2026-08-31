@@ -27,7 +27,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
     vendedor: 'Mark',
-    asistente: 'Mariano Sandoval',
+    asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: null,
     fecha_entrega_comprometida: '2026-08-01',

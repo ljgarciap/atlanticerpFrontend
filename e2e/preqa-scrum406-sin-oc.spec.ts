@@ -15,7 +15,7 @@ async function login(page, email: string) {
 test('SCRUM-406 — tarjeta sin stock y SIN OC asociada no revienta, no muestra ETA inventada', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 

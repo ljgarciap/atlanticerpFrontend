@@ -6,7 +6,7 @@ import PaymentsPage from './PaymentsPage'
 import { comprasApi } from '@/api/comprasApi'
 import type { PurchaseOrderListResponse, PurchaseOrderSummary } from '@/types/compras'
 
-// SCRUM-250 (corrección de Daniela Amaya, 2026-08-09) — la pantalla de "Pagos a Proveedores"
+// SCRUM-250 (corrección de Gerencia Test, 2026-08-09) — la pantalla de "Pagos a Proveedores"
 // nunca tuvo test dedicado (solo el panel de detalle de orden, PurchaseOrderPaymentsPanel.test.tsx,
 // estaba cubierto). Cubre los 4 gaps reales que Daniela reportó: 5 KPIs dinámicos, búsqueda +
 // filtro de proveedor + "Limpiar filtros", los 5 chips con la nomenclatura correcta
@@ -37,7 +37,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     id: 12, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Yirena',
     status: 'por_aprobar', next_status: 'ordenado', is_critical: false, modality: 'directo',
     shipping_type: null, shipping_cost: null,
-    estimated_arrival_date: null, requires_mark_approval: false, blocked_by_mark_approval: false,
+    estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
     approved_by: null, approved_by_name: null, total_amount: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-01T00:00:00Z',
@@ -74,7 +74,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('PaymentsPage (SCRUM-250, corrección Daniela Amaya)', () => {
+describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
   it('muestra los 5 KPIs dinámicos (no valores fijos)', async () => {
     mockedComprasApi.orders.list.mockResolvedValue(makeResponse({
       payment_kpis: { total_pending_balance: 63600, sin_enviar: 6, por_pagar: 2, parcial: 1, completo: 3 },

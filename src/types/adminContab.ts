@@ -20,7 +20,7 @@ export interface FiscalSettings {
   pac_doc_factura_habilitado: boolean
   pac_doc_nota_credito_habilitado: boolean
   retencion_proveedores_activa: boolean
-  mark_approver_user_id: number | null
+  primary_approver_user_id: number | null
   /** Batch 4 de Facturación (REQ-450) — plazo de crédito que define el vencimiento de facturas
    *  para el panel de Antigüedad de Cartera. Agregado al backend en esa sesión sin campo en esta
    *  pantalla — gap real encontrado por Luis (superadmin, 2026-08-22), corregido acá. */
@@ -34,7 +34,7 @@ export interface FiscalSettings {
 /** Campos editables desde el formulario — excluye los de solo lectura/gobernados por el backend. */
 export type FiscalSettingsPayload = Omit<
   FiscalSettings,
-  'pac_last_sync_at' | 'pac_connection_status' | 'pac_provider' | 'mark_approver_user_id'
+  'pac_last_sync_at' | 'pac_connection_status' | 'pac_provider' | 'primary_approver_user_id'
 >
 
 export interface ItbmsRate {
@@ -308,7 +308,7 @@ export interface InvoiceDetail {
   guia_entrega: { existe: boolean; fecha: string | null }
   cobrabilidad: CobrabilidadEstado
   motivo_incobrable: string | null
-  /** Calculado server-side (`current_user_id === mark_approver_user_id`) — el frontend nunca
+  /** Calculado server-side (`current_user_id === primary_approver_user_id`) — el frontend nunca
    *  decide por su cuenta quién es Mark, mismo criterio de fail-closed que el resto de gates
    *  exclusivos de Mark en este módulo. Undefined/false = no mostrar Aprobar/Rechazar. */
   puede_decidir_incobrable?: boolean
@@ -612,7 +612,7 @@ export interface NotaCreditoResumenMes {
   /** REQ-482 RN2/RN3 — umbral configurable ($5,000 por defecto, Configuración Fiscal) a partir del
    *  cual una nota queda pendiente de aprobación de Mark. Viaja acá para que el formulario nunca lo
    *  hardcodee. */
-  mark_approval_threshold: number
+  primary_approval_threshold: number
 }
 
 // Batch 11 (SCRUM-559→564, REQ-482→487) — submit real del formulario: factura de origen, monto/
@@ -771,7 +771,7 @@ export interface PreviewCorreccionResponse {
   tarjetas: PreviewCorreccionTarjetas
   factura_preview: PreviewCorreccionFactura
   monto: number
-  /** `monto > markApprovalThreshold()` — RN1 REQ-490. Determina el mensaje de confirmación
+  /** `monto > primaryApprovalThreshold()` — RN1 REQ-490. Determina el mensaje de confirmación
    *  ("se generó la factura nueva" vs "queda pendiente de aprobación de Mark, la original sigue
    *  activa"). */
   requiere_aprobacion: boolean
@@ -915,7 +915,7 @@ export interface NotaCreditoDetalle {
   cuenta_bancaria_salida: string | null
 }
 
-/** `PUT /admin-contab/notas-credito/{id}/decision` — REQ-494, exclusivo Mark (`mark_only`).
+/** `PUT /admin-contab/notas-credito/{id}/decision` — REQ-494, exclusivo Mark (`primary_approver_only`).
  *  `motivo_rechazo` obligatorio cuando `approve = false` (RN4), ignorado si `approve = true`. */
 export interface NotaCreditoDecisionPayload {
   approve: boolean
@@ -1024,10 +1024,10 @@ export interface CommissionInternalSummary {
   banner_comisiones_count: number
   banner_comisiones_total: number
   vendedores: CommissionVendorSummary[]
-  /** Calculado server-side (`current_user_id === mark_approver_user_id`) — mismo criterio que
+  /** Calculado server-side (`current_user_id === primary_approver_user_id`) — mismo criterio que
    *  `puede_decidir_incobrable` en Facturación, el frontend nunca decide por su cuenta quién es
    *  Mark. Gatea los botones editar/eliminar/agregar tramo del modal "Tabla de comisión
-   *  escalonada" — el CRUD real (`POST/PUT/DELETE .../tiers`) está gateado por `mark_only` en el
+   *  escalonada" — el CRUD real (`POST/PUT/DELETE .../tiers`) está gateado por `primary_approver_only` en el
    *  backend sin importar lo que muestre la UI. */
   puede_editar_tramos: boolean
 }
@@ -1148,10 +1148,10 @@ export interface CommissionExternalSummary {
   /** Meses con al menos un proyecto, más reciente primero (RN de REQ-509). */
   meses_disponibles: string[]
   arquitectos: ArchitectCommissionRow[]
-  /** Batch 17 (REQ-516 RN4) — calculado server-side (`current_user_id === mark_approver_user_id`),
+  /** Batch 17 (REQ-516 RN4) — calculado server-side (`current_user_id === primary_approver_user_id`),
    *  mismo criterio que `puede_editar_tramos`/`puede_decidir_incobrable` en el resto del módulo:
    *  el frontend nunca decide por su cuenta quién es Mark. Gatea Aprobar/Rechazar en el modal de
-   *  detalle — el endpoint real (`percent/decide`) está gateado por `mark_only` de todos modos. */
+   *  detalle — el endpoint real (`percent/decide`) está gateado por `primary_approver_only` de todos modos. */
   puede_decidir_porcentaje: boolean
 }
 
@@ -1327,7 +1327,7 @@ export interface DailyCashCount {
   cerrado_at: string | null
   aprobado_por: string | null
   aprobado_at: string | null
-  /** Calculado server-side (`current_user_id === mark_approver_user_id`), mismo criterio que
+  /** Calculado server-side (`current_user_id === primary_approver_user_id`), mismo criterio que
    *  `puede_decidir_incobrable`/`puede_editar_tramos` en el resto del módulo — el frontend nunca
    *  decide por su cuenta quién es Mark. NO estaba en el contrato original del ADR (§ Contrato
    *  JSON exacto); se agrega acá por consistencia con el patrón ya establecido en todo el resto de
@@ -1517,7 +1517,7 @@ export interface PettyCashReportDetail {
   fecha_aprobacion: string | null
   grupos: PettyCashGrupo[]
   total_general: number
-  /** Calculado server-side (actor === mark_approver_user_id), mismo criterio que
+  /** Calculado server-side (actor === primary_approver_user_id), mismo criterio que
    *  `DailyCashCount.puede_aprobar` — el frontend nunca decide por su cuenta quién es Mark.
    *  Ausente/`false` = no mostrar "Aprobar reporte". */
   puede_aprobar?: boolean

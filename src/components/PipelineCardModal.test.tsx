@@ -99,7 +99,7 @@ describe('PipelineCardModal', () => {
     expect(screen.getByText('Ana Diaz')).toBeInTheDocument()
   })
 
-  // SCRUM-78 — hallazgo de Daniela Amaya (2026-07-21): antes el formulario era editable apenas
+  // SCRUM-78 — hallazgo de Gerencia Test (2026-07-21): antes el formulario era editable apenas
   // se abría la tarjeta, sin ningún gate — riesgo de cambiar/borrar algo por accidente. Ahora
   // abre siempre en modo vista, con un botón "Editar" explícito.
   it('abre en modo vista — sin Editar, no hay ningún input de texto visible', async () => {
@@ -303,7 +303,7 @@ describe('PipelineCardModal', () => {
     expect(await screen.findByText('Falta la superficie trabajada (m²) antes de mover a Propuesta.')).toBeInTheDocument()
   })
 
-  // SCRUM-677 — Daniela Amaya reportó dos veces (2026-08-03/04, con video) que la alerta de
+  // SCRUM-677 — Gerencia Test reportó dos veces (2026-08-03/04, con video) que la alerta de
   // "dato faltante" quedaba visible para siempre incluso después de completar el dato y
   // guardar/mover la tarjeta con éxito. Causa real: stageError/quoteGateError solo se
   // limpiaban en el onSuccess de SU PROPIA mutación (changeStage / handleCreateQuoteClick),

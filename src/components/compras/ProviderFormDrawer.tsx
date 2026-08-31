@@ -18,7 +18,7 @@ const PHONE_REGEX = /^\+?[0-9\s-]{7,20}$/
 // edición de proveedor pero con flujo de solo-lectura → editar, en vez de un drawer siempre editable.
 export const PROVIDER_CATEGORIES = ['locales', 'zona_libre', 'china', 'europa', 'online'] as const
 
-// REQ-126 RN1 (realineado SCRUM-189, 2026-08-06 — hallazgo Daniela Amaya): al CREAR, obligatorios
+// REQ-126 RN1 (realineado SCRUM-189, 2026-08-06 — hallazgo Gerencia Test): al CREAR, obligatorios
 // nombre, categoría y país, más al menos un medio de contacto (WhatsApp/Teléfono/Correo). Al
 // EDITAR, categoría y país siguen siendo opcionales — hay un caso protegido (Senior Review
 // 2026-07-30) donde vaciar `category` de un proveedor ya creado debe poder guardarse (recalcula

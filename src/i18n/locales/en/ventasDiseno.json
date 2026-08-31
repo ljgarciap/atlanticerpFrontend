@@ -223,7 +223,7 @@
     "partner": "Partner Price",
     "premium": "Premium Rate",
     "none": "Not set",
-    "partnerLocked": "Only Mark can assign Partner Price."
+    "partnerLocked": "Only users with the Partner Price permission can assign it."
   },
   "clients": {
     "title": "Clients",

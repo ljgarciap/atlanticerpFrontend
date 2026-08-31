@@ -18,8 +18,8 @@ import { execSync } from 'node:child_process'
  * hardcodeados de una corrida anterior.
  */
 
-const LIDER_COMPRAS_EMAIL = 'gerencia2@atlantic.com.pa'
-const LIDER_COMPRAS_PASS = 'gerencia2@atlantic.com.pa'
+const LIDER_COMPRAS_EMAIL = 'lidercompras@test.com'
+const LIDER_COMPRAS_PASS = 'lidercompras@test.com'
 // Candidato de "rol sin permiso de edición" investigado en vivo, no asumido: el módulo Compras
 // hoy en el sistema SOLO es visible (`modules.compras.view`) para `lider_compras`/`management`,
 // y AMBOS security levels que lo ven tienen `can_edit=true` (confirmado con query directa a
@@ -29,8 +29,8 @@ const LIDER_COMPRAS_PASS = 'gerencia2@atlantic.com.pa'
 // routes/compras.php) — exactamente el mismo puente que usa el botón "Ver orden" del panel "Por
 // recibir" de Bodega Home (SCRUM-371/REQ-301). Confirmado en vivo: GET 200, PATCH
 // advance/liquidate y PUT update devuelven 403 con este mismo token.
-const BODEGA_EMAIL = 'almacen@atlantic.com.pa'
-const BODEGA_PASS = 'almacen@atlantic.com.pa'
+const BODEGA_EMAIL = 'liderbodega@test.com'
+const BODEGA_PASS = 'liderbodega@test.com'
 
 interface Fixture {
   stamp: number
@@ -62,28 +62,28 @@ $provIntl = \\App\\Modules\\Compras\\Models\\Provider::create(['name' => "PreQA7
 $prod1 = \\App\\Modules\\VentasDiseno\\Models\\CatalogProduct::create(['reference' => "PREQA736-REF1-{$stamp}", 'factory_reference' => "PREQA736-FAB1-{$stamp}", 'description' => 'PreQA736 Lampara Normal', 'price_full' => 100, 'cost' => 50, 'is_active' => true]);
 $prodDoomed = \\App\\Modules\\VentasDiseno\\Models\\CatalogProduct::create(['reference' => "PREQA736-DOOMED-{$stamp}", 'factory_reference' => "PREQA736-DOOMED-FAB-{$stamp}", 'description' => 'PreQA736 Producto A Eliminar', 'price_full' => 75, 'cost' => 40, 'is_active' => true]);
 
-$orderA = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'en_transito_local', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 800, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()->subDays(3), 'en_transito_local_at' => now()]);
+$orderA = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'en_transito_local', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 800, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()->subDays(3), 'en_transito_local_at' => now()]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderA->id, 'catalog_product_id' => $prod1->id, 'quantity' => 8, 'unit_cost' => 100, 'subtotal' => 800]);
 $agency = \\App\\Modules\\Compras\\Models\\LiquidationAgency::create(['name' => "PreQA736 Agencia {$stamp}"]);
 $orderA->update(['liquidation_agency_id' => $agency->id]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderPayment::create(['purchase_order_id' => $orderA->id, 'amount' => 300, 'payment_proof_storage_key' => 'preqa736/fake-proof.pdf', 'registered_by' => $owner->id]);
 
-$orderB = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'ordenado', 'status_changed_at' => now(), 'modality' => 'directo', 'shipping_type' => 'terrestre', 'who_pays_shipping' => 'cliente', 'total_amount' => 200, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()]);
+$orderB = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'ordenado', 'status_changed_at' => now(), 'modality' => 'directo', 'shipping_type' => 'terrestre', 'who_pays_shipping' => 'cliente', 'total_amount' => 200, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderB->id, 'catalog_product_id' => $prod1->id, 'quantity' => 2, 'unit_cost' => 100, 'subtotal' => 200]);
 
-$orderC = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'recibido', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 100, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()->subDays(5), 'en_transito_local_at' => now()->subDays(1)]);
+$orderC = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'recibido', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 100, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()->subDays(5), 'en_transito_local_at' => now()->subDays(1)]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderC->id, 'catalog_product_id' => $prod1->id, 'quantity' => 1, 'unit_cost' => 100, 'subtotal' => 100]);
 
-$orderF = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'por_aprobar', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'aereo', 'who_pays_shipping' => 'atlantic', 'total_amount' => 500, 'currency' => 'USD', 'requires_mark_approval' => true]);
+$orderF = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'por_aprobar', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'aereo', 'who_pays_shipping' => 'atlantic', 'total_amount' => 500, 'currency' => 'USD', 'requires_primary_approval' => true]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderF->id, 'catalog_product_id' => $prod1->id, 'quantity' => 5, 'unit_cost' => 100, 'subtotal' => 500]);
 
-$orderE = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'ordenado', 'status_changed_at' => now(), 'modality' => 'directo', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 75, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()]);
+$orderE = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provIntl->id, 'created_by' => $owner->id, 'status' => 'ordenado', 'status_changed_at' => now(), 'modality' => 'directo', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 75, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderE->id, 'catalog_product_id' => $prodDoomed->id, 'quantity' => 1, 'unit_cost' => 75, 'subtotal' => 75]);
 $prodDoomed->delete();
 
 // Clon de Orden A, dedicado a Escenario 5 (rol de solo lectura) -- Escenario 2 avanza Orden A de
 // verdad, así que este test de permisos necesita su propia orden con next_status garantizado.
-$orderG = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'en_transito_local', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 800, 'currency' => 'USD', 'requires_mark_approval' => false, 'ordenado_at' => now()->subDays(3), 'en_transito_local_at' => now()]);
+$orderG = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'en_transito_local', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 800, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()->subDays(3), 'en_transito_local_at' => now()]);
 \\App\\Modules\\Compras\\Models\\PurchaseOrderLine::create(['purchase_order_id' => $orderG->id, 'catalog_product_id' => $prod1->id, 'quantity' => 8, 'unit_cost' => 100, 'subtotal' => 800]);
 $orderG->update(['liquidation_agency_id' => $agency->id]);
 

@@ -17,7 +17,7 @@ import type { ReportGranularity } from '@/types/compras'
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend)
 
 /**
- * SCRUM-263 (hallazgo de Daniela Amaya 2026-08-10) — el mockup pide el valor $ sobre cada barra;
+ * SCRUM-263 (hallazgo de Gerencia Test 2026-08-10) — el mockup pide el valor $ sobre cada barra;
  * `chart.js` no lo hace de fábrica y no hay `chartjs-plugin-datalabels` en el proyecto todavía
  * (evita sumar una dependencia nueva para un solo gráfico — "Nunca instalar dependencias sin
  * verificar compatibilidad", ver CLAUDE.md raíz). Plugin propio, mínimo, solo para este chart.
@@ -106,7 +106,7 @@ export default function ReportsPage() {
                 layout: { padding: { top: 20 } },
                 plugins: { legend: { display: false } },
                 scales: {
-                  // SCRUM-263 (rebote de Daniela Amaya 2026-08-12, contradictorio — "horizontales"
+                  // SCRUM-263 (rebote de Gerencia Test 2026-08-12, contradictorio — "horizontales"
                   // en la descripción, "verticales" en el criterio de aceptación; decisión ya
                   // tomada con Luis en el daily 2026-08-14, ver memoria del batch: sacar AMBAS
                   // líneas de grilla, apoyándose en `barValueLabelsPlugin` (valor $ sobre cada
@@ -276,7 +276,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              {/* SCRUM-268 (corrección de Daniela Amaya) — barra de comparación visual Liquidados
+              {/* SCRUM-268 (corrección de Gerencia Test) — barra de comparación visual Liquidados
                   vs Por liquidar, proporcional; ambos en 0 muestra la barra vacía (gris) en vez de
                   dividir por cero. */}
               {(() => {

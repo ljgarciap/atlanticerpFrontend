@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Pre-QA — SCRUM-765 (mejora nueva, Daniela Amaya 2026-08-15): botón "Ver" en el detalle de un
+// Pre-QA — SCRUM-765 (mejora nueva, Gerencia Test 2026-08-15): botón "Ver" en el detalle de un
 // proyecto de Final Stage (Inicio) que lleva directo al Pipeline, filtrado/localizado en ese
 // proyecto. Se promueve a spec permanente porque toca un gate de navegación (deep-link
 // ?card=<id>) compartido con Lista de Proyectos.

@@ -11,10 +11,10 @@ import { execSync } from 'node:child_process'
 // vez de asumir un pedido pre-sembrado a mano (que se pierde en la siguiente corrida, o si otra
 // sesion lo despuebla como paso en esta misma sesion).
 
-const FELIX = 'conta@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
+const FELIX = 'contabilidad@test.com'
+const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
-const MILENA = 'milena.e@grupolafayette.com'
+const MILENA = 'vendedordisenador@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -32,17 +32,17 @@ async function goToComisiones(page: Page): Promise<void> {
   await page.waitForTimeout(1200)
 }
 
-test('REQ-503/505 — Neil Quiel: NC visible con referencia, agrupacion por mes con arrastre', async ({ page }) => {
+test('REQ-503/505 — Vendedor Disenador Test 2: NC visible con referencia, agrupacion por mes con arrastre', async ({ page }) => {
   const ok = await login(page, FELIX)
   expect(ok).toBeTruthy()
   await goToComisiones(page)
 
-  // filtrar a Neil Quiel
+  // filtrar a Vendedor Disenador Test 2
   const vendorSelect = page.locator('select').nth(1)
-  await vendorSelect.selectOption({ label: 'Neil Quiel' })
+  await vendorSelect.selectOption({ label: 'Vendedor Disenador Test 2' })
   await page.waitForTimeout(900)
 
-  const row = page.locator('td', { hasText: 'Neil Quiel' }).first()
+  const row = page.locator('td', { hasText: 'Vendedor Disenador Test 2' }).first()
   await expect(row).toBeVisible()
   await row.click()
   await page.waitForTimeout(600)
@@ -69,9 +69,9 @@ test('REQ-507 — estado de cuenta: mes en curso (3 totales) vs mes cerrado (sol
   await goToComisiones(page)
 
   const vendorSelect = page.locator('select').nth(1)
-  await vendorSelect.selectOption({ label: 'Neil Quiel' })
+  await vendorSelect.selectOption({ label: 'Vendedor Disenador Test 2' })
   await page.waitForTimeout(900)
-  await page.locator('td', { hasText: 'Neil Quiel' }).first().click()
+  await page.locator('td', { hasText: 'Vendedor Disenador Test 2' }).first().click()
   await page.waitForTimeout(600)
 
   const verEstadoCuenta = page.getByText('Ver estado de cuenta', { exact: false })
@@ -107,7 +107,7 @@ test('REQ-507 — estado de cuenta: mes en curso (3 totales) vs mes cerrado (sol
   // la fila puede seguir expandida de antes (expandedVendor persiste entre cambios de mes) — solo
   // hacer click si el boton "Ver estado de cuenta" todavia no esta visible
   if (!(await page.getByText('Ver estado de cuenta', { exact: false }).isVisible().catch(() => false))) {
-    await page.locator('td', { hasText: 'Neil Quiel' }).first().click()
+    await page.locator('td', { hasText: 'Vendedor Disenador Test 2' }).first().click()
     await page.waitForTimeout(600)
   }
   await page.getByText('Ver estado de cuenta', { exact: false }).click()
@@ -151,7 +151,7 @@ test('PERMISOS — Milena (vendedor) solo ve su propia fila, sin selector de ven
   const selects = page.locator('select')
   await expect(selects).toHaveCount(1) // solo el select de mes, sin selector de vendedor
   await expect(page.getByText('Exportar', { exact: false })).toHaveCount(0)
-  await expect(page.getByText('Kayra Milena Estrada', { exact: false }).first()).toBeVisible()
+  await expect(page.getByText('Vendedor Disenador Test', { exact: false }).first()).toBeVisible()
 })
 
 test('ICONOGRAFIA — sin emoji en toda la pantalla de Comisiones Internas', async ({ page }) => {
@@ -166,11 +166,11 @@ test('ICONOGRAFIA — sin emoji en toda la pantalla de Comisiones Internas', asy
 })
 
 test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', () => {
-  // pedido_id (pipeline_cards.id) usado para este test — owner Idmar Hernandez
-  // (idmar@atlantic.com.pa), amount=549.27, mes de cierre agosto 2026. Compartido con
-  // Bernardo Gomez.
+  // pedido_id (pipeline_cards.id) usado para este test — owner Vendedor Disenador Test 10
+  // (vendedordisenador10@test.com), amount=549.27, mes de cierre agosto 2026. Compartido con
+  // Vendedor Disenador Test 9.
   const SHARED_PEDIDO_ID = 184
-  const SHARED_WITH_USER_ID = 42 // Bernardo Gomez
+  const SHARED_WITH_USER_ID = 42 // Vendedor Disenador Test 9
 
   function sshTinker(phpExpr: string): void {
     const escaped = phpExpr.replace(/"/g, '\\"')
@@ -206,25 +206,25 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
     await goToComisiones(page)
 
     const vendorSelect = page.locator('select').nth(1)
-    await vendorSelect.selectOption({ label: 'Idmar Hernandez' })
+    await vendorSelect.selectOption({ label: 'Vendedor Disenador Test 10' })
     await page.waitForTimeout(900)
-    await page.locator('td', { hasText: 'Idmar Hernandez' }).first().click()
+    await page.locator('td', { hasText: 'Vendedor Disenador Test 10' }).first().click()
     await page.waitForTimeout(600)
     await page.screenshot({ path: 'e2e/.tmp/b15-02-idmar-shared.png', fullPage: true })
     const expandedIdmar = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
     await expect(expandedIdmar.getByText('Compartido con', { exact: false })).toBeVisible()
-    await expect(expandedIdmar.getByText('Bernardo Gomez', { exact: false })).toBeVisible()
+    await expect(expandedIdmar.getByText('Vendedor Disenador Test 9', { exact: false })).toBeVisible()
     await expect(expandedIdmar.getByText('549.27', { exact: false })).toBeVisible() // total del proyecto completo
     await expect(expandedIdmar.getByText('274.64', { exact: false }).first()).toBeVisible() // su parte
 
-    await vendorSelect.selectOption({ label: 'Bernardo Gomez' })
+    await vendorSelect.selectOption({ label: 'Vendedor Disenador Test 9' })
     await page.waitForTimeout(900)
-    await page.locator('td', { hasText: 'Bernardo Gomez' }).first().click()
+    await page.locator('td', { hasText: 'Vendedor Disenador Test 9' }).first().click()
     await page.waitForTimeout(600)
     await page.screenshot({ path: 'e2e/.tmp/b15-03-bernardo-shared.png', fullPage: true })
     const expandedBernardo = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
     await expect(expandedBernardo.getByText('Compartido con', { exact: false })).toBeVisible()
-    await expect(expandedBernardo.getByText('Idmar Hernandez', { exact: false })).toBeVisible()
+    await expect(expandedBernardo.getByText('Vendedor Disenador Test 10', { exact: false })).toBeVisible()
     await expect(expandedBernardo.getByText('274.64', { exact: false }).first()).toBeVisible()
   })
 })

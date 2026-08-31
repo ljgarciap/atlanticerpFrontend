@@ -14,7 +14,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose, IcoCheck, IcoAlertTriangle, IcoBarChart } from '@/components/icons'
 import type { GeneralCountChip, GeneralCountDuplicateWarning, GeneralCountLine, GeneralCountRow } from '@/types/bodega'
 
-/** SCRUM-797 (rebote de Daniela Amaya 2026-08-27) — 409 estructurado que devuelven
+/** SCRUM-797 (rebote de Gerencia Test 2026-08-27) — 409 estructurado que devuelven
  * `POST /general-counts` y `POST /general-counts/{id}/submit`: un elemento por producto en
  * conflicto real (ya no un único conteo bloqueando toda la bodega). */
 function duplicatesFrom(err: unknown): GeneralCountDuplicateWarning[] {
@@ -24,10 +24,10 @@ function duplicatesFrom(err: unknown): GeneralCountDuplicateWarning[] {
   return []
 }
 
-// SCRUM-466 (REQ-396, rebote de Daniela Amaya 2026-08-14) — "Realizar ajuste" debe verse
+// SCRUM-466 (REQ-396, rebote de Gerencia Test 2026-08-14) — "Realizar ajuste" debe verse
 // EXCLUSIVAMENTE para el Líder de Bodega, no para Mark ni ningún otro perfil de Bodega. A
 // diferencia de Aprobar/Rechazar de este mismo panel (gateados solo por identidad de persona,
-// `mark_approver_user_id`, sin equivalente de rol en el JWT — ver docblock de `RowAction` abajo),
+// `primary_approver_user_id`, sin equivalente de rol en el JWT — ver docblock de `RowAction` abajo),
 // acá SÍ hay un campo confiable: `role` en el JWT ES el `role_key` real
 // (`JwtClaimsBuilder` → `$user->role->key`), confirmado con el mismo criterio ya usado en
 // `OrderCardTile.tsx` para "Asignar Repartidor" (`BodegaRoles::LIDER_BODEGA` = `'lider_bodega'`).
@@ -45,7 +45,7 @@ export default function BodegaInventarioGeneralPage() {
   const { t } = useTranslation(['common', 'bodega'])
   const navigate = useNavigate()
 
-  // SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — "Continuar" en la bandeja de
+  // SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — "Continuar" en la bandeja de
   // Conteos generales retoma un borrador (pendiente_evaluacion/evaluado) en el panel "Nuevo
   // conteo general" de arriba, con sus datos ya capturados. Estado levantado al padre porque
   // ambos paneles son hoy componentes hermanos independientes.
@@ -119,7 +119,7 @@ function NewCountPanel({ resume, onResumeConsumed }: {
 
   const submitRef = useRef(false)
 
-  // SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — "Continuar" desde la bandeja carga
+  // SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — "Continuar" desde la bandeja carga
   // el conteo EXISTENTE (mismo id, mismas líneas ya creadas) en vez de disparar otro
   // `POST .../general-counts` para la misma bodega. `evaluated` arranca en `true` si el borrador
   // ya pasó por `evaluate` (estado `evaluado`, `cantidad_contada`/`diferencia` ya poblados por el
@@ -376,7 +376,7 @@ function NewCountPanel({ resume, onResumeConsumed }: {
   )
 }
 
-/** SCRUM-797 (rebote de Daniela Amaya 2026-08-27) — mismo patrón visual que `CruceConfirmModal`
+/** SCRUM-797 (rebote de Gerencia Test 2026-08-27) — mismo patrón visual que `CruceConfirmModal`
  * (nunca `confirm()` nativo), ahora con la lista real de productos en conflicto (antes un único
  * conteo bloqueaba toda la bodega, ver `AdjustmentDuplicateModal` en SolicitudAjustePage.tsx para
  * el mismo patrón de lista ya usado en Solicitud de Ajuste). */
@@ -585,7 +585,7 @@ function CountsTrayPanel({ onContinue }: { onContinue: (row: GeneralCountRow) =>
   )
 }
 
-/** SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — confirmación antes de borrar un
+/** SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — confirmación antes de borrar un
  * conteo en borrador. Modal propio, nunca `confirm()` nativo (mismo criterio que
  * `CruceConfirmModal` de arriba — invisible para la automatización de Playwright). */
 function ConfirmDeleteCountModal({ row, deleting, onConfirm, onCancel }: {
@@ -619,11 +619,11 @@ function ConfirmDeleteCountModal({ row, deleting, onConfirm, onCancel }: {
 }
 
 /**
- * SCRUM-463 (rebote de Daniela Amaya 2026-08-14) — reemplaza el candado decorativo de
+ * SCRUM-463 (rebote de Gerencia Test 2026-08-14) — reemplaza el candado decorativo de
  * SCRUM-465 Escenario 3: Aprobar/Rechazar quedaban visibles/clicables para CUALQUIER perfil de
  * Bodega, con un candado (`IcoLock`) como única afordancia — el backend sí rechazaba (403) a
  * quien no fuera Mark, pero el botón seguía pareciendo funcional. Ahora `GeneralCountController::
- * index()` expone `can_approve` (si el usuario actual ES Mark, `mark_approver_user_id`) — con
+ * index()` expone `can_approve` (si el usuario actual ES Mark, `primary_approver_user_id`) — con
  * eso el frontend puede ocultar los botones por completo para todos los demás, en vez de confiar
  * en un candado + el 403 del backend como única defensa real.
  */
@@ -650,7 +650,7 @@ function RowAction({ row, canApprove, onApprove, approving, onReject, onApply, a
     </button>
   )
 
-  // SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — un conteo que quedó en borrador
+  // SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — un conteo que quedó en borrador
   // (nunca evaluado) o evaluado pero nunca enviado a aprobación quedaba inerte en esta tabla, sin
   // ninguna acción disponible (caía al "—" del final de esta función). Aplica tanto si nunca se
   // evaluó (`pendiente_evaluacion`) como si se evaluó pero no se envió (`evaluado`).
@@ -717,7 +717,7 @@ function RowAction({ row, canApprove, onApprove, approving, onReject, onApply, a
         </div>
       )
     }
-    // SCRUM-466 (rebote de Daniela Amaya 2026-08-14) — exclusivo del Líder de Bodega (ver
+    // SCRUM-466 (rebote de Gerencia Test 2026-08-14) — exclusivo del Líder de Bodega (ver
     // constante LIDER_BODEGA_ROLE arriba), OCULTO (no solo deshabilitado) para Mark y cualquier
     // otro perfil de Bodega.
     if (!isLiderBodega) {

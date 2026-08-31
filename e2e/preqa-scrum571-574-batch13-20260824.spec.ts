@@ -31,10 +31,10 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
-const FELIX = 'conta@atlantic.com.pa'
-const FELIX_PW = 'conta@atlantic.com.pa'
-const MARK = 'mbekhar@atlantic.com.pa'
-const MARK_PW = 'mbekhar@atlantic.com.pa' // default (email-como-password) — NO la del prompt de despacho, ver docblock arriba
+const FELIX = 'contabilidad@test.com'
+const FELIX_PW = 'contabilidad@test.com'
+const MARK = 'gerencia3@test.com'
+const MARK_PW = 'gerencia3@test.com' // default (email-como-password) — NO la del prompt de despacho, ver docblock arriba
 
 async function login(page: Page, email: string, password: string) {
   await page.context().clearCookies()
@@ -171,6 +171,6 @@ test('REQ-494 RN3 — NC-0011 (aprobada) muestra quién aprobó y cuándo', asyn
   await login(page, FELIX, FELIX_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0011')
-  await expect(page.getByText(/Mark Bekhar/i).first()).toBeVisible({ timeout: 8000 })
+  await expect(page.getByText(/Gerencia Test 3/i).first()).toBeVisible({ timeout: 8000 })
   await page.screenshot({ path: 'e2e/.tmp/preqa-b13-nc0011-aprobado-por.png' })
 })

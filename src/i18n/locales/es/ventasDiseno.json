@@ -223,7 +223,7 @@
     "partner": "Precio Socio",
     "premium": "Tarifa Premium",
     "none": "Sin definir",
-    "partnerLocked": "Solo Mark puede asignar Precio Socio."
+    "partnerLocked": "Solo quien tenga el permiso de Precio Socio puede asignarlo."
   },
   "clients": {
     "title": "Clientes",

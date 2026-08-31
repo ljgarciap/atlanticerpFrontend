@@ -21,7 +21,7 @@ function order(overrides: Partial<OrderCard> = {}): OrderCard {
   return {
     id: 24, order_number: '2401', order_type: 'pedido', stage: 'despachado',
     proyecto: 'Torre Azul', cliente: 'Constructora Pacífico', vendedor: 'Mark',
-    asistente: 'Mariano Sandoval', picker: 'Apolonio Gonzalez', repartidor: 'Gary Arrocha',
+    asistente: 'Asistente Bodega Test 2', picker: 'Ayudante General Bodega Test', repartidor: 'Transporte Test',
     fecha_entrega_comprometida: '2026-08-01', is_atrasado: false, is_sin_stock: false,
     eta_proveedor: null, invoice_ready: true,
     family: { sequence_in_family: null, total_in_family: null, badge: null },
@@ -40,14 +40,14 @@ beforeEach(() => {
   vi.clearAllMocks()
   mutateMock = vi.fn()
   mockedUseTeamMembersByRole.mockReturnValue({
-    data: { data: [{ id: 30, name: 'Gary Arrocha' }, { id: 31, name: 'Otro Repartidor' }] },
+    data: { data: [{ id: 30, name: 'Transporte Test' }, { id: 31, name: 'Otro Repartidor' }] },
   } as unknown as ReturnType<typeof useTeamMembersByRole>)
   mockedUseRegisterSignedGuide.mockReturnValue({ mutate: mutateMock, isPending: false } as unknown as ReturnType<typeof useRegisterSignedGuide>)
 })
 
 describe('RegisterSignedGuideModal', () => {
   it('preselecciona "quién entregó" con el repartidor ya asignado al pedido (match por nombre)', () => {
-    render(<RegisterSignedGuideModal order={order({ repartidor: 'Gary Arrocha' })} onClose={vi.fn()} />)
+    render(<RegisterSignedGuideModal order={order({ repartidor: 'Transporte Test' })} onClose={vi.fn()} />)
 
     const select = screen.getByTestId('signed-guide-courier-select') as HTMLSelectElement
     expect(select.value).toBe('30')
@@ -84,7 +84,7 @@ describe('RegisterSignedGuideModal', () => {
   })
 
   it('con datos válidos, dispara useRegisterSignedGuide con delivered_by_courier_id/received_by_name/file', () => {
-    render(<RegisterSignedGuideModal order={order({ repartidor: 'Gary Arrocha' })} onClose={vi.fn()} />)
+    render(<RegisterSignedGuideModal order={order({ repartidor: 'Transporte Test' })} onClose={vi.fn()} />)
 
     fireEvent.change(screen.getByTestId('signed-guide-received-by-input'), { target: { value: 'María Fernández' } })
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
@@ -106,7 +106,7 @@ describe('RegisterSignedGuideModal', () => {
     mutateMock.mockImplementation((_vars, { onError }) => {
       onError({ isAxiosError: true, response: { status: 422, data: { message: 'El pedido no está en la etapa Despachado.', errors: { order: ['El pedido no está en la etapa Despachado.'] } } } })
     })
-    render(<RegisterSignedGuideModal order={order({ repartidor: 'Gary Arrocha' })} onClose={vi.fn()} />)
+    render(<RegisterSignedGuideModal order={order({ repartidor: 'Transporte Test' })} onClose={vi.fn()} />)
 
     fireEvent.change(screen.getByTestId('signed-guide-received-by-input'), { target: { value: 'María Fernández' } })
     const input = document.querySelector('input[type="file"]') as HTMLInputElement

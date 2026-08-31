@@ -172,7 +172,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // SCRUM-500 — administración de umbrales de Bodega, mismo gate estricto que arriba.
   const canSeeBodegaSettings = usePermission('superadmin.all')
 
-  // SCRUM-711, 3ra vuelta — causa raíz real del bug reportado por Mark Bekhar (video
+  // SCRUM-711, 3ra vuelta — causa raíz real del bug reportado por Gerencia Test 3 (video
   // 2026-07-31, login fresco): esto NO tiene relación con `sidebar-collapsed` (el ancho del
   // sidebar completo, ya arreglado en rondas 1 y 2) — es un mecanismo totalmente aparte, el
   // acordeón de cada SECCIÓN del menú (ej. "VENTAS & DISEÑO", "CONFIGURACIÓN"). Antes de este

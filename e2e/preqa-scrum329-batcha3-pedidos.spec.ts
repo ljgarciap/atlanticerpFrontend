@@ -15,7 +15,7 @@ async function login(page, email: string) {
 test('Pedidos — encabezado, contador real, botones (SCRUM-375/404)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -35,7 +35,7 @@ test('Pedidos — encabezado, contador real, botones (SCRUM-375/404)', async ({ 
 })
 
 test('Pedidos — panel de carga por asistente (SCRUM-376)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   const panel = page.getByTestId('assistant-load-panel')
@@ -46,7 +46,7 @@ test('Pedidos — panel de carga por asistente (SCRUM-376)', async ({ page }) =>
 })
 
 test('Pedidos — filtros combinables + doble clic en chip (SCRUM-379/380)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -70,7 +70,7 @@ test('Pedidos — filtros combinables + doble clic en chip (SCRUM-379/380)', asy
 })
 
 test('Pedidos — Kanban 7 etapas en orden (SCRUM-381)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   const board = page.getByTestId('pedidos-board')
@@ -85,7 +85,7 @@ test('Pedidos — Kanban 7 etapas en orden (SCRUM-381)', async ({ page }) => {
 })
 
 test('Pedidos — tarjeta: alerta atrasado + familia + factura pasiva (SCRUM-382/397/405)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/board-cards-detail.png', fullPage: true })
@@ -103,7 +103,7 @@ test('Pedidos — botones de transición deshabilitados, nunca pegan a endpoint 
       requestsToMutationEndpoints.push(url)
     }
   })
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -119,7 +119,7 @@ test('Pedidos — botones de transición deshabilitados, nunca pegan a endpoint 
 })
 
 test('Pedidos — modal Ver Detalle: contacto/direccion/ref fabrica reales (SCRUM-402, regresion Senior Review)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -142,7 +142,7 @@ test('Pedidos — modal Ver Detalle: contacto/direccion/ref fabrica reales (SCRU
 test('Pedidos — recargar con modal abierto no rompe (foco de ruptura)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   await page.getByTestId('order-card-27').click()
@@ -156,7 +156,7 @@ test('Pedidos — recargar con modal abierto no rompe (foco de ruptura)', async 
 })
 
 test('Pedidos — Guia de Entrega: sin firmar en blanco, firmada muestra nombre (SCRUM-400 RN1/RN2)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 
@@ -180,7 +180,7 @@ test('Pedidos — Guia de Entrega: sin firmar en blanco, firmada muestra nombre 
 })
 
 test('Pedidos — grep visual de emoji en la UI real (regla SCRUM-56)', async ({ page }) => {
-  await login(page, 'almacen@atlantic.com.pa')
+  await login(page, 'liderbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
   await page.getByTestId('order-card-27').click()

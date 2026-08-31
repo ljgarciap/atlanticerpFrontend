@@ -31,11 +31,11 @@ test.describe.configure({ mode: 'serial' })
 // asumir ninguno de esos comentarios como válido.
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const WHIL = 'whil@atlantic.com.pa' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'mbekhar@atlantic.com.pa' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const MARK = 'gerencia3@test.com' // Mark Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 const WHIL_PASSWORD = WHIL // default = email, confirmado en esta sesión (200 real)
-const TECH_SUPERADMIN = 'lujogarpin78@gmail.com' // password real = default (email)
+const TECH_SUPERADMIN = 'superadmin3@test.com' // password real = default (email)
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   // Defensivo (heredado de v7 — ver feedback_preqa_crowdsec_no_paralelo): CrowdSec puede tardar
@@ -122,7 +122,7 @@ test('SCRUM-161 RN2/Escenario 2 — CORREGIDO Y CONFIRMADO EN VIVO CON MUTACIÓN
   const createResp = await apiCall(page, 'POST', `${BASE}/api/gerencia/reglas-aprobacion`, {
     tipo: 'zona_libre', activo: true,
     observaciones: 'TEST Pre-QA v8 — verificar aislamiento por tipo, ELIMINAR tras la prueba',
-    aprobador_ids: [20], // Whileyner Contreras, confirmado por JWT sub=20 en esta sesión
+    aprobador_ids: [20], // Gerencia Test 5, confirmado por JWT sub=20 en esta sesión
   })
   const reglaId = (createResp.json as any)?.id
   test.skip(!reglaId, 'no se pudo crear la regla de prueba')

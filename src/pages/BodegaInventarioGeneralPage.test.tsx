@@ -251,7 +251,7 @@ describe('BodegaInventarioGeneralPage', () => {
     await waitFor(() => expect(mockedApi.generalCounts.submit).toHaveBeenCalledWith(10, false))
   })
 
-  // ── SCRUM-797 (rebote de Daniela Amaya 2026-08-27) — duplicados por producto ──────
+  // ── SCRUM-797 (rebote de Gerencia Test 2026-08-27) — duplicados por producto ──────
 
   it('SCRUM-797 — 409 al elegir bodega con un producto en conflicto real muestra el modal con ese producto', async () => {
     mockedApi.generalCounts.create.mockRejectedValue({
@@ -377,7 +377,7 @@ describe('BodegaInventarioGeneralPage', () => {
   })
 
   /**
-   * SCRUM-463 (rebote de Daniela Amaya 2026-08-14) — reemplaza el test viejo del candado
+   * SCRUM-463 (rebote de Gerencia Test 2026-08-14) — reemplaza el test viejo del candado
    * decorativo: antes Aprobar/Rechazar quedaban visibles/clicables para CUALQUIER perfil de
    * Bodega (con un candado como única señal); ahora se OCULTAN por completo cuando
    * `can_approve` es false (el usuario actual no es Mark).
@@ -467,7 +467,7 @@ describe('BodegaInventarioGeneralPage', () => {
     expect(await waitFor(() => mockedApi.generalCounts.apply)).toHaveBeenCalledWith(3)
   })
 
-  // SCRUM-466 (rebote de Daniela Amaya 2026-08-14) — "Realizar ajuste" aparecía también para Mark
+  // SCRUM-466 (rebote de Gerencia Test 2026-08-14) — "Realizar ajuste" aparecía también para Mark
   // (y, por extensión, cualquier otro perfil de Bodega) — debe verse SOLO para el Líder de Bodega.
   it('rebote 2026-08-14 — "Realizar ajuste" queda oculto para Mark (role distinto de lider_bodega)', async () => {
     mockedUseAuthStore.mockReturnValue('management' as never) // rol de Mark
@@ -549,7 +549,7 @@ describe('BodegaInventarioGeneralPage', () => {
   })
 
   /**
-   * SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — un conteo que queda en borrador
+   * SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — un conteo que queda en borrador
    * (nunca evaluado) o evaluado pero nunca enviado a aprobación quedaba inerte en la bandeja, sin
    * ninguna acción disponible. Aplica tanto si nunca se evaluó como si se evaluó pero no se envió.
    */

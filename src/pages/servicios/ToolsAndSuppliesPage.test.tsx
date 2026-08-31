@@ -51,7 +51,7 @@ const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Aaron', last_name: 'Leis', email: 'servicio@atlantic.com.pa',
+    id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
     role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
     ...overrides,
   }
@@ -59,7 +59,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
 
 function makeTechnician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 3, user_id: null, nombre: 'Miguel Castillo', telefono: null, email: null, especialidad: 'general',
+    id: 3, user_id: null, nombre: 'Garantias Servicios Test', telefono: null, email: null, especialidad: 'general',
     color: '#5BA5A0', has_bonus_plan: false, estado: 'available', visitas_hoy: 0,
     herramientas_asignadas: 0, pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
     ...overrides,
@@ -83,7 +83,7 @@ function makeTool(overrides: Partial<Tool> = {}): Tool {
 function makeRequest(overrides: Partial<ToolPurchaseRequest> = {}): ToolPurchaseRequest {
   return {
     id: 1, source_tool_id: null, nombre: 'Escalera de tijera', cantidad: 3, estado: 'solicitado',
-    requested_by: 'Aaron', received_at: null, created_at: '2026-08-12T10:00:00Z',
+    requested_by: 'Lider Servicios Test', received_at: null, created_at: '2026-08-12T10:00:00Z',
     ...overrides,
   }
 }
@@ -166,21 +166,21 @@ describe('ToolsAndSuppliesPage — REQ-268 listado agrupado', () => {
 
   it('RN2 — muestra el nombre del técnico asignado', async () => {
     mockedApi.tools.list.mockResolvedValue([
-      makeTool({ assigned_to_technician_id: 3, assigned_to: 'Miguel Castillo' }),
+      makeTool({ assigned_to_technician_id: 3, assigned_to: 'Garantias Servicios Test' }),
     ])
     renderPage()
 
-    // El select tiene "Miguel Castillo" seleccionado — aparece dentro del <select>.
+    // El select tiene "Garantias Servicios Test" seleccionado — aparece dentro del <select>.
     await waitFor(() => {
       expect(screen.getByRole('combobox', { name: 'tools.table.columns.assignedTo' })).toHaveValue('3')
     })
   })
 
   it('RN2 — muestra el responsable de incidente cuando el backend lo resuelve', async () => {
-    mockedApi.tools.list.mockResolvedValue([makeTool({ estado: 'damaged', responsable_incidente: 'Carlos Vergara' })])
+    mockedApi.tools.list.mockResolvedValue([makeTool({ estado: 'damaged', responsable_incidente: 'Tecnico Servicios Test' })])
     renderPage()
 
-    expect(await screen.findByText('Responsable: Carlos Vergara')).toBeInTheDocument()
+    expect(await screen.findByText('Responsable: Tecnico Servicios Test')).toBeInTheDocument()
   })
 
   it('RN4 — sin resultados muestra el mensaje, nunca una tabla vacía', async () => {
@@ -306,7 +306,7 @@ describe('ToolsAndSuppliesPage — REQ-270 reasignación', () => {
     const tool = makeTool()
     mockedApi.tools.list.mockResolvedValue([tool])
     mockedApi.tools.reassign.mockResolvedValue({
-      ...tool, assigned_to_technician_id: 3, assigned_to: 'Miguel Castillo', assigned_since: '2026-08-12T09:00:00Z',
+      ...tool, assigned_to_technician_id: 3, assigned_to: 'Garantias Servicios Test', assigned_since: '2026-08-12T09:00:00Z',
     })
     renderPage()
     await screen.findByText('Casco de seguridad')
@@ -320,7 +320,7 @@ describe('ToolsAndSuppliesPage — REQ-270 reasignación', () => {
   })
 
   it('reasignar a "En bodega de herramientas" manda null', async () => {
-    const tool = makeTool({ assigned_to_technician_id: 3, assigned_to: 'Miguel Castillo' })
+    const tool = makeTool({ assigned_to_technician_id: 3, assigned_to: 'Garantias Servicios Test' })
     mockedApi.tools.list.mockResolvedValue([tool])
     mockedApi.tools.reassign.mockResolvedValue({ ...tool, assigned_to_technician_id: null, assigned_to: 'En bodega de herramientas' })
     renderPage()

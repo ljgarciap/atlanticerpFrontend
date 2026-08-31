@@ -16,9 +16,9 @@ import { test, expect, type APIRequestContext } from '@playwright/test'
 const BACKEND_URL = process.env.PREQA_BACKEND_URL ?? 'http://localhost:8090'
 
 // Cuentas reales (password = email), ver project_roster_usuarios_reales_atlanticerp.md.
-const SUPERADMIN = { email: 'andres.loi@atlantic.com.pa', password: 'andres.loi@atlantic.com.pa' }
-const DAVID = { email: 'david@grupolafayette.com', password: 'david@grupolafayette.com' } // Gerencia, compras.read/bodega.read reales
-const MARK = { email: 'mbekhar@atlantic.com.pa', password: 'mbekhar@atlantic.com.pa' } // Gerencia, ídem
+const SUPERADMIN = { email: 'superadmin@test.com', password: 'superadmin@test.com' }
+const DAVID = { email: 'gerencia2@test.com', password: 'gerencia2@test.com' } // Gerencia, compras.read/bodega.read reales
+const MARK = { email: 'gerencia3@test.com', password: 'gerencia3@test.com' } // Gerencia, ídem
 
 async function login(request: APIRequestContext, email: string, password: string): Promise<string> {
   const res = await request.post(`${BACKEND_URL}/api/auth/login`, {

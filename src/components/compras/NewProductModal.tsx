@@ -28,7 +28,7 @@ function buildSchema(t: TFunction) {
   return z.object({
     reference:         z.string().min(1, t('compras:providerForm.validation.nameRequired')).max(255),
     factory_reference: z.string().max(255).nullable().optional(),
-    // SCRUM-768 (hallazgo de Daniela Amaya 2026-08-16): el backend (StorePurchaseOrderRequest)
+    // SCRUM-768 (hallazgo de Gerencia Test 2026-08-16): el backend (StorePurchaseOrderRequest)
     // exige `lines.*.new_product.name` desde SCRUM-237/240 (nombre y descripción son campos
     // independientes) — este modal nunca lo mandaba, la orden siempre rebotaba 422.
     name:                z.string().min(1, t('compras:providerForm.validation.nameRequired')).max(255),
@@ -267,7 +267,7 @@ export default function NewProductModal({ providerId, onClose, onAdd }: Props) {
                 {...register('additional_cost_amount')}
                 className={inputCls(false) + ' flex-1'}
               />
-              {/* Hallazgo Pre-QA 2026-08-04 (reporte de Daniela Amaya, mismo dia): inputCls() ya trae
+              {/* Hallazgo Pre-QA 2026-08-04 (reporte de Gerencia Test, mismo dia): inputCls() ya trae
                   "w-full", y Tailwind emite esa utilidad DESPUES de "w-32" en el stylesheet
                   compilado -- w-full ganaba el cascade pese a estar antes en el string de clases,
                   el select terminaba ocupando ~100% de la fila (428px medido) y dejaba el input de

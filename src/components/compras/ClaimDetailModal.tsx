@@ -19,7 +19,7 @@ const RESOLUTION_TYPES = [
 ] as const
 
 /**
- * SCRUM-259 (REQ-196, hallazgo de Daniela Amaya 2026-08-10) — ficha completa del reclamo,
+ * SCRUM-259 (REQ-196, hallazgo de Gerencia Test 2026-08-10) — ficha completa del reclamo,
  * reorganizada según el mockup: encabezado (producto + cantidad afectada), info principal en 2
  * filas, sección Unidades afectadas/Monto en disputa, descripción, fotos, historial de 3 etapas
  * fijas (Reportado/En revisión/Resuelto, futuras atenuadas "Pendiente"), Ver orden asociada y

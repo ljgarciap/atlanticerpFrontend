@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Pre-QA — rebote SCRUM-427 (Daniela Amaya 2026-08-13): sincronización de estados/notificaciones
+// Pre-QA — rebote SCRUM-427 (Gerencia Test 2026-08-13): sincronización de estados/notificaciones
 // entre Bodega y Compras al confirmar la llegada física de mercancía. Este flujo ya tuvo 1 CRITICO
 // real (2026-07-23, RN2 — el modal no refrescaba tras confirmar) y este rebote agrega 2 reglas
 // nuevas: la nota de Bodega debe traer cantidad+usuario, y el detalle de Compras debe reflejar el
@@ -40,7 +40,7 @@ test('1. Bodega — antes de confirmar, el detalle no muestra nota de espera', a
   expect(modalText).not.toContain('esperando')
 })
 
-test('2. Bodega — confirma 5 de 8 y la nota enriquecida muestra cantidad + usuario (Esteban Cardenas / Management Demo)', async ({ page }) => {
+test('2. Bodega — confirma 5 de 8 y la nota enriquecida muestra cantidad + usuario (Lider Bodega Test / Management Demo)', async ({ page }) => {
   test.skip(REF === 'PREQA427-FIXTURE-MISSING', 'Requiere PREQA427_REF — ver checkpoint de memoria 2026-08-15')
   await login(page, 'management@atlantic.test')
   await page.goto(`${BASE}/bodega/inventario`)
@@ -61,9 +61,9 @@ test('2. Bodega — confirma 5 de 8 y la nota enriquecida muestra cantidad + usu
   const modalText = await page.locator('.fixed.inset-0').first().innerText()
   console.log('BODEGA MODAL TEXT TRAS CONFIRMAR:', modalText)
   expect(modalText).toContain('5 unidad')
-  // El nombre real del usuario "almacen@..." (Esteban Cardenas) no aplica acá porque logueamos
+  // El nombre real del usuario "almacen@..." (Lider Bodega Test) no aplica acá porque logueamos
   // como management — el usuario mostrado debe ser el de la sesión que confirmó.
-  expect(modalText).toMatch(/Management Demo|Esteban Cardenas/)
+  expect(modalText).toMatch(/Management Demo|Lider Bodega Test/)
 })
 
 test('3. Compras — el detalle del mismo producto refleja lo que Bodega ya confirmó (cantidad + usuario), bloqueado de re-confirmar', async ({ page }) => {

@@ -67,13 +67,13 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.home.summary.mockResolvedValue(makeSummary())
   mockedApi.calendar.list.mockResolvedValue({ data: [], source_unavailable: false })
-  mockedStore.mockReturnValue({ user: { id: 1, first_name: 'Yirena' } } as never)
+  mockedStore.mockReturnValue({ user: { id: 1, first_name: 'Lider Compras' } } as never)
 })
 
 describe('ComprasHomePage', () => {
   it('muestra el saludo con el nombre como título principal, sin "Inicio" (SCRUM-175)', async () => {
     renderPage()
-    expect(await screen.findByText('compras:home.greeting:Yirena')).toBeInTheDocument()
+    expect(await screen.findByText('compras:home.greeting:Lider Compras')).toBeInTheDocument()
     expect(screen.queryByText('compras:home.title')).not.toBeInTheDocument()
   })
 

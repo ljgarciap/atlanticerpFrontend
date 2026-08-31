@@ -18,11 +18,11 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const VENDEDOR_SIN_PERMISO = 'milena.e@grupolafayette.com'
-const MARK = 'mbekhar@atlantic.com.pa'
-const DAVID = 'david@grupolafayette.com'
-const LIDER_COMPRAS = 'gerencia2@atlantic.com.pa'
-const TECNICO_SIN_VENTAS = 'carlos@atlantic.com.pa' // solo-lectura, servicios — sin ventas_diseno.read
+const VENDEDOR_SIN_PERMISO = 'vendedordisenador@test.com'
+const MARK = 'gerencia3@test.com'
+const DAVID = 'gerencia2@test.com'
+const LIDER_COMPRAS = 'lidercompras@test.com'
+const TECNICO_SIN_VENTAS = 'tecnicoservicios@test.com' // solo-lectura, servicios — sin ventas_diseno.read
 
 const STAMP = Date.now()
 const MASTER_CLIENT = `PreQA Master ${STAMP}`

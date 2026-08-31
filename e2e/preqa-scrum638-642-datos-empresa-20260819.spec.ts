@@ -4,8 +4,8 @@ import { test, expect, Page } from '@playwright/test'
  * Visual Review + Pre-QA fusionado — SCRUM-638→642 (REQ-561→565), Datos de la Empresa.
  * Password default = email (CoreUserSeeder).
  */
-const MARK = 'mbekhar@atlantic.com.pa'
-const NO_MARK = 'luis.garcia@atlantic.com.pa'
+const MARK = 'gerencia3@test.com'
+const NO_MARK = 'superadmin2@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

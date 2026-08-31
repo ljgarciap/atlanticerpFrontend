@@ -144,7 +144,7 @@ export const serviciosApi = {
   technicians: {
     // Opciones para el select de filtro (REQ-217) o del modal de Agendar (REQ-226 RN2) — lista
     // liviana, no el listado completo de Técnicos Internos (Batch 6, fuera de alcance acá).
-    // Con `tipo`, el backend ya filtra por especialidad (Garantías → solo Miguel Castillo).
+    // Con `tipo`, el backend ya filtra por especialidad (Garantías → solo Garantias Servicios Test).
     internalOptions: (tipo?: TicketType): Promise<TechnicianOption[]> =>
       api.get<{ data: TechnicianOption[] }>('/servicios/technicians/internal', {
         params: { fields: 'options', ...(tipo ? { tipo } : {}) },
@@ -479,7 +479,7 @@ export const serviciosApi = {
         params: year ? { year } : {},
       }).then(r => r.data.data),
 
-    // REQ-286 — 403 si el actor no califica (ni Gerencia ni el propio Carlos Vergara). El caller
+    // REQ-286 — 403 si el actor no califica (ni Gerencia ni el propio Tecnico Servicios Test). El caller
     // (ReportsCommissionSection) no debe llamar este endpoint si no califica (`enabled: false`),
     // el 403 acá es solo la segunda línea de defensa del backend, no un caso que el frontend maneje.
     comisionCarlosVergara: (params: Partial<ReportsPeriodParams> = {}): Promise<ReportsComisionCarlosVergara> =>

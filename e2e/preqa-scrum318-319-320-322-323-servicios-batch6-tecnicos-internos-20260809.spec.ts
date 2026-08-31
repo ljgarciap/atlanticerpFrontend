@@ -3,7 +3,7 @@ import { execSync } from 'node:child_process'
 
 /**
  * Pre-QA — Fase 4 Servicios, Batch 6 (SCRUM-318/319/320/322/323, REQ-255/256/257/259/260) —
- * Técnicos internos. SCRUM-321 (REQ-258, comisión Carlos Vergara) queda deliberadamente fuera —
+ * Técnicos internos. SCRUM-321 (REQ-258, comisión Tecnico Servicios Test) queda deliberadamente fuera —
  * depende de REQ-292/Batch 7, sin construir todavía (ver comentario en el ticket).
  *
  * Corre contra el stack local (Vite dev server proxy a nginx:8090, ver vite.config.ts), no
@@ -22,9 +22,9 @@ import { execSync } from 'node:child_process'
  * basura de una corrida previa el mismo día rompería el conteo exacto de visitas de la próxima).
  *
  * Cuentas reales (password = email):
- *  - servicio@atlantic.com.pa (lider_servicios) — alta completa, vista Equipo/Agenda.
- *  - carlos@atlantic.com.pa   (tecnico_servicios) — solo consulta, sin alta.
- *  - milena.e@grupolafayette.com   (vendedor_disenador) — solo vista de Agenda equipo (RN5).
+ *  - liderservicios@test.com (lider_servicios) — alta completa, vista Equipo/Agenda.
+ *  - tecnicoservicios@test.com   (tecnico_servicios) — solo consulta, sin alta.
+ *  - vendedordisenador@test.com   (vendedor_disenador) — solo vista de Agenda equipo (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -45,10 +45,10 @@ $tenant->makeCurrent();
 $now = \\Carbon\\Carbon::now('America/Panama');
 $stamp = ${Date.now()};
 
-$carlos = \\App\\Models\\User::where('email', 'carlos@atlantic.com.pa')->first();
-$pedro = \\App\\Models\\User::where('email', 'santopedro181994@gmail.com')->first();
-$agustin = \\App\\Models\\User::where('email', 'agustinrodriguez141985@gmail.com')->first();
-$miguel = \\App\\Models\\User::where('email', 'garantias@atlantic.com.pa')->first();
+$carlos = \\App\\Models\\User::where('email', 'tecnicoservicios@test.com')->first();
+$pedro = \\App\\Models\\User::where('email', 'tecnicoservicios2@test.com')->first();
+$agustin = \\App\\Models\\User::where('email', 'tecnicoservicios3@test.com')->first();
+$miguel = \\App\\Models\\User::where('email', 'garantiasservicios@test.com')->first();
 
 function mk($numero, $tech, $estado, $start, $end) {
   return \\App\\Modules\\Servicios\\Models\\Ticket::create([
@@ -136,15 +136,15 @@ function techCard(page: Page, name: string) {
 }
 
 test('REQ-255/256 — Vista Equipo refleja estado, especialidad y visitas de hoy en tiempo real', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await expect(page.getByText('Carlos Vergara')).toBeVisible()
-  await expect(techCard(page, 'Carlos Vergara').getByText('Ocupado')).toBeVisible()
-  await expect(techCard(page, 'Pedro Santos').getByText('En ruta')).toBeVisible()
-  await expect(techCard(page, 'Agustin Rodriguez').getByText('Fuera')).toBeVisible()
-  await expect(techCard(page, 'Miguel Castillo').getByText('Disponible')).toBeVisible()
-  await expect(techCard(page, 'Miguel Castillo').getByText('Garantías')).toBeVisible()
+  await expect(page.getByText('Tecnico Servicios Test')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Servicios Test').getByText('Ocupado')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Servicios Test 2').getByText('En ruta')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Servicios Test 3').getByText('Fuera')).toBeVisible()
+  await expect(techCard(page, 'Garantias Servicios Test').getByText('Disponible')).toBeVisible()
+  await expect(techCard(page, 'Garantias Servicios Test').getByText('Garantías')).toBeVisible()
 
   // Placeholders documentados (Herramientas/Batch 13, %1ra visita/REQ-211) — deben verse
   // sensatos ("0"/"—"), no crashear ni mostrar "null"/"undefined".
@@ -153,10 +153,10 @@ test('REQ-255/256 — Vista Equipo refleja estado, especialidad y visitas de hoy
 })
 
 test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visitas muestra el estado vacío', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await techCard(page, 'Carlos Vergara').getByRole('button', { name: /visitas hoy/i }).click()
+  await techCard(page, 'Tecnico Servicios Test').getByRole('button', { name: /visitas hoy/i }).click()
 
   const modal = page.getByTestId('internal-technician-visits-modal')
   await expect(modal).toBeVisible()
@@ -167,25 +167,25 @@ test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visi
   await modal.getByRole('button').first().click()
   await expect(modal).not.toBeVisible()
 
-  await techCard(page, 'Miguel Castillo').getByRole('button', { name: /visitas hoy/i }).click()
+  await techCard(page, 'Garantias Servicios Test').getByRole('button', { name: /visitas hoy/i }).click()
   const modal2 = page.getByTestId('internal-technician-visits-modal')
   await expect(modal2).toBeVisible()
   await expect(modal2.getByText('Sin visitas hoy')).toBeVisible()
 })
 
 test('REQ-255 RN5 — clic en nombre/avatar abre el detalle con teléfono/correo/especialidad', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await page.getByText('Miguel Castillo').click()
+  await page.getByText('Garantias Servicios Test').click()
   const detail = page.getByTestId('internal-technician-detail-modal')
   await expect(detail).toBeVisible()
   await expect(detail.getByText('Garantías')).toBeVisible()
-  await expect(detail.getByText('garantias@atlantic.com.pa')).toBeVisible()
+  await expect(detail.getByText('garantiasservicios@test.com')).toBeVisible()
 })
 
 test('REQ-259 RN5 — técnico interno (tecnico_servicios) NO ve el botón de alta', async ({ page }) => {
-  await login(page, 'carlos@atlantic.com.pa')
+  await login(page, 'tecnicoservicios@test.com')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('+ Nuevo técnico')).not.toBeVisible()
@@ -194,7 +194,7 @@ test('REQ-259 RN5 — técnico interno (tecnico_servicios) NO ve el botón de al
 })
 
 test('REQ-260 RN5 — Vendedor/Diseñador tiene acceso de solo vista a Agenda equipo, sin botón de alta', async ({ page }) => {
-  await login(page, 'milena.e@grupolafayette.com')
+  await login(page, 'vendedordisenador@test.com')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('+ Nuevo técnico')).not.toBeVisible()
@@ -205,23 +205,23 @@ test('REQ-260 RN5 — Vendedor/Diseñador tiene acceso de solo vista a Agenda eq
 })
 
 test('REQ-260 — Agenda equipo agrupa por técnico y filtra a uno solo', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
   await page.getByText('Agenda equipo').click()
   await page.waitForTimeout(1000)
 
-  await expect(page.getByRole('heading', { name: 'Carlos Vergara' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Pedro Santos' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test 2' })).toBeVisible()
 
-  await page.getByLabel('Filtrar por técnico').selectOption({ label: 'Pedro Santos' })
+  await page.getByLabel('Filtrar por técnico').selectOption({ label: 'Tecnico Servicios Test 2' })
   await page.waitForTimeout(1000)
-  await expect(page.getByRole('heading', { name: 'Carlos Vergara' })).not.toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Pedro Santos' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test' })).not.toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test 2' })).toBeVisible()
   await expect(page.getByText(fx.pedroEnRouteHora)).toBeVisible()
 })
 
 test('REQ-259 — alta de técnico interno: validación bloquea envío sin nombre, éxito con datos válidos', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
   await page.getByText('+ Nuevo técnico').click()
@@ -250,7 +250,7 @@ test('REQ-259 — alta de técnico interno: validación bloquea envío sin nombr
 })
 
 test('REQ-259 — doble clic en Guardar no crea 2 técnicos duplicados', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
   const name2 = `${TECH_NAME} DblClick`

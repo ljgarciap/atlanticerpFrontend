@@ -29,7 +29,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderDetail {
   return {
     id: 13, provider_id: 1, provider_name: 'LightCorp', status: 'recibido',
-    modality: 'directo', requires_mark_approval: false, currency: 'USD',
+    modality: 'directo', requires_primary_approval: false, currency: 'USD',
     total_amount: 100, created_by: 1, created_at: '2026-08-01T00:00:00Z',
     shipping_type: null, shipping_cost: null, estimated_arrival_date: null,
     actual_arrival_date: null, who_pays_shipping: null,
@@ -111,7 +111,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
     ))
   })
 
-  // SCRUM-260 (rebote de Daniela Amaya 2026-08-12) — "Unidades afectadas" volvía a permitir
+  // SCRUM-260 (rebote de Gerencia Test 2026-08-12) — "Unidades afectadas" volvía a permitir
   // superar la cantidad pedida (max={} del <input> no bloquea un valor tecleado a mano, y
   // canSubmit solo chequeaba > 0). Ahora debe bloquear el guardado y mostrar el mensaje real.
   it('rebote 2026-08-12 — no permite guardar con unidades afectadas por encima de lo pedido', async () => {
@@ -159,7 +159,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
     expect(screen.getByText('common:actions.save').closest('button')).not.toBeDisabled()
   })
 
-  // SCRUM-260 (rebote de Daniela Amaya 2026-08-12) — el modal era muy chico para el buscador de
+  // SCRUM-260 (rebote de Gerencia Test 2026-08-12) — el modal era muy chico para el buscador de
   // productos; el listado de resultados usaba overflow-hidden (recortaba resultados en vez de
   // permitir scroll).
   it('rebote 2026-08-12 — el listado de resultados de la búsqueda de orden permite scroll en vez de recortarse', async () => {

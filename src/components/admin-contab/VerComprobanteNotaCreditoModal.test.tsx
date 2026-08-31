@@ -32,7 +32,7 @@ function makeComprobante(overrides: Partial<NotaCreditoComprobanteDetail> = {}):
     tiene_comprobante: true,
     url: 'https://s3.example.com/comprobante.pdf?sig=abc',
     mime_type: 'application/pdf',
-    subido_por: 'Felix Campos',
+    subido_por: 'Contabilidad Test',
     fecha: '2026-08-20',
     ...overrides,
   }
@@ -57,7 +57,7 @@ describe('VerComprobanteNotaCreditoModal — REQ-495', () => {
     renderModal()
 
     expect(await screen.findByTitle('notasCredito.comprobanteModal.title')).toBeInTheDocument()
-    expect(screen.getByText(/adjuntadoPor.*Felix Campos/)).toBeInTheDocument()
+    expect(screen.getByText(/adjuntadoPor.*Contabilidad Test/)).toBeInTheDocument()
   })
 
   it('con un comprobante de imagen, previsualiza con <img> en vez de <iframe>', async () => {

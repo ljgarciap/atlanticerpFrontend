@@ -40,7 +40,7 @@ test.describe('SCRUM-768 — Nueva Orden: nuevo proveedor + nuevo producto', () 
       }
     })
 
-    await login(page, 'gerencia2@atlantic.com.pa')
+    await login(page, 'lidercompras@test.com')
     await page.goto('/compras/ordenes/nueva')
     await expect(page.getByRole('heading', { name: 'Nueva Orden' })).toBeVisible()
 
@@ -88,7 +88,7 @@ test.describe('SCRUM-768 — Nueva Orden: nuevo proveedor + nuevo producto', () 
 
   test('negativo: falta name del producto nuevo -> bloquea inline, no permite submit', async ({ page }) => {
     const id = uniq()
-    await login(page, 'gerencia2@atlantic.com.pa')
+    await login(page, 'lidercompras@test.com')
     await page.goto('/compras/ordenes/nueva')
 
     const search = page.getByPlaceholder(/Buscar proveedor/i)
@@ -126,7 +126,7 @@ test.describe('SCRUM-240 — Crear producto nuevo desde Inventario', () => {
       }
     })
 
-    await login(page, 'gerencia2@atlantic.com.pa')
+    await login(page, 'lidercompras@test.com')
     await page.goto('/inventario')
     await page.waitForTimeout(1000)
 

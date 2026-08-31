@@ -166,7 +166,7 @@ interface ResultRow {
   catalog_product_id: number
   reference:            string
   name:                  string
-  // SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — Categoría, columna nueva del orden exacto
+  // SCRUM-246 (rebote de Gerencia Test 2026-08-09) — Categoría, columna nueva del orden exacto
   // pedido: Producto candidato, Categoría, Stock disponible, Precio, % de similitud, Acción.
   category:               string | null
   price_full:             number
@@ -198,7 +198,7 @@ function fromSearchResult(r: SubstituteSearchResult): ResultRow {
 }
 
 /**
- * SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — "% de similitud" siempre como número + barra
+ * SCRUM-246 (rebote de Gerencia Test 2026-08-09) — "% de similitud" siempre como número + barra
  * visual, nunca solo el número. Sin dato (método "catalog", sin IA) muestra "—", nunca 0% (0%
  * implicaría "comparado y sin ninguna similitud", distinto de "no se calculó").
  */
@@ -393,7 +393,7 @@ function SearchTab() {
         <Card variant="panel" className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              {/* SCRUM-246 (rebote de Daniela Amaya 2026-08-09) — orden exacto pedido: Producto
+              {/* SCRUM-246 (rebote de Gerencia Test 2026-08-09) — orden exacto pedido: Producto
                   candidato, Categoría, Stock disponible, Precio, % de similitud, Acción. Costo
                   sale de la tabla (no forma parte del pedido); Categoría/Similitud se ven siempre,
                   sin importar el método — "Siempre en formato tabla" del rebote incluye el shape

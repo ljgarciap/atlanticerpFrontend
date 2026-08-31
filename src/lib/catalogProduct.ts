@@ -1,5 +1,5 @@
 /**
- * SCRUM-237/240 (rebote de Daniela Amaya 2026-08-12, decisión del Arquitecto 2026-08-15) —
+ * SCRUM-237/240 (rebote de Gerencia Test 2026-08-12, decisión del Arquitecto 2026-08-15) —
  * `catalog_products` gana una columna `name` propia (antes `description` hacía doble función de
  * "nombre visible" y "descripción", causando que editar la Descripción cambiara el nombre del
  * producto en toda la app). Backfill server-side: `name = description` para productos existentes.

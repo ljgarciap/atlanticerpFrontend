@@ -138,7 +138,7 @@ export const bodegaApi = {
         form.append(`lines[${i}][tipo]`, line.tipo)
         form.append(`lines[${i}][cantidad]`, String(line.cantidad))
         form.append(`lines[${i}][motivo]`, line.motivo)
-        // SCRUM-428 (corrección de Daniela Amaya 2026-08-13) — ambos opcionales, solo se mandan
+        // SCRUM-428 (corrección de Gerencia Test 2026-08-13) — ambos opcionales, solo se mandan
         // si tienen contenido (nunca un string vacío pisando algo en el backend).
         // TODO: backend batch4 — confirmar en Senior Review el nombre real de estos 2 campos
         // nuevos (worktree de Backend Dev en paralelo, ver memoria
@@ -420,7 +420,7 @@ export const bodegaApi = {
     apply: (id: number): Promise<GeneralCountRow> =>
       api.post<GeneralCountRow>(`/bodega/general-counts/${id}/apply`).then(r => r.data),
 
-    // SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — "Eliminar" un conteo en borrador
+    // SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — "Eliminar" un conteo en borrador
     // (`pendiente_evaluacion`/`evaluado`, nunca enviado a aprobación). Solo válido en esos 2
     // estados — el frontend ya gatea qué filas ofrecen el botón (ver RowAction), pero el backend
     // es la fuente de verdad real de qué se puede borrar.

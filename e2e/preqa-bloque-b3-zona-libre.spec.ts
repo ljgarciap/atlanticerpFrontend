@@ -19,7 +19,7 @@ async function login(page, email: string) {
 
 test.describe('Bloque B3 — Nueva Orden Zona Libre (3C)', () => {
   test('camino de ruptura: cantidad 0 no agrega línea, edición a 0 se rechaza, quitar reaparece, totales recalculan', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/ordenes-zona-libre/nueva')
     await page.waitForTimeout(1000)
 
@@ -80,7 +80,7 @@ test.describe('Bloque B3 — Nueva Orden Zona Libre (3C)', () => {
   })
 
   test('camino feliz: guardar orden muestra panel de confirmación con folio y estado pendiente', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/ordenes-zona-libre/nueva')
     await page.waitForTimeout(1000)
 
@@ -107,7 +107,7 @@ test.describe('Bloque B3 — Nueva Orden Zona Libre (3C)', () => {
 
 test.describe('Bloque B3 — Bandeja Órdenes Zona Libre (3D)', () => {
   test('chips mutuamente excluyentes, acciones correctas por estado, motivo real visible', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/ordenes-zona-libre')
     await page.waitForTimeout(1200)
 
@@ -142,7 +142,7 @@ test.describe('Bloque B3 — Bandeja Órdenes Zona Libre (3D)', () => {
 
 test.describe('Bloque B3 — RN3/permisos (verificados también por API directo, ver reporte)', () => {
   test('Bodega NO ve ninguna acción de aprobar/rechazar en la bandeja', async ({ page }) => {
-    await login(page, 'almacen@atlantic.com.pa')
+    await login(page, 'liderbodega@test.com')
     await page.goto('/bodega/ordenes-zona-libre')
     await page.waitForTimeout(1000)
     await expect(page.getByRole('button', { name: /^aprobar$/i })).toHaveCount(0)

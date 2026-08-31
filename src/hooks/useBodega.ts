@@ -737,7 +737,7 @@ export function useApplyGeneralCount() {
   })
 }
 
-/** SCRUM-462 (REQ-392, rebote de Daniela Amaya 2026-08-14) — "Eliminar" un conteo en borrador
+/** SCRUM-462 (REQ-392, rebote de Gerencia Test 2026-08-14) — "Eliminar" un conteo en borrador
  * (pendiente_evaluacion/evaluado) desde la bandeja de "Conteos generales". */
 export function useDeleteGeneralCount() {
   const qc = useQueryClient()

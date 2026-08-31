@@ -88,7 +88,7 @@ function makeTiers(): CommissionTier[] {
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Felix', last_name: 'Test', email: 'felix@atlantic.com.pa',
+    id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'contabilidad@test.com',
     role: 'lider_admin_contab', permissions: [],
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
@@ -153,8 +153,8 @@ describe('ComisionesInternasPage — REQ-498 tabla de tramos', () => {
 
   // Regresión de Pre-QA/Visual Review (2026-08-25): antes se gateaba con `admin_contab.edit`,
   // que Felix también tiene sin ser Mark — veía "Agregar tramo" y el guardado le devolvía 403
-  // (`mark_only` en el backend). `puede_editar_tramos` es el cómputo server-side dependiente del
-  // actor (`current_user_id === mark_approver_user_id`, mismo criterio que
+  // (`primary_approver_only` en el backend). `puede_editar_tramos` es el cómputo server-side dependiente del
+  // actor (`current_user_id === primary_approver_user_id`, mismo criterio que
   // `puede_decidir_incobrable` en Facturación) — el frontend nunca debe volver a decidir esto
   // por su cuenta vía un flag de módulo genérico.
   it('Felix (admin_contab.edit=true pero no es Mark) NO ve "Agregar tramo"', async () => {
@@ -246,14 +246,14 @@ describe('ComisionesInternasPage — Batch 15: REQ-506 proyectos compartidos', (
       groups: [{
         mes: '2026-08', porcentaje: 1.5, porcentaje_fijo: true, arrastrado: false,
         pedidos: [makeOrder({
-          total_pedido: 10000, compartido_con: ['Neil Quiel'], total_pedido_completo: 20000,
+          total_pedido: 10000, compartido_con: ['Vendedor Disenador Test 2'], total_pedido_completo: 20000,
         })],
       }],
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
     await clickVendorRow('Kayra Estrada')
-    expect(await screen.findByText(/Neil Quiel/)).toBeInTheDocument()
+    expect(await screen.findByText(/Vendedor Disenador Test 2/)).toBeInTheDocument()
     expect(screen.getByText(/20,000\.00/)).toBeInTheDocument()
   })
 })

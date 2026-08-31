@@ -22,8 +22,8 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const ALMACEN_EMAIL = 'almacen@atlantic.com.pa'
-const ALMACEN_PASS  = 'almacen@atlantic.com.pa'
+const ALMACEN_EMAIL = 'liderbodega@test.com'
+const ALMACEN_PASS  = 'liderbodega@test.com'
 const SUPERADMIN_EMAIL = 'management@atlantic.test'
 const SUPERADMIN_PASS  = 'Password123!'
 

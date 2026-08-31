@@ -11,8 +11,8 @@ async function login(page, email: string) {
 }
 
 // SCRUM-391 — actor SIN modules.bodega.view_team (Picker real: ayudante_general_bodega,
-// apolonio.gonzalez@atlantic.com.pa, confirmado por Pre-QA vía tinker que view_team=false,
-// a diferencia de logistica@atlantic.com.pa/asistente_bodega que SÍ tiene view_team=true —
+// ayudantegeneralbodega@test.com, confirmado por Pre-QA vía tinker que view_team=false,
+// a diferencia de asistentebodega@test.com/asistente_bodega que SÍ tiene view_team=true —
 // el brief original sugería logistica como el actor sin el permiso, dato desactualizado).
 // Comportamiento esperado (decisión de producto confirmada por Luis, comentario de código
 // 2026-07-24): lista de chips vacía con mensaje, NUNCA un error.
@@ -22,7 +22,7 @@ test('SCRUM-391 — actor sin view_team ve el modal con chips vacíos, sin error
   const failedRequests: string[] = []
   page.on('requestfailed', req => failedRequests.push(req.url()))
 
-  await login(page, 'apolonio.gonzalez@atlantic.com.pa')
+  await login(page, 'ayudantegeneralbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1000)
 

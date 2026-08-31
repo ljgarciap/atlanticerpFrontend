@@ -11,7 +11,7 @@ type PaymentStatusFilter = 'all' | 'sin_enviar' | 'por_pagar' | 'parcial' | 'com
 const PAYMENT_STATUS_CHIPS: PaymentStatusFilter[] = ['all', 'sin_enviar', 'por_pagar', 'parcial', 'completo']
 
 /**
- * SCRUM-250 (REQ-187, hallazgo de Daniela Amaya 2026-08-09) — Pagos a Proveedores. Solo órdenes
+ * SCRUM-250 (REQ-187, hallazgo de Gerencia Test 2026-08-09) — Pagos a Proveedores. Solo órdenes
  * que todavía no llegan a "Ordenado" (`payment_pending=1`, ver PurchaseOrderController::index()),
  * comportamiento ya validado por QA, sin cambios en este batch.
  *

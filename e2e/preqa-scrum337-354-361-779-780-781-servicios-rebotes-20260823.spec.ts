@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test'
  * 781-tablero, 354) sí tenía bugs reales, corregidos en los commits de este mismo batch.
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): servicio@atlantic.com.pa (Aaron Leis, lider_servicios).
+ * (password = email): liderservicios@test.com (Aaron Leis, lider_servicios).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -35,7 +35,7 @@ async function login(page: Page, email: string) {
 // ============================================================================
 
 test('0. SCRUM-337/780 — smoke: Tickets>Cotizaciones y Técnicos>Técnicos externos navegan por click real', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1200)
 
@@ -69,14 +69,14 @@ test('0. SCRUM-337/780 — smoke: Tickets>Cotizaciones y Técnicos>Técnicos ext
 // ============================================================================
 
 test('1. SCRUM-779 — marcar herramienta Dañada pide detalle obligatorio y aparece en el Kardex con cantidad/saldo', async ({ page, request }) => {
-  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' } })
+  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'liderservicios@test.com', password: 'liderservicios@test.com' } })
   const { token } = await loginRes.json()
   const tools = await (await request.get(`${BASE}/api/servicios/tools?per_page=100`, { headers: { Authorization: `Bearer ${token}` } })).json()
   const good = tools.data.find((t: any) => t.estado === 'good')
   console.log('[SCRUM-779] herramienta elegida:', good?.nombre, good?.codigo_unico)
   expect(good).toBeTruthy()
 
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1500)
   const toolsTab = page.getByRole('tab', { name: /herramientas/i }).or(page.getByRole('button', { name: /herramientas/i }))
@@ -116,7 +116,7 @@ test('1. SCRUM-779 — marcar herramienta Dañada pide detalle obligatorio y apa
 // ============================================================================
 
 test('2. SCRUM-781 — quitar un producto en edición y presionar Cancelar NO lo elimina de verdad', async ({ page, request }) => {
-  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'servicio@atlantic.com.pa', password: 'servicio@atlantic.com.pa' } })
+  const loginRes = await request.post(`${BASE}/api/auth/login`, { data: { email: 'liderservicios@test.com', password: 'liderservicios@test.com' } })
   const { token } = await loginRes.json()
 
   // Ticket 25 ya usado en Pre-QA anteriores de este módulo, con productos reales.
@@ -124,7 +124,7 @@ test('2. SCRUM-781 — quitar un producto en edición y presionar Cancelar NO lo
   console.log('[SCRUM-781] productos ANTES:', JSON.stringify(before.productos?.map((p: any) => p.id)))
   expect(before.productos.length).toBeGreaterThan(0)
 
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tickets?ticket=25`)
   await page.waitForTimeout(1500)
   const editBtn = page.getByRole('button', { name: /^editar$/i }).first()
@@ -151,7 +151,7 @@ test('2. SCRUM-781 — quitar un producto en edición y presionar Cancelar NO lo
 // ============================================================================
 
 test('3. SCRUM-781 — Tablero: número de ticket visible sin superposición con badges largos', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   const tableroBtn = page.getByRole('button', { name: /^tablero$/i }).or(page.getByRole('tab', { name: /tablero/i }))
@@ -171,7 +171,7 @@ test('3. SCRUM-781 — Tablero: número de ticket visible sin superposición con
 // ============================================================================
 
 test('4. SCRUM-354 — meses sin datos no muestran "0" en el gráfico de Reportes', async ({ page }) => {
-  await login(page, 'servicio@atlantic.com.pa')
+  await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/reportes`)
   await page.waitForTimeout(2000)
   await page.screenshot({ path: `${DL_DIR}/05-reportes-grafico-anual.png`, fullPage: true })

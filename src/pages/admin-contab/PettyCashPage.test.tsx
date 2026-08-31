@@ -53,7 +53,7 @@ function makeSummary(overrides: Partial<PettyCashSummary> = {}): PettyCashSummar
 function makePending(overrides: Partial<PettyCashPendingResult> = {}): PettyCashPendingResult {
   return {
     grupos: [{
-      solicitante_id: 5, solicitante_nombre: 'Yaneth Pineda', subtotal: 50.5,
+      solicitante_id: 5, solicitante_nombre: 'Asistente Administrativa Test', subtotal: 50.5,
       lineas: [
         { id: 1, fecha: '01 jul 2026', proveedor: 'Cafetería Manolo', descripcion: 'Café', monto_bruto: 18.5, itbms: 1.3, total: 19.8, estado: 'pendiente', intentos_rechazo: 0, attachments: [{ id: 1, nombre_archivo: 'recibo.jpg', mime_type: 'image/jpeg' }] },
         { id: 2, fecha: '01 jul 2026', proveedor: 'Farmacia Arrocha', descripcion: 'Botiquín', monto_bruto: 28.0, itbms: 2.7, total: 30.7, estado: 'pendiente', intentos_rechazo: 0, attachments: [] },
@@ -66,7 +66,7 @@ function makePending(overrides: Partial<PettyCashPendingResult> = {}): PettyCash
 
 function makeRejectedLine(overrides: Partial<PettyCashRejectedLine> = {}): PettyCashRejectedLine {
   return {
-    id: 9, fecha: '25 jun 2026', solicitante_nombre: 'Neil Quiel', proveedor: 'Copy Centro El Dorado',
+    id: 9, fecha: '25 jun 2026', solicitante_nombre: 'Vendedor Disenador Test 2', proveedor: 'Copy Centro El Dorado',
     descripcion: 'Impresión de brochures', monto_bruto: 12.0, itbms: 0.84, total: 12.84,
     estado: 'rechazado_temporal', intentos_rechazo: 2, attachments: [],
     ...overrides,
@@ -74,14 +74,14 @@ function makeRejectedLine(overrides: Partial<PettyCashRejectedLine> = {}): Petty
 }
 
 function makeReport(overrides: Partial<PettyCashReportListItem> = {}): PettyCashReportListItem {
-  return { numero: '0002-2026', fecha_creacion: '02 jul 2026', total: 35, estado: 'pendiente_aprobacion', forma_pago: 'transferencia', realizado_por_nombre: 'Felix Campos', ...overrides }
+  return { numero: '0002-2026', fecha_creacion: '02 jul 2026', total: 35, estado: 'pendiente_aprobacion', forma_pago: 'transferencia', realizado_por_nombre: 'Contabilidad Test', ...overrides }
 }
 
 function makeReportDetail(overrides: Partial<PettyCashReportDetail> = {}): PettyCashReportDetail {
   return {
     numero: '0002-2026', estado: 'pendiente_aprobacion', forma_pago: 'transferencia', fecha_creacion: '02 jul 2026',
-    realizado_por_nombre: 'Felix Campos', aprobado_por_nombre: null, fecha_aprobacion: null,
-    grupos: [{ solicitante_id: 5, solicitante_nombre: 'Yaneth Pineda', subtotal: 35, lineas: [] }],
+    realizado_por_nombre: 'Contabilidad Test', aprobado_por_nombre: null, fecha_aprobacion: null,
+    grupos: [{ solicitante_id: 5, solicitante_nombre: 'Asistente Administrativa Test', subtotal: 35, lineas: [] }],
     total_general: 35, puede_aprobar: true,
     ...overrides,
   }
@@ -127,9 +127,9 @@ describe('PettyCashPage — REQ-536 pestañas', () => {
 describe('PettyCashPage — REQ-537 panel Pendientes', () => {
   it('agrupa por solicitante con subtotal y total general', async () => {
     renderPage()
-    expect(await screen.findByText('Yaneth Pineda')).toBeInTheDocument()
+    expect(await screen.findByText('Asistente Administrativa Test')).toBeInTheDocument()
     expect(screen.getByText('Cafetería Manolo')).toBeInTheDocument()
-    expect(screen.getByText(/subtotal:solicitante=Yaneth Pineda/)).toBeInTheDocument()
+    expect(screen.getByText(/subtotal:solicitante=Asistente Administrativa Test/)).toBeInTheDocument()
     expect(screen.getByText('cajaChica.pendientesPanel.totalGeneral')).toBeInTheDocument()
     expect(screen.getAllByText(/50\.50/).length).toBeGreaterThan(0)
   })
@@ -145,7 +145,7 @@ describe('PettyCashPage — REQ-539/540 detalle de reporte', () => {
 
   it('un reporte finalizado no ofrece Aprobar, solo Descargar', async () => {
     mockedApi.pettyCash.reports.mockResolvedValue([makeReport({ numero: '0001-2026', estado: 'finalizado' })])
-    mockedApi.pettyCash.reportDetail.mockResolvedValue(makeReportDetail({ numero: '0001-2026', estado: 'finalizado', puede_aprobar: false, aprobado_por_nombre: 'Mark Bekhar' }))
+    mockedApi.pettyCash.reportDetail.mockResolvedValue(makeReportDetail({ numero: '0001-2026', estado: 'finalizado', puede_aprobar: false, aprobado_por_nombre: 'Gerencia Test 3' }))
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
     fireEvent.click(await screen.findByText('cajaChica.reportesPanel.ver'))
@@ -173,7 +173,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
     mockedApi.pettyCash.rejected.mockResolvedValue([makeRejectedLine()])
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
-    expect(await screen.findByText('Neil Quiel')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Disenador Test 2')).toBeInTheDocument()
     expect(screen.getByText('Copy Centro El Dorado')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
   })
@@ -181,19 +181,19 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
   it('al hacer clic en una fila abre el modal unificado de detalle', async () => {
     mockedApi.pettyCash.rejected.mockResolvedValue([makeRejectedLine()])
     mockedApi.pettyCash.expenseDetail.mockResolvedValue({
-      id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Neil Quiel',
+      id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Disenador Test 2',
       proveedor: 'Copy Centro El Dorado', descripcion: 'Impresión de brochures',
       monto_bruto: 12.0, itbms: 0.84, total: 12.84, estado: 'rechazado_temporal', intentos_rechazo: 2,
       ubicacion: 'rechazados', reporte_numero: null, reporte_estado: null,
       editable: true, puede_agregar_soporte: true, puede_rechazar: false, puede_reabrir: true,
       attachments: [], historial: [
-        { accion: 'rechazo', motivo: 'Descripción genérica.', fecha: '25 jun 2026', actor_nombre: 'Mark Bekhar' },
-        { accion: 'rechazo', motivo: 'No corresponde a la empresa.', fecha: '01 jul 2026', actor_nombre: 'Mark Bekhar' },
+        { accion: 'rechazo', motivo: 'Descripción genérica.', fecha: '25 jun 2026', actor_nombre: 'Gerencia Test 3' },
+        { accion: 'rechazo', motivo: 'No corresponde a la empresa.', fecha: '01 jul 2026', actor_nombre: 'Gerencia Test 3' },
       ],
     })
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
-    fireEvent.click(await screen.findByText('Neil Quiel'))
+    fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
     expect(await screen.findByText('cajaChica.detalleLineaModal.reabrir')).toBeInTheDocument()
   })
 })

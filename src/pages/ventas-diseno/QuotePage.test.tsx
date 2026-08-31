@@ -225,7 +225,7 @@ describe('QuotePage', () => {
     expect(screen.queryByText('ventasDiseno:quote.addExistingContact')).not.toBeInTheDocument()
   })
 
-  // SCRUM-122 (Daniela Amaya, 2026-08-02) — el directorio de Arquitectos dejó de ser
+  // SCRUM-122 (Gerencia Test, 2026-08-02) — el directorio de Arquitectos dejó de ser
   // global: sin Subcliente elegido no hay a qué acotar la búsqueda, mismo criterio que
   // ya aplica a Proyecto (disabled={!canEdit || !subClient}).
   it('el campo Arquitecto queda deshabilitado sin un Subcliente elegido (SCRUM-122)', async () => {
@@ -309,7 +309,7 @@ describe('QuotePage', () => {
     }))
   })
 
-  // SCRUM-122 (root cause) — Daniela Amaya (QA) reportó que, una vez elegido el
+  // SCRUM-122 (root cause) — Gerencia Test (QA) reportó que, una vez elegido el
   // arquitecto, la cotización solo mostraba el nombre: teléfono/correo se
   // descartaban en searchArchitects/createArchitect antes de llegar al estado.
   it('muestra teléfono y correo del arquitecto elegido de la lista, no solo el nombre (SCRUM-122)', async () => {
@@ -356,7 +356,7 @@ describe('QuotePage', () => {
     expect(screen.getByText('nuevo@arq.test')).toBeInTheDocument()
   })
 
-  // SCRUM-122 — el gap original reportado por Daniela Amaya era justamente este: al
+  // SCRUM-122 — el gap original reportado por Gerencia Test era justamente este: al
   // ABRIR una cotización ya existente con arquitecto asignado, no solo al crearlo.
   it('hidrata teléfono y correo del arquitecto al abrir una cotización ya existente', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({
