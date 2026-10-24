@@ -32,9 +32,9 @@ export default function NotasCreditoPage() {
   // (`NotaCreditoDevolucionDetail`) es más angosto que lo que el formulario necesita (ver docblock
   // del tipo) — no trae monto/saldo/% ITBMS de la factura de origen, así que se combina con
   // `facturas()` (mismo endpoint que usa el modo manual) para completar
-  // `NotaCreditoDevolucionPrecargada`. `persona_devuelve`/`conformidad` no existen en ningún lado
-  // del backend (`CustomerReturnLine` no los trackea) — se muestran con un placeholder explícito,
-  // nunca inventados; gap real documentado para Pre-QA/Senior Review.
+  // `NotaCreditoDevolucionPrecargada`. SCRUM-865 punto 2 cerró el gap de `persona_devuelve`/
+  // `proyecto`/`conformidad` — antes se mostraban como "No disponible" aunque Bodega sí tuviera el
+  // dato, porque el backend nunca los traía (ver `CreditNoteService::devolucionDetail()`).
   const [pendingDevolucion, setPendingDevolucion] = useState<NotaCreditoDevolucionDetail | null>(null)
   const [precargaError, setPrecargaError] = useState(false)
   const devolucionDetailMutation = useNotaCreditoDevolucionDetail()
@@ -65,12 +65,20 @@ export default function NotasCreditoPage() {
         // sugerido cae a 0 en ese caso. El campo sigue editable siempre.
         monto_unitario: p.unit_price ?? 0,
       })),
-      persona_devuelve: t('notasCredito.formulario.precargaDatoNoDisponible'),
-      proyecto: null,
-      conformidad: t('notasCredito.formulario.precargaDatoNoDisponible'),
+      persona_devuelve: pendingDevolucion.contact_name
+        ? `${pendingDevolucion.contact_name} — ${pendingDevolucion.contact_phone}`
+        : t('notasCredito.formulario.precargaDatoNoDisponible'),
+      proyecto: pendingDevolucion.project,
+      conformidad_disponible: pendingDevolucion.has_signed_document,
       factura_monto: factura.monto,
       factura_saldo_pendiente: factura.saldo_pendiente,
+      // SCRUM-1116 — lo que aún se puede acreditar y lo ya acreditado: sin esto el modal abierto desde una devolución
+      // no mostraba el aviso de notas previas ni topaba el monto con el valor acreditable de la factura.
+      monto_acreditable: pendingDevolucion.monto_acreditable ?? factura.monto_acreditable,
+      notas_previas_total: pendingDevolucion.notas_previas_total ?? factura.notas_previas_total,
       factura_itbms_percentage: factura.itbms_percentage,
+      factura_origen_numero: pendingDevolucion.factura_origen_numero,
+      monto_sugerido: pendingDevolucion.monto_sugerido,
       customer_return_id: pendingDevolucion.customer_return_id,
     }
     setDevolucionPreview(precargada)

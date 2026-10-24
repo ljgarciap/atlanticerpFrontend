@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PendientesPanel from './PendientesPanel'
@@ -73,6 +73,20 @@ describe('PendientesPanel', () => {
     expect(dots).toHaveLength(2)
     expect(dots[0]?.className).toContain('bg-red-500')
     expect(dots[1]?.className).toContain('bg-amber-500')
+  })
+
+  it('SCRUM-871 — con más de 5 alertas acota a 5 y "Ver más" abre el listado completo', async () => {
+    const items: HomePendientes['items'] = Array.from({ length: 7 }, (_, i) => ({
+      tipo: 'comision_pendiente' as const, severidad: 'media' as const,
+      titulo: `Alerta ${i + 1}`, detalle: 'detalle', monto: 100, fecha_referencia: `2026-08-${10 + i}`,
+    }))
+    mockedApi.home.pendientes.mockResolvedValue({ count: 7, items })
+    renderPanel()
+
+    expect(await screen.findAllByText(/Alerta \d/)).toHaveLength(5)
+
+    fireEvent.click(screen.getByText('common:actions.viewMore'))
+    expect(screen.getAllByText(/Alerta \d/)).toHaveLength(5 + 7)
   })
 
   it('muestra el estado vacío sin pendientes', async () => {

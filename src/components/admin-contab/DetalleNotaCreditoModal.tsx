@@ -1,13 +1,20 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
-import { useNotaCreditoDetalle, useDecideNotaCredito, useDownloadInvoicePdf } from '@/hooks/useAdminContab'
+import { useNotaCreditoDetalle, useDecideNotaCredito, useNotaCreditoFePreview, useNotaCreditoFeTransmisiones, useNotaCreditoFeAccion, useNotaCreditoFeReconciliar } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { IcoClose, IcoTruck, IcoCheck, IcoBan, IcoPaperclip, IcoFileText, IcoLink } from '@/components/icons'
+import { IcoClose, IcoTruck, IcoCheck, IcoBan, IcoPaperclip, IcoFileText, IcoLink, IcoAlertTriangle } from '@/components/icons'
 import { formatDateShort } from '@/utils/dates'
 import VerComprobanteNotaCreditoModal from './VerComprobanteNotaCreditoModal'
 import DocumentoNotaCreditoModal from './DocumentoNotaCreditoModal'
+import QuoteViewerModal from '@/components/QuoteViewerModal'
+import GuiaEntregaModal from '@/components/GuiaEntregaModal'
+import InvoiceDetailModal from './InvoiceDetailModal'
+import FiscalElectronicStatusBadge from './FiscalElectronicStatusBadge'
+import FeTransmisionesPanel from './FeTransmisionesPanel'
+import FeAccionFiscalBoton from './FeAccionFiscal'
+import type { FeAccionFiscal } from '@/types/adminContab'
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
@@ -42,13 +49,29 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
   const { t } = useTranslation('adminContab')
   const { data: nota, isLoading, isError } = useNotaCreditoDetalle(notaId)
   const decideMutation  = useDecideNotaCredito()
-  const facturaMutation = useDownloadInvoicePdf()
+  const fePreviewMutation = useNotaCreditoFePreview()
+  const feTransmisionesMutation = useNotaCreditoFeTransmisiones()
+  const feAccionMutation = useNotaCreditoFeAccion()
+  const feReconciliarMutation = useNotaCreditoFeReconciliar()
+  const [reconciliarUsado, setReconciliarUsado] = useState(false) // SCRUM-1019, mismo motivo que accionFeUsada
+  const [accionFeUsada, setAccionFeUsada] = useState<FeAccionFiscal | null>(null) // SCRUM-1007, ver InvoiceDetailModal
   const [rejecting, setRejecting]           = useState(false)
   const [motivoRechazo, setMotivoRechazo]   = useState('')
   const [motivoError, setMotivoError]       = useState<string | null>(null)
   const [decideError, setDecideError]       = useState<string | null>(null)
   const [comprobanteOpen, setComprobanteOpen] = useState(false)
   const [documentoOpen, setDocumentoOpen]     = useState(false)
+  // SCRUM-932 — Cotización/Guía de Entrega de la factura de origen, mismo patrón de modal hijo que
+  // ya usa `DetalleCobroModal.tsx` (SCRUM-931) — primera vez que este componente abre uno.
+  const [quoteId, setQuoteId]         = useState<number | null>(null)
+  const [guiaOrderId, setGuiaOrderId] = useState<number | null>(null)
+  // SCRUM-932 (rebote Daniela 2026-09-20) — "Factura de origen" debía abrir el mismo modal de
+  // detalle que Cobros (InvoiceDetailModal), no descargar el PDF directo (verFacturaOrigen()/
+  // useDownloadInvoicePdf(), retirados). El backend ya expone ambos ids que el modal necesita:
+  // `factura_origen_order_id` (order_id) y `factura_origen_id` (PK de AdminContInvoice, distinto
+  // del anterior — ver docblock de CreditNoteService::detail()).
+  const [detailOrderId, setDetailOrderId]     = useState<number | null>(null)
+  const [detailInvoiceId, setDetailInvoiceId] = useState<number | null>(null)
 
   function aprobar() {
     setDecideError(null)
@@ -79,11 +102,20 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
   }
 
   function verFacturaOrigen() {
-    // REQ-497 — `invoices.downloadPdf()` identifica la factura por `order_id`, no por el `id`
-    // propio de `AdminContInvoice` (`factura_origen_id`) — son dos campos distintos, ver docblock
-    // de `factura_origen_order_id` en `NotaCreditoDetalle`.
+    // SCRUM-932 — mismo patrón que DetalleCobroModal: abre InvoiceDetailModal con ambos ids,
+    // nunca descarga el PDF directo. `factura_origen_order_id` sigue siendo distinto de
+    // `factura_origen_id` (ver docblock de `factura_origen_order_id` en `NotaCreditoDetalle`).
     if (!nota || !nota.factura_origen_numero || nota.factura_origen_order_id === null) return
-    facturaMutation.mutate({ orderId: nota.factura_origen_order_id, orderNumber: nota.factura_origen_numero })
+    setDetailOrderId(nota.factura_origen_order_id)
+    setDetailInvoiceId(nota.factura_origen_id)
+  }
+
+  function verFacturaNueva() {
+    // SCRUM-1060 — el reemplazo conserva el `order_id` de la original: `factura_nueva_id` es lo que
+    // hace que InvoiceDetailModal muestre ESTA factura y no la anulada.
+    if (!nota || nota.factura_nueva_order_id === null || nota.factura_nueva_id === null) return
+    setDetailOrderId(nota.factura_nueva_order_id)
+    setDetailInvoiceId(nota.factura_nueva_id)
   }
 
   return (
@@ -114,13 +146,42 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
                 <DetailField label={t('notasCredito.detalle.subtotal')} value={formatCurrency(nota.subtotal)} />
                 <DetailField label={t('notasCredito.detalle.itbms')} value={formatCurrency(nota.itbms)} />
                 <DetailField label={t('notasCredito.detalle.estado')} value={t(`notasCredito.historial.estados.${nota.estado}`)} />
-                {/* REQ-497 — clic en la factura de origen abre la factura completa, mismo formato
-                    que Facturación (reusa invoices.downloadPdf() tal cual). */}
+                {/* SCRUM-932 — Cotización y Guía de Entrega, ANTES de "Factura de origen" (AC
+                    explícito del ticket) — clickeables cuando hay id, texto plano si no. */}
+                <div>
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('notasCredito.detalle.cotizacion')}</div>
+                  {nota.cotizacion_folio ? (
+                    <button
+                      type="button" onClick={() => setQuoteId(nota.quote_id)}
+                      className="text-sm text-primary-dark hover:underline inline-flex items-center gap-1 mt-0.5"
+                    >
+                      <IcoLink size={11} />{nota.cotizacion_folio}
+                    </button>
+                  ) : (
+                    <div className="text-sm text-slate-800 dark:text-slate-100 mt-0.5">—</div>
+                  )}
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('notasCredito.detalle.guiaEntrega')}</div>
+                  {nota.guia_entrega_numero ? (
+                    <button
+                      type="button" onClick={() => setGuiaOrderId(nota.guia_entrega_order_id)}
+                      className="text-sm text-primary-dark hover:underline inline-flex items-center gap-1 mt-0.5"
+                    >
+                      <IcoLink size={11} />{nota.guia_entrega_numero}
+                    </button>
+                  ) : (
+                    <div className="text-sm text-slate-800 dark:text-slate-100 mt-0.5">—</div>
+                  )}
+                </div>
+                {/* SCRUM-932 (rebote Daniela 2026-09-20) — clic en la factura de origen abre el
+                    modal de detalle (InvoiceDetailModal), mismo comportamiento que Cobros — ya
+                    no descarga el PDF directo. */}
                 <div>
                   <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('notasCredito.detalle.facturaOrigen')}</div>
                   {nota.factura_origen_numero ? (
                     <button
-                      type="button" onClick={verFacturaOrigen} disabled={facturaMutation.isPending}
+                      type="button" onClick={verFacturaOrigen}
                       className="text-sm text-primary-dark hover:underline inline-flex items-center gap-1 mt-0.5"
                     >
                       <IcoLink size={11} />{nota.factura_origen_numero}
@@ -130,8 +191,22 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
                   )}
                 </div>
                 <DetailField label={t('notasCredito.detalle.registradoPor')} value={nota.registrado_por ?? '—'} />
+                {/* SCRUM-1060 — la factura de reemplazo abre el mismo modal de detalle que la de
+                    origen; sin ids de navegación (nota previa al campo) queda como texto. */}
                 {nota.factura_nueva_numero && (
-                  <DetailField label={t('notasCredito.detalle.facturaNueva')} value={nota.factura_nueva_numero} />
+                  nota.factura_nueva_order_id !== null && nota.factura_nueva_id !== null ? (
+                    <div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('notasCredito.detalle.facturaNueva')}</div>
+                      <button
+                        type="button" onClick={verFacturaNueva}
+                        className="text-sm text-primary-dark hover:underline inline-flex items-center gap-1 mt-0.5"
+                      >
+                        <IcoLink size={11} />{nota.factura_nueva_numero}
+                      </button>
+                    </div>
+                  ) : (
+                    <DetailField label={t('notasCredito.detalle.facturaNueva')} value={nota.factura_nueva_numero} />
+                  )
                 )}
                 {nota.aprobado_por && (
                   <DetailField
@@ -170,6 +245,58 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
                     {t('notasCredito.detalle.motivoRechazo')}
                   </span>
                   <p className="text-sm text-slate-700 dark:text-slate-200">{nota.motivo_rechazo}</p>
+                </div>
+              )}
+
+              {/* SCRUM-943 — solo tiene sentido una vez aplicada; mientras pendiente_aprobacion o
+                  rechazada, la nota nunca llegó a certificarse ante el PAC. */}
+              {nota.estado === 'aplicada' && (
+                <div className="mt-3">
+                  <FiscalElectronicStatusBadge
+                    estado={nota.fe_estado} detalle={nota.fe_detalle} cufe={nota.cufe} qrContent={nota.qr_content} t={t}
+                    onLoadPreview={() => fePreviewMutation.mutateAsync(notaId)}
+                  />
+                  {/* SCRUM-1009 — la NC de una Corrección de datos aún no certificó: el reemplazo espera. */}
+                  {nota.motivo_correccion && nota.fe_estado !== null && nota.fe_estado !== 'certificado' && nota.fe_estado !== 'no_aplica' && (
+                    <div className="mt-2 flex items-start gap-2 rounded-lg bg-sky-50 dark:bg-sky-950/30 text-sky-800 dark:text-sky-300 p-2.5 text-[11px] font-medium">
+                      <IcoAlertTriangle size={13} />
+                      <span>{t('notasCredito.detalle.avisoCorreccionSinCertificar')}</span>
+                    </div>
+                  )}
+                  {nota.puede_ver_fe_transmisiones && nota.fe_estado !== null && nota.fe_estado !== 'no_aplica' && (
+                    <div className="mt-2">
+                      <FeTransmisionesPanel t={t} onLoad={() => feTransmisionesMutation.mutateAsync(notaId)} />
+                    </div>
+                  )}
+                  {(nota.accion_fe ?? accionFeUsada) !== null && (
+                    <div className="mt-2">
+                      <FeAccionFiscalBoton
+                        key={notaId}
+                        accion={(nota.accion_fe ?? accionFeUsada) as FeAccionFiscal}
+                        disponible={nota.accion_fe != null}
+                        t={t}
+                        onEjecutar={() => {
+                          const accion = (nota.accion_fe ?? accionFeUsada) as FeAccionFiscal
+                          setAccionFeUsada(accion)
+                          return feAccionMutation.mutateAsync({ accion, id: notaId })
+                        }}
+                      />
+                    </div>
+                  )}
+                  {(nota.puede_reconciliar_fe === true || reconciliarUsado) && (
+                    <div className="mt-2">
+                      <FeAccionFiscalBoton
+                        key={`rec:${notaId}`}
+                        accion="reconciliar"
+                        disponible={nota.puede_reconciliar_fe === true}
+                        t={t}
+                        onEjecutar={() => {
+                          setReconciliarUsado(true)
+                          return feReconciliarMutation.mutateAsync(notaId)
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -257,6 +384,14 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
 
       {comprobanteOpen && <VerComprobanteNotaCreditoModal notaId={notaId} onClose={() => setComprobanteOpen(false)} />}
       {documentoOpen && nota && <DocumentoNotaCreditoModal nota={nota} onClose={() => setDocumentoOpen(false)} />}
+      {quoteId !== null && <QuoteViewerModal quoteId={quoteId} onClose={() => setQuoteId(null)} />}
+      {guiaOrderId !== null && <GuiaEntregaModal orderId={guiaOrderId} onClose={() => setGuiaOrderId(null)} />}
+      {detailOrderId !== null && (
+        <InvoiceDetailModal
+          orderId={detailOrderId} invoiceId={detailInvoiceId} t={t}
+          onClose={() => { setDetailOrderId(null); setDetailInvoiceId(null) }}
+        />
+      )}
     </div>
   )
 }

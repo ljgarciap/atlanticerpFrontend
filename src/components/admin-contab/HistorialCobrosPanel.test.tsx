@@ -42,6 +42,7 @@ function makeResult(overrides: Partial<PaymentHistorialResult> = {}): PaymentHis
         referencia: 'TRF-77410', registrado_por: 'Contabilidad Test', tiene_comprobante: false,
       },
     ],
+    meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
     ...overrides,
   }
 }
@@ -66,7 +67,9 @@ describe('HistorialCobrosPanel — REQ-470', () => {
 
     expect(await screen.findByRole('cell', { name: 'Hotel Riu' })).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: 'Grupo Sensei' })).toBeInTheDocument()
-    expect(screen.getByText('cobros.historial.resultCount:mostrados=2:total=6')).toBeInTheDocument()
+    // SCRUM-947 — el "total" de este contador ahora es meta.total (filtrado/paginado real), no
+    // el `total` global sin filtrar del payload (ese sigue existiendo, pero ya no se usa acá).
+    expect(screen.getByText('cobros.historial.resultCount:mostrados=2:total=2')).toBeInTheDocument()
   })
 
   it('clic en una fila llama a onSelectPayment con el id del cobro', async () => {
@@ -113,9 +116,36 @@ describe('HistorialCobrosPanel — REQ-470', () => {
   })
 
   it('sin resultados muestra el mensaje vacío', async () => {
-    mockedApi.payments.historial.mockResolvedValue(makeResult({ rows: [], total: 0 }))
+    mockedApi.payments.historial.mockResolvedValue(makeResult({
+      rows: [], total: 0, meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
+    }))
     renderPanel()
 
     expect(await screen.findByText('cobros.historial.vacio')).toBeInTheDocument()
+  })
+})
+
+// SCRUM-947 — paginación estándar.
+describe('HistorialCobrosPanel — SCRUM-947 paginación', () => {
+  it('pide la página 1 con 20 por página por defecto', async () => {
+    renderPanel()
+    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    expect(mockedApi.payments.historial).toHaveBeenCalledWith(expect.objectContaining({ page: 1, per_page: 20 }))
+  })
+
+  it('cambiar un filtro reinicia a la página 1', async () => {
+    mockedApi.payments.historial.mockResolvedValue(
+      makeResult({ meta: { total: 45, per_page: 20, current_page: 2, last_page: 3 } }),
+    )
+    renderPanel()
+    await screen.findByRole('cell', { name: 'Hotel Riu' })
+
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.payments.historial).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })))
+
+    fireEvent.change(screen.getByPlaceholderText('cobros.historial.searchPlaceholder'), { target: { value: 'algo' } })
+    await waitFor(() => expect(mockedApi.payments.historial).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: 'algo', page: 1 }),
+    ))
   })
 })

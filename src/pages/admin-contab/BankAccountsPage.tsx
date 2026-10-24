@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,6 +9,7 @@ import {
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import { IcoDollarSign, IcoEye, IcoPlus } from '@/components/icons'
 import BankAccountDetailModal from './BankAccountDetailModal'
 import type { BankAccount, BankMovement, CreateBankAccountPayload } from '@/types/adminContab'
@@ -68,7 +69,13 @@ export default function BankAccountsPage() {
   const deletedAccounts  = (accounts ?? []).filter(a => !a.activa)
 
   const movementsAccountId = typeof selectedTab === 'number' ? selectedTab : undefined
-  const { data: movements } = useBankMovements(movementsAccountId)
+  const [movementsPage, setMovementsPage]       = useState(1)
+  const [movementsPerPage, setMovementsPerPage] = useState<number | 'all'>(20)
+  // SCRUM-947 — cambiar de tab (cuenta) reinicia la página, misma convención que un filtro nuevo.
+  useEffect(() => { setMovementsPage(1) }, [selectedTab])
+  const { data: movementsResult } = useBankMovements(movementsAccountId, movementsPage, movementsPerPage)
+  const movements     = movementsResult?.data
+  const movementsMeta = movementsResult?.meta
 
   function onCreate(data: AccountFormData) {
     const payload: CreateBankAccountPayload = data
@@ -178,7 +185,17 @@ export default function BankAccountsPage() {
       {selectedTab === 'deleted' ? (
         <DeletedAccountsList accounts={deletedAccounts} onDetail={setDetailAccount} t={t} />
       ) : (
-        <MovementsTable movements={movements ?? []} activeAccounts={activeAccounts} t={t} />
+        <>
+          <MovementsTable movements={movements ?? []} activeAccounts={activeAccounts} t={t} />
+          {movementsMeta && (
+            <Pagination
+              meta={movementsMeta}
+              perPage={movementsPerPage}
+              onPageChange={setMovementsPage}
+              onPerPageChange={pp => { setMovementsPerPage(pp); setMovementsPage(1) }}
+            />
+          )}
+        </>
       )}
 
       {detailAccount && (

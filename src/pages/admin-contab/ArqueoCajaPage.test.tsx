@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -84,8 +84,9 @@ function makeDailyCount(overrides: Partial<DailyCashCount> = {}): DailyCashCount
     fecha: '2026-08-25', es_atrasado: false, fecha_real_hoy: '2026-08-25',
     cobros: [{ movement_type: 'payment', movement_id: 55, concepto: 'Cobro — Grupo Sensei (REC-2214)', metodo_pago: 'transferencia', monto: 6600, observacion: null }],
     notas_credito: [{ movement_type: 'credit_note', movement_id: 12, concepto: 'Devolución de dinero — Fam. Herrera', monto: 500, observacion: '' }],
+    comisiones: [],
     retenciones: [],
-    total_cobrado: 6600, total_notas_credito: 500, total_neto: 6100, observacion_general: null,
+    total_cobrado: 6600, total_notas_credito: 500, total_comisiones: 0, total_neto: 6100, observacion_general: null,
     cerrado_por: null, cerrado_at: null, aprobado_por: null, aprobado_at: null,
     ...overrides,
   }
@@ -94,7 +95,7 @@ function makeDailyCount(overrides: Partial<DailyCashCount> = {}): DailyCashCount
 function makeHistory(overrides: Partial<import('@/types/adminContab').DailyCashCountHistoryResult> = {}) {
   return {
     data: [] as import('@/types/adminContab').DailyCashCountHistoryRow[],
-    meta: { current_page: 1, last_page: 1 },
+    meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
     pendientes_aprobacion: 0,
     ...overrides,
   }
@@ -188,6 +189,39 @@ describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
     expect(screen.getByText(/6,100\.00/)).toBeInTheDocument() // total neto
   })
 
+  it('SCRUM-1175 — cada línea del arqueo muestra el nombre del cliente y las comisiones, que no tienen cliente, no muestran nada', async () => {
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
+      cobros: [{ movement_type: 'payment', movement_id: 55, concepto: 'Cobro REC-2214', cliente: 'Grupo Sensei', metodo_pago: 'transferencia', monto: 6600, observacion: null }],
+      comisiones: [{ movement_type: 'commission', movement_id: 91, concepto: 'Comisión arquitecto Arquitecto 12', monto: 18.10, observacion: null }],
+      total_comisiones: 18.10,
+    }))
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.chips.hoy'))
+
+    const cobro = (await screen.findByText('Cobro REC-2214')).closest('tr')!
+    expect(cobro).toHaveTextContent('Grupo Sensei')
+    const comision = screen.getByText('Comisión arquitecto Arquitecto 12').closest('tr')!
+    expect(comision.querySelector('[data-testid="arqueo-fila-cliente"]')).toBeNull()
+  })
+
+  it('SCRUM-879 (rebote PM Review) — muestra las comisiones pagadas hoy como salida real, en rojo, dentro de la misma tabla', async () => {
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
+      comisiones: [{ movement_type: 'commission', movement_id: 91, concepto: 'Comisión arquitecto Arquitecto 12 — PED-2026-0070', monto: 18.10, observacion: null }],
+      total_comisiones: 18.10, total_neto: 6081.90,
+    }))
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.chips.hoy'))
+    const row = await screen.findByText('Comisión arquitecto Arquitecto 12 — PED-2026-0070')
+    expect(row.closest('tr')).toHaveTextContent('-USD 18.10')
+    expect(screen.getByText(/6,081\.90/)).toBeInTheDocument() // total neto ya descuenta la comisión
+  })
+
   it('editar la observación de una fila dispara el PUT al perder el foco', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
     mockedApi.cashPosition.updateEntryObservation.mockResolvedValue(undefined)
@@ -221,6 +255,19 @@ describe('ArqueoCajaPage — restricción de rol Yaneth (§8 del ADR, ajustado 2
     renderPage()
     await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.title')
     expect(mockedApi.cashPosition.projected).toHaveBeenCalled()
+  })
+})
+
+// SCRUM-1139 — `lider_operaciones` (Mariam) espeja a la asistente: mismo arqueo del día y misma exclusión de REQ-521/523.
+describe('ArqueoCajaPage — lider_operaciones espeja a Yaneth (SCRUM-1139)', () => {
+  it('aterriza directo en Arqueo del día, sin toggle ni chips, y nunca pide Real (histórico)', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_operaciones' }) } as ReturnType<typeof useAuthStore>)
+    renderPage()
+    await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.title')
+    expect(screen.queryByText('adminContab:arqueoCaja.toggle.proyectado')).not.toBeInTheDocument()
+    expect(screen.queryByText('adminContab:arqueoCaja.chips.dias30')).not.toBeInTheDocument()
+    expect(mockedApi.cashPosition.real).not.toHaveBeenCalled()
+    expect(mockedApi.cashPosition.dailyCount).toHaveBeenCalled()
   })
 })
 
@@ -387,5 +434,97 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
     fireEvent.click(await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.cerrar.confirmar'))
 
     await waitFor(() => expect(screen.getByPlaceholderText('adminContab:arqueoCaja.arqueoDelDia.observacionGeneralPlaceholder')).toHaveValue(''))
+  })
+
+  // SCRUM-947 — paginación estándar (antes: botones "Anterior"/"Siguiente" propios, per_page fijo
+  // en 20 sin selector).
+  it('SCRUM-947: el historial usa el componente de paginación estándar, con selector de por página', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Mark', aprobado_at: '2026-07-03', realizado_por: 'Yaneth Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
+      meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 },
+    }))
+    renderPage()
+    await screen.findByText('adminContab:arqueoCaja.historial.title')
+    await screen.findByText(/pagination\.showing/)
+
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.cashPosition.history).toHaveBeenLastCalledWith(2, 20))
+  })
+})
+
+describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / total pasado a pedido)', () => {
+  function goToDailyCount() {
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
+    fireEvent.click(screen.getByText('adminContab:arqueoCaja.chips.hoy'))
+  }
+
+  it('muestra ambos indicadores bajo la tabla y los totales, con sus etiquetas y valores', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
+      total_facturado_dia: 12500.5, total_pasado_a_pedido_dia: 48200,
+    }))
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    goToDailyCount()
+
+    const block = await screen.findByTestId('arqueo-indicadores-dia')
+    const ind = within(block)
+    expect(ind.getByText('adminContab:arqueoCaja.arqueoDelDia.totalFacturadoDia')).toBeInTheDocument()
+    expect(ind.getByText(/12,500\.50/)).toBeInTheDocument()
+    expect(ind.getByText('adminContab:arqueoCaja.arqueoDelDia.totalPasadoAPedidoDia')).toBeInTheDocument()
+    expect(ind.getByText(/48,200\.00/)).toBeInTheDocument()
+    // Quedan DESPUÉS del total neto (debajo de la tabla y los totales existentes).
+    const totalNeto = screen.getByText('adminContab:arqueoCaja.arqueoDelDia.totalNeto')
+    expect(totalNeto.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('un día sin movimientos muestra 0.00 en ambos (arranca en cero), no oculta el bloque', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({ total_facturado_dia: 0, total_pasado_a_pedido_dia: 0 }))
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    goToDailyCount()
+
+    const ind = within(await screen.findByTestId('arqueo-indicadores-dia'))
+    expect(ind.getAllByText(/0\.00/)).toHaveLength(2)
+  })
+
+  it('no inventa $0.00: si el backend no envía los indicadores, el bloque no se renderiza', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    renderPage() // makeDailyCount() base no trae total_facturado_dia ni total_pasado_a_pedido_dia
+    await screen.findByText(/28,740\.00/)
+    goToDailyCount()
+    await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.totalNeto')
+    expect(screen.queryByTestId('arqueo-indicadores-dia')).not.toBeInTheDocument()
+  })
+
+  it('los indicadores son informativos: no cambian el total neto mostrado', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
+      total_facturado_dia: 999999, total_pasado_a_pedido_dia: 888888,
+    }))
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    goToDailyCount()
+    const block = await screen.findByTestId('arqueo-indicadores-dia')
+    expect(block.parentElement).toHaveTextContent(/6,100\.00/) // total_neto sigue = cobrado - NC - comisiones
+  })
+
+  it('el detalle de un arqueo cerrado del historial muestra los valores congelados al cerrar', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Mark', aprobado_at: '2026-07-03', realizado_por: 'Yaneth Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
+    }))
+    mockedApi.cashPosition.historyDetail.mockResolvedValue(makeDailyCount({
+      id: 5, numero: 2, estado: 'aprobado', fecha: '2026-07-02',
+      total_facturado_dia: 7300.25, total_pasado_a_pedido_dia: 15000,
+    }))
+    renderPage()
+    fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.ver'))
+
+    const ind = within(await screen.findByTestId('arqueo-indicadores-dia'))
+    expect(ind.getByText(/7,300\.25/)).toBeInTheDocument()
+    expect(ind.getByText(/15,000\.00/)).toBeInTheDocument()
   })
 })

@@ -37,8 +37,8 @@ function makeReportOk(overrides: Partial<Extract<ClientCollectionReport, { estad
   return {
     estado: 'ok',
     resumen: { registros: 6, total_facturado: 43900, total_cobrado: 37700, total_pendiente: 6200 },
-    filas: [{ fecha: '2026-01-15', num: 1, importe: 8400, media: 8400, transferencia: 8400, cheque: 0, efectivo: 0, yappy: 0, otros: 0, total_caja: 8400 }],
-    totales: { num: 1, importe: 8400, media: 8400, transferencia: 8400, cheque: 0, efectivo: 0, yappy: 0, otros: 0, total_caja: 8400 },
+    filas: [{ fecha: '2026-01-15', num: 1, importe: 8400, transferencia: 8400, cheque: 0, efectivo: 0, yappy: 0, otros: 0, total_caja: 8400 }],
+    totales: { num: 1, importe: 8400, transferencia: 8400, cheque: 0, efectivo: 0, yappy: 0, otros: 0, total_caja: 8400 },
     pendientes: [],
     ...overrides,
   }
@@ -163,5 +163,28 @@ describe('MensualClientePage — RN1 REQ-578 descargar bloqueado sin datos', () 
     fireEvent.click(screen.getByText('adminContab:reportes.mensualCliente.descargar'))
 
     await waitFor(() => expect(mockedApi.reports.mensualClienteExcel).toHaveBeenCalledWith({ masterClientId: 7, desde: undefined, hasta: undefined }))
+  })
+})
+
+// SCRUM-935 — la columna "Media" ya no forma parte de la tabla (encabezado, filas ni totales),
+// aunque el backend siguiera enviando el campo.
+describe('MensualClientePage — SCRUM-935 sin columna Media', () => {
+  it('la tabla muestra las columnas restantes pero no "Media"', async () => {
+    const conMedia = makeReportOk()
+    if (conMedia.estado === 'ok') {
+      Object.assign(conMedia.filas[0], { media: 8400 })
+      Object.assign(conMedia.totales, { media: 8400 })
+    }
+    mockedApi.reports.mensualCliente.mockResolvedValue(conMedia)
+    renderPage()
+    await selectClient()
+
+    expect(await screen.findByText('adminContab:reportes.mensualCliente.columnas.importe')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:reportes.mensualCliente.columnas.transferencia')).toBeInTheDocument()
+    expect(screen.queryByText('adminContab:reportes.mensualCliente.columnas.media')).not.toBeInTheDocument()
+    // Fila de datos + fila de totales: 1 celda menos que antes — encabezado y celdas coinciden.
+    const headerCells = document.querySelectorAll('thead th').length
+    const firstRowCells = document.querySelector('tbody tr')!.querySelectorAll('td').length
+    expect(firstRowCells).toBe(headerCells)
   })
 })

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -7,7 +7,7 @@ import { adminContabApi } from '@/api/adminContabApi'
 import { autocompleteApi } from '@/api/autocompleteApi'
 import type {
   PettyCashSummary, PettyCashPendingResult, PettyCashReportListItem, PettyCashReportDetail,
-  PettyCashRejectedLine,
+  PettyCashRejectedLine, PettyCashReportListResponse, PettyCashRejectedResult,
 } from '@/types/adminContab'
 
 // Batch 20 de Admin&Cont (SCRUM-612→617, REQ-535→540) — Caja Chica. Cubre: contadores de las 3
@@ -60,13 +60,14 @@ function makePending(overrides: Partial<PettyCashPendingResult> = {}): PettyCash
       ],
     }],
     total_general: 50.5,
+    meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
     ...overrides,
   }
 }
 
 function makeRejectedLine(overrides: Partial<PettyCashRejectedLine> = {}): PettyCashRejectedLine {
   return {
-    id: 9, fecha: '25 jun 2026', solicitante_nombre: 'Vendedor Disenador Test 2', proveedor: 'Copy Centro El Dorado',
+    id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Disenador Test 2', proveedor: 'Copy Centro El Dorado',
     descripcion: 'Impresión de brochures', monto_bruto: 12.0, itbms: 0.84, total: 12.84,
     estado: 'rechazado_temporal', intentos_rechazo: 2, attachments: [],
     ...overrides,
@@ -75,6 +76,15 @@ function makeRejectedLine(overrides: Partial<PettyCashRejectedLine> = {}): Petty
 
 function makeReport(overrides: Partial<PettyCashReportListItem> = {}): PettyCashReportListItem {
   return { numero: '0002-2026', fecha_creacion: '02 jul 2026', total: 35, estado: 'pendiente_aprobacion', forma_pago: 'transferencia', realizado_por_nombre: 'Contabilidad Test', ...overrides }
+}
+
+// SCRUM-947 — reports()/rejected() ahora devuelven {data|lineas, meta} en vez del array bare.
+function makeReportsResult(items: PettyCashReportListItem[]): PettyCashReportListResponse {
+  return { data: items, meta: { total: items.length, per_page: 20, current_page: 1, last_page: 1 } }
+}
+
+function makeRejectedResult(lineas: PettyCashRejectedLine[]): PettyCashRejectedResult {
+  return { lineas, meta: { total: lineas.length, per_page: 20, current_page: 1, last_page: 1 } }
 }
 
 function makeReportDetail(overrides: Partial<PettyCashReportDetail> = {}): PettyCashReportDetail {
@@ -102,9 +112,9 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.pettyCash.summary.mockResolvedValue(makeSummary())
   mockedApi.pettyCash.pending.mockResolvedValue(makePending())
-  mockedApi.pettyCash.reports.mockResolvedValue([makeReport()])
+  mockedApi.pettyCash.reports.mockResolvedValue(makeReportsResult([makeReport()]))
   mockedApi.pettyCash.reportDetail.mockResolvedValue(makeReportDetail())
-  mockedApi.pettyCash.rejected.mockResolvedValue([])
+  mockedApi.pettyCash.rejected.mockResolvedValue(makeRejectedResult([]))
   mockedAutocomplete.users.mockResolvedValue([])
 })
 
@@ -136,6 +146,13 @@ describe('PettyCashPage — REQ-537 panel Pendientes', () => {
 })
 
 describe('PettyCashPage — REQ-539/540 detalle de reporte', () => {
+  it('SCRUM-868: la tabla de Reportes muestra la columna Forma de pago', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
+    expect(await screen.findByText('cajaChica.reportesPanel.columnas.formaPago')).toBeInTheDocument()
+    expect(await screen.findByText('cajaChica.formasPago.transferencia')).toBeInTheDocument()
+  })
+
   it('al ver un reporte pendiente con puede_aprobar=true muestra el botón Aprobar', async () => {
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
@@ -144,7 +161,7 @@ describe('PettyCashPage — REQ-539/540 detalle de reporte', () => {
   })
 
   it('un reporte finalizado no ofrece Aprobar, solo Descargar', async () => {
-    mockedApi.pettyCash.reports.mockResolvedValue([makeReport({ numero: '0001-2026', estado: 'finalizado' })])
+    mockedApi.pettyCash.reports.mockResolvedValue(makeReportsResult([makeReport({ numero: '0001-2026', estado: 'finalizado' })]))
     mockedApi.pettyCash.reportDetail.mockResolvedValue(makeReportDetail({ numero: '0001-2026', estado: 'finalizado', puede_aprobar: false, aprobado_por_nombre: 'Gerencia Test 3' }))
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
@@ -170,7 +187,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
   })
 
   it('lista las líneas con 2 intentos y sus datos, incluido el solicitante', async () => {
-    mockedApi.pettyCash.rejected.mockResolvedValue([makeRejectedLine()])
+    mockedApi.pettyCash.rejected.mockResolvedValue(makeRejectedResult([makeRejectedLine()]))
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
     expect(await screen.findByText('Vendedor Disenador Test 2')).toBeInTheDocument()
@@ -179,7 +196,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
   })
 
   it('al hacer clic en una fila abre el modal unificado de detalle', async () => {
-    mockedApi.pettyCash.rejected.mockResolvedValue([makeRejectedLine()])
+    mockedApi.pettyCash.rejected.mockResolvedValue(makeRejectedResult([makeRejectedLine()]))
     mockedApi.pettyCash.expenseDetail.mockResolvedValue({
       id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Disenador Test 2',
       proveedor: 'Copy Centro El Dorado', descripcion: 'Impresión de brochures',
@@ -195,5 +212,38 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
     fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
     expect(await screen.findByText('cajaChica.detalleLineaModal.reabrir')).toBeInTheDocument()
+  })
+})
+
+// SCRUM-947 — paginación estándar en las 3 tablas.
+describe('PettyCashPage — SCRUM-947 paginación', () => {
+  it('Pendientes pide la página 1 con 20 por página por defecto', async () => {
+    renderPage()
+    await screen.findByText('Asistente Administrativa Test')
+    expect(mockedApi.pettyCash.pending).toHaveBeenCalledWith(1, 20)
+  })
+
+  it('Reportes: avanzar de página pide la página siguiente', async () => {
+    mockedApi.pettyCash.reports.mockResolvedValue({
+      data: [makeReport()], meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 },
+    })
+    renderPage()
+    fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
+    await screen.findByText('0002-2026')
+
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.pettyCash.reports).toHaveBeenLastCalledWith(2, 20))
+  })
+
+  it('Rechazados: avanzar de página pide la página siguiente', async () => {
+    mockedApi.pettyCash.rejected.mockResolvedValue({
+      lineas: [makeRejectedLine()], meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 },
+    })
+    renderPage()
+    fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
+    await screen.findByText('Vendedor Disenador Test 2')
+
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.pettyCash.rejected).toHaveBeenLastCalledWith(2, 20))
   })
 })

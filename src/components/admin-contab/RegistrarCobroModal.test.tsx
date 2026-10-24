@@ -31,12 +31,21 @@ vi.mock('@/api/adminContabApi', () => ({
 const mockedApi = vi.mocked(adminContabApi, true)
 
 const CLIENT: PaymentClientOption = { id: 7, name: 'Vitrio Retail, S.A.' }
-const CORRIENTE: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', moneda: 'USD', activa: true, movimientos_count: 0 }
-const TARJETA: BankAccount = { id: 2, banco: 'Banistmo', tipo_cuenta: 'tarjeta_credito', ultimos_4_digitos: '2222', moneda: 'USD', activa: true, movimientos_count: 0 }
+const CORRIENTE: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const TARJETA: BankAccount = { id: 2, banco: 'Banistmo', tipo_cuenta: 'tarjeta_credito', ultimos_4_digitos: '2222', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvoicesResult {
   return {
-    invoices: [{ id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000 }, { id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200 }],
+    invoices: [
+      {
+        id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000, abono_obligatorio: null, neto_a_cobrar: 4000,
+        sales_project_id: 10, proyecto: 'Torre Azul', quote_id: 100, cotizacion_folio: 'COT-2026-0100',
+      },
+      {
+        id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200, abono_obligatorio: null, neto_a_cobrar: 2200,
+        sales_project_id: 20, proyecto: 'Casa Miramar', quote_id: 200, cotizacion_folio: 'COT-2026-0200',
+      },
+    ],
     credit_balance: 0,
     master_client_name: null,
     ...overrides,
@@ -84,6 +93,15 @@ describe('RegistrarCobroModal — REQ-464 selección de cliente y facturas', () 
     expect(await screen.findByText('cobros.registrarModal.sinFacturasPendientes')).toBeInTheDocument()
   })
 
+  // SCRUM-905 — el buscador debe pedir solo clientes con facturas pendientes de cobro, no la
+  // lista completa de clientes del sistema.
+  it('busca clientes filtrando solo los que tienen facturas pendientes de cobro', async () => {
+    renderModal()
+    const input = screen.getByPlaceholderText('cobros.registrarModal.clientePlaceholder')
+    fireEvent.change(input, { target: { value: 'Vitrio' } })
+    await waitFor(() => expect(mockedApi.payments.searchClients).toHaveBeenCalledWith('Vitrio', false, true))
+  })
+
   it('Escenario 2 — seleccionar 2 facturas ($4,000 + $2,200) muestra el total en tiempo real', async () => {
     renderModal()
     await selectClient()
@@ -96,29 +114,116 @@ describe('RegistrarCobroModal — REQ-464 selección de cliente y facturas', () 
   })
 })
 
-describe('RegistrarCobroModal — REQ-465 saldo a favor', () => {
-  it('Escenario 1 — saldo a favor de $500 se aplica por defecto y el monto recibido se autocalcula en $5,700', async () => {
+describe('RegistrarCobroModal — SCRUM-931 filtro cruzado Proyecto/# Cotización', () => {
+  it('elegir un Proyecto filtra las opciones de Cotización y la lista de facturas al de ese proyecto', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText('F-0001')
+
+    fireEvent.change(screen.getByLabelText('cobros.registrarModal.proyectoLabel'), { target: { value: '10' } })
+
+    // Solo F-0001 (proyecto 10) queda visible; F-0002 (proyecto 20) desaparece de la lista.
+    expect(screen.getByText('F-0001')).toBeInTheDocument()
+    expect(screen.queryByText('F-0002')).not.toBeInTheDocument()
+
+    // El select de Cotización solo ofrece la cotización del proyecto elegido.
+    const cotizacionSelect = screen.getByLabelText('cobros.registrarModal.cotizacionLabel') as HTMLSelectElement
+    const opciones = Array.from(cotizacionSelect.options).map(o => o.textContent)
+    expect(opciones).toContain('COT-2026-0100')
+    expect(opciones).not.toContain('COT-2026-0200')
+  })
+
+  it('elegir una Cotización autocompleta/filtra el Proyecto al de esa cotización', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText('F-0001')
+
+    fireEvent.change(screen.getByLabelText('cobros.registrarModal.cotizacionLabel'), { target: { value: '200' } })
+
+    const proyectoSelect = screen.getByLabelText('cobros.registrarModal.proyectoLabel') as HTMLSelectElement
+    expect(proyectoSelect.value).toBe('20')
+    expect(screen.getByText('F-0002')).toBeInTheDocument()
+    expect(screen.queryByText('F-0001')).not.toBeInTheDocument()
+  })
+
+  it('limpiar la selección de Proyecto/Cotización (volver a "Todos"/"Todas") restaura la lista completa', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText('F-0001')
+
+    fireEvent.change(screen.getByLabelText('cobros.registrarModal.proyectoLabel'), { target: { value: '10' } })
+    expect(screen.queryByText('F-0002')).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('cobros.registrarModal.proyectoLabel'), { target: { value: '' } })
+    expect(screen.getByText('F-0001')).toBeInTheDocument()
+    expect(screen.getByText('F-0002')).toBeInTheDocument()
+  })
+
+  /**
+   * Bug real encontrado en Senior Review (2026-09-20): el total y el payload de registro usaban
+   * `selectedInvoiceIds` contra la lista COMPLETA de facturas, no contra `visibleInvoices` — una
+   * factura tildada y luego ocultada por el filtro seguía "cobrándose" sin checkbox visible.
+   */
+  it('tildar F-0001, filtrar a un Proyecto que la oculta, y el total dejar de incluirla', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText('F-0001')
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /F-0001/ }))
+    expect(await screen.findByTestId('total-facturas')).toHaveTextContent(/4,000\.00/)
+
+    // Filtrar a Proyecto 20 (Casa Miramar) — oculta F-0001 (proyecto 10), que seguía tildada.
+    fireEvent.change(screen.getByLabelText('cobros.registrarModal.proyectoLabel'), { target: { value: '20' } })
+
+    expect(screen.queryByText('F-0001')).not.toBeInTheDocument()
+    // La única factura tildada quedó oculta por el filtro → la selección se podó a vacío → el
+    // bloque de total (gateado por selectedInvoiceIds.size > 0) desaparece por completo. Antes del
+    // fix, el total seguía en pantalla mostrando 4,000.00 pese a que F-0001 ya no era visible.
+    expect(screen.queryByTestId('total-facturas')).not.toBeInTheDocument()
+  })
+})
+
+describe('RegistrarCobroModal — SCRUM-902 §4.4 saldo a favor a nivel Cliente master', () => {
+  it('Escenario 9 — aplicar $500 de saldo cliente sobre $6,200 de facturas deja el monto recibido en $5,700', async () => {
     mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({ credit_balance: 500 }))
     renderModal()
     await selectClient()
     fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
     fireEvent.click(screen.getByRole('checkbox', { name: /F-0002/ }))
 
-    const checkbox = screen.getByRole('checkbox', { name: /aplicarSaldoFavor/ })
-    expect(checkbox).toBeChecked() // RN1 — marcada por defecto
+    // A diferencia del viejo checkbox todo-o-nada, nunca arranca aplicado — es un monto que el
+    // usuario decide y escribe.
+    expect(await screen.findByTestId('monto-recibido')).toHaveTextContent(/6,200\.00/)
+    fireEvent.change(screen.getByLabelText(/saldoClienteLabel/), { target: { value: '500' } })
 
     expect(await screen.findByTestId('monto-recibido')).toHaveTextContent(/5,700\.00/)
   })
 
-  it('Escenario 2 — saldo a favor cubre el 100%: monto recibido $0, cuenta bancaria deja de ser obligatoria', async () => {
+  it('Escenario 8 — un monto de saldo cliente mayor al disponible bloquea el registro con mensaje explícito', async () => {
+    mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({ credit_balance: 400 }))
+    renderModal()
+    await selectClient()
+    fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
+
+    fireEvent.change(screen.getByLabelText(/saldoClienteLabel/), { target: { value: '500' } })
+
+    expect(await screen.findByText(/saldoClienteExcede/)).toBeInTheDocument()
+    expect(screen.getByText('cobros.registrarModal.confirm')).toBeDisabled()
+  })
+
+  it('saldo cliente que cubre el 100% de la factura: monto recibido $0, cuenta bancaria deja de ser obligatoria', async () => {
     mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({
-      invoices: [{ id: 1, numero: 'F-0001', monto: 6200, saldo_pendiente: 6200 }],
+      invoices: [{
+        id: 1, numero: 'F-0001', monto: 6200, saldo_pendiente: 6200, abono_obligatorio: null, neto_a_cobrar: 6200,
+        sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
+      }],
       credit_balance: 6200,
     }))
     mockedApi.payments.register.mockResolvedValue({ id: 1, estado: 'confirmado' } as Payment)
     renderModal()
     await selectClient()
     fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
+    fireEvent.change(screen.getByLabelText(/saldoClienteLabel/), { target: { value: '6200' } })
 
     expect(await screen.findByTestId('monto-recibido')).toHaveTextContent(/^(?:USD|\$)\s?0\.00$/)
 
@@ -158,13 +263,18 @@ describe('RegistrarCobroModal — REQ-466 método de pago y cuenta bancaria', ()
     })
   })
 
-  it('Retención de impuestos oculta el campo de cuenta bancaria', async () => {
+  // SCRUM-955 §3 — antes ocultaba el campo por completo; ahora lo muestra bloqueado en "Otros"
+  // (el payload sigue mandando bank_account_id: null, sin cambio de contrato con backend).
+  it('Retención de impuestos bloquea el campo de cuenta bancaria en "Otros"', async () => {
     renderModal()
     await selectClient()
     fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
     fireEvent.change(screen.getByLabelText('cobros.registrarModal.metodoPagoLabel'), { target: { value: 'retencion_impuestos' } })
 
-    expect(screen.queryByLabelText('cobros.registrarModal.cuentaBancariaLabel')).not.toBeInTheDocument()
+    const select = screen.getByLabelText('cobros.registrarModal.cuentaBancariaLabel') as HTMLSelectElement
+    expect(select).toBeDisabled()
+    expect(select.value).toBe('otros')
+    expect(Array.from(select.options).map(o => o.textContent)).toEqual(['cobros.registrarModal.cuentaBancariaOtros'])
     expect(screen.getByLabelText('cobros.registrarModal.numeroDocumentoRetencionLabel')).toBeInTheDocument()
   })
 })
@@ -209,7 +319,7 @@ describe('RegistrarCobroModal — REQ-467 campos condicionales y validación', (
     await waitFor(() => expect(mockedApi.payments.register).toHaveBeenCalledWith({
       master_client_id: 7,
       invoice_ids: [1],
-      aplicar_saldo_favor: false,
+      monto_saldo_cliente_aplicado: 0,
       metodo_pago: 'transferencia',
       monto_recibido_estimado: 4000,
       bank_account_id: CORRIENTE.id,

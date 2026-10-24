@@ -3,20 +3,23 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { isAxiosError } from 'axios'
 import {
-  useInvoiceSummary, useInvoiceList, useInvoicePreview, useCreateInvoice, useInvoiceExport,
-  useInvoiceDetail, useMarkUncollectible, useDecideUncollectible, useInvoiceAging, useDownloadInvoicePdf,
+  useInvoiceSummary, useInvoiceList, useInvoiceSellers, useInvoicePreview, useCreateInvoice, useInvoiceExport, useInvoiceAging,
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import {
   IcoFileText, IcoChevronRight, IcoSearch, IcoClose, IcoDownload, IcoChevronDown,
-  IcoCheck, IcoBan, IcoPrinter, IcoAlertTriangle, IcoTruck, IcoClock,
 } from '@/components/icons'
 import { FiscalItemsTable, FiscalTotalsBlock } from '@/components/admin-contab/FiscalDocumentPreview'
+import InvoiceDetailModal from '@/components/admin-contab/InvoiceDetailModal'
+import ReceptorGuardNotice from '@/components/admin-contab/ReceptorGuardNotice'
 import type {
-  CarteraTab, EntregaEstado, FacturacionView, InvoiceEntry, InvoicePreviewResponse, InvoiceExportFormat,
+  CarteraTab, EntregaEstado, FacturacionView, InvoiceEntry, InvoiceModo, InvoicePreviewResponse, InvoiceExportFormat,
   InvoiceListFilters,
 } from '@/types/adminContab'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 /**
  * Batch 2 del cuerpo principal de Admin&Cont (SCRUM-513→518, REQ-436→441) — Facturación.
@@ -32,12 +35,20 @@ function formatCurrency(value: number): string {
 }
 
 function mutationErrorMessage(err: unknown, fallback: string): string {
-  const data = isAxiosError<{ message?: string }>(err) ? err.response?.data : undefined
-  return data?.message ?? fallback
+  const data = isAxiosError<{ message?: string; errors?: unknown }>(err) ? err.response?.data : undefined
+  // Guardado en lote rechazado (422): además del mensaje general, el motivo de cada pedido (p. ej. el RUC que no validó).
+  const detalle = Array.isArray(data?.errors)
+    ? (data.errors as { missing?: string[] }[]).flatMap(e => e.missing ?? []).filter(Boolean)
+    : []
+  const motivos = [...new Set(detalle)].join('\n')
+  return motivos !== '' ? `${data?.message ?? fallback}\n${motivos}` : (data?.message ?? fallback)
 }
 
-function openEstadoCuenta(masterClientId: number) {
-  window.open(`/admin-contab/facturacion/estado-cuenta?master_client_id=${masterClientId}`, '_blank')
+// SCRUM-856 — acceso directo sin cliente preseleccionado (mismo mecanismo de ventana/pestaña
+// nueva que el acceso por proyecto de más abajo, para consistencia con el patrón ya existente).
+function openEstadoCuenta(masterClientId?: number) {
+  const query = masterClientId !== undefined ? `?master_client_id=${masterClientId}` : ''
+  window.open(`/admin-contab/facturacion/estado-cuenta${query}`, '_blank')
 }
 
 const ESTADO_PILL_CLASSES: Record<EntregaEstado, string> = {
@@ -59,16 +70,43 @@ function pillFor(entry: InvoiceEntry, t: (key: string) => string): { label: stri
   return { label: t(`adminContab:facturacion.estados.${entry.estado}`), className: ESTADO_PILL_CLASSES[entry.estado] }
 }
 
+// SCRUM-929 — una fila ya NO es 1:1 con `order_id` (la raíz puede tener su parcial y el completo,
+// ambas con el mismo `order_id`): la clave real es `invoice_id` (facturada) o `order_id` (pendiente,
+// a lo sumo una por entrega). Ver ADR §4.3.
+function rowKey(entry: InvoiceEntry): string {
+  return entry.invoice_id !== null ? `inv-${entry.invoice_id}` : `pending-${entry.order_id}`
+}
+
+// SCRUM-929 — agrupa las filas de un PEDIDO (varias facturas y/o entregas pendientes pueden
+// compartir `pedido_id`) para renderizar el botón "Facturar pedido completo" una sola vez por
+// pedido, no una vez por fila.
+function groupByPedido(entries: InvoiceEntry[]): [number, InvoiceEntry[]][] {
+  const map = new Map<number, InvoiceEntry[]>()
+  for (const e of entries) {
+    if (!map.has(e.pedido_id)) map.set(e.pedido_id, [])
+    map.get(e.pedido_id)!.push(e)
+  }
+  return Array.from(map.entries())
+}
+
 export default function FacturacionPage() {
-  const { t } = useTranslation(['common', 'adminContab'])
+  const { t } = useTranslation(['common', 'adminContab', 'bodega'])
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
 
   const [cartera, setCartera] = useState<CarteraTab>('cobrable')
   const [view, setView] = useState<FacturacionView>('agrupado')
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
   const [cliente, setCliente] = useState('')
   const [proyecto, setProyecto] = useState('')
+  // SCRUM-1175 — vendedores elegidos: el pedido entra si cualquiera de sus responsables está entre ellos (en todas las páginas, no solo la visible).
+  const [vendedorIds, setVendedorIds] = useState<number[]>([])
+  const { data: vendedoresOpciones } = useInvoiceSellers()
   const [estado, setEstado] = useState<EntregaEstado | ''>('')
+  // SCRUM-1147 — Cobradas / Por cobrar ('' = todas).
+  const [cobro, setCobro] = useState<'cobradas' | 'por_cobrar' | ''>('')
   // SCRUM-156/159 (Gerencia → "Variación margen"/panel Facturación): la tarjeta y
   // el clic en barra navegan acá con ?desde=&hasta= — antes se ignoraba, esta
   // pantalla nunca leía la URL al montar.
@@ -77,6 +115,7 @@ export default function FacturacionPage() {
   const [openGroups, setOpenGroups] = useState<Record<number, boolean>>({})
   const [creatingInvoice, setCreatingInvoice] = useState(false)
   const [previewOrderIds, setPreviewOrderIds] = useState<number[] | null>(null)
+  const [previewModo, setPreviewModo] = useState<InvoiceModo | undefined>(undefined)
   const [previewFromWizard, setPreviewFromWizard] = useState(false)
   // Estado del wizard "+ Crear Factura" subido a este nivel (RN3 REQ-443 — "Editar" desde la
   // vista previa vuelve al formulario sin perder cliente/proyecto/selección ya elegidos).
@@ -84,22 +123,32 @@ export default function FacturacionPage() {
   const [wizardProyecto, setWizardProyecto] = useState('')
   const [wizardSelected, setWizardSelected] = useState<number[]>([])
   // Batch 4 (REQ-447) — modal de detalle/trazabilidad, se abre al hacer clic en cualquier fila.
+  // SCRUM-929 — `invoiceId` acompaña a `orderId` para elegir la factura exacta cuando la tarjeta
+  // tiene más de una activa (la raíz con su parcial y el completo).
   const [detailOrderId, setDetailOrderId] = useState<number | null>(null)
+  const [detailInvoiceId, setDetailInvoiceId] = useState<number | null>(null)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
 
   const listFilters = {
     tab: cartera,
     view: 'plana' as const, // el agrupado lo arma este componente — el fetch siempre trae la lista plana
     cliente: cliente || undefined,
     proyecto: proyecto || undefined,
+    vendedor_ids: vendedorIds.length > 0 ? vendedorIds : undefined,
     estado: estado || undefined,
+    cobro: cobro || undefined,
     desde: desde || undefined,
     hasta: hasta || undefined,
-    search: search || undefined,
+    search: searchTerm || undefined,
   }
-  const { data: listResult, isLoading } = useInvoiceList(listFilters)
+  // SCRUM-947 — page/per_page NO viajan en ExportMenu (usa `listFilters` tal cual, ver abajo): un
+  // export debe traer TODO lo que matchea el filtro, nunca una sola página.
+  const { data: listResult, isLoading } = useInvoiceList({ ...listFilters, page, per_page: perPage })
 
   const list = listResult?.rows ?? []
   const totalEnTab = listResult?.total_en_tab ?? list.length
+  const meta = listResult?.meta
 
   function resetWizard() {
     setWizardCliente(''); setWizardProyecto(''); setWizardSelected([])
@@ -113,11 +162,14 @@ export default function FacturacionPage() {
   function openPreviewFromWizard(orderIds: number[]) {
     setCreatingInvoice(false)
     setPreviewFromWizard(true)
+    setPreviewModo(undefined) // el wizard solo ofrece pedidos "completo" (ver CrearFacturaModal) — sin ambigüedad de modo por id.
     setPreviewOrderIds(orderIds)
   }
 
-  function openPreviewSingle(orderId: number) {
+  // SCRUM-929 — `modo` ausente = 'completo' (comportamiento de siempre, un pedido/entrega única).
+  function openPreviewSingle(orderId: number, modo?: InvoiceModo) {
     setPreviewFromWizard(false)
+    setPreviewModo(modo)
     setPreviewOrderIds([orderId])
   }
 
@@ -128,20 +180,38 @@ export default function FacturacionPage() {
 
   function closePreview() {
     setPreviewOrderIds(null)
+    setPreviewModo(undefined)
     setPreviewFromWizard(false)
   }
 
   function handleInvoiceConfirmed() {
     setPreviewOrderIds(null)
+    setPreviewModo(undefined)
     setPreviewFromWizard(false)
     resetWizard()
   }
 
+  function openDetail(orderId: number, invoiceId: number | null) {
+    setDetailOrderId(orderId)
+    setDetailInvoiceId(invoiceId)
+  }
+
+  function closeDetail() {
+    setDetailOrderId(null)
+    setDetailInvoiceId(null)
+  }
+
   const clientesOptions = useMemo(() => Array.from(new Set(list.map(e => e.cliente))).sort(), [list])
-  const proyectosOptions = useMemo(() => Array.from(new Set(list.map(e => e.proyecto))).sort(), [list])
+  // SCRUM-980 — un pedido sin proyecto real (`proyecto === null`, ver InvoiceEntry) nunca puede
+  // facturarse (RN2 REQ-441 lo rechaza server-side por falta de Cotización/Monto/Cliente) — no
+  // tiene sentido ofrecerlo como opción de filtro.
+  const proyectosOptions = useMemo(
+    () => Array.from(new Set(list.flatMap(e => e.proyecto !== null ? [e.proyecto] : []))).sort(),
+    [list],
+  )
 
   const groups = useMemo(() => {
-    const map = new Map<number, { proyecto: string; cliente: string; master_client_id: number | null; cotizacion_folio: string | null; entries: InvoiceEntry[] }>()
+    const map = new Map<number | null, { proyecto: string | null; cliente: string; master_client_id: number | null; cotizacion_folio: string | null; entries: InvoiceEntry[] }>()
     for (const e of list) {
       if (!map.has(e.sales_project_id)) {
         map.set(e.sales_project_id, { proyecto: e.proyecto, cliente: e.cliente, master_client_id: e.master_client_id, cotizacion_folio: e.cotizacion_folio, entries: [] })
@@ -152,10 +222,10 @@ export default function FacturacionPage() {
   }, [list])
 
   function clearFilters() {
-    setSearch(''); setCliente(''); setProyecto(''); setEstado(''); setDesde(''); setHasta('')
+    setSearch(''); setCliente(''); setProyecto(''); setVendedorIds([]); setEstado(''); setCobro(''); setDesde(''); setHasta(''); setPage(1)
   }
 
-  const hasFilters = !!(search || cliente || proyecto || estado || desde || hasta)
+  const hasFilters = !!(search || cliente || proyecto || vendedorIds.length > 0 || estado || cobro || desde || hasta)
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
@@ -167,7 +237,19 @@ export default function FacturacionPage() {
             <p className="text-xs text-slate-400 dark:text-slate-500">{t('adminContab:facturacion.subtitle')}</p>
           </div>
         </div>
-        <Button onClick={openWizard}>{t('adminContab:facturacion.crearFactura')}</Button>
+        <div className="flex gap-2">
+          {/* SCRUM-897 — mismo botón/pantalla de Bodega→Pedidos, reusado tal cual (misma ruta,
+              misma key de traducción) — Admin&Cont ya tiene acceso vía `admin_contab.view` al
+              permiso de la ruta (ver App.tsx), sin necesidad de duplicar el componente. */}
+          <Button variant="secondary" onClick={() => navigate('/bodega/pedidos/status')}>
+            {t('bodega:pedidos.actions.orderStatus')}
+          </Button>
+          {/* SCRUM-856 — acceso directo a Estado de Cuenta, sin filtros preseleccionados. */}
+          <Button variant="secondary" onClick={() => openEstadoCuenta()}>
+            {t('adminContab:facturacion.estadoCuenta')}
+          </Button>
+          <Button onClick={openWizard}>{t('adminContab:facturacion.crearFactura')}</Button>
+        </div>
       </div>
 
       <StatCards t={t} />
@@ -182,10 +264,10 @@ export default function FacturacionPage() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex gap-1 bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
-              <Button variant="secondary" active={cartera === 'cobrable'} className="!px-3 !py-1.5 !text-xs" onClick={() => setCartera('cobrable')}>
+              <Button variant="secondary" active={cartera === 'cobrable'} className="!px-3 !py-1.5 !text-xs" onClick={() => { setCartera('cobrable'); setPage(1) }}>
                 {t('adminContab:facturacion.cartera.cobrable')}
               </Button>
-              <Button variant="secondary" active={cartera === 'incobrable'} className="!px-3 !py-1.5 !text-xs" onClick={() => setCartera('incobrable')}>
+              <Button variant="secondary" active={cartera === 'incobrable'} className="!px-3 !py-1.5 !text-xs" onClick={() => { setCartera('incobrable'); setPage(1) }}>
                 {t('adminContab:facturacion.cartera.incobrable')}
               </Button>
             </div>
@@ -205,28 +287,44 @@ export default function FacturacionPage() {
           <div className="relative">
             <IcoSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              value={search} onChange={e => setSearch(e.target.value)}
+              value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
               placeholder={t('adminContab:facturacion.filtros.buscarPlaceholder')}
               className="w-full rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <select value={cliente} onChange={e => setCliente(e.target.value)} className={selectClass}>
+            <select value={cliente} onChange={e => { setCliente(e.target.value); setPage(1) }} className={selectClass}>
               <option value="">{t('adminContab:facturacion.filtros.todosClientes')}</option>
               {clientesOptions.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <select value={proyecto} onChange={e => setProyecto(e.target.value)} className={selectClass}>
+            <select value={proyecto} onChange={e => { setProyecto(e.target.value); setPage(1) }} className={selectClass}>
               <option value="">{t('adminContab:facturacion.filtros.todosProyectos')}</option>
               {proyectosOptions.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
-            <select value={estado} onChange={e => setEstado(e.target.value as EntregaEstado | '')} className={selectClass}>
+            <UserMultiSelect
+              users={vendedoresOpciones ?? []} selectedIds={vendedorIds}
+              onChange={ids => { setVendedorIds(ids); setPage(1) }}
+              placeholder={t('adminContab:facturacion.filtros.vendedor')}
+            />
+            <select value={estado} onChange={e => { setEstado(e.target.value as EntregaEstado | ''); setPage(1) }} className={selectClass}>
               <option value="">{t('adminContab:facturacion.filtros.todosEstados')}</option>
               {(['pendiente-facturar', 'facturada'] as const).map(s => (
                 <option key={s} value={s}>{t(`adminContab:facturacion.estados.${s}`)}</option>
               ))}
             </select>
-            <input type="date" value={desde} onChange={e => setDesde(e.target.value)} className={selectClass} title="Desde" />
-            <input type="date" value={hasta} onChange={e => setHasta(e.target.value)} className={selectClass} title="Hasta" />
+            {/* SCRUM-1147 — identifica de un vistazo qué facturas tienen cobro pendiente. */}
+            <select
+              value={cobro}
+              aria-label={t('adminContab:facturacion.filtros.cobro')}
+              onChange={e => { setCobro(e.target.value as 'cobradas' | 'por_cobrar' | ''); setPage(1) }}
+              className={selectClass}
+            >
+              <option value="">{t('adminContab:facturacion.filtros.todasCobro')}</option>
+              <option value="cobradas">{t('adminContab:facturacion.filtros.cobradas')}</option>
+              <option value="por_cobrar">{t('adminContab:facturacion.filtros.porCobrar')}</option>
+            </select>
+            <input type="date" value={desde} onChange={e => { setDesde(e.target.value); setPage(1) }} className={selectClass} title="Desde" />
+            <input type="date" value={hasta} onChange={e => { setHasta(e.target.value); setPage(1) }} className={selectClass} title="Hasta" />
             {hasFilters && (
               <button type="button" onClick={clearFilters} className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2">
                 <IcoClose size={13} />{t('adminContab:facturacion.filtros.limpiar')}
@@ -245,36 +343,52 @@ export default function FacturacionPage() {
           <p className="text-xs text-slate-400 py-6 text-center">{t('adminContab:facturacion.empty')}</p>
         ) : view === 'agrupado' ? (
           <div className="rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-            {groups.map(([projectId, group]) => (
-              <FactGroup
-                key={projectId}
-                open={!!openGroups[projectId]}
-                onToggle={() => setOpenGroups(prev => ({ ...prev, [projectId]: !prev[projectId] }))}
-                group={group}
-                t={t}
-                onOpenPreview={openPreviewSingle}
-                onOpenDetail={setDetailOrderId}
-              />
-            ))}
+            {groups.map(([projectId, group]) => {
+              // SCRUM-980 — projectId es null cuando el pedido no tiene PipelineCard/SalesProject
+              // real (mismo caso raíz que el wizard "+ Crear Factura"); -1 nunca es un id real de
+              // sales_project (autoincrement de Postgres), sirve de key/toggle-state estable.
+              const key = projectId ?? -1
+              return (
+                <FactGroup
+                  key={key}
+                  open={!!openGroups[key]}
+                  onToggle={() => setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }))}
+                  group={group}
+                  t={t}
+                  onOpenPreview={openPreviewSingle}
+                  onOpenDetail={openDetail}
+                />
+              )
+            })}
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden divide-y divide-slate-100 dark:divide-slate-700">
-            {list.map(entry => (
-              <FactRow key={entry.order_id} entry={entry} flat t={t} onGenerarFactura={openPreviewSingle} onOpenDetail={setDetailOrderId} />
+          <div className="rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+            {groupByPedido(list).map(([pedidoId, entries]) => (
+              <PedidoBlock key={pedidoId} entries={entries} flat t={t} onOpenPreview={openPreviewSingle} onOpenDetail={openDetail} />
             ))}
           </div>
+        )}
+
+        {meta && (
+          <Pagination
+            meta={meta}
+            perPage={perPage}
+            onPageChange={setPage}
+            onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+          />
         )}
       </Card>
 
       <AgingPanel t={t} />
 
       {detailOrderId !== null && (
-        <InvoiceDetailModal orderId={detailOrderId} t={t} onClose={() => setDetailOrderId(null)} />
+        <InvoiceDetailModal orderId={detailOrderId} invoiceId={detailInvoiceId} t={t} onClose={closeDetail} />
       )}
 
       {previewOrderIds && (
         <PreviewModal
           orderIds={previewOrderIds}
+          modo={previewModo}
           fromWizard={previewFromWizard}
           t={t}
           onClose={closePreview}
@@ -327,10 +441,10 @@ function FactGroup(
   {
     open: boolean
     onToggle: () => void
-    group: { proyecto: string; cliente: string; master_client_id: number | null; cotizacion_folio: string | null; entries: InvoiceEntry[] }
+    group: { proyecto: string | null; cliente: string; master_client_id: number | null; cotizacion_folio: string | null; entries: InvoiceEntry[] }
     t: (key: string, opts?: Record<string, unknown>) => string
-    onOpenPreview: (orderId: number) => void
-    onOpenDetail: (orderId: number) => void
+    onOpenPreview: (orderId: number, modo?: InvoiceModo) => void
+    onOpenDetail: (orderId: number, invoiceId: number | null) => void
   },
 ) {
   return (
@@ -360,9 +474,52 @@ function FactGroup(
       </div>
       {open && (
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
-          {group.entries.map(entry => (
-            <FactRow key={entry.order_id} entry={entry} t={t} onGenerarFactura={onOpenPreview} onOpenDetail={onOpenDetail} />
+          {/* SCRUM-929 — un proyecto puede tener más de un pedido; cada uno arma su propio bloque
+              (sus filas + el botón "Facturar pedido completo" cuando aplica). */}
+          {groupByPedido(group.entries).map(([pedidoId, entries]) => (
+            <PedidoBlock key={pedidoId} entries={entries} t={t} onOpenPreview={onOpenPreview} onOpenDetail={onOpenDetail} />
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * SCRUM-929 — un PEDIDO puede tener varias filas (una por factura + una por cada entrega pendiente).
+ * Renderiza cada fila y, si el pedido se factura por entrega y todavía admite un `completo` (cubre
+ * lo que falta), un único botón "Facturar pedido completo" al final — no uno por fila, el dato
+ * (`puede_facturar_completo`/`restante`) viene repetido en cada fila del mismo pedido.
+ */
+function PedidoBlock(
+  { entries, flat, t, onOpenPreview, onOpenDetail }:
+  {
+    entries: InvoiceEntry[]
+    flat?: boolean
+    t: (key: string, opts?: Record<string, unknown>) => string
+    onOpenPreview: (orderId: number, modo?: InvoiceModo) => void
+    onOpenDetail: (orderId: number, invoiceId: number | null) => void
+  },
+) {
+  const primera = entries[0]
+  const ofrecerCompleto = primera.facturacion_por_entrega && primera.puede_facturar_completo
+  return (
+    <div className={flat ? 'divide-y divide-slate-100 dark:divide-slate-700' : undefined}>
+      {entries.map(entry => (
+        <FactRow key={rowKey(entry)} entry={entry} flat={flat} t={t} onGenerarFactura={onOpenPreview} onOpenDetail={onOpenDetail} />
+      ))}
+      {ofrecerCompleto && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2 bg-primary-soft/30 dark:bg-primary/5">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+            {t('adminContab:facturacion.facturarCompleto.restante', { monto: formatCurrency(primera.restante) })}
+          </span>
+          <button
+            type="button"
+            onClick={() => onOpenPreview(primera.order_id, 'completo')}
+            className="text-[11px] font-medium text-primary-dark bg-primary-soft rounded-md px-2.5 py-1.5 hover:brightness-95 whitespace-nowrap"
+          >
+            {t('adminContab:facturacion.facturarCompleto.boton')}
+          </button>
         </div>
       )}
     </div>
@@ -375,33 +532,72 @@ function FactRow(
     entry: InvoiceEntry
     flat?: boolean
     t: (key: string, opts?: Record<string, unknown>) => string
-    onGenerarFactura: (orderId: number) => void
+    onGenerarFactura: (orderId: number, modo?: InvoiceModo) => void
     /** REQ-447 — clic en cualquier fila abre el modal de detalle/trazabilidad. */
-    onOpenDetail: (orderId: number) => void
+    onOpenDetail: (orderId: number, invoiceId: number | null) => void
   },
 ) {
   const pill = pillFor(entry, t)
+  const porEntrega = entry.facturacion_por_entrega && !!entry.entrega
   return (
     <div
-      className="grid grid-cols-[1.6fr_0.9fr_0.9fr_0.9fr_1fr] gap-3 items-center px-4 py-2.5 text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/30"
-      onClick={() => onOpenDetail(entry.order_id)}
+      className="grid grid-cols-[1.5fr_1fr_0.9fr_0.9fr_0.9fr_1fr] gap-3 items-center px-4 py-2.5 text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/30"
+      onClick={() => onOpenDetail(entry.order_id, entry.invoice_id)}
     >
       <div className="min-w-0">
         <div className="font-medium text-slate-800 dark:text-slate-100 truncate">{entry.order_number}</div>
         {flat && <div className="text-[10.5px] text-slate-400 truncate">{entry.cliente} · {entry.proyecto}</div>}
+        {/* SCRUM-929 — con facturación por entrega, cada fila es SU entrega ("Entrega 2 de 3"); en
+            un pedido de entrega única / solo-completo se conserva el aviso agregado de siempre. */}
+        {porEntrega ? (
+          <div className="text-[10.5px] text-slate-400">
+            {t('adminContab:facturacion.entregaSecuencia', { seq: entry.entrega!.sequence_in_family, total: entry.entrega!.total_in_family })}
+          </div>
+        ) : entry.entregas_del_pedido && entry.entregas_del_pedido.length > 1 && (
+          <div className="text-[10.5px] text-slate-400">
+            {t('adminContab:facturacion.entregasParciales', { count: entry.entregas_del_pedido.length })}
+          </div>
+        )}
       </div>
-      <div className="text-xs text-slate-500 dark:text-slate-300">{entry.numero_factura ?? '—'}</div>
+      {/* SCRUM-1175 — vendedores responsables del pedido; «—» si no tiene. */}
+      <div className="min-w-0 text-xs text-slate-500 dark:text-slate-300 truncate" data-testid="fila-vendedor" title={(entry.vendedores ?? []).join(', ')}>
+        {(entry.vendedores ?? []).length > 0 ? entry.vendedores!.join(', ') : '—'}
+      </div>
+      <div className="text-xs text-slate-500 dark:text-slate-300">
+        {entry.numero_factura ?? '—'}
+        {entry.tipo_factura === 'parcial' && <span className="text-slate-400"> · {t('adminContab:facturacion.tipoFactura.parcial')}</span>}
+      </div>
       <div className="text-xs text-slate-500 dark:text-slate-300">{entry.cotizacion_folio ?? '—'}</div>
-      <div className="text-xs font-medium text-slate-800 dark:text-slate-100">{formatCurrency(entry.monto)}</div>
+      <div className="text-xs font-medium text-slate-800 dark:text-slate-100">
+        {entry.monto !== null ? formatCurrency(entry.monto) : '—'}
+        {/* SCRUM-1147 — saldo a favor aplicable (informativo), en rojo; sin saldo no se muestra nada. */}
+        {entry.saldo_a_favor != null && entry.saldo_a_favor > 0 && (
+          <span className="ml-1.5 text-red-600 dark:text-red-400" title={t('adminContab:facturacion.saldoAFavorTitulo')}>
+            {t('adminContab:facturacion.saldoAFavor', { monto: formatCurrency(entry.saldo_a_favor) })}
+          </span>
+        )}
+      </div>
       <div className="flex items-center justify-end gap-2">
         {entry.estado === 'pendiente-facturar' ? (
-          <button
-            type="button"
-            onClick={e => { e.stopPropagation(); onGenerarFactura(entry.order_id) }}
-            className="text-[11px] font-medium text-primary-dark bg-primary-soft rounded-md px-2.5 py-1.5 hover:brightness-95"
-          >
-            {t('adminContab:facturacion.generarFactura')}
-          </button>
+          porEntrega ? (
+            <button
+              type="button"
+              disabled={!entry.puede_facturar_entrega}
+              title={entry.motivo_entrega_no_disponible ?? undefined}
+              onClick={e => { e.stopPropagation(); onGenerarFactura(entry.order_id, 'entrega') }}
+              className="text-[11px] font-medium text-primary-dark bg-primary-soft rounded-md px-2.5 py-1.5 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+            >
+              {t('adminContab:facturacion.generarFacturaEntrega')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); onGenerarFactura(entry.order_id) }}
+              className="text-[11px] font-medium text-primary-dark bg-primary-soft rounded-md px-2.5 py-1.5 hover:brightness-95"
+            >
+              {t('adminContab:facturacion.generarFactura')}
+            </button>
+          )
         ) : (
           <span className={`text-[10.5px] font-semibold px-2 py-1 rounded-md whitespace-nowrap ${pill.className}`}>
             {pill.label}
@@ -413,9 +609,10 @@ function FactRow(
 }
 
 function PreviewModal(
-  { orderIds, fromWizard, t, onClose, onEdit, onConfirmed }:
+  { orderIds, modo, fromWizard, t, onClose, onEdit, onConfirmed }:
   {
     orderIds: number[]
+    modo?: InvoiceModo
     fromWizard: boolean
     t: (key: string, opts?: Record<string, unknown>) => string
     onClose: () => void
@@ -427,20 +624,32 @@ function PreviewModal(
   const createMutation = useCreateInvoice()
   const [preview, setPreview] = useState<InvoicePreviewResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
-  // RN1 REQ-442 — marcada por defecto cuando el cliente tiene saldo a favor.
-  const [aplicarSaldoFavor, setAplicarSaldoFavor] = useState(true)
+  // SCRUM-1140 — clientes (sub_client_id) cuya factura se emite a Consumidor final por decisión de quien factura. La decisión
+  // es por cliente en pantalla y se traduce a los pedidos del lote que cuelgan de él al guardar.
+  const [consumidorFinal, setConsumidorFinal] = useState<number[]>([])
 
-  useEffect(() => {
+  // También se vuelve a llamar tras corregir un RUC desde el aviso de la guarda: la vista previa se recalcula
+  // (y la DGI se vuelve a consultar) con los datos ya guardados.
+  function loadPreview() {
     setPreview(null)
-    previewMutation.mutate({ orderIds, aplicarSaldoFavor }, {
+    setError(null)
+    previewMutation.mutate({ orderIds, modo }, {
       onSuccess: setPreview,
       onError: err => setError(mutationErrorMessage(err, t('adminContab:facturacion.preview.error'))),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- orderIds es estable por identidad del modal; re-dispara solo al togglear el saldo
-  }, [aplicarSaldoFavor])
+  }
+
+  useEffect(() => {
+    loadPreview()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- orderIds/modo son estables por identidad del modal, corre una sola vez al abrir
+  }, [])
 
   function confirm() {
-    createMutation.mutate({ order_ids: orderIds, aplicar_saldo_favor: aplicarSaldoFavor }, {
+    if (createMutation.isPending) return // doble clic: el segundo POST daba "ya tiene una factura" tras un éxito real
+    const consumidorFinalOrderIds = (preview?.results ?? [])
+      .filter(r => r.ok && r.receptor_validacion?.sub_client_id != null && consumidorFinal.includes(r.receptor_validacion.sub_client_id))
+      .map(r => r.order_id)
+    createMutation.mutate({ order_ids: orderIds, modo, ...(consumidorFinalOrderIds.length > 0 ? { consumidor_final_order_ids: consumidorFinalOrderIds } : {}) }, {
       onSuccess: onConfirmed,
       onError: err => setError(mutationErrorMessage(err, t('adminContab:facturacion.confirmError'))),
     })
@@ -448,12 +657,16 @@ function PreviewModal(
 
   const results = preview?.results ?? []
   const hasErrors = results.some(r => !r.ok)
-  const primerResultado = results[0]
-  // RN1/RN3 REQ-442 — el saldo a favor solo puede venir en el primer resultado del lote.
-  const saldoDisponible = primerResultado?.ok ? (primerResultado.saldo_disponible ?? 0) : 0
+  // Guarda de RUC: mientras algún receptor no valide contra la DGI no se puede guardar ninguna factura del lote.
+  // Un cliente marcado como Consumidor final deja de bloquear: sale sin documento.
+  const esConsumidorFinal = (subId: number | null | undefined) => subId != null && consumidorFinal.includes(subId)
+  const receptorBloquea = results.some(r => r.ok && r.receptor_validacion?.bloquea === true && !esConsumidorFinal(r.receptor_validacion.sub_client_id))
+  // Un mismo cliente puede aparecer en varias facturas del lote: su aviso/formulario se muestra una sola vez.
+  const receptoresMostrados = new Set<number>()
+  // SCRUM-902 §4.3 — el saldo a favor ya no se aplica al generar la factura (siempre se genera
+  // por su monto completo); se retiró `aplicar_saldo_favor`/`saldo_disponible`/`saldo_aplicable`/
+  // `total_a_pagar`/`aviso_saldo_solo_primera` de este flujo por completo.
   const totalFactura = results.filter(r => r.ok).reduce((sum, r) => sum + (r.total ?? r.monto ?? 0), 0)
-  const totalAPagar = results.filter(r => r.ok).reduce((sum, r) => sum + (r.total_a_pagar ?? r.total ?? r.monto ?? 0), 0)
-  const saldoAplicado = aplicarSaldoFavor ? Math.max(0, totalFactura - totalAPagar) : 0
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -472,41 +685,65 @@ function PreviewModal(
 
         {preview && (
           <div className="space-y-3 mb-4">
-            {saldoDisponible > 0 && (
-              <div className="bg-primary-soft/60 dark:bg-primary-dark/10 rounded-lg p-3">
-                <label className="flex items-center gap-2 text-xs font-medium text-primary-dark cursor-pointer">
-                  <input
-                    type="checkbox" checked={aplicarSaldoFavor}
-                    onChange={e => setAplicarSaldoFavor(e.target.checked)}
-                  />
-                  {t('adminContab:facturacion.preview.aplicarSaldo', { monto: formatCurrency(saldoDisponible) })}
-                </label>
-                {preview.aviso_saldo_solo_primera && (
-                  <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1.5">
-                    {t('adminContab:facturacion.preview.avisoSaldoSoloPrimera')}
-                  </p>
-                )}
-              </div>
-            )}
-
             {results.map(r => (
               <div key={r.order_id} className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 {r.ok ? (
                   <>
                     <div className="flex justify-between items-baseline mb-1.5">
                       <div>
-                        <div className="font-medium text-slate-800 dark:text-slate-100">{r.order_number}</div>
+                        <div className="font-medium text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                          {r.order_number}
+                          {r.tipo === 'parcial' && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary-soft text-primary-dark">
+                              {t('adminContab:facturacion.tipoFactura.parcial')}
+                            </span>
+                          )}
+                        </div>
                         {r.cliente && <div className="text-[10.5px] text-slate-400">{r.cliente}</div>}
                         {r.cotizacion_folio && <div className="text-[10.5px] text-slate-400">{r.cotizacion_folio}</div>}
                       </div>
                     </div>
 
+                    {r.receptor_validacion && (() => {
+                      const subId = r.receptor_validacion.sub_client_id
+                      if (subId !== null) {
+                        if (receptoresMostrados.has(subId)) return null
+                        receptoresMostrados.add(subId)
+                      }
+                      return (
+                        <ReceptorGuardNotice
+                          receptor={r.receptor_validacion}
+                          cliente={r.cliente}
+                          onCorrected={loadPreview}
+                          consumidorFinal={esConsumidorFinal(subId)}
+                          onConsumidorFinalChange={subId === null ? undefined : (v: boolean) => setConsumidorFinal(prev => v ? [...new Set([...prev, subId])] : prev.filter(id => id !== subId))}
+                        />
+                      )
+                    })()}
+
+                    {/* SCRUM-929 — una parcial que no cierra el pedido deja saldo; se avisa cuánto en vez
+                        del viejo mensaje genérico "una sola factura por el total" (ya no aplica: facturar
+                        por entrega es una opción de primera clase, no un caso a advertir). */}
+                    {r.tipo === 'parcial' && !r.cierra_pedido && r.restante_despues !== undefined && r.restante_despues > 0 && (
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-1.5">
+                        {t('adminContab:facturacion.preview.restanteDespues', { monto: formatCurrency(r.restante_despues) })}
+                      </p>
+                    )}
+
+                    {/* Advertencias REALES del backend (F6/F7 del ADR) — descuadres contra la
+                        cotización recalculada hoy, nunca un mensaje inventado en el frontend. */}
+                    {r.advertencias && r.advertencias.length > 0 && (
+                      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2 mb-1.5 space-y-1">
+                        {r.advertencias.map((a, i) => (
+                          <p key={i} className="text-[11px] text-amber-800 dark:text-amber-300">{a}</p>
+                        ))}
+                      </div>
+                    )}
+
                     <FiscalItemsTable items={r.items} t={t} />
                     <FiscalTotalsBlock
                       subtotal={r.subtotal} descuentos={r.descuentos} itbms={r.itbms}
                       total={r.total} monto={r.monto}
-                      saldoAplicable={aplicarSaldoFavor ? r.saldo_aplicable : undefined}
-                      totalAPagar={r.total_a_pagar}
                       t={t}
                     />
                   </>
@@ -521,8 +758,8 @@ function PreviewModal(
             {!hasErrors && results.length > 1 && (
               <div className="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 text-sm">
                 <div className="flex justify-between font-bold text-primary-dark">
-                  <span>{saldoAplicado > 0 ? t('adminContab:facturacion.preview.totalAPagar') : t('adminContab:facturacion.preview.total')}</span>
-                  <span>{formatCurrency(totalAPagar)}</span>
+                  <span>{t('adminContab:facturacion.preview.total')}</span>
+                  <span>{formatCurrency(totalFactura)}</span>
                 </div>
               </div>
             )}
@@ -534,7 +771,7 @@ function PreviewModal(
           {fromWizard && (
             <Button variant="secondary" onClick={onEdit}>{t('adminContab:facturacion.preview.editar')}</Button>
           )}
-          <Button onClick={confirm} disabled={!preview || hasErrors} loading={createMutation.isPending}>{t('adminContab:facturacion.preview.guardar')}</Button>
+          <Button onClick={confirm} disabled={!preview || hasErrors || receptorBloquea} loading={createMutation.isPending}>{t('adminContab:facturacion.preview.guardar')}</Button>
         </div>
       </Card>
     </div>
@@ -564,10 +801,24 @@ function CrearFacturaModal(
   const { data: listResult } = useInvoiceList({ tab: 'cobrable', view: 'plana' })
   const entries = listResult?.rows ?? []
 
-  const pendientes = entries.filter(e => e.estado === 'pendiente-facturar')
+  // SCRUM-980 — un pedido sin proyecto real (`proyecto === null`) nunca tuvo un PipelineCard con
+  // Cotización/Monto/Cliente detrás y jamás va a poder facturarse (RN2 REQ-441 lo rechaza
+  // server-side) — excluirlo acá, no solo dejar que la Vista previa lo rechace después de que el
+  // usuario ya recorrió el wizard entero. El type predicate narrea `proyecto`/`sales_project_id`
+  // a no-null para el resto del wizard (clientes/proyectosDeCliente/entregasDeProyecto).
+  const pendientes = entries.filter(
+    (e): e is InvoiceEntry & { proyecto: string; sales_project_id: number } =>
+      e.estado === 'pendiente-facturar' && e.proyecto !== null,
+  )
   const clientes = Array.from(new Set(pendientes.map(e => e.cliente))).sort()
   const proyectosDeCliente = Array.from(new Set(pendientes.filter(e => e.cliente === cliente).map(e => e.proyecto))).sort()
-  const entregasDeProyecto = pendientes.filter(e => e.cliente === cliente && e.proyecto === proyecto)
+  // SCRUM-929 — este wizard solo batchea PEDIDOS enteros (`modo` es a nivel de llamada, ver ADR
+  // §4.1: no se puede mezclar en un mismo submit una entrega puntual con un pedido completo). Un
+  // pedido que se factura por entrega tiene su propio botón "Generar factura de esta entrega" y
+  // "Facturar pedido completo" directamente en la tabla — no entra a este selector.
+  const entregasDeProyecto = pendientes.filter(e => e.cliente === cliente && e.proyecto === proyecto && !e.facturacion_por_entrega)
+  const soloPorEntrega = proyecto !== '' && entregasDeProyecto.length === 0
+    && pendientes.some(e => e.cliente === cliente && e.proyecto === proyecto && e.facturacion_por_entrega)
 
   function toggle(orderId: number) {
     setSelected(selected.includes(orderId) ? selected.filter(id => id !== orderId) : [...selected, orderId])
@@ -632,7 +883,10 @@ function CrearFacturaModal(
         {proyecto && (
           <div className="mb-2">
             <div className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2">{t('adminContab:facturacion.crear.entregasLabel')}</div>
-            {entregasDeProyecto.length === 0 ? (
+            {soloPorEntrega ? (
+              // SCRUM-929 — este pedido se factura por entrega: sus botones viven en la tabla principal.
+              <p className="text-xs text-slate-400">{t('adminContab:facturacion.crear.soloPorEntrega')}</p>
+            ) : entregasDeProyecto.length === 0 ? (
               <p className="text-xs text-slate-400">{t('adminContab:facturacion.crear.sinPendientes')}</p>
             ) : (
               <div className="space-y-2">
@@ -640,7 +894,7 @@ function CrearFacturaModal(
                   <label key={e.order_id} className="flex items-center gap-2.5 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 cursor-pointer text-sm">
                     <input type="checkbox" checked={selected.includes(e.order_id)} onChange={() => toggle(e.order_id)} />
                     <span className="flex-1">{e.order_number}{e.cotizacion_folio && <> · {e.cotizacion_folio}</>}</span>
-                    <span className="font-semibold">{formatCurrency(e.monto)}</span>
+                    <span className="font-semibold">{e.monto !== null ? formatCurrency(e.monto) : '—'}</span>
                   </label>
                 ))}
               </div>
@@ -727,198 +981,5 @@ function AgingPanel({ t }: { t: (key: string, opts?: Record<string, unknown>) =>
         ))}
       </div>
     </Card>
-  )
-}
-
-function InvoiceDetailModal(
-  { orderId, t, onClose }:
-  { orderId: number; t: (key: string, opts?: Record<string, unknown>) => string; onClose: () => void },
-) {
-  const { data: detail, isLoading } = useInvoiceDetail(orderId)
-  const navigate = useNavigate()
-  const markMutation = useMarkUncollectible()
-  const decideMutation = useDecideUncollectible()
-  const pdfMutation = useDownloadInvoicePdf()
-  const [motivo, setMotivo] = useState('')
-  const [proposingUncollectible, setProposingUncollectible] = useState(false)
-  const [motivoError, setMotivoError] = useState<string | null>(null)
-
-  function submitMotivo() {
-    if (motivo.trim() === '') {
-      // RN2 REQ-448 — motivo obligatorio, mensaje inline (nunca window.alert()).
-      setMotivoError(t('adminContab:facturacion.detalle.motivoRequerido'))
-      return
-    }
-    markMutation.mutate({ orderId, motivo }, {
-      onSuccess: () => { setProposingUncollectible(false); setMotivo(''); setMotivoError(null) },
-    })
-  }
-
-  function decide(approve: boolean) {
-    decideMutation.mutate({ orderId, approve })
-  }
-
-  function verPdf() {
-    if (!detail) return
-    pdfMutation.mutate({ orderId, orderNumber: detail.order_number })
-  }
-
-  function registrarCobro() {
-    if (!detail || detail.master_client_id === null) return
-    onClose() // cerramos el modal antes de salir de la pantalla, mismo criterio que confirmar/cancelar
-    navigate(`/admin-contab/cobros?master_client_id=${detail.master_client_id}&accion=nuevo-cobro`)
-  }
-
-  const facturaCompleta = !!detail?.numero_factura
-  // RN2/Escenario 3 REQ-447 — defensa doble: la Guía de Entrega nunca se muestra completa si
-  // todavía no hay factura, sin importar lo que diga `guia_entrega.existe`.
-  const guiaCompleta = facturaCompleta && (detail?.guia_entrega.existe ?? false)
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <Card variant="modal" className="w-full max-w-xl max-h-[90vh] overflow-y-auto p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{t('adminContab:facturacion.detalle.title')}</h2>
-            {detail && <p className="text-xs text-slate-400">{detail.order_number} · {detail.cliente}</p>}
-          </div>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><IcoClose size={16} /></button>
-        </div>
-
-        {isLoading && <p className="text-xs text-slate-400 py-4">{t('common:labels.loading')}</p>}
-
-        {detail && (
-          <div className="space-y-4">
-            {/* REQ-447 — trazabilidad Cotización → Factura → Guía de Entrega, en ese orden fijo. */}
-            <div className="flex items-center gap-2">
-              <TrazabilidadStep label={t('adminContab:facturacion.detalle.pasoCotizacion')} done={!!detail.cotizacion_folio} sub={detail.cotizacion_folio} t={t} />
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-              <TrazabilidadStep label={t('adminContab:facturacion.detalle.pasoFactura')} done={facturaCompleta} sub={detail.numero_factura} t={t} />
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-              <TrazabilidadStep label={t('adminContab:facturacion.detalle.pasoGuiaEntrega')} done={guiaCompleta} sub={detail.guia_entrega.fecha} t={t} icon={<IcoTruck size={13} />} />
-            </div>
-
-            {detail.es_anulada && (
-              <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg p-3 text-xs font-medium">
-                <IcoAlertTriangle size={15} /> {t('adminContab:facturacion.detalle.anuladaAviso')}
-              </div>
-            )}
-
-            {(detail.estado === 'facturada' || detail.estado === 'anulada') && (
-              <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
-                <FiscalItemsTable items={detail.items} t={t} />
-                <FiscalTotalsBlock
-                  subtotal={detail.subtotal} descuentos={detail.descuentos} itbms={detail.itbms}
-                  total={detail.total} monto={detail.monto}
-                  saldoAplicable={detail.saldo_aplicado > 0 ? detail.saldo_aplicado : undefined}
-                  totalAPagar={detail.total_a_pagar}
-                  t={t}
-                />
-                {(detail.cuenta_pago || detail.responsable) && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                    <div className="text-[10px] font-medium uppercase text-slate-400">{t('adminContab:facturacion.detalle.datosPago')}</div>
-                    {detail.cuenta_pago && <div>{t('adminContab:facturacion.detalle.cuentaPago')}: {detail.cuenta_pago}</div>}
-                    {detail.responsable && <div>{t('adminContab:facturacion.detalle.responsable')}: {detail.responsable}</div>}
-                  </div>
-                )}
-                <Button
-                  variant="secondary" className="!text-xs mt-3 inline-flex items-center gap-1.5"
-                  onClick={verPdf} loading={pdfMutation.isPending}
-                >
-                  <IcoPrinter size={13} /> {t('adminContab:facturacion.detalle.verPdf')}
-                </Button>
-              </div>
-            )}
-
-            {/* REQ-448 — cobrabilidad, exclusiva de facturas en estado 'facturada'. */}
-            {detail.estado === 'facturada' && (
-              <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
-                {detail.cobrabilidad === 'normal' && !proposingUncollectible && (
-                  <button
-                    type="button" onClick={() => setProposingUncollectible(true)}
-                    className="text-[11px] font-medium text-red-600 dark:text-red-400 hover:underline"
-                  >
-                    {t('adminContab:facturacion.detalle.marcarIncobrable')}
-                  </button>
-                )}
-
-                {detail.cobrabilidad === 'normal' && proposingUncollectible && (
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-300">
-                      {t('adminContab:facturacion.detalle.motivoLabel')}
-                    </label>
-                    <textarea
-                      value={motivo} onChange={e => { setMotivo(e.target.value); setMotivoError(null) }}
-                      placeholder={t('adminContab:facturacion.detalle.motivoPlaceholder')}
-                      className="w-full rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
-                      rows={2}
-                    />
-                    {motivoError && <p className="text-xs text-red-500">{motivoError}</p>}
-                    <div className="flex gap-2">
-                      <Button variant="secondary" className="!text-xs" onClick={() => { setProposingUncollectible(false); setMotivo(''); setMotivoError(null) }}>
-                        {t('adminContab:facturacion.crear.cancelar')}
-                      </Button>
-                      <Button className="!text-xs" onClick={submitMotivo} loading={markMutation.isPending}>
-                        {t('adminContab:facturacion.detalle.enviarPropuesta')}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {detail.cobrabilidad === 'pendiente_aprobacion' && (
-                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 space-y-2">
-                    <p className="text-xs font-medium text-orange-800 dark:text-orange-300">
-                      {t('adminContab:facturacion.detalle.pendienteAprobacionAviso')}
-                    </p>
-                    {detail.motivo_incobrable && <p className="text-xs text-slate-500 dark:text-slate-400">{detail.motivo_incobrable}</p>}
-                    {detail.puede_decidir_incobrable && (
-                      <div className="flex gap-2">
-                        <Button variant="secondary" className="!text-xs inline-flex items-center gap-1.5" onClick={() => decide(false)} loading={decideMutation.isPending}>
-                          <IcoBan size={13} /> {t('adminContab:facturacion.detalle.rechazar')}
-                        </Button>
-                        <Button className="!text-xs inline-flex items-center gap-1.5" onClick={() => decide(true)} loading={decideMutation.isPending}>
-                          <IcoCheck size={13} /> {t('adminContab:facturacion.detalle.aprobar')}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {detail.cobrabilidad === 'incobrable' && (
-                  <span className="text-[10.5px] font-semibold px-2 py-1 rounded-md bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                    {t('adminContab:facturacion.estados.incobrable')}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {detail.puede_registrar_cobro && (
-              <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
-                <Button onClick={registrarCobro}>{t('adminContab:facturacion.detalle.registrarCobro')}</Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-700 mt-4">
-          <Button variant="secondary" onClick={onClose}>{t('adminContab:facturacion.detalle.cerrar')}</Button>
-        </div>
-      </Card>
-    </div>
-  )
-}
-
-function TrazabilidadStep(
-  { label, done, sub, icon, t }:
-  { label: string; done: boolean; sub?: string | null; icon?: React.ReactNode; t: (key: string) => string },
-) {
-  return (
-    <div className="flex flex-col items-center gap-1 text-center min-w-[72px]">
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${done ? 'bg-primary-soft text-primary-dark' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-        {done ? <IcoCheck size={14} /> : (icon ?? <IcoClock size={14} />)}
-      </div>
-      <div className="text-[10.5px] font-medium text-slate-600 dark:text-slate-300">{label}</div>
-      <div className="text-[9.5px] text-slate-400">{done ? sub : t('adminContab:facturacion.detalle.pendiente')}</div>
-    </div>
   )
 }

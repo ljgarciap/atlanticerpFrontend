@@ -178,7 +178,6 @@ export default function ClientCollectionReportView(
                         : <><th className="py-1.5 px-2">{t('adminContab:reportes.mensualCliente.columnas.anio')}</th><th className="py-1.5 px-2">{t('adminContab:reportes.mensualCliente.columnas.mes')}</th></>}
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.num')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.importe')}</th>
-                      <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.media')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.transferencia')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.cheque')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.mensualCliente.columnas.efectivo')}</th>
@@ -195,7 +194,6 @@ export default function ClientCollectionReportView(
                           : <><td className="py-1.5 px-2">{f.anio}</td><td className="py-1.5 px-2">{f.mes}</td></>}
                         <td className="py-1.5 px-2 text-right">{f.num}</td>
                         <td className="py-1.5 px-2 text-right">{money(f.importe)}</td>
-                        <td className="py-1.5 px-2 text-right">{money(f.media)}</td>
                         <td className="py-1.5 px-2 text-right">{money(f.transferencia)}</td>
                         <td className="py-1.5 px-2 text-right">{money(f.cheque)}</td>
                         <td className="py-1.5 px-2 text-right">{money(f.efectivo)}</td>
@@ -212,7 +210,6 @@ export default function ClientCollectionReportView(
                         : <td className="py-1.5 px-2" colSpan={2}>{t('adminContab:reportes.mensualCliente.totalPeriodo')}</td>}
                       <td className="py-1.5 px-2 text-right">{report.totales.num}</td>
                       <td className="py-1.5 px-2 text-right">{money(report.totales.importe)}</td>
-                      <td className="py-1.5 px-2 text-right">{money(report.totales.media)}</td>
                       <td className="py-1.5 px-2 text-right">{money(report.totales.transferencia)}</td>
                       <td className="py-1.5 px-2 text-right">{money(report.totales.cheque)}</td>
                       <td className="py-1.5 px-2 text-right">{money(report.totales.efectivo)}</td>

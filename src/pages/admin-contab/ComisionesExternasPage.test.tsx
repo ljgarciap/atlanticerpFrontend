@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -52,19 +52,22 @@ const mockedApi   = vi.mocked(adminContabApi, true)
 const mockedStore = vi.mocked(useAuthStore)
 
 function makeSummary(overrides: Partial<CommissionExternalSummary> = {}): CommissionExternalSummary {
+  const arquitectos = overrides.arquitectos ?? []
   return {
     comision_generada: 4900, pagada_total: 3400, pagado_este_mes: 0, pendiente_factura: 1500,
-    aun_no_generada: 200, meses_disponibles: ['2026-08'], arquitectos: [],
+    aun_no_generada: 200, meses_disponibles: ['2026-08'], arquitectos,
     puede_decidir_porcentaje: false,
+    meta: { total: arquitectos.length, per_page: 20, current_page: 1, last_page: 1 },
     ...overrides,
   }
 }
 
 function makeProject(overrides: Partial<ArchitectCommissionProject> = {}): ArchitectCommissionProject {
   return {
-    pipeline_card_id: 1, numero_pedido: 'PED-0001', cliente: 'Cliente Test', fecha_pedido: '2026-08-05',
+    pipeline_card_id: 1, numero_pedido: 'PED-0001', proyecto_nombre: 'Proyecto Test', cliente: 'Cliente Test', fecha_pedido: '2026-08-05',
     monto_proyecto: 34000, total_facturado: 34000, total_cobrado: 34000,
     porcentaje: 10, comision: 3400, impuesto: 238, total: 3638, estado: 'pendiente_factura_arquitecto',
+    estado_cobro_cliente: 'cobrado',
     cuenta_cobro: null, comprobante_retencion: null, fecha_pago: null,
     porcentaje_pendiente: null, porcentaje_pendiente_motivo: null, bank_account: null,
     ...overrides,
@@ -244,6 +247,15 @@ describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () =
     expect(await screen.findByText('adminContab:comisionesExternas.detalle.subir')).toBeInTheDocument()
   })
 
+  it('lider_operaciones (SCRUM-1139, espeja a la asistente) ve el botón "Subir" cuenta de cobro', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_operaciones' }) } as ReturnType<typeof useAuthStore>)
+    const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
+    mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
+    renderPage()
+    await clickArchitectRow('Arq. Juan Pérez')
+    expect(await screen.findByText('adminContab:comisionesExternas.detalle.subir')).toBeInTheDocument()
+  })
+
   it('Mark (management) NO ve ningún botón de subir/reemplazar cuenta de cobro', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
     const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
@@ -295,5 +307,48 @@ describe('ComisionesExternasPage — REQ-519 modal de detalle refleja mutaciones
 
     // El banner debe aparecer en el MISMO modal, sin ningún cierre/reapertura de por medio.
     expect(await screen.findByText(/comisionesExternas.detalleModal.propuestaPendiente/)).toBeInTheDocument()
+  })
+})
+
+describe('ComisionesExternasPage — SCRUM-947 paginación', () => {
+  it('pide la página 1 con 20 por página por defecto', async () => {
+    renderPage()
+    await screen.findByText(/4,900\.00/)
+    expect(mockedApi.commissionsExternal.summary).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, per_page: 20 }),
+    )
+  })
+
+  it('avanzar de página pide la página siguiente, y el conteo de resultados usa el total sin paginar', async () => {
+    const arquitectos = [makeArchitectRow(), makeArchitectRow({ architect_id: 2, nombre: 'Arq. Ana Ruiz' })]
+    mockedApi.commissionsExternal.summary.mockResolvedValue(
+      makeSummary({ arquitectos, meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 } }),
+    )
+    renderPage()
+    await screen.findAllByText('Arq. Juan Pérez')
+
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.commissionsExternal.summary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, per_page: 20 }),
+    ))
+  })
+
+  it('cambiar un filtro resetea la página a 1', async () => {
+    const arquitectos = [makeArchitectRow()]
+    mockedApi.commissionsExternal.summary.mockResolvedValue(
+      makeSummary({ arquitectos, meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 } }),
+    )
+    renderPage()
+    await screen.findAllByText('Arq. Juan Pérez')
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
+    await waitFor(() => expect(mockedApi.commissionsExternal.summary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+    ))
+
+    const searchInput = screen.getByPlaceholderText('adminContab:comisionesExternas.filtros.buscarPlaceholder')
+    fireEvent.change(searchInput, { target: { value: 'Ana' } })
+    await waitFor(() => expect(mockedApi.commissionsExternal.summary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 1, search: 'Ana' }),
+    ))
   })
 })

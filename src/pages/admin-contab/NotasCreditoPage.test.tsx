@@ -48,6 +48,7 @@ function makeResumen(overrides: Partial<NotaCreditoResumenMes> = {}): NotaCredit
 function makeHistorial(overrides: Partial<NotaCreditoHistorialResult> = {}): NotaCreditoHistorialResult {
   return {
     data: [],
+    meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
     ...overrides,
   }
 }
@@ -122,19 +123,84 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       cliente: 'Grupo Sensei',
       factura_origen_id: 5,
       factura_origen_numero: 'HS-3402',
+      project: 'Proyecto Paso a Bodega 1',
+      contact_name: 'PERSONA QUE DEVUELVE DANIELA',
+      contact_phone: '54345434',
+      has_signed_document: true,
       productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
-      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null },
+      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
     ])
     renderPage()
     fireEvent.click(await screen.findByText('HS-3402'))
     expect(await screen.findByText('notasCredito.formulario.tipoDevolucionReadonly')).toBeInTheDocument()
-    // persona_devuelve/conformidad no existen en el backend (CustomerReturnLine no los trackea) —
-    // el formulario muestra el placeholder explícito, nunca un dato inventado.
-    expect(screen.getAllByText('notasCredito.formulario.precargaDatoNoDisponible').length).toBeGreaterThan(0)
+    // SCRUM-865 punto 2 — el backend ya trae proyecto/persona que devuelve/conformidad cuando
+    // Bodega los capturó; el formulario debe mostrar el dato real, no el placeholder.
+    expect(screen.getByText('Proyecto Paso a Bodega 1')).toBeInTheDocument()
+    expect(screen.getByText('PERSONA QUE DEVUELVE DANIELA — 54345434')).toBeInTheDocument()
+    expect(screen.getByText('notasCredito.formulario.conformidadVerDocumento')).toBeInTheDocument()
+    expect(screen.queryByText('notasCredito.formulario.precargaDatoNoDisponible')).not.toBeInTheDocument()
     expect(screen.getByText(/Luminaria LED/)).toBeInTheDocument()
     expect(screen.queryByPlaceholderText('notasCredito.formulario.clientePlaceholder')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-865 punto 2 — si Bodega NO capturó persona/proyecto/documento para una devolución vieja, mantiene el placeholder explícito', async () => {
+    mockedApi.notasCredito.historial.mockResolvedValue(makeHistorial({
+      data: [{
+        id: null, tipo: null, subtipo_anulacion: null, numero: null,
+        cliente: 'Grupo Sensei', master_client_id: 1, estado: 'pendiente_generar_nota',
+        monto: null, fecha: '2026-08-20', factura_origen_numero: 'HS-3402',
+        registrado_por: null, devolucion_bodega_id: null, customer_return_id: 43,
+      }],
+    }))
+    mockedApi.notasCredito.devolucionDetail.mockResolvedValue({
+      customer_return_id: 43,
+      return_number: 'DEV-2026-0043',
+      master_client_id: 1,
+      cliente: 'Grupo Sensei',
+      factura_origen_id: 5,
+      factura_origen_numero: 'HS-3402',
+      project: null,
+      contact_name: '',
+      contact_phone: '',
+      has_signed_document: false,
+      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
+    })
+    mockedApi.notasCredito.facturas.mockResolvedValue([
+      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByText('HS-3402'))
+    expect(await screen.findByText('notasCredito.formulario.tipoDevolucionReadonly')).toBeInTheDocument()
+    expect(screen.getAllByText('notasCredito.formulario.precargaDatoNoDisponible').length).toBeGreaterThan(0)
+    expect(screen.queryByText('notasCredito.formulario.conformidadVerDocumento')).not.toBeInTheDocument()
+  })
+
+  /** SCRUM-1116 (Pre-QA obs. 3) — el modal abierto desde una devolución no mostraba el aviso "ya acreditado" porque la
+   *  precarga no pasaba `notas_previas_total` (ni `monto_acreditable`). Ahora los toma del detalle o, si no vienen, de la factura. */
+  it('SCRUM-1116 — la precarga desde una devolución muestra el aviso de notas previas con los valores de la factura', async () => {
+    mockedApi.notasCredito.historial.mockResolvedValue(makeHistorial({
+      data: [{
+        id: null, tipo: null, subtipo_anulacion: null, numero: null,
+        cliente: 'Grupo Sensei', master_client_id: 1, estado: 'pendiente_generar_nota',
+        monto: null, fecha: '2026-08-20', factura_origen_numero: 'HS-3402',
+        registrado_por: null, devolucion_bodega_id: null, customer_return_id: 44,
+      }],
+    }))
+    mockedApi.notasCredito.devolucionDetail.mockResolvedValue({
+      customer_return_id: 44, return_number: 'DEV-2026-0044', master_client_id: 1, cliente: 'Grupo Sensei',
+      factura_origen_id: 5, factura_origen_numero: 'HS-3402', project: null, contact_name: '', contact_phone: '',
+      has_signed_document: false,
+      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: 100, qty_received: 2, reason: null, reason_detail: null }],
+    })
+    mockedApi.notasCredito.facturas.mockResolvedValue([
+      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, monto_acreditable: 350, notas_previas_total: 150, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByText('HS-3402'))
+    expect(await screen.findByText('notasCredito.formulario.tipoDevolucionReadonly')).toBeInTheDocument()
+    expect(screen.getByTestId('nota-credito-acreditable')).toBeInTheDocument()
   })
 
   /** SCRUM-786 — antes `unit_price` no existía en el backend y el monto sugerido siempre
@@ -155,16 +221,22 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       cliente: 'Grupo Sensei',
       factura_origen_id: 5,
       factura_origen_numero: 'HS-3402',
+      project: null,
+      contact_name: '',
+      contact_phone: '',
+      has_signed_document: false,
       productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: 45.5, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
-      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null },
+      { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
     ])
     renderPage()
     fireEvent.click(await screen.findByText('HS-3402'))
     await screen.findByText(/Luminaria LED/)
-    // 2 unidades × $45.50 = $91.00 — antes de este fix habría sido $0.00 siempre.
-    expect(screen.getByText(/91\.00/)).toBeInTheDocument()
+    // 2 unidades × $45.50 = $91.00 neto (línea del producto, sin ITBMS) — antes de SCRUM-786 habría sido $0.00 siempre.
+    expect(screen.getAllByText(/91\.00/).length).toBeGreaterThan(0)
+    // El monto sugerido es el total CON ITBMS 7 %: 91.00 × 1.07 = 97.37 (NC-0001, 2026-10-06 — antes quedaba en 91.00 y la NC acreditaba solo el neto).
+    expect(screen.getByDisplayValue('97.37')).toBeInTheDocument()
   })
 
   it('si falla el detalle de la devolución, muestra un error en vez de abrir el formulario', async () => {

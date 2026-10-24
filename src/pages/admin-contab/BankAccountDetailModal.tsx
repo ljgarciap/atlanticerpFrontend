@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDeactivateBankAccount, useReactivateBankAccount } from '@/hooks/useAdminContab'
+import { isAxiosError } from 'axios'
+import { useDeactivateBankAccount, useReactivateBankAccount, useUpdateBankAccount } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoAlertTriangle } from '@/components/icons'
@@ -21,7 +22,20 @@ export default function BankAccountDetailModal({ account, onClose }: Props) {
   const { t } = useTranslation(['common', 'adminContab'])
   const deactivate = useDeactivateBankAccount()
   const reactivate = useReactivateBankAccount()
+  const updateAccount = useUpdateBankAccount()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  // SCRUM-857 (REQ-458) — antes no había forma de editar ningún campo de una cuenta ya creada;
+  // agregado principalmente para poder completar el número de cuenta completo sin borrar/recrear.
+  const [editingNumero, setEditingNumero] = useState(false)
+  const [numeroDraft, setNumeroDraft] = useState(account.numero_cuenta_completo ?? '')
+
+  function saveNumero() {
+    updateAccount.mutate(
+      { id: account.id, data: { numero_cuenta_completo: numeroDraft.trim() || null } },
+      { onSuccess: () => setEditingNumero(false) },
+    )
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -39,6 +53,45 @@ export default function BankAccountDetailModal({ account, onClose }: Props) {
           <Field label={t('adminContab:cuentasBancarias.fields.banco')} value={account.banco} />
           <Field label={t('adminContab:cuentasBancarias.fields.tipoCuenta')} value={t(`adminContab:cuentasBancarias.tipos.${account.tipo_cuenta}`)} />
           <Field label={t('adminContab:cuentasBancarias.fields.ultimos4')} value={`****${account.ultimos_4_digitos}`} />
+          <div>
+            <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              {t('adminContab:cuentasBancarias.fields.numeroCuentaCompleto')}
+            </span>
+            {editingNumero ? (
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  autoFocus value={numeroDraft} onChange={e => setNumeroDraft(e.target.value)}
+                  disabled={updateAccount.isPending}
+                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-2 py-1.5 text-sm"
+                />
+                <Button onClick={saveNumero} loading={updateAccount.isPending}>
+                  {t('adminContab:cuentasBancarias.numeroCuentaCompleto.saveButton')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-800 dark:text-slate-100">
+                  {account.numero_cuenta_completo ?? (
+                    <span className="italic text-slate-400">{t('adminContab:cuentasBancarias.numeroCuentaCompleto.empty')}</span>
+                  )}
+                </span>
+                <button
+                  type="button" onClick={() => { setNumeroDraft(account.numero_cuenta_completo ?? ''); setEditingNumero(true) }}
+                  className="text-[11px] text-primary hover:underline"
+                >
+                  {t('adminContab:cuentasBancarias.numeroCuentaCompleto.editButton')}
+                </button>
+              </div>
+            )}
+            <p className="text-[11px] text-slate-400 mt-0.5">{t('adminContab:cuentasBancarias.numeroCuentaCompleto.hint')}</p>
+            {updateAccount.isError && (
+              <p className="text-xs text-red-500 mt-1">
+                {isAxiosError<{ message?: string }>(updateAccount.error)
+                  ? updateAccount.error.response?.data.message ?? t('adminContab:cuentasBancarias.numeroCuentaCompleto.saveError')
+                  : t('adminContab:cuentasBancarias.numeroCuentaCompleto.saveError')}
+              </p>
+            )}
+          </div>
           <Field label={t('adminContab:cuentasBancarias.fields.moneda')} value={account.moneda} />
           <Field
             label={t('adminContab:cuentasBancarias.fields.estado')}

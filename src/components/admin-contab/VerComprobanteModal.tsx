@@ -3,9 +3,10 @@ import { usePaymentAttachment } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-PA', { day: '2-digit', month: 'short', year: 'numeric' })
+  return formatDateFromTimestamp(iso)
 }
 
 interface Props {

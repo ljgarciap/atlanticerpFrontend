@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import HistorialNotasCreditoPanel from './HistorialNotasCreditoPanel'
@@ -43,8 +43,10 @@ const FILA_COLA: NotaCreditoHistorialRow = {
 }
 
 function makeResult(overrides: Partial<NotaCreditoHistorialResult> = {}): NotaCreditoHistorialResult {
+  const data = overrides.data ?? [NOTA_REAL, FILA_COLA]
   return {
-    data: [NOTA_REAL, FILA_COLA],
+    data,
+    meta: { total: data.length, per_page: 20, current_page: 1, last_page: 1 },
     ...overrides,
   }
 }
@@ -103,5 +105,59 @@ describe('HistorialNotasCreditoPanel — REQ-492', () => {
     mockedApi.notasCredito.historial.mockResolvedValue(makeResult({ data: [] }))
     renderPanel()
     expect(await screen.findByText('notasCredito.historial.vacio')).toBeInTheDocument()
+  })
+})
+
+// SCRUM-947 — el filtro "Cliente" mandaba el nombre al backend, que siempre espera
+// master_client_id (int) — nunca filtró nada en la práctica. Corregido al mismo tiempo que se
+// agregó paginación (mismo bloque de código).
+describe('HistorialNotasCreditoPanel — SCRUM-947 filtro Cliente (bugfix) y paginación', () => {
+  it('el select de Cliente ofrece los nombres pero envía el master_client_id', async () => {
+    renderPanel()
+    await screen.findByRole('cell', { name: 'Grupo Sensei' })
+
+    const select = screen.getByText('notasCredito.historial.filtroCliente').closest('select')!
+    expect(within(select).getByText('Grupo Sensei')).toBeInTheDocument()
+    expect(within(select).getByText('Torres Pacífico SA')).toBeInTheDocument()
+
+    fireEvent.change(select, { target: { value: '2' } })
+
+    await waitFor(() => expect(mockedApi.notasCredito.historial).toHaveBeenLastCalledWith(
+      expect.objectContaining({ cliente: 2 }),
+    ))
+  })
+
+  it('con más de una página, pide la siguiente', async () => {
+    mockedApi.notasCredito.historial.mockResolvedValue(
+      makeResult({ meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 } }),
+    )
+    renderPanel()
+    await screen.findByRole('cell', { name: 'Grupo Sensei' })
+
+    fireEvent.click(screen.getByText('2'))
+
+    await waitFor(() => expect(mockedApi.notasCredito.historial).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, per_page: 20 }),
+    ))
+  })
+
+  it('cambiar un filtro reinicia a la página 1', async () => {
+    mockedApi.notasCredito.historial.mockResolvedValue(
+      makeResult({ meta: { total: 45, per_page: 20, current_page: 2, last_page: 3 } }),
+    )
+    renderPanel()
+    await screen.findByRole('cell', { name: 'Grupo Sensei' })
+    fireEvent.click(screen.getByText('2'))
+    await waitFor(() => expect(mockedApi.notasCredito.historial).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+    ))
+
+    fireEvent.change(screen.getByPlaceholderText('notasCredito.historial.searchPlaceholder'), {
+      target: { value: 'algo' },
+    })
+
+    await waitFor(() => expect(mockedApi.notasCredito.historial).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: 'algo', page: 1 }),
+    ))
   })
 })

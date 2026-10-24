@@ -4,14 +4,17 @@ import { usePaymentHistorial } from '@/hooks/useAdminContab'
 import { PAYMENT_METHODS } from '@/types/adminContab'
 import type { PaymentEstado, PaymentMethod } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
+import { Pagination } from '@/components/ui/Pagination'
 import { IcoSearch, IcoClose } from '@/components/icons'
 import { formatDateShort } from '@/utils/dates'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const selectClass = 'rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary'
 
 const ESTADO_PILL_CLASSES: Record<PaymentEstado, string> = {
   confirmado: 'bg-primary-soft text-primary-dark',
   esperando_confirmacion: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  anulado: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
 }
 
 function formatCurrency(value: number): string {
@@ -40,23 +43,30 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
   const { t } = useTranslation('adminContab')
 
   const [search, setSearch]   = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [cliente, setCliente] = useState('')
   const [metodo, setMetodo]   = useState<PaymentMethod | ''>('')
   const [estado, setEstado]   = useState<PaymentEstado | ''>(initialEstado ?? '')
   const [desde, setDesde]     = useState('')
   const [hasta, setHasta]     = useState('')
+  const [page, setPage]       = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
 
   const { data, isFetching } = usePaymentHistorial({
-    search: search || undefined,
+    search: searchTerm || undefined,
     cliente: cliente || undefined,
     metodo: metodo || undefined,
     estado: estado || undefined,
     desde: desde || undefined,
     hasta: hasta || undefined,
+    page, per_page: perPage,
   })
 
-  const rows  = data?.rows ?? []
-  const total = data?.total ?? 0
+  const rows = data?.rows ?? []
+  const meta = data?.meta
   const hasFilters = !!(search || cliente || metodo || estado || desde || hasta)
   // Filtro backend es exacto (no parcial) — un <select> de valores reales evita que el usuario
   // escriba un nombre parcial y el filtro devuelva 0 resultados en silencio. Mismo patrón que
@@ -64,7 +74,7 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
   const clientesOptions = useMemo(() => Array.from(new Set(rows.map(r => r.cliente))).sort(), [rows])
 
   function clearFilters() {
-    setSearch(''); setCliente(''); setMetodo(''); setEstado(''); setDesde(''); setHasta('')
+    setSearch(''); setCliente(''); setMetodo(''); setEstado(''); setDesde(''); setHasta(''); setPage(1)
   }
 
   return (
@@ -78,27 +88,28 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
         <div className="relative">
           <IcoSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            value={search} onChange={e => setSearch(e.target.value)}
+            value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
             placeholder={t('cobros.historial.searchPlaceholder')}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select value={cliente} onChange={e => setCliente(e.target.value)} className={selectClass}>
+          <select value={cliente} onChange={e => { setCliente(e.target.value); setPage(1) }} className={selectClass}>
             <option value="">{t('cobros.historial.filtroCliente')}</option>
             {clientesOptions.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <select value={metodo} onChange={e => setMetodo(e.target.value as PaymentMethod | '')} className={selectClass}>
+          <select value={metodo} onChange={e => { setMetodo(e.target.value as PaymentMethod | ''); setPage(1) }} className={selectClass}>
             <option value="">{t('cobros.historial.filtroMetodo')}</option>
             {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
           </select>
-          <select value={estado} onChange={e => setEstado(e.target.value as PaymentEstado | '')} className={selectClass}>
+          <select value={estado} onChange={e => { setEstado(e.target.value as PaymentEstado | ''); setPage(1) }} className={selectClass}>
             <option value="">{t('cobros.historial.filtroEstado')}</option>
             <option value="confirmado">{t('cobros.historial.estados.confirmado')}</option>
             <option value="esperando_confirmacion">{t('cobros.historial.estados.esperando_confirmacion')}</option>
+            <option value="anulado">{t('cobros.historial.estados.anulado')}</option>
           </select>
-          <input type="date" value={desde} onChange={e => setDesde(e.target.value)} className={selectClass} title={t('cobros.historial.desde')} />
-          <input type="date" value={hasta} onChange={e => setHasta(e.target.value)} className={selectClass} title={t('cobros.historial.hasta')} />
+          <input type="date" value={desde} onChange={e => { setDesde(e.target.value); setPage(1) }} className={selectClass} title={t('cobros.historial.desde')} />
+          <input type="date" value={hasta} onChange={e => { setHasta(e.target.value); setPage(1) }} className={selectClass} title={t('cobros.historial.hasta')} />
           {hasFilters && (
             <button type="button" onClick={clearFilters} className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2">
               <IcoClose size={13} />{t('cobros.historial.limpiarFiltros')}
@@ -108,7 +119,7 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
       </div>
 
       <div className="text-[11px] text-slate-400 mb-2">
-        {t('cobros.historial.resultCount', { mostrados: rows.length, total })}
+        {t('cobros.historial.resultCount', { mostrados: rows.length, total: meta?.total ?? 0 })}
       </div>
 
       <div className="overflow-x-auto">
@@ -156,6 +167,15 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
           <p className="text-sm text-slate-400 text-center py-6">{t('cobros.historial.vacio')}</p>
         )}
       </div>
+
+      {meta && (
+        <Pagination
+          meta={meta}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+        />
+      )}
     </Card>
   )
 }

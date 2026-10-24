@@ -131,6 +131,7 @@ export default function LibroFacturasPage() {
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.libroFacturas.columnas.porcentaje')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.libroFacturas.columnas.itbms')}</th>
                       <th className="py-1.5 px-2 text-right">{t('adminContab:reportes.libroFacturas.columnas.total')}</th>
+                      <th className="py-1.5 px-2">{t('adminContab:reportes.libroFacturas.columnas.vendedor')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -150,6 +151,7 @@ export default function LibroFacturasPage() {
                         <td className="py-1.5 px-2 text-right">{d.porcentaje}%</td>
                         <td className="py-1.5 px-2 text-right">{money(d.itbms)}</td>
                         <td className="py-1.5 px-2 text-right font-semibold">{money(d.total)}</td>
+                        <td className="py-1.5 px-2">{d.vendedor ?? '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -160,6 +162,7 @@ export default function LibroFacturasPage() {
                       <td />
                       <td className="py-1.5 px-2 text-right">{money(data.resumen.itbms)}</td>
                       <td className="py-1.5 px-2 text-right">{money(data.resumen.total)}</td>
+                      <td />
                     </tr>
                   </tfoot>
                 </table>

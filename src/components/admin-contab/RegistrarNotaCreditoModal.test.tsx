@@ -12,8 +12,10 @@ import type {
 // (SCRUM-559→564, REQ-482→487) agrega el submit real: factura de origen, monto/desglose ITBMS,
 // excedente, banners+avisos automáticos, comprobante y el POST que registra la nota.
 
+const tMock = vi.hoisted(() => vi.fn((key: string, _params?: Record<string, unknown>) => key))
+
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: tMock }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
@@ -21,7 +23,7 @@ vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
     payments: { searchClients: vi.fn() },
     bankAccounts: { list: vi.fn() },
-    notasCredito: { itbmsRates: vi.fn(), facturas: vi.fn(), register: vi.fn() },
+    notasCredito: { itbmsRates: vi.fn(), facturas: vi.fn(), register: vi.fn(), devolucionSignedDocumentUrl: vi.fn() },
   },
 }))
 
@@ -36,11 +38,17 @@ const RATES: NotaCreditoItbmsRateOption[] = [
 const CLIENT: PaymentClientOption = { id: 1, name: 'Grupo Sensei' }
 
 const FACTURAS: NotaCreditoFacturaOrigen[] = [
-  { id: 10, numero: 'F-0001', monto: 6200, saldo_pendiente: 6200, itbms_percentage: 7, itbms_rate_id: 1 },
-  { id: 11, numero: 'F-0002', monto: 1000, saldo_pendiente: 0, itbms_percentage: 7, itbms_rate_id: 1 },
+  {
+    id: 10, numero: 'F-0001', monto: 6200, saldo_pendiente: 6200, itbms_percentage: 7, itbms_rate_id: 1,
+    sales_project_id: 10, proyecto: 'Torre Azul', quote_id: 100, cotizacion_folio: 'COT-2026-0100',
+  },
+  {
+    id: 11, numero: 'F-0002', monto: 1000, saldo_pendiente: 0, itbms_percentage: 7, itbms_rate_id: 1,
+    sales_project_id: 20, proyecto: 'Casa Miramar', quote_id: 200, cotizacion_folio: 'COT-2026-0200',
+  },
 ]
 
-const BANK_ACCOUNT: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', moneda: 'USD', activa: true, movimientos_count: 0 }
+const BANK_ACCOUNT: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 const DEVOLUCION: NotaCreditoDevolucionPrecargada = {
   cliente_id: 1,
@@ -50,7 +58,7 @@ const DEVOLUCION: NotaCreditoDevolucionPrecargada = {
   productos: [{ descripcion: 'Luminaria LED', cantidad: 2, monto_unitario: 150 }],
   persona_devuelve: 'María Torres',
   proyecto: 'Torres Pacífico',
-  conformidad: 'Guía firmada #GE-1187',
+  conformidad_disponible: true,
   factura_monto: 500,
   factura_saldo_pendiente: 500,
   factura_itbms_percentage: 7,
@@ -167,11 +175,81 @@ describe('RegistrarNotaCreditoModal — REQ-481 Devolución de mercancía precar
     expect(screen.getByText('HS-3402')).toBeInTheDocument()
     expect(screen.getByText('María Torres')).toBeInTheDocument()
     expect(screen.getByText('Torres Pacífico')).toBeInTheDocument()
-    expect(screen.getByText(/Guía firmada #GE-1187/)).toBeInTheDocument()
+    // SCRUM-865 punto 2 — con documento firmado disponible, muestra un link para verlo, no un texto fijo.
+    expect(screen.getByText('notasCredito.formulario.conformidadVerDocumento')).toBeInTheDocument()
     expect(screen.getByText('notasCredito.formulario.devolucionAviso')).toBeInTheDocument()
     // Sin buscador de cliente editable en este modo (RN2 REQ-481), ni selector de factura (RN3 REQ-483).
     expect(screen.queryByPlaceholderText('notasCredito.formulario.clientePlaceholder')).not.toBeInTheDocument()
     expect(screen.queryByText('notasCredito.formulario.facturaOrigenLabel')).not.toBeInTheDocument()
+  })
+
+  it('el monto sugerido es el total CON ITBMS: los precios devueltos son netos, no se acredita solo el neto (NC-0001, 2026-10-06)', () => {
+    // 2 × 150 neto = 300; con ITBMS 7 % de la factura de origen = 321.
+    renderModal({ devolucionPrecargada: DEVOLUCION })
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    expect(montoInput).toHaveValue(321)
+    expect(screen.getByText('notasCredito.formulario.productosSinItbmsHint')).toBeInTheDocument()
+  })
+
+  it('caso real NC-0001 — 2 × 64.38 con ITBMS 7 % sugiere 137.77 (total de la factura) y no 128.76', () => {
+    renderModal({
+      devolucionPrecargada: {
+        ...DEVOLUCION,
+        productos: [{ descripcion: 'LAMP RIEL MAGNETIC9W', cantidad: 2, monto_unitario: 64.38 }],
+        factura_monto: 137.77,
+        factura_saldo_pendiente: 137.77,
+      },
+    })
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    expect(montoInput).toHaveValue(137.77)
+  })
+
+  it('usa el monto_sugerido que entrega el backend (total con ITBMS) en vez de recalcularlo', () => {
+    renderModal({ devolucionPrecargada: { ...DEVOLUCION, monto_sugerido: 137.77 } })
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    expect(montoInput).toHaveValue(137.77)
+  })
+
+  it('monto_sugerido null (alguna línea sin precio) deja el monto vacío, no un total parcial', () => {
+    renderModal({ devolucionPrecargada: { ...DEVOLUCION, monto_sugerido: null } })
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    expect(montoInput).toHaveValue(null)
+  })
+
+  it('muestra como referencia el total de la factura de origen y su saldo pendiente', () => {
+    renderModal({ devolucionPrecargada: DEVOLUCION })
+    expect(screen.getByText('notasCredito.formulario.facturaTotalReferencia')).toBeInTheDocument()
+  })
+
+  it('la referencia del total usa el número de la FACTURA de origen, no el de la devolución', () => {
+    renderModal({ devolucionPrecargada: { ...DEVOLUCION, referencia: 'DEV-2026-0042', factura_origen_numero: 'F-0001' } })
+    const hint = screen.getByText('notasCredito.formulario.facturaTotalReferencia')
+    expect(hint).toBeInTheDocument()
+    expect(tMock).toHaveBeenCalledWith('notasCredito.formulario.facturaTotalReferencia', expect.objectContaining({ numero: 'F-0001' }))
+  })
+
+  it('con ITBMS 0 % el monto sugerido es el neto', () => {
+    renderModal({ devolucionPrecargada: { ...DEVOLUCION, factura_itbms_percentage: 0 } })
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    expect(montoInput).toHaveValue(300)
+  })
+
+  it('SCRUM-865 punto 2 — sin documento firmado, muestra el placeholder en vez del link', () => {
+    renderModal({ devolucionPrecargada: { ...DEVOLUCION, conformidad_disponible: false } })
+    expect(screen.queryByText('notasCredito.formulario.conformidadVerDocumento')).not.toBeInTheDocument()
+    expect(screen.getByText('notasCredito.formulario.precargaDatoNoDisponible')).toBeInTheDocument()
+  })
+
+  it('SCRUM-865 punto 2 — clic en "Ver documento firmado" pide la URL presignada del customer_return_id y la abre', async () => {
+    mockedApi.notasCredito.devolucionSignedDocumentUrl.mockResolvedValue({ url: 'https://s3.example/devolucion-firmada.pdf' })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    renderModal({ devolucionPrecargada: DEVOLUCION })
+
+    fireEvent.click(screen.getByText('notasCredito.formulario.conformidadVerDocumento'))
+
+    await waitFor(() => expect(openSpy).toHaveBeenCalledWith('https://s3.example/devolucion-firmada.pdf', '_blank', 'noopener,noreferrer'))
+    expect(mockedApi.notasCredito.devolucionSignedDocumentUrl).toHaveBeenCalledWith(42)
+    openSpy.mockRestore()
   })
 })
 
@@ -271,6 +349,77 @@ describe('RegistrarNotaCreditoModal — REQ-483 selección de factura de origen'
     await selectClient()
     await selectFactura(10)
     expect(screen.getByText('notasCredito.formulario.montoLabel')).toBeInTheDocument()
+  })
+})
+
+describe('RegistrarNotaCreditoModal — SCRUM-932 filtro cruzado Proyecto/# Cotización', () => {
+  it('elegir un Proyecto filtra las opciones de Cotización y las opciones del select de factura al de ese proyecto', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText(/F-0001/)
+
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.proyectoLabel'), { target: { value: '10' } })
+
+    const facturaSelect = screen.getByText('notasCredito.formulario.facturaOrigenPlaceholder').closest('select')!
+    const facturaOpciones = Array.from(facturaSelect.options).map(o => o.value)
+    expect(facturaOpciones).toContain('10')
+    expect(facturaOpciones).not.toContain('11')
+
+    const cotizacionSelect = screen.getByLabelText('notasCredito.formulario.cotizacionLabel') as HTMLSelectElement
+    const opciones = Array.from(cotizacionSelect.options).map(o => o.textContent)
+    expect(opciones).toContain('COT-2026-0100')
+    expect(opciones).not.toContain('COT-2026-0200')
+  })
+
+  it('elegir una Cotización autocompleta/filtra el Proyecto al de esa cotización', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText(/F-0001/)
+
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.cotizacionLabel'), { target: { value: '200' } })
+
+    const proyectoSelect = screen.getByLabelText('notasCredito.formulario.proyectoLabel') as HTMLSelectElement
+    expect(proyectoSelect.value).toBe('20')
+    const facturaSelect = screen.getByText('notasCredito.formulario.facturaOrigenPlaceholder').closest('select')!
+    const facturaOpciones = Array.from(facturaSelect.options).map(o => o.value)
+    expect(facturaOpciones).toContain('11')
+    expect(facturaOpciones).not.toContain('10')
+  })
+
+  /**
+   * Mismo tipo de bug que Senior Review encontró y corrigió en `RegistrarCobroModal.tsx`
+   * (SCRUM-931): elegir una factura y después cambiar el filtro de forma que la oculte no debe
+   * dejarla seleccionada "a ciegas" (el bloque de monto/ITBMS que depende de `facturaOrigenId`
+   * debe desaparecer junto con la opción oculta).
+   */
+  it('elegir F-0001, filtrar a un Proyecto que la oculta, y la selección se limpia (el bloque de monto desaparece)', async () => {
+    renderModal()
+    await selectClient()
+    await selectFactura(10)
+    expect(screen.getByText('notasCredito.formulario.montoLabel')).toBeInTheDocument()
+
+    // Filtrar a Proyecto 20 (Casa Miramar) — oculta F-0001 (proyecto 10), ya elegida.
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.proyectoLabel'), { target: { value: '20' } })
+
+    await waitFor(() => expect(screen.queryByText('notasCredito.formulario.montoLabel')).not.toBeInTheDocument())
+    const facturaSelect = screen.getByText('notasCredito.formulario.facturaOrigenPlaceholder').closest('select')! as HTMLSelectElement
+    expect(facturaSelect.value).toBe('')
+  })
+
+  it('limpiar la selección de Proyecto/Cotización (volver a "Todos"/"Todas") restaura la lista completa de facturas', async () => {
+    renderModal()
+    await selectClient()
+    await screen.findByText(/F-0001/)
+
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.proyectoLabel'), { target: { value: '10' } })
+    let facturaSelect = screen.getByText('notasCredito.formulario.facturaOrigenPlaceholder').closest('select')!
+    expect(Array.from(facturaSelect.options).map(o => o.value)).not.toContain('11')
+
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.proyectoLabel'), { target: { value: '' } })
+    facturaSelect = screen.getByText('notasCredito.formulario.facturaOrigenPlaceholder').closest('select')!
+    const facturaOpciones = Array.from(facturaSelect.options).map(o => o.value)
+    expect(facturaOpciones).toContain('10')
+    expect(facturaOpciones).toContain('11')
   })
 })
 
@@ -384,9 +533,9 @@ describe('RegistrarNotaCreditoModal — REQ-487 comprobante de soporte', () => {
     expect(screen.getByText('notasCredito.formulario.comprobanteObligatorioHint')).toBeInTheDocument()
   })
 
-  it('NUNCA obligatorio en modo Devolución, incluso superando el umbral', () => {
+  it('SCRUM-865 punto 3 — también obligatorio en modo Devolución (el ticket exige "cualquier tipo"; el backend ya lo enforcea)', () => {
     renderModal({ devolucionPrecargada: DEVOLUCION, primaryApprovalThreshold: 1 })
-    expect(screen.queryByText('notasCredito.formulario.comprobanteObligatorioHint')).not.toBeInTheDocument()
+    expect(screen.getByText('notasCredito.formulario.comprobanteObligatorioHint')).toBeInTheDocument()
   })
 })
 
@@ -408,14 +557,31 @@ describe('RegistrarNotaCreditoModal — REQ-486 avisos automáticos', () => {
 describe('RegistrarNotaCreditoModal — submit real', () => {
   const file = new File(['x'], 'soporte.png', { type: 'image/png' })
 
-  it('motivo obligatorio: el botón sigue deshabilitado hasta completarlo', async () => {
+  it('motivo obligatorio: el botón sigue deshabilitado hasta completarlo (con comprobante ya adjunto, SCRUM-865 lo exige para cualquier tipo)', async () => {
     renderModal()
     await selectClient()
     await selectFactura(10) // saldo_pendiente 6200, monto 500 no genera excedente
     const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
     fireEvent.change(montoInput, { target: { value: '500' } })
+    const fileInput = screen.getByLabelText('notasCredito.formulario.comprobantePlaceholder')
+    fireEvent.change(fileInput, { target: { files: [file] } })
     expect(screen.getByText('notasCredito.formulario.confirm')).toBeDisabled()
     fireEvent.change(screen.getByText('notasCredito.formulario.motivoLabel').closest('label')!.querySelector('textarea')!, { target: { value: 'Descuento comercial acordado' } })
+    expect(screen.getByText('notasCredito.formulario.confirm')).not.toBeDisabled()
+  })
+
+  it('SCRUM-865 (REQ-495): comprobante obligatorio para cualquier tipo manual, no solo Anulación completa o sobre el umbral', async () => {
+    renderModal()
+    await selectClient()
+    await selectFactura(10)
+    const montoInput = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    fireEvent.change(montoInput, { target: { value: '500' } })
+    fireEvent.change(screen.getByText('notasCredito.formulario.motivoLabel').closest('label')!.querySelector('textarea')!, { target: { value: 'Descuento comercial acordado' } })
+    expect(screen.getByText('notasCredito.formulario.confirm')).toBeDisabled()
+    expect(screen.getByText('notasCredito.formulario.comprobanteObligatorioHint')).toBeInTheDocument()
+
+    const fileInput = screen.getByLabelText('notasCredito.formulario.comprobantePlaceholder')
+    fireEvent.change(fileInput, { target: { files: [file] } })
     expect(screen.getByText('notasCredito.formulario.confirm')).not.toBeDisabled()
   })
 
@@ -440,5 +606,77 @@ describe('RegistrarNotaCreditoModal — submit real', () => {
       motivo: 'Descuento comercial acordado',
       comprobante: file,
     }))
+  })
+})
+
+describe('RegistrarNotaCreditoModal — SCRUM-1116 valor acreditable restante', () => {
+  const BASE = { itbms_percentage: 7, itbms_rate_id: 1, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null }
+  const F_SIN_NOTAS: NotaCreditoFacturaOrigen = { ...BASE, id: 20, numero: 'F-0100', monto: 1000, saldo_pendiente: 1000, monto_acreditable: 1000, notas_previas_total: 0 }
+  const F_CON_NOTA: NotaCreditoFacturaOrigen = { ...BASE, id: 21, numero: 'F-0101', monto: 1000, saldo_pendiente: 700, monto_acreditable: 700, notas_previas_total: 300 }
+  const F_AGOTADA: NotaCreditoFacturaOrigen = { ...BASE, id: 22, numero: 'F-0102', monto: 1000, saldo_pendiente: 1000, monto_acreditable: 0, notas_previas_total: 1000 }
+
+  beforeEach(() => {
+    mockedApi.notasCredito.facturas.mockResolvedValue([F_SIN_NOTAS, F_CON_NOTA, F_AGOTADA])
+  })
+
+  async function elegirAnulacion(facturaId: number) {
+    renderModal()
+    await selectClient()
+    fireEvent.change(screen.getByDisplayValue('notasCredito.tipos.descuento_comercial'), { target: { value: 'anulacion_completa' } })
+    await selectFactura(facturaId)
+    return screen.getByText('notasCredito.formulario.montoLabel').closest('label')!
+  }
+
+  it('sin notas previas la anulación es por el total de la factura y no muestra el aviso de notas previas', async () => {
+    const bloque = await elegirAnulacion(20)
+    expect(within(bloque).getByText(/1,000\.00/)).toBeInTheDocument()
+    expect(screen.queryByTestId('nota-credito-acreditable')).not.toBeInTheDocument()
+  })
+
+  it('con una nota previa de 300 la anulación es por 700 (lo que aún se puede acreditar), no por 1.000', async () => {
+    const bloque = await elegirAnulacion(21)
+    expect(within(bloque).getByTestId('nota-credito-acreditable')).toHaveTextContent('valorAcreditableReferencia')
+    // El monto bloqueado que se muestra es 700; el input no existe.
+    expect(bloque.querySelector('input')).toBeNull()
+    expect(bloque.querySelector('div')!.textContent).toMatch(/700\.00/)
+  })
+
+  it('al enviar la anulación se manda el valor acreditable (700) como monto', async () => {
+    await elegirAnulacion(21)
+    fireEvent.change(screen.getByLabelText('notasCredito.formulario.motivoLabel'), { target: { value: 'Pedido cancelado' } })
+    const archivo = new File(['x'], 'soporte.pdf', { type: 'application/pdf' })
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(fileInput, { target: { files: [archivo] } })
+    const boton = screen.getByText('notasCredito.formulario.confirm')
+    await waitFor(() => expect(boton).not.toBeDisabled())
+    fireEvent.click(boton)
+    await waitFor(() => expect(mockedApi.notasCredito.register).toHaveBeenCalled())
+    const enviado = mockedApi.notasCredito.register.mock.calls[0][0] as { monto: number }
+    expect(enviado.monto).toBe(700)
+  })
+
+  it('con el valor acreditable en cero la anulación se bloquea con un mensaje claro', async () => {
+    await elegirAnulacion(22)
+    expect(screen.getByTestId('nota-credito-sin-valor')).toBeInTheDocument()
+    expect(screen.getByText('notasCredito.formulario.confirm')).toBeDisabled()
+  })
+
+  it('un descuento que supera lo acreditable muestra el error y deshabilita el envío; uno dentro del valor no', async () => {
+    renderModal()
+    await selectClient()
+    await selectFactura(21) // acreditable 700
+    const input = screen.getByText('notasCredito.formulario.montoLabel').closest('label')!.querySelector('input')!
+    fireEvent.change(input, { target: { value: '800' } })
+    expect(screen.getByTestId('nota-credito-supera-acreditable')).toBeInTheDocument()
+    expect(screen.getByText('notasCredito.formulario.confirm')).toBeDisabled()
+
+    fireEvent.change(input, { target: { value: '700' } })
+    expect(screen.queryByTestId('nota-credito-supera-acreditable')).not.toBeInTheDocument()
+  })
+
+  it('un backend anterior sin monto_acreditable sigue funcionando: se usa el total de la factura', async () => {
+    mockedApi.notasCredito.facturas.mockResolvedValue([{ ...BASE, id: 30, numero: 'F-0200', monto: 500, saldo_pendiente: 500 }])
+    const bloque = await elegirAnulacion(30)
+    expect(bloque.querySelector('div')!.textContent).toMatch(/500\.00/)
   })
 })

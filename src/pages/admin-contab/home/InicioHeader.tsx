@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { useHomeCalendarToday, useHomePendientes } from '@/hooks/useAdminContab'
+import { firstNameOnly } from '@/lib/greeting'
 
 /**
  * Batch Home (SCRUM-503→512), Grupo 5 (SCRUM-503, REQ-426) — encabezado de "Inicio".
  *
- * RN1: nombre completo del usuario logueado (no solo el de pila, a diferencia de otros módulos) —
+ * RN1 (SUPERADA por SCRUM-863 — alineación global de saludos): antes mostraba nombre completo "a
+ * diferencia de otros módulos" a propósito; SCRUM-863 pide consistencia global usando solo el
+ * primer nombre en todos los módulos, así que este módulo pasa a alinearse con el resto. Nombre
  * viene del JWT vía `useAuthStore`, nunca de una llamada nueva. RN5: sin nombre resuelto, saludo
  * genérico sin romper la pantalla.
  * RN3/RN4: los conteos de "reuniones"/"pendientes" son SIEMPRE los mismos que ya muestran los
@@ -16,7 +19,7 @@ export default function InicioHeader() {
   const { t } = useTranslation(['adminContab'])
   const { user } = useAuthStore()
 
-  const fullName = user ? `${user.first_name} ${user.last_name}`.trim() : ''
+  const firstName = firstNameOnly(user?.first_name)
 
   const { data: eventosHoy } = useHomeCalendarToday()
   const { data: pendientes } = useHomePendientes()
@@ -29,7 +32,7 @@ export default function InicioHeader() {
   return (
     <div className="mb-5">
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-        {fullName ? t('adminContab:home.header.saludo', { nombre: fullName }) : t('adminContab:home.header.saludoGenerico')}
+        {firstName ? t('adminContab:home.header.saludo', { nombre: firstName }) : t('adminContab:home.header.saludoGenerico')}
       </h1>
       <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
         {t('adminContab:home.header.subtitulo', {

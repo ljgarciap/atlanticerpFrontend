@@ -16,14 +16,19 @@ function money(n: number): string {
 // PaymentMethodSalesReportService::report()).
 type MetodoKey = 'transferencia' | 'cheque' | 'efectivo' | 'tarjeta' | 'deposito' | 'yappy' | 'link_pago' | 'retencion_impuestos' | 'ajuste_cuenta'
 
+// SCRUM-880 — orden de las columnas DESPUÉS de "Total" pedido por negocio (Yappy y Link de pago
+// antes de Tarjeta y Depósito bancario). Debe coincidir con
+// PaymentMethodSalesReportService::COLUMNAS_METODO_ORDEN en el backend. Las claves siguen siendo el
+// vocabulario canónico de AdminContPayment (ver comentario de MetodoKey arriba) — solo cambia el
+// orden, no las claves.
 const METODOS: { key: MetodoKey; labelKey: string }[] = [
   { key: 'transferencia', labelKey: 'transferencia' },
   { key: 'cheque', labelKey: 'cheque' },
   { key: 'efectivo', labelKey: 'efectivo' },
-  { key: 'tarjeta', labelKey: 'tarjeta' },
-  { key: 'deposito', labelKey: 'depositoBancario' },
   { key: 'yappy', labelKey: 'yappy' },
   { key: 'link_pago', labelKey: 'linkPago' },
+  { key: 'tarjeta', labelKey: 'tarjeta' },
+  { key: 'deposito', labelKey: 'depositoBancario' },
   { key: 'retencion_impuestos', labelKey: 'retencionImpuestos' },
   { key: 'ajuste_cuenta', labelKey: 'ajustesCuenta' },
 ]

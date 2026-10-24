@@ -27,9 +27,10 @@ vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
     payments: {
       summary: vi.fn(), searchClients: vi.fn(), openInvoices: vi.fn(), defaultBankAccount: vi.fn(), register: vi.fn(),
-      historial: vi.fn(), detail: vi.fn(),
+      historial: vi.fn(), detail: vi.fn(), config: vi.fn(),
     },
     bankAccounts: { list: vi.fn() },
+    reversals: { list: vi.fn(), decide: vi.fn() },
   },
 }))
 
@@ -41,7 +42,16 @@ function makeSummary(overrides: Partial<PaymentSummary> = {}): PaymentSummary {
 
 function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvoicesResult {
   return {
-    invoices: [{ id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000 }, { id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200 }],
+    invoices: [
+      {
+        id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000, abono_obligatorio: null, neto_a_cobrar: 4000,
+        sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
+      },
+      {
+        id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200, abono_obligatorio: null, neto_a_cobrar: 2200,
+        sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
+      },
+    ],
     credit_balance: 0,
     master_client_name: null,
     ...overrides,
@@ -49,7 +59,7 @@ function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvo
 }
 
 function makeBankAccount(overrides: Partial<BankAccount> = {}): BankAccount {
-  return { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', moneda: 'USD', activa: true, movimientos_count: 0, ...overrides }
+  return { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0, ...overrides }
 }
 
 function renderPage(initialEntries: string[] = ['/admin-contab/cobros']) {
@@ -70,7 +80,9 @@ beforeEach(() => {
   mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices())
   mockedApi.payments.defaultBankAccount.mockResolvedValue(null)
   mockedApi.bankAccounts.list.mockResolvedValue([makeBankAccount()])
-  mockedApi.payments.historial.mockResolvedValue({ rows: [], total: 0 } as PaymentHistorialResult)
+  mockedApi.payments.historial.mockResolvedValue({
+    rows: [], total: 0, meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
+  } as PaymentHistorialResult)
 })
 
 describe('CobrosPage — REQ-463 tarjetas del mes', () => {
@@ -103,5 +115,39 @@ describe('CobrosPage — REQ-462 apertura del formulario', () => {
 
     expect(await screen.findByText('cobros.registrarModal.title')).toBeInTheDocument()
     await waitFor(() => expect(mockedApi.payments.openInvoices).toHaveBeenCalledWith(42))
+  })
+})
+
+// SCRUM-1168 F2 — el formulario depende de la bandera del concepto nuevo del entorno.
+describe('CobrosPage — SCRUM-1168 F2 formulario según la bandera cobros_v2', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockedApi.payments.summary.mockResolvedValue(makeSummary())
+    mockedApi.payments.historial.mockResolvedValue({ rows: [], total: 0, meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } } as never)
+    mockedApi.payments.searchClients.mockResolvedValue([])
+    mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices())
+    mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: 1, label: 'Banco General' })
+    mockedApi.bankAccounts.list.mockResolvedValue([makeBankAccount()])
+  })
+
+  it('con el concepto nuevo activo, «Registrar cobro» abre el formulario con o sin factura', async () => {
+    mockedApi.payments.config.mockResolvedValue({ v2: true, compensaciones_dias_movimiento: 30 })
+    renderPage()
+    await waitFor(() => expect(mockedApi.payments.config).toHaveBeenCalled())
+
+    fireEvent.click(screen.getByText('cobros.registrarButton'))
+
+    expect(await screen.findByTestId('registrar-cobro-v2')).toBeInTheDocument()
+  })
+
+  it('con el concepto nuevo apagado, abre el formulario de siempre', async () => {
+    mockedApi.payments.config.mockResolvedValue({ v2: false, compensaciones_dias_movimiento: 30 })
+    renderPage()
+    await waitFor(() => expect(mockedApi.payments.config).toHaveBeenCalled())
+
+    fireEvent.click(screen.getByText('cobros.registrarButton'))
+
+    expect(await screen.findByText('cobros.registrarModal.title')).toBeInTheDocument()
+    expect(screen.queryByTestId('registrar-cobro-v2')).not.toBeInTheDocument()
   })
 })
