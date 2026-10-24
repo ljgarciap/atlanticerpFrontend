@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { Button } from '@/components/ui/Button'
 import { IcoChevronLeft, IcoChevronRight } from '@/components/icons'
 import type { CommissionCriterio, ReportsPeriodParams } from '@/types/servicios'
@@ -56,15 +57,15 @@ export default function ReportsCommissionSection({ globalPeriod }: Props) {
     queryFn:  serviciosApi.internalTechnicians.list,
   })
 
-  const isManagement = user?.role === 'management' || user?.role === 'superadmin'
+  const isManagement = usePermission('platform.management')
   // El técnico con plan de bonificación se resuelve por `has_bonus_plan`, el MISMO flag que usa el
-  // backend (`ReportsController::comisionCarlosVergara()`), nunca por su nombre: el nombre es
+  // backend (`ReportsController::comisionTecnico()`), nunca por su nombre: el nombre es
   // editable en Técnicos Internos, y con el match por string un simple renombre ("Tecnico Servicios A.
   // Tecnico Servicios") le ocultaba a Tecnico Servicios su propia sección aunque el backend siguiera autorizándolo
   // (hallazgo de Pre-QA 2026-08-12, reproducido en vivo).
-  const carlosVergara = technicians?.find(tech => tech.has_bonus_plan)
-  const isCarlosVergara = !!user && !!carlosVergara && carlosVergara.user_id === user.id
-  const qualifies = isManagement || isCarlosVergara
+  const bonusTechnician = technicians?.find(tech => tech.has_bonus_plan)
+  const isBonusTechnician = !!user && !!bonusTechnician && bonusTechnician.user_id === user.id
+  const qualifies = isManagement || isBonusTechnician
 
   const now = new Date()
   const currentPeriod = { year: now.getFullYear(), month: now.getMonth() + 1 }
@@ -89,8 +90,8 @@ export default function ReportsCommissionSection({ globalPeriod }: Props) {
   }
 
   const { data, isLoading } = useQuery({
-    queryKey: ['servicios-reports-comision-carlos-vergara', period.year, period.month],
-    queryFn:  () => serviciosApi.reportes.comisionCarlosVergara(period),
+    queryKey: ['servicios-reports-comision-tecnico', period.year, period.month],
+    queryFn:  () => serviciosApi.reportes.comisionTecnico(period),
     enabled:  qualifies,
   })
 

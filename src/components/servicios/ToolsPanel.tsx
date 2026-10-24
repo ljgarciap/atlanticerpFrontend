@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
@@ -17,8 +18,8 @@ const BODEGA = 'bodega'
 // REQ-269/270/271/272 — exclusivo de Lider Servicios/Líder de Servicios y superadmin (mismo patrón que
 // canEditTicketStatus en TicketsPage.tsx). Técnico interno y otros roles del módulo ven la
 // pantalla completa en modo lectura.
-function canManageTools(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin'
+function canManageTools(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
 }
 
 // REQ-268→272 (Batch 13 Grupo D parte 1). Sub-vista "Herramientas" de Insumos y Herramientas.
@@ -26,7 +27,7 @@ export default function ToolsPanel() {
   const { t }   = useTranslation('servicios')
   const qc      = useQueryClient()
   const user    = useAuthStore(s => s.user)
-  const canEdit = canManageTools(user?.role)
+  const canEdit = canManageTools(user?.permissions)
 
   const [search, setSearch]         = useState('')
 

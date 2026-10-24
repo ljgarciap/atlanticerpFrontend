@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import { useReversalRequests, useDecideReversal } from '@/hooks/useAdminContab'
 import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { formatDateShort } from '@/utils/dates'
@@ -19,7 +20,8 @@ function formatCurrency(value: number): string {
 export default function SolicitudesReversoPanel() {
   const { t } = useTranslation('adminContab')
   const user = useAuthStore(s => s.user)
-  const puedeDecidir = user?.role === 'superadmin' || user?.flags?.mark_approver === true
+  const esSuperadmin = usePermission('superadmin.all')
+  const puedeDecidir = esSuperadmin || user?.flags?.mark_approver === true
 
   const { data } = useReversalRequests({ estado: 'solicitada', per_page: 50 })
   const decideMutation = useDecideReversal()

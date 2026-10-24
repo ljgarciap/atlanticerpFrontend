@@ -16,6 +16,7 @@ import TicketCreateModal from '@/components/servicios/TicketCreateModal'
 import { IcoPlus } from '@/components/icons'
 import { TICKET_STATUSES } from '@/types/servicios'
 import type { Ticket } from '@/types/servicios'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 type ViewMode = 'table' | 'board'
 
@@ -23,15 +24,15 @@ type ViewMode = 'table' | 'board'
 // drag-and-drop, REQ-218/221). superadmin incluido como bypass (mismo criterio que el resto de
 // la app, ver Sidebar.tsx `isGerencia`). Vendedor/Diseñador (y cualquier otro rol con acceso de
 // solo lectura al módulo) ve el panel completo pero sin poder ejecutar el cambio.
-function canEditTicketStatus(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin'
+function canEditTicketStatus(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
 }
 
 // REQ-245 RN4 — Lider Servicios/Líder de Servicios, superadmin, Gerencia (`management`) y Vendedor/Diseñador
 // pueden reportar un ticket nuevo — técnico interno/garantías NO tienen este botón disponible
 // (mismo criterio que el backend, `role:` en routes/servicios.php, más angosto que servicios.write).
-function canCreateTicket(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin' || role === 'management' || role === 'vendedor_disenador'
+function canCreateTicket(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.create'])
 }
 
 // REQ-216 — orden por defecto: primero "Reportado" sin agendar, luego el resto por fecha de
@@ -114,8 +115,8 @@ export default function TicketsPage() {
     setDetailTicketId(ticketId)
   }
 
-  const canEdit   = canEditTicketStatus(user?.role)
-  const canCreate = canCreateTicket(user?.role)
+  const canEdit   = canEditTicketStatus(user?.permissions)
+  const canCreate = canCreateTicket(user?.permissions)
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['servicios-technicians-internal-options'],

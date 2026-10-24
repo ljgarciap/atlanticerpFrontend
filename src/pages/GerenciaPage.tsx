@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { useGerenciaHome, useGerenciaVendors, useGerenciaClients, useGerenciaExport } from '@/hooks/useGerencia'
 import { gerenciaApi } from '@/api/gerenciaApi'
 import { Card } from '@/components/ui/Card'
@@ -176,7 +177,7 @@ export default function GerenciaPage() {
   const [showAprobacionesConfig, setShowAprobacionesConfig] = useState(false)
   const [pendingAction, setPendingAction] = useState<{ item: AprobacionItem; action: 'aprobar' | 'rechazar' } | null>(null)
   const [detailItem,    setDetailItem]    = useState<AprobacionItem | null>(null)
-  const isSuperadmin = user?.role === 'superadmin'
+  const isSuperadmin = usePermission('superadmin.all')
 
   // SCRUM-862 — "Exportar reporte", mismo patrón de menú pdf/excel que ArqueoCajaPage.
   const [exportMenuOpen, setExportMenuOpen] = useState(false)

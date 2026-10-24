@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -21,8 +22,8 @@ const GROUP_ORDER: ServiciosSetting['group'][] = ['cotizacion', 'operacion', 'sl
 // escritura exclusiva de Gerencia — el formulario queda visible-pero-deshabilitado para el resto,
 // no oculto, para que cualquier rol con acceso a Servicios pueda VER los umbrales vigentes (mismo
 // criterio ya usado en InternalTechnicianCommissionModal para la sección de SLA).
-function canEdit(role: string | undefined): boolean {
-  return role === 'superadmin' || role === 'management'
+function canEdit(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.settings.configure'])
 }
 
 export default function ServiciosSettingsPanel() {
@@ -30,7 +31,7 @@ export default function ServiciosSettingsPanel() {
   const toast   = useToastStore(s => s.show)
   const qc      = useQueryClient()
   const user    = useAuthStore(s => s.user)
-  const editable = canEdit(user?.role)
+  const editable = canEdit(user?.permissions)
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['servicios-settings'],

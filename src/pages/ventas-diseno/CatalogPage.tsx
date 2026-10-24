@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 import type { CatalogItem, CatalogPdfExportStatus } from '@/types/ventasDiseno'
 import type { CatalogProductCategory } from '@/types/compras'
@@ -53,7 +54,7 @@ export default function VentasDisenoCatalogPage() {
   // SCRUM-785 RN1 — Vendedor/Diseñador nunca ve este atajo, independiente del estado UAT: es
   // gestión interna de inventario, fuera de las acciones de su rol sobre Catálogo.
   const canSeeInventoryBodega  = user?.menuVisibility?.ventas_diseno?.catalogo_inventario_bodega !== false
-    && user?.role !== 'vendedor_disenador'
+    && hasGerenciaScope(user)
 
   const [search, setSearch]     = useState('')
   const [category, setCategory] = useState<CatalogProductCategory | ''>('')

@@ -1,13 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/store/authStore'
 import { usePermission } from '@/hooks/usePermission'
 import { Button } from '@/components/ui/Button'
 
 interface Props { children: React.ReactNode }
 
 export default function SecurityLayout({ children }: Props) {
-  const { user }     = useAuthStore()
   const { t }        = useTranslation(['security', 'common'])
   const navigate     = useNavigate()
   const { pathname } = useLocation()
@@ -17,7 +15,7 @@ export default function SecurityLayout({ children }: Props) {
   // distintos entre sí -- un usuario management sin security.levels/superadmin.all
   // (ej. gerencia5@test.com) veía los 4 tabs clickeables y 3 lo redirigían en
   // silencio a /ventas-diseno/home. Cada tab ahora refleja el gate real de su ruta.
-  const isDepartmentsRole = user?.role === 'superadmin' || user?.role === 'management' // matches RequireRole en App.tsx
+  const isDepartmentsRole = usePermission('platform.management') // matches GUARD.GERENCIA en App.tsx
   const canSeeLevels = usePermission('security.levels')
   const canSeeSuperadminOnly = usePermission('superadmin.all') // alerts, notification-rules, roles
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { comprasApi } from '@/api/comprasApi'
-import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { useToastStore } from '@/store/toastStore'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -29,9 +29,8 @@ export default function ReplenishmentPage() {
   const { t } = useTranslation(['compras', 'common'])
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
-  // «Pedidos de venta» (donde cae el enlace, buscando por el folio de la cotización) solo lo abren estos roles; para el resto el N° queda como texto, sin enlace roto.
-  const canOpenOrders = user?.role === 'lider_compras' || user?.role === 'management' || user?.role === 'superadmin'
+  // «Pedidos de venta» (donde cae el enlace, buscando por el folio de la cotización) solo lo abre quien tiene `ventas_diseno.orders.access` (Compras y Gerencia); para el resto el N° queda como texto, sin enlace roto.
+  const canOpenOrders = usePermission('ventas_diseno.orders.access')
   const { data, isLoading, isError } = useQuery({
     queryKey: ['compras', 'replenishment'],
     queryFn:  () => comprasApi.replenishment.get(),

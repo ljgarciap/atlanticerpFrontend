@@ -126,10 +126,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // individual security.users/levels ya no alcanza sin el rol base.
   // SCRUM-1181 — los hooks se llaman SIEMPRE, todos, y se combinan después: `usePermission(a) || usePermission(b)` no ejecuta la segunda cuando la
   // primera es true y cambia la cantidad de hooks entre renders (rompe al cambiar de identidad en sitio).
+  const isPlatformManagement = usePermission('platform.management')
   const hasSecurityUsers  = usePermission('security.users')
   const hasSecurityLevels = usePermission('security.levels')
   const canSeeSecurity = (hasSecurityUsers || hasSecurityLevels)
-    && (user?.role === 'management' || user?.role === 'superadmin')
+    && isPlatformManagement
     && user?.menuVisibility?.configuracion?.root !== false
   // ADR-006, Decisión 11 — el resto de las secciones sí son módulos del catálogo nuevo.
   // effectivePermissionsV2() (User.php) ya traduce modules.view -> permissions 'X.read' y
@@ -155,7 +156,8 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const canSeeCompras      = user?.modules?.compras?.view === true
   // SCRUM-1119 — Pedidos (márgenes, montos, estado de compra) es solo de Compras y Gerencia. Compras no tiene
   // el módulo Ventas y Diseño, así que su entrada vive en su propia sección en vez de en la de Ventas.
-  const isLiderCompras       = user?.role === 'lider_compras'
+  // Quien tiene Pedidos (`ventas_diseno.orders.access`) pero no el módulo Ventas y Diseño (Compras). Sin atajo de superadmin a propósito.
+  const isLiderCompras       = (user?.permissions ?? []).includes('ventas_diseno.orders.access') && !canSeeVentasDiseno
   // SCRUM-861 punto 3 — "Ajustes de Compras" sale de Proveedores a su propia entrada de menú,
   // gateada por el mismo permiso que ya usaba el panel embebido (`compras.settings.configure`).
   const canConfigureCompras = usePermission('compras.settings.configure')
@@ -370,7 +372,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // deja el comportamiento correcto para cuando eso pase.
   // superadmin incluido — mismo bypass que el resto de la app (RequirePermission ya trata
   // superadmin.all como comodín, y /security/departments ya usa roles={['superadmin','management']}
-  // con este mismo RequireRole) — sin esto, Luis/Andres/Luis J quedarían bloqueados de su propia
+  // con este mismo RequirePermission) — sin esto, Luis/Andres/Luis J quedarían bloqueados de su propia
   // pantalla. Hallazgo de un segundo pase de Pre-QA (2026-07-31, revisión estática) que no pudo
   // correr en vivo por una limitación de sandbox del worktree.
   // SCRUM-1150 (decisión de Luis, 2026-10-15): Contabilidad replica a Gerencia en CRM y Ventas & Diseño, así que ve Dashboard CRM y Pedidos por
@@ -393,10 +395,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // (1) "Cotizaciones" deja de ser un ítem propio de la sección, pasa a submenú de "Tickets"
   // (mismo patrón NavDropdown que "Técnicos" un poco más abajo); (2) "Ajustes" se angosta de
   // lider_servicios/management/superadmin a solo Gerencia (management/superadmin) — Lider Servicios/Líder
-  // de Servicios ya no debe verlo. Ver también RequireRole en App.tsx (acceso por URL directa) y
+  // de Servicios ya no debe verlo. Ver también RequirePermission en App.tsx (acceso por URL directa) y
   // el gate del backend en routes/servicios.php (GET /servicios/settings).
-  const isServiciosLimited = user?.role === 'vendedor_disenador'
-  const canViewServiciosSettings = ['management', 'superadmin'].includes(user?.role ?? '')
+  // Vendedor/Diseñador: ve Servicios sin el directorio de Técnicos Externos (`servicios.external_technicians.view`).
+  const isServiciosLimited = !usePermission('servicios.external_technicians.view')
+  const canViewServiciosSettings = usePermission('servicios.settings.configure')
 
   const serviciosTechChildren: NavItem[] = [
     { id: 'servicios-tecnicos-internos', label: tServicios('nav.techniciansInternal'), href: '/servicios/tecnicos', icon: <IcoUsers /> },
@@ -450,13 +453,12 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // propias Comisiones Internas, ver ComisionesInternasPage) pero NO acceso real a ninguna otra
   // pantalla de Admin&Cont — el backend le devuelve datos vacíos/guiones en todas ellas (Inicio,
   // Facturación, Movimientos, Comisiones Externas, Tesorería, Reportes ya tenía su propio fix,
-  // SCRUM-650/Batch 22). Mismo roster que `RequireRole` ya usa en App.tsx para /admin-contab/reportes
+  // SCRUM-650/Batch 22). Mismo roster que `RequirePermission` ya usa en App.tsx para /admin-contab/reportes
   // (routes/admin-contab.php es la fuente real) — no hay un permiso más fino que `admin_contab.view`
   // en el JWT para distinguir "acceso completo" de "solo mis comisiones", así que se replica acá el
   // mismo allow-list explícito en vez de inventar un permiso nuevo para un solo ticket de corrección.
   // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) espeja a la asistente: mismo roster que el backend (`role:` de routes/admin-contab.php).
-  const ADMIN_CONTAB_FULL_ACCESS_ROLES = ['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']
-  const canSeeFullAdminContab = ADMIN_CONTAB_FULL_ACCESS_ROLES.includes(user?.role ?? '')
+  const canSeeFullAdminContab = usePermission('admin_contab.records.manage')
 
   const adminContabItems: NavEntry[] = [
     // Batch final (SCRUM-503→512) — "Inicio" ya es una pantalla real, primer ítem del menú (mismo
@@ -528,7 +530,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const hasVentasDisenoEdit  = usePermission('ventas_diseno.edit')
   const canEditClientTaxData = hasEditClientTaxData || hasVentasDisenoEdit || canExemptItbms
   // SCRUM-1012 — Empresa/Fiscal solo para el roster completo de Admin&Cont (no basta `admin_contab.view`,
-  // que Vendedor/Diseñador tienen por Comisiones): ver también RequireRole en /admin-contab/empresa y /fiscal.
+  // que Vendedor/Diseñador tienen por Comisiones): ver también RequirePermission en /admin-contab/empresa y /fiscal.
   const adminContabConfigItems: NavEntry[] = [
     ...(canSeeFullAdminContab && canSeeMarkOnlyConfig
       ? [{ id: 'admin-contab-empresa', label: tAdminContab('nav.empresa'), href: '/admin-contab/empresa', icon: <IcoUsers /> }]
@@ -676,7 +678,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     // scoping por cliente, a diferencia de Cotizaciones/Pedidos/Albaranes/Facturas, donde el
     // modal "Historial ICG" scoped y la pestaña global de Vista ICG SÍ son vistas distintas). La
     // ruta /migracion/pagos sigue viva (acceso directo), solo se retiró el ítem del Sidebar.
-    ...(user?.role === 'superadmin'
+    ...(isSuperadmin
       ? [{
           section: t('nav.migracion'),
           items: [
@@ -709,7 +711,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     // SCRUM-58 — "visible a los roles permitidos": Sandbox es una herramienta de
     // desarrollo, no un módulo de negocio — se restringe a superadmin (antes era
     // visible para cualquier usuario autenticado).
-    ...(user?.role === 'superadmin'
+    ...(isSuperadmin
       ? [{
           section: 'Dev',
           items: [{ id: 'sandbox', label: 'Sandbox', href: '/test', icon: <IcoBeaker /> }],

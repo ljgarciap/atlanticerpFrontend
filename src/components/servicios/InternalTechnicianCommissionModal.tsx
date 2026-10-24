@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -17,8 +18,8 @@ interface Props {
 
 const INPUT_CLASSES = 'w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:border-primary'
 
-function canEditSla(role: string | undefined): boolean {
-  return role === 'management' || role === 'superadmin'
+function canEditSla(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.settings.configure'])
 }
 
 // SCRUM-321 (rebote QA) — CSS `capitalize` title-cases CADA palabra ("Agosto De 2026"); acá solo
@@ -246,14 +247,14 @@ export default function InternalTechnicianCommissionModal({ technician, onClose 
                         <input
                           type="number" min={1}
                           value={slaForm[tipo] ?? ''}
-                          disabled={!canEditSla(user?.role)}
+                          disabled={!canEditSla(user?.permissions)}
                           onChange={e => setSlaForm(f => ({ ...f, [tipo]: e.target.value }))}
                           className={`${INPUT_CLASSES} disabled:opacity-50`}
                         />
                       </label>
                     ))}
                   </div>
-                  {canEditSla(user?.role) && (
+                  {canEditSla(user?.permissions) && (
                     <Button
                       variant="secondary" className="mt-2"
                       onClick={() => slaMutation.mutate()} loading={slaMutation.isPending}

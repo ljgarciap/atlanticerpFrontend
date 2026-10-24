@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
-import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import {
   useCashPositionHeader, useCashPositionProjected, useCashPositionReal, useDailyCashCount,
   useUpdateDailyCashCountEntryObservation, useUpdateDailyCashCountGeneralObservation, useCashPositionExport,
@@ -45,20 +45,22 @@ function mutationErrorMessage(err: unknown, fallback: string): string {
  */
 export default function ArqueoCajaPage() {
   const { t } = useTranslation(['common', 'adminContab'])
-  const { user } = useAuthStore()
 
   // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) recibe el mismo acceso que Asistente Administrativa en Admin&Cont, incluida la exclusión de REQ-521/523 (Proyectado/Vista real).
-  const isYaneth        = user?.role === 'asistente_administrativa' || user?.role === 'lider_operaciones'
+  // Asistente y Operaciones: capturan operaciones (`operations.manage`) pero no tienen la supervisión (`oversight.manage`).
+  const canOperate      = usePermission('admin_contab.operations.manage')
+  const hasOversight    = usePermission('admin_contab.oversight.manage')
+  const isYaneth        = canOperate && !hasOversight
   // Aclarado por Luis 2026-08-25 (Pre-QA Batch 18): REQ-521 le veda a Asistente Administrativa el PANEL de detalle
   // (facturas/comisiones línea por línea) y la Vista real 30/90d — no los 3 totales agregados del
   // encabezado, que REQ-520 sí le da. `canProjectedReal` sigue gateando toggle/chips + ambos
   // paneles de detalle + la Vista real; el fetch de `projected` para las tarjetas ya no depende de
   // esta flag (ver abajo).
   const canProjectedReal = !isYaneth
-  const canDailyCount    = user?.role === 'superadmin' || user?.role === 'lider_admin_contab' || isYaneth
+  const canDailyCount    = canOperate
   // REQ-528/529 — el historial (y su "Ver"/"Descargar resumen") es para los 4 roles del módulo,
   // a diferencia del Arqueo del día (`canDailyCount`), que excluye a Gerencia/Gerencia (`management`).
-  const canViewHistorial = canDailyCount || user?.role === 'management'
+  const canViewHistorial = usePermission('admin_contab.records.manage')
 
   const [view, setView]             = useState<'proyectado' | 'real'>(isYaneth ? 'real' : 'proyectado')
   const [windowDays, setWindowDays] = useState<CashPositionWindowDays>(isYaneth ? 0 : 30)

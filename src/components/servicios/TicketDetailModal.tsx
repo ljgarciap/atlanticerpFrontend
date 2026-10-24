@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -25,26 +26,24 @@ import { formatDateTimeShort, formatDateFromTimestamp, formatTimeShort } from '@
 // este ticket puntual — distinto de `canEdit` (edición global del ticket, solo Lider Servicios/superadmin),
 // por eso vive acá y no en TicketsPage. Gerencia y el resto quedan solo con lectura, igual que
 // confirma la Matriz de Permisos por Rol del Excel para "Generar/editar Informe de Inspección".
-export function canEditInspectionReport(role: string | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
-  if (role === 'superadmin' || role === 'lider_servicios') return true
-  if ((role === 'tecnico_servicios' || role === 'garantias_servicios') && userId != null && userId === technicianId) return true
-  return false
+export function canEditInspectionReport(permissions: readonly string[] | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
+  if (hasAnyPermission(permissions, ['servicios.tickets.manage'])) return true
+  return hasAnyPermission(permissions, ['servicios.field_work.edit']) && userId != null && userId === technicianId
 }
 
-// REQ-244 RN "Descargar plantilla en blanco" — mismo roster que la ruta
-// `role:superadmin,lider_servicios,tecnico_servicios` de `/inspection-report/pdf/blank` en
+// REQ-244 RN "Descargar plantilla en blanco" — mismo permiso que la ruta
+// (`servicios.claim_sheets.manage`: lider y técnico) de `/inspection-report/pdf/blank` en
 // routes/servicios.php. Más angosto que `canEditInspectionReport`: sin `garantias_servicios` a
 // propósito (Pre-QA 2026-08-11, Batch 9 — confirmado con el backend que ese rol recibe 403 ahí).
-function canDownloadBlankInspectionReport(role: string | undefined): boolean {
-  return role === 'superadmin' || role === 'lider_servicios' || role === 'tecnico_servicios'
+function canDownloadBlankInspectionReport(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.claim_sheets.manage'])
 }
 
 // REQ-278 — mismo criterio que `ClaimSheetService::assertCanEdit()`, sin rama `garantias_servicios`
 // a propósito (Reclamos no es un tipo de ticket que atienda el especialista de garantías).
-function canEditClaimSheet(role: string | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
-  if (role === 'superadmin' || role === 'lider_servicios') return true
-  if (role === 'tecnico_servicios' && userId != null && userId === technicianId) return true
-  return false
+function canEditClaimSheet(permissions: readonly string[] | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
+  if (hasAnyPermission(permissions, ['servicios.tickets.manage'])) return true
+  return hasAnyPermission(permissions, ['servicios.claim_sheets.manage']) && userId != null && userId === technicianId
 }
 
 // REQ-279 RN4 — solo installation/warranty manejan subtipo (mismo mapeo que
@@ -712,8 +711,8 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
           ticketCliente={ticket.cliente_master ?? ticket.subcliente ?? '—'}
           ticketProyecto={ticket.proyecto}
           ticketDireccion={ticket.direccion}
-          canEdit={canEditInspectionReport(user?.role, user?.id, ticket.internal_technician?.id)}
-          canDownloadBlank={canDownloadBlankInspectionReport(user?.role)}
+          canEdit={canEditInspectionReport(user?.permissions, user?.id, ticket.internal_technician?.id)}
+          canDownloadBlank={canDownloadBlankInspectionReport(user?.permissions)}
           onClose={() => setInspectionReportOpen(false)}
           onSaved={() => {
             setInspectionReportOpen(false)
@@ -726,7 +725,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
         <ClaimSheetModal
           ticketId={ticket.id}
           ticketNumero={ticket.numero}
-          canEdit={canEditClaimSheet(user?.role, user?.id, ticket.internal_technician?.id)}
+          canEdit={canEditClaimSheet(user?.permissions, user?.id, ticket.internal_technician?.id)}
           onClose={() => setClaimSheetOpen(false)}
           onSaved={() => {
             setClaimSheetOpen(false)

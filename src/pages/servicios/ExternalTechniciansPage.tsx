@@ -10,13 +10,14 @@ import ExternalTechnicianDetailModal from '@/components/servicios/ExternalTechni
 import { IcoPlus } from '@/components/icons'
 import type { ExternalTechnicianStatus } from '@/types/servicios'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 type StatusChip = ExternalTechnicianStatus | ''
 
 // REQ-263 RN5 / REQ-264 RN4 / REQ-265 RN1 / REQ-266 RN1 — alta, tarifa y activar/inactivar son
 // exclusivos de Lider Servicios/Líder de Servicios y Gerencia; técnico interno tiene solo consulta.
-function canManage(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin' || role === 'management'
+function canManage(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.field_ops.admin'])
 }
 
 // Fase 4 — Servicios, Batch 5 (REQ-263→267). Vive bajo /servicios/tickets/externos
@@ -25,7 +26,7 @@ function canManage(role: string | undefined): boolean {
 export default function ExternalTechniciansPage() {
   const { t }    = useTranslation('servicios')
   const user     = useAuthStore(s => s.user)
-  const canEdit  = canManage(user?.role)
+  const canEdit  = canManage(user?.permissions)
 
   const [search, setSearch]     = useState('')
 

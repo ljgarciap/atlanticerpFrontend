@@ -59,7 +59,7 @@ export default function InspectionReportMobilePage() {
     enabled:  Number.isFinite(ticketId),
   })
 
-  const canEdit = canEditInspectionReport(user?.role, user?.id, ticket?.internal_technician?.id ?? null)
+  const canEdit = canEditInspectionReport(user?.permissions, user?.id, ticket?.internal_technician?.id ?? null)
 
   const { data: fields = [] } = useQuery({
     queryKey: ['servicios-inspection-report-fields', ticketId],
