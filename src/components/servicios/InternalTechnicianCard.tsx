@@ -92,9 +92,9 @@ export default function InternalTechnicianCard({
       )}
 
       {/* Batch 10 (REQ-258 RN8/RN9) — mini-indicador del resultado calculado, exclusivo del
-          propio técnico o Gerencia (nunca Aaron, ver docblock de canViewCommissionResult en
+          propio técnico o Gerencia (nunca Lider Servicios, ver docblock de canViewCommissionResult en
           InternalTechniciansPage). Botón separado del de arriba a propósito: son 2 audiencias
-          distintas que pueden no solaparse (Aaron gestiona sin ver; Carlos ve sin gestionar). */}
+          distintas que pueden no solaparse (Lider Servicios gestiona sin ver; Tecnico Servicios ve sin gestionar). */}
       {t.has_bonus_plan && canViewCommissionResult && onViewCommissionResult && (
         <Button variant="outline" className="!text-xs !py-1.5" onClick={() => onViewCommissionResult(t)}>
           {i18n.t('servicios:technicians.internal.card.commissionResult')}

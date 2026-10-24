@@ -383,7 +383,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* SCRUM-897 — se agrega `admin_contab.view` al permiso de entrada: Administración →
-                Facturación replica este mismo botón/pantalla (Felix/Yaneth/Mark/Gerencia no tienen
+                Facturación replica este mismo botón/pantalla (Contabilidad/Yaneth/Mark/Gerencia no tienen
                 `bodega.read` ni `ventas_diseno.read`). Backend Dev ya amplió el roster real en
                 `OrderStatusController::resolveAccess()` (SCRUM-897) — este permiso de ruta solo
                 evita el flash de "acceso denegado" del lado del cliente antes de llegar al backend. */}
@@ -447,10 +447,10 @@ export default function App() {
             } />
             {/* Bloque B5 (SCRUM-460→466, REQ-390→396) — "Inventario general" real, reemplaza el
                 placeholder "próximamente". Aprobar/Rechazar visibles a todos los perfiles de
-                Bodega (bodega.read a nivel de ruta) — el backend enforcea el gate de Mark (403)
+                Bodega (bodega.read a nivel de ruta) — el backend enforcea el gate de Gerencia (403)
                 en approve/reject, mismo criterio que Solicitud de ajuste/Reubicación. "Realizar
                 ajuste" es la excepción: exclusivo del Líder de Bodega, oculto en frontend para
-                cualquier otro perfil (incl. Mark) desde SCRUM-466 (rebote 2026-08-14, ver
+                cualquier otro perfil (incl. Gerencia) desde SCRUM-466 (rebote 2026-08-14, ver
                 LIDER_BODEGA_ROLE en BodegaInventarioGeneralPage.tsx). */}
             <Route path="/bodega/inventario-general" element={
               <RequirePermission permission="bodega.read">
@@ -461,7 +461,7 @@ export default function App() {
                 placeholder "próximamente" que traía Batch B1. Backend implementado localmente en
                 `atlanticerp-backend` (commit 4ab8513), sin push a origin todavía — bodega.read a nivel
                 de ruta, el backend enforcea bodega.write en los POST reales (incl. reject, que NO
-                requiere el gate de aprobación de Mark). */}
+                requiere el gate de aprobación de Gerencia). */}
             <Route path="/bodega/devoluciones" element={
               <RequirePermission permission="bodega.read">
                 <BodegaDevolucionesPage />
@@ -539,7 +539,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* Batch 10 (decisión de Luis 2026-08-11) creó esta ruta con lectura amplia y edición
-                restringida dentro de la página. SCRUM-780 (Daniela, 2026-08-19) la reemplaza:
+                restringida dentro de la página. SCRUM-780 (Gerencia, 2026-08-19) la reemplaza:
                 Ajustes debe ser exclusivo de Gerencia, incluida la entrada por URL directa — no
                 alcanza con ocultar el link del sidebar. Mismo gate en el backend
                 (routes/servicios.php, GET /servicios/settings). */}
@@ -575,7 +575,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* Batch Configuración Fiscal (SCRUM-632→637, REQ-555→560) — este gate de entrada es
-                el normal del router (mismo criterio que el resto de rutas); el gate real (Mark,
+                el normal del router (mismo criterio que el resto de rutas); el gate real (Gerencia,
                 no un permiso de nivel) vive en el 403 del backend, ver FiscalConfigPage. */}
             <Route path="/admin-contab/fiscal" element={
               <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
@@ -585,7 +585,7 @@ export default function App() {
               </RequireRole>
             } />
             {/* Batch Datos de la Empresa (SCRUM-638→642, REQ-561→565) — mismo criterio que
-                /admin-contab/fiscal: gate de entrada normal del router, gate real (Mark) en el
+                /admin-contab/fiscal: gate de entrada normal del router, gate real (Gerencia) en el
                 403 del backend, ver CompanyProfilePage. */}
             <Route path="/admin-contab/empresa" element={
               <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
@@ -595,8 +595,8 @@ export default function App() {
               </RequireRole>
             } />
             {/* Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas
-                Bancarias. A diferencia de Fiscal/Empresa, NO es exclusiva de Mark — el backend
-                gatea cada acción por rol (Felix/Yaneth/Gerencia), sin 403 en el GET general. */}
+                Bancarias. A diferencia de Fiscal/Empresa, NO es exclusiva de Gerencia — el backend
+                gatea cada acción por rol (Contabilidad/Yaneth/Gerencia), sin 403 en el GET general. */}
             {/* SCRUM-882 — mismo fix que /admin-contab/inicio arriba: vendedor_disenador no debe
                 llegar acá por URL directa (Tesorería no forma parte de lo que ve este rol). */}
             <Route path="/admin-contab/cuentas-bancarias" element={
@@ -607,7 +607,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* Batch 2 del cuerpo principal (SCRUM-513→518, REQ-436→441) — Facturación. Mismo
-                criterio que Cuentas Bancarias: no exclusiva de Mark, gate por rol en el backend.
+                criterio que Cuentas Bancarias: no exclusiva de Gerencia, gate por rol en el backend.
                 SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/facturacion" element={
               <RequirePermission permission="admin_contab.view">
@@ -627,7 +627,7 @@ export default function App() {
             } />
             {/* Batch 10 del cuerpo principal (SCRUM-553→558, REQ-476→481) — apertura de Notas
                 Crédito y Devoluciones. Mismo criterio que Facturación/Cobros: no exclusiva de
-                Mark, gate por rol en el backend. Sin submit real todavía (Batch 11).
+                Gerencia, gate por rol en el backend. Sin submit real todavía (Batch 11).
                 SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/notas-credito" element={
               <RequirePermission permission="admin_contab.view">
@@ -671,7 +671,7 @@ export default function App() {
             } />
             {/* Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Mismo gate
                 `admin_contab.view` — a diferencia de Internas, la audiencia acá es únicamente
-                Felix/Yaneth/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
+                Contabilidad/Yaneth/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
                 ADR-SCRUM585-590-batch16-comisiones-externas.md.
                 SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio (a diferencia
                 de Comisiones Internas, acá no hay versión acotada para vendedor_disenador). */}
@@ -684,7 +684,7 @@ export default function App() {
             } />
             {/* Batch 18 (SCRUM-597→601, REQ-520→524) — Arqueo / Flujo de Caja, parte 1. Mismo gate
                 `admin_contab.view` de entrada que el resto del módulo — la restricción fina de
-                Yaneth (sin Proyectado/Real 30-90d) vive dentro de la página, no acá (ver
+                Asistente Administrativa (sin Proyectado/Real 30-90d) vive dentro de la página, no acá (ver
                 ADR-SCRUM597-601-batch18-arqueo-caja.md).
                 SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/arqueo-caja" element={
@@ -696,7 +696,7 @@ export default function App() {
             } />
             {/* Batch 20 (SCRUM-612→617, REQ-535→540) — Caja Chica. Mismo gate de entrada
                 `admin_contab.view` que el resto del módulo — el gate fino por rol (registrar/
-                generar reporte solo Felix/Yaneth, aprobar exclusivo Mark) vive en el backend.
+                generar reporte solo Contabilidad/Yaneth, aprobar exclusivo Gerencia) vive en el backend.
                 SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/caja-chica" element={
               <RequirePermission permission="admin_contab.view">
@@ -890,7 +890,7 @@ export default function App() {
           <Route element={<RequireAuth><FocusedViewShell /></RequireAuth>}>
             {/* REQ-276 (SCRUM-346) — "Movimiento de herramientas", vista de apoyo abierta en
                 pestaña nueva desde ToolsAndSuppliesPage (window.open). Gate de rol acá
-                (Aaron/Gerencia/superadmin), no solo visual en el botón que la abre. */}
+                (Lider Servicios/Gerencia/superadmin), no solo visual en el botón que la abre. */}
             <Route path="/servicios/tools/kardex" element={
               <RequirePermission permission="servicios.read">
                 <RequireRole roles={['lider_servicios', 'management', 'superadmin']}>

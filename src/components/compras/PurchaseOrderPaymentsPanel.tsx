@@ -105,7 +105,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: formatMoney(order.pending_amount_change as number) })}</span>
             {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Gerencia;
-                Yirena (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
+                Lider Compras (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
             {isMark && (
               <div className="flex gap-2">
                 <Button

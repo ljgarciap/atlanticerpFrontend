@@ -294,7 +294,7 @@ export default function OrderDetailPage() {
         {/* SCRUM-208 (rediseño 2026-08-15, docs/architecture/scrum208-recepcion-parcial-rediseno.md)
             — el aviso deja de ser puramente informativo: 2 botones independientes.
             "Ingresar a Inventario" (`confirm-pending-receipts`, root cause real del reporte de
-            Daniela — la parte ya recibida no aparecía en Inventario porque nada la confirmaba
+            Gerencia — la parte ya recibida no aparecía en Inventario porque nada la confirmaba
             hasta que la orden ENTERA llegaba a Recibido) y "Completar etapa del remanente"
             (`advance-remainder`, avanza lo que sigue pendiente por sus propias etapas, sin
             depender del status de la orden completa). Ambos ya implementados en el backend. */}

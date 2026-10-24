@@ -879,7 +879,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   {/* SCRUM-909 — solo con Entrega Parcial seleccionada; ver criterio 1. No
                       gateado por isEditing: es una acción propia (abre su propio modal),
                       no un campo de este formulario. SCRUM-1128 — oculto para el acceso de solo
-                      lectura del Pipeline (Félix): el modal pide asignaciones que exigen
+                      lectura del Pipeline (Contabilidad): el modal pide asignaciones que exigen
                       ventas_diseno.read y mostraba 2×403 con un texto engañoso. */}
                   {deliveryType === 'partial' && !readsPipelineReadOnly && (
                     <Button
@@ -1192,7 +1192,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
               </Button>
             )}
             {/* SCRUM-1128 — `can_edit` es false en Perdido para todos los roles, así que no sirve
-                de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Félix). */}
+                de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Contabilidad). */}
             {card?.stage === 'lost' && !readsPipelineReadOnly && (
               <Button
                 variant="accent"
@@ -1206,7 +1206,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             {/* REQ-597 RN3 / REQ-603 RN2 (Epic CRM Batch B) — Aprobado es terminal, sin ningún
                 botón de movimiento (ni "Mover a siguiente" — ya cubierto por STAGE_FLOW.approved
                 === null — ni "Marcar como Perdido", que sí se colaba para un usuario con permiso
-                de editar Aprobado, ej. Mark). */}
+                de editar Aprobado, ej. Gerencia). */}
             {card && canEdit && card.stage !== 'lost' && card.stage !== 'approved' && (
               <>
                 {/* RN5 (SCRUM-677/680): nunca un botón genérico de movimiento hacia Cotización —
