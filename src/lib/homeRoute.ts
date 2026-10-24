@@ -4,7 +4,7 @@ import type { UserInfo } from '@/types/auth'
 // (Lider Compras, role_key='lider_compras') no veía nada al entrar a AtlanticERP. Causa raíz: App.tsx tenía
 // una única `FALLBACK_ROUTE = '/ventas-diseno/home'` hardcodeada, usada tanto para el redirect
 // post-login como para el catch-all `*` y como destino de "acceso denegado" de
-// RequirePermission/RequireRole. Lider Compras solo tiene `role_module_visibility` para el módulo
+// RequirePermission/RequirePermission. Lider Compras solo tiene `role_module_visibility` para el módulo
 // `compras` (ver 2026_07_11_100001_create_auth_role_module_visibility_table.php en
 // atlanticerp-backend — comportamiento de backend correcto y deliberado, no un bug), así que al
 // aterrizar en `/ventas-diseno/home` el RequirePermission de esa ruta (permission

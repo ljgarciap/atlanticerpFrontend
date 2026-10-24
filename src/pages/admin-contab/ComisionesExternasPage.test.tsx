@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import ComisionesExternasPage from './ComisionesExternasPage'
 import { adminContabApi } from '@/api/adminContabApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type {
   CommissionExternalSummary, ArchitectCommissionRow, ArchitectCommissionProject, ArchitectOption,
 } from '@/types/adminContab'
@@ -50,6 +51,10 @@ vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
 
 const mockedApi   = vi.mocked(adminContabApi, true)
 const mockedStore = vi.mocked(useAuthStore)
+// `usePermission` lee con selector: el mock debe aplicarlo (devolver `{ user }` a secas lo rompe).
+function mockAuth(user: unknown) {
+  mockedStore.mockImplementation(((sel?: (s: unknown) => unknown) => (sel ? sel({ user }) : { user })) as never)
+}
 
 function makeSummary(overrides: Partial<CommissionExternalSummary> = {}): CommissionExternalSummary {
   const arquitectos = overrides.arquitectos ?? []
@@ -86,9 +91,11 @@ function makeArchitectRow(overrides: Partial<ArchitectCommissionRow> = {}): Arch
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
     id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'contabilidad@test.com',
-    role: 'lider_admin_contab', permissions: [],
+    role: 'lider_admin_contab',
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
+    // Fase 1b: permisos del rol REAL del seed + los de cada caso (el JWT real los une igual).
+    permissions: [...new Set([...permissionsForOrEmpty(overrides.role ?? 'lider_admin_contab'), ...(overrides.permissions ?? [])])],
   } as UserInfo
 }
 
@@ -114,7 +121,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary())
   mockedApi.commissionsExternal.architectOptions.mockResolvedValue([{ id: 1, nombre: 'Arq. Juan Pérez' } as ArchitectOption])
-  mockedStore.mockReturnValue({ user: makeUser() } as ReturnType<typeof useAuthStore>)
+  mockAuth(makeUser())
 })
 
 describe('ComisionesExternasPage — REQ-508 tarjetas', () => {
@@ -248,7 +255,7 @@ describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () =
   })
 
   it('lider_operaciones (SCRUM-1139, espeja a la asistente) ve el botón "Subir" cuenta de cobro', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_operaciones' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_operaciones' }))
     const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
     mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
     renderPage()
@@ -257,7 +264,7 @@ describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () =
   })
 
   it('Gerencia (management) NO ve ningún botón de subir/reemplazar cuenta de cobro', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
     mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
     renderPage()

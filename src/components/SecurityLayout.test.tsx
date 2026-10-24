@@ -49,7 +49,7 @@ beforeEach(() => {
 // reflejar el permiso real de su ruta en App.tsx, no el bucket de rol isSuperAdmin.
 describe('SecurityLayout — tabs reflejan el permiso real de cada ruta (SCRUM-713 Pre-QA)', () => {
   it('management sin security.levels ni superadmin.all solo ve Usuarios y Departamentos', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'management', permissions: ['security.users', 'settings.global'] }) })
+    useAuthStore.setState({ user: baseUser({ role: 'management', permissions: ['security.users', 'settings.global', 'platform.management'] }) })
     renderLayout()
 
     expect(screen.getByText('Usuarios')).toBeInTheDocument()

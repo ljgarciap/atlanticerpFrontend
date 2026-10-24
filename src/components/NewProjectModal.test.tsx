@@ -241,7 +241,7 @@ describe('NewProjectModal', () => {
 
   // SCRUM-849.4 — Gerencia puede asignar desde la creación.
   it('Gerencia puede asignar a varios vendedores al crear', async () => {
-    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management', permissions: ['platform.management'] } } as never)
     mockedApi.home.vendors.mockResolvedValue([
       { id: 1, name: 'Ana Diaz' }, { id: 2, name: 'Beto Solis' },
     ] as never)
@@ -261,7 +261,7 @@ describe('NewProjectModal', () => {
   })
 
   it('sin selección de asignados, Gerencia crea igual sin mandar assignee_ids', async () => {
-    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management', permissions: ['platform.management'] } } as never)
     renderModal()
 
     const [nameInput] = screen.getAllByRole('textbox')

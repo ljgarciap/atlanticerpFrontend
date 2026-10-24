@@ -316,7 +316,7 @@ describe('ReplenishmentPage (SCRUM-1184)', () => {
   })
 
   it('los pedidos afectados son enlace a Pedidos de venta para quien puede abrirlos y texto para el resto', async () => {
-    useAuthStore.setState({ user: { id: 2, role: 'lider_compras', permissions: [] } as never })
+    useAuthStore.setState({ user: { id: 2, role: 'lider_compras', permissions: ['ventas_diseno.orders.access'] } as never })
     const { unmount } = renderPage({ groups: [{ provider: ALFA, products: [product(1)] }], custom_items_count: 0, total_products: 1 })
     fireEvent.click(await screen.findByText('compras:replenishment.ordersCount:1'))
     const link = await screen.findByRole('link', { name: 'PED-1' })
@@ -331,7 +331,7 @@ describe('ReplenishmentPage (SCRUM-1184)', () => {
   })
 
   it('un pedido sin cotización con folio no tiene enlace aunque el rol pueda abrir Pedidos de venta', async () => {
-    useAuthStore.setState({ user: { id: 2, role: 'lider_compras', permissions: [] } as never })
+    useAuthStore.setState({ user: { id: 2, role: 'lider_compras', permissions: ['ventas_diseno.orders.access'] } as never })
     const p = product(1)
     renderPage({ groups: [{ provider: ALFA, products: [{ ...p, orders: [{ ...p.orders[0], quote_folio: null }] }] }], custom_items_count: 0, total_products: 1 })
     fireEvent.click(await screen.findByText('compras:replenishment.ordersCount:1'))

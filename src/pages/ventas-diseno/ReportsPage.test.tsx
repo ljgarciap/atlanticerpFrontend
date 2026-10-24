@@ -203,7 +203,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra el selector de alcance Equipo para Gerencia', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: [] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     renderPage()
     expect(await screen.findByText('ventasDiseno:scope.team')).toBeInTheDocument()
   })
@@ -232,7 +232,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra y abre el panel de Configuración con el permiso reports.configure', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.reports.configure'] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.reports.configure', 'platform.management'] })
     mockedApi.reports.goals.list.mockResolvedValue([])
     mockedApi.reports.settings.get.mockResolvedValue({
       low_sales_threshold: 20000, low_sales_months: 3, quote_probability_percent: 40, proposal_probability_percent: 70,
@@ -246,7 +246,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('guardar una Meta refresca el resumen de Reportes (regresión E2E)', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.reports.configure'] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.reports.configure', 'platform.management'] })
     mockedApi.reports.goals.list.mockResolvedValue([
       { user_id: 1, user_name: 'Designer Demo', goal_amount: null, goal_plus_amount: null },
     ])
@@ -313,7 +313,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra Top de vendedores en alcance Equipo', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: [] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
       scope: 'team',
       top_vendors: [{ user_id: 1, user_name: 'Designer Demo', total_current_month: 3000, low_sales_alert: true }],
@@ -335,7 +335,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra Forecast con Meta superada en verde', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: [] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
       scope: 'team',
       forecast: {
@@ -364,7 +364,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra la nota de que el Ponderado no alcanza para cubrir la meta', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: [] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
       scope: 'team',
       forecast: {
@@ -384,7 +384,7 @@ describe('VentasDisenoReportsPage', () => {
   })
 
   it('muestra la nota de que el Ponderado sí alcanza para cubrir la meta', async () => {
-    mockAuthState({ id: 1, role: 'management', permissions: [] })
+    mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
       scope: 'team',
       forecast: {

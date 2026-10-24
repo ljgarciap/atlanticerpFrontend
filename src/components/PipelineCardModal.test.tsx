@@ -862,7 +862,7 @@ describe('PipelineCardModal', () => {
   })
 
   it('Gerencia puede reasignar a varias personas y el resto queda como compartido_con', async () => {
-    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management', permissions: ['platform.management'] } } as never)
     mockedApi.home.vendors.mockResolvedValue([
       { id: 1, name: 'Ana Diaz' }, { id: 2, name: 'Beto Solis' }, { id: 3, name: 'Carla Ruiz' },
     ] as never)
@@ -885,7 +885,7 @@ describe('PipelineCardModal', () => {
   // lista `users` que recibe, así que Gerencia no aparecía ahí y no había forma de quitarlo, aunque
   // sí se podía con cualquier creador vendedor/diseñador (esos sí están en `teamVendors`).
   it('Gerencia puede quitarse a sí misma del campo Responsable cuando ella creó el proyecto (SCRUM-884)', async () => {
-    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management', permissions: ['platform.management'] } } as never)
     mockedApi.home.vendors.mockResolvedValue([
       { id: 1, name: 'Ana Diaz' }, { id: 2, name: 'Beto Solis' },
     ] as never)

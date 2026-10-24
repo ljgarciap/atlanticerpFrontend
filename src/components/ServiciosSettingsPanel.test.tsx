@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import ServiciosSettingsPanel from './ServiciosSettingsPanel'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { ServiciosSetting } from '@/types/servicios'
 import type { UserInfo } from '@/types/auth'
 
@@ -36,8 +37,10 @@ const mockedApi = vi.mocked(serviciosApi, true)
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
     id: 1, first_name: 'Lider Servicios', last_name: 'Leis', email: 'liderservicios@test.com',
-    role: 'superadmin', permissions: ['servicios.read'], modules: {},
+    role: 'superadmin', modules: {},
     ...overrides,
+    // Fase 1b: permisos del rol REAL del seed + los de cada caso (el JWT real los une igual).
+    permissions: [...new Set([...permissionsForOrEmpty(overrides.role ?? 'superadmin'), ...(overrides.permissions ?? ['servicios.read'])])],
   }
 }
 

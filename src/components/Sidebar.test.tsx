@@ -3,6 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import { useUnsavedQuoteGuard } from '@/store/unsavedQuoteGuard'
 import type { UserInfo, ModulePermissions } from '@/types/auth'
 
@@ -68,12 +69,21 @@ function noModule(overrides: Partial<ModulePermissions> = {}): ModulePermissions
   return { view: false, view_team: false, edit: false, approve: false, ...overrides }
 }
 
+// Fase 1b: el menú se decide por permiso. Los permisos del rol REAL del seed (fixture volcado del backend) se mezclan
+// con los individuales de cada caso, igual que el JWT real (nivel de seguridad + extra_permissions).
 function baseUser(overrides: Partial<UserInfo> = {}): UserInfo {
+  const role = overrides.role ?? 'designer'
   return {
     id: 1, first_name: 'Test', last_name: 'User', email: 't@t.com',
-    role: 'designer', permissions: [], modules: {},
+    role, modules: {},
     ...overrides,
+    permissions: [...new Set([...permissionsForOrEmpty(role), ...(overrides.permissions ?? [])])],
   }
+}
+
+// Para los casos «sin el permiso X»: SOLO los permisos que pasa el caso, sin los del rol del seed (que ya podrían traer X).
+function exactUser(overrides: Partial<UserInfo> = {}): UserInfo {
+  return { ...baseUser(overrides), permissions: overrides.permissions ?? [] }
 }
 
 function LocationProbe() {
@@ -218,7 +228,9 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     })
 
     it('no aparece sin el permiso, aunque tenga acceso completo a Admin&Cont', () => {
-      abrirConfiguracion({ role: 'lider_admin_contab', permissions: [] })
+      useAuthStore.setState({ user: exactUser({ role: 'lider_admin_contab', permissions: ['admin_contab.records.manage'], modules: { admin_contab: noModule({ view: true }) } }) })
+      renderSidebar()
+      fireEvent.click(screen.getAllByText('Configuración')[0])
       expect(screen.queryByText('Datos fiscales de clientes')).not.toBeInTheDocument()
     })
 
@@ -549,7 +561,7 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   // Corrige un hallazgo de un segundo pase de Pre-QA (2026-07-31): el primer fix gateaba
   // Dashboard CRM solo a 'management', dejando afuera a superadmin — a diferencia del resto de
   // la app (RequirePermission trata superadmin.all como comodín; /security/departments ya usa
-  // roles={['superadmin','management']} con el mismo RequireRole que ahora usa /crm/dashboard).
+  // roles={['superadmin','management']} con el mismo RequirePermission que ahora usa /crm/dashboard).
   it('también muestra "Dashboard CRM" para superadmin (mismo bypass que el resto de la app)', () => {
     useAuthStore.setState({ user: baseUser({ role: 'superadmin', permissions: ['superadmin.all'], modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
@@ -585,7 +597,7 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   })
 
   it('NO muestra "Pedidos" para Líder Admin (lider_admin_contab)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    useAuthStore.setState({ user: exactUser({ role: 'lider_admin_contab', modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
     // Se abre el grupo para que la ausencia de "Pedidos" sea por permiso, no por colapso.
     fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
@@ -1087,7 +1099,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
   })
 
   it('sin compras.sustitutos.manage no ve Comparación de Referencias (su ruta lo rebotaría)', () => {
-    useAuthStore.setState({ user: baseUser({
+    useAuthStore.setState({ user: exactUser({
       role: 'lider_operaciones', permissions: ['compras.limited.view'], modules: { compras: noModule({ view: false }) },
     }) })
     renderSidebar()
@@ -1111,7 +1123,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
   })
 
   it('sin compras.limited.view y sin el módulo no aparece ningún menú de Compras de consulta', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'lider_operaciones', permissions: ['admin_contab.view'], modules: { admin_contab: noModule({ view: true }) } }) })
+    useAuthStore.setState({ user: exactUser({ role: 'lider_operaciones', permissions: ['admin_contab.view'], modules: { admin_contab: noModule({ view: true }) } }) })
     renderSidebar()
 
     expect(visible('Compras · Inventario')).toBe(false)
@@ -1186,7 +1198,7 @@ describe('Sidebar — Empresa y Fiscal solo para Gerencia y superadmin (SCRUM-11
 // Bodega; solo dos permisos angostos de consulta. Su menú: Inventario + Comparación de Referencias
 // (como antes de 1013) + Órdenes → Logística y Envío, y Bodega → Bodegas. Nunca el menú completo.
 describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 rebote, SCRUM-1021)', () => {
-  const vendedor = (permissions: string[]) => baseUser({
+  const vendedor = (permissions: string[]) => exactUser({
     role: 'vendedor_disenador', permissions: ['ventas_diseno.read', 'ventas_diseno.edit', ...permissions],
     modules: { ventas_diseno: noModule({ view: true }) },
   })
@@ -1254,7 +1266,7 @@ describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 reb
 
 describe('Sidebar — Contabilidad: Pipeline solo lectura (SCRUM-1128)', () => {
   it('con ventas_diseno.pipeline.read_all ve únicamente el ítem Pipeline de CRM, nada más del módulo', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} }) })
+    useAuthStore.setState({ user: exactUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('CRM')[0])
     expect(screen.getAllByText('Pipeline').length).toBeGreaterThan(0)
@@ -1266,7 +1278,7 @@ describe('Sidebar — Contabilidad: Pipeline solo lectura (SCRUM-1128)', () => {
 
   // SCRUM-1139 — Contabilidad edita el Pipeline con `pipeline.edit`, pero el Sidebar sigue mostrándole solo ese ítem.
   it('con read_all + pipeline.edit ve únicamente el ítem Pipeline de CRM, sin ítems de otros módulos', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} }) })
+    useAuthStore.setState({ user: exactUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('CRM')[0])
     expect(screen.getAllByText('Pipeline').length).toBeGreaterThan(0)
