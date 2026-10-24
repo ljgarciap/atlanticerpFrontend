@@ -461,7 +461,8 @@ test.describe('SCRUM-477 — Ver guía de entrega original: mismos productos/can
     const list = await apiGet(token, '/api/bodega/returns')
     const anyId = list.data[0]?.id
     expect(anyId).toBeTruthy()
-    const guide = await apiGet(token, `/api/bodega/returns/${anyId}/delivery-guide`)
+    // SCRUM-1180: la guía se genera con POST sin cuerpo (antes GET).
+    const guide = await apiPost(token, `/api/bodega/returns/${anyId}/delivery-guide`, undefined)
     expect(guide.url).toBeTruthy()
   })
 })

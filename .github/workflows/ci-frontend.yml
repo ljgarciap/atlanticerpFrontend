@@ -1,13 +1,24 @@
 # =============================================================================
 # AtlanticERP Frontend — CI/CD
 #
-# CI:  TypeScript check (tsc) + Vite build + Vitest.
-#      Corre en todo push y en toda PR a cualquier rama.
+# Rediseño 2026-10-03 (ADR-009, atlanticerp/docs/adr/009-gate-local-con-recibo.md): el plan Free de la
+# organización incluye 2.000 min/mes de Actions y se agotaron en agosto y septiembre; además el MISMO
+# commit corría sus tests tres veces (dev, test, master). Ahora:
 #
-# CD:  rsync de dist/ al EC2 correspondiente vía SSH.
-#      dev    → EC2_DEV_HOST  (dev.atlanticerp.ai)   — solo en push a `dev`
-#      test   → EC2_TEST_HOST (test.atlanticerp.ai)  — solo en push a `test`
-#      master → EC2_PROD_HOST (atlanticerp.ai)        — solo en push a `master`
+# Gate: tsc + build + Vitest completo se corren UNA vez en local con `infra/gate.sh`, que deja un recibo
+#       por SHA; el hook .githooks/pre-push lo exige para empujar a dev/test/master.
+#
+# Build: tsc + Vite build — SIEMPRE (produce el dist/ que se despliega; ~1 min).
+# Tests: Vitest + coverage — SOLO en `master` (última barrera antes de producción), `hotfix/**`, PRs a
+#        master y a pedido (workflow_dispatch). No corre en `dev` ni `test`, ni si el push solo toca
+#        docs/ o archivos .md.
+#
+# CD:  rsync de dist/ al EC2 correspondiente vía SSH (el deploy en sí tarda ~15 s).
+#      dev    → EC2_DEV_HOST  (dev.atlanticerp.ai)   — push a `dev`, tras el build, SIN tests
+#      test   → EC2_TEST_HOST (test.atlanticerp.ai)  — push a `test`, tras el build, SIN tests
+#      master → EC2_PROD_HOST (atlanticerp.ai)        — push a `master`, tras el build Y los tests
+#      Cada deploy termina verificando que el sitio responda.
+#      Si Actions no tiene minutos: infra/deploy-manual.sh <dev|test|prod> (reutiliza el recibo del gate).
 #
 # Secrets requeridos (GitHub → Settings → Secrets and variables → Actions):
 #   EC2_DEV_HOST    — IP del EC2 de dev   (dev.atlanticerp.ai)
@@ -27,29 +38,38 @@ name: CI/CD Frontend
 on:
   push:
     branches:
-      - '**'
+      - dev
+      - test
+      - master
+      - 'hotfix/**'
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.gitignore'
   pull_request:
     branches:
-      - '**'
+      - master
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.gitignore'
+  workflow_dispatch:
 
-concurrency:
-  group: frontend-${{ github.ref }}
-  cancel-in-progress: true
+# OJO: NO hay `concurrency` a nivel de workflow. Con cancel-in-progress un segundo push cancelaría un
+# deploy en curso a medias (rsync --delete a medio copiar). La concurrencia vive en cada job: build y
+# tests se cancelan al llegar un push nuevo; los deploys se encolan y nunca se cancelan.
 
 jobs:
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 1 — CI: Vitest + Vite build (tsc incluido en el build)
+  # JOB 1 — Build: tsc + Vite build (SIEMPRE: produce el dist/ que despliegan los jobs de CD)
   # ─────────────────────────────────────────────────────────────────────────────
-  ci:
-    name: CI — Build + Tests
+  build:
+    name: CI — Build
     runs-on: ubuntu-22.04
-    # El runner corre en UTC por defecto; varios tests asumen hora local
-    # (ej. ArqueoCajaPage). America/Bogota = UTC-5 fijo (sin DST) — mismo
-    # offset que usaba binax con America/Panama. Ajustar si AtlanticERP
-    # termina operando en otra zona horaria.
-    env:
-      TZ: America/Bogota
+    concurrency:
+      group: frontend-build-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout código
@@ -67,26 +87,6 @@ jobs:
       - name: Instalar dependencias npm
         run: npm ci
 
-      # Vitest corre ANTES del build para detectar fallos de lógica primero.
-      # Si no existen tests todavía, Vitest sale con código 0 (no falla el CI).
-      # --coverage: solo visibilidad por ahora (sin thresholds), fase 1 del
-      # tracking de coverage, ver SCRUM-50. El umbral se fija cuando haya un
-      # número base real.
-      - name: Vitest (tests unitarios + coverage)
-        run: npm run test:coverage
-
-      - name: Subir reporte de coverage como artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-coverage
-          path: coverage/
-          retention-days: 14
-
-      # "npm run build" ejecuta "tsc && vite build" (ver package.json).
-      # tsc valida tipos TypeScript; vite build produce dist/ con los estáticos
-      # optimizados. Si tsc falla, el build falla aquí antes del rsync.
-      # El plugin versionJson escribe dist/version.json con { ts: <epoch> }
-      # para que useDevLiveReload detecte nuevos deploys y recargue el navegador.
       - name: Build Vite (tsc + bundle)
         run: npm run build
 
@@ -112,9 +112,87 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # JOB 2 — CD dev: rsync a dev.atlanticerp.ai (solo en push a `dev`)
   # ─────────────────────────────────────────────────────────────────────────────
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Tests: Vitest + coverage (SOLO master, hotfix, PRs y ejecución manual)
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: CI — Tests
+    runs-on: ubuntu-22.04
+    if: >-
+      github.ref == 'refs/heads/master'
+      || startsWith(github.ref, 'refs/heads/hotfix/')
+      || github.event_name == 'pull_request'
+      || github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: frontend-test-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Node 20 LTS: soportado por Vite 5, Vitest 1.x y disponible en las AMIs
+      # Ubuntu 22.04 de los EC2. `cache: 'npm'` acelera instalaciones posteriores.
+      - name: Configurar Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # --frozen-lockfile garantiza reproducibilidad exacta del package-lock.json.
+      - name: Instalar dependencias npm
+        run: npm ci
+
+      # SCRUM-962 — auditoría de dependencias: solo reporte (resumen en la pestaña del run), nunca falla el CI.
+      - name: Auditoría de dependencias (informativa)
+        continue-on-error: true
+        run: infra/audit.sh
+
+      # SCRUM-963 — SAST con Semgrep (imagen fijada, reglas propias en infra/semgrep): solo reporte, nunca falla el CI.
+      - name: SAST — Semgrep (informativo)
+        continue-on-error: true
+        run: infra/sast.sh
+
+      # Vitest corre ANTES del build para detectar fallos de lógica primero.
+      # Si no existen tests todavía, Vitest sale con código 0 (no falla el CI).
+      # --coverage: solo visibilidad por ahora (sin thresholds), fase 1 del
+      # tracking de coverage, ver SCRUM-50. El umbral se fija cuando haya un
+      # número base real.
+      #
+      # TZ=America/Bogota (en binax: America/Panama, mismo offset; agregado 2026-09-01) — encontrado bloqueando el deploy de
+      # SCRUM-712/819: varios fixtures usan timestamps ISO con offset explícito
+      # (ej. "2026-07-02T14:05:00-05:00") y el componente los formatea con la hora LOCAL del
+      # runtime — en las máquinas de desarrollo (Panamá, -05:00) da el resultado esperado, pero
+      # el runner de GitHub Actions corre en UTC por default, así que la misma hora se ve
+      # desplazada 5 horas y el texto esperado no aparece. Confirmado en vivo (TZ=UTC localmente
+      # reproduce el fallo exacto) que es 1 solo test hoy — fijar el TZ acá es más robusto que ir
+      # parcheando cada test de fecha/hora uno por uno a medida que aparecen (ya había pasado una
+      # vez antes, ver commit 6d3c923, con una causa distinta pero el mismo síntoma de fondo).
+      - name: Vitest (tests unitarios + coverage)
+        env:
+          TZ: America/Bogota  # UTC-5 fijo, igual que Panamá; ajustar si AtlanticERP opera en otra zona horaria
+        run: npm run test:coverage
+
+      - name: Subir reporte de coverage como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage/
+          retention-days: 14
+
+      # "npm run build" ejecuta "tsc && vite build" (ver package.json).
+      # tsc valida tipos TypeScript; vite build produce dist/ con los estáticos
+      # optimizados. Si tsc falla, el build falla aquí antes del rsync.
+      # El plugin versionJson escribe dist/version.json con { ts: <epoch> }
+      # para que useDevLiveReload detecte nuevos deploys y recargue el navegador.
+
   deploy-dev:
     name: CD — Deploy dev.atlanticerp.ai
-    needs: ci
+    needs: build
+    concurrency:
+      group: frontend-deploy-dev
+      cancel-in-progress: false
     runs-on: ubuntu-22.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     environment:
@@ -159,6 +237,17 @@ jobs:
               "docker compose -f /var/www/backend/infra/docker-compose.qa.yml \
                exec -T nginx nginx -s reload"
 
+      - name: Verificar que el sitio responde
+        run: |
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://dev.atlanticerp.ai/" || true)
+            echo "intento $i: https://dev.atlanticerp.ai/ = $CODE (se espera 200)"
+            if [ "$CODE" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "ERROR: dev.atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          exit 1
+
       - name: Limpiar clave SSH
         if: always()
         run: rm -f ~/.ssh/deploy_key
@@ -168,7 +257,10 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy-test:
     name: CD — Deploy test.atlanticerp.ai
-    needs: ci
+    needs: build
+    concurrency:
+      group: frontend-deploy-test
+      cancel-in-progress: false
     runs-on: ubuntu-22.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/test'
     environment:
@@ -207,6 +299,17 @@ jobs:
               "docker compose -f /var/www/backend/infra/docker-compose.qa.yml \
                exec -T nginx nginx -s reload"
 
+      - name: Verificar que el sitio responde
+        run: |
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://test.atlanticerp.ai/" || true)
+            echo "intento $i: https://test.atlanticerp.ai/ = $CODE (se espera 200)"
+            if [ "$CODE" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "ERROR: test.atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          exit 1
+
       - name: Limpiar clave SSH
         if: always()
         run: rm -f ~/.ssh/deploy_key
@@ -218,7 +321,10 @@ jobs:
   # en GitHub con "Required reviewers: Luis" para exigir aprobación manual.
   deploy-prod:
     name: CD — Deploy atlanticerp.ai (PRODUCCIÓN)
-    needs: ci
+    needs: [build, test]
+    concurrency:
+      group: frontend-deploy-prod
+      cancel-in-progress: false
     runs-on: ubuntu-22.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
@@ -257,6 +363,17 @@ jobs:
               ubuntu@"${{ secrets.EC2_PROD_HOST }}" \
               "docker compose -f /var/www/backend/infra/docker-compose.prod.yml \
                exec -T nginx nginx -s reload"
+
+      - name: Verificar que el sitio responde
+        run: |
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://atlanticerp.ai/" || true)
+            echo "intento $i: https://atlanticerp.ai/ = $CODE (se espera 200)"
+            if [ "$CODE" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "ERROR: atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          exit 1
 
       - name: Limpiar clave SSH
         if: always()

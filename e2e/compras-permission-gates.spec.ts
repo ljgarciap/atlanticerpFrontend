@@ -13,6 +13,14 @@ import { test, expect, type Page } from '@playwright/test'
 //   creado desde la UI quedaba "internacional" para siempre. Corregido en el mismo día
 //   (commit a9b9da3 / a618e1b en frontend). Este test evita que el selector desaparezca nunca
 //   más sin que se note.
+//   Actualizado 2026-09-09 (hallazgo de gate, no relacionado al batch que lo encontró) — el
+//   selector de `origin` dejado de existir como campo propio desde SCRUM-189 (2026-07-30,
+//   `ProviderFormDrawer.tsx`): `origin` ahora se DERIVA de `category` (`locales` → local,
+//   cualquier otra → internacional). El test seguía apuntando al campo viejo (nunca actualizado
+//   tras SCRUM-189) — timeouteaba porque `.filter({ hasText })` sobre `select` matcheaba por
+//   accidente el `<select name="category">` (la opción "locales" contiene el substring "local"),
+//   y ese select no tiene ninguna opción con value literal "local"/"internacional". Reescrito
+//   para ejercitar el mecanismo real vigente.
 
 async function login(page: Page, email: string, password: string) {
   await page.goto('/')
@@ -30,15 +38,15 @@ test('un rol sin acceso a Compras (vendedor_disenador) no ve el módulo en el si
   await expect(page.getByRole('table')).toHaveCount(0, { timeout: 5000 })
 })
 
-test('el formulario de Proveedores tiene un selector de Origen (local/internacional) — B2, Senior Review 2026-07-16', async ({ page }) => {
+test('el formulario de Proveedores tiene un selector de Categoría que determina el origen (local/internacional) — B2, Senior Review 2026-07-16 / SCRUM-189', async ({ page }) => {
   await login(page, 'lidercompras@test.com', 'lidercompras@test.com')
   await page.goto('/compras/proveedores')
   await page.getByRole('button', { name: /agregar proveedor/i }).click()
 
-  const originSelect = page.locator('select').filter({ hasText: /internacional|local/i }).first()
-  await expect(originSelect).toBeVisible({ timeout: 5000 })
-  await originSelect.selectOption('local')
-  await expect(originSelect).toHaveValue('local')
-  await originSelect.selectOption('internacional')
-  await expect(originSelect).toHaveValue('internacional')
+  const categorySelect = page.locator('select[name="category"]')
+  await expect(categorySelect).toBeVisible({ timeout: 5000 })
+  await categorySelect.selectOption('locales')
+  await expect(categorySelect).toHaveValue('locales')
+  await categorySelect.selectOption('china')
+  await expect(categorySelect).toHaveValue('china')
 })

@@ -7,16 +7,19 @@
 # .github/workflows/*.yml — build local (mismo "npm ci && npm run build" que CI),
 # rsync de dist/ al mismo destino, mismo reload de nginx.
 #
-# A diferencia del CD real, este script corre vitest+tsc localmente ANTES de tocar
-# el servidor (mismo gate que el job "ci" de GHA) — nunca saltea la verificación
-# solo porque Actions esté caído.
+# Antes de tocar el servidor exige el gate local (infra/gate.sh: tsc + build + Vitest completo, ADR-009).
+# Si el commit ya tiene recibo verde (lo normal: se corrió antes del push) NO lo repite. Nunca se
+# saltea la verificación: sin recibo, la corre. El dist/ se reconstruye siempre antes de subirlo.
 #
-# Uso: infra/deploy-manual.sh <dev|test|prod>
+# Uso: infra/deploy-manual.sh <dev|test|prod> [--force-gate]
+#   --force-gate   vuelve a correr el gate aunque ya haya recibo verde para este commit
 set -euo pipefail
 
 ENV="${1:-}"
+GATE_ARGS=()
+[[ "${2:-}" == "--force-gate" ]] && GATE_ARGS=(--force)
 if [[ "$ENV" != "dev" && "$ENV" != "test" && "$ENV" != "prod" ]]; then
-  echo "Uso: $0 <dev|test|prod>" >&2
+  echo "Uso: $0 <dev|test|prod> [--force-gate]" >&2
   exit 1
 fi
 
@@ -38,9 +41,8 @@ if [[ "$LOCAL_SHA" != "$REMOTE_SHA" ]]; then
   exit 1
 fi
 
-echo "==> [local] tsc + vitest (mismo gate que el job CI de GitHub Actions)"
-npx tsc --noEmit
-npx vitest run
+echo "==> [local] gate (infra/gate.sh) — reutiliza el recibo verde de este commit si ya existe"
+./infra/gate.sh ${GATE_ARGS[@]+"${GATE_ARGS[@]}"}
 
 echo "==> [local] npm run build (mismo build que CI)"
 npm run build

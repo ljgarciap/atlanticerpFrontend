@@ -1,0 +1,46 @@
+# Reglas propias de AtlanticERP para Semgrep (SCRUM-963) — familia `xss-sinks` (frontend). Prueba al lado (xss-sinks.tsx):
+#   docker run --rm -v "$PWD":/src semgrep/semgrep:1.178.0 semgrep --test /src/infra/semgrep/rules
+# Un par YAML/prueba por familia a propósito: Semgrep evalúa cada regla de un YAML contra TODO su archivo de prueba.
+# WARNING = sumidero de XSS con valor no constante; INFO = inventario con contador en baseline-counts.json.
+rules:
+  - id: atlanticerp-dangerous-html
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      `dangerouslySetInnerHTML` / `innerHTML` / `document.write` con un valor que no es constante: si algún tramo viene del usuario
+      o de la API es XSS. Sanear con DOMPurify antes, o no usar HTML crudo. Si ya está saneado, `// nosemgrep: atlanticerp-dangerous-html — <cómo>`.
+    metadata:
+      category: security
+      cwe: "CWE-79: Cross-site Scripting"
+      owner: cybersecurity
+    patterns:
+      - pattern-either:
+          - pattern: '<$EL ... dangerouslySetInnerHTML={{ __html: $X }} ... />'
+          - pattern: $E.innerHTML = $X
+          - pattern: $E.outerHTML = $X
+          - pattern: document.write($X)
+      - metavariable-pattern:
+          metavariable: $X
+          patterns:
+            - pattern-not: '"..."'
+            - pattern-not: '`...`'
+            - pattern-not: DOMPurify.sanitize(...)
+
+  - id: atlanticerp-persisted-token
+    languages: [typescript]
+    severity: INFO
+    message: >-
+      INVENTARIO: un token (`token`/`secret`/`jwt`/`password` en el nombre) se guarda en `localStorage`/`sessionStorage`. Un XSS lo lee.
+      Hoy el refresh token vive en el store persistido de `authStore.ts` (hallazgo A-08 del threat model de Auth, riesgo aceptado
+      mientras haya CSP). Si el contador sube, revisar el sitio nuevo.
+    metadata:
+      category: security
+      cwe: "CWE-922: Insecure Storage of Sensitive Information"
+      owner: cybersecurity
+    patterns:
+      - pattern-either:
+          - pattern: localStorage.setItem($K, ...)
+          - pattern: sessionStorage.setItem($K, ...)
+      - metavariable-regex:
+          metavariable: $K
+          regex: '(?i).*(token|secret|jwt|password).*'   # metavariable-regex ANCLA al inicio: sin el `.*` inicial solo casa si la clave empieza así

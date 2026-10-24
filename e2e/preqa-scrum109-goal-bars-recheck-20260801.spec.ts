@@ -36,7 +36,9 @@ test('1. Neil (con Meta, $0 vendido) — barras + labels $ visibles, mes en curs
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-neil-meta-configurada.png', fullPage: true })
 
   await expect(page.getByText(/sin meta configurada/i)).toHaveCount(0)
-  await expect(page.getByText(/mes en curso \(parcial\)/i)).toBeVisible()
+  // SCRUM-836 (2026-09-03) — el footnote "Mes en curso (parcial)" se reemplazó por un chip de
+  // leyenda junto a Meta/Alcanzado (mismo mockup de Daniela); el texto se acortó a "Mes en curso".
+  await expect(page.getByText(/mes en curso/i)).toBeVisible()
 })
 
 test('2. Annie (SIN Meta configurada) — resto del grafico sigue funcionando', async ({ page }) => {
@@ -47,7 +49,9 @@ test('2. Annie (SIN Meta configurada) — resto del grafico sigue funcionando', 
   await expect(page.getByText(/sin meta configurada/i)).toBeVisible()
   // El resto del panel (barras de Vendido + mes en curso) no debe romperse solo porque
   // falta el dataset de Meta.
-  await expect(page.getByText(/mes en curso \(parcial\)/i)).toBeVisible()
+  // SCRUM-836 (2026-09-03) — el footnote "Mes en curso (parcial)" se reemplazó por un chip de
+  // leyenda junto a Meta/Alcanzado (mismo mockup de Daniela); el texto se acortó a "Mes en curso".
+  await expect(page.getByText(/mes en curso/i)).toBeVisible()
   const canvas = page.locator('canvas').first()
   await expect(canvas).toBeVisible()
 })

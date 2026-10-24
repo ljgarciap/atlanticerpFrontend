@@ -1,0 +1,40 @@
+# Reglas propias de AtlanticERP para Semgrep (SCRUM-963) — familia `navigation` (frontend). Prueba al lado (navigation.tsx).
+# INFO = inventario con contador en baseline-counts.json; `infra/sast.sh` avisa si sube.
+rules:
+  - id: atlanticerp-window-open-dynamic
+    languages: [typescript]
+    severity: INFO
+    message: >-
+      INVENTARIO: `window.open` con una URL que no es constante y sin `noopener`. Si la URL puede venir de la API o del usuario, validar
+      que sea https y del host esperado (open redirect / `javascript:`), y pasar `'noopener,noreferrer'` como tercer argumento.
+    metadata:
+      category: security
+      cwe: "CWE-601: URL Redirection to Untrusted Site"
+      owner: cybersecurity
+    patterns:
+      - pattern: window.open($URL, ...)
+      - pattern-not:
+          patterns:
+            - pattern: window.open($URL, $T, $F)
+            - metavariable-regex:
+                metavariable: $F
+                regex: '.*noopener.*'
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not: '"..."'
+            - pattern-not: '`...`'
+
+  - id: atlanticerp-target-blank-no-rel
+    languages: [typescript]
+    severity: INFO
+    message: >-
+      INVENTARIO: enlace con `target="_blank"` sin `rel="noopener noreferrer"`. Los navegadores modernos ya aplican `noopener` por
+      defecto, pero explicitarlo protege a los antiguos y evita enviar el `Referer` con rutas internas.
+    metadata:
+      category: security
+      cwe: "CWE-1022: Use of Web Link to Untrusted Target with window.opener Access"
+      owner: cybersecurity
+    patterns:
+      - pattern: <$A ... target="_blank" ... />
+      - pattern-not: <$A ... rel="..." ... />
