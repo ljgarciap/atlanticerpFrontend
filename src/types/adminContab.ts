@@ -61,6 +61,8 @@ export interface FraudSettings {
   fraude_aprobaciones_repetidas_n: number
   /** Ventana en minutos para contar aprobaciones repetidas (default 10). */
   fraude_aprobaciones_repetidas_minutos: number
+  /** Días de antigüedad (estrictamente mayores) a partir de los que una comisión pendiente genera alerta en Inicio (default 10). */
+  comision_pendiente_dias: number
 }
 
 export interface FiscalSettings {

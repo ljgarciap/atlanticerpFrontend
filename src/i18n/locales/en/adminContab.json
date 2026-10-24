@@ -1753,6 +1753,10 @@
       "fraudeAprobacionesRepetidasMinutos": {
         "label": "Repeated approvals window (minutes)",
         "help": "Time window in which repeated approvals from the same user are counted."
+      },
+      "comisionPendienteDias": {
+        "label": "Days before a pending commission raises an alert",
+        "help": "A commission that has been unpaid for more than this many days appears as an alert on the Admin&Cont home screen."
       }
     },
     "validation": {

@@ -1804,6 +1804,10 @@
       "fraudeAprobacionesRepetidasMinutos": {
         "label": "Ventana de aprobaciones repetidas (minutos)",
         "help": "Ventana de tiempo en la que se cuentan las aprobaciones repetidas del mismo usuario."
+      },
+      "comisionPendienteDias": {
+        "label": "Días para alertar una comisión pendiente",
+        "help": "Una comisión sin pagar con más de esta cantidad de días de antigüedad aparece como alerta en la pantalla de Inicio de Admin&Cont."
       }
     },
     "validation": {

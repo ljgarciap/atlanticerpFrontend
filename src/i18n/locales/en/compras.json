@@ -659,7 +659,8 @@
     "similarityMinThreshold": "Minimum threshold to show a candidate",
     "similarityWeightsSumWarning": "Text, price and margin weights should add up to 100 (current sum: {{sum}}).",
     "invalid": "Enter a number between 0 and 100.",
-    "saveError": "Could not save the setting. Try again."
+    "saveError": "Could not save the setting. Try again.",
+    "criticalDaysPorAprobar": "\"Pending approval\" days before an order is critical"
   },
   "inventory": {
     "providersPicker": {

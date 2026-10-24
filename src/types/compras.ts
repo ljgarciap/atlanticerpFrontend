@@ -545,6 +545,8 @@ export interface ComprasSettings {
   primary_approver_user_id: number | null
   // SCRUM-257 (REQ-194) — días "En revisión" antes de marcar un reclamo con la bandera de atención.
   claim_attention_days: number
+  /** REQ-139 RN2 — días «Por aprobar» a partir de los cuales una orden es crítica (default 3). */
+  critical_days_por_aprobar: number
   // SCRUM-247 (REQ-184) — margen del sustituto propuesto por debajo del cual la solicitud escala a Mark.
   replacement_margin_threshold: number
   // Lote 4 (SCRUM-246) — pesos de la fórmula de "% de similitud" de "Buscar en catálogo"

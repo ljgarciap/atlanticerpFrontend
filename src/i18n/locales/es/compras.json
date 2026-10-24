@@ -659,7 +659,8 @@
     "similarityMinThreshold": "Umbral mínimo para mostrar candidato",
     "similarityWeightsSumWarning": "Los pesos de texto, precio y margen deberían sumar 100 (suma actual: {{sum}}).",
     "invalid": "Ingresa un número entre 0 y 100.",
-    "saveError": "No se pudo guardar el ajuste. Intentá de nuevo."
+    "saveError": "No se pudo guardar el ajuste. Intentá de nuevo.",
+    "criticalDaysPorAprobar": "Días «Por aprobar» para considerar crítica una orden"
   },
   "inventory": {
     "providersPicker": {

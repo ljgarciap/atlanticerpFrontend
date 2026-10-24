@@ -27,6 +27,8 @@ const mockedApi = vi.mocked(projectsApi, true)
 function makeSettings(overrides: Partial<CrmSettings> = {}): CrmSettings {
   return {
     entrega_proxima_dias: 3, freshness_recent_dias: 7, freshness_stale_dias: 21,
+    // Fase 1 — valores distintos a propósito (`getByDisplayValue`).
+    pipeline_estancado_dias: 16, cliente_contacto_obsoleto_dias: 61,
     // SCRUM-998 — valores distintos de los de arriba a propósito (`getByDisplayValue` no puede repetir un valor).
     catalog_pdf_max_single_products: 500, catalog_pdf_max_single_photos: 200, catalog_pdf_volume_size: 250, catalog_pdf_export_retention_days: 14,
     ...overrides,
@@ -76,6 +78,7 @@ describe('CrmSettingsPanel', () => {
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
       entrega_proxima_dias: 10, freshness_recent_dias: 7, freshness_stale_dias: 21,
+      pipeline_estancado_dias: 16, cliente_contacto_obsoleto_dias: 61,
       catalog_pdf_max_single_products: 500, catalog_pdf_max_single_photos: 200, catalog_pdf_volume_size: 250, catalog_pdf_export_retention_days: 14,
     }))
   })
@@ -97,6 +100,7 @@ describe('CrmSettingsPanel', () => {
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
       entrega_proxima_dias: 3, freshness_recent_dias: 7, freshness_stale_dias: 21,
+      pipeline_estancado_dias: 16, cliente_contacto_obsoleto_dias: 61,
       catalog_pdf_max_single_products: 800, catalog_pdf_max_single_photos: 200, catalog_pdf_volume_size: 250, catalog_pdf_export_retention_days: 14,
     }))
   })
