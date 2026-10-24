@@ -6,7 +6,7 @@ import QuotePage from './QuotePage'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
 import { useUnsavedQuoteGuard } from '@/store/unsavedQuoteGuard'
-import type { QuoteDetail } from '@/types/ventasDiseno'
+import type { QuoteDetail, QuoteCreateResult } from '@/types/ventasDiseno'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -19,6 +19,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
     quotes: {
+      associates: { add: vi.fn(), remove: vi.fn() },
       create: vi.fn(),
       get:    vi.fn(),
       update: vi.fn(),
@@ -35,8 +36,11 @@ vi.mock('@/api/ventasDisenoApi', () => ({
     },
     masterClients:  { list: vi.fn(), create: vi.fn() },
     subClients:     { list: vi.fn(), create: vi.fn(), contacts: { list: vi.fn(), create: vi.fn() } },
+    // SCRUM-873 — CreateClientModal (no mockeado, se renderiza real desde
+    // QuotePage) llama a clients.create/addSubClient al confirmar el mini-form.
+    clients:        { create: vi.fn(), addSubClient: vi.fn() },
     salesProjects:  { list: vi.fn(), create: vi.fn() },
-    architects:     { list: vi.fn(), create: vi.fn(), update: vi.fn() },
+    architects:     { list: vi.fn(), search: vi.fn(), create: vi.fn(), update: vi.fn() },
     pricingSettings: { get: vi.fn(), update: vi.fn() },
     quoteConditionsSettings: { get: vi.fn(), update: vi.fn() },
   },
@@ -70,11 +74,19 @@ function emptyQuote(overrides: Partial<QuoteDetail> = {}): QuoteDetail {
     parts: [], subtotal: 0,
     observations: null, includes_installation: false,
     discount_totals_type: 'percent', discount_totals_value: 0, discount_totals_amount: 0,
-    net_total: 0, itbms: 0, grand_total: 0,
+    net_total: 0, itbms: 0, itbms_exento: false, itbms_percentage: 7, grand_total: 0,
     conditions_text: 'Texto de condiciones', observations_preview: '',
     created_at: '2026-07-08T00:00:00Z',
     ...overrides,
   }
+}
+
+// SCRUM-912 (Senior Review) — quotes.create() ahora devuelve QuoteCreateResult, no QuoteDetail
+// directo: {persisted: false} cuando el payload no tenía ningún dato real, o
+// {persisted: true, ...QuoteDetail} cuando sí persistió. Los tests que simulan una creación
+// exitosa usan este helper en vez de emptyQuote() a secas.
+function persistedQuote(overrides: Partial<QuoteDetail> = {}): QuoteCreateResult {
+  return { persisted: true, ...emptyQuote(overrides) }
 }
 
 // SCRUM-723 — "Volver a Pipeline" navega de verdad (ya no hay mutation/respuesta de
@@ -86,8 +98,11 @@ function PipelineRouteProbe() {
   return <div data-testid="pipeline-route-probe">card={params.get('card')}</div>
 }
 
+let lastQueryClient: QueryClient
+
 function renderPage(initialEntries = ['/ventas-diseno/quotes/1']) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  lastQueryClient = queryClient
   return render(
     <MemoryRouter initialEntries={initialEntries}>
       <QueryClientProvider client={queryClient}>
@@ -115,12 +130,120 @@ beforeEach(() => {
 })
 
 describe('QuotePage', () => {
-  it('crea una cotización vacía cuando se entra sin id', async () => {
-    mockedApi.quotes.create.mockResolvedValue(emptyQuote())
-    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+  // SCRUM-1166 — la etiqueta de ITBMS sale de lo que manda el servidor, no de un «7%» fijo.
+  it('SCRUM-1166: el aviso de exención de la cotización distingue exenta, conserva ITBMS y conserva exención', async () => {
+    const cliente = (exento: boolean) => ({ id: 5, business_name: 'Cliente X', itbms_exento: exento })
+    const caso = async (quote: Partial<QuoteDetail>) => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote(quote))
+      const r = renderPage()
+      return { r, aviso: await screen.findByTestId('quote-aviso-exencion').catch(() => null) }
+    }
+
+    // cliente exento y cotización exenta: aviso normal
+    let c = await caso({ sub_client: cliente(true), itbms_exento: true })
+    expect(c.aviso).toHaveTextContent('ventasDiseno:quote.exencion.exenta')
+    c.r.unmount()
+
+    // cliente exento pero la cotización ya estaba confirmada: conserva su ITBMS
+    c = await caso({ sub_client: cliente(true), itbms_exento: false })
+    expect(c.aviso).toHaveTextContent('ventasDiseno:quote.exencion.conservaItbms')
+    c.r.unmount()
+
+    // el cliente ya no es exento pero la cotización conserva su exención
+    c = await caso({ sub_client: cliente(false), itbms_exento: true })
+    expect(c.aviso).toHaveTextContent('ventasDiseno:quote.exencion.conservaExenta')
+    c.r.unmount()
+
+    // nada que avisar
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: cliente(false), itbms_exento: false }))
+    renderPage()
+    await screen.findByText('ventasDiseno:quote.totals.itbms')
+    expect(screen.queryByTestId('quote-aviso-exencion')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1166: una cotización de un cliente exento rotula «ITBMS (Exento)»; una normal muestra su porcentaje real', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ itbms_exento: true, itbms_percentage: 0 }))
+    const { unmount } = renderPage()
+    expect(await screen.findByText('ventasDiseno:quote.totals.itbmsExento')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:quote.totals.itbms')).not.toBeInTheDocument()
+    unmount()
+
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ itbms_exento: false, itbms_percentage: 7 }))
+    renderPage()
+    expect(await screen.findByText('ventasDiseno:quote.totals.itbms')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:quote.totals.itbmsExento')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-912 — reemplaza el test viejo "crea una cotización vacía cuando se entra sin
+  // id": esa era exactamente la causa del bug (BUG-01, cotización huérfana persistida
+  // por solo abrir el formulario). Ahora no debe crearse nada hasta que el usuario
+  // toque un campo real.
+  it('NO crea ninguna cotización al entrar sin id mientras el formulario queda intacto (SCRUM-912)', async () => {
     renderPage(['/ventas-diseno/quotes'])
 
-    await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledWith({}))
+    // El encabezado (Descripción) debe poder renderizarse sin que exista una
+    // cotización todavía — si esto no aparece, el formulario quedó trabado en
+    // "Cargando..." (regresión del gate `isLoading || !quote`).
+    await screen.findByText('ventasDiseno:quote.description')
+
+    expect(mockedApi.quotes.create).not.toHaveBeenCalled()
+  })
+
+  it('crea la cotización recién al tocar el primer campo del formulario en blanco (SCRUM-912)', async () => {
+    mockedApi.quotes.create.mockResolvedValue(persistedQuote({ description: 'Cotizacion X' }))
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ description: 'Cotizacion X' }))
+    renderPage(['/ventas-diseno/quotes'])
+    await screen.findByText('ventasDiseno:quote.description')
+
+    // Orden en el DOM: [0] Master, [1] Sub, [2] RUC, [3] Proyecto, [4] Descripción.
+    const descriptionInput = document.querySelectorAll('input[type="text"]')[4] as HTMLInputElement
+    fireEvent.change(descriptionInput, { target: { value: 'Cotizacion X' } })
+
+    await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Cotizacion X' }),
+    ))
+  })
+
+  /**
+   * SCRUM-912 (Senior Review) — bug real encontrado: es alcanzable que
+   * buildHeaderPayload() se lea con todos los campos vacíos en el momento exacto en
+   * que el efecto reactivo dispara create() (ej. tipear y borrar el buscador de
+   * Cliente Master sin llegar a seleccionar nada real) — el backend legítimamente no
+   * persiste nada y responde {persisted: false}, sin id. Antes esto navegaba a
+   * "/ventas-diseno/quotes/undefined" y dejaba la pantalla rota; ningún mock de test
+   * devolvía nunca ese shape, así que ningún test lo cubría.
+   */
+  it('con {persisted: false} no navega a una URL rota y permite reintentar al siguiente toque real (SCRUM-912)', async () => {
+    mockedApi.quotes.create.mockResolvedValueOnce({ persisted: false })
+    renderPage(['/ventas-diseno/quotes'])
+    await screen.findByText('ventasDiseno:quote.description')
+
+    const descriptionInput = document.querySelectorAll('input[type="text"]')[4] as HTMLInputElement
+    fireEvent.change(descriptionInput, { target: { value: 'x' } })
+    fireEvent.change(descriptionInput, { target: { value: '' } })
+
+    await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledTimes(1))
+    // Nunca navegó — sigue en la pantalla de "nueva cotización" sin id, con el
+    // formulario intacto (no la ruta rota "/quotes/undefined").
+    expect(await screen.findByText('ventasDiseno:quote.description')).toBeInTheDocument()
+
+    // El siguiente dato real reintenta la creación (formTouched se resetea a false
+    // tras persisted:false, así que el próximo toque lo vuelve a disparar).
+    mockedApi.quotes.create.mockResolvedValueOnce(persistedQuote({ description: 'Cotizacion real' }))
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ description: 'Cotizacion real' }))
+    fireEvent.change(descriptionInput, { target: { value: 'Cotizacion real' } })
+
+    await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledTimes(2))
+    expect(mockedApi.quotes.create).toHaveBeenLastCalledWith(
+      expect.objectContaining({ description: 'Cotizacion real' }),
+    )
+  })
+
+  it('el "Diseñador a cargo" muestra al usuario logueado antes de que la cotización exista (SCRUM-912)', async () => {
+    mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Test', permissions: [] })
+    renderPage(['/ventas-diseno/quotes'])
+
+    expect(await screen.findByText('Gerencia Test')).toBeInTheDocument()
   })
 
   it('muestra el nombre del diseñador a cargo, bloqueado', async () => {
@@ -139,7 +262,7 @@ describe('QuotePage', () => {
     expect(await screen.findByText('ventasDiseno:quote.fillOrderHint.needsMasterClient')).toBeInTheDocument()
   })
 
-  it('con Cliente Master pero sin Subcliente, muestra el mensaje guía bajo Proyecto y Arquitecto', async () => {
+  it('con Cliente Master pero sin Subcliente, muestra el mensaje guía solo bajo Proyecto (el Arquitecto ya no depende del Subcliente, SCRUM-1121)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({
       master_client: { id: 1, name: 'Grupo Delta' },
     }))
@@ -148,7 +271,7 @@ describe('QuotePage', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('ventasDiseno:quote.fillOrderHint.needsMasterClient')).not.toBeInTheDocument()
-      expect(screen.getAllByText('ventasDiseno:quote.fillOrderHint.needsSubClient')).toHaveLength(2)
+      expect(screen.getAllByText('ventasDiseno:quote.fillOrderHint.needsSubClient')).toHaveLength(1)
     })
   })
 
@@ -225,30 +348,121 @@ describe('QuotePage', () => {
     expect(screen.queryByText('ventasDiseno:quote.addExistingContact')).not.toBeInTheDocument()
   })
 
+  // SCRUM-873 — bug real: crear un Subcliente NUEVO (de un Cliente Master ya
+  // existente) durante una cotización, con su propio contacto, mostraba el
+  // mismo mensaje "Guarda la cotización antes de agregar contactos" de arriba
+  // aunque el Subcliente ya viniera completo — handleSubCreated nunca persistía
+  // sub_client_id en la cotización (a diferencia de handleMasterCreated, que sí
+  // lo hacía para el caso "Master + Sub juntos"). Este test cubre el fix: el
+  // link se persiste de inmediato y el primer contacto se auto-vincula, sin
+  // pedir guardar antes de tiempo.
+  it('un Subcliente nuevo creado durante la cotización se autocompleta y vincula su contacto sin pedir guardar antes (SCRUM-873)', async () => {
+    mockedApi.quotes.get
+      .mockResolvedValueOnce(emptyQuote({
+        master_client: { id: 1, name: 'Grupo Delta' },
+      }))
+      // Tras linkNewClientMutation invalidar la query, el refetch ya trae el
+      // Subcliente vinculado — mismo patrón que el backend real.
+      .mockResolvedValue(emptyQuote({
+        master_client: { id: 1, name: 'Grupo Delta' },
+        sub_client: { id: 20, business_name: 'Delta Norte' },
+      }))
+    mockedApi.subClients.list.mockResolvedValue([])
+    mockedApi.clients.addSubClient.mockResolvedValue({
+      id: 20, master_client_id: 1, business_name: 'Delta Norte', tax_id: '155-9999-1-2026', tax_id_dv: '81',
+      delivery_address: null, category: null,
+      contacts: [{ id: 100, name: 'Juan Pérez', role: 'client', phone: '6000-1111', email: null }],
+    })
+    mockedApi.quotes.update.mockResolvedValue(emptyQuote({
+      master_client: { id: 1, name: 'Grupo Delta' },
+      sub_client: { id: 20, business_name: 'Delta Norte' },
+    }))
+    mockedApi.quotes.contacts.create.mockResolvedValue({ pivot_id: 1, id: 100, name: 'Juan Pérez', role: 'client', phone: '6000-1111', email: null })
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    const subClientLabel = screen.getByText('ventasDiseno:modal.subClient')
+    const subClientInput = subClientLabel.parentElement!.querySelector('input') as HTMLInputElement
+    await waitFor(() => expect(subClientInput).not.toBeDisabled())
+
+    fireEvent.focus(subClientInput)
+    fireEvent.change(subClientInput, { target: { value: 'Delta Norte' } })
+    fireEvent.mouseDown(await screen.findByText('ventasDiseno:clients.detail.newSubClient'))
+
+    const businessNameLabel = await screen.findByText('ventasDiseno:clients.createModal.businessName *')
+    const businessNameInput = businessNameLabel.parentElement!.querySelector('input') as HTMLInputElement
+    expect(businessNameInput.value).toBe('Delta Norte') // precargado (RN7.1)
+
+    const taxIdLabel = screen.getByText('ventasDiseno:clients.createModal.taxId *')
+    const taxIdInput = taxIdLabel.parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.change(taxIdInput, { target: { value: '155-9999-1-2026' } })
+    // SCRUM-928 — DV obligatorio inmediatamente después del RUC (también en el flujo de Cotización).
+    const dvInput = screen.getByText('ventasDiseno:clients.createModal.taxIdDv').parentElement!.querySelector('input') as HTMLInputElement
+    expect(screen.getByText('ventasDiseno:clients.createModal.saveSubClient')).toBeDisabled()
+    fireEvent.change(dvInput, { target: { value: '81' } })
+
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.contactName'), { target: { value: 'Juan Pérez' } })
+    fireEvent.change(screen.getByPlaceholderText('common:labels.phone'), { target: { value: '6000-1111' } })
+
+    fireEvent.click(screen.getByText('ventasDiseno:clients.createModal.saveSubClient'))
+
+    await waitFor(() => expect(mockedApi.clients.addSubClient).toHaveBeenCalledWith(1, expect.objectContaining({
+      // SCRUM-873 (Senior Review) — crear un Subcliente desde acá es siempre en contexto de
+      // Cotización: nunca debe generar el Lead card duplicado que el flujo normal de "Cliente
+      // nuevo" (desde CRM) sí crea. El backend usa este flag para saltarse esa creación.
+      business_name: 'Delta Norte', tax_id: '155-9999-1-2026', tax_id_dv: '81', from_quote_context: true,
+    })))
+
+    // El fix: el link a la cotización se persiste de inmediato, sin esperar a
+    // "Guardar borrador".
+    await waitFor(() => expect(mockedApi.quotes.update).toHaveBeenCalledWith(1, {
+      master_client_id: 1, sub_client_id: 20, ruc: '155-9999-1-2026',
+    }))
+
+    // Y el primer contacto (ya cargado junto con el Subcliente) se auto-vincula,
+    // igual que en el caso "Master + Sub nuevos juntos" que ya funcionaba.
+    await waitFor(() => expect(mockedApi.quotes.contacts.create).toHaveBeenCalledWith(1, 100))
+
+    await waitFor(() => {
+      expect(screen.queryByText('ventasDiseno:quote.saveBeforeContacts')).not.toBeInTheDocument()
+    })
+  })
+
   // SCRUM-122 (Gerencia Test, 2026-08-02) — el directorio de Arquitectos dejó de ser
   // global: sin Subcliente elegido no hay a qué acotar la búsqueda, mismo criterio que
   // ya aplica a Proyecto (disabled={!canEdit || !subClient}).
-  it('el campo Arquitecto queda deshabilitado sin un Subcliente elegido (SCRUM-122)', async () => {
+  it('el campo Arquitecto NO depende del Subcliente: la base de asociados es global (SCRUM-1121)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
     await screen.findByText('Designer Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
-    expect(architectInput).toBeDisabled()
+    expect(architectInput).not.toBeDisabled()
+  })
+
+  // SCRUM-873 — Arquitecto pasó a ser opcional (el Request del backend deja de
+  // exigirlo por separado); el texto aclaratorio deja explícito por qué se
+  // llenaría igual (comisión) sin depender de que el usuario infiera que es
+  // opcional solo por la ausencia de un "*" junto al label.
+  it('muestra el texto aclaratorio de que Arquitecto es opcional, para comisión (SCRUM-873)', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    expect(screen.getByText('ventasDiseno:quote.architectHint')).toBeInTheDocument()
   })
 
   it('ofrece "+ Crear" para Arquitecto aunque el fuzzy match traiga resultados que no son un match exacto (SCRUM-122)', async () => {
     // Bug real verificado en vivo contra dev.atlanticerp.ai: el buscador tokenizado hace match
     // con "Arq. QA Real" al escribir cualquier nombre nuevo que empiece con "QA" (comparten
     // la palabra "QA"), así que "+ Crear" nunca aparecía aunque el nombre exacto no existiera.
-    // El buscador de Arquitecto depende de un Subcliente ya elegido (SCRUM-122, mismo patrón
-    // que Proyecto) — sin sub_client en el fixture el campo queda disabled.
+    // SCRUM-1121: el buscador de Arquitecto ya no depende del Subcliente (base única y global de asociados).
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
-    mockedApi.architects.list.mockResolvedValue([
+    mockedApi.architects.search.mockResolvedValue([
       { id: 1, name: 'Arq. QA Real', phone: null, email: null },
       { id: 2, name: 'Arq. QA Real2', phone: null, email: null },
-    ])
+    ] as never)
     renderPage()
     await screen.findByText('Designer Demo')
 
@@ -267,7 +481,7 @@ describe('QuotePage', () => {
 
   it('no ofrece "+ Crear" cuando el query coincide exacto con una opción existente', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
-    mockedApi.architects.list.mockResolvedValue([{ id: 1, name: 'Arq. QA Real', phone: null, email: null }])
+    mockedApi.architects.search.mockResolvedValue([{ id: 1, name: 'Arq. QA Real', phone: null, email: null }] as never)
     renderPage()
     await screen.findByText('Designer Demo')
 
@@ -283,7 +497,7 @@ describe('QuotePage', () => {
 
   it('permite crear Arquitecto solo con Correo, sin Teléfono (SCRUM-122)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
-    mockedApi.architects.list.mockResolvedValue([])
+    mockedApi.architects.search.mockResolvedValue([] as never)
     mockedApi.architects.create.mockResolvedValue({ id: 9, name: 'Arq. Nuevo', phone: null, email: 'nuevo@arq.test' })
     renderPage()
     await screen.findByText('Designer Demo')
@@ -305,7 +519,7 @@ describe('QuotePage', () => {
     fireEvent.click(confirmButton)
 
     await waitFor(() => expect(mockedApi.architects.create).toHaveBeenCalledWith({
-      sub_client_id: 10, name: 'Arq. Nuevo', phone: null, email: 'nuevo@arq.test',
+      type: 'architect', name: 'Arq. Nuevo', phone: null, email: 'nuevo@arq.test',
     }))
   })
 
@@ -314,9 +528,9 @@ describe('QuotePage', () => {
   // descartaban en searchArchitects/createArchitect antes de llegar al estado.
   it('muestra teléfono y correo del arquitecto elegido de la lista, no solo el nombre (SCRUM-122)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
-    mockedApi.architects.list.mockResolvedValue([
+    mockedApi.architects.search.mockResolvedValue([
       { id: 1, name: 'Arq. QA Real', phone: '6000-1111', email: 'qa.real@arq.test' },
-    ])
+    ] as never)
     renderPage()
     await screen.findByText('Designer Demo')
 
@@ -333,7 +547,7 @@ describe('QuotePage', () => {
 
   it('muestra teléfono y correo del arquitecto recién creado inline', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
-    mockedApi.architects.list.mockResolvedValue([])
+    mockedApi.architects.search.mockResolvedValue([] as never)
     mockedApi.architects.create.mockResolvedValue({ id: 9, name: 'Arq. Nuevo', phone: '6000-2222', email: 'nuevo@arq.test' })
     renderPage()
     await screen.findByText('Designer Demo')
@@ -506,6 +720,61 @@ describe('QuotePage', () => {
     const modalLabel = await screen.findByText('ventasDiseno:clients.createModal.masterClient *')
     const modalInput = modalLabel.parentElement!.querySelector('input') as HTMLInputElement
     expect(modalInput.value).toBe('Constructora XYZ')
+  })
+
+  /**
+   * SCRUM-873 (Senior Review) — bug real: crear un Cliente Master + Subcliente juntos
+   * desde acá (mismo flujo que arriba, pero de cero, no "Subcliente nuevo de un Master
+   * existente") nunca pasaba `from_quote_context: true` al backend — el Lead card
+   * duplicado que el flujo normal de "Cliente nuevo" (desde CRM) crea seguía
+   * generándose también acá, pese a que el ticket lo pedía explícitamente evitar.
+   */
+  it('crear Cliente Master + Subcliente juntos desde la cotización manda from_quote_context (SCRUM-873)', async () => {
+    mockedApi.quotes.get
+      .mockResolvedValueOnce(emptyQuote())
+      .mockResolvedValue(emptyQuote({
+        master_client: { id: 1, name: 'Constructora XYZ' },
+        sub_client: { id: 20, business_name: 'Constructora XYZ' },
+      }))
+    mockedApi.masterClients.list.mockResolvedValue([])
+    mockedApi.clients.create.mockResolvedValue({
+      id: 1, name: 'Constructora XYZ', default_price_type: null,
+      sub_clients: [{
+        id: 20, master_client_id: 1, business_name: 'Constructora XYZ', tax_id: '155-1234-1-2026', tax_id_dv: '12',
+        delivery_address: null, category: null, contacts: [],
+      }],
+    })
+    mockedApi.quotes.update.mockResolvedValue(emptyQuote({
+      master_client: { id: 1, name: 'Constructora XYZ' },
+      sub_client: { id: 20, business_name: 'Constructora XYZ' },
+    }))
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    const masterLabel = screen.getByText('ventasDiseno:modal.masterClient')
+    const masterInput = masterLabel.parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.focus(masterInput)
+    fireEvent.change(masterInput, { target: { value: 'Constructora XYZ' } })
+    fireEvent.mouseDown(await screen.findByText('ventasDiseno:clients.actions.createClient'))
+
+    const businessNameLabel = await screen.findByText('ventasDiseno:clients.createModal.businessName *')
+    const businessNameInput = businessNameLabel.parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.change(businessNameInput, { target: { value: 'Constructora XYZ' } })
+    const taxIdLabel = screen.getByText('ventasDiseno:clients.createModal.taxId *')
+    const taxIdInput = taxIdLabel.parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.change(taxIdInput, { target: { value: '155-1234-1-2026' } })
+    fireEvent.change(
+      screen.getByText('ventasDiseno:clients.createModal.taxIdDv').parentElement!.querySelector('input') as HTMLInputElement,
+      { target: { value: '12' } },
+    )
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.contactName'), { target: { value: 'Juan Pérez' } })
+    fireEvent.change(screen.getByPlaceholderText('common:labels.phone'), { target: { value: '6000-1111' } })
+
+    fireEvent.click(screen.getByText('ventasDiseno:clients.createModal.saveClient'))
+
+    await waitFor(() => expect(mockedApi.clients.create).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Constructora XYZ', tax_id_dv: '12', from_quote_context: true,
+    })))
   })
 
   it('el texto tipeado en Subcliente precarga el modal de creación (RN7.1)', async () => {
@@ -708,6 +977,86 @@ describe('QuotePage', () => {
     await waitFor(() => expect(mockedApi.quotes.update).toHaveBeenCalledWith(1, { price_type: 'project' }))
   })
 
+  // SCRUM-1164 — con partidas que tienen su propio tipo de precio, cambiar el general pregunta antes de tocar nada.
+  describe('SCRUM-1164 — cambiar el tipo de precio general con partidas de tipo propio', () => {
+    const item = (id: number, override: 'project' | 'special' | null) => ({
+      id, catalog_product_id: null, is_custom: true, reference: `REF-${id}`, description: `Ítem ${id}`, quantity: 1, unit_price: 100, cost: null,
+      price_type_override: override, discount_percent: null, effective_unit_price: 100, line_total: 100, stock_quantity: null, below_min_margin: false, photo_url: null,
+    })
+    const conPropios = () => emptyQuote({
+      parts: [{ id: 1, name: 'Sala', position: 1, subtotal: 200, items: [item(1, 'project'), item(2, null), item(3, 'special')] }] as never,
+    })
+    const selectGeneral = () => document.querySelectorAll('select')[1] as HTMLSelectElement
+
+    it('muestra siempre una nota fija con cuántas partidas usan un tipo propio', async () => {
+      mockedApi.quotes.get.mockResolvedValue(conPropios())
+      renderPage()
+      expect(await screen.findByTestId('price-type-own-note')).toBeInTheDocument()
+    })
+
+    it('sin partidas de tipo propio no hay nota y el cambio es directo, sin pregunta', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      mockedApi.quotes.update.mockResolvedValue(emptyQuote({ price_type: 'project' }))
+      renderPage()
+      await screen.findByText('Designer Demo')
+      expect(screen.queryByTestId('price-type-own-note')).not.toBeInTheDocument()
+
+      fireEvent.change(selectGeneral(), { target: { value: 'project' } })
+
+      await waitFor(() => expect(mockedApi.quotes.update).toHaveBeenCalledWith(1, { price_type: 'project' }))
+      expect(screen.queryByTestId('price-type-apply-prompt')).not.toBeInTheDocument()
+    })
+
+    it('al cambiar, pregunta primero y no guarda nada hasta que se elige', async () => {
+      mockedApi.quotes.get.mockResolvedValue(conPropios())
+      renderPage()
+      await screen.findByTestId('price-type-own-note')
+
+      fireEvent.change(selectGeneral(), { target: { value: 'premium' } })
+
+      expect(await screen.findByTestId('price-type-apply-prompt')).toBeInTheDocument()
+      expect(mockedApi.quotes.update).not.toHaveBeenCalled()
+    })
+
+    it('«Aplicar a todos» envía el tipo y la bandera para limpiar los propios', async () => {
+      mockedApi.quotes.get.mockResolvedValue(conPropios())
+      mockedApi.quotes.update.mockResolvedValue(emptyQuote({ price_type: 'premium' }))
+      renderPage()
+      await screen.findByTestId('price-type-own-note')
+      fireEvent.change(selectGeneral(), { target: { value: 'premium' } })
+
+      fireEvent.click(await screen.findByText('ventasDiseno:quote.priceTypeApplyAll'))
+
+      await waitFor(() => expect(mockedApi.quotes.update).toHaveBeenCalledWith(1, { price_type: 'premium', clear_item_price_overrides: true }))
+      await waitFor(() => expect(screen.queryByTestId('price-type-apply-prompt')).not.toBeInTheDocument())
+    })
+
+    it('«Mantener los propios» cambia solo el general, como siempre', async () => {
+      mockedApi.quotes.get.mockResolvedValue(conPropios())
+      mockedApi.quotes.update.mockResolvedValue(emptyQuote({ price_type: 'premium' }))
+      renderPage()
+      await screen.findByTestId('price-type-own-note')
+      fireEvent.change(selectGeneral(), { target: { value: 'premium' } })
+
+      fireEvent.click(await screen.findByText('ventasDiseno:quote.priceTypeKeepOwn'))
+
+      await waitFor(() => expect(mockedApi.quotes.update).toHaveBeenCalledWith(1, { price_type: 'premium' }))
+    })
+
+    it('Cancelar cierra la pregunta sin guardar nada', async () => {
+      mockedApi.quotes.get.mockResolvedValue(conPropios())
+      renderPage()
+      await screen.findByTestId('price-type-own-note')
+      fireEvent.change(selectGeneral(), { target: { value: 'premium' } })
+
+      const prompt = await screen.findByTestId('price-type-apply-prompt')
+      fireEvent.click(within(prompt).getByText('common:actions.cancel'))
+
+      await waitFor(() => expect(screen.queryByTestId('price-type-apply-prompt')).not.toBeInTheDocument())
+      expect(mockedApi.quotes.update).not.toHaveBeenCalled()
+    })
+  })
+
   it('cambiar a modo Global lo actualiza de inmediato', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.update.mockResolvedValue(emptyQuote({ discount_mode: 'global' }))
@@ -818,7 +1167,216 @@ describe('QuotePage', () => {
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.validation.check'))
 
-    expect(await screen.findByText(/Cliente Master, Ítems/)).toBeInTheDocument()
+    expect(await screen.findByText('ventasDiseno:quote.validation.field.masterClient')).toBeInTheDocument()
+  })
+
+  // SCRUM-985 — errores de validación al final del formulario, con campos en rojo y limpieza dinámica.
+  describe('SCRUM-985 — validación y visualización de errores', () => {
+    const FIELD = (k: string) => `ventasDiseno:quote.validation.field.${k}`
+    const rejectMissing = (missing: string[]) => mockedApi.quotes.saveDraft.mockRejectedValue({
+      isAxiosError: true, response: { data: { valid: false, missing } },
+    })
+    const deliverySelect = () =>
+      screen.getByText('ventasDiseno:modal.deliveryType').parentElement!.querySelector('select') as HTMLSelectElement
+
+    it('los errores salen AL FINAL del formulario, todos y en el orden de los campos', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      // el backend los manda desordenados a propósito: la UI ordena por campo
+      rejectMissing(['Contacto', 'Descripción', 'Cliente Master', 'Ítems'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+
+      const box = await screen.findByTestId('quote-form-errors')
+      const items = Array.from(box.querySelectorAll('li')).map(li => li.textContent)
+      expect(items).toEqual([FIELD('masterClient'), FIELD('description'), FIELD('contacts'), FIELD('items')])
+
+      // después de todos los campos y secciones: viene después del botón de guardar y de Contactos/Condiciones
+      const follows = (a: Node, b: Node) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+      expect(follows(screen.getByText('ventasDiseno:modal.contacts'), box)).toBe(true)
+      expect(follows(screen.getByText('ventasDiseno:quote.conditions'), box)).toBe(true)
+      expect(follows(screen.getByText('ventasDiseno:quote.generate'), box)).toBe(true)
+      expect(follows(screen.getByText('ventasDiseno:quote.description'), box)).toBe(true)
+    })
+
+    it('Única con error de fecha -> cambiar a Por definir quita el rojo y el mensaje de inmediato', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote({ delivery_type: 'single', delivery_dates: [] }))
+      rejectMissing(['Fecha de entrega'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'single' } })
+
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      expect(await screen.findByText(FIELD('deliveryDates'))).toBeInTheDocument()
+      const dateInput = screen.getByText('ventasDiseno:modal.deliveryDates').parentElement as HTMLElement
+      expect(dateInput.className).toContain('border-red-500')
+
+      fireEvent.change(deliverySelect(), { target: { value: 'tbd' } })
+
+      expect(screen.queryByText(FIELD('deliveryDates'))).not.toBeInTheDocument()
+      expect(screen.queryByTestId('quote-form-errors')).not.toBeInTheDocument()
+      expect(screen.queryByText('ventasDiseno:modal.deliveryDates')).not.toBeInTheDocument()
+    })
+
+    it('volver de Por definir a Única no revive un error de la selección anterior; guardar valida con la opción actual', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      rejectMissing(['Fecha de entrega'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await screen.findByText(FIELD('deliveryDates'))
+
+      fireEvent.change(deliverySelect(), { target: { value: 'tbd' } })
+      expect(screen.queryByTestId('quote-form-errors')).not.toBeInTheDocument()
+
+      // Guardar de nuevo: el payload lleva la opción actual (tbd, sin fechas)
+      mockedApi.quotes.saveDraft.mockClear()
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await waitFor(() => expect(mockedApi.quotes.saveDraft).toHaveBeenCalledWith(
+        1, expect.objectContaining({ delivery_type: 'tbd', delivery_dates: [] }),
+      ))
+    })
+
+    it('campo con error en rojo; al corregir el valor el rojo y su mensaje desaparecen, los demás siguen', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      rejectMissing(['Descripción', 'RUC / Cédula'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await screen.findByText(FIELD('description'))
+      const descWrap = screen.getByText('ventasDiseno:quote.description').parentElement as HTMLElement
+      const rucWrap = screen.getByText('ventasDiseno:quote.ruc').parentElement as HTMLElement
+      expect(descWrap.className).toContain('border-red-500')
+      expect(rucWrap.className).toContain('border-red-500')
+
+      fireEvent.change(descWrap.querySelector('input') as HTMLInputElement, { target: { value: 'Torre A' } })
+
+      expect(screen.queryByText(FIELD('description'))).not.toBeInTheDocument()
+      expect(descWrap.className).not.toContain('border-red-500')
+      expect(screen.getByText(FIELD('ruc'))).toBeInTheDocument()
+      expect(rucWrap.className).toContain('border-red-500')
+    })
+
+    it('Parcial con error de fecha: rellenar una fecha limpia el error', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      rejectMissing(['Fecha de entrega'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await screen.findByText(FIELD('deliveryDates'))
+
+      const dateWrap = screen.getByText('ventasDiseno:modal.deliveryDates').parentElement as HTMLElement
+      fireEvent.change(dateWrap.querySelector('input[type="date"]') as HTMLInputElement, { target: { value: '2026-12-01' } })
+
+      expect(screen.queryByText(FIELD('deliveryDates'))).not.toBeInTheDocument()
+    })
+
+    // Escenario literal reportado por Daniela: el FE mandaba delivery_dates [''] y el backend
+    // respondía 422 de formato (sin `missing`), que caía al banner crudo y no se limpiaba.
+    const laravel422Format = (n = 0) => ({
+      isAxiosError: true,
+      response: { status: 422, data: {
+        message: `El campo delivery_dates.${n} debe ser una fecha válida.`,
+        errors: { [`delivery_dates.${n}`]: [`El campo delivery_dates.${n} debe ser una fecha válida.`] },
+      } },
+    })
+
+    it('el payload no incluye fechas vacías (Única sin fecha)', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      rejectMissing(['Fecha de entrega'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'single' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await waitFor(() => expect(mockedApi.quotes.saveDraft).toHaveBeenCalled())
+      expect(mockedApi.quotes.saveDraft).toHaveBeenCalledWith(
+        1, expect.objectContaining({ delivery_type: 'single', delivery_dates: [] }),
+      )
+      expect(await screen.findByText(FIELD('deliveryDates'))).toBeInTheDocument()
+    })
+
+    it('Parcial con una fecha rellena y otra vacía manda solo la rellena', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      mockedApi.quotes.saveDraft.mockResolvedValue(emptyQuote())
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
+      const dateWrap = screen.getByText('ventasDiseno:modal.deliveryDates').parentElement as HTMLElement
+      fireEvent.change(dateWrap.querySelectorAll('input[type="date"]')[1] as HTMLInputElement, { target: { value: '2026-12-01' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await waitFor(() => expect(mockedApi.quotes.saveDraft).toHaveBeenCalledWith(
+        1, expect.objectContaining({ delivery_type: 'partial', delivery_dates: ['2026-12-01'] }),
+      ))
+    })
+
+    it('422 de formato de fecha (errors.delivery_dates.0) se mapea al campo, sin banner crudo', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      mockedApi.quotes.saveDraft.mockRejectedValue(laravel422Format())
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'single' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+
+      expect(await screen.findByText(FIELD('deliveryDates'))).toBeInTheDocument()
+      expect(screen.queryByText(/debe ser una fecha válida/)).not.toBeInTheDocument()
+      const dateWrap = screen.getByText('ventasDiseno:modal.deliveryDates').parentElement as HTMLElement
+      expect(dateWrap.className).toContain('border-red-500')
+    })
+
+    it('flujo real: Única sin fecha -> error -> Por definir limpia todo -> guardar con otros faltantes no revive el de fecha', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      // 1er guardado: lo que realmente llegaba (422 de formato + nada de `missing`)
+      mockedApi.quotes.saveDraft.mockRejectedValueOnce(laravel422Format())
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.change(deliverySelect(), { target: { value: 'single' } })
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await screen.findByText(FIELD('deliveryDates'))
+
+      fireEvent.change(deliverySelect(), { target: { value: 'tbd' } })
+      expect(screen.queryByText(FIELD('deliveryDates'))).not.toBeInTheDocument()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+      // 2do guardado: el backend responde `missing` con otros faltantes
+      rejectMissing(['Cliente Master', 'Contacto'])
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      const box = await screen.findByTestId('quote-form-errors')
+      expect(Array.from(box.querySelectorAll('li')).map(li => li.textContent))
+        .toEqual([FIELD('masterClient'), FIELD('contacts')])
+      expect(screen.queryByText(FIELD('deliveryDates'))).not.toBeInTheDocument()
+      expect(screen.queryByText(/debe ser una fecha válida/)).not.toBeInTheDocument()
+    })
+
+    it('un error no mapeable cae al banner y se limpia al cambiar la entrega o al reintentar', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      mockedApi.quotes.saveDraft.mockRejectedValueOnce({
+        isAxiosError: true, response: { status: 500, data: { message: 'Fallo inesperado' } },
+      })
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      expect(await screen.findByText('Fallo inesperado')).toBeInTheDocument()
+
+      fireEvent.change(deliverySelect(), { target: { value: 'tbd' } })
+      expect(screen.queryByText('Fallo inesperado')).not.toBeInTheDocument()
+    })
+
+    it('Contactos con error se enmarca completo en rojo', async () => {
+      mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+      rejectMissing(['Contacto'])
+      renderPage()
+      await screen.findByText('Designer Demo')
+      fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
+      await screen.findByText(FIELD('contacts'))
+      const block = screen.getByText('ventasDiseno:modal.contacts').parentElement as HTMLElement
+      expect(block.className).toContain('border-2')
+      expect(block.className).toContain('border-red-500')
+      expect(block.className).toContain('rounded-lg')
+    })
   })
 
   it('agregar un contacto no borra campos del encabezado todavía sin guardar (regresión Cotización-D)', async () => {
@@ -888,7 +1446,7 @@ describe('QuotePage', () => {
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.generate'))
 
-    expect(await screen.findByText(/Ítems/)).toBeInTheDocument()
+    expect(await screen.findByText('ventasDiseno:quote.validation.field.items')).toBeInTheDocument()
   })
 
   it('Guardar borrador bloqueado por falta de un campo general no llega a generar', async () => {
@@ -901,7 +1459,7 @@ describe('QuotePage', () => {
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.generate'))
 
-    expect(await screen.findByText(/Cliente Master/)).toBeInTheDocument()
+    expect(await screen.findByText('ventasDiseno:quote.validation.field.masterClient')).toBeInTheDocument()
     expect(mockedApi.quotes.generate).not.toHaveBeenCalled()
   })
 
@@ -1029,6 +1587,30 @@ describe('QuotePage', () => {
     await waitFor(() => expect(screen.queryByText('ventasDiseno:quote.saveConfirmModal.title')).not.toBeInTheDocument())
   })
 
+  // SCRUM-1122 — confirmar traslada monto y fechas de entrega a la tarjeta: su detalle y el tablero no pueden quedarse con la copia vieja.
+  it('confirmar invalida la tarjeta de Pipeline y el tablero para que muestren las fechas trasladadas', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
+    mockedApi.quotes.confirm.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-03T00:00:00Z' }))
+    renderPage()
+    await screen.findByText('Designer Demo')
+    lastQueryClient.setQueryData(['ventas-diseno-pipeline-card', 42], { id: 42, delivery_dates: [] })
+    lastQueryClient.setQueryData(['ventas-diseno-pipeline', 'own'], { data: [] })
+    lastQueryClient.setQueryData(['ventas-diseno-pipeline-card-product-delivery-assignments', 42], [])
+
+    fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
+    fireEvent.click(await screen.findByText('ventasDiseno:quote.save'))
+    await screen.findByText('ventasDiseno:quote.saveConfirmModal.title')
+    fireEvent.click(screen.getByText('ventasDiseno:quote.saveConfirmModal.confirm'))
+
+    await waitFor(() => expect(mockedApi.quotes.confirm).toHaveBeenCalled())
+    await waitFor(() => {
+      expect(lastQueryClient.getQueryState(['ventas-diseno-pipeline-card', 42])?.isInvalidated).toBe(true)
+      expect(lastQueryClient.getQueryState(['ventas-diseno-pipeline', 'own'])?.isInvalidated).toBe(true)
+      // el cascade de la FK puede quitar asignaciones de producto de las fechas que desaparecen
+      expect(lastQueryClient.getQueryState(['ventas-diseno-pipeline-card-product-delivery-assignments', 42])?.isInvalidated).toBe(true)
+    })
+  })
+
   // ── SCRUM-725 — advertencia de margen mínimo (Mark/David) al confirmar ──────
 
   it('confirm() con margin_warning muestra el modal de advertencia en vez de un error genérico', async () => {
@@ -1102,7 +1684,7 @@ describe('QuotePage', () => {
   })
 
   it('crea la cotización con precarga desde una tarjeta de Pipeline (?fromPipelineCard=)', async () => {
-    mockedApi.quotes.create.mockResolvedValue(emptyQuote({ master_client: { id: 5, name: 'Cliente Pipeline' } }))
+    mockedApi.quotes.create.mockResolvedValue(persistedQuote({ master_client: { id: 5, name: 'Cliente Pipeline' } }))
     renderPage(['/ventas-diseno/quotes?fromPipelineCard=42'])
 
     await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledWith(
@@ -1111,7 +1693,7 @@ describe('QuotePage', () => {
   })
 
   it('crea la cotización con precarga desde un subcliente (?fromSubClient=)', async () => {
-    mockedApi.quotes.create.mockResolvedValue(emptyQuote())
+    mockedApi.quotes.create.mockResolvedValue(persistedQuote())
     renderPage(['/ventas-diseno/quotes?fromSubClient=7'])
 
     await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalledWith(
@@ -1170,5 +1752,124 @@ describe('QuotePage', () => {
     fireEvent.click(screen.getByText('ventasDiseno:quote.pricingConfig.toggle'))
 
     expect(await screen.findByText('ventasDiseno:quote.pricingConfig.title')).toBeInTheDocument()
+  })
+
+  // Pre-QA SCRUM-849.5 (2026-09-08) — hallazgo CRÍTICO real: el campo "Diseñador a cargo" mostraba
+  // SIEMPRE al usuario logueado, nunca al dueño real de la cotización — invisible en self-QA
+  // porque el propio dueño ve su propio nombre; Gerencia abriendo la cotización de otra persona
+  // veía su propio nombre/teléfono en vez del real.
+  it('SCRUM-849.5 — muestra el nombre/teléfono del DUEÑO real de la cotización, no del usuario logueado', async () => {
+    mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Test', permissions: [] })
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({
+      owner: { id: 1, name: 'Vendedor Disenador Test 2', phone: '6123-4567' },
+    }))
+    renderPage()
+
+    expect(await screen.findByText('Vendedor Disenador Test 2')).toBeInTheDocument()
+    expect(screen.getByText('6123-4567', { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText('Gerencia Test')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1195 — «Diseñador a cargo» muestra al Responsable del proyecto (designer), no a Gerencia que generó la versión (owner)', async () => {
+    mockAuthState({ id: 9, first_name: 'Mark', last_name: 'Bekhar', permissions: [] })
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({
+      owner:    { id: 9, name: 'Gerencia Test 3', phone: '6000-0000' },
+      designer: { id: 1, name: 'Paola Vendedora', phone: '6123-4567' },
+    }))
+    renderPage()
+
+    expect(await screen.findByText('Paola Vendedora')).toBeInTheDocument()
+    expect(screen.getByText('6123-4567', { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
+  })
+
+  it('al crear una cotización nueva, la cotización recién creada ya trae al dueño real (mismo campo, sin caso especial)', async () => {
+    // SCRUM-912 — ya no crea al montar: hay que tocar el formulario primero (el
+    // fallback al usuario logueado, cubierto en el test de arriba, es un caso
+    // aparte de ANTES de que exista la cotización).
+    mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Test', permissions: [] })
+    mockedApi.quotes.create.mockResolvedValue(persistedQuote({
+      owner: { id: 9, name: 'Gerencia Test', phone: '6000-0000' },
+    }))
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote({
+      owner: { id: 9, name: 'Gerencia Test', phone: '6000-0000' },
+    }))
+    renderPage(['/ventas-diseno/quotes'])
+    await screen.findByText('ventasDiseno:quote.description')
+
+    const descriptionInput = document.querySelectorAll('input[type="text"]')[4] as HTMLInputElement
+    fireEvent.change(descriptionInput, { target: { value: 'Cotizacion X' } })
+
+    await waitFor(() => expect(mockedApi.quotes.create).toHaveBeenCalled())
+    expect(await screen.findByText('Gerencia Test')).toBeInTheDocument()
+    expect(screen.getByText('6000-0000', { exact: false })).toBeInTheDocument()
+  })
+
+  // ── SCRUM-1121 (corrección de Daniela) — la sección «Asociados» se eliminó; los contactos van en «Contacto» ──
+
+  it('SCRUM-1121 — la cotización ya no tiene la sección «Asociados»', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    expect(screen.queryByTestId('associates-search')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('associates-section')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1121 — el picker de Arquitecto busca en la base global (sin subcliente) y solo tipo arquitecto', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+    mockedApi.architects.search.mockResolvedValue([] as never)
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    const architectInput = screen.getByText('ventasDiseno:quote.architect').parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.focus(architectInput)
+    fireEvent.change(architectInput, { target: { value: 'Arq' } })
+
+    await waitFor(() => expect(mockedApi.architects.search).toHaveBeenCalledWith('Arq', 'architect'))
+  })
+
+  // SCRUM-1121 (Senior Review) — alta de Arquitecto desde el picker con detección de duplicados.
+  async function createArchitectFromPicker(name: string) {
+    const architectLabel = screen.getByText('ventasDiseno:quote.architect')
+    const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
+    fireEvent.focus(architectInput)
+    fireEvent.change(architectInput, { target: { value: name } })
+    fireEvent.mouseDown(await screen.findByText('ventasDiseno:modal.createNew'))
+    fireEvent.change(await screen.findByPlaceholderText('common:labels.email'), { target: { value: 'dup@arq.test' } })
+    fireEvent.click(within(architectLabel.parentElement!).getByText('common:actions.confirm'))
+  }
+
+  it('SCRUM-1121 — duplicado exacto al crear el Arquitecto: usa el que ya existe en vez de dejar al usuario sin salida', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+    mockedApi.architects.search.mockResolvedValue([] as never)
+    mockedApi.architects.create.mockRejectedValue(Object.assign(new Error('409'), {
+      isAxiosError: true,
+      response: { status: 409, data: { code: 'duplicate_exact', message: 'dup', duplicates: [
+        { id: 77, type: 'architect', name: 'Arq. Ya Existente', phone: '6000-7777', email: 'dup@arq.test', document: null },
+      ] } },
+    }))
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    await createArchitectFromPicker('Otro Nombre')
+
+    expect(await screen.findByText('6000-7777')).toBeInTheDocument()
+    expect(screen.getAllByDisplayValue('Arq. Ya Existente').length).toBeGreaterThan(0)
+  })
+
+  it('SCRUM-1121 — nombre parecido al crear el Arquitecto: muestra el aviso del servidor y no lo crea', async () => {
+    mockedApi.quotes.get.mockResolvedValue(emptyQuote())
+    mockedApi.architects.search.mockResolvedValue([] as never)
+    mockedApi.architects.create.mockRejectedValue(Object.assign(new Error('409'), {
+      isAxiosError: true,
+      response: { status: 409, data: { code: 'duplicate_similar', message: 'Hay un asociado con un nombre parecido.', duplicates: [] } },
+    }))
+    renderPage()
+    await screen.findByText('Designer Demo')
+
+    await createArchitectFromPicker('Maria Fernandez')
+
+    expect(await screen.findByText('Hay un asociado con un nombre parecido.')).toBeInTheDocument()
   })
 })

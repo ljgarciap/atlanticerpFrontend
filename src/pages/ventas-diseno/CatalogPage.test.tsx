@@ -6,7 +6,7 @@ import VentasDisenoCatalogPage from './CatalogPage'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
-import type { CatalogItem, CatalogListResult } from '@/types/ventasDiseno'
+import type { CatalogItem, CatalogListResult, CatalogPdfExportStatus } from '@/types/ventasDiseno'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -30,6 +30,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       technicalSheetUrl: vi.fn(),
       uploadTechnicalSheet: vi.fn(),
       sendPdf: vi.fn(),
+      pdfExport: vi.fn(),
     },
   },
 }))
@@ -67,11 +68,11 @@ function makeResult(overrides: Partial<CatalogListResult> = {}): CatalogListResu
   }
 }
 
-function renderPage() {
+function renderPage(initialEntry = '/') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <VentasDisenoCatalogPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -98,6 +99,17 @@ describe('VentasDisenoCatalogPage', () => {
   })
 
   // Criterio duro REQ-615 Escenario 1 — nunca debe verse costo/margen en ningún lado del render.
+  it('SCRUM-1196 — muestra aparte lo que hay en Showroom Obarrio sin sumarlo al disponible, y no lo muestra si es 0', async () => {
+    mockedApi.catalog.list.mockResolvedValue(makeResult({ data: [
+      makeItem({ id: 1, reference: 'CON-SHOW', disponible: 10, stock_showroom: 3 }),
+      makeItem({ id: 2, reference: 'SIN-SHOW', disponible: 5, stock_showroom: 0 }),
+    ] }))
+    renderPage()
+
+    expect(await screen.findByTestId('catalog-showroom-1')).toHaveTextContent('ventasDiseno:catalogScreen.stock.showroom:3')
+    expect(screen.queryByTestId('catalog-showroom-2')).not.toBeInTheDocument()
+  })
+
   it('nunca renderiza costo ni margen', async () => {
     mockedApi.catalog.list.mockResolvedValue(makeResult({
       data: [makeItem({ description: 'Lámpara test' })],
@@ -114,6 +126,32 @@ describe('VentasDisenoCatalogPage', () => {
     }))
     renderPage()
     expect(await screen.findByText('ventasDiseno:catalogScreen.badge.ok')).toBeInTheDocument()
+  })
+
+  // SCRUM-992 (criterio 8) — una ráfaga de teclas produce un único request de búsqueda, no uno por tecla.
+  it('una ráfaga de 10 teclas dispara 1 solo request de búsqueda y el input responde al instante', async () => {
+    renderPage()
+    await screen.findByText('IL-DEC-1410A · 770 Lights')
+    expect(mockedApi.catalog.list).toHaveBeenCalledTimes(1)
+
+    const input = screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder')
+    const word = 'luminaria1'
+    for (let i = 1; i <= word.length; i++) {
+      fireEvent.change(input, { target: { value: word.slice(0, i) } })
+      expect(input).toHaveValue(word.slice(0, i))
+    }
+    expect(mockedApi.catalog.list).toHaveBeenCalledTimes(1)
+
+    await waitFor(() => expect(mockedApi.catalog.list).toHaveBeenCalledWith(expect.objectContaining({ search: word })))
+    expect(mockedApi.catalog.list).toHaveBeenCalledTimes(2)
+  })
+
+  it('un solo carácter no dispara búsqueda', async () => {
+    renderPage()
+    await screen.findByText('IL-DEC-1410A · 770 Lights')
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder'), { target: { value: 'l' } })
+    await new Promise(r => setTimeout(r, 400))
+    expect(mockedApi.catalog.list).toHaveBeenCalledTimes(1)
   })
 
   it('cambiar a vista Lista no reinicia el buscador (mismo estado, otro render)', async () => {
@@ -188,12 +226,13 @@ describe('VentasDisenoCatalogPage', () => {
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder'), {
       target: { value: 'lampara' },
     })
-    expect(screen.getByText('ventasDiseno:catalogScreen.selectedCount:0')).toBeInTheDocument()
+    // SCRUM-992 — el filtro efectivo cambia tras el debounce (250 ms), y ahí se limpia la selección.
+    expect(await screen.findByText('ventasDiseno:catalogScreen.selectedCount:0')).toBeInTheDocument()
   })
 
   it('SCRUM-702 — "Enviar catálogo completo" dispara la descarga con mode:completo y sin product_ids', async () => {
     const showSpy = mockToast()
-    mockedApi.catalog.sendPdf.mockResolvedValue(undefined)
+    mockedApi.catalog.sendPdf.mockResolvedValue({ queued: false })
     renderPage()
     await screen.findByText('IL-DEC-1410A · 770 Lights')
 
@@ -207,7 +246,7 @@ describe('VentasDisenoCatalogPage', () => {
     mockedApi.catalog.list.mockResolvedValue(makeResult({
       data: [makeItem({ id: 1, reference: 'A-1' }), makeItem({ id: 2, reference: 'A-2' })],
     }))
-    mockedApi.catalog.sendPdf.mockResolvedValue(undefined)
+    mockedApi.catalog.sendPdf.mockResolvedValue({ queued: false })
     renderPage()
     await screen.findByText('A-1 · 770 Lights')
 
@@ -227,6 +266,94 @@ describe('VentasDisenoCatalogPage', () => {
 
     fireEvent.click(screen.getByText('ventasDiseno:catalogScreen.actions.sendFull'))
     await waitFor(() => expect(showSpy).toHaveBeenCalledWith('ventasDiseno:catalogScreen.sendError', 'error'))
+  })
+
+  // ── SCRUM-998 — catálogo grande generado en segundo plano (ZIP de volúmenes) ─────────────────────
+
+  function makeExport(overrides: Partial<CatalogPdfExportStatus> = {}): CatalogPdfExportStatus {
+    return {
+      export_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', status: 'running', total_products: 29630, volumes: 60, size_bytes: null,
+      error_message: null, created_at: null, finished_at: null, expires_at: null, download_url: null,
+      ...overrides,
+    }
+  }
+
+  it('SCRUM-998 — si el backend responde 202 avisa que se genera en volúmenes y muestra el avance sin descargar nada', async () => {
+    const showSpy = mockToast()
+    mockedApi.catalog.sendPdf.mockResolvedValue({ queued: true, exportId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', totalProducts: 29630, volumes: 60 })
+    mockedApi.catalog.pdfExport.mockResolvedValue(makeExport())
+    renderPage()
+    await screen.findByText('IL-DEC-1410A · 770 Lights')
+
+    fireEvent.click(screen.getByText('ventasDiseno:catalogScreen.actions.sendFull'))
+
+    await waitFor(() => expect(showSpy).toHaveBeenCalledWith('ventasDiseno:catalogScreen.sendQueued:29630', 'success'))
+    expect(showSpy).not.toHaveBeenCalledWith('ventasDiseno:catalogScreen.sendSuccess', 'success')
+    expect(await screen.findByText('ventasDiseno:catalogScreen.exportBanner.generating:29630')).toBeInTheDocument()
+    expect(mockedApi.catalog.pdfExport).toHaveBeenCalledWith('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')
+  })
+
+  it('SCRUM-998 — con ?export= (enlace del aviso) y el ZIP listo muestra el botón y descarga con una URL recién pedida', async () => {
+    const assign = vi.fn()
+    const realLocation = window.location
+    Object.defineProperty(window, 'location', { value: { ...realLocation, assign }, writable: true, configurable: true })
+    try {
+      mockedApi.catalog.pdfExport
+        .mockResolvedValueOnce(makeExport({ status: 'done', size_bytes: 52_428_800, download_url: 'https://s3.test/viejo' }))
+        .mockResolvedValue(makeExport({ status: 'done', size_bytes: 52_428_800, download_url: 'https://s3.test/nuevo' }))
+      renderPage('/?export=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')
+
+      fireEvent.click(await screen.findByText('ventasDiseno:catalogScreen.exportBanner.download'))
+
+      await waitFor(() => expect(assign).toHaveBeenCalledWith('https://s3.test/nuevo'))
+    } finally {
+      Object.defineProperty(window, 'location', { value: realLocation, writable: true, configurable: true })
+    }
+  })
+
+  it('SCRUM-998 — si al hacer clic el enlace ya venció avisa en vez de descargar', async () => {
+    const showSpy = mockToast()
+    mockedApi.catalog.pdfExport
+      .mockResolvedValueOnce(makeExport({ status: 'done', size_bytes: 1024, download_url: 'https://s3.test/x' }))
+      .mockResolvedValue(makeExport({ status: 'done', size_bytes: 1024, download_url: null }))
+    renderPage('/?export=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')
+
+    fireEvent.click(await screen.findByText('ventasDiseno:catalogScreen.exportBanner.download'))
+
+    await waitFor(() => expect(showSpy).toHaveBeenCalledWith('ventasDiseno:catalogScreen.exportBanner.expired', 'error'))
+  })
+
+  it('SCRUM-998 — una exportación fallida muestra el motivo seguro que devuelve el backend', async () => {
+    mockedApi.catalog.pdfExport.mockResolvedValue(makeExport({ status: 'failed', error_message: 'No se pudo generar el catálogo. Intenta de nuevo.' }))
+    renderPage('/?export=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo generar el catálogo. Intenta de nuevo.')
+    expect(screen.queryByText('ventasDiseno:catalogScreen.exportBanner.download')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-998 — una exportación ajena o inexistente (404) se muestra como no encontrada', async () => {
+    mockedApi.catalog.pdfExport.mockRejectedValue(new Error('404'))
+    renderPage('/?export=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
+
+    expect(await screen.findByText('ventasDiseno:catalogScreen.exportBanner.notFound')).toBeInTheDocument()
+  })
+
+  it('SCRUM-998 — sin ?export= no hay banner ni se consulta ninguna exportación', async () => {
+    renderPage()
+    await screen.findByText('IL-DEC-1410A · 770 Lights')
+
+    expect(mockedApi.catalog.pdfExport).not.toHaveBeenCalled()
+    expect(screen.queryByText(/exportBanner/)).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-998 — se puede cerrar el banner', async () => {
+    mockedApi.catalog.pdfExport.mockResolvedValue(makeExport())
+    renderPage('/?export=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')
+    await screen.findByText('ventasDiseno:catalogScreen.exportBanner.generating:29630')
+
+    fireEvent.click(screen.getByLabelText('common:actions.close'))
+
+    await waitFor(() => expect(screen.queryByText(/exportBanner\.generating/)).not.toBeInTheDocument())
   })
 
   it('REQ-620 — botones de Inventario navegan a las rutas reales', async () => {

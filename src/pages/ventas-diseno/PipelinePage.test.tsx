@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import VentasDisenoPipelinePage from './PipelinePage'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
+import { useToastStore } from '@/store/toastStore'
 import type { PipelineCard } from '@/types/ventasDiseno'
 
 vi.mock('react-i18next', () => ({
@@ -22,8 +23,10 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       get: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      changeStage: vi.fn(),
       contacts: { create: vi.fn(), update: vi.fn(), remove: vi.fn() },
     },
+    home: { vendors: vi.fn().mockResolvedValue([]) },
     masterClients: { list: vi.fn(), create: vi.fn() },
     subClients: { list: vi.fn(), create: vi.fn() },
   },
@@ -33,8 +36,20 @@ vi.mock('@/store/authStore', () => ({
   useAuthStore: vi.fn(),
 }))
 
+// SCRUM-849.1 — drag&drop reporta errores de transición vía toast (sin modal abierto).
+vi.mock('@/store/toastStore', () => ({ useToastStore: vi.fn() }))
+
 const mockedApi   = vi.mocked(ventasDisenoApi, true)
 const mockedStore = vi.mocked(useAuthStore)
+const mockedToast = vi.mocked(useToastStore)
+
+function mockToast(showSpy: (msg: string, type?: 'success' | 'error') => void = vi.fn()) {
+  mockedToast.mockImplementation(((selector?: (s: { show: typeof showSpy }) => unknown) => {
+    const state = { show: showSpy }
+    return selector ? selector(state) : state
+  }) as never)
+  return showSpy
+}
 
 function makeCard(overrides: Partial<PipelineCard> = {}): PipelineCard {
   return {
@@ -44,6 +59,7 @@ function makeCard(overrides: Partial<PipelineCard> = {}): PipelineCard {
     master_client: { id: 1, name: 'Grupo Delta' },
     sub_client: { id: 1, business_name: 'Delta Residencial' },
     owner: { id: 1, name: 'Ana Diaz' },
+    assignees: [{ id: 1, name: 'Ana Diaz' }],
     amount: null,
     worked_area_m2: null,
     days_in_stage: 2,
@@ -67,8 +83,18 @@ function renderPage(initialEntries = ['/ventas-diseno/pipeline']) {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.pipeline.list.mockResolvedValue([])
-  mockedStore.mockReturnValue({ user: { id: 1, role: 'designer' } } as never)
+  mockedStore.mockReturnValue({ user: { id: 1, role: 'designer', permissions: ['ventas_diseno.write'] } } as never)
+  mockToast()
 })
+
+// SCRUM-849.1 — jsdom no dispara drag&drop nativo del navegador; se simulan los eventos
+// React (dragStart/dragOver/drop) directo, mismo patrón que el resto de la suite usa
+// fireEvent para click/change.
+function dragCardToColumn(cardId: number, targetStage: string) {
+  fireEvent.dragStart(screen.getByTestId(`pipeline-card-${cardId}`))
+  fireEvent.dragOver(screen.getByTestId(`pipeline-stage-${targetStage}`))
+  fireEvent.drop(screen.getByTestId(`pipeline-stage-${targetStage}`))
+}
 
 describe('VentasDisenoPipelinePage', () => {
   it('muestra el título de la pantalla', async () => {
@@ -252,6 +278,7 @@ describe('VentasDisenoPipelinePage', () => {
     mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
     mockedApi.pipeline.get.mockResolvedValue({
       ...makeCard({ id: 5 }),
+      creator: null,
       delivery_type: null, observations: null, delivery_dates: [], contacts: [],
       has_architect_contact: false, can_edit: true, files: [], latest_quote_id: null,
     })
@@ -262,5 +289,152 @@ describe('VentasDisenoPipelinePage', () => {
         expect.objectContaining({ scope: 'team' }),
       ),
     )
+  })
+
+  // SCRUM-849.1 — drag&drop entre columnas del Pipeline.
+  describe('drag & drop entre etapas', () => {
+    it('arrastrar una tarjeta a otra columna llama al mismo endpoint que "Mover a..."', async () => {
+      mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
+      mockedApi.pipeline.changeStage.mockResolvedValue({} as never)
+      renderPage()
+
+      await screen.findByText('Torre Delta')
+      dragCardToColumn(7, 'design')
+
+      await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(7, 'design'))
+    })
+
+    it('soltar en la misma columna de origen no llama al endpoint (no-op)', async () => {
+      mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
+      renderPage()
+
+      await screen.findByText('Torre Delta')
+      dragCardToColumn(7, 'lead')
+
+      expect(mockedApi.pipeline.changeStage).not.toHaveBeenCalled()
+    })
+
+    it('una transición rechazada por el backend se avisa por toast, sin bloquear el tablero', async () => {
+      const showSpy = mockToast()
+      mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
+      mockedApi.pipeline.changeStage.mockRejectedValue({
+        isAxiosError: true,
+        response: { data: { message: 'Falta al menos 1 contacto antes de mover esta tarjeta desde Lead.' } },
+      })
+      renderPage()
+
+      await screen.findByText('Torre Delta')
+      dragCardToColumn(7, 'approved')
+
+      await waitFor(() => expect(showSpy).toHaveBeenCalledWith(
+        'Falta al menos 1 contacto antes de mover esta tarjeta desde Lead.', 'error',
+      ))
+    })
+  })
+})
+
+
+// SCRUM-1128 — filtro Pedidos y modo solo lectura (Félix).
+describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
+  function renderPage() {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    return render(
+      <MemoryRouter>
+        <QueryClientProvider client={qc}>
+          <VentasDisenoPipelinePage />
+        </QueryClientProvider>
+      </MemoryRouter>,
+    )
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockToast()
+    mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 1, stage: 'approved' })])
+  })
+
+  it('el filtro Pedidos envía orders=approved|pending al backend', async () => {
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'designer', modules: { ventas_diseno: { edit: true } } } } as never)
+    renderPage()
+    const sel = await screen.findByTestId('pipeline-orders-filter')
+    fireEvent.change(sel, { target: { value: 'pending' } })
+    await waitFor(() => expect(mockedApi.pipeline.list).toHaveBeenLastCalledWith(expect.objectContaining({ orders: 'pending' })))
+    fireEvent.change(sel, { target: { value: 'approved' } })
+    await waitFor(() => expect(mockedApi.pipeline.list).toHaveBeenLastCalledWith(expect.objectContaining({ orders: 'approved' })))
+  })
+
+  it('sin permiso de edición del módulo: oculta Nuevo proyecto/Nueva cotización y no permite arrastrar', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', modules: { ventas_diseno: { edit: false } } } } as never)
+    renderPage()
+    const tile = await screen.findByTestId('pipeline-card-1')
+    expect(tile).toHaveAttribute('draggable', 'false')
+    expect(screen.queryByText('ventasDiseno:kanban.actions.newProject')).not.toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:kanban.actions.newQuote')).not.toBeInTheDocument()
+  })
+  it('sin claim modules.ventas_diseno y sin permiso de escritura (Félix): solo lectura, no se asume edición', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} } } as never)
+    renderPage()
+    const tile = await screen.findByTestId('pipeline-card-1')
+    expect(tile).toHaveAttribute('draggable', 'false')
+    expect(screen.queryByText('ventasDiseno:kanban.actions.newProject')).not.toBeInTheDocument()
+  })
+
+  it('con permiso ventas_diseno.write edita aunque el claim de módulo no llegue', async () => {
+    mockedStore.mockReturnValue({ user: { id: 2, role: 'designer', permissions: ['ventas_diseno.write'] } } as never)
+    renderPage()
+    const tile = await screen.findByTestId('pipeline-card-1')
+    expect(tile).toHaveAttribute('draggable', 'true')
+  })
+
+  it('Félix (pipeline.read_all): lista con scope=team, sin toggle ni llamada a vendors, en solo lectura', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pass_to_order'], modules: {} } } as never)
+    renderPage()
+    const tile = await screen.findByTestId('pipeline-card-1')
+    expect(tile).toHaveAttribute('draggable', 'false')
+    expect(mockedApi.pipeline.list).toHaveBeenCalledWith(expect.objectContaining({ scope: 'team' }))
+    expect(mockedApi.pipeline.list).not.toHaveBeenCalledWith(expect.objectContaining({ scope: 'own' }))
+    expect(screen.queryByText('ventasDiseno:scope.team')).not.toBeInTheDocument()
+    expect(mockedApi.home.vendors).not.toHaveBeenCalled()
+    expect(screen.queryByText('ventasDiseno:kanban.actions.newProject')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1139 — Félix con `pipeline.edit`: edita el tablero (crear proyecto, arrastrar), sin ir a Cotizaciones.
+  it('Félix con pipeline.read_all + pipeline.edit: arrastra, ve Nuevo proyecto y NO ve Nueva cotización', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} } } as never)
+    renderPage()
+    const tile = await screen.findByTestId('pipeline-card-1')
+    expect(tile).toHaveAttribute('draggable', 'true')
+    expect(mockedApi.pipeline.list).toHaveBeenCalledWith(expect.objectContaining({ scope: 'team' }))
+    expect(screen.getByText('ventasDiseno:kanban.actions.newProject')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:kanban.actions.newQuote')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1139 (observación de Pre-QA) — el Catálogo exige `ventas_diseno.read`: a Félix, con solo permisos angostos del Pipeline, el botón sería un enlace muerto.
+  it('Félix (solo permisos angostos del Pipeline): NO ve el botón Catálogo', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} } } as never)
+    renderPage()
+    await screen.findByTestId('pipeline-card-1')
+    expect(screen.queryByText('ventasDiseno:kanban.actions.catalog')).not.toBeInTheDocument()
+  })
+
+  it('quien tiene ventas_diseno.read (aunque tenga pipeline.edit) sigue viendo el botón Catálogo', async () => {
+    mockedStore.mockReturnValue({ user: { id: 3, role: 'management', permissions: ['ventas_diseno.read', 'ventas_diseno.pipeline.edit'], modules: {} } } as never)
+    renderPage()
+    await screen.findByTestId('pipeline-card-1')
+    expect(screen.getByText('ventasDiseno:kanban.actions.catalog')).toBeInTheDocument()
+  })
+
+  it('superadmin sigue viendo el botón Catálogo', async () => {
+    mockedStore.mockReturnValue({ user: { id: 4, role: 'superadmin', permissions: ['superadmin.all'], modules: {} } } as never)
+    renderPage()
+    await screen.findByTestId('pipeline-card-1')
+    expect(screen.getByText('ventasDiseno:kanban.actions.catalog')).toBeInTheDocument()
+  })
+
+  it('quien edita por el módulo sigue viendo Nueva cotización', async () => {
+    mockedStore.mockReturnValue({ user: { id: 2, role: 'designer', permissions: ['ventas_diseno.write'] } } as never)
+    renderPage()
+    await screen.findByTestId('pipeline-card-1')
+    expect(screen.getByText('ventasDiseno:kanban.actions.newQuote')).toBeInTheDocument()
   })
 })

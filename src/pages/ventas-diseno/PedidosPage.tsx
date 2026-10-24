@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
+import { useAuthStore } from '@/store/authStore'
 import type { OrderRow, OrderStatus } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -10,6 +11,10 @@ import { Pagination } from '@/components/ui/Pagination'
 import { usePermission } from '@/hooks/usePermission'
 import PedidoDetailModal from '@/components/PedidoDetailModal'
 import OrdersSettingsPanel from '@/components/OrdersSettingsPanel'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { formatDateFromTimestamp } from '@/utils/dates'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const STATUSES: OrderStatus[] = ['pendiente', 'igual', 'bajo', 'mejoro']
 
@@ -48,9 +53,26 @@ export default function VentasDisenoPedidosPage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const navigate = useNavigate()
   const canConfigureThreshold = usePermission('ventas_diseno.pricing.configure')
+  // SCRUM-1119 — Compras ve Pedidos sin tener Ventas y Diseño: Catálogo y Cotizaciones exigen ventas_diseno.read.
+  const canOpenVentasDiseno = usePermission('ventas_diseno.read')
+  // SCRUM-854 (rebote de QA, 2026-09-09) — esta pantalla no tiene selector Mías/Equipo (REQ-629
+  // RN4, ver docblock de OrdersService::list()): el backend ya manda 'team' siempre y baja a
+  // 'own' solo por rol. El filtro de vendedor/diseñador acá no necesita el toggle own/team que sí
+  // usan Pipeline/Cotizaciones/Reportes — solo tiene efecto real (y solo se muestra) para quien ya
+  // ve el equipo completo; para un vendedor normal, que ya ve únicamente lo suyo, sería un
+  // selector de una sola opción sin utilidad.
+  const { user } = useAuthStore()
+  const canSeeTeam = hasGerenciaScope(user)
 
-  const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  // SCRUM-1184 — «Pendientes de reposición» (Compras) enlaza a un pedido con ?search=<N° de pedido>.
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [estado, setEstado] = useState<OrderStatus | ''>('')
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
   const [detailId, setDetailId] = useState<number | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [page, setPage] = useState(1)
@@ -58,13 +80,19 @@ export default function VentasDisenoPedidosPage() {
   // SCRUM-166 RN4 (Gerencia → "Monto aprobado del mes"): llega con ?mes=YYYY-MM.
   // /ventas-diseno/orders no tiene filtro de fecha — se filtra client-side por
   // `approved_at`, mismo criterio que QuotesListPage.tsx (SCRUM-166 RN3).
-  const [searchParams] = useSearchParams()
   const [mes] = useState<string | null>(() => searchParams.get('mes'))
 
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
+
   const { data: result, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-orders', search, estado, page, perPage, mes],
+    queryKey: ['ventas-diseno-orders', searchTerm, estado, page, perPage, mes, ownerIds],
     queryFn:  () => ventasDisenoApi.orders.list({
-      search: search || undefined, estado: estado || undefined,
+      search: searchTerm || undefined, estado: estado || undefined,
+      owner_ids: canSeeTeam && ownerIds.length > 0 ? ownerIds : undefined,
       page: mes ? 1 : page, per_page: mes ? 'all' : perPage,
     }),
   })
@@ -75,6 +103,7 @@ export default function VentasDisenoPedidosPage() {
   function clearFilters() {
     setSearch('')
     setEstado('')
+    setOwnerIds([])
     setPage(1)
   }
 
@@ -101,12 +130,16 @@ export default function VentasDisenoPedidosPage() {
               {t('ventasDiseno:orders.settings.toggle')}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => navigate('/ventas-diseno/catalog')}>
-            {t('ventasDiseno:orders.actions.catalog')}
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/ventas-diseno/quotes-list')}>
-            {t('ventasDiseno:orders.actions.viewQuotes')}
-          </Button>
+          {canOpenVentasDiseno && (
+            <>
+              <Button variant="secondary" onClick={() => navigate('/ventas-diseno/catalog')}>
+                {t('ventasDiseno:orders.actions.catalog')}
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/ventas-diseno/quotes-list')}>
+                {t('ventasDiseno:orders.actions.viewQuotes')}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -156,7 +189,12 @@ export default function VentasDisenoPedidosPage() {
             <option key={s} value={s}>{t(`ventasDiseno:orders.status.${s}`)}</option>
           ))}
         </select>
-        {(search || estado) && (
+        {/* SCRUM-854 — filtro Vendedor/Diseñador, mismo componente que Pipeline/Cotizaciones/
+            Reportes/Lista de Proyectos/Pedidos (Bodega). */}
+        {canSeeTeam && (
+          <UserMultiSelect users={teamVendors ?? []} selectedIds={ownerIds} onChange={ids => { setOwnerIds(ids); setPage(1) }} />
+        )}
+        {(search || estado || ownerIds.length > 0) && (
           <Button variant="secondary" onClick={clearFilters}>{t('ventasDiseno:orders.filters.clear')}</Button>
         )}
       </Card>
@@ -195,7 +233,7 @@ export default function VentasDisenoPedidosPage() {
                     <td className="px-3 py-2">{row.master_client?.name ?? '—'}</td>
                     <td className="px-3 py-2">{row.sales_project?.name ?? '—'}</td>
                     <td className="px-3 py-2 text-right font-semibold">{fmtMoney(row.amount)}</td>
-                    <td className="px-3 py-2">{new Date(row.approved_at).toLocaleDateString()}</td>
+                    <td className="px-3 py-2">{formatDateFromTimestamp(row.approved_at)}</td>
                     <td className="px-3 py-2 text-right">{fmtPct(row.quoted_margin)}</td>
                     <td className="px-3 py-2 text-right">{invoicedMarginCell(row, t)}</td>
                     <td className="px-3 py-2">
