@@ -26,7 +26,7 @@ const isNumberArray = (v: unknown): v is number[] => Array.isArray(v) && v.every
 export const ITEMS_DROPPABLE_PREFIX = 'items-'
 
 /**
- * SCRUM-1161 — lista de partidas de Crear/Editar cotización (y CotizaYA): colapsar/expandir (solo visual, por pestaña),
+ * SCRUM-1161 — lista de partidas de Crear/Editar cotización : colapsar/expandir (solo visual, por pestaña),
  * y reordenar partidas y productos dentro de su partida por drag and drop. El orden de CREACIÓN no cambia: lo nuevo
  * entra al final y el arrastre solo reescribe la posición después.
  */

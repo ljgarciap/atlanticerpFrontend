@@ -43,9 +43,6 @@
     "actividad": "Actividad",
     "logs": "Logs",
     "settings": "Configuración",
-    "lumo": "LUMO",
-    "soporte": "Soporte",
-    "manuales": "Manuales de usuario",
     "configuracionGlobal": "Configuración global"
   },
   "globalSettings": {

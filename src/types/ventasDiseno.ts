@@ -825,9 +825,7 @@ export interface QuoteDetail {
   id:                        number
   // SCRUM-1121 — asociados del proyecto (o del borrador si la cotización aún no tiene proyecto).
   associates?:               Associate[]
-  // SCRUM-1120 — 'cotizaya' = cotización de venta chica (módulo CotizaYA), aparte del flujo comercial.
-  origin?:                   'comercial' | 'cotizaya'
-  cotizaya?:                 { customer_name: string | null; customer_phone: string | null } | null
+  origin?:                   'comercial' | 'icg_legacy'
   status:                    QuoteStatus
   // Cotización-D (REQ-048/051): folio/generated_at quedan null mientras la
   // cotización siga siendo un borrador sin generar — ese es el gate que habilita
@@ -1121,7 +1119,7 @@ export interface QuoteListRow {
   stage:            PipelineStage | null
   price_type:       QuotePriceType
   owner:            PipelineCardOwner
-  // SCRUM-1195 — Responsable del proyecto (dueño de la tarjeta del Pipeline); null sin tarjeta (borradores, CotizaYA). `owner` = quien generó la versión.
+  // SCRUM-1195 — Responsable del proyecto (dueño de la tarjeta del Pipeline); null sin tarjeta (borradores). `owner` = quien generó la versión.
   designer?:        { id: number; name: string } | null
   quote_date:       string
   document_status:  QuoteDocumentStatus
@@ -1224,46 +1222,4 @@ export interface OrderDetail extends OrderRow {
 
 export interface OrdersSettingsValue {
   margin_drop_threshold_pts: number
-}
-
-// SCRUM-1120 — CotizaYA: cotizaciones de venta chica, independientes del flujo comercial.
-export interface CotizaYaContactOption {
-  id:    number
-  name:  string
-  role:  string | null
-  phone: string | null
-  email: string | null
-}
-
-export interface CotizaYaContext {
-  configured:              boolean
-  master_client:           { id: number; name: string } | null
-  sub_client:              { id: number; business_name: string } | null
-  contacts:                CotizaYaContactOption[]
-  default_conditions_text: string
-}
-
-export interface CotizaYaListRow {
-  id:             number
-  folio:          string
-  customer_name:  string | null
-  customer_phone: string | null
-  description:    string | null
-  owner:          { id: number; name: string }
-  generated_at:   string | null
-  grand_total:    number
-}
-
-export interface CotizaYaListResult {
-  data: CotizaYaListRow[]
-  meta: { total: number; per_page: number; current_page: number; last_page: number }
-}
-
-/** Campos propios del formulario de CotizaYA (todos opcionales; el Cliente Master es siempre el fijo). */
-export interface CotizaYaFields {
-  cotizaya_customer_name?:  string | null
-  cotizaya_customer_phone?: string | null
-  description?:             string | null
-  observations?:            string | null
-  conditions_text?:         string | null
 }

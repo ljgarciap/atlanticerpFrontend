@@ -26,7 +26,7 @@ const LABELS: Record<string, Record<string, string>> = {
   ventasDiseno: {
     'nav.module': 'Ventas & Diseño', 'nav.home': 'Inicio', 'nav.pipeline': 'Pipeline',
     'nav.clients': 'Clientes', 'nav.quotesList': 'Cotizaciones', 'nav.reports': 'Reportes',
-    'nav.auditLog': 'Historial', 'nav.pedidos': 'Pedidos', 'nav.cotizaya': 'CotizaYA',
+    'nav.auditLog': 'Historial', 'nav.pedidos': 'Pedidos',
     'nav.statusPedidos': 'Status de Pedidos',
   },
   crm: {
@@ -1249,26 +1249,6 @@ describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 reb
     expect(visible('Inicio Bodega')).toBe(true)
     expect(visible('Bodegas')).toBe(true)
     expect(visible('Movimientos')).toBe(true)
-  })
-})
-
-// SCRUM-1120 — CotizaYA: ítem de menú inmediatamente después de Cotizaciones, dentro de Ventas & Diseño.
-describe('Sidebar — CotizaYA (SCRUM-1120)', () => {
-  it('aparece en Ventas & Diseño justo después de Cotizaciones', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
-    renderSidebar()
-    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
-
-    const labels = screen.getAllByRole('button').map(b => b.textContent?.trim())
-    const quotes = labels.indexOf('Cotizaciones')
-    expect(quotes).toBeGreaterThan(-1)
-    expect(labels[quotes + 1]).toBe('CotizaYA')
-  })
-
-  it('no aparece para quien no tiene Ventas & Diseño', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'lider_compras', permissions: [], modules: { compras: noModule({ view: true }) } }) })
-    renderSidebar()
-    expect(screen.queryByText('CotizaYA')).not.toBeInTheDocument()
   })
 })
 

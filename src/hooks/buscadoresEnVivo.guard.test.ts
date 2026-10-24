@@ -25,7 +25,6 @@ const EXCEPCIONES: Record<string, string> = {
   'pages/admin-contab/ClientesFiscalPage.tsx': 'espera propia de 350 ms antes de consultar',
   'components/bodega/ZonaLibreCatalogoTable.tsx': 'espera propia antes de consultar (spec UX SCRUM-990); Enter la aplica de inmediato',
   'components/compras/FamilyCombobox.tsx': 'filtra en el navegador las familias ya cargadas',
-  'pages/LumoBitacorasPage.tsx': 'el filtro de vendedor es un selector de ids, no texto libre',
   'components/ClientPicker.tsx': 'búsqueda imperativa con espera propia de 250 ms (SCRUM-1176); enfocar el campo busca al instante',
   'components/UserMultiSelect.tsx': 'filtra en el navegador una lista ya cargada',
   'pages/servicios/ServiceQuotesHistoryPage.tsx': 'filtra en el navegador una lista ya cargada',

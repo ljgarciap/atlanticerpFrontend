@@ -101,7 +101,7 @@ describe('VentasDisenoQuotesListPage', () => {
     expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-1195 — sin Responsable (borrador, CotizaYA) la columna cae a quien generó la cotización', async () => {
+  it('SCRUM-1195 — sin Responsable (borrador) la columna cae a quien generó la cotización', async () => {
     mockedApi.quotes.list.mockResolvedValue(makeResult({ data: [makeRow({ designer: null })] }))
     renderPage()
     expect(await screen.findByText('Designer Demo')).toBeInTheDocument()

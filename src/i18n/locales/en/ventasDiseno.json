@@ -10,8 +10,7 @@
     "pedidos": "Orders",
     "statusPedidos": "Order Status",
     "reports": "Reports",
-    "auditLog": "History",
-    "cotizaya": "CotizaYA"
+    "auditLog": "History"
   },
   "scope": {
     "own": "Home",
@@ -969,69 +968,6 @@
       "montoMaximo": "Maximum amount",
       "sinTope": "No cap (last tier)"
     }
-  },
-  "cotizaya": {
-    "title": "CotizaYA",
-    "subtitle": "Small-sale quotes, independent of the commercial flow",
-    "button": "CotizaYA",
-    "searchPlaceholder": "Search by ID, customer, phone or description",
-    "empty": "There are no CotizaYA quotes yet",
-    "table": {
-      "id": "ID",
-      "customer": "Customer name",
-      "phone": "Phone",
-      "description": "Description",
-      "designer": "Designer",
-      "date": "Date",
-      "total": "Total",
-      "actions": "Actions",
-      "viewDetail": "View detail",
-      "downloadPdf": "Download PDF"
-    },
-    "form": {
-      "title": "New CotizaYA",
-      "back": "Back to CotizaYA",
-      "mainData": "Main data",
-      "customerName": "Customer name",
-      "customerPhone": "Phone",
-      "description": "Description",
-      "designer": "Designer in charge",
-      "contacts": "Contacts",
-      "contactsOptional": "(optional)",
-      "noContacts": "No contacts on file",
-      "observations": "Notes",
-      "parts": "Parts",
-      "noParts": "No parts yet",
-      "addPart": "+ Add part",
-      "partDefaultName": "Part {{n}}",
-      "totals": "Totals",
-      "subtotal": "General subtotal",
-      "itbms": "VAT (ITBMS)",
-      "total": "Total",
-      "conditions": "Terms",
-      "generate": "Generate",
-      "generating": "Generating…",
-      "notConfigured": "CotizaYA is not set up in this environment: the CotizaYA customer is missing.",
-      "missing": "Missing to generate: {{fields}}",
-      "genericError": "The action could not be completed. Please try again."
-    },
-    "detail": {
-      "title": "{{folio}}",
-      "back": "Back to CotizaYA",
-      "downloadPdf": "Download PDF",
-      "fixed": "Generated quote: it can only be viewed and downloaded as PDF.",
-      "customer": "Customer",
-      "phone": "Phone",
-      "description": "Description",
-      "designer": "Designer",
-      "date": "Date",
-      "contacts": "Contacts",
-      "observations": "Notes",
-      "conditions": "Terms",
-      "parts": "Parts",
-      "loadError": "The quote could not be loaded."
-    },
-    "pdfError": "The PDF could not be downloaded. Please try again."
   },
   "associates": {
     "title": "Associates",

@@ -83,9 +83,6 @@ import VentasMedioPagoPage from '@/pages/admin-contab/VentasMedioPagoPage'
 import FraudSettingsPage from '@/pages/admin-contab/FraudSettingsPage'
 import ClientesFiscalPage from '@/pages/admin-contab/ClientesFiscalPage'
 import GerenciaPage      from '@/pages/GerenciaPage'
-import LumoBitacorasPage from '@/pages/LumoBitacorasPage'
-import SoportePage       from '@/pages/SoportePage'
-import ManualesPage      from '@/pages/ManualesPage'
 import LegacyMigrationDashboardPage from '@/pages/LegacyMigrationDashboardPage'
 import LegacyPagosPage from '@/pages/LegacyPagosPage'
 import VistaIcgPage from '@/pages/VistaIcgPage'
@@ -100,9 +97,6 @@ import VentasDisenoQuotesListPage from '@/pages/ventas-diseno/QuotesListPage'
 import VentasDisenoAuditLogPage from '@/pages/ventas-diseno/AuditLogPage'
 import VentasDisenoCatalogPage  from '@/pages/ventas-diseno/CatalogPage'
 import VentasDisenoPedidosPage  from '@/pages/ventas-diseno/PedidosPage'
-import VentasDisenoCotizaYaPage       from '@/pages/ventas-diseno/CotizaYaPage'
-import VentasDisenoCotizaYaFormPage   from '@/pages/ventas-diseno/CotizaYaFormPage'
-import VentasDisenoCotizaYaDetailPage from '@/pages/ventas-diseno/CotizaYaDetailPage'
 import CrmDashboardPage     from '@/pages/crm/DashboardPage'
 import CrmProjectsListPage  from '@/pages/crm/ProjectsListPage'
 import SettingsPage       from '@/pages/SettingsPage'
@@ -242,23 +236,6 @@ export default function App() {
               <RequireRole roles={['lider_compras', 'management', 'superadmin']} orGerenciaScope>
                 <VentasDisenoPedidosPage />
               </RequireRole>
-            } />
-            {/* SCRUM-1120 — CotizaYA: cotizaciones de venta chica, independientes del flujo comercial.
-                Mismos permisos que Cotizaciones (leer para ver, escribir para crear). */}
-            <Route path="/ventas-diseno/cotizaya" element={
-              <RequirePermission permission="ventas_diseno.read">
-                <VentasDisenoCotizaYaPage />
-              </RequirePermission>
-            } />
-            <Route path="/ventas-diseno/cotizaya/nueva" element={
-              <RequirePermission permission="ventas_diseno.write">
-                <VentasDisenoCotizaYaFormPage />
-              </RequirePermission>
-            } />
-            <Route path="/ventas-diseno/cotizaya/:id" element={
-              <RequirePermission permission="ventas_diseno.read">
-                <VentasDisenoCotizaYaDetailPage />
-              </RequirePermission>
             } />
             <Route path="/ventas-diseno/quotes/:id?" element={
               <RequirePermission permission="ventas_diseno.write">
@@ -803,22 +780,6 @@ export default function App() {
               </RequirePermission>
             } />
             <Route path="/operaciones"   element={<OperacionesPage />} />
-
-            {/* SCRUM-925 — el Sidebar ya oculta el link a quien no tiene lumo.view; esto es
-                defensa en profundidad para quien entre por URL directa (Arquitecto, 2026-09-16). */}
-            <Route path="/lumo" element={
-              <RequirePermission permission="lumo.view">
-                <LumoBitacorasPage />
-              </RequirePermission>
-            } />
-
-            {/* SCRUM-923 — visible a cualquier usuario autenticado, sin RequirePermission
-                (decisión de Luis 2026-09-16). */}
-            <Route path="/soporte" element={<SoportePage />} />
-
-            {/* SCRUM-984 — visible a cualquier usuario autenticado; el panel de carga se gatea por
-                manuales.manage dentro de la página. */}
-            <Route path="/manuales" element={<ManualesPage />} />
 
             {/* SCRUM-816 — dashboard de migración ICG. Gate role:superadmin exclusivo (ajuste
                 2026-09-04 a pedido de Luis — antes incluía management/Gerencia, mismo criterio

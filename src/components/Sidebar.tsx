@@ -11,7 +11,7 @@ import {
   IcoHome, IcoList, IcoPipeline, IcoShoppingBag, IcoBox, IcoBeaker,
   IcoBarChart, IcoUsers, IcoUserCheck, IcoChevronLeft, IcoChevronRight, IcoChevronDown, IcoClock,
   IcoFileText, IcoMapPin, IcoGlobe, IcoSettings, IcoShield, IcoTool, IcoDollarSign, IcoBan,
-  IcoTrendingUp, IcoBook, IcoArchive, IcoEye, IcoLifeBuoy, IcoBookOpen,
+  IcoTrendingUp, IcoBook, IcoArchive, IcoEye, 
 } from '@/components/icons'
 import { hasGerenciaScope } from '@/lib/gerenciaScope'
 import { canReachComprasItem } from '@/config/comprasMenuPermissions'
@@ -215,11 +215,6 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const canSeeBodegaSettings = usePermission('superadmin.all')
   // SCRUM-944/945 — vista consolidada de valores paramétricos de negocio, mismo gate estricto.
   const canSeeGlobalSettings = usePermission('superadmin.all')
-  // SCRUM-925 — permiso individual por persona (Mark/David/Felix), mismo patrón que
-  // canSeeAiUsage/canSeeBodegaSettings arriba, no el patrón user?.modules?.X?.view de los módulos
-  // por rol (lumo.view vive en extra_permissions vía SpecialPermissionSeeder, no en un módulo del
-  // catálogo de 7).
-  const canSeeLumo = usePermission('lumo.view')
   // SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Mark en el backend (`primary_approver_only`, por identidad; superadmin
   // aparte): al resto del roster de Admin&Cont le abrían la pantalla y el API respondía 403 («no carga el contenido»). Solo se oculta cuando
   // el flag viene explícitamente en `false`: una sesión abierta antes de este cambio no trae el campo y conserva el menú hasta renovarla
@@ -594,8 +589,6 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           items: [
             { id: 'ventas-diseno-home',     label: tVentasDiseno('nav.home'),     href: '/ventas-diseno/home',     icon: <IcoHome /> },
             { id: 'ventas-diseno-quotes-list', label: tVentasDiseno('nav.quotesList'), href: '/ventas-diseno/quotes-list', icon: <IcoList /> },
-            // SCRUM-1120 — CotizaYA, inmediatamente después de Cotizaciones.
-            { id: 'ventas-diseno-cotizaya', label: tVentasDiseno('nav.cotizaya'), href: '/ventas-diseno/cotizaya', icon: <IcoFileText /> },
             // Epic CRM Batch F (SCRUM-703→710) — Pedidos; SCRUM-1119: solo Gerencia (Compras tiene su entrada aparte).
             ...(canSeePedidosTab
               ? [{ id: 'ventas-diseno-pedidos', label: tVentasDiseno('nav.pedidos'), href: '/ventas-diseno/pedidos', icon: <IcoShoppingBag /> }]
@@ -674,17 +667,6 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     ...(canSeeGerencia
       ? [{ section: t('nav.gerencia'), items: [{ id: 'gerencia', label: t('nav.gerencia'), href: '/gerencia', icon: <IcoUserCheck /> }] }]
       : []),
-    // SCRUM-925 — LUMO (Identity Bridge), gateado por permiso individual, no por rol/módulo.
-    ...(canSeeLumo
-      ? [{ section: t('nav.lumo'), items: [{ id: 'lumo', label: t('nav.lumo'), href: '/lumo', icon: <IcoBook /> }] }]
-      : []),
-    // SCRUM-923 — Soporte, visible a cualquier usuario autenticado (decisión de Luis
-    // 2026-09-16), sin gate de permiso.
-    { section: t('nav.soporte'), items: [{ id: 'soporte', label: t('nav.soporte'), href: '/soporte', icon: <IcoLifeBuoy /> }] },
-    // SCRUM-984 — Manuales de usuario, visible a cualquier usuario autenticado, justo después de
-    // Soporte (orden pedido en el ticket). El panel de carga se gatea dentro de la página
-    // (manuales.manage), no el ítem de menú.
-    { section: t('nav.manuales'), items: [{ id: 'manuales', label: t('nav.manuales'), href: '/manuales', icon: <IcoBookOpen /> }] },
     // SCRUM-816 — la épica de Migración ICG no tiene módulo propio en el JWT (ver docblock de
     // LegacyMigrationDashboardController). Sección completa + ambos ítems son superadmin-exclusivo
     // (ajuste 2026-09-04 a pedido de Luis — el Dashboard antes también era visible para
