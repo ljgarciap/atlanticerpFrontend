@@ -1007,7 +1007,7 @@ export interface ReportsCompletadosAnioItem {
 // Batch 10 (`TechnicianCommissionResult`) — mismo shape que devuelve
 // GET /internal-technicians/{id}/commission, este endpoint solo evita exponer el id del técnico
 // en la URL. `null` = sin captura del período (mismo criterio que TechnicianCommissionResult).
-export type ReportsComisionCarlosVergara = TechnicianCommissionResult | null
+export type ReportsComisionTecnico = TechnicianCommissionResult | null
 
 // REQ-280 — "Biblioteca de documentos" (informes de inspección + hojas de reclamo). Nunca
 // "documentos de satisfacción" (texto del mockup viejo que no existe en el dominio real, ver

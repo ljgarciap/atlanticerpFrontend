@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import {
   useCommissionExternalSummary, useArchitectOptions, useUploadArchitectCuentaCobro, useViewArchitectCuentaCobro,
 } from '@/hooks/useAdminContab'
@@ -46,13 +46,12 @@ const ESTADO_COBRO_CLIENTE_PILL_CLASSES: Record<ArchitectCommissionEstadoCobroCl
  */
 export default function ComisionesExternasPage() {
   const { t } = useTranslation(['common', 'adminContab'])
-  const { user } = useAuthStore()
-  const canUploadCuentaCobro = user?.role === 'superadmin' || user?.role === 'lider_admin_contab' || user?.role === 'asistente_administrativa' || user?.role === 'lider_operaciones'
+  const canUploadCuentaCobro = usePermission('admin_contab.operations.manage')
   // REQ-515/516 — mismo roster amplio del backend (`role:superadmin,lider_admin_contab,
   // asistente_administrativa,management`), que en la práctica es toda la audiencia de esta
   // pantalla (ver docblock de clase) — Marcar como pagado/Proponer %/Recordar están disponibles
   // para cualquiera con acceso acá, solo Decidir % (Aprobar/Rechazar) es exclusivo de Gerencia.
-  const canManage = canUploadCuentaCobro || user?.role === 'management'
+  const canManage = usePermission('admin_contab.records.manage')
 
   const [search, setSearch]           = useState('')
 

@@ -17,17 +17,18 @@ import InternalTechnicianCommissionResultModal from '@/components/servicios/Inte
 import { IcoPlus } from '@/components/icons'
 import type { InternalTechnician } from '@/types/servicios'
 import type { UserInfo } from '@/types/auth'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 type ViewMode = 'team' | 'agenda'
 
 // REQ-259 RN5 — exclusivo de Lider Servicios/Líder de Servicios.
-function canRegisterTechnician(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin'
+function canRegisterTechnician(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
 }
 
 // REQ-292 RN5 — Lider Servicios y Gerencia capturan/editan la comisión mensual.
-function canManageCommission(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'management' || role === 'superadmin'
+function canManageCommission(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.field_ops.admin'])
 }
 
 // Batch 10 (REQ-258 RN8) — el resultado calculado lo ve el propio técnico o Gerencia, NUNCA Lider Servicios
@@ -35,7 +36,7 @@ function canManageCommission(role: string | undefined): boolean {
 // técnico (no solo por rol) porque "el propio técnico" depende de cuál tarjeta es.
 function canViewCommissionResultFor(user: UserInfo | null | undefined, technician: InternalTechnician): boolean {
   if (!user) return false
-  if (user.role === 'management' || user.role === 'superadmin') return true
+  if (hasAnyPermission(user.permissions, ['platform.management'])) return true
   return technician.user_id !== null && technician.user_id === user.id
 }
 
@@ -44,8 +45,8 @@ export default function InternalTechniciansPage() {
   const { t }    = useTranslation('servicios')
   const user     = useAuthStore(s => s.user)
   const qc       = useQueryClient()
-  const canAdd   = canRegisterTechnician(user?.role)
-  const canManageComm = canManageCommission(user?.role)
+  const canAdd   = canRegisterTechnician(user?.permissions)
+  const canManageComm = canManageCommission(user?.permissions)
   const [searchParams] = useSearchParams()
 
   // REQ-207 RN2 (Inicio → botón "Agenda") / REQ-208 RN2 (panel Rutas del día → "Ver agenda

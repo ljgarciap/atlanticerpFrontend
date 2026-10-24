@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ReportsCommissionSection from './ReportsCommissionSection'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { InternalTechnician, ReportsPeriodParams } from '@/types/servicios'
 
 vi.mock('react-i18next', async (importOriginal) => ({
@@ -14,17 +15,17 @@ vi.mock('react-i18next', async (importOriginal) => ({
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: {
     internalTechnicians: { list: vi.fn() },
-    reportes:            { comisionCarlosVergara: vi.fn() },
+    reportes:            { comisionTecnico: vi.fn() },
   },
 }))
 
 const mockedApi = vi.mocked(serviciosApi, true)
 
-const CARLOS_USER_ID = 18
+const TECNICO_USER_ID = 18
 
 function technician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 1, user_id: CARLOS_USER_ID, nombre: 'Tecnico Servicios Test', telefono: null,
+    id: 1, user_id: TECNICO_USER_ID, nombre: 'Tecnico Servicios Test', telefono: null,
     email: 'tecnicoservicios@test.com', especialidad: 'general', color: '#3B82F6',
     has_bonus_plan: true, estado: 'off', visitas_hoy: 0, herramientas_asignadas: 0,
     pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
@@ -33,7 +34,7 @@ function technician(overrides: Partial<InternalTechnician> = {}): InternalTechni
 }
 
 function setUser(role: string, id: number) {
-  useAuthStore.setState({ user: { id, role, email: 'x@y.z', first_name: 'X', last_name: 'Y' } as never })
+  useAuthStore.setState({ user: { id, role, permissions: permissionsForOrEmpty(role), email: 'x@y.z', first_name: 'X', last_name: 'Y' } as never })
 }
 
 const DEFAULT_GLOBAL_PERIOD: ReportsPeriodParams = { year: 2026, month: 8 }
@@ -53,7 +54,7 @@ beforeEach(() => {
     technician(),
     technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
   ])
-  mockedApi.reportes.comisionCarlosVergara.mockResolvedValue({
+  mockedApi.reportes.comisionTecnico.mockResolvedValue({
     capture: { year: 2026, month: 8, licencia_medica: false },
     total: 258,
     desglose: [{ criterio: 'calidad', peso_pct: 25, pct_obtenido: 92, monto_max: 100, monto_obtenido: 92 }],
@@ -71,7 +72,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
     renderSection()
 
     await waitFor(() => expect(screen.getByText('reports.commission.title')).toBeInTheDocument())
-    await waitFor(() => expect(mockedApi.reportes.comisionCarlosVergara).toHaveBeenCalled())
+    await waitFor(() => expect(mockedApi.reportes.comisionTecnico).toHaveBeenCalled())
   })
 
   it('el técnico con plan de bonificación ve su propia sección aunque le hayan cambiado el nombre', async () => {
@@ -79,7 +80,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
       technician({ nombre: 'Tecnico Servicios A. Tecnico Servicios' }),
       technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
     ])
-    setUser('tecnico_servicios', CARLOS_USER_ID)
+    setUser('tecnico_servicios', TECNICO_USER_ID)
     renderSection()
 
     await waitFor(() => expect(screen.getByText('reports.commission.title')).toBeInTheDocument())
@@ -91,7 +92,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
 
     await waitFor(() => expect(mockedApi.internalTechnicians.list).toHaveBeenCalled())
     expect(screen.queryByText('reports.commission.title')).not.toBeInTheDocument()
-    expect(mockedApi.reportes.comisionCarlosVergara).not.toHaveBeenCalled()
+    expect(mockedApi.reportes.comisionTecnico).not.toHaveBeenCalled()
   })
 
   it('lider_servicios (Lider Servicios) no ve la sección NI dispara la llamada de red', async () => {
@@ -100,7 +101,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
 
     await waitFor(() => expect(mockedApi.internalTechnicians.list).toHaveBeenCalled())
     expect(screen.queryByText('reports.commission.title')).not.toBeInTheDocument()
-    expect(mockedApi.reportes.comisionCarlosVergara).not.toHaveBeenCalled()
+    expect(mockedApi.reportes.comisionTecnico).not.toHaveBeenCalled()
   })
 })
 
@@ -113,7 +114,7 @@ describe('ReportsCommissionSection — sincronía con el filtro general (SCRUM-9
     setUser('management', 4)
     renderSection({ year: 2025, month: 3 })
 
-    await waitFor(() => expect(mockedApi.reportes.comisionCarlosVergara).toHaveBeenCalledWith({ year: 2025, month: 3 }))
+    await waitFor(() => expect(mockedApi.reportes.comisionTecnico).toHaveBeenCalledWith({ year: 2025, month: 3 }))
     await waitFor(() => expect(screen.getByText('Marzo de 2025')).toBeInTheDocument())
   })
 
@@ -121,7 +122,7 @@ describe('ReportsCommissionSection — sincronía con el filtro general (SCRUM-9
     setUser('management', 4)
     const { rerender } = renderSection({ year: 2026, month: 8 })
 
-    await waitFor(() => expect(mockedApi.reportes.comisionCarlosVergara).toHaveBeenCalledWith({ year: 2026, month: 8 }))
+    await waitFor(() => expect(mockedApi.reportes.comisionTecnico).toHaveBeenCalledWith({ year: 2026, month: 8 }))
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     rerender(
@@ -130,7 +131,7 @@ describe('ReportsCommissionSection — sincronía con el filtro general (SCRUM-9
       </QueryClientProvider>,
     )
 
-    await waitFor(() => expect(mockedApi.reportes.comisionCarlosVergara).toHaveBeenCalledWith({ year: 2026, month: 5 }))
+    await waitFor(() => expect(mockedApi.reportes.comisionTecnico).toHaveBeenCalledWith({ year: 2026, month: 5 }))
     await waitFor(() => expect(screen.getByText('Mayo de 2026')).toBeInTheDocument())
   })
 

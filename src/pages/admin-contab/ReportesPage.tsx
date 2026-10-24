@@ -10,7 +10,7 @@ import {
 import { Card } from '@/components/ui/Card'
 import { IcoBarChart, IcoTrendingUp, IcoChevronRight, IcoCheck, IcoFileText, IcoList, IcoBook, IcoDollarSign } from '@/components/icons'
 import type { ReportsPeriodo } from '@/types/adminContab'
-import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend)
 
@@ -91,9 +91,8 @@ export default function ReportesPage() {
   // SCRUM-881 (Pre-QA, 2026-09-11) -- el backend ya bloqueaba GET /reports/felix-commission
   // para asistente_administrativa (routes/admin-contab.php linea 396), pero esta tarjeta se
   // renderizaba sin ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio
-  // (fetch bloqueado en 403). Mismo allow-list que el backend.
-  const { user } = useAuthStore()
-  const canSeeFelixCommission = ['superadmin', 'lider_admin_contab', 'management'].includes(user?.role ?? '')
+  // (fetch bloqueado en 403). Mismo permiso que el backend (`admin_contab.oversight.manage`: líder y Gerencia, sin la asistente).
+  const canSeeFelixCommission = usePermission('admin_contab.oversight.manage')
 
   return (
     <div className="max-w-6xl mx-auto pb-16">

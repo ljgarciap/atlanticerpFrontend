@@ -10,7 +10,7 @@ import type { ReglaAprobacion, SaveReglaAprobacionPayload } from '@/types/gerenc
 
 // SCRUM-163 (REQ-101) — panel de administración de REGLA_APROBACION, exclusivo de superadmin
 // (gate real vive en el backend, ver routes/gerencia.php — el botón que abre este panel en
-// GerenciaPage.tsx ya está condicionado a user?.role === 'superadmin', esto es solo defensa en
+// GerenciaPage.tsx ya está condicionado a superadmin.all, esto es solo defensa en
 // profundidad de UX). El catálogo de `tipo` es texto libre a propósito: la matriz real de tipos
 // vs. aprobadores está PENDIENTE DE DEFINIR CON EL CLIENTE (ver docblock de ReglaAprobacion en el
 // backend) — esta pantalla solo da la infraestructura para cargarla cuando esté definida.

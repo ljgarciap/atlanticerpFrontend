@@ -23,7 +23,7 @@ import type {
   HomeEstadoTicketsResponse,
   ReportsPeriodParams, ReportsPanoramaMes, ReportsInstalacionesCotizadasVsRealizadas,
   ReportsDistribucionTipoItem, ReportsDistribucionTecnicoItem, ReportsCompletadosAnioItem,
-  ReportsComisionCarlosVergara, ReportsBibliotecaFilters, ReportsBibliotecaResponse,
+  ReportsComisionTecnico, ReportsBibliotecaFilters, ReportsBibliotecaResponse,
   Tool, ToolEstado, ToolFilters, ToolPurchaseRequest, ToolPurchaseRequestsResponse,
   CreateToolPurchaseRequestPayload, ReceiveToolPurchaseResponse,
   Insumo, CreateInsumoSolicitudPayload, InsumoPurchaseRequest, CreateInsumoPayload,
@@ -494,8 +494,8 @@ export const serviciosApi = {
     // REQ-286 — 403 si el actor no califica (ni Gerencia ni el propio Tecnico Servicios Test). El caller
     // (ReportsCommissionSection) no debe llamar este endpoint si no califica (`enabled: false`),
     // el 403 acá es solo la segunda línea de defensa del backend, no un caso que el frontend maneje.
-    comisionCarlosVergara: (params: Partial<ReportsPeriodParams> = {}): Promise<ReportsComisionCarlosVergara> =>
-      api.get<{ data: ReportsComisionCarlosVergara }>('/servicios/reportes/comision-carlos-vergara', { params })
+    comisionTecnico: (params: Partial<ReportsPeriodParams> = {}): Promise<ReportsComisionTecnico> =>
+      api.get<{ data: ReportsComisionTecnico }>('/servicios/reportes/comision-tecnico', { params })
         .then(r => r.data.data),
 
     // Devuelve { data, meta } completo, sin desenvolver — se pasa directo a <Pagination meta={...}/>.

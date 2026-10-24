@@ -17,22 +17,23 @@ import EstadoTicketsPanel from '@/components/servicios/EstadoTicketsPanel'
 import TicketDetailModal from '@/components/servicios/TicketDetailModal'
 import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { IcoPlus, IcoCalendar } from '@/components/icons'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 // REQ-245 RN4 — MISMO criterio que TicketsPage.tsx `canCreateTicket()` (técnico interno/garantías
 // NO tienen este botón, ver la ruta en routes/servicios.php). Senior Review 2026-08-11 (Batch 15):
 // el botón "+ Nuevo ticket" de Inicio se renderizaba sin este gate, a diferencia del mismo botón
 // en la pantalla de Tickets — cualquier rol veía el botón acá y solo se enteraba de que no podía
 // crear al recibir un 403 real del backend al enviar el formulario.
-function canCreateTicket(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin' || role === 'management' || role === 'vendedor_disenador'
+function canCreateTicket(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.create'])
 }
 
 // REQ-214 RN3/RN4 (Grupo C, SCRUM-277) — MISMO criterio que TicketsPage.tsx `canEditTicketStatus()`
 // (solo Lider Servicios/Líder de Servicios y superadmin agendan/reagendan). Duplicada acá a propósito, no
 // exportada desde TicketsPage.tsx — mismo patrón ya usado por `canCreateTicket()` arriba. Si este
 // criterio cambia, actualizar las DOS copias (acá y en TicketsPage.tsx) — no diverjas una sin la otra.
-function canEditTicketStatus(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin'
+function canEditTicketStatus(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
 }
 
 // Fase 4 — Servicios, Batch 15 (REQ-207/208/210/211) + Batch SCRUM-322/269 (REQ-206, saludo
@@ -47,8 +48,8 @@ export default function ServiciosHomePage() {
   const navigate   = useNavigate()
   const qc         = useQueryClient()
   const user       = useAuthStore(s => s.user)
-  const canCreate  = canCreateTicket(user?.role)
-  const canSchedule = canEditTicketStatus(user?.role)
+  const canCreate  = canCreateTicket(user?.permissions)
+  const canSchedule = canEditTicketStatus(user?.permissions)
   const [createOpen, setCreateOpen] = useState(false)
   // REQ-214 (Grupo C) — modal "Ver ticket" abierto desde el panel de Insumos pendientes, siempre
   // de solo lectura (`canEdit=false`, sin Editar ni Cancelar) — solo Agendar/Reagendar respeta el

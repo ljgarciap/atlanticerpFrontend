@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
@@ -13,11 +14,11 @@ interface Props {
 }
 
 // REQ-211 RN2a(c) — solo Gerencia puede sobrescribir la meta del mes (mismo gate que el backend,
-// `role:superadmin,management` en routes/servicios.php). Oculto por completo para el resto, no
+// `permission:servicios.settings.configure` en routes/servicios.php). Oculto por completo para el resto, no
 // deshabilitado — es una acción, no un umbral que todo el equipo deba poder consultar (a
 // diferencia de ServiciosSettingsPage).
-function canEditGoal(role: string | undefined): boolean {
-  return role === 'superadmin' || role === 'management'
+function canEditGoal(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.settings.configure'])
 }
 
 function formatPct(value: number | null): string {
@@ -42,7 +43,7 @@ export default function HomeMonthlyIndicators({ data }: Props) {
   const { t }  = useTranslation('servicios')
   const qc     = useQueryClient()
   const user   = useAuthStore(s => s.user)
-  const editable = canEditGoal(user?.role)
+  const editable = canEditGoal(user?.permissions)
   const [goalModalOpen, setGoalModalOpen] = useState(false)
 
   const instalaciones = data?.instalaciones

@@ -25,6 +25,8 @@ export default function UsersPage() {
   const { user: authUser } = useAuthStore()
   const actorPermissions   = authUser?.permissions ?? []
   const actorHasSuperadmin = actorPermissions.includes('superadmin.all')
+  // EXCEPCIÓN a la Fase 1b (decide por rol A PROPÓSITO): la ruta pide `permission:superadmin.all`, pero el servicio revalida en BD que el
+  // operador tenga el ROL BASE superadmin (`AdminPasswordResetService::operatorIsStillSuperadmin`, H3 del threat model). Aquí se alinea la UI con eso.
   // El backend gatea el reset con `role:superadmin`, que compara el claim `role` del JWT (rol base),
   // NO el permiso `superadmin.all` (que también lo da un nivel 10 o un rol adicional). Se alinea el
   // criterio de la UI para no mostrar botones que terminarían en 403.

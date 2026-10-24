@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
@@ -13,8 +14,8 @@ import { IcoPlus } from '@/components/icons'
 // REQ-273/274/275 — exclusivo de Lider Servicios/Líder de Servicios y superadmin, mismo criterio que
 // canManageTools en ToolsPanel.tsx (no se reexporta desde ahí a propósito: son 2 sub-vistas que
 // Backend Dev puede evolucionar por separado, ver docblock de InsumosPanel/ToolsPanel).
-function canManageInsumos(role: string | undefined): boolean {
-  return role === 'lider_servicios' || role === 'superadmin'
+function canManageInsumos(permissions: readonly string[] | undefined): boolean {
+  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
 }
 
 // REQ-273→275 (Batch Grupo D parte 2, SCRUM-343/344/345). Sub-vista "Insumos" de Insumos y
@@ -23,7 +24,7 @@ export default function InsumosPanel() {
   const { t }   = useTranslation('servicios')
   const qc      = useQueryClient()
   const user    = useAuthStore(s => s.user)
-  const canEdit = canManageInsumos(user?.role)
+  const canEdit = canManageInsumos(user?.permissions)
 
   const [createOpen, setCreateOpen]       = useState(false)
   const [requestTarget, setRequestTarget] = useState<Insumo | null>(null)
