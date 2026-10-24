@@ -11,6 +11,8 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoDownload } from '@/components/icons'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 type Tag = 'design' | 'quote' | 'both'
 const TAGS: Tag[] = ['design', 'quote', 'both']
@@ -37,17 +39,22 @@ export default function CrmProjectsListPage() {
   const showToast = useToastStore(s => s.show)
 
   const [search,   setSearch]   = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [scope,    setScope]    = useState<'own' | 'team'>('own')
-  const [ownerId,  setOwnerId]  = useState<number | ''>('')
+  // SCRUM-854 — multi-selección Vendedor/Diseñador, reemplaza el `<select>` de un solo owner.
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
   const [stage,    setStage]    = useState<PipelineStage | ''>('')
   const [tag,      setTag]      = useState<Tag | ''>('')
   const [page,     setPage]     = useState(1)
   const [perPage,  setPerPage]  = useState<number | 'all'>(20)
 
   const filters = {
-    search: search || undefined,
+    search: searchTerm || undefined,
     scope,
-    owner_id: scope === 'team' && ownerId !== '' ? ownerId : undefined,
+    owner_ids: scope === 'team' && ownerIds.length > 0 ? ownerIds : undefined,
     stage: stage || undefined,
     tag: tag || undefined,
     page,
@@ -76,9 +83,9 @@ export default function CrmProjectsListPage() {
   const canViewTeam = data?.can_view_team ?? false
   const owners     = data?.filters.owners ?? []
 
-  const filtersActive = search !== '' || stage !== '' || tag !== '' || (scope === 'team' && ownerId !== '')
+  const filtersActive = search !== '' || stage !== '' || tag !== '' || (scope === 'team' && ownerIds.length > 0)
   const handleClearFilters = () => {
-    setSearch(''); setStage(''); setTag(''); setOwnerId(''); setPage(1)
+    setSearch(''); setStage(''); setTag(''); setOwnerIds([]); setPage(1)
   }
 
   if (isLoading) {
@@ -119,7 +126,7 @@ export default function CrmProjectsListPage() {
               variant="outline"
               active={scope === 'own'}
               className="!px-3 !py-1.5 !text-xs"
-              onClick={() => { setScope('own'); setOwnerId(''); setPage(1) }}
+              onClick={() => { setScope('own'); setOwnerIds([]); setPage(1) }}
             >
               {tVd('scope.own')}
             </Button>
@@ -133,16 +140,12 @@ export default function CrmProjectsListPage() {
             </Button>
           </div>
           {scope === 'team' && (
-            <select
-              value={ownerId}
-              onChange={e => { setOwnerId(e.target.value ? Number(e.target.value) : ''); setPage(1) }}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              <option value="">{tCrm('projectsList.filters.allOwners')}</option>
-              {owners.map(o => (
-                <option key={o.id} value={o.id}>{o.name}</option>
-              ))}
-            </select>
+            <UserMultiSelect
+              users={owners}
+              selectedIds={ownerIds}
+              onChange={ids => { setOwnerIds(ids); setPage(1) }}
+              placeholder={tCrm('projectsList.filters.allOwners')}
+            />
           )}
         </div>
       )}

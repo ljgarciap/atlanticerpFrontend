@@ -32,8 +32,19 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
   const [clientOpen, setClientOpen]     = useState(false)
   const [masterClientId, setMasterClientId] = useState<number | null>(initialMasterClientId ?? null)
 
+  // SCRUM-931 — filtro cruzado Proyecto↔Cotización, resuelto local sobre la lista de facturas
+  // abiertas ya cargada (ver ADR-SCRUM931): sin request nueva, sin asumir que la combinación
+  // siempre acota a una sola factura (una cotización puede tener varias entregas facturadas por
+  // separado, ver SCRUM-929).
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
+  const [selectedQuoteId, setSelectedQuoteId]     = useState<number | null>(null)
+
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<number>>(new Set())
-  const [aplicarSaldoFavor, setAplicarSaldoFavor]   = useState(true)
+  // SCRUM-902 §4.4 — reemplaza el viejo checkbox todo-o-nada `aplicarSaldoFavor`: monto editable
+  // que el usuario decide aplicar del saldo a nivel Cliente master, con tope al disponible. El
+  // saldo a nivel Factura/Proyecto (abono_obligatorio) nunca pasa por acá — se aplica solo,
+  // bloqueado, por factura (ver el desglose en cada fila de "Facturas abiertas" abajo).
+  const [montoSaldoCliente, setMontoSaldoCliente]   = useState('')
   const [metodoPago, setMetodoPago]                 = useState<PaymentMethod>('transferencia')
   const [bankAccountId, setBankAccountId]           = useState<number | null>(null)
   const [bankAccountTouched, setBankAccountTouched] = useState(false)
@@ -44,7 +55,9 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
   const [comprobanteDragOver, setComprobanteDragOver] = useState(false)
   const [error, setError]                           = useState<string | null>(null)
 
-  const { data: clientOptions = [] } = usePaymentClients(clientQuery)
+  // SCRUM-905 — solo clientes con facturas pendientes de cobro (no la lista completa de clientes
+  // del sistema, que era el comportamiento por defecto de `usePaymentClients`).
+  const { data: clientOptions = [] } = usePaymentClients(clientQuery, false, true)
   const { data: openInvoicesResult, isFetching: loadingInvoices } = useOpenInvoices(masterClientId)
   const { data: bankAccounts = [] } = useBankAccounts()
   const { data: suggestedAccount } = useDefaultBankAccount(metodoPago)
@@ -53,6 +66,67 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
   const invoices      = openInvoicesResult?.invoices ?? []
   const creditBalance = openInvoicesResult?.credit_balance ?? 0
   const sinCuentaBancaria = PAYMENT_METHODS_SIN_CUENTA_BANCARIA.includes(metodoPago)
+
+  // SCRUM-931 — opciones de cada select derivadas de `invoices`, acotadas por la selección
+  // VIGENTE del otro campo (filtrado cruzado real, no solo padre→hijo).
+  const projectOptions = useMemo(() => {
+    const byId = new Map<number, string>()
+    for (const inv of invoices) {
+      if (inv.sales_project_id === null) continue
+      if (selectedQuoteId !== null && inv.quote_id !== selectedQuoteId) continue
+      if (!byId.has(inv.sales_project_id)) byId.set(inv.sales_project_id, inv.proyecto ?? `#${inv.sales_project_id}`)
+    }
+    return Array.from(byId, ([id, name]) => ({ id, name }))
+  }, [invoices, selectedQuoteId])
+
+  const quoteOptions = useMemo(() => {
+    const byId = new Map<number, string>()
+    for (const inv of invoices) {
+      if (inv.quote_id === null) continue
+      if (selectedProjectId !== null && inv.sales_project_id !== selectedProjectId) continue
+      if (!byId.has(inv.quote_id)) byId.set(inv.quote_id, inv.cotizacion_folio ?? `#${inv.quote_id}`)
+    }
+    return Array.from(byId, ([id, folio]) => ({ id, folio }))
+  }, [invoices, selectedProjectId])
+
+  // Factura(s) que matchean la combinación elegida — nunca asume cardinalidad 1.
+  const visibleInvoices = useMemo(
+    () => invoices.filter(inv =>
+      (selectedProjectId === null || inv.sales_project_id === selectedProjectId)
+      && (selectedQuoteId === null || inv.quote_id === selectedQuoteId)),
+    [invoices, selectedProjectId, selectedQuoteId],
+  )
+
+  // Si el filtro Proyecto/Cotización oculta una factura ya tildada, la selección se poda para que
+  // no quede una factura "cobrándose" sin checkbox visible en pantalla (el total y el submit usan
+  // `selectedInvoiceIds`, no `visibleInvoices` — sin esto, el neto a cobrar podía incluir una
+  // factura que el usuario ya no ve).
+  useEffect(() => {
+    const visibleIds = new Set(visibleInvoices.map(inv => inv.id))
+    setSelectedInvoiceIds(prev => {
+      const next = new Set([...prev].filter(id => visibleIds.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [visibleInvoices])
+
+  function selectProject(id: number | null) {
+    setSelectedProjectId(id)
+    // Si la Cotización ya elegida no pertenece a este Proyecto, la combinación queda inconsistente
+    // — se limpia en vez de dejar un filtro que no matchea ninguna factura.
+    if (id !== null && selectedQuoteId !== null) {
+      const stillValid = invoices.some(inv => inv.quote_id === selectedQuoteId && inv.sales_project_id === id)
+      if (!stillValid) setSelectedQuoteId(null)
+    }
+  }
+
+  function selectQuote(id: number | null) {
+    setSelectedQuoteId(id)
+    // AC — elegir Cotización autocompleta/filtra el Proyecto al de esa cotización.
+    if (id !== null) {
+      const projectOfQuote = invoices.find(inv => inv.quote_id === id)?.sales_project_id
+      if (projectOfQuote != null) setSelectedProjectId(projectOfQuote)
+    }
+  }
 
   // REQ-462 RN2 — al llegar preseleccionado desde Facturación, la query string solo trae el id;
   // el nombre se completa apenas responde open-invoices (mismo request que ya se necesita).
@@ -83,24 +157,29 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
     }
   }, [suggestedAccount, sinCuentaBancaria, bankAccountTouched])
 
-  // RN1 REQ-465 — el saldo a favor se ofrece marcado por defecto en cuanto hay al menos 1 factura
-  // seleccionada y el cliente tiene saldo disponible.
+  // Reinicia el monto de saldo a aplicar al cambiar de cliente (mismo criterio que antes con
+  // `aplicarSaldoFavor` — nunca arrastrar una elección de un cliente distinto).
   useEffect(() => {
-    setAplicarSaldoFavor(creditBalance > 0)
-  }, [masterClientId, creditBalance])
+    setMontoSaldoCliente('')
+  }, [masterClientId])
 
+  // SCRUM-902 §4.2/4.3 — `neto_a_cobrar` ya viene reducido por el backend cuando la factura tiene
+  // un abono obligatorio (Factura/Proyecto); para el resto es simplemente `saldo_pendiente`.
   const totalFacturas = useMemo(
-    () => invoices.filter(i => selectedInvoiceIds.has(i.id)).reduce((sum, i) => sum + i.saldo_pendiente, 0),
+    () => invoices.filter(i => selectedInvoiceIds.has(i.id)).reduce((sum, i) => sum + i.neto_a_cobrar, 0),
     [invoices, selectedInvoiceIds],
   )
-  const saldoFavorAplicado = aplicarSaldoFavor ? Math.min(creditBalance, totalFacturas) : 0
-  const montoRecibido = Math.max(0, Math.round((totalFacturas - saldoFavorAplicado) * 100) / 100)
+  const montoSaldoClienteNumber = parseFloat(montoSaldoCliente.replace(/[^0-9.]/g, '')) || 0
+  const saldoClienteExcedeDisponible = montoSaldoClienteNumber > creditBalance
+  const montoRecibido = Math.max(0, Math.round((totalFacturas - montoSaldoClienteNumber) * 100) / 100)
 
   function selectClient(opt: PaymentClientOption) {
     setMasterClientId(opt.id)
     setClientQuery(opt.name)
     setClientOpen(false)
     setSelectedInvoiceIds(new Set())
+    setSelectedProjectId(null)
+    setSelectedQuoteId(null)
   }
 
   // REQ-468 RN1 — JPG/PNG/PDF, máx. 10MB. La validación de tipo/tamaño es solo UX inmediata acá
@@ -127,7 +206,7 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
     })
   }
 
-  const canSubmit = masterClientId !== null && selectedInvoiceIds.size > 0
+  const canSubmit = masterClientId !== null && selectedInvoiceIds.size > 0 && !saldoClienteExcedeDisponible
     && (sinCuentaBancaria || montoRecibido === 0 || bankAccountId !== null)
     && (metodoPago !== 'ajuste_cuenta' || comentarioAjuste.trim() !== '')
 
@@ -137,7 +216,7 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
     registerMutation.mutate({
       master_client_id: masterClientId,
       invoice_ids: Array.from(selectedInvoiceIds),
-      aplicar_saldo_favor: aplicarSaldoFavor,
+      monto_saldo_cliente_aplicado: montoSaldoClienteNumber,
       metodo_pago: metodoPago,
       monto_recibido_estimado: montoRecibido,
       // RN4 REQ-465/466 — sin cuenta bancaria cuando el método no la usa O cuando no entra
@@ -165,8 +244,14 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
           <Button variant="icon" onClick={onClose}><IcoClose /></Button>
         </div>
 
-        <div className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-          {/* Cliente */}
+        {/* Cliente — rebote Daniela (SCRUM-905, 2026-09-13): un ancestro con overflow-y-auto
+            clippea cualquier hijo absolutamente posicionado que caiga fuera de su propio alto,
+            sin importar z-index — por eso el desplegable de resultados "no se veía" al tipear
+            (SÍ se renderizaba, solo quedaba recortado por el scroll del cuerpo del modal). El
+            buscador de cliente es siempre el primer paso del flujo y no necesita co-scrollear
+            con el resto del formulario, así que vive en su propio contenedor SIN overflow, fuera
+            del área scrolleable de abajo. */}
+        <div className="px-5 pt-4">
           <div className="relative">
             <label className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
               {t('cobros.registrarModal.clienteLabel')}
@@ -183,20 +268,57 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 pl-8 pr-3 py-2 text-sm"
               />
             </div>
+            {/* SCRUM-905 — max-h-48/py-1.5 se sentía comprimido con nombres largos de cliente;
+                más alto + más padding por fila para que se lea cómodo sin tapar el resto del modal. */}
             {clientOpen && clientOptions.length > 0 && (
-              <ul className="absolute z-10 mt-1 w-full rounded-md border border-slate-200 bg-white dark:bg-slate-800 py-1 shadow-lg max-h-48 overflow-auto">
+              <ul className="absolute z-10 mt-1 w-full rounded-md border border-slate-200 bg-white dark:bg-slate-800 py-1 shadow-lg max-h-80 overflow-auto">
                 {clientOptions.map(opt => (
                   <li key={opt.id} onMouseDown={() => selectClient(opt)}
-                    className="cursor-pointer px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    className="cursor-pointer px-3 py-2.5 text-sm leading-snug text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
                     {opt.name}
                   </li>
                 ))}
               </ul>
             )}
           </div>
+        </div>
 
+        <div className="px-5 pb-4 pt-4 flex flex-col gap-4 max-h-[calc(70vh-90px)] overflow-y-auto">
           {masterClientId !== null && (
             <>
+              {/* Proyecto / # de Cotización — SCRUM-931, filtrado cruzado sobre las facturas ya
+                  cargadas de este cliente (sin request nueva, ver ADR-SCRUM931). */}
+              {!loadingInvoices && invoices.length > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-sm">
+                    <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                      {t('cobros.registrarModal.proyectoLabel')}
+                    </span>
+                    <select
+                      value={selectedProjectId ?? ''}
+                      onChange={e => selectProject(e.target.value ? Number(e.target.value) : null)}
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
+                    >
+                      <option value="">{t('cobros.registrarModal.proyectoTodos')}</option>
+                      {projectOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </label>
+                  <label className="text-sm">
+                    <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                      {t('cobros.registrarModal.cotizacionLabel')}
+                    </span>
+                    <select
+                      value={selectedQuoteId ?? ''}
+                      onChange={e => selectQuote(e.target.value ? Number(e.target.value) : null)}
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
+                    >
+                      <option value="">{t('cobros.registrarModal.cotizacionTodas')}</option>
+                      {quoteOptions.map(q => <option key={q.id} value={q.id}>{q.folio}</option>)}
+                    </select>
+                  </label>
+                </div>
+              )}
+
               {/* Facturas abiertas — REQ-464 */}
               <div>
                 <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
@@ -206,14 +328,34 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                   <p className="text-xs text-slate-400">{t('cobros.registrarModal.cargandoFacturas')}</p>
                 ) : invoices.length === 0 ? (
                   <p className="text-xs text-slate-400">{t('cobros.registrarModal.sinFacturasPendientes')}</p>
+                ) : visibleInvoices.length === 0 ? (
+                  <p className="text-xs text-slate-400">{t('cobros.registrarModal.sinFacturasParaFiltro')}</p>
                 ) : (
                   <div className="flex flex-col gap-1.5">
-                    {invoices.map(inv => (
-                      <label key={inv.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 text-sm cursor-pointer">
-                        <input type="checkbox" checked={selectedInvoiceIds.has(inv.id)} onChange={() => toggleInvoice(inv.id)} />
-                        <span className="flex-1 text-slate-700 dark:text-slate-200">{inv.numero}</span>
-                        <span className="font-semibold text-slate-800 dark:text-slate-100">{formatCurrency(inv.saldo_pendiente)}</span>
-                      </label>
+                    {visibleInvoices.map(inv => (
+                      <div key={inv.id} className="rounded-lg bg-slate-50 dark:bg-slate-700/40 text-sm">
+                        <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
+                          <input type="checkbox" checked={selectedInvoiceIds.has(inv.id)} onChange={() => toggleInvoice(inv.id)} />
+                          <span className="flex-1 text-slate-700 dark:text-slate-200">{inv.numero}</span>
+                          {inv.abono_obligatorio ? (
+                            <span className="font-semibold text-slate-800 dark:text-slate-100">{formatCurrency(inv.neto_a_cobrar)}</span>
+                          ) : (
+                            <span className="font-semibold text-slate-800 dark:text-slate-100">{formatCurrency(inv.saldo_pendiente)}</span>
+                          )}
+                        </label>
+                        {/* SCRUM-902 §4.2/4.3 — abono obligatorio de nivel Factura/Proyecto: monto
+                            ya reducido y BLOQUEADO, desglose de los 3 montos siempre visible
+                            (Escenario 5: "$1,200 − $500 de abono aplicado = $700"). */}
+                        {inv.abono_obligatorio && (
+                          <div className="px-3 pb-2 -mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap">
+                            <span>{formatCurrency(inv.monto)}</span>
+                            <span>−</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(inv.abono_obligatorio.monto)} {t('cobros.registrarModal.abonoAplicadoTag')}</span>
+                            <span>=</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">{formatCurrency(inv.neto_a_cobrar)}</span>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
@@ -224,19 +366,26 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                 )}
               </div>
 
-              {/* Saldo a favor — REQ-465 */}
+              {/* Saldo a favor a nivel Cliente master — SCRUM-902 §4.4, opcional y editable con
+                  tope al disponible (nunca cubre el abono obligatorio de arriba, que se aplica solo). */}
               {creditBalance > 0 && selectedInvoiceIds.size > 0 && (
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={aplicarSaldoFavor} onChange={e => setAplicarSaldoFavor(e.target.checked)} />
-                  <span className="text-slate-700 dark:text-slate-200">
-                    {t('cobros.registrarModal.aplicarSaldoFavor', { monto: formatCurrency(creditBalance) })}
-                  </span>
-                </label>
-              )}
-              {aplicarSaldoFavor && saldoFavorAplicado > 0 && (
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                  {t('cobros.registrarModal.saldoFavorAplicadoLine')}: -{formatCurrency(saldoFavorAplicado)}
-                </p>
+                <div>
+                  <label className="text-sm">
+                    <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                      {t('cobros.registrarModal.saldoClienteLabel', { monto: formatCurrency(creditBalance) })}
+                    </span>
+                    <input
+                      type="text" value={montoSaldoCliente} placeholder="$0.00"
+                      onChange={e => setMontoSaldoCliente(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
+                    />
+                  </label>
+                  {saldoClienteExcedeDisponible && (
+                    <p className="text-[11px] text-red-600 mt-1">
+                      {t('cobros.registrarModal.saldoClienteExcede', { monto: formatCurrency(creditBalance) })}
+                    </p>
+                  )}
+                </div>
               )}
 
               {/* Monto recibido — autocalculado, RN3 REQ-465 */}
@@ -261,24 +410,31 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                 </select>
               </label>
 
-              {/* Cuenta bancaria destino — RN4 REQ-466, oculto para retencion/ajuste */}
-              {!sinCuentaBancaria && (
-                <label className="text-sm">
-                  <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
-                    {t('cobros.registrarModal.cuentaBancariaLabel')}
-                  </span>
-                  <select
-                    value={bankAccountId ?? ''}
-                    onChange={e => { setBankAccountId(e.target.value ? Number(e.target.value) : null); setBankAccountTouched(true) }}
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
-                  >
-                    <option value="">{t('cobros.registrarModal.cuentaBancariaPlaceholder')}</option>
-                    {bankAccounts.filter(a => a.activa).map(a => (
-                      <option key={a.id} value={a.id}>{a.banco} — {t(`cuentasBancarias.tipos.${a.tipo_cuenta}`)} ****{a.ultimos_4_digitos}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
+              {/* Cuenta bancaria destino — RN4 REQ-466. SCRUM-955 §3: retención/ajuste ya no
+                  ocultan el campo, lo muestran bloqueado en "Otros" (el payload sigue mandando
+                  null, ver bank_account_id más abajo — sin cambio de contrato con backend). */}
+              <label className="text-sm">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                  {t('cobros.registrarModal.cuentaBancariaLabel')}
+                </span>
+                <select
+                  value={sinCuentaBancaria ? 'otros' : (bankAccountId ?? '')}
+                  disabled={sinCuentaBancaria}
+                  onChange={e => { setBankAccountId(e.target.value ? Number(e.target.value) : null); setBankAccountTouched(true) }}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm disabled:bg-slate-50 disabled:dark:bg-slate-800 disabled:text-slate-400"
+                >
+                  {sinCuentaBancaria ? (
+                    <option value="otros">{t('cobros.registrarModal.cuentaBancariaOtros')}</option>
+                  ) : (
+                    <>
+                      <option value="">{t('cobros.registrarModal.cuentaBancariaPlaceholder')}</option>
+                      {bankAccounts.filter(a => a.activa).map(a => (
+                        <option key={a.id} value={a.id}>{a.banco} — {t(`cuentasBancarias.tipos.${a.tipo_cuenta}`)} ****{a.ultimos_4_digitos}</option>
+                      ))}
+                    </>
+                  )}
+                </select>
+              </label>
 
               {/* Campos condicionales — REQ-467 */}
               {metodoPago === 'retencion_impuestos' && (

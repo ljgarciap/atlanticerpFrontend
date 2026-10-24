@@ -20,10 +20,10 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/api/usersApi', async () => {
   const actual = await vi.importActual<typeof import('@/api/usersApi')>('@/api/usersApi')
-  return { ...actual, usersApi: { create: vi.fn(), update: vi.fn(), updateFlags: vi.fn() } }
+  return { ...actual, usersApi: { create: vi.fn(), update: vi.fn(), updateFlags: vi.fn(), list: vi.fn() } }
 })
 vi.mock('@/api/rolesApi', () => ({ rolesApi: { list: vi.fn() } }))
-vi.mock('@/api/levelsApi', () => ({ levelsApi: { listAll: vi.fn() } }))
+vi.mock('@/api/levelsApi', () => ({ levelsApi: { listAll: vi.fn(), catalog: vi.fn() } }))
 vi.mock('@/api/departmentsApi', () => ({ departmentsApi: { listAll: vi.fn() } }))
 
 const mockedUsersApi = vi.mocked(usersApi, true)
@@ -49,6 +49,7 @@ function baseUser(overrides: Partial<UserInfo> = {}): UserInfo {
 function makeUser(overrides: Partial<UserListItem> = {}): UserListItem {
   return {
     id: 5, first_name: 'Juan', last_name: 'García', email: 'juan@atlantic.test', phone: null,
+    job_title: null, hire_date: null, manager: null,
     is_active: true, mfa_enabled: false, notes: null, department: null, extra_permissions: [],
     security_level: { id: 3, level: 3, name: 'Nivel 3' }, roles: [],
     role_id: 1, additional_role_ids: [], approve_large_amounts: false, manage_users: false,
@@ -70,7 +71,17 @@ beforeEach(() => {
   useAuthStore.setState({ user: baseUser() })
   mockedRolesApi.list.mockResolvedValue(ROLES)
   mockedLevelsApi.listAll.mockResolvedValue(LEVELS)
+  mockedLevelsApi.catalog.mockResolvedValue({
+    catalog: {
+      crm: [{ key: 'crm.read', label: 'CRM — Ver', description: null }],
+      admin_contab: [
+        { key: 'admin_contab.edit.receptor_fiscal', label: 'Corregir el RUC y la razón social del cliente al facturar', description: null },
+        { key: 'admin_contab.edit.receptor_consumidor_final', label: 'Facturar a Consumidor final', description: null },
+      ],
+    },
+  })
   mockedDepartmentsApi.listAll.mockResolvedValue([])
+  mockedUsersApi.list.mockResolvedValue({ data: [], meta: { total: 0, per_page: 100, current_page: 1, last_page: 1 } })
 })
 
 describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
@@ -92,7 +103,7 @@ describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
     const { container } = renderDrawer(null)
     await waitFor(() => expect(screen.getByText('Vendedor/Diseñador')).toBeInTheDocument())
 
-    const roleSelect = container.querySelectorAll('select')[0]
+    const roleSelect = container.querySelectorAll('select')[1]
     expect(within(roleSelect).queryByText('Superadmin')).not.toBeInTheDocument()
   })
 
@@ -103,7 +114,7 @@ describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
     // botones de roles adicionales) — esperar por count en vez de un único match.
     await waitFor(() => expect(screen.getAllByText('Vendedor/Diseñador').length).toBeGreaterThan(0))
 
-    const roleSelect = container.querySelectorAll('select')[0]
+    const roleSelect = container.querySelectorAll('select')[1]
     expect(within(roleSelect).getByText('Superadmin')).toBeInTheDocument()
   })
 
@@ -134,6 +145,47 @@ describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
     await waitFor(() => expect(screen.getAllByText('Vendedor/Diseñador').length).toBeGreaterThan(0))
   })
 
+  it('SCRUM-822 — al crear, el payload incluye is_active=true por defecto', async () => {
+    mockedUsersApi.create.mockResolvedValue(makeUser())
+    const { container } = renderDrawer(null)
+
+    fireEvent.change(container.querySelector('input[name="first_name"]')!, { target: { value: 'Nueva' } })
+    fireEvent.change(container.querySelector('input[name="last_name"]')!, { target: { value: 'Persona' } })
+    fireEvent.change(container.querySelector('input[name="email"]')!, { target: { value: 'nueva@atlantic.test' } })
+
+    await waitFor(() => expect(screen.getByText('Vendedor/Diseñador')).toBeInTheDocument())
+    fireEvent.change(screen.getByDisplayValue('security:users.form.noRole'), { target: { value: '1' } })
+
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    await waitFor(() => expect(mockedUsersApi.create).toHaveBeenCalled())
+    const payload = mockedUsersApi.create.mock.calls[0][0]
+    expect(payload.is_active).toBe(true)
+  })
+
+  it('SCRUM-822 — el select de jefe directo excluye al propio usuario en edición', async () => {
+    mockedUsersApi.list.mockResolvedValue({
+      data: [makeUser({ id: 5, first_name: 'Juan' }), makeUser({ id: 9, first_name: 'Otro', last_name: 'Jefe' })],
+      meta: { total: 2, per_page: 100, current_page: 1, last_page: 1 },
+    })
+    const { container } = renderDrawer(makeUser({ id: 5 }))
+
+    await waitFor(() => expect(screen.getByText('Otro Jefe')).toBeInTheDocument())
+    const managerSelect = container.querySelectorAll('select')[0]
+    expect(within(managerSelect).queryByText('Juan García')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-822 — al editar, el payload no incluye is_active (RN3 solo aplica al crear)', async () => {
+    mockedUsersApi.update.mockResolvedValue(makeUser({ job_title: 'Coordinador' }))
+    renderDrawer(makeUser())
+
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    await waitFor(() => expect(mockedUsersApi.update).toHaveBeenCalled())
+    const [, payload] = mockedUsersApi.update.mock.calls[0]
+    expect(payload).not.toHaveProperty('is_active')
+  })
+
   it('togglear un flag llama a usersApi.updateFlags', async () => {
     mockedUsersApi.updateFlags.mockResolvedValue(makeUser({ approve_large_amounts: true }))
     renderDrawer(makeUser({ approve_large_amounts: false }))
@@ -145,3 +197,25 @@ describe('UserFormDrawer — rol base único (ADR-006, Fase D)', () => {
     await waitFor(() => expect(mockedUsersApi.updateFlags).toHaveBeenCalledWith(5, { approve_large_amounts: true }))
   })
 })
+
+describe('UserFormDrawer — permisos adicionales desde el catálogo (SCRUM-1140)', () => {
+  it('un superadmin ve los permisos del catálogo real, incluidos los angostos de quien factura', async () => {
+    useAuthStore.setState({ user: baseUser({ permissions: ['superadmin.all'] }) })
+    renderDrawer(null)
+
+    const bloque = await screen.findByTestId('extra-permissions')
+    await waitFor(() => expect(bloque).toHaveTextContent('admin_contab'))
+    expect(bloque).toHaveTextContent('Corregir el RUC y la razón social del cliente al facturar')
+    expect(bloque).toHaveTextContent('Facturar a Consumidor final')
+    expect(mockedLevelsApi.catalog).toHaveBeenCalled()
+  })
+
+  it('quien no es superadmin no ve los permisos adicionales ni consulta el catálogo', async () => {
+    renderDrawer(null)
+
+    await screen.findByText('Vendedor/Diseñador')
+    expect(screen.queryByTestId('extra-permissions')).not.toBeInTheDocument()
+    expect(mockedLevelsApi.catalog).not.toHaveBeenCalled()
+  })
+})
+

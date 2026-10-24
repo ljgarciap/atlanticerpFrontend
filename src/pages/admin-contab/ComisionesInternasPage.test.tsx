@@ -11,6 +11,15 @@ import type {
 } from '@/types/adminContab'
 import type { UserInfo } from '@/types/auth'
 
+// Mismo cálculo que ComisionesInternasPage::currentMonthKey() — el botón "Ver estado de cuenta"
+// pide por defecto el mes ACTUAL (reloj real, sin mockear), no el mes de la fixture de datos.
+// Hardcodear '2026-08' rompe apenas cambia el mes real (encontrado 2026-09-01, cuando el
+// calendario real pasó de agosto a septiembre a mitad de esta sesión).
+function currentMonthKey(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
 // Batch 14 del cuerpo principal (SCRUM-575→579, REQ-498→502) — Comisiones Internas. Cubre: 4
 // tarjetas + banner de pago automático (REQ-499), tabla de tramos solo lectura (REQ-498 RN1),
 // scoping view/view_team (REQ-575/577 permisos — vendedor sin exportar/filtrar por otros).
@@ -280,7 +289,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => 
     await clickVendorRow('Kayra Estrada')
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verEstadoCuenta'))
     await screen.findByText('adminContab:comisionesInternas.estadoCuenta.title')
-    expect(mockedApi.commissionsInternal.accountStatement).toHaveBeenCalledWith(1, '2026-08')
+    expect(mockedApi.commissionsInternal.accountStatement).toHaveBeenCalledWith(1, currentMonthKey())
   })
 
   it('RN1 — mes cerrado no muestra Por pagar / Pendiente de cobro', async () => {

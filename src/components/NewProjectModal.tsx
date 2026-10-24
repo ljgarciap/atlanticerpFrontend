@@ -1,13 +1,16 @@
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
+import { useAuthStore } from '@/store/authStore'
 import type { ContactRole, PipelineCardDetail } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import ClientPicker from '@/components/ClientPicker'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
 type ProjectType = 'lead' | 'design'
 
@@ -22,9 +25,18 @@ interface Props {
 export default function NewProjectModal({ onClose, onCreated }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const qc = useQueryClient()
+  const { user } = useAuthStore()
+  // SCRUM-849.4 — mismo criterio de rol que PipelineCardModal/PipelineController::update().
+  const canSeeTeam = hasGerenciaScope(user)
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
 
   const [type, setType] = useState<ProjectType>('lead')
   const [name, setName] = useState('')
+  const [assigneeIds, setAssigneeIds] = useState<number[]>([])
   const [masterClient, setMasterClient] = useState<{ id: number; label: string } | null>(null)
   const [subClient,    setSubClient]    = useState<{ id: number; label: string } | null>(null)
   const [subClientHasNoContacts, setSubClientHasNoContacts] = useState(false)
@@ -59,6 +71,8 @@ export default function NewProjectModal({ onClose, onCreated }: Props) {
         sub_client_id: type === 'design' ? subClient?.id ?? null : null,
         tag: type === 'lead' ? (tag || null) : null,
         observations: type === 'lead' ? (observations || null) : null,
+        // SCRUM-849.4 — Gerencia-only; el backend lo ignora en silencio para cualquier otro rol.
+        ...(canSeeTeam && assigneeIds.length > 0 ? { assignee_ids: assigneeIds } : {}),
       })
 
       // Pre-QA (SCRUM-88) — un fallo de upload acá NO debe dejar al usuario creyendo que
@@ -110,6 +124,7 @@ export default function NewProjectModal({ onClose, onCreated }: Props) {
     setContactRole('client')
     setContactPhone('')
     setContactEmail('')
+    setAssigneeIds([])
   }
 
   const searchMasterClients = useCallback(
@@ -130,8 +145,8 @@ export default function NewProjectModal({ onClose, onCreated }: Props) {
     [masterClient],
   )
   const createSubClient = useCallback(
-    (q: string, taxId: string) => masterClient
-      ? ventasDisenoApi.subClients.create(masterClient.id, q, taxId).then(c => {
+    (q: string, taxId: string, _extra2: string, taxIdDv: string) => masterClient
+      ? ventasDisenoApi.subClients.create(masterClient.id, q, taxId, taxIdDv, true).then(c => {
           subContactsById.current.set(c.id, 0)
           return { id: c.id, label: c.business_name }
         })
@@ -196,6 +211,17 @@ export default function NewProjectModal({ onClose, onCreated }: Props) {
             />
           </div>
 
+          {/* SCRUM-849.4 — solo Gerencia puede asignar desde la creación; sin selección, la
+              tarjeta nace asignada a quien la crea (comportamiento de siempre). */}
+          {canSeeTeam && (
+            <div className="mb-3">
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+                {t('ventasDiseno:modal.owner')}
+              </label>
+              <UserMultiSelect users={teamVendors ?? []} selectedIds={assigneeIds} onChange={setAssigneeIds} />
+            </div>
+          )}
+
           {type === 'design' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <ClientPicker
@@ -214,6 +240,7 @@ export default function NewProjectModal({ onClose, onCreated }: Props) {
                 onCreate={createSubClient}
                 disabled={!masterClient}
                 extraFieldLabel={t('ventasDiseno:modal.subClientTaxId')}
+                dvFieldLabel={t('ventasDiseno:modal.subClientTaxIdDv')}
               />
             </div>
           )}

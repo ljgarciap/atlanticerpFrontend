@@ -10,6 +10,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import CreateClientModal from '@/components/CreateClientModal'
 import ClientDetailModal from '@/components/ClientDetailModal'
 import ClientProjectsModal from '@/components/ClientProjectsModal'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const CATEGORY_CHIPS: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
 const CATEGORY_CODE: Record<SubClientCategory, string> = {
@@ -34,6 +35,8 @@ export default function VentasDisenoClientsPage() {
   // interacción del usuario — solo por click explícito en el mismo chip o en "Todos".
   const [activeFilters, setActiveFilters] = useState<FilterChip[]>([])
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
   // SCRUM-754 (2026-08-18) — paginación real de backend, un Cliente Master por fila.
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
@@ -54,9 +57,9 @@ export default function VentasDisenoClientsPage() {
   const [showCreate, setShowCreate] = useState(false)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-clients', activeFilters, search, page, perPage],
+    queryKey: ['ventas-diseno-clients', activeFilters, searchTerm, page, perPage],
     queryFn: () => ventasDisenoApi.clients.list({
-      search: search || undefined,
+      search: searchTerm || undefined,
       category: categories.length > 0 ? categories : undefined,
       stale: staleOnly ? true : undefined,
       page,

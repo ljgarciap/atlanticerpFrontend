@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useProviders } from '@/hooks/useCompras'
-import { usePermission } from '@/hooks/usePermission'
 import ProviderFormDrawer from '@/components/compras/ProviderFormDrawer'
 import ProviderDetailModal from '@/components/compras/ProviderDetailModal'
-import ComprasSettingsPanel from '@/components/ComprasSettingsPanel'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchProviderSuggestions } from '@/utils/searchSuggestionsCompras'
 import type { Provider } from '@/types/compras'
 import { IcoChevronDown } from '@/components/icons'
 
@@ -30,11 +30,6 @@ export default function ProvidersPage() {
   // SCRUM-186 (2026-08-06): "Ver detalle" abre un modal de solo-lectura → editar, distinto del
   // drawer (que ahora es exclusivo del flujo de creación).
   const [detailId,    setDetailId]    = useState<number | null>(null)
-
-  // SCRUM-184 (REQ-121) — hallazgo MEDIO Pre-QA 2026-07-16: panel de ajustes gateado por
-  // `compras.settings.configure`, mismo patrón que PricingSettingsPanel/ReportsConfigPanel.
-  const canConfigureSettings = usePermission('compras.settings.configure')
-  const [showSettings, setShowSettings] = useState(false)
 
   const { data, isFetching } = useProviders({
     search: query || undefined,
@@ -95,19 +90,9 @@ export default function ProvidersPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          {canConfigureSettings && (
-            <Button
-              variant="secondary" active={showSettings} activeVariant="primary"
-              onClick={() => setShowSettings(v => !v)}
-            >
-              {t('compras:settings.toggle')}
-            </Button>
-          )}
           <Button onClick={openCreate}>{t('compras:providers.actions.create')}</Button>
         </div>
       </div>
-
-      {canConfigureSettings && showSettings && <ComprasSettingsPanel />}
 
       {kpis && (
         <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
@@ -123,14 +108,17 @@ export default function ProvidersPage() {
       )}
 
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:providers.filters.searchPlaceholder')}
-          className="flex-1 max-w-sm px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-sm">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchProviderSuggestions}
+            placeholder={t('compras:providers.filters.searchPlaceholder')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <select
           value={category}
           onChange={e => { setCategory(e.target.value); setPage(1) }}

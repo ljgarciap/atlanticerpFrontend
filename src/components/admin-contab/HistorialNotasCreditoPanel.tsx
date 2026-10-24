@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { useNotaCreditoHistorial } from '@/hooks/useAdminContab'
 import type { NotaCreditoHistorialEstado, NotaCreditoHistorialRow, NotaCreditoTipo } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
+import { Pagination } from '@/components/ui/Pagination'
 import { IcoSearch, IcoClose, IcoTruck } from '@/components/icons'
 import { formatDateShort } from '@/utils/dates'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const selectClass = 'rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary'
 
@@ -43,26 +45,41 @@ export default function HistorialNotasCreditoPanel({ onSelectNota, onGenerarDesd
   const { t } = useTranslation('adminContab')
 
   const [search, setSearch]   = useState('')
-  const [cliente, setCliente] = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
+  const [cliente, setCliente] = useState<number | ''>('')
   const [tipo, setTipo]       = useState<NotaCreditoTipo | ''>('')
   const [estado, setEstado]   = useState<NotaCreditoHistorialEstado | ''>('')
+  const [page, setPage]       = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
 
   const { data, isFetching } = useNotaCreditoHistorial({
-    search: search || undefined,
+    search: searchTerm || undefined,
     cliente: cliente || undefined,
     tipo: tipo || undefined,
     estado: estado || undefined,
+    page, per_page: perPage,
   })
 
-  const rows  = data?.data ?? []
-  // Sin paginación del lado del backend — `total` es simplemente el tamaño del resultado ya
-  // filtrado (ver docblock de `NotaCreditoHistorialResult`).
-  const total = rows.length
+  const rows = data?.data ?? []
+  const meta = data?.meta
+  const total = meta?.total ?? 0
   const hasFilters = !!(search || cliente || tipo || estado)
-  const clientesOptions = useMemo(() => Array.from(new Set(rows.map(r => r.cliente))).sort(), [rows])
+  // Deduplicado por master_client_id (el filtro real que espera el backend) — antes armaba las
+  // opciones con el nombre, que el backend nunca pudo usar (ver NotaCreditoHistorialFilters.cliente).
+  // Con paginación, solo refleja los clientes de la página actual — igual que cualquier otro filtro
+  // derivado de `rows` en este batch; la búsqueda de texto libre (`search`, arriba) sigue
+  // matcheando por nombre sobre TODO el histórico, sin esta limitación.
+  const clientesOptions = useMemo(() => {
+    const byId = new Map<number, string>()
+    for (const r of rows) byId.set(r.master_client_id, r.cliente)
+    return Array.from(byId, ([id, nombre]) => ({ id, nombre })).sort((a, b) => a.nombre.localeCompare(b.nombre))
+  }, [rows])
 
   function clearFilters() {
-    setSearch(''); setCliente(''); setTipo(''); setEstado('')
+    setSearch(''); setCliente(''); setTipo(''); setEstado(''); setPage(1)
   }
 
   function handleRowClick(row: NotaCreditoHistorialRow) {
@@ -84,21 +101,25 @@ export default function HistorialNotasCreditoPanel({ onSelectNota, onGenerarDesd
         <div className="relative">
           <IcoSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            value={search} onChange={e => setSearch(e.target.value)}
+            value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
             placeholder={t('notasCredito.historial.searchPlaceholder')}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select value={cliente} onChange={e => setCliente(e.target.value)} className={selectClass}>
+          <select
+            value={cliente}
+            onChange={e => { setCliente(e.target.value === '' ? '' : Number(e.target.value)); setPage(1) }}
+            className={selectClass}
+          >
             <option value="">{t('notasCredito.historial.filtroCliente')}</option>
-            {clientesOptions.map(c => <option key={c} value={c}>{c}</option>)}
+            {clientesOptions.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
           </select>
-          <select value={tipo} onChange={e => setTipo(e.target.value as NotaCreditoTipo | '')} className={selectClass}>
+          <select value={tipo} onChange={e => { setTipo(e.target.value as NotaCreditoTipo | ''); setPage(1) }} className={selectClass}>
             <option value="">{t('notasCredito.historial.filtroTipo')}</option>
             {TIPOS.map(tp => <option key={tp} value={tp}>{t(`notasCredito.tipos.${tp}`)}</option>)}
           </select>
-          <select value={estado} onChange={e => setEstado(e.target.value as NotaCreditoHistorialEstado | '')} className={selectClass}>
+          <select value={estado} onChange={e => { setEstado(e.target.value as NotaCreditoHistorialEstado | ''); setPage(1) }} className={selectClass}>
             <option value="">{t('notasCredito.historial.filtroEstado')}</option>
             {ESTADOS.map(es => <option key={es} value={es}>{t(`notasCredito.historial.estados.${es}`)}</option>)}
           </select>
@@ -168,6 +189,15 @@ export default function HistorialNotasCreditoPanel({ onSelectNota, onGenerarDesd
           <p className="text-sm text-slate-400 text-center py-6">{t('notasCredito.historial.vacio')}</p>
         )}
       </div>
+
+      {meta && (
+        <Pagination
+          meta={meta}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+        />
+      )}
     </Card>
   )
 }

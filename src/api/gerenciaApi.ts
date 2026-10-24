@@ -1,10 +1,38 @@
 import api from './authApi'
 import type { AprobacionItem, GerenciaFilters, GerenciaHomeResponse, ReglaAprobacion, SaveReglaAprobacionPayload } from '@/types/gerencia'
 import type { OutlookCalendarEvent } from '@/types/calendar'
+import type { ApprovalPendingItem } from '@/lib/homeCards'
 
 export const gerenciaApi = {
   home: (filters?: GerenciaFilters): Promise<GerenciaHomeResponse> =>
     api.get<GerenciaHomeResponse>('/gerencia/home', { params: filters }).then(r => r.data),
+
+  // SCRUM-862 — "Exportar reporte" era un botón `disabled` placeholder. Mismo patrón blob que
+  // `adminContabApi.cashPosition.export()`: el backend responde el archivo binario o, si no hay
+  // datos para los filtros aplicados, un JSON `{ no_data: true }` — se pide siempre como blob y se
+  // intenta leer como JSON solo si el content-type no es binario, para no descargar un archivo
+  // vacío sin explicación (RN del ticket).
+  exportHome: async (filters: GerenciaFilters, format: 'pdf' | 'xlsx'): Promise<{ noData: true } | { noData: false }> => {
+    const res = await api.get('/gerencia/home/export', {
+      params: { ...filters, format },
+      responseType: 'blob',
+    })
+
+    const contentType = (res.headers['content-type'] as string | undefined) ?? ''
+    if (contentType.includes('application/json')) {
+      const text = await (res.data as Blob).text()
+      const parsed = JSON.parse(text) as { no_data?: boolean }
+      if (parsed.no_data) return { noData: true }
+    }
+
+    const url = URL.createObjectURL(res.data as Blob)
+    const a   = document.createElement('a')
+    a.href     = url
+    a.download = `reporte-gerencia-${new Date().toISOString().slice(0, 10)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`
+    a.click()
+    URL.revokeObjectURL(url)
+    return { noData: false }
+  },
 
   // SCRUM-164 (REQ-102) — mismo endpoint compartido con Ventas & Diseño/Compras/Bodega/Servicios
   // (`OutlookCalendarController`, `module=gerencia`). RN1/PERMISOS: solo lectura del propio
@@ -31,6 +59,13 @@ export const gerenciaApi = {
     rechazar: (item: AprobacionItem, razon?: string): Promise<void> =>
       api.post(`/gerencia/aprobaciones/${item.type}/${item.id}/rechazar`, { razon }).then(() => undefined),
   },
+
+  // SCRUM-908 — card cross-módulo aparte del panel de aprobaciones ya existente arriba
+  // (`aprobaciones`), a pedido explícito de Luis (2026-09-21): no se fusionan. No anidado bajo
+  // `home` porque esa key ya es la función `home()` de arriba (GET /gerencia/home), no un
+  // namespace — a diferencia del resto de los módulos (comprasApi.home.summary/approvalsPending).
+  homeApprovalsPendingAll: (): Promise<{ data: ApprovalPendingItem[] }> =>
+    api.get<{ data: ApprovalPendingItem[] }>('/gerencia/home/approvals-pending-all').then(r => r.data),
 
   reglasAprobacion: {
     list: (): Promise<ReglaAprobacion[]> =>

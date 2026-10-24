@@ -6,6 +6,7 @@ import type { CreatedShareLink, Document, ShareLink } from '@/types/project'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   projectId: number
@@ -106,7 +107,7 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
               <p className="text-[11px] text-slate-600 dark:text-slate-300 break-all">{justCreated.url}</p>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] text-slate-400">
-                  {t('crm:shareLink.expiresAt', { date: new Date(justCreated.expires_at).toLocaleDateString() })}
+                  {t('crm:shareLink.expiresAt', { date: formatDateFromTimestamp(justCreated.expires_at) })}
                 </p>
                 <Button
                   variant="ghost"
@@ -139,7 +140,7 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
                         {statusLabel[status]}
                       </span>
                       <p className="text-[10px] text-slate-400">
-                        {t('crm:shareLink.expiresAt', { date: new Date(link.expires_at).toLocaleDateString() })}
+                        {t('crm:shareLink.expiresAt', { date: formatDateFromTimestamp(link.expires_at) })}
                       </p>
                     </div>
                     <div className="flex items-center justify-between gap-2">

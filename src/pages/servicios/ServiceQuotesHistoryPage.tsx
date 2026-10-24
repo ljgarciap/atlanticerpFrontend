@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import ServiceQuotePdfViewerModal from '@/components/servicios/ServiceQuotePdfViewerModal'
 import { IcoEye } from '@/components/icons'
 import type { ServiceQuoteGlobalHistoryEntry, ServiceQuoteStatus } from '@/types/servicios'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 type StatusChip = ServiceQuoteStatus | ''
 
@@ -19,7 +20,7 @@ const ESTADO_BADGE: Record<string, string> = {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 
 // REQ-250 RN — el backend no expone búsqueda de texto en GET /servicios/quotes (solo `?estado=`,

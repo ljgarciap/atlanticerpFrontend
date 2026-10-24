@@ -50,7 +50,7 @@ function makeQuote(overrides: Partial<QuoteDetail> = {}): QuoteDetail {
     parts: [], subtotal: 0,
     observations: null, includes_installation: false,
     discount_totals_type: 'percent', discount_totals_value: 0, discount_totals_amount: 0,
-    net_total: 0, itbms: 0, grand_total: 0,
+    net_total: 0, itbms: 0, itbms_exento: false, itbms_percentage: 7, grand_total: 0,
     conditions_text: 'Texto de condiciones', observations_preview: '',
     created_at: '2026-07-01T00:00:00Z',
     ...overrides,
@@ -96,6 +96,17 @@ describe('QuoteViewerModal', () => {
     // contenido es un PDF real embebido en iframe, pedido con external=false siempre.
     await waitFor(() => expect(mockedApi.quotes.pdf).toHaveBeenCalledWith(1, false))
     await waitFor(() => expect(document.querySelector('iframe')).toHaveAttribute('src', 'blob:mock-quote-pdf'))
+  })
+
+  it('SCRUM-930/931/932 — un 403/500 real en quotes.get muestra un mensaje de error, nunca "Cargando" para siempre', async () => {
+    // Antes de este fix, isLoading pasaba a false en error pero `quote` seguía undefined, cayendo
+    // en la misma rama que "todavía cargando" — mismo hallazgo de Pre-QA ya corregido en
+    // GuiaEntregaModal, replicado acá (ver QuoteViewerModal.tsx).
+    mockedApi.quotes.get.mockRejectedValue(new AxiosError('Forbidden', '403', undefined, undefined, { status: 403 } as never))
+    renderModal()
+
+    expect(await screen.findByText('ventasDiseno:quotesList.viewer.error')).toBeInTheDocument()
+    expect(screen.queryByText('common:labels.loading')).not.toBeInTheDocument()
   })
 
   it('el botón Cerrar dispara onClose', async () => {
@@ -156,6 +167,32 @@ describe('QuoteViewerModal', () => {
     expect(screen.queryByText('ventasDiseno:document.versions.useAsBase')).not.toBeInTheDocument()
   })
 
+  // SCRUM-1143 — el Responsable que solo LEE la versión de Gerencia no ve «Usar como base» sobre ella (daría 403);
+  // sí lo ve sobre sus propias versiones.
+  it('SCRUM-1143 — «Usar como base» solo aparece en las versiones que el usuario puede duplicar', async () => {
+    const base = makeVersions()
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue({
+      ...base,
+      versions: [{ ...base.versions[0], can_use_as_base: true }, { ...base.versions[1], can_use_as_base: false }],
+    })
+    renderModal()
+
+    await screen.findByText('ventasDiseno:document.versions.title')
+    expect(screen.getAllByText('ventasDiseno:document.versions.useAsBase')).toHaveLength(1)
+  })
+
+  it('SCRUM-1143 — con una única versión de solo lectura tampoco se ofrece «Nueva versión»', async () => {
+    const base = makeVersions()
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue({ ...base, versions: [{ ...base.versions[0], can_use_as_base: false }] })
+    renderModal()
+
+    await waitFor(() => expect(mockedApi.quotes.versions).toHaveBeenCalled())
+    await screen.findByText('ventasDiseno:quotesList.viewer.close')
+    expect(screen.queryByText('ventasDiseno:document.versions.newVersion')).not.toBeInTheDocument()
+  })
+
   it('"Usar como base" duplica, navega al nuevo borrador y cierra el modal', async () => {
     mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
     mockedApi.quotes.versions.mockResolvedValue(makeVersions())
@@ -187,6 +224,42 @@ describe('QuoteViewerModal', () => {
   })
 
   // ── SCRUM-796 (secc. 15) — caso especial, una sola versión ───────────────────
+
+  // SCRUM-1115 — un proyecto restaurado desde Perdido vuelve a Lead/Diseño con su historial: también ahí se puede partir de una versión.
+  it.each(['lead', 'design'] as const)('SCRUM-1115 — "Usar como base" aparece con la tarjeta en %s (restaurada desde Perdido)', async (stage) => {
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue(makeVersions({ card_stage: stage }))
+    renderModal()
+
+    await screen.findByText('ventasDiseno:document.versions.title')
+    expect(screen.getAllByText('ventasDiseno:document.versions.useAsBase').length).toBeGreaterThan(0)
+  })
+
+  it.each(['lead', 'design'] as const)('SCRUM-1115 — con 1 sola versión y la tarjeta en %s, muestra "Nueva versión"', async (stage) => {
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue(makeVersions({ versions: [makeVersions().versions[0]], card_stage: stage }))
+    renderModal()
+
+    expect(await screen.findByText('ventasDiseno:document.versions.newVersion')).toBeInTheDocument()
+  })
+
+  it.each(['lost', 'proposal', 'approved'] as const)('SCRUM-1115 — con la tarjeta en %s NO ofrece "Usar como base" (el backend también lo bloquea)', async (stage) => {
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue(makeVersions({ card_stage: stage }))
+    renderModal()
+
+    await screen.findByText('ventasDiseno:document.versions.title')
+    expect(screen.queryByText('ventasDiseno:document.versions.useAsBase')).not.toBeInTheDocument()
+  })
+
+  it.each(['lost', 'proposal', 'approved'] as const)('SCRUM-1115 — con 1 sola versión y la tarjeta en %s NO muestra "Nueva versión"', async (stage) => {
+    mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))
+    mockedApi.quotes.versions.mockResolvedValue(makeVersions({ versions: [makeVersions().versions[0]], card_stage: stage }))
+    renderModal()
+
+    await screen.findAllByText(/COT-2026-0001/)
+    expect(screen.queryByText('ventasDiseno:document.versions.newVersion')).not.toBeInTheDocument()
+  })
 
   it('con 1 sola versión y tarjeta en Cotización, muestra "Nueva versión" junto a "Cerrar"', async () => {
     mockedApi.quotes.get.mockResolvedValue(makeQuote({ confirmed_at: '2026-07-01T00:00:00Z' }))

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import {
-  useReplacementRequests, useGenerateReplacementOrder,
+  useReplacementRequests, useGenerateReplacementOrder, useDecideReplacementRequest,
   useSearchSubstitutes, useSubstituteSearchResult, useCreateReplacementRequest,
 } from '@/hooks/useCompras'
 import { comprasApi } from '@/api/comprasApi'
@@ -71,6 +71,7 @@ function RequestsTab() {
 
   const { data, isFetching } = useReplacementRequests(chip === 'all' ? undefined : chip, page, perPage)
   const generateOrder = useGenerateReplacementOrder()
+  const decide = useDecideReplacementRequest()
   const requests = data?.data ?? []
   const meta = data?.meta
 
@@ -79,6 +80,15 @@ function RequestsTab() {
     generateOrder.mutate(id, {
       onSuccess: res => navigate(`/compras/ordenes/${res.order_id}`),
       onError:   err => setErrorById(prev => ({ ...prev, [id]: apiErrorMessage(err, t('compras:replacements.errors.generateGeneric')) })),
+    })
+  }
+
+  // SCRUM-818 — habilitado solo cuando el backend informa can_decide=true (matriz de aprobación
+  // por margen + responsable del proyecto, calculada server-side, nunca reimplementada acá).
+  const handleDecide = (id: number, decision: 'approve' | 'reject') => {
+    setErrorById(prev => { const next = { ...prev }; delete next[id]; return next })
+    decide.mutate({ id, decision }, {
+      onError: err => setErrorById(prev => ({ ...prev, [id]: apiErrorMessage(err, t('compras:replacements.errors.decideGeneric')) })),
     })
   }
 
@@ -103,6 +113,7 @@ function RequestsTab() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:replacements.table.original')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:replacements.table.proposed')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:replacements.table.project')}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:replacements.table.margin')}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:replacements.table.status')}</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('compras:orders.table.actions')}</th>
             </tr>
@@ -110,7 +121,7 @@ function RequestsTab() {
           <tbody className="divide-y divide-slate-100">
             {requests.length === 0 && !isFetching && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-slate-400 text-sm">{t('compras:replacements.table.empty')}</td>
+                <td colSpan={6} className="px-4 py-10 text-center text-slate-400 text-sm">{t('compras:replacements.table.empty')}</td>
               </tr>
             )}
             {requests.map(r => (
@@ -118,9 +129,33 @@ function RequestsTab() {
                 <td className="px-4 py-3 text-slate-600">{r.original_product_name}</td>
                 <td className="px-4 py-3 text-slate-600">{r.proposed_product_name ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{r.sales_project_name ?? '—'}</td>
+                <td className="px-4 py-3 text-slate-600">{r.margin_percent !== null ? `${r.margin_percent}%` : '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{t(`compras:replacements.status.${r.status}`)}</td>
                 <td className="px-4 py-3 text-right">
-                  {r.status === 'rechazada' && r.generated_order_id === null && (
+                  {r.can_decide && (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline" className="!px-3 !py-1.5 !text-xs"
+                        loading={decide.isPending}
+                        onClick={() => handleDecide(r.id, 'approve')}
+                      >
+                        {t('compras:replacements.actions.approve')}
+                      </Button>
+                      <Button
+                        variant="outline" className="!px-3 !py-1.5 !text-xs !text-red-600 !border-red-200 hover:!bg-red-50"
+                        loading={decide.isPending}
+                        onClick={() => handleDecide(r.id, 'reject')}
+                      >
+                        {t('compras:replacements.actions.reject')}
+                      </Button>
+                    </div>
+                  )}
+                  {/* SCRUM-818 (rebote 2026-09-03, Hallazgo 3) — antes solo chequeaba status/
+                      generated_order_id, sin rol: Vendedor/Operaciones veían el botón habilitado
+                      y recién el backend los frenaba tras el click ("No tienes permiso"). Ahora
+                      se usa can_generate_order (calculado server-side, exclusivo Líder de
+                      Compras), nunca una regla propia del frontend. */}
+                  {r.can_generate_order && (
                     <>
                       <Button
                         variant="outline" className="!px-3 !py-1.5 !text-xs"
@@ -129,9 +164,6 @@ function RequestsTab() {
                       >
                         {t('compras:replacements.actions.generateOrder')}
                       </Button>
-                      {errorById[r.id] && (
-                        <p className="text-xs text-red-600 mt-1">{errorById[r.id]}</p>
-                      )}
                     </>
                   )}
                   {r.generated_order_id !== null && (
@@ -141,6 +173,9 @@ function RequestsTab() {
                     >
                       {t('compras:replacements.actions.viewOrder')}
                     </button>
+                  )}
+                  {errorById[r.id] && (
+                    <p className="text-xs text-red-600 mt-1">{errorById[r.id]}</p>
                   )}
                 </td>
               </tr>
@@ -171,6 +206,11 @@ interface ResultRow {
   category:               string | null
   price_full:             number
   cost:                    number | null
+  // SCRUM-818 (rebote 2026-09-03, Hallazgo 5) — calculado server-side (CatalogProduct::
+  // marginPercent(), sobre Costo Total), SIEMPRE presente sin importar si `cost` viaja o no
+  // (Vendedor/Diseñador ve el margen pero nunca el costo crudo) — nunca recalcular acá con una
+  // fórmula propia, ver docblock de GenerateRequestModal.
+  margin_percent:          number | null
   stock_quantity:          number | null
   // Lote 4 (SCRUM-246, 2026-08-17) — método "catalog" ahora SÍ calcula similitud server-side
   // (SubstituteSimilarityService); sigue null solo para foto/ficha técnica (hueco documentado a
@@ -183,7 +223,8 @@ function fromCatalogProduct(p: ComprasCatalogProduct): ResultRow {
   return {
     catalog_product_id: p.id, reference: p.reference, name: p.name,
     category: p.category ?? null,
-    price_full: p.price_full, cost: p.cost, stock_quantity: p.stock_quantity,
+    price_full: p.price_full, cost: p.cost, margin_percent: p.margin_percent ?? null,
+    stock_quantity: p.stock_quantity,
     similarity_percent: p.similarity_percent ?? null, reasoning: null,
   }
 }
@@ -192,7 +233,8 @@ function fromSearchResult(r: SubstituteSearchResult): ResultRow {
   return {
     catalog_product_id: r.catalog_product_id, reference: r.reference, name: r.name,
     category: r.category ?? null,
-    price_full: r.price_full, cost: r.cost, stock_quantity: r.stock_quantity,
+    price_full: r.price_full, cost: r.cost, margin_percent: r.margin_percent ?? null,
+    stock_quantity: r.stock_quantity,
     similarity_percent: r.similarity_percent, reasoning: r.reasoning,
   }
 }
@@ -477,9 +519,12 @@ function GenerateRequestModal({ original, proposed, onClose }: {
 
   const createRequest = useCreateReplacementRequest()
 
-  const estimatedMargin = proposed.cost !== null && proposed.price_full > 0
-    ? Math.round(((proposed.price_full - proposed.cost) / proposed.price_full) * 100 * 100) / 100
-    : null
+  // SCRUM-818 (rebote 2026-09-03, Hallazgo 5) — antes se recalculaba acá con
+  // (price_full-cost)/price_full, una fórmula simplificada que además quedaba en blanco para
+  // Vendedor/Diseñador (nunca recibe `cost`). Ahora siempre se usa el margen que ya viene
+  // calculado server-side (CatalogProduct::marginPercent(), sobre Costo Total) — mismo valor
+  // sin importar el rol, nunca reimplementado en el frontend.
+  const estimatedMargin = proposed.margin_percent
 
   const handleSubmit = () => {
     setError(null)
@@ -528,13 +573,17 @@ function GenerateRequestModal({ original, proposed, onClose }: {
               projectLabel={projectLabel}
               onChange={(id, label) => { setProjectId(id); setProjectLabel(label) }}
               emptyLabel={t('compras:replacements.generateModal.projectPlaceholder')}
+              catalogProductId={original.id}
             />
 
             {error && <p className="text-xs text-red-600 mt-3">{error}</p>}
 
             <div className="flex justify-end gap-2 mt-5">
               <Button variant="outline" onClick={onClose}>{t('compras:replacements.generateModal.cancel')}</Button>
-              <Button loading={createRequest.isPending} onClick={handleSubmit}>
+              {/* SCRUM-818 CA06 — sin proyecto de venta válido, el botón queda deshabilitado (no
+                  solo un error al hacer clic) — cubre tanto "todavía no eligió" como "no hay
+                  ningún proyecto disponible para este producto". */}
+              <Button loading={createRequest.isPending} disabled={projectId === null} onClick={handleSubmit}>
                 {t('compras:replacements.generateModal.submit')}
               </Button>
             </div>

@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { PICKER_PER_PAGE_OPTIONS, useServerProductPicker } from '@/hooks/useServerProductPicker'
 import { isAxiosError } from 'axios'
-import { comprasApi } from '@/api/comprasApi'
 import { useZonaLibreProvider, useCreateZonaLibreRequest, useZonaLibreRequestDetail, useUpdateZonaLibreRequest } from '@/hooks/useBodega'
 import ZonaLibreWarehousesModal from '@/components/bodega/ZonaLibreWarehousesModal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Pagination } from '@/components/ui/Pagination'
 import { formatMoney, formatInt } from '@/lib/money'
+import { useAuthStore } from '@/store/authStore'
+import { clearSessionDraft, loadSessionDraft, saveSessionDraft, sessionDraftKey } from '@/lib/sessionDraft'
 import type { ComprasCatalogProduct } from '@/types/compras'
 import type { ZonaLibreShippingType } from '@/types/bodega'
 
@@ -19,6 +22,16 @@ interface CartLine {
   description:       string
   unitCost:          number
   quantity:          number
+}
+
+/** SCRUM-1172 — lo que sobrevive a una recarga de la pantalla: carrito y datos de envío. */
+interface SavedZonaLibreOrder { cart: CartLine[]; shippingType: ZonaLibreShippingType; estimatedArrival: string }
+function isSavedZonaLibreOrder(v: unknown): v is SavedZonaLibreOrder {
+  const o = v as Partial<SavedZonaLibreOrder> | null
+  return typeof o === 'object' && o !== null && Array.isArray(o.cart) && typeof o.shippingType === 'string' && typeof o.estimatedArrival === 'string'
+    // Cada línea del carrito se renderiza tal cual: una malformada ({} o null) dejaría la pantalla en blanco.
+    && o.cart.every(l => typeof l === 'object' && l !== null && Number.isFinite(l.catalogProductId) && typeof l.reference === 'string'
+      && typeof l.description === 'string' && Number.isFinite(l.unitCost) && Number.isFinite(l.quantity))
 }
 
 /** 422 estructurado de `GET /bodega/zona-libre/provider` cuando no hay proveedor configurado. */
@@ -58,8 +71,13 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
   const updateRequest = useUpdateZonaLibreRequest()
   const [prefilled, setPrefilled] = useState(false)
 
+  // SCRUM-1172 — recargar la página ya no pierde el carrito de una orden nueva (en modo edición manda la solicitud existente).
+  const userId   = useAuthStore(s => s.user?.id)
+  const draftKey = isEdit ? null : sessionDraftKey('zona-libre-nueva-orden', userId)
+  const [restored] = useState(() => loadSessionDraft(draftKey, isSavedZonaLibreOrder))
+
   const [search, setSearch] = useState('')
-  const [cart, setCart] = useState<CartLine[]>([])
+  const [cart, setCart] = useState<CartLine[]>(restored?.cart ?? [])
   const [quantityDrafts, setQuantityDrafts] = useState<Record<number, string>>({})
   const [rowError, setRowError] = useState<{ id: number; message: string } | null>(null)
   const [warehousesModal, setWarehousesModal] = useState<{ id: number; name: string } | null>(null)
@@ -68,23 +86,30 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
   const [editValue, setEditValue] = useState('')
   const [editError, setEditError] = useState(false)
 
-  const [shippingType, setShippingType] = useState<ZonaLibreShippingType>('terrestre')
-  const [estimatedArrival, setEstimatedArrival] = useState('')
+  const [shippingType, setShippingType] = useState<ZonaLibreShippingType>(restored?.shippingType ?? 'terrestre')
+  const [estimatedArrival, setEstimatedArrival] = useState(restored?.estimatedArrival ?? '')
 
   const [createdOrder, setCreatedOrder] = useState<{ order_number: string } | null>(null)
 
+  // Guarda el borrador en cada cambio; al crear la orden (o si el carrito queda vacío) se borra para no reabrirla.
+  useEffect(() => {
+    if (draftKey === null) return
+    if (createdOrder !== null || cart.length === 0) clearSessionDraft(draftKey)
+    else saveSessionDraft(draftKey, { cart, shippingType, estimatedArrival })
+  }, [draftKey, createdOrder, cart, shippingType, estimatedArrival])
+
   // REQ-364 — buscador acotado SIEMPRE al proveedor fijo, nunca a otro (RN de REQ-363: Bodega no
   // elige proveedor en este flujo).
-  const { data: productResults } = useQuery({
-    queryKey: ['compras/products/zona-libre', provider?.id, search],
-    queryFn:  () => comprasApi.products.search(provider!.id, search),
-    enabled:  provider !== undefined,
-  })
-
+  // SCRUM-992 — debounce 250 ms + mínimo 2 caracteres; el input sigue respondiendo al instante.
+  const searchTerm = useDebouncedSearchTerm(search)
   // REQ-365 — un producto agregado al carrito desaparece de "disponibles" sin recargar, y
-  // reaparece al quitarlo (derivado del propio estado del carrito en cada render).
-  const cartIds = new Set(cart.map(l => l.catalogProductId))
-  const availableProducts = (productResults?.data ?? []).filter(p => !cartIds.has(p.id))
+  // reaparece al quitarlo (se excluye en el servidor según el propio estado del carrito).
+  // SCRUM-1162/1163 — paginación REAL en servidor (20 por defecto, 10/20/50) con el total del proveedor. El carrito y las cantidades en borrador viven aparte de la página.
+  const productPagination = useServerProductPicker({
+    providerId: provider?.id, searchTerm, excludeIds: cart.map(l => l.catalogProductId),
+    queryKey: 'compras/products/zona-libre', enabled: provider !== undefined,
+  })
+  const availableProducts = productPagination.items
 
   const total = cart.reduce((sum, l) => sum + l.unitCost * l.quantity, 0)
 
@@ -304,8 +329,12 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
             <tbody className="divide-y divide-slate-100">
               {availableProducts.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-6 text-center text-slate-400 text-xs">
-                    {t('bodega:zonaLibre.newOrder.products.empty')}
+                  <td colSpan={8} className="py-6 text-center text-slate-400 text-xs" data-testid={`product-picker-empty-${productPagination.emptyReason ?? 'loading'}`}>
+                    {/* SCRUM-1172 — tres motivos distintos para no ver filas. */}
+                    {productPagination.emptyReason === 'search' ? t('bodega:zonaLibre.newOrder.products.noResults')
+                      : productPagination.emptyReason === 'allAdded' ? t('bodega:zonaLibre.newOrder.products.allAdded')
+                      : productPagination.emptyReason === 'noProducts' ? t('bodega:zonaLibre.newOrder.products.noProducts')
+                      : t('bodega:zonaLibre.newOrder.products.empty')}
                   </td>
                 </tr>
               )}
@@ -350,6 +379,16 @@ export default function BodegaNuevaOrdenZonaLibrePage() {
             </tbody>
           </table>
         </div>
+        {availableProducts.length > 0 && (
+          <Pagination
+            meta={productPagination.meta}
+            perPage={productPagination.perPage}
+            onPageChange={productPagination.setPage}
+            onPerPageChange={productPagination.setPerPage}
+            perPageOptions={PICKER_PER_PAGE_OPTIONS}
+            allowAll={false}
+          />
+        )}
       </Card>
 
       {/* Líneas de la orden + envío + guardar — solo visible con carrito no vacío (REQ-369 RN1) */}

@@ -6,7 +6,8 @@
     "departments": "Departamentos",
     "alerts": "Alertas de seguridad",
     "notificationRules": "Reglas de notificación",
-    "roles": "Roles"
+    "roles": "Roles",
+    "impersonations": "Sesiones de soporte"
   },
   "alerts": {
     "title": "Alertas de seguridad",
@@ -120,6 +121,11 @@
       "password": "Contraseña",
       "passwordHint": "Si se deja en blanco, la contraseña por defecto será el correo electrónico del usuario.",
       "phone": "Teléfono",
+      "jobTitle": "Cargo",
+      "hireDate": "Fecha de ingreso",
+      "manager": "Jefe directo",
+      "noManager": "Ninguno — Socio Director",
+      "activeOnCreate": "Usuario activo",
       "department": "Departamento",
       "securityLevel": "Nivel de seguridad",
       "notes": "Notas",
@@ -142,6 +148,7 @@
       },
       "extraPermissions": "Permisos adicionales",
       "extraPermissionsHint": "Permisos individuales extra, además de los del nivel de seguridad",
+      "extraPermissionsError": "No se pudo cargar el catálogo de permisos",
       "permLabels": {
         "crm.read":       "CRM — Ver",
         "crm.write":      "CRM — Crear",
@@ -153,7 +160,9 @@
         "security.users":  "Seguridad — Usuarios",
         "security.levels": "Seguridad — Niveles",
         "settings.global": "Configuración global",
-        "superadmin.all":  "Superadmin — Todo"
+        "superadmin.all":  "Superadmin — Todo",
+        "admin_contab.edit.receptor_fiscal": "Facturación — Corregir RUC y razón social del cliente",
+        "admin_contab.edit.receptor_consumidor_final": "Facturación — Facturar a Consumidor final"
       }
     },
     "actions": {
@@ -164,8 +173,70 @@
       "view": "Ver",
       "resetMfa": "Resetear MFA",
       "visibility": "Permisos de navegación",
-      "bulkVisibility": "Visibilidad de módulos (UAT)"
+      "bulkVisibility": "Visibilidad de módulos (UAT)",
+      "resetPassword": "Restablecer contraseña",
+      "bulkResetPassword": "Restablecer contraseñas…",
+      "impersonate": "Ver como"
     },
+      "resetPassword": {
+        "title": "Restablecer contraseña",
+        "message": "La contraseña de {{name}} ({{email}}) pasará a ser su correo electrónico y deberá cambiarla al ingresar.",
+        "warning": "Se cerrarán sus sesiones abiertas. Esta acción queda registrada en la auditoría.",
+        "confirm": "Restablecer",
+        "success": "Contraseña restablecida: {{name}} deberá cambiarla al ingresar",
+        "inactiveTooltip": "No se puede restablecer la contraseña de un usuario inactivo",
+        "selfWarning": "Es tu propia cuenta: tu sesión actual quedará invalidada y deberás cambiar la contraseña al volver a ingresar.",
+        "passwordLabel": "Tu contraseña",
+        "passwordHelp": "Esta cuenta es de máximo privilegio: confirma con tu contraseña actual para continuar.",
+        "errors": {
+          "inactive": "No se puede restablecer la contraseña de un usuario inactivo",
+          "forbidden": "Solo un superadmin puede restablecer contraseñas",
+          "notFound": "El usuario ya no existe",
+          "throttled": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+          "passwordRequired": "Confirma con tu contraseña actual para restablecer esta cuenta.",
+          "reauthFailed": "Contraseña incorrecta.",
+          "throttledWait": "Demasiados intentos. Inténtalo de nuevo en {{time}}.",
+          "disabled": "El restablecimiento de contraseñas está deshabilitado en este entorno. Un superadmin puede habilitarlo en Configuración global.",
+          "generic": "No se pudo restablecer la contraseña. Inténtalo de nuevo."
+        }
+      },
+      "bulkResetPassword": {
+        "title": "Restablecer contraseñas",
+        "subtitle": "Restablece la contraseña de todos los usuarios activos: pasará a ser su correo electrónico y deberán cambiarla al ingresar. Primero se calcula a quiénes afectaría, sin cambiar nada.",
+        "includeSelf": "Incluir mi propia cuenta",
+        "includeSuperadmins": "Incluir cuentas de superadministrador",
+        "includeSuperadminsWarning": "Por defecto no se tocan. Incluirlas deja a todos los superadministradores con la contraseña igual a su correo hasta que la cambien.",
+        "calculate": "Calcular usuarios afectados",
+        "affected_one": "Usuario afectado: {{count}}",
+        "affected_other": "Usuarios afectados: {{count}}",
+        "excludedCount_one": "({{count}} excluido)",
+        "excludedCount_other": "({{count}} excluidos)",
+        "emptyPreview": "No hay usuarios para restablecer con esta selección.",
+        "filterPlaceholder": "Filtrar por correo o nombre",
+        "excludeHelper": "Marca a quienes quieras excluir del restablecimiento.",
+        "excludeUser": "Excluir a {{email}}",
+        "continue": "Continuar",
+        "back": "Volver",
+        "recalculate": "Volver a calcular",
+        "confirmWarning": "Se cerrarán las sesiones abiertas de estos usuarios y la acción queda registrada en la auditoría.",
+        "passwordLabel": "Tu contraseña",
+        "passwordHelp": "Confirma con tu contraseña actual para aplicar el restablecimiento masivo.",
+        "disabledNotice": "El restablecimiento de contraseñas está deshabilitado en este entorno. Un superadmin puede habilitarlo en Configuración global.",
+        "confirmInstruction": "Para confirmar, escribe exactamente {{phrase}}",
+        "apply": "Restablecer contraseñas",
+        "resultCount_one": "Se restableció {{count}} contraseña",
+        "resultCount_other": "Se restablecieron {{count}} contraseñas",
+        "resultNote": "Cada persona deberá cambiar su contraseña al ingresar.",
+        "errors": {
+          "mismatch": "El número de usuarios cambió mientras confirmabas. Vuelve a calcular y confirma de nuevo.",
+          "forbidden": "Solo un superadmin puede restablecer contraseñas",
+          "throttled": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+          "reauthFailed": "Contraseña incorrecta.",
+          "throttledWait": "Demasiados intentos. Inténtalo de nuevo en {{time}}.",
+          "disabled": "El restablecimiento de contraseñas está deshabilitado en este entorno. Un superadmin puede habilitarlo en Configuración global.",
+          "generic": "No se pudo completar la operación. Inténtalo de nuevo."
+        }
+      },
     "visibility": {
       "title": "Permisos de navegación",
       "subtitle": "Excepciones para esta persona, por encima de la visibilidad de su rol. Un módulo o ítem sin marcar acá hereda lo que ya tiene el rol."
@@ -326,5 +397,72 @@
       "in_app": "In-app (campana)",
       "email": "Email"
     }
+  },
+  "impersonate": {
+    "title": "Ver como {{name}}",
+    "message": "Vas a ver la aplicación exactamente como la ve {{name}} ({{email}}), con su rol, permisos y menú.",
+    "readOnlyNote": "Es de solo lectura: no podrás guardar cambios. La sesión dura poco tiempo, no se renueva y queda registrada a tu nombre, con el motivo.",
+    "reasonLabel": "Motivo",
+    "reasonHelp": "Indica para qué vas a entrar, por ejemplo la clave del ticket de soporte.",
+    "passwordLabel": "Tu contraseña",
+    "passwordHelp": "Confirma con tu contraseña actual para iniciar la sesión.",
+    "confirm": "Ver como esta persona",
+    "tooltips": {
+      "inactive": "No se puede ver como una persona inactiva",
+      "self": "No puedes ver como tú mismo",
+      "superadmin": "No se puede ver como otro superadmin",
+      "guest": "No se puede ver como un invitado"
+    },
+    "errors": {
+      "reasonRequired": "Escribe el motivo.",
+      "passwordRequired": "Escribe tu contraseña.",
+      "reauthFailed": "Contraseña incorrecta.",
+      "throttled": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+      "throttledWait": "Demasiados intentos. Vuelve a intentarlo en {{time}}.",
+      "forbidden": "No tienes permiso para ver como otra persona, o no puedes ver como esta persona.",
+      "invalid": "No se puede ver como esta persona (inactiva, bloqueada o no elegible).",
+      "notFound": "La persona ya no existe.",
+      "generic": "No se pudo iniciar la sesión de Ver como. Inténtalo de nuevo."
+    }
+  },
+  "impersonations": {
+    "title": "Sesiones de soporte",
+    "subtitle": "Registro de las sesiones de Ver como usuario: quién observó a quién, por qué motivo y cuánto duró.",
+    "empty": "No hay sesiones para este filtro.",
+    "loadError": "No se pudieron cargar las sesiones.",
+    "filters": {
+      "all": "Todas",
+      "active": "Activas",
+      "ended": "Terminadas",
+      "expired": "Vencidas"
+    },
+    "columns": {
+      "actor": "Superadmin",
+      "target": "Observado",
+      "reason": "Motivo",
+      "startedAt": "Inicio",
+      "endedAt": "Fin",
+      "status": "Estado",
+      "endedReason": "Causa",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activa",
+      "ended": "Terminada",
+      "expired": "Vencida"
+    },
+    "endedReason": {
+      "manual": "El superadmin salió",
+      "expired": "Venció",
+      "revoked": "Terminada por un superadmin",
+      "target_blocked": "La persona se bloqueó o desactivó",
+      "unknown": "Otra causa"
+    },
+    "terminate": "Terminar",
+    "terminateTitle": "Terminar sesión",
+    "terminateMessage": "La sesión de {{actor}} viendo como {{target}} se cerrará de inmediato.",
+    "terminateConfirm": "Terminar sesión",
+    "terminateError": "No se pudo terminar la sesión.",
+    "terminated": "Sesión terminada."
   }
 }

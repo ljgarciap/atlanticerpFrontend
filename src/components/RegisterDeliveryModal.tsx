@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next'
 import { useOrderDetail, useOrderWarehouseBreakdown, useRegisterDelivery } from '@/hooks/useBodega'
 import type { OrderItemDetail, OrderShortageReason, RegisterDeliveryItemPayload } from '@/types/bodega'
 import { ORDER_SHORTAGE_REASONS } from '@/types/bodega'
-import { Card } from '@/components/ui/Card'
+import FullScreenWindow from '@/components/FullScreenWindow'
 import { Button } from '@/components/ui/Button'
-import { IcoClose, IcoPencil, IcoLock } from '@/components/icons'
+import { IcoPencil, IcoLock } from '@/components/icons'
 import OrderItemWarehousesModal from '@/components/OrderItemWarehousesModal'
 
 interface Props {
@@ -52,7 +52,8 @@ function buildRowSchema(cap: number, requested: number) {
     .object({
       qtyDelivered:  z.number().int().min(0).max(cap),
       motivo:        z.union([shortageReasonSchema, z.literal('')]),
-      motivoDetalle: z.string(),
+      // SCRUM-1148 — tope del texto libre de "Otra" (el backend lo valida con max:250; sin tope devolvía 500).
+      motivoDetalle: z.string().max(250),
     })
     .superRefine((row, ctx) => {
       const isPartial = row.qtyDelivered < requested
@@ -95,14 +96,6 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order?.id, rowsInitialized])
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
 
   // SCRUM-403 (REQ-333) — mismo criterio que `OrderDetailModal`: una sola llamada a nivel de todo
   // el pedido para "Ver bodegas" por fila, gateada a que el modal ya esté cargado.
@@ -207,20 +200,16 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
   // RegisterSignedGuideModal) — comparten la misma causa raíz en teoría, pero quedan fuera de
   // alcance de este ticket puntual; señalado para Senior Review, no corregido en silencio.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-0 sm:p-4" data-testid="register-delivery-modal">
-      <Card variant="modal" className="w-full max-w-4xl my-4 flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[90vh]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              {t('bodega:pedidos.registerDeliveryModal.title')}
-            </h2>
-            <p className="text-xs text-slate-500">
-              {t('bodega:pedidos.registerDeliveryModal.orderNumber')} #{order?.order_number ?? '—'}
-            </p>
-          </div>
-          <Button variant="icon" onClick={onClose}><IcoClose /></Button>
-        </div>
-
+    <FullScreenWindow
+      testId="register-delivery-modal"
+      title={t('bodega:pedidos.registerDeliveryModal.title')}
+      subtitle={(
+        <p className="text-xs text-slate-500">
+          {t('bodega:pedidos.registerDeliveryModal.orderNumber')} #{order?.order_number ?? '—'}
+        </p>
+      )}
+      onClose={onClose}
+    >
         <div className="overflow-y-auto px-5 py-4 flex-1">
           {isLoading || !order ? (
             <p className="text-slate-400 text-sm py-6 text-center">{t('common:labels.loading')}</p>
@@ -329,6 +318,7 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
                                     <input
                                       type="text"
                                       value={row.motivoDetalle}
+                                      maxLength={250}
                                       onChange={e => handleMotivoDetalleChange(item.id, e.target.value)}
                                       placeholder={t('bodega:pedidos.registerDeliveryModal.motivoDetallePlaceholder')}
                                       data-testid={`register-delivery-motivo-detalle-${item.id}`}
@@ -388,7 +378,6 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
             {t('bodega:pedidos.registerDeliveryModal.save')}
           </Button>
         </div>
-      </Card>
 
       {warehousesForItem && warehousesForItem.catalog_product_id !== null && (
         <OrderItemWarehousesModal
@@ -399,7 +388,7 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
           onClose={() => setWarehousesForItem(null)}
         />
       )}
-    </div>,
+    </FullScreenWindow>,
     document.body,
   )
 }

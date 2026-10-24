@@ -4,6 +4,7 @@ import { usePettyCashSummary, usePettyCashPending, usePettyCashReports, usePetty
 import type { PettyCashEstadoLinea } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import { IcoBook, IcoClock, IcoFileText, IcoBan, IcoPlus } from '@/components/icons'
 import RegistrarGastoCajaChicaModal from '@/components/admin-contab/RegistrarGastoCajaChicaModal'
 import GenerarReportePettyCashModal from '@/components/admin-contab/GenerarReportePettyCashModal'
@@ -140,7 +141,9 @@ function TabButton(
 function PendientesPanel(
   { t, onSelectLinea }: { t: (key: string, opts?: Record<string, unknown>) => string; onSelectLinea: (id: number) => void },
 ) {
-  const { data, isFetching } = usePettyCashPending()
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
+  const { data, isFetching } = usePettyCashPending(page, perPage)
 
   if (!data) return <p className="text-xs text-slate-400 text-center py-8">{isFetching ? '…' : null}</p>
 
@@ -207,6 +210,12 @@ function PendientesPanel(
           </tbody>
         </table>
       </div>
+      <Pagination
+        meta={data.meta}
+        perPage={perPage}
+        onPageChange={setPage}
+        onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+      />
       <p className="text-[10.5px] text-slate-400 mt-4">{t('cajaChica.pendientesPanel.footnote')}</p>
     </div>
   )
@@ -215,10 +224,12 @@ function PendientesPanel(
 function ReportesPanel(
   { t, onSelect }: { t: (key: string, opts?: Record<string, unknown>) => string; onSelect: (numero: string) => void },
 ) {
-  const { data, isFetching } = usePettyCashReports()
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
+  const { data, isFetching } = usePettyCashReports(page, perPage)
 
   if (!data) return <p className="text-xs text-slate-400 text-center py-8">{isFetching ? '…' : null}</p>
-  if (data.length === 0) return <p className="text-xs text-slate-400 text-center py-8">{t('cajaChica.reportesPanel.vacio')}</p>
+  if (data.data.length === 0) return <p className="text-xs text-slate-400 text-center py-8">{t('cajaChica.reportesPanel.vacio')}</p>
 
   return (
     <div>
@@ -231,12 +242,13 @@ function ReportesPanel(
               <th className="py-2 pr-3">{t('cajaChica.reportesPanel.columnas.fechaCreacion')}</th>
               <th className="py-2 pr-3">{t('cajaChica.reportesPanel.columnas.total')}</th>
               <th className="py-2 pr-3">{t('cajaChica.reportesPanel.columnas.estado')}</th>
+              <th className="py-2 pr-3">{t('cajaChica.reportesPanel.columnas.formaPago')}</th>
               <th className="py-2 pr-3">{t('cajaChica.reportesPanel.columnas.realizadoPor')}</th>
               <th className="py-2 pr-3" />
             </tr>
           </thead>
           <tbody>
-            {data.map(r => (
+            {data.data.map(r => (
               <tr key={r.numero} className="border-b border-slate-50 dark:border-slate-800">
                 <td className="py-2 pr-3 text-slate-700 dark:text-slate-200">{r.numero}</td>
                 <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{r.fecha_creacion}</td>
@@ -250,6 +262,7 @@ function ReportesPanel(
                     {t(`cajaChica.estadosReporte.${r.estado}`)}
                   </span>
                 </td>
+                <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{t(`cajaChica.formasPago.${r.forma_pago}`)}</td>
                 <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{r.realizado_por_nombre}</td>
                 <td className="py-2 pr-3">
                   <button type="button" onClick={() => onSelect(r.numero)} className="text-primary-dark hover:underline">
@@ -261,6 +274,12 @@ function ReportesPanel(
           </tbody>
         </table>
       </div>
+      <Pagination
+        meta={data.meta}
+        perPage={perPage}
+        onPageChange={setPage}
+        onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+      />
     </div>
   )
 }
@@ -270,14 +289,16 @@ function ReportesPanel(
 function RechazadosPanel(
   { t, onSelectLinea }: { t: (key: string, opts?: Record<string, unknown>) => string; onSelectLinea: (id: number) => void },
 ) {
-  const { data, isFetching } = usePettyCashRejected()
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
+  const { data, isFetching } = usePettyCashRejected(page, perPage)
 
   if (!data) return <p className="text-xs text-slate-400 text-center py-8">{isFetching ? '…' : null}</p>
 
   return (
     <div>
       <p className="text-[11px] text-slate-400 mb-3">{t('cajaChica.rechazadosPanel.subtitle')}</p>
-      {data.length === 0 ? (
+      {data.lineas.length === 0 ? (
         <p className="text-xs text-slate-400 text-center py-8">{t('cajaChica.rechazadosPanel.vacio')}</p>
       ) : (
         <div className="overflow-x-auto">
@@ -293,7 +314,7 @@ function RechazadosPanel(
               </tr>
             </thead>
             <tbody>
-              {data.map(l => (
+              {data.lineas.map(l => (
                 <tr
                   key={l.id} onClick={() => onSelectLinea(l.id)}
                   className="border-b border-slate-50 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60"
@@ -310,6 +331,12 @@ function RechazadosPanel(
           </table>
         </div>
       )}
+      <Pagination
+        meta={data.meta}
+        perPage={perPage}
+        onPageChange={setPage}
+        onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+      />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { gerenciaApi } from '@/api/gerenciaApi'
 import type { GerenciaFilters } from '@/types/gerencia'
 
@@ -23,5 +23,13 @@ export function useGerenciaHome(filters?: GerenciaFilters) {
     queryKey:  ['gerencia/home', filters],
     queryFn:   () => gerenciaApi.home(filters),
     staleTime: 60_000,
+  })
+}
+
+// SCRUM-862 — "Exportar reporte" en Gerencia.
+export function useGerenciaExport() {
+  return useMutation({
+    mutationFn: ({ filters, format }: { filters: GerenciaFilters; format: 'pdf' | 'xlsx' }) =>
+      gerenciaApi.exportHome(filters, format),
   })
 }

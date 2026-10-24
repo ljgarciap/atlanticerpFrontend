@@ -12,6 +12,7 @@ import { QuoteIndicator, InspectionReportIndicator } from './TicketIndicators'
 import TicketCancelModal from './TicketCancelModal'
 import { useToastStore } from '@/store/toastStore'
 import { IcoEye } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   tickets:      Ticket[]
@@ -41,7 +42,7 @@ const TYPE_COLORS: Record<TicketType, string> = {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 
 interface CardProps {

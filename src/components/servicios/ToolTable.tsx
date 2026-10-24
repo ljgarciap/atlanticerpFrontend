@@ -5,6 +5,7 @@ import ToolEstadoSelect from './ToolEstadoSelect'
 import ToolAssignmentSelect from './ToolAssignmentSelect'
 import ToolReceiveButton from './ToolReceiveButton'
 import { Button } from '@/components/ui/Button'
+import { formatDateShort } from '@/utils/dates'
 
 interface Props {
   tools:               Tool[]
@@ -48,14 +49,11 @@ function groupTools(tools: Tool[], purchaseRequests: ToolPurchaseRequest[]): Too
 }
 
 // CRÍTICO Pre-QA 2026-08-13 (REQ-270) — `assigned_since` viaja como fecha pura "YYYY-MM-DD"
-// (Tool::assigned_since->toDateString()), sin hora/zona. `new Date('2026-08-13')` la interpreta
-// como medianoche UTC; en cualquier zona horaria negativa (ej. America/Panama, UTC-5 — la zona
-// real de producción), `.toLocaleDateString()` la muestra un día ANTES del valor real ("Desde"
-// mostraba ayer en vez de hoy tras reasignar, reproducido en vivo). Se arma la fecha a partir de
-// sus componentes en vez de parsear el string ISO, para que quede anclada a la zona local.
+// (Tool::assigned_since->toDateString()), sin hora/zona. `formatDateShort()` (utils/dates.ts,
+// SCRUM-787/883) ya blinda contra el mismo off-by-one que motivó este fix — se dejó de duplicar
+// esa lógica acá.
 function formatDate(iso: string): string {
-  const [year, month, day] = iso.split('-').map(Number)
-  return new Date(year, month - 1, day).toLocaleDateString()
+  return formatDateShort(iso)
 }
 
 // REQ-268 RN1 — resumen "5 unidad(es) (4 buen estado, 1 desgaste)".

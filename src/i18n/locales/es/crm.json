@@ -426,5 +426,23 @@
     "copyNowWarning": "Por seguridad, no vas a poder volver a verlo una vez que cierres este modal.",
     "noLinks":      "Todavía no generaste ningún link para este documento.",
     "close":        "Cerrar"
+  },
+  "settings": {
+    "title": "Umbrales de CRM",
+    "subtitle": "Ventanas de días que alimentan las alertas de Dashboard y los filtros de urgencia/frescura de Proyectos.",
+    "saveError": "No se pudieron guardar los umbrales.",
+    "fields": {
+      "entregaProximaDias": "Entrega próxima (días)",
+      "freshnessRecentDias": "Actividad reciente (días)",
+      "freshnessStaleDias": "Proyecto frío / sin actividad (días)",
+      "catalogPdfMaxSingleProducts": "Máximo de productos de un PDF plano",
+      "catalogPdfMaxSinglePhotos": "Máximo de productos con foto de un PDF plano",
+      "catalogPdfVolumeSize": "Productos por volumen del ZIP",
+      "catalogPdfExportRetentionDays": "Días que se conserva el ZIP"
+    },
+    "catalogPdf": {
+      "title": "PDF de Catálogo",
+      "subtitle": "Hasta el máximo, el PDF se descarga de inmediato. Por encima se genera en segundo plano un ZIP de volúmenes (un PDF por tanda) y se avisa al terminar. Cada foto es una descarga, por eso el PDF plano también tiene un máximo de fotos. El máximo de productos no puede pasar de 1.000, el de fotos de 500, y el volumen va de 50 a 1.000."
+    }
   }
 }

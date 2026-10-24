@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { firstNameOnly } from '@/lib/greeting'
 
 /**
  * REQ-206 (SCRUM-269) — Encabezado de Inicio de Servicios, saludo dinámico.
@@ -59,7 +60,7 @@ export default function ServiciosHomeHeader() {
     queryFn:  serviciosApi.tickets.stats,
   })
 
-  const firstName = user?.first_name?.trim()
+  const firstName = firstNameOnly(user?.first_name)
   const greeting  = firstName ? t('home.greeting', { name: firstName }) : t('home.greetingFallback')
 
   const isLoadingSummary = loadingTechnicianStats || loadingTicketStats

@@ -13,7 +13,8 @@ export type ProviderOrigin = 'local' | 'internacional'
 // REQ-126 (mockup 2G__Compras_Proveedores.html) — 5 valores fijos, no texto libre. Realineado
 // 2026-07-30 (SCRUM-189, hallazgo de Gerencia Test) — `origin` se deriva de esto server-side,
 // ya no es un campo propio del form.
-export type ProviderCategory = 'locales' | 'zona_libre' | 'china' | 'europa' | 'online'
+// SCRUM-820 — "latinoamerica" agregada 2026-08-31 a pedido de Gerencia Test.
+export type ProviderCategory = 'locales' | 'zona_libre' | 'china' | 'europa' | 'online' | 'latinoamerica'
 
 export interface Provider {
   id:               number
@@ -32,6 +33,9 @@ export interface Provider {
 }
 
 export interface ProviderDetail extends Provider {
+  // SCRUM-852 — identificación fiscal (RUC/NIT/Tax ID), unicidad dura igual que `name`.
+  tax_id:               string | null
+  tax_id_dv?:           string | null
   whatsapp:             string | null
   phone:                string | null
   email:                string | null
@@ -41,6 +45,28 @@ export interface ProviderDetail extends Provider {
   bank_account_number:  string | null
   bank_swift:           string | null
   bank_beneficiary:     string | null
+  // SCRUM-819 — respaldo visual, independiente de los campos bank_* de arriba. null = sin imagen
+  // cargada (nunca un objeto vacío).
+  bank_image:           { url: string; filename: string | null } | null
+}
+
+/** ADR-SCRUM819 — extracción automática de datos bancarios desde `bank_image` vía IA. */
+export type ProviderBankField = 'bank_name' | 'bank_account_number' | 'bank_swift' | 'bank_beneficiary'
+
+export interface ProviderBankExtractionResult {
+  fields_found:        ProviderBankField[]
+  bank_name:           string | null
+  bank_account_number: string | null
+  bank_swift:          string | null
+  bank_beneficiary:    string | null
+  confidence:          'alta' | 'media' | 'baja'
+}
+
+export interface ProviderBankExtraction {
+  id:     string | null
+  status: 'pending' | 'running' | 'completed' | 'failed' | null
+  result: ProviderBankExtractionResult | null
+  error:  string | null
 }
 
 export interface ProviderListResponse {
@@ -58,6 +84,9 @@ export interface ProviderListResponse {
 
 export interface ProviderPayload {
   name:                  string
+  // SCRUM-852 — opcional, unicidad validada por el backend (422 con mensaje si ya existe).
+  tax_id?:               string | null
+  tax_id_dv?:            string | null
   category?:             ProviderCategory | null
   currency?:             string | null
   is_active?:            boolean
@@ -119,6 +148,14 @@ export interface PurchaseOrderSummary {
   // listado (antes solo en PurchaseOrderDetail).
   shipping_type:               ShippingType | null
   shipping_cost:                number | null
+  // SCRUM-1145 — costos adicionales opcionales; `total_amount` sigue siendo solo productos (igual que el
+  // PDF), `payable_total` = productos + envío aéreo pagado por Atlantic + adicionales.
+  import_cost:                  number | null
+  freight_cost:                 number | null
+  handling_cost:                number | null
+  other_cost:                   number | null
+  additional_costs_total:       number
+  payable_total:                number
   estimated_arrival_date:      string | null
   requires_primary_approval:      boolean
   blocked_by_primary_approval:    boolean
@@ -180,7 +217,19 @@ export interface PurchaseOrderLineDetail {
   reception_status:         ReceptionStatus
 }
 
+/** SCRUM-1127 — versión guardada de la orden en otro idioma (hoy solo inglés). */
+export interface OrderTranslationStatus {
+  exists:       boolean
+  /** La orden cambió después de traducir: hay que regenerar antes de usarla. */
+  stale:        boolean
+  generated_at: string | null
+}
+
+export type OrderDocLang = 'es' | 'en'
+
 export interface PurchaseOrderDetail extends PurchaseOrderSummary {
+  // SCRUM-1127 — la versión en inglés se genera a pedido, orden por orden.
+  translations?: { en: OrderTranslationStatus }
   // shipping_type/shipping_cost ya vienen de PurchaseOrderSummary (REQ-140/SCRUM-203).
   who_pays_shipping:   WhoPaysShipping | null
   // SCRUM-210 (REQ-147, alcance reducido) — solo relevante para órdenes Zona Libre.
@@ -305,6 +354,16 @@ export interface ReplacementRequest {
   requested_by_name:     string | null
   generated_order_id:    number | null
   created_at:            string
+  // SCRUM-818 — calculado server-side con la misma regla que approve()/reject() aplican de
+  // verdad, nunca reimplementada acá (matriz de aprobación por margen + responsable del proyecto).
+  can_decide:            boolean
+  // SCRUM-818 (rebote 2026-09-03, Hallazgo 3) — mismo criterio que can_decide: antes el botón
+  // "Generar orden" se mostraba a cualquiera con la fila visible (Vendedor/Operaciones incluidos)
+  // y el backend recién bloqueaba tras el click. Ahora el backend informa explícitamente quién
+  // puede generar la orden (exclusivo Líder de Compras) — nunca reimplementar esta regla acá.
+  // Opcional (no `?:` en la respuesta real, siempre presente) para no forzar a todos los fixtures
+  // de test de este tipo a declararlo — `undefined` se trata igual que `false` (botón oculto).
+  can_generate_order?:   boolean
 }
 
 // SCRUM-754 (2026-08-18) — mismo shape que PaginationMeta (components/ui/Pagination.tsx).
@@ -333,6 +392,9 @@ export interface SubstituteSearchResult {
   photo_url:              string | null
   price_full:              number
   cost:                    number | null
+  // SCRUM-818 (rebote 2026-09-03) — calculado server-side (siempre presente en la respuesta real;
+  // opcional acá para no forzar a los fixtures de test existentes a declararlo).
+  margin_percent?:         number | null
   stock_quantity:          number | null
   similarity_percent:      number
   reasoning:                string
@@ -422,6 +484,10 @@ export interface PurchaseOrderPayload {
   shipping_type?:           ShippingType | null
   who_pays_shipping?:       WhoPaysShipping | null
   shipping_cost?:            number | null
+  import_cost?:              number | null
+  freight_cost?:             number | null
+  handling_cost?:            number | null
+  other_cost?:               number | null
   modality?:                 Modality | null
   estimated_arrival_date?:   string | null
   notes?:                    string | null
@@ -443,6 +509,9 @@ export interface ComprasCatalogProduct {
   photo_url:            string | null
   price_full:            number
   cost:                  number | null
+  // SCRUM-818 (rebote 2026-09-03) — calculado server-side (siempre presente en la respuesta real;
+  // opcional acá para no forzar a los fixtures de test existentes a declararlo).
+  margin_percent?:       number | null
   stock_quantity:        number | null
   reorder_point:          number | null
   // SCRUM-246 (rebote de Gerencia Test 2026-08-09) — Categoría, columna nueva en la tabla de
@@ -453,6 +522,13 @@ export interface ComprasCatalogProduct {
   // `original_catalog_product_id` (método "Buscar en catálogo" de Comparación de Referencias);
   // en el resto de los consumidores de este endpoint (Nueva Orden) siempre viene `null`.
   similarity_percent?:   number | null
+}
+
+/** SCRUM-1163 — respuesta paginada en servidor de `GET /compras/products?page=` (total real del proveedor, no el tope de 100). */
+export interface ComprasCatalogProductPage {
+  data:  ComprasCatalogProduct[]
+  fuzzy: boolean
+  meta:  { total: number; per_page: number; current_page: number; last_page: number }
 }
 
 /** REQ-133 — buscador de Pedidos Aprobados. */
@@ -648,7 +724,12 @@ interface InventoryProductBase {
   name?:           string
   description:     string
   brand:           string | null
-  photo_url:       string | null
+  // SCRUM-830 — 'photo_url' es la miniatura optimizada (listados/tarjetas); 'photo_full_url' es
+  // la imagen completa (detalle). 'has_uploaded_photo' distingue "imagen subida por este
+  // mecanismo" de un `photo_url` legacy heredado del sync ICG.
+  photo_url:            string | null
+  photo_full_url?:      string | null
+  has_uploaded_photo?:  boolean
   // SCRUM-234/238 (hallazgo de Gerencia Test 2026-08-09) — Categoría, Rotación, Stock mínimo y
   // Bodega(s) pasan a ser visibles en AMBOS modos (antes solo en modo Compras completo).
   category:        string | null
@@ -659,6 +740,8 @@ interface InventoryProductBase {
   stock_quantity:  number | null
   por_servir:      number
   disponible:      number
+  /** SCRUM-1196 — unidades en Showroom Obarrio: se pueden vender pero NO suman al disponible (dato aparte para el vendedor). */
+  stock_showroom?: number
   estado:          InventoryEstado
   is_active:       boolean
   has_technical_sheet?:         boolean
@@ -706,6 +789,8 @@ export interface InventoryProduct extends InventoryProductBase {
   margin_percent?:     number | null
   provider_id?:        number | null
   provider_name?:      string | null
+  // SCRUM-1126 — todos los proveedores asociados al producto (el principal es `provider_id`).
+  providers?:          { id: number; name: string }[]
   family_id?:           number | null
   family_name?:         string | null
   // SCRUM-425 — solo viene en el detalle (GET /compras/inventory/{id}); productos creados antes
@@ -724,6 +809,8 @@ export interface InventoryProduct extends InventoryProductBase {
 
 export interface InventoryKpis {
   total_products: number
+  /** SCRUM-991 — productos activos con unidades en alguna bodega operativa (coincide con la suma de bodegas). */
+  with_stock:     number
   low_stock:      number
   out_of_stock:   number
   in_attention:   number
@@ -805,6 +892,8 @@ export interface InventoryProductPayload {
   other_cost?:          number
   reorder_point?:       number | null
   provider_id?:          number | null
+  // SCRUM-1126 — proveedores asociados; `provider_id` es el principal (el primero).
+  provider_ids?:         number[]
   rotation?:             InventoryRotation | null
   // SCRUM-240 (corrección de Gerencia Test, 2026-08-12) — "Stock inicial (opcional)" reemplaza
   // stock_quantity/warehouse_id (una sola bodega) por una entrada opcional POR bodega. Los 2
@@ -856,6 +945,14 @@ export interface InventoryTechnicalSheetResponse {
   has_technical_sheet:          boolean
   technical_sheet_filename:     string | null
   technical_sheet_uploaded_at:  string | null
+}
+
+// SCRUM-830 — respuesta de POST /compras/inventory/{id}/photo (reemplazo de imagen en edición).
+export interface InventoryPhotoResponse {
+  id:                  number
+  photo_url:           string | null
+  photo_full_url:      string | null
+  has_uploaded_photo:  boolean
 }
 
 // SCRUM-262→268 (REQ-199→205) — Reportes avanzados. REQ-202 fuera de este batch.
@@ -1131,4 +1228,43 @@ export interface ComprasHomeSummary {
   por_reordenar:       ComprasHomeReorderItem[]
   // REQ-113, desbloqueado 2026-07-21 — reuniones de hoy vía Outlook (OutlookCalendarService)
   events_today_count:  number
+}
+
+// SCRUM-1184 — «Pendientes de reposición»: pedidos sin stock consolidados por producto y agrupados por proveedor.
+export interface ReplenishmentOrderRef {
+  order_id:     number
+  order_number: string
+  project:      string | null
+  /** Folio de la cotización del pedido (con el que se busca en «Pedidos de venta»); null si no tiene. */
+  quote_folio:  string | null
+  since:        string | null
+  qty:          number
+}
+
+export interface ReplenishmentProduct {
+  catalog_product_id: number
+  reference:          string
+  name:               string
+  /** Suma de lo que falta en todos los pedidos que esperan este producto. */
+  faltante:           number
+  stock:              number
+  /** Cantidad ya pedida a proveedores en órdenes de compra abiertas. */
+  en_camino:          number
+  unit_cost:          number
+  since:              string | null
+  orders:             ReplenishmentOrderRef[]
+  /** Proveedores entre los que se puede ordenar este producto (el principal incluido). */
+  providers:          { id: number; name: string }[]
+}
+
+export interface ReplenishmentGroup {
+  provider: { id: number; name: string } | null
+  products: ReplenishmentProduct[]
+}
+
+export interface ReplenishmentResponse {
+  groups:             ReplenishmentGroup[]
+  /** Ítems de pedidos sin producto de catálogo: no se pueden ordenar desde esta pantalla. */
+  custom_items_count: number
+  total_products:     number
 }

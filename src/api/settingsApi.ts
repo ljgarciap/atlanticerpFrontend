@@ -4,6 +4,9 @@ export interface UserPreferences {
   language:            'es' | 'en'
   theme:               'light' | 'dark'
   session_timeout_min: number
+  // docs/specs/demo-mode.md — gate PERSONAL. Solo tiene efecto real si
+  // SystemSettings.demo_mode_enabled también está en true.
+  demo_mode_enabled:   boolean
 }
 
 export interface SystemSettings {
@@ -13,6 +16,12 @@ export interface SystemSettings {
   mfa_mode:                    'disabled' | 'optional' | 'required'
   share_links_expiration_days: number
   session_inactivity_hours:    number
+  // docs/specs/demo-mode.md — gate GLOBAL, default false.
+  demo_mode_enabled:           boolean
+  // SCRUM-990 — umbral de la guarda del sincronizador de Lafayette: fracción mínima (0,5 a 1,0, por defecto 0,9) de la última sincronización
+  // exitosa que debe traer una extracción para aceptarla. GET lo devuelve a quien tenga `settings.global`; PATCH solo a superadmin.all
+  // (403 si no, 422 con error en esta clave fuera del rango).
+  lafayette_guarda_min_ratio:  number
 }
 
 export interface AiKeyResponse {
@@ -44,4 +53,11 @@ export const settingsApi = {
 
   updateDocumentsMaxSize: (max_size_mb: number): Promise<{ max_size_mb: number }> =>
     api.put('/settings/documents/max-size', { max_size_mb }).then(r => r.data as { max_size_mb: number }),
+
+  // docs/specs/demo-mode.md — lectura del gate GLOBAL sin requerir `settings.global`, mismo
+  // patrón que getDocumentsMaxSize ("accessible to all authenticated users"). Reemplaza el uso de
+  // getSystemSettings() en useDemoModeActive() — ese sigue detrás del permiso, correcto para la
+  // pantalla de admin, pero no sirve para que CUALQUIER usuario sepa si el gate está encendido.
+  getDemoModeStatus: (): Promise<{ enabled: boolean }> =>
+    api.get('/settings/demo-mode-status').then(r => r.data as { enabled: boolean }),
 }

@@ -59,7 +59,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     status: 'en_transito', next_status: 'en_aduana', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
     estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
-    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 1000, currency: 'USD',
+    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 1000, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null, additional_costs_total: 0, payable_total: 1000, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-05T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -155,6 +155,7 @@ describe('LogisticsPage — sincronización de contenedor/naviera (B3)', () => {
   })
 
   it('un blur con un cambio real sí actualiza el campo correspondiente', async () => {
+    mockAuthState(['compras.edit'])
     mockedComprasApi.orders.list.mockResolvedValue({
       data: [makeSummary()], filters: { creators: [] },
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
@@ -688,5 +689,43 @@ describe('LogisticsPage — confirmar pendientes a Inventario (SCRUM-208, redise
     fireEvent.click(button)
 
     await waitFor(() => expect(screen.getByText('compras:orders.errors.confirmPendingReceiptsGeneric')).toBeInTheDocument())
+  })
+})
+
+// SCRUM-1013 (rebote de Daniela, 2026-10-02) — "solo consulta": sin compras.edit, Número de contenedor y
+// Naviera se ven como texto de solo lectura (antes eran editables y solo fallaban con 403 al guardar).
+describe('LogisticsPage — solo consulta sin compras.edit (SCRUM-1013 rebote)', () => {
+  function cargar() {
+    mockedComprasApi.orders.list.mockResolvedValue({
+      data: [makeSummary()], filters: { creators: [] },
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ container_number: 'CONT-123', carrier: 'Maersk' }))
+  }
+
+  it('contenedor y naviera son de solo lectura y un cambio forzado no llama al backend', async () => {
+    mockAuthState(['compras.logistica.view'])
+    cargar()
+    renderPage()
+
+    const container = (await screen.findByDisplayValue('CONT-123')) as HTMLInputElement
+    const carrier = screen.getByDisplayValue('Maersk') as HTMLInputElement
+    expect(container.readOnly).toBe(true)
+    expect(carrier.readOnly).toBe(true)
+
+    fireEvent.change(container, { target: { value: 'CONT-999' } })
+    fireEvent.blur(container)
+    await new Promise(r => setTimeout(r, 50))
+    expect(mockedComprasApi.orders.updateShippingInfo).not.toHaveBeenCalled()
+  })
+
+  it('con compras.edit los campos siguen editables', async () => {
+    mockAuthState(['compras.edit'])
+    cargar()
+    renderPage()
+
+    const container = (await screen.findByDisplayValue('CONT-123')) as HTMLInputElement
+    expect(container.readOnly).toBe(false)
+    expect((screen.getByDisplayValue('Maersk') as HTMLInputElement).readOnly).toBe(false)
   })
 })

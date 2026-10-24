@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoChevronLeft, IcoChevronRight, IcoAlertTriangle } from '@/components/icons'
 import { startOfMonth, endOfMonth, startOfWeek, addDays, toDateKey, isSameDay } from '@/lib/dateGrid'
+import { formatTimeShort } from '@/utils/dates'
 
 // Re-exportado por compatibilidad — CalendarModal.test.tsx y MiniCalendarCard lo importan de acá
 // y de '@/lib/dateGrid' respectivamente; mismo símbolo, sin duplicar la lógica.
@@ -179,7 +180,7 @@ export default function CalendarModal({ queryKeyPrefix, fetchEvents, onClose, in
                     <span className="font-semibold">{e.title || t('ventasDiseno:home.calendar.untitled')}</span>{' '}
                     {e.start_at && (
                       <span className="text-slate-400">
-                        {new Date(e.start_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
+                        {formatTimeShort(e.start_at)}
                       </span>
                     )}
                   </div>

@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { authApi } from '@/api/authApi'
+import { parseAuthError, isTooManyAttempts } from '@/lib/authErrors'
+import { useRetryCountdown, describeWait } from '@/hooks/useRetryCountdown'
 import AppLogo from '@/components/AppLogo'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -22,19 +24,30 @@ export default function ForgotPasswordPage() {
   const { t } = useTranslation(['common', 'auth'])
   const [sent, setSent]       = useState(false)
   const [apiError, setApiError] = useState('')
+  const wait = useRetryCountdown()
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   const onSubmit = async (data: FormData) => {
+    if (wait.active) return
     setApiError('')
     try {
       await authApi.forgotPassword(data.email)
-    } catch {
-      // Always show success — never reveal whether email exists
+    } catch (err: unknown) {
+      // Cierre de H4: el límite de intentos es la única excepción visible. Aplica por IP y por correo
+      // exista o no la cuenta, así que no revela nada; se bloquea el envío con una espera legible.
+      const parsed = parseAuthError(err)
+      if (isTooManyAttempts(parsed)) { wait.start(parsed.retryAfter ?? 60); return }
+      // Cualquier otro error: siempre se muestra éxito — nunca se revela si el correo existe.
     }
     setSent(true)
+  }
+
+  const waitText = (seconds: number) => {
+    const { unit, count } = describeWait(seconds)
+    return t(`auth:errors.wait.${unit}`, { count })
   }
 
   return (
@@ -101,13 +114,19 @@ export default function ForgotPasswordPage() {
                 )}
               </div>
 
+              {wait.active && (
+                <div role="alert" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  {t('auth:errors.tooManyAttempts', { time: waitText(wait.remaining) })}
+                </div>
+              )}
+
               {apiError && (
                 <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                   {apiError}
                 </div>
               )}
 
-              <Button type="submit" loading={isSubmitting} className="w-full">
+              <Button type="submit" loading={isSubmitting} disabled={wait.active} className="w-full">
                 {isSubmitting ? t('auth:forgotPassword.submitting') : t('auth:forgotPassword.submit')}
               </Button>
 

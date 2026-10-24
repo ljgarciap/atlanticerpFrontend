@@ -28,6 +28,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
     },
     subClients: {
       contacts: { create: vi.fn(), update: vi.fn(), remove: vi.fn() },
+      history: vi.fn(),
     },
   },
 }))
@@ -41,7 +42,7 @@ function makeDetail(): ClientDetail {
     default_price_type: 'project',
     sub_clients: [
       {
-        id: 10, master_client_id: 1, business_name: 'Delta Residencial', tax_id: '155-0-1',
+        id: 10, master_client_id: 1, business_name: 'Delta Residencial', tax_id: '155-0-1', tax_id_dv: '81',
         delivery_address: null, category: 'a_walkin',
         contacts: [{ id: 100, name: 'Ana Pérez', role: 'client', phone: '6000-0000', email: null }],
       },
@@ -64,6 +65,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.clients.get.mockResolvedValue(makeDetail())
   mockedApi.clients.projects.mockResolvedValue([])
+  mockedApi.subClients.history.mockResolvedValue({ data: [], total: 0, per_page: 20, current_page: 1, last_page: 1 })
 })
 
 describe('ClientDetailModal', () => {
@@ -72,6 +74,39 @@ describe('ClientDetailModal', () => {
     expect(await screen.findByText('ventasDiseno:priceType.project')).toBeInTheDocument()
     expect(screen.getByText('Delta Residencial')).toBeInTheDocument()
     expect(screen.getByText('Ana Pérez')).toBeInTheDocument()
+  })
+
+  it('SCRUM-1166: un subcliente exento de ITBMS lo muestra con su chip; uno que no lo es, no', async () => {
+    const detail = makeDetail()
+    detail.sub_clients[0].itbms_exento = true
+    detail.sub_clients[0].itbms_exencion_documento = 'Resolución 201-1234'
+    mockedApi.clients.get.mockResolvedValue(detail)
+    renderModal()
+
+    const chip = await screen.findByTestId(`chip-exento-${detail.sub_clients[0].id}`)
+    expect(chip).toHaveTextContent('ventasDiseno:clients.detail.exentoItbms')
+    expect(chip).toHaveAttribute('title', 'Resolución 201-1234')
+  })
+
+  it('SCRUM-1166: sin la marca no aparece el chip de exento', async () => {
+    renderModal()
+    await screen.findByText('Delta Residencial')
+    expect(screen.queryByText('ventasDiseno:clients.detail.exentoItbms')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-928: muestra el DV junto al RUC del subcliente, y lo omite si el subcliente no lo tiene', async () => {
+    renderModal()
+    const ruc = await screen.findByText(/ventasDiseno:clients\.detail\.taxId: 155-0-1/)
+    expect(ruc).toHaveTextContent('ventasDiseno:clients.detail.taxIdDv: 81')
+  })
+
+  it('SCRUM-928: un subcliente anterior al campo (sin DV) no muestra la etiqueta DV', async () => {
+    const detail = makeDetail()
+    detail.sub_clients[0].tax_id_dv = null
+    mockedApi.clients.get.mockResolvedValue(detail)
+    renderModal()
+    const ruc = await screen.findByText(/ventasDiseno:clients\.detail\.taxId: 155-0-1/)
+    expect(ruc).not.toHaveTextContent('taxIdDv')
   })
 
   it('cambiar la categoría de un subcliente llama al API con el subcliente correcto', async () => {
@@ -112,5 +147,15 @@ describe('ClientDetailModal', () => {
     fireEvent.click(screen.getByText('common:actions.add'))
 
     expect(await screen.findByText('El correo electrónico debe ser una dirección de correo válida.')).toBeInTheDocument()
+  })
+
+  it('SCRUM-762: abre el modal de Historial ICG del subcliente correcto', async () => {
+    renderModal()
+    await screen.findByText('Delta Residencial')
+
+    fireEvent.click(screen.getByText('ventasDiseno:clients.detail.icgHistory'))
+
+    expect(await screen.findByText('ventasDiseno:clients.icgHistoryModal.title:Delta Residencial')).toBeInTheDocument()
+    await waitFor(() => expect(mockedApi.subClients.history).toHaveBeenCalledWith(10, 'cotizaciones', 1, 20))
   })
 })

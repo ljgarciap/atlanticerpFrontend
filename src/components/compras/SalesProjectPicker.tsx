@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { comprasApi } from '@/api/comprasApi'
 import type { ApprovedProject } from '@/types/compras'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 interface Props {
   projectId:    number | null
@@ -13,6 +14,10 @@ interface Props {
   // proyecto es obligatorio (ej. GenerateRequestModal, REQ-184) deben pasar un texto propio —
   // ese mismo copy en un contexto "requerido" sugeriría erróneamente que dejarlo en blanco está bien.
   emptyLabel?:  string
+  // SCRUM-818 — GenerateRequestModal filtra el picker a solo proyectos que contienen ESTE
+  // producto (el producto original que se busca reemplazar). Nueva Orden no lo pasa — sigue
+  // viendo todos los proyectos aprobados, sin cambios de comportamiento.
+  catalogProductId?: number
 }
 
 /**
@@ -22,16 +27,24 @@ interface Props {
  * ReplacementRequestsPage) — NUNCA `prompt()` nativo, siempre este buscador. Antes vivía inline
  * en OrderLinesEditor::LineRow.
  */
-export default function SalesProjectPicker({ projectId, projectLabel, onChange, emptyLabel }: Props) {
+export default function SalesProjectPicker({ projectId, projectLabel, onChange, emptyLabel, catalogProductId }: Props) {
   const { t } = useTranslation(['common', 'compras'])
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
   const [open, setOpen] = useState(false)
 
   const { data: results } = useQuery({
-    queryKey: ['compras/approved-projects/picker', search],
-    queryFn:  () => comprasApi.approvedProjects.search(search),
+    queryKey: ['compras/approved-projects/picker', searchTerm, catalogProductId],
+    queryFn:  () => comprasApi.approvedProjects.search(searchTerm, catalogProductId),
     enabled:  open,
   })
+
+  // SCRUM-818 (CA06) — mensaje específico "no existe proyecto para este producto" en vez del
+  // "—" genérico, solo cuando el picker está filtrando por producto y no hay ningún resultado
+  // (sin importar el texto de búsqueda — si no hay NINGÚN proyecto con este producto, no hay
+  // nada que un texto de búsqueda pudiera encontrar tampoco).
+  const noProjectsForProduct = catalogProductId !== undefined && results && results.data.length === 0
 
   const pick = (p: ApprovedProject) => {
     onChange(p.sales_project_id, p.project_name)
@@ -81,7 +94,11 @@ export default function SalesProjectPicker({ projectId, projectLabel, onChange, 
               </li>
             ))}
             {results && results.data.length === 0 && (
-              <li className="px-2 py-1.5 text-xs text-slate-400">—</li>
+              <li className="px-2 py-1.5 text-xs text-slate-400">
+                {noProjectsForProduct
+                  ? t('compras:replacements.generateModal.noProjectForProduct')
+                  : '—'}
+              </li>
             )}
           </ul>
         </div>

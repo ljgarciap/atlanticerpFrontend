@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { operativeWarehouses } from '@/lib/warehouses'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { isAxiosError } from 'axios'
@@ -12,6 +13,7 @@ import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose } from '@/components/icons'
 import { ADJUSTMENT_MOTIVOS } from '@/types/bodega'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import type {
   AdjustmentDuplicateWarning, AdjustmentEstado, AdjustmentMotivo, AdjustmentRequestLine, AdjustmentRequestLineDraft, AdjustmentTipo, ProductSearchResult,
 } from '@/types/bodega'
@@ -147,7 +149,7 @@ export default function SolicitudAjustePage() {
                   )}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{line.solicitado_por}</td>
-                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{new Date(line.fecha).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateFromTimestamp(line.fecha)}</td>
                 <td className="px-4 py-3"><EstadoBadge estado={line.estado} /></td>
                 <td className="px-4 py-3">
                   {/* SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Aprobar/Rechazar quedaban
@@ -287,7 +289,7 @@ function DetailModal({ line, onClose }: { line: AdjustmentRequestLine; onClose: 
           <div className="flex flex-wrap items-center gap-2">
             <EstadoBadge estado={line.estado} />
             <span className="text-xs text-slate-400">
-              {t('bodega:adjustments.detailModal.date')}: {new Date(line.fecha).toLocaleDateString()}
+              {t('bodega:adjustments.detailModal.date')}: {formatDateFromTimestamp(line.fecha)}
             </span>
           </div>
 
@@ -375,7 +377,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
 }) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = warehousesData?.data ?? []
+  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
   const create = useCreateAdjustmentRequest()
 
   // SCRUM-428 (REQ-358) — cuando se entra con un producto ya fijo (fila de Ver Inventario), el
@@ -644,12 +646,12 @@ function AdjustmentDuplicateModal({ duplicates, onConfirm, onCancel }: {
               <p className="font-semibold">{d.warehouse_name ?? '—'}</p>
               {d.adjustment && (
                 <p className="text-xs text-amber-700">
-                  {t('bodega:adjustments.duplicateModal.sameType', { date: new Date(d.adjustment.fecha).toLocaleDateString() })}
+                  {t('bodega:adjustments.duplicateModal.sameType', { date: formatDateFromTimestamp(d.adjustment.fecha) })}
                 </p>
               )}
               {d.general_count && (
                 <p className="text-xs text-slate-500">
-                  {t('bodega:adjustments.duplicateModal.crossType', { date: new Date(d.general_count.fecha).toLocaleDateString() })}
+                  {t('bodega:adjustments.duplicateModal.crossType', { date: formatDateFromTimestamp(d.general_count.fecha) })}
                 </p>
               )}
             </li>

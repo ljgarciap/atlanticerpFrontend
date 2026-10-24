@@ -36,9 +36,11 @@ function makeDetalle(overrides: Partial<NotaCreditoDetalle> = {}): NotaCreditoDe
     motivo: 'Descuento comercial acordado', motivo_rechazo: null, tiene_comprobante: true,
     fecha: '2026-08-20', registrado_por: 'Contabilidad Test', aprobado_por: null, fecha_decision: null,
     factura_origen_id: 10, factura_origen_numero: 'F-0001', factura_origen_order_id: 55,
-    factura_nueva_numero: null, factura_nueva_order_id: null, motivo_correccion: null, nuevo_tratamiento_itbms: null,
+    quote_id: null, cotizacion_folio: null, guia_entrega_numero: null, guia_entrega_order_id: null,
+    factura_nueva_numero: null, factura_nueva_order_id: null, factura_nueva_id: null, motivo_correccion: null, nuevo_tratamiento_itbms: null,
     nueva_fecha_factura: null, puede_aprobar_rechazar: false,
     devolucion_bodega_id: null, bodega_trazabilidad: null, cuenta_bancaria_salida: null,
+    fe_estado: null, cufe: null, qr_content: null, pac_provider_usado: null,
     ...overrides,
   }
 }
@@ -69,7 +71,7 @@ describe('DocumentoNotaCreditoModal — REQ-496/497', () => {
     renderModal({ factura_origen_id: 10, factura_origen_numero: 'F-0001', factura_origen_order_id: 55 })
     fireEvent.click(screen.getByRole('button', { name: /F-0001/ }))
     await waitFor(() => {
-      expect(mockedApi.invoices.downloadPdf).toHaveBeenCalledWith(55, 'F-0001')
+      expect(mockedApi.invoices.downloadPdf).toHaveBeenCalledWith(55, 'F-0001', undefined)
     })
   })
 

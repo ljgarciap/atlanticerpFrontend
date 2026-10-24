@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import BodegaOrdenesZonaLibrePage from './BodegaOrdenesZonaLibrePage'
 import { bodegaApi } from '@/api/bodegaApi'
 import { comprasApi } from '@/api/comprasApi'
@@ -56,12 +56,18 @@ function makeRow(overrides: Partial<ZonaLibreRequestRow> = {}): ZonaLibreRequest
   }
 }
 
-function renderPage() {
+function LocationProbe() {
+  const l = useLocation()
+  return <span data-testid="url">{l.pathname}{l.search}</span>
+}
+
+function renderPage(initialEntry = '/bodega/ordenes-zona-libre') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <BodegaOrdenesZonaLibrePage />
+        <LocationProbe />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -273,5 +279,71 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     expect(screen.getByText('Entrega urgente para el cliente Hotel Riu.')).toBeInTheDocument()
     expect(screen.getByText('Bombillo LED')).toBeInTheDocument()
     expect(mockedApi.zonaLibre.requests.get).toHaveBeenCalledWith(3)
+  })
+
+  // SCRUM-1170 — el recordatorio lleva a `?request={id}`: la bandeja resalta esa solicitud y abre su detalle.
+  describe('SCRUM-1170 — abrir una solicitud concreta con ?request=<id>', () => {
+    const filas = [makeRow({ id: 3, order_number: '1003' }), makeRow({ id: 9, order_number: '1009' })]
+    const detalle9: ZonaLibreRequestDetail = {
+      ...makeRow({ id: 9, order_number: '1009' }),
+      notes: 'Reposición urgente de la línea Nordic.', approved_by_name: null, rejected_by_name: null, rejection_reason: null,
+      lines: [{ id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Bombillo LED', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 }],
+    }
+
+    beforeEach(() => {
+      mockedApi.zonaLibre.requests.list.mockResolvedValue({ data: filas, meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 } })
+      mockedApi.zonaLibre.requests.get.mockResolvedValue(detalle9)
+    })
+
+    it('abre el detalle de esa solicitud, resalta su fila y pide la lista pendiente completa', async () => {
+      renderPage('/bodega/ordenes-zona-libre?request=9')
+
+      expect(await screen.findByText('Reposición urgente de la línea Nordic.')).toBeInTheDocument()
+      expect(mockedApi.zonaLibre.requests.get).toHaveBeenCalledWith(9)
+      // Solo pendientes y sin paginar: una solicitud antigua no queda en la página 2 sin resaltarse.
+      expect(mockedApi.zonaLibre.requests.list).toHaveBeenCalledWith({ status: 'pendiente', page: 1, per_page: 'all' })
+
+      const fila = (await screen.findByText('#1009')).closest('tr')!
+      expect(fila).toHaveAttribute('data-highlighted', 'true')
+      expect(screen.getByText('#1003').closest('tr')).not.toHaveAttribute('data-highlighted')
+    })
+
+    it('al cerrar el detalle la URL deja de reabrirlo y la fila sigue resaltada', async () => {
+      renderPage('/bodega/ordenes-zona-libre?request=9')
+      await screen.findByText('Reposición urgente de la línea Nordic.')
+      expect(screen.getByTestId('url')).toHaveTextContent('?request=9')
+
+      // El único botón de cierre del modal es la X (tiene el icono, sin texto).
+      const modal = screen.getByText('Reposición urgente de la línea Nordic.').closest('.fixed')!
+      fireEvent.click(modal.querySelector('button')!)
+
+      await waitFor(() => expect(screen.queryByText('Reposición urgente de la línea Nordic.')).not.toBeInTheDocument())
+      expect(screen.getByTestId('url')).toHaveTextContent('/bodega/ordenes-zona-libre')
+      expect(screen.getByTestId('url').textContent).not.toContain('request')
+      expect((await screen.findByText('#1009')).closest('tr')).toHaveAttribute('data-highlighted', 'true')
+    })
+
+    it.each([['abc'], ['9abc'], ['-1'], [''], ['1e3']])('un ?request= inválido (%j) se ignora: bandeja normal, sin detalle ni resaltado', async (valor) => {
+      renderPage(`/bodega/ordenes-zona-libre?request=${valor}`)
+
+      await waitFor(() => expect(mockedApi.zonaLibre.requests.list).toHaveBeenCalledWith({ status: 'todas', page: 1, per_page: 20 }))
+      await screen.findByText('#1003')
+      expect(mockedApi.zonaLibre.requests.get).not.toHaveBeenCalled()
+      expect(document.querySelector('[data-highlighted]')).toBeNull()
+    })
+
+    it('sin el parámetro la bandeja se comporta como siempre', async () => {
+      renderPage()
+      await waitFor(() => expect(mockedApi.zonaLibre.requests.list).toHaveBeenCalledWith({ status: 'todas', page: 1, per_page: 20 }))
+      expect(mockedApi.zonaLibre.requests.get).not.toHaveBeenCalled()
+    })
+
+    it('una solicitud que ya no existe muestra un aviso en el detalle, no un «cargando» eterno', async () => {
+      mockedApi.zonaLibre.requests.get.mockRejectedValue({ response: { status: 404 } })
+      renderPage('/bodega/ordenes-zona-libre?request=999')
+
+      expect(await screen.findByTestId('zona-libre-detail-not-found')).toBeInTheDocument()
+      expect(screen.queryByText('common:labels.loading')).not.toBeInTheDocument()
+    })
   })
 })

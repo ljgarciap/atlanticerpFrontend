@@ -39,6 +39,7 @@ export const MENU_ITEM_CATALOG: Record<string, MenuItemCatalogEntry[]> = {
     { key: 'proveedores',  label: 'Proveedores' },
     { key: 'ordenes',      label: 'Ver Órdenes' },
     { key: 'nueva_orden',  label: 'Nueva Orden' },
+    { key: 'reposicion',   label: 'Pendientes de reposición' },
     { key: 'logistica',    label: 'Logística & Envío' },
     { key: 'ingresos',     label: 'Ingresos de Mercancía' },
     { key: 'agencias',     label: 'Agencias de Liquidación' },

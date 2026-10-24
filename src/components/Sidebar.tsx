@@ -11,14 +11,20 @@ import {
   IcoHome, IcoList, IcoPipeline, IcoShoppingBag, IcoBox, IcoBeaker,
   IcoBarChart, IcoUsers, IcoUserCheck, IcoChevronLeft, IcoChevronRight, IcoChevronDown, IcoClock,
   IcoFileText, IcoMapPin, IcoGlobe, IcoSettings, IcoShield, IcoTool, IcoDollarSign, IcoBan,
-  IcoTrendingUp, IcoBook,
+  IcoTrendingUp, IcoBook, IcoArchive, IcoEye, IcoLifeBuoy, IcoBookOpen,
 } from '@/components/icons'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
+import { canReachComprasItem } from '@/config/comprasMenuPermissions'
 
 interface NavItem {
   id:    string
   label: string
   href:  string
   icon:  React.ReactNode
+  /** SCRUM-930 — cuando está presente, se ejecuta en vez de `navigate(href)` (ej. abrir un popup
+   *  con `window.open()`). `href` se mantiene igual para el chequeo de `isActive`, aunque en ese
+   *  caso nunca coincide con la URL actual (la navegación real ocurre fuera de este tab/ruta). */
+  onClick?: () => void
 }
 
 // SCRUM-724 — mapea cada NavItem.id real de este archivo a su {module, key} en
@@ -42,6 +48,7 @@ const MENU_ITEM_KEYS: Record<string, { module: string; key: string }> = {
   'compras-proveedores':       { module: 'compras', key: 'proveedores' },
   'compras-ordenes':           { module: 'compras', key: 'ordenes' },
   'compras-nueva-orden':       { module: 'compras', key: 'nueva_orden' },
+  'compras-reposicion':        { module: 'compras', key: 'reposicion' },
   'compras-logistica':         { module: 'compras', key: 'logistica' },
   'compras-ingresos':           { module: 'compras', key: 'ingresos' },
   'compras-agencias':           { module: 'compras', key: 'agencias' },
@@ -49,6 +56,7 @@ const MENU_ITEM_KEYS: Record<string, { module: string; key: string }> = {
   'compras-reclamos':           { module: 'compras', key: 'reclamos' },
   'compras-sustitutos':         { module: 'compras', key: 'sustitutos' },
   'compras-reportes':           { module: 'compras', key: 'reportes' },
+  'compras-configuracion':     { module: 'compras', key: 'configuracion' },
   inventario:                    { module: 'compras', key: 'inventario' },
   'bodega-home':                 { module: 'bodega', key: 'home' },
   'bodega-pedidos':             { module: 'bodega', key: 'pedidos' },
@@ -114,7 +122,14 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // SCRUM-739 (UAT-2) — 'configuracion'/'root' es el ítem sintético que usa la
   // máscara global de rollout para este menú (no es parte de ModuleCatalog, así
   // que no pasa por el check de módulo como el resto de las secciones de abajo).
-  const canSeeSecurity = (usePermission('security.users') || usePermission('security.levels'))
+  // SCRUM-1012 — Seguridad exclusiva del rol Gerencia (management) + superadmin: el permiso
+  // individual security.users/levels ya no alcanza sin el rol base.
+  // SCRUM-1181 — los hooks se llaman SIEMPRE, todos, y se combinan después: `usePermission(a) || usePermission(b)` no ejecuta la segunda cuando la
+  // primera es true y cambia la cantidad de hooks entre renders (rompe al cambiar de identidad en sitio).
+  const hasSecurityUsers  = usePermission('security.users')
+  const hasSecurityLevels = usePermission('security.levels')
+  const canSeeSecurity = (hasSecurityUsers || hasSecurityLevels)
+    && (user?.role === 'management' || user?.role === 'superadmin')
     && user?.menuVisibility?.configuracion?.root !== false
   // ADR-006, Decisión 11 — el resto de las secciones sí son módulos del catálogo nuevo.
   // effectivePermissionsV2() (User.php) ya traduce modules.view -> permissions 'X.read' y
@@ -133,7 +148,17 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const hasVentasDisenoAccess = usePermission('ventas_diseno.read')
   const canSeeVentasDiseno = (user?.modules?.ventas_diseno?.view === true || hasVentasDisenoAccess)
     && user?.menuVisibility?.ventas_diseno?.__module__ !== false
+  // SCRUM-1128 — Félix solo tiene lectura del Pipeline (`ventas_diseno.pipeline.read_all`): no tiene
+  // `ventas_diseno.read` ni `modules.ventas_diseno`, así que `canSeeVentasDiseno` es false para él.
+  // Ve únicamente el ítem Pipeline de CRM, nunca el resto del módulo.
+  const canSeePipelineReadOnly = usePermission('ventas_diseno.pipeline.read_all') && !canSeeVentasDiseno
   const canSeeCompras      = user?.modules?.compras?.view === true
+  // SCRUM-1119 — Pedidos (márgenes, montos, estado de compra) es solo de Compras y Gerencia. Compras no tiene
+  // el módulo Ventas y Diseño, así que su entrada vive en su propia sección en vez de en la de Ventas.
+  const isLiderCompras       = user?.role === 'lider_compras'
+  // SCRUM-861 punto 3 — "Ajustes de Compras" sale de Proveedores a su propia entrada de menú,
+  // gateada por el mismo permiso que ya usaba el panel embebido (`compras.settings.configure`).
+  const canConfigureCompras = usePermission('compras.settings.configure')
   // SCRUM-231→244 — Inventario reusa permission:compras.* en el backend (las 14 tickets dicen
   // "Compras y Gerencia" en su sección PERMISOS, nunca "Bodega" — confirmado con Luis 2026-07-17,
   // el gateo modules.bodega.view era un placeholder nunca validado contra esta spec). También
@@ -147,6 +172,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // contraparte cosmética para que el link ni siquiera aparezca.
   const canSeeInventario   = canSeeCompras
     || (canSeeVentasDiseno && user?.menuVisibility?.compras?.__module__ !== false)
+  // SCRUM-818 — mismo criterio dual que Inventario arriba: el vendedor/diseñador responsable de
+  // un proyecto necesita "Comparación de Referencias" aunque no vea el resto de Compras (el
+  // backend scopea a sus propios proyectos, ver ReplacementRequestController).
+  const canSeeSustitutos   = canSeeCompras
+    || (canSeeVentasDiseno && user?.menuVisibility?.compras?.__module__ !== false)
   // SCRUM-451→456 — primera pantalla real del módulo Bodega (ModuleCatalog::BODEGA), gateada
   // por `bodega.read` (cada ticket dice "Visible para todos los perfiles de Bodega", a
   // diferencia de Inventario/Compras arriba). Mismo OR que ventas_diseno arriba (hallazgo de
@@ -156,6 +186,18 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const hasBodegaAccess = usePermission('bodega.read')
   const canSeeBodega       = (user?.modules?.bodega?.view === true || hasBodegaAccess)
     && user?.menuVisibility?.bodega?.__module__ !== false
+  // SCRUM-1013 (rebote) / SCRUM-1021 — el vendedor no tiene los módulos Compras ni Bodega: solo dos
+  // permisos angostos de consulta. Ve únicamente Órdenes → Logística y Envío, y Bodegas; nunca el menú
+  // completo de esos módulos (canSeeCompras / canSeeBodega siguen siendo false para él).
+  const hasLogisticaView   = usePermission('compras.logistica.view')
+  const canSeeLogisticaOnly = !canSeeCompras && hasLogisticaView
+  // SCRUM-1157 (Pre-QA) — `compras.limited.view` es el permiso de CONSULTA de Compras (Ver Órdenes, Logística, Inventario, Ingresos): sus rutas lo
+  // aceptan, pero el menú solo mostraba Compras con el módulo en ver completo. Mariam tiene el módulo en solo lectura (`can_view=1` por persona, que
+  // apaga `modules.compras.view`) y solo ese permiso: abría esas pantallas por URL y su aterrizaje (/compras/ordenes) no estaba en su menú.
+  const hasLimitedView = usePermission('compras.limited.view')
+  const canSeeComprasLimited = !canSeeCompras && hasLimitedView
+  const hasWarehousesView  = usePermission('bodega.warehouses.view')
+  const canSeeBodegasOnly  = !canSeeBodega && hasWarehousesView
   // SCRUM-58 — 4 módulos que faltaban del catálogo de 7 (ModuleCatalog.php en el backend).
   // Fase 4 Batch 1+19 — mismo OR dual que ventas_diseno/bodega arriba: alguien con
   // servicios.read otorgado por extra_permissions pero sin visibilidad de rol (ej. excepción
@@ -171,6 +213,19 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const canSeeAiUsage = usePermission('superadmin.all')
   // SCRUM-500 — administración de umbrales de Bodega, mismo gate estricto que arriba.
   const canSeeBodegaSettings = usePermission('superadmin.all')
+  // SCRUM-944/945 — vista consolidada de valores paramétricos de negocio, mismo gate estricto.
+  const canSeeGlobalSettings = usePermission('superadmin.all')
+  // SCRUM-925 — permiso individual por persona (Mark/David/Felix), mismo patrón que
+  // canSeeAiUsage/canSeeBodegaSettings arriba, no el patrón user?.modules?.X?.view de los módulos
+  // por rol (lumo.view vive en extra_permissions vía SpecialPermissionSeeder, no en un módulo del
+  // catálogo de 7).
+  const canSeeLumo = usePermission('lumo.view')
+  // SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Mark en el backend (`primary_approver_only`, por identidad; superadmin
+  // aparte): al resto del roster de Admin&Cont le abrían la pantalla y el API respondía 403 («no carga el contenido»). Solo se oculta cuando
+  // el flag viene explícitamente en `false`: una sesión abierta antes de este cambio no trae el campo y conserva el menú hasta renovarla
+  // (el backend sigue cortando el acceso de todos modos).
+  const isSuperadmin = usePermission('superadmin.all')
+  const canSeeMarkOnlyConfig = isSuperadmin || user?.flags?.mark_approver !== false
 
   // SCRUM-711, 3ra vuelta — causa raíz real del bug reportado por Gerencia Test 3 (video
   // 2026-07-31, login fresco): esto NO tiene relación con `sidebar-collapsed` (el ancho del
@@ -229,6 +284,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const comprasOrdenesChildren: NavItem[] = [
     { id: 'compras-ordenes', label: tCompras('nav.orders'), href: '/compras/ordenes', icon: <IcoBarChart /> },
     { id: 'compras-nueva-orden', label: tCompras('nav.newOrder'), href: '/compras/ordenes/nueva', icon: <IcoList /> },
+    { id: 'compras-reposicion', label: tCompras('nav.replenishment'), href: '/compras/reposicion', icon: <IcoBox /> },
     { id: 'compras-logistica', label: tCompras('nav.logistics'), href: '/compras/logistica', icon: <IcoPipeline /> },
   ]
 
@@ -250,7 +306,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // Compras (canSeeCompras) — el fallback de abajo (Ventas & Diseño con acceso de solo lectura a
   // Inventario, sin ver el resto de Compras) se mantiene como link suelto para no duplicarlo (RN5)
   // ni mostrarlo dentro de un dropdown con ítems a los que ese usuario no tiene acceso.
-  const comprasInventarioItems: NavEntry[] = [
+  const rawComprasInventarioItems: NavEntry[] = [
     // SCRUM-183→196 — Proveedores + Nueva Orden reales, ya no placeholder "coming soon" (ver App.tsx).
     ...(canSeeCompras
       ? [
@@ -260,13 +316,45 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           { id: 'compras-pagos-menu', label: tCompras('nav.paymentsMenu'), icon: <IcoBarChart />, children: comprasPagosChildren },
           { id: 'compras-proveedores', label: tCompras('nav.providers'), href: '/compras/proveedores', icon: <IcoShoppingBag /> },
           { id: 'compras-reclamos', label: tCompras('nav.claims'), href: '/compras/reclamos', icon: <IcoFileText /> },
+          ...(isLiderCompras
+            ? [{ id: 'compras-pedidos-venta', label: tCompras('nav.salesOrders'), href: '/ventas-diseno/pedidos', icon: <IcoShoppingBag /> }]
+            : []),
           { id: 'compras-reportes', label: tCompras('nav.reports'), href: '/compras/reportes', icon: <IcoBarChart /> },
+          ...(canConfigureCompras
+            ? [{ id: 'compras-configuracion', label: tCompras('nav.settings'), href: '/compras/configuracion', icon: <IcoSettings /> }]
+            : []),
         ]
       : []),
-    ...(canSeeInventario && !canSeeCompras
+    // Consulta de Compras (SCRUM-1157): los mismos dos desplegables, y `canReachComprasItem` deja solo lo que su permiso abre (sin Nueva Orden, Pagos,
+    // Agencias, Proveedores, etc.). Reemplaza los links sueltos de abajo para no duplicar Inventario, Sustitutos ni Órdenes.
+    ...(canSeeComprasLimited
+      ? [
+          { id: 'compras-ordenes-menu', label: tCompras('nav.ordersMenu'), icon: <IcoBarChart />, children: comprasOrdenesChildren },
+          { id: 'compras-catalogo-stock-menu', label: tCompras('nav.catalogStockMenu'), icon: <IcoBox />, children: comprasCatalogoStockChildren },
+        ]
+      : []),
+    ...(canSeeInventario && !canSeeCompras && !canSeeComprasLimited
       ? [{ id: 'inventario', label: t('nav.inventario'), href: '/inventario', icon: <IcoBox /> }]
       : []),
+    ...(canSeeSustitutos && !canSeeCompras && !canSeeComprasLimited
+      ? [{ id: 'compras-sustitutos', label: tCompras('nav.replacements'), href: '/compras/sustitutos', icon: <IcoBeaker /> }]
+      : []),
+    ...(canSeeLogisticaOnly && !canSeeComprasLimited
+      ? [{ id: 'compras-ordenes-menu', label: tCompras('nav.ordersMenu'), icon: <IcoBarChart />, children: [
+          { id: 'compras-logistica', label: tCompras('nav.logistics'), href: '/compras/logistica', icon: <IcoPipeline /> },
+        ] }]
+      : []),
   ]
+
+  // SCRUM-1157 — el menú solo lista lo que la ruta deja abrir (ver `comprasMenuPermissions.ts`); un desplegable sin hijos accesibles se oculta.
+  const userPermissions = user?.permissions ?? []
+  const comprasInventarioItems: NavEntry[] = rawComprasInventarioItems.flatMap((entry): NavEntry[] => {
+    if (isDropdown(entry)) {
+      const children = entry.children.filter(c => canReachComprasItem(c.id, userPermissions))
+      return children.length > 0 ? [{ ...entry, children }] : []
+    }
+    return canReachComprasItem(entry.id, userPermissions) ? [entry] : []
+  })
 
   // Epic CRM (SCRUM-332) Batch A — SCRUM-673→676/REQ-593→596, reemplaza el bloqueo total que
   // traía SCRUM-713/SCRUM-711. CRM pasa a ser un módulo propio, separado de Ventas & Diseño
@@ -290,8 +378,14 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // con este mismo RequireRole) — sin esto, Luis/Andres/Luis J quedarían bloqueados de su propia
   // pantalla. Hallazgo de un segundo pase de Pre-QA (2026-07-31, revisión estática) que no pudo
   // correr en vivo por una limitación de sandbox del worktree.
-  const isGerencia = user?.role === 'management' || user?.role === 'superadmin'
-  const canSeePedidosTab = user?.role !== 'lider_admin_contab' && user?.role !== 'asistente_administrativa'
+  // SCRUM-1150 (decisión de Luis, 2026-10-15): Félix replica a Mark en CRM y Ventas & Diseño, así que ve Dashboard CRM y Pedidos por
+  // el permiso `ventas_diseno.gerencia_scope` (reemplaza el «Pedidos oculto para Félix» de REQ-594 RN5/RN6 de arriba).
+  const isGerencia = hasGerenciaScope(user)
+  // SCRUM-1119 — antes se ocultaba solo a Admin&Cont; ahora Pedidos es exclusivo de Gerencia (acá) y de Compras
+  // (su propia entrada, arriba). El backend lo vuelve a exigir por rol.
+  const canSeePedidosTab = isGerencia
+  // SCRUM-1159 — quien ve Ventas & Diseño pero no la pantalla "Pedidos" consulta sus pedidos por "Status de Pedidos".
+  const sellerOrderStatus = canSeeVentasDiseno && !canSeePedidosTab
 
   // SCRUM-774 — el menú de Servicios se muda del menú superior (ServiciosNavMenu, eliminado)
   // al panel lateral, mismo patrón que "Inventario" de Bodega (NavDropdown anidado dentro de la
@@ -337,44 +431,133 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
         : []),
     ]),
   ]
+  // SCRUM-825 (2026-09-01) — reorganización completa del menú, reemplaza la lista plana anterior
+  // (11 items sueltos + 1 dropdown) por la estructura exacta que pide el ticket: Inicio |
+  // Facturación | Movimientos▾ | Comisiones▾ | Tesorería▾ | Reportes, con Cobros (pantalla ya
+  // existía — `CobrosPage`/`/admin-contab/cobros` — pero nunca tuvo link de sidebar, mismo
+  // hallazgo de Luis 2026-08-22 documentado abajo) agregado dentro de Movimientos. Fiscal/Empresa
+  // se mueven al grupo "Configuración" (ver `adminContabConfigItems` más abajo, junto a
+  // Seguridad) — dejan de ser parte de este array. "Notas Crédito y Devoluciones" pasa de item
+  // plano de nivel 1 a hijo de Movimientos junto con Cobros — el desalineamiento que reportaba el
+  // ticket (RN10) era justamente que le faltaba el nivel de indentación del dropdown, no un bug
+  // de CSS aparte: al compartir el mismo NavDropdown que Cobros, hereda la misma alineación por
+  // construcción, sin necesitar ningún ajuste de estilo dedicado.
+  //
   // Hallazgo de Luis (2026-08-22) — "Admin. & Contab." llevaba 5 batches (Config Fiscal, Datos
   // de la Empresa, Cuentas Bancarias, Facturación 2/3/4) con pantallas reales construidas, pero
   // el ítem de menú seguía siendo el placeholder original de un solo link a `/admin-contab`
   // (`AdminContabPage.tsx`, "Próximamente") — cada Visual Review de esos batches validó su propia
-  // pantalla, ninguna validó que el punto de entrada del sidebar llevara a algo. Mismo patrón que
-  // `serviciosItems` de abajo: items planos, sin gate de rol adicional por ítem porque cada
-  // pantalla ya se auto-gatea (Fiscal/Empresa muestran "Acceso restringido" si el actor no es
-  // Mark, ver `restricted.*` en `adminContab.json` — el router no necesita duplicarlo).
+  // pantalla, ninguna validó que el punto de entrada del sidebar llevara a algo. Sin gate de rol
+  // adicional por ítem porque cada pantalla ya se auto-gatea (Fiscal/Empresa muestran "Acceso
+  // restringido" si el actor no es Mark, ver `restricted.*` en `adminContab.json` — el router no
+  // necesita duplicarlo).
+  // SCRUM-882 — Vendedor/Diseñador tiene `admin_contab.view=true` (lo necesita para consultar sus
+  // propias Comisiones Internas, ver ComisionesInternasPage) pero NO acceso real a ninguna otra
+  // pantalla de Admin&Cont — el backend le devuelve datos vacíos/guiones en todas ellas (Inicio,
+  // Facturación, Movimientos, Comisiones Externas, Tesorería, Reportes ya tenía su propio fix,
+  // SCRUM-650/Batch 22). Mismo roster que `RequireRole` ya usa en App.tsx para /admin-contab/reportes
+  // (routes/admin-contab.php es la fuente real) — no hay un permiso más fino que `admin_contab.view`
+  // en el JWT para distinguir "acceso completo" de "solo mis comisiones", así que se replica acá el
+  // mismo allow-list explícito en vez de inventar un permiso nuevo para un solo ticket de corrección.
+  // SCRUM-1139 — `lider_operaciones` (Mariam) espeja a la asistente: mismo roster que el backend (`role:` de routes/admin-contab.php).
+  const ADMIN_CONTAB_FULL_ACCESS_ROLES = ['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']
+  const canSeeFullAdminContab = ADMIN_CONTAB_FULL_ACCESS_ROLES.includes(user?.role ?? '')
+
   const adminContabItems: NavEntry[] = [
     // Batch final (SCRUM-503→512) — "Inicio" ya es una pantalla real, primer ítem del menú (mismo
     // patrón que compras-inicio/servicios-inicio/ventas-diseno-home arriba).
-    { id: 'admin-contab-inicio',   label: tAdminContab('nav.home'),             href: '/admin-contab/inicio',             icon: <IcoHome /> },
-    { id: 'admin-contab-fiscal',   label: tAdminContab('nav.fiscal'),           href: '/admin-contab/fiscal',             icon: <IcoSettings /> },
-    { id: 'admin-contab-empresa',  label: tAdminContab('nav.empresa'),          href: '/admin-contab/empresa',            icon: <IcoUsers /> },
-    // Batch 18 (SCRUM-597→601) — Arqueo de Caja. Mismo criterio "item plano" que el resto de este
-    // menú (ver hallazgo de Luis arriba) — orden del mockup dentro del grupo "Tesorería" (Arqueo de
-    // Caja antes de Cuentas bancarias/Caja chica), aunque acá no se replica el dropdown "Tesorería"
-    // del mockup — sigue el patrón real ya establecido de items planos sin agrupar.
-    { id: 'admin-contab-arqueo-caja', label: tAdminContab('nav.arqueoCaja'), href: '/admin-contab/arqueo-caja', icon: <IcoTrendingUp /> },
-    { id: 'admin-contab-cuentas',  label: tAdminContab('nav.cuentasBancarias'), href: '/admin-contab/cuentas-bancarias',  icon: <IcoDollarSign /> },
-    // Batch 20 (SCRUM-612→617) — Caja Chica. Ver comentario de Arqueo de Caja arriba: mismo
-    // criterio "item plano", orden del mockup dentro del grupo Tesorería (Arqueo → Cuentas → Caja
-    // chica).
-    { id: 'admin-contab-caja-chica', label: tAdminContab('nav.cajaChica'), href: '/admin-contab/caja-chica', icon: <IcoBook /> },
-    { id: 'admin-contab-facturacion', label: tAdminContab('nav.facturacion'),   href: '/admin-contab/facturacion',        icon: <IcoFileText /> },
-    // Batch 10 (SCRUM-553→558) — Notas Crédito y Devoluciones. Agregado en el mismo batch que crea
-    // la pantalla, a propósito, para no repetir el hallazgo de Luis de arriba.
-    { id: 'admin-contab-notas-credito', label: tAdminContab('nav.notasCredito'), href: '/admin-contab/notas-credito',     icon: <IcoBan /> },
-    // Batch 14 (SCRUM-575→579) — Comisiones Internas.
+    ...(canSeeFullAdminContab ? [
+      { id: 'admin-contab-inicio',   label: tAdminContab('nav.home'),             href: '/admin-contab/inicio',             icon: <IcoHome /> },
+      // SCRUM-930 (F5) — Estado de Cuenta sigue siendo la vista popup existente (FocusedViewShell,
+      // botón "Cerrar Ventana" propio, ver ADR-SCRUM930): este ítem dispara el mismo `window.open()`
+      // que ya usa `FacturacionPage.tsx::openEstadoCuenta()`, sin cliente preseleccionado — no
+      // convierte la pantalla en una ruta normal de AppShell (decisión del Arquitecto).
+      {
+        id: 'admin-contab-estado-cuenta', label: tAdminContab('nav.estadoCuentaMenu'),
+        href: '/admin-contab/facturacion/estado-cuenta', icon: <IcoList />,
+        onClick: () => window.open('/admin-contab/facturacion/estado-cuenta', '_blank'),
+      },
+      { id: 'admin-contab-facturacion', label: tAdminContab('nav.facturacion'),   href: '/admin-contab/facturacion',        icon: <IcoFileText /> },
+      // SCRUM-825 RN2/RN5 — Movimientos: Cobros (ruta ya existía, sin link de sidebar hasta ahora) +
+      // Notas Crédito y Devoluciones (Batch 10, SCRUM-553→558 — antes item plano, ver arriba).
+      { id: 'admin-contab-movimientos-menu', label: tAdminContab('nav.movimientosMenu'), icon: <IcoFileText />, children: [
+        { id: 'admin-contab-cobros', label: tAdminContab('nav.cobros'), href: '/admin-contab/cobros', icon: <IcoDollarSign /> },
+        { id: 'admin-contab-notas-credito', label: tAdminContab('nav.notasCredito'), href: '/admin-contab/notas-credito', icon: <IcoBan /> },
+        // SCRUM-913 — orden corregido: Cobros, Notas crédito, Registrar abono, Saldo a favor
+        // (el orden anterior, de SCRUM-902/903, tenía Saldo a favor antes que Registrar abono).
+        // SCRUM-1168 — con el concepto nuevo de cobros ya no se registran abonos (el dinero que entra sin factura es un cobro) y aparece
+        // «Compensaciones», la vista por cliente para aplicar ese dinero a sus facturas. `cobros_v2` viaja en el JWT (dato visual).
+        ...(user?.flags?.cobros_v2 === true
+          ? [{ id: 'admin-contab-compensaciones', label: tAdminContab('nav.compensaciones'), href: '/admin-contab/compensaciones', icon: <IcoDollarSign /> }]
+          : [{ id: 'admin-contab-registrar-abono', label: tAdminContab('nav.registrarAbono'), href: '/admin-contab/abonos', icon: <IcoDollarSign /> }]),
+        // F5 — con el concepto nuevo el saldo a favor se ve y se usa desde Compensaciones (la pantalla sigue en la ruta, solo sale del menú).
+        ...(user?.flags?.cobros_v2 === true ? [] : [{ id: 'admin-contab-saldo-favor', label: tAdminContab('nav.saldoFavor'), href: '/admin-contab/saldo-favor', icon: <IcoTrendingUp /> }]),
+      ] },
+    ] : []),
+    // Batch 14 (SCRUM-575→579) — Comisiones Internas. RN3 — sin cambios de contenido, ya era un
+    // dropdown antes de este ticket. SCRUM-882 — "Internas" se mantiene siempre visible (es la
+    // única pantalla que le corresponde a Vendedor/Diseñador); "Externas" se oculta para ese rol.
     { id: 'admin-contab-comisiones-menu', label: tAdminContab('nav.comisionesMenu'), icon: <IcoBarChart />, children: [
       { id: 'admin-contab-comisiones-internas', label: tAdminContab('nav.comisionesInternas'), href: '/admin-contab/comisiones/internas', icon: <IcoBarChart /> },
       // Batch 16 (SCRUM-585→590) — antes omitido a propósito ("Externas" sin pantalla real, ver
       // comentario viejo de Batch 14), ya implementado.
-      { id: 'admin-contab-comisiones-externas', label: tAdminContab('nav.comisionesExternas'), href: '/admin-contab/comisiones/externas', icon: <IcoBarChart /> },
+      ...(canSeeFullAdminContab ? [
+        { id: 'admin-contab-comisiones-externas', label: tAdminContab('nav.comisionesExternas'), href: '/admin-contab/comisiones/externas', icon: <IcoBarChart /> },
+      ] : []),
     ] },
-    // Batch 22 (SCRUM-643→647) — home de Reportes. Agregado en el mismo batch que crea la
-    // pantalla, a propósito (ver hallazgo de Luis arriba, mismo criterio que Notas Crédito).
-    { id: 'admin-contab-reportes', label: tAdminContab('nav.reportes'), href: '/admin-contab/reportes', icon: <IcoBarChart /> },
+    ...(canSeeFullAdminContab ? [
+      // SCRUM-825 RN4 — Tesorería: Arqueo de Caja (Batch 18, SCRUM-597→601) → Cuentas Bancarias →
+      // Caja Chica (Batch 20, SCRUM-612→617), mismo orden que ya usaban como items planos.
+      { id: 'admin-contab-tesoreria-menu', label: tAdminContab('nav.tesoreriaMenu'), icon: <IcoTrendingUp />, children: [
+        { id: 'admin-contab-arqueo-caja', label: tAdminContab('nav.arqueoCaja'), href: '/admin-contab/arqueo-caja', icon: <IcoTrendingUp /> },
+        { id: 'admin-contab-cuentas', label: tAdminContab('nav.cuentasBancarias'), href: '/admin-contab/cuentas-bancarias', icon: <IcoDollarSign /> },
+        { id: 'admin-contab-caja-chica', label: tAdminContab('nav.cajaChica'), href: '/admin-contab/caja-chica', icon: <IcoBook /> },
+      ] },
+      // Batch 22 (SCRUM-643→647) — home de Reportes. Último ítem del nivel principal (RN1).
+      { id: 'admin-contab-reportes', label: tAdminContab('nav.reportes'), href: '/admin-contab/reportes', icon: <IcoBarChart /> },
+    ] : []),
+  ]
+
+  // SCRUM-825 — Fiscal/Empresa (RN6/RN7) salen del menú principal de Admin&Cont y se agregan al
+  // grupo "Configuración" (ver más abajo, junto a Seguridad). "Alertas de fraude" (REQ-635,
+  // superadmin.all) no está mencionado en el ticket — RN1 dice que el nivel principal contiene
+  // "únicamente" los 6 ítems listados, así que se movió acá también en vez de dejarlo como
+  // excepción: semánticamente es una pantalla de configuración (gateada a superadmin), no una
+  // operación diaria de Admin&Cont, mismo criterio que agrupa Fiscal/Empresa/Seguridad juntas.
+  // SCRUM-1002 — validar/editar datos fiscales de clientes: solo quien puede editarlos Y tiene acceso completo a
+  // Admin&Cont (Mark, Felix); un vendedor con `ventas_diseno.edit` ya tiene el botón en Clientes y no vería esta pantalla.
+  // SCRUM-1166 — la pantalla también es de quien marca clientes exentos de ITBMS (permiso angosto), aunque no edite datos fiscales.
+  const canExemptItbms = usePermission('admin_contab.edit.client_itbms_exemption')
+  // SCRUM-1181 — hooks siempre llamados (ver canSeeSecurity arriba), combinados después.
+  const hasEditClientTaxData = usePermission('ventas_diseno.edit.client_tax_data')
+  const hasVentasDisenoEdit  = usePermission('ventas_diseno.edit')
+  const canEditClientTaxData = hasEditClientTaxData || hasVentasDisenoEdit || canExemptItbms
+  // SCRUM-1012 — Empresa/Fiscal solo para el roster completo de Admin&Cont (no basta `admin_contab.view`,
+  // que Vendedor/Diseñador tienen por Comisiones): ver también RequireRole en /admin-contab/empresa y /fiscal.
+  const adminContabConfigItems: NavEntry[] = [
+    ...(canSeeFullAdminContab && canSeeMarkOnlyConfig
+      ? [{ id: 'admin-contab-empresa', label: tAdminContab('nav.empresa'), href: '/admin-contab/empresa', icon: <IcoUsers /> }]
+      : []),
+    ...(canSeeFullAdminContab && canEditClientTaxData
+      ? [{ id: 'admin-contab-clientes-fiscal', label: tAdminContab('nav.clientesFiscal'), href: '/admin-contab/datos-fiscales-clientes', icon: <IcoUsers /> }]
+      : []),
+    ...(canSeeFullAdminContab && canSeeMarkOnlyConfig
+      ? [{ id: 'admin-contab-fiscal',  label: tAdminContab('nav.fiscal'),  href: '/admin-contab/fiscal',  icon: <IcoSettings /> }]
+      : []),
+    ...(canSeeBodegaSettings
+      ? [{ id: 'admin-contab-fraude', label: tAdminContab('nav.fraudSettings'), href: '/admin-contab/configuracion-fraude', icon: <IcoSettings /> }]
+      : []),
+  ]
+
+  // SCRUM-1012 — el grupo "Configuración" solo existe si tiene algún ítem visible (un rol con
+  // `admin_contab.view` pero sin Empresa/Fiscal/Seguridad/Global ya no ve un encabezado vacío).
+  const settingsItems: NavEntry[] = [
+    ...(canSeeAdminContab ? adminContabConfigItems : []),
+    ...(canSeeSecurity ? [{ id: 'config-seguridad', label: t('nav.security'), href: '/security/users', icon: <IcoShield /> }] : []),
+    // SCRUM-944/945 — último ítem del grupo (vista transversal, no de un módulo puntual).
+    ...(canSeeGlobalSettings
+      ? [{ id: 'config-global', label: t('nav.configuracionGlobal'), href: '/configuracion/global', icon: <IcoSettings /> }]
+      : []),
   ]
 
   const groups: SidebarGroup[] = [
@@ -388,10 +571,20 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             { id: 'crm-pipeline',  label: tVentasDiseno('nav.pipeline'), href: '/ventas-diseno/pipeline', icon: <IcoPipeline /> },
             { id: 'crm-projects',  label: tCrm('nav.projectList'),      href: '/crm/projects',           icon: <IcoList /> },
             { id: 'crm-clients',   label: tVentasDiseno('nav.clients'),  href: '/ventas-diseno/clients',  icon: <IcoUsers /> },
+            // SCRUM-907 — directorio de arquitectos, justo debajo de Clientes (RN del ticket).
+            { id: 'crm-architects', label: tVentasDiseno('nav.architects'), href: '/ventas-diseno/architects', icon: <IcoUserCheck /> },
             // SCRUM-728 — acceso adicional al Catálogo desde CRM, misma ruta/permiso
             // (ventas_diseno.read, ver App.tsx) que los botones "Catálogo" ya existentes
             // en Clientes/Pedidos/Pipeline — no duplica pantalla ni funcionalidad.
             { id: 'crm-catalog',   label: tCrm('nav.catalog'),          href: '/ventas-diseno/catalog',  icon: <IcoBox /> },
+          ],
+        }]
+      : []),
+    ...(canSeePipelineReadOnly
+      ? [{
+          section: tCrm('nav.module'),
+          items: [
+            { id: 'crm-pipeline', label: tVentasDiseno('nav.pipeline'), href: '/ventas-diseno/pipeline', icon: <IcoPipeline /> },
           ],
         }]
       : []),
@@ -401,9 +594,16 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           items: [
             { id: 'ventas-diseno-home',     label: tVentasDiseno('nav.home'),     href: '/ventas-diseno/home',     icon: <IcoHome /> },
             { id: 'ventas-diseno-quotes-list', label: tVentasDiseno('nav.quotesList'), href: '/ventas-diseno/quotes-list', icon: <IcoList /> },
-            // Epic CRM Batch F (SCRUM-703→710) — placeholder hasta esa pantalla existir.
+            // SCRUM-1120 — CotizaYA, inmediatamente después de Cotizaciones.
+            { id: 'ventas-diseno-cotizaya', label: tVentasDiseno('nav.cotizaya'), href: '/ventas-diseno/cotizaya', icon: <IcoFileText /> },
+            // Epic CRM Batch F (SCRUM-703→710) — Pedidos; SCRUM-1119: solo Gerencia (Compras tiene su entrada aparte).
             ...(canSeePedidosTab
               ? [{ id: 'ventas-diseno-pedidos', label: tVentasDiseno('nav.pedidos'), href: '/ventas-diseno/pedidos', icon: <IcoShoppingBag /> }]
+              : []),
+            // SCRUM-1159 — Vendedor/Diseñador (sin la pantalla Pedidos de arriba): consulta de solo lectura de SUS pedidos. El backend
+            // (`OrderStatusController::resolveAccess`) ya restringe por dueño de la tarjeta, no hace falta un gate extra acá.
+            ...(!canSeePedidosTab
+              ? [{ id: 'ventas-diseno-status-pedidos', label: tVentasDiseno('nav.statusPedidos'), href: '/bodega/pedidos/status', icon: <IcoShoppingBag /> }]
               : []),
             { id: 'ventas-diseno-reports',  label: tVentasDiseno('nav.reports'),  href: '/ventas-diseno/reports',  icon: <IcoBarChart /> },
             ...(canSeeAuditLog
@@ -414,6 +614,16 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
       : []),
     ...(comprasInventarioItems.length > 0
       ? [{ section: t('nav.compras') + ' · ' + t('nav.inventario'), items: comprasInventarioItems }]
+      : []),
+    // SCRUM-1159 (rebote) — el vendedor busca la consulta de sus pedidos en Bodega: misma pantalla de solo lectura que en Ventas & Diseño
+    // (`/bodega/pedidos/status`), también bajo Bodega para quien no tiene el módulo completo (no se le abre "Pedidos" del tablero).
+    ...((canSeeBodegasOnly || (sellerOrderStatus && !canSeeBodega))
+      ? [{ section: t('nav.bodega'), items: [
+          ...(canSeeBodegasOnly ? [{ id: 'bodega-bodegas', label: t('nav.bodegas'), href: '/bodega/bodegas', icon: <IcoMapPin /> }] : []),
+          ...(sellerOrderStatus && !canSeeBodega
+            ? [{ id: 'bodega-status-pedidos', label: tVentasDiseno('nav.statusPedidos'), href: '/bodega/pedidos/status', icon: <IcoShoppingBag /> }]
+            : []),
+        ] }]
       : []),
     ...(canSeeBodega
       ? [{ section: t('nav.bodega'), items: [
@@ -464,11 +674,42 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     ...(canSeeGerencia
       ? [{ section: t('nav.gerencia'), items: [{ id: 'gerencia', label: t('nav.gerencia'), href: '/gerencia', icon: <IcoUserCheck /> }] }]
       : []),
+    // SCRUM-925 — LUMO (Identity Bridge), gateado por permiso individual, no por rol/módulo.
+    ...(canSeeLumo
+      ? [{ section: t('nav.lumo'), items: [{ id: 'lumo', label: t('nav.lumo'), href: '/lumo', icon: <IcoBook /> }] }]
+      : []),
+    // SCRUM-923 — Soporte, visible a cualquier usuario autenticado (decisión de Luis
+    // 2026-09-16), sin gate de permiso.
+    { section: t('nav.soporte'), items: [{ id: 'soporte', label: t('nav.soporte'), href: '/soporte', icon: <IcoLifeBuoy /> }] },
+    // SCRUM-984 — Manuales de usuario, visible a cualquier usuario autenticado, justo después de
+    // Soporte (orden pedido en el ticket). El panel de carga se gatea dentro de la página
+    // (manuales.manage), no el ítem de menú.
+    { section: t('nav.manuales'), items: [{ id: 'manuales', label: t('nav.manuales'), href: '/manuales', icon: <IcoBookOpen /> }] },
+    // SCRUM-816 — la épica de Migración ICG no tiene módulo propio en el JWT (ver docblock de
+    // LegacyMigrationDashboardController). Sección completa + ambos ítems son superadmin-exclusivo
+    // (ajuste 2026-09-04 a pedido de Luis — el Dashboard antes también era visible para
+    // Gerencia/management vía isGerencia; ahora comparte el mismo gate que "Vista ICG").
+    // SCRUM-749 (2026-09-03) — "Pagos ICG" sacado del menú a pedido de Luis: quedaba redundante
+    // con la pestaña "Pagos" de "Vista ICG" (mismo componente exacto, TESORERIA nunca tuvo
+    // scoping por cliente, a diferencia de Cotizaciones/Pedidos/Albaranes/Facturas, donde el
+    // modal "Historial ICG" scoped y la pestaña global de Vista ICG SÍ son vistas distintas). La
+    // ruta /migracion/pagos sigue viva (acceso directo), solo se retiró el ítem del Sidebar.
+    ...(user?.role === 'superadmin'
+      ? [{
+          section: t('nav.migracion'),
+          items: [
+            { id: 'migracion-dashboard', label: t('nav.migracionDashboard'), href: '/migracion/dashboard', icon: <IcoArchive /> },
+            { id: 'migracion-vista', label: t('nav.migracionVista'), href: '/migracion/vista', icon: <IcoEye /> },
+          ],
+        }]
+      : []),
     ...(canSeeAiUsage
       ? [{
           section: t('nav.auditoria'),
           items: [
             { id: 'ai-usage', label: t('nav.consumoIa'), href: '/auditoria/uso-ia', icon: <IcoClock /> },
+            // SCRUM-1020 — dashboard de actividad, mismo gate que Consumo IA y Logs.
+            { id: 'audit-activity', label: t('nav.actividad'), href: '/auditoria/actividad', icon: <IcoBarChart /> },
             // SCRUM-793 (Epic SCRUM-788 — Logs y Telemetría) — mismo gate que Consumo IA arriba.
             { id: 'audit-logs', label: t('nav.logs'), href: '/auditoria/logs', icon: <IcoList /> },
           ],
@@ -476,12 +717,13 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
       : []),
     // SCRUM-711 — Configuración reemplaza el tab superior "Seguridad"; mismo gate
     // (security.users / security.levels) que tenía el tab en AppShell.tsx.
-    ...(canSeeSecurity
-      ? [{
-          section: t('nav.settings'),
-          items: [{ id: 'config-seguridad', label: t('nav.security'), href: '/security/users', icon: <IcoShield /> }],
-        }]
-      : []),
+    // SCRUM-825 — Datos de la Empresa/Configuración Fiscal (RN6/RN7) se agregan acá, ANTES de
+    // Seguridad (orden exacto del ticket). El grupo entero ya no puede gatearse solo por
+    // `canSeeSecurity` — la mayoría de usuarios de Admin&Cont no tiene `security.users`/`.levels`,
+    // y perderían el link a Fiscal/Empresa si el grupo entero dependiera de ese permiso. Se
+    // muestra si CUALQUIERA de los 2 orígenes aplica; cada ítem sigue auto-gateado como antes
+    // (`adminContabConfigItems` ya resuelve `canSeeBodegaSettings` internamente).
+    ...(settingsItems.length > 0 ? [{ section: t('nav.settings'), items: settingsItems }] : []),
     // SCRUM-58 — "visible a los roles permitidos": Sandbox es una herramienta de
     // desarrollo, no un módulo de negocio — se restringe a superadmin (antes era
     // visible para cualquier usuario autenticado).
@@ -658,7 +900,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             return (
               <button
                 key={entry.id}
-                onClick={() => handleNavItem(entry.href)}
+                onClick={() => { if (entry.onClick) { entry.onClick(); onClose() } else { handleNavItem(entry.href) } }}
                 title={isCollapsed ? entry.label : undefined}
                 className={[
                   'w-full flex items-center py-3 lg:py-2 text-sm lg:text-[13px] font-medium transition-colors border-l-2',

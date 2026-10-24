@@ -165,6 +165,16 @@ export function IcoChevronDown({ size = 16, ...props }: IconProps) {
   )
 }
 
+export function IcoGripVertical({ size = 16, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+      <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+      <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+    </svg>
+  )
+}
+
 export function IcoSun({ size = 18, ...props }: IconProps) {
   return (
     <svg {...base(size)} {...props}>
@@ -501,6 +511,71 @@ export function IcoTool({ size = 18, ...props }: IconProps) {
   return (
     <svg {...base(size)} {...props}>
       <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    </svg>
+  )
+}
+
+// SCRUM-923 — "Soporte" en el Sidebar. No había ningún ícono de soporte/ayuda en el set
+// (regla SCRUM-56: nunca emoji) — salvavidas Feather estándar, mismo criterio de stroke/relleno
+// que el resto del set.
+export function IcoLifeBuoy({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="4"/>
+      <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/>
+      <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
+      <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/>
+      <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+    </svg>
+  )
+}
+
+// ── Manuales de usuario (SCRUM-984) ──────────────────────────────────────
+export function IcoBookOpen({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+  )
+}
+
+export function IcoVideo({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <polygon points="23 7 16 12 23 17 23 7"/>
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+    </svg>
+  )
+}
+
+export function IcoPlay({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <polygon points="5 3 19 12 5 21 5 3"/>
+    </svg>
+  )
+}
+
+export function IcoUpload({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+  )
+}
+
+export function IcoTrash({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+      <path d="M10 11v6"/>
+      <path d="M14 11v6"/>
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
     </svg>
   )
 }

@@ -43,6 +43,16 @@ export function useResetUserMfa() {
   })
 }
 
+export function useResetUserPassword() {
+  return useMutation({
+    gcTime: 0,
+    // La contraseña del operador viaja en las variables de la mutación: gcTime 0 evita que el
+    // MutationCache la conserve en memoria los 5 minutos por defecto tras terminar.
+    mutationFn: ({ id, operatorPassword }: { id: number; operatorPassword?: string }) =>
+      usersApi.resetPassword(id, operatorPassword),
+  })
+}
+
 export function usePendingUsers() {
   return useQuery({
     queryKey: ['users/pending'],

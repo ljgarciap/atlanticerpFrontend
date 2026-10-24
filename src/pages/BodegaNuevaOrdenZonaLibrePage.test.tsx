@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import BodegaNuevaOrdenZonaLibrePage from './BodegaNuevaOrdenZonaLibrePage'
 import { bodegaApi } from '@/api/bodegaApi'
 import { comprasApi } from '@/api/comprasApi'
+import { useAuthStore } from '@/store/authStore'
 import type { ZonaLibreRequestDetail } from '@/types/bodega'
 
 const navigateMock = vi.fn()
@@ -14,6 +15,7 @@ vi.mock('react-router-dom', async () => {
 })
 
 vi.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: () => undefined },
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => opts ? `${key}:${JSON.stringify(opts)}` : key,
   }),
@@ -31,12 +33,28 @@ vi.mock('@/api/bodegaApi', () => ({
 
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: {
-    products: { search: vi.fn() },
+    products: { search: vi.fn(), searchPage: vi.fn() },
   },
 }))
 
 const mockedBodegaApi = vi.mocked(bodegaApi, true)
 const mockedComprasApi = vi.mocked(comprasApi, true)
+
+// SCRUM-1163 — simula la paginación REAL del servidor (`GET /compras/products?page=`): corta por página, excluye los ya agregados y devuelve el total.
+function serveProducts(all: unknown[]) {
+  mockedComprasApi.products.searchPage.mockImplementation(async ({ page, perPage, excludeIds, search }) => {
+    const term = search.toLowerCase()
+    const visibles = (all as Array<{ id: number; reference: string; description: string }>)
+      .filter(p => !excludeIds.includes(p.id))
+      .filter(p => term === '' || p.reference.toLowerCase().includes(term) || p.description.toLowerCase().includes(term))
+    const lastPage = Math.max(1, Math.ceil(visibles.length / perPage))
+    return {
+      fuzzy: false,
+      data: visibles.slice((page - 1) * perPage, page * perPage) as never,
+      meta: { total: visibles.length, per_page: perPage, current_page: page, last_page: lastPage },
+    }
+  })
+}
 
 const PROVIDER = { id: 5, name: 'Zona Libre de Colón' }
 const PRODUCT = {
@@ -73,11 +91,78 @@ function renderPage(initialEntry = '/bodega/ordenes-zona-libre/nueva') {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  window.sessionStorage.clear()
+  useAuthStore.setState({ user: null })
   mockedBodegaApi.zonaLibre.provider.mockResolvedValue(PROVIDER)
-  mockedComprasApi.products.search.mockResolvedValue({ fuzzy: false, data: [PRODUCT] })
+  serveProducts([PRODUCT])
 })
 
 describe('BodegaNuevaOrdenZonaLibrePage', () => {
+  // SCRUM-1163 — paginación REAL en servidor: más de 100 productos se pueden recorrer completos, sin aviso de tope.
+  it('con más de 100 productos muestra el total real y permite llegar a la última página (SCRUM-1163)', async () => {
+    const muchos = Array.from({ length: 130 }, (_, i) => ({ ...PRODUCT, id: 1000 + i, reference: `REF-${i}`, description: `Producto ${i}` }))
+    serveProducts(muchos)
+    renderPage()
+    await screen.findByText('Producto 0')
+    expect(screen.queryByTestId('product-search-capped-hint')).not.toBeInTheDocument()
+
+    fireEvent.click(await screen.findByRole('button', { name: '7' }))
+    expect(await screen.findByText('Producto 129')).toBeInTheDocument()
+  })
+
+  // SCRUM-1172 — tres motivos distintos para no ver filas.
+  it('distingue «proveedor sin productos», «búsqueda sin resultados» y «ya agregaste todos» (SCRUM-1172)', async () => {
+    serveProducts([])
+    const { unmount } = renderPage()
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.products.noProducts')).toBeInTheDocument()
+    unmount()
+
+    serveProducts([PRODUCT])
+    renderPage()
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+
+    fireEvent.change(screen.getByPlaceholderText('bodega:zonaLibre.newOrder.products.searchPlaceholder'), { target: { value: 'zzzz-no-existe' } })
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.products.noResults')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('bodega:zonaLibre.newOrder.products.searchPlaceholder'), { target: { value: '' } })
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '2' } })
+    fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.products.allAdded')).toBeInTheDocument()
+  })
+
+  // SCRUM-1172 — recargar la página no pierde el carrito de la orden en curso.
+  it('conserva el carrito y el envío al recargar (SCRUM-1172)', async () => {
+    useAuthStore.setState({ user: { id: 7 } as never })
+    const { unmount } = renderPage()
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
+    fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')).toBeInTheDocument()
+    unmount()
+
+    renderPage()   // «recarga»
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')).toBeInTheDocument()
+    expect(screen.getByText('$135.00')).toBeInTheDocument()   // 3 x $45.00, la cantidad y el costo se conservan
+  })
+
+  // Pre-QA SCRUM-1172 — un carrito con líneas malformadas dejaba la pantalla en blanco.
+  it.each([[[null]], [[{}]]])('un carrito con líneas malformadas se ignora y la pantalla carga (SCRUM-1172) %#', async (cart) => {
+    useAuthStore.setState({ user: { id: 7 } as never })
+    window.sessionStorage.setItem('atlanticerp:draft:zona-libre-nueva-orden:7', JSON.stringify({ cart, shippingType: 'terrestre', estimatedArrival: '' }))
+    renderPage()
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+    expect(screen.queryByText('bodega:zonaLibre.newOrder.actions.submit')).not.toBeInTheDocument()
+  })
+
+  it('sin sesión de usuario no se guarda borrador y uno corrupto se ignora (SCRUM-1172)', async () => {
+    window.sessionStorage.setItem('atlanticerp:draft:zona-libre-nueva-orden:7', '{no es json')
+    useAuthStore.setState({ user: { id: 7 } as never })
+    renderPage()
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+    expect(screen.queryByText('bodega:zonaLibre.newOrder.actions.submit')).not.toBeInTheDocument()
+  })
+
   it('muestra el proveedor fijo y el aviso de restricción (SCRUM-433 RN2)', async () => {
     renderPage()
     await waitFor(() => expect(mockedBodegaApi.zonaLibre.provider).toHaveBeenCalled())
@@ -118,8 +203,8 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
 
     expect(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')).toBeInTheDocument()
-    expect(screen.queryByText('bodega:zonaLibre.newOrder.products.add')).not.toBeInTheDocument()
-    expect(screen.getByText('bodega:zonaLibre.newOrder.products.empty')).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('bodega:zonaLibre.newOrder.products.add')).not.toBeInTheDocument())
+    expect(await screen.findByText('bodega:zonaLibre.newOrder.products.allAdded')).toBeInTheDocument()
     // 3 * $45.00 = $135.00
     expect(screen.getByText('$135.00')).toBeInTheDocument()
   })
@@ -155,10 +240,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   // SCRUM-436 (rebote de Gerencia Test 2026-08-13) — Cantidad/Costo/Subtotal/Monto total deben
   // llevar separador de miles (formatMoney/formatInt de src/lib/money.ts), no solo decimales.
   it('rebote 2026-08-13 — Cantidad/Costo/Subtotal/Monto total del carrito usan separador de miles', async () => {
-    mockedComprasApi.products.search.mockResolvedValue({
-      fuzzy: false,
-      data: [{ ...PRODUCT, id: 11, description: 'Candelabro Cristal Imperial', cost: 1200.5 }],
-    })
+    serveProducts([{ ...PRODUCT, id: 11, description: 'Candelabro Cristal Imperial', cost: 1200.5 }])
     renderPage()
     await screen.findByText('Candelabro Cristal Imperial')
 
@@ -166,6 +248,8 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
 
     await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')
+    // El listado de disponibles se actualiza desde el servidor (excluye lo ya agregado): se espera a que el producto salga del listado.
+    await waitFor(() => expect(screen.queryByText('bodega:zonaLibre.newOrder.products.add')).not.toBeInTheDocument())
 
     // Cantidad: 2,000 (con separador de miles, no "2000").
     expect(screen.getByText('2,000')).toBeInTheDocument()

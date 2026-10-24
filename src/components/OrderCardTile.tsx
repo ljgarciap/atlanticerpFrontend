@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { isAxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
-import type { OrderCard, OrderStage } from '@/types/bodega'
+import type { OrderCard, OrderInvoiceStatusResponse, OrderStage } from '@/types/bodega'
 import {
   useOrderInvoiceStatus, useAssignPicker, useStartPicking, useTeamMembersByRole,
   useAssignCourier, useDispatchOrder,
@@ -68,7 +68,9 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
   const { t } = useTranslation(['common', 'bodega'])
   const { user } = useAuthStore()
   const invoiceStatusMutation = useOrderInvoiceStatus()
-  const [invoiceStatusMessage, setInvoiceStatusMessage] = useState<string | null>(null)
+  // SCRUM-832 — antes solo se guardaba `status_message`; ahora se guarda la respuesta completa
+  // (puede traer el detalle fiscal cuando invoice_ready===true, ver `OrderInvoiceStatusResponse`).
+  const [invoiceStatus, setInvoiceStatus] = useState<OrderInvoiceStatusResponse | null>(null)
 
   const showGuideButton = STAGES_WITH_GUIDE.includes(order.stage)
   const isTerminal = order.stage === 'entregado'
@@ -134,13 +136,12 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
   // SCRUM-399/400 (REQ-329/330) — "Confirmar Guía Firmada" (Despachado -> Entregado, automático).
   const [showSignedGuideModal, setShowSignedGuideModal] = useState(false)
 
-  // SCRUM-401 (REQ-331) — alcance reducido: el link "ver" solo muestra el `status_message` que ya
-  // trae el backend, nunca una vista de documento con precios (ver docblock de
-  // `OrderInvoiceController` en el backend).
+  // SCRUM-832 — el link "ver" ahora muestra la factura real (ítems/Subtotal/ITBMS/Total) cuando
+  // ya existe, no solo `status_message` (ver docblock de `InvoiceStatusModal`/`OrderInvoiceController`).
   function handleViewInvoice(e: React.MouseEvent) {
     e.stopPropagation()
     invoiceStatusMutation.mutate(order.id, {
-      onSuccess: ({ status_message }) => setInvoiceStatusMessage(status_message),
+      onSuccess: response => setInvoiceStatus(response),
     })
   }
 
@@ -620,15 +621,15 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
         </div>
       )}
 
-      {invoiceStatusMessage !== null && (
+      {invoiceStatus !== null && (
         // stopPropagation — el modal vive anidado dentro del `onClick={onOpenDetail}` de la
-        // tarjeta (overlay `fixed inset-0`, pero sigue siendo hijo en el árbol de React); sin
-        // esto, cualquier clic dentro del modal (incl. "Cerrar") también dispara `onOpenDetail`.
+        // tarjeta en el árbol de React (el portal solo cambia dónde se monta en el DOM; los
+        // eventos sintéticos de React siguen burbujeando por el árbol de componentes). Sin esto,
+        // cualquier clic dentro del modal (incl. "Cerrar") también dispara `onOpenDetail`.
         <div onClick={e => e.stopPropagation()}>
           <InvoiceStatusModal
-            orderNumber={order.order_number}
-            statusMessage={invoiceStatusMessage}
-            onClose={() => setInvoiceStatusMessage(null)}
+            response={invoiceStatus}
+            onClose={() => setInvoiceStatus(null)}
           />
         </div>
       )}

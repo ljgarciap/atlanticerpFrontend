@@ -9,15 +9,18 @@ import {
   useLiquidateOrder, useLiquidationAgencies, useCreateLiquidationAgency,
 } from '@/hooks/useCompras'
 import { usePermission } from '@/hooks/usePermission'
-import OrderLinesEditor, { buildLinesPayload, type OrderDraft } from '@/components/compras/OrderLinesEditor'
+import OrderLinesEditor, { buildLinesPayload, buildAdditionalCostsPayload, type OrderDraft } from '@/components/compras/OrderLinesEditor'
 import PurchaseOrderPaymentsModal from '@/components/compras/PurchaseOrderPaymentsModal'
 import ProviderConfirmationCard from '@/components/compras/ProviderConfirmationCard'
 import ProjectBreakdownModal from '@/components/compras/ProjectBreakdownModal'
+import { OrderLanguageVersions } from '@/components/compras/OrderLanguageVersions'
 import { ReceptionBadge } from '@/components/compras/ReceptionBadge'
 import { OriginBadge } from '@/components/compras/OriginBadge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { orderStatusLabel } from '@/utils/orderStatusLabel'
+import { formatMoney } from '@/lib/money'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import { IcoDollarSign, IcoMoreVertical } from '@/components/icons'
 import type { PurchaseOrderDetail, LiquidationAgency } from '@/types/compras'
 
@@ -67,6 +70,10 @@ function draftFromOrder(order: PurchaseOrderDetail): OrderDraft {
     shippingType: order.shipping_type ?? 'terrestre',
     whoPaysShipping: order.who_pays_shipping ?? 'cliente',
     shippingCost: order.shipping_cost !== null ? String(order.shipping_cost) : '',
+    importCost: order.import_cost != null ? String(order.import_cost) : '',
+    freightCost: order.freight_cost != null ? String(order.freight_cost) : '',
+    handlingCost: order.handling_cost != null ? String(order.handling_cost) : '',
+    otherCost: order.other_cost != null ? String(order.other_cost) : '',
     modality: order.modality,
     estimatedArrivalDate: order.estimated_arrival_date ?? '',
   }
@@ -88,6 +95,11 @@ export default function OrderDetailPage() {
   // de acción de la orden debe quedar disponible para ese perfil, aunque el estado de la orden
   // habilite la acción.
   const canManageOrder = usePermission('compras.edit')
+  const canWriteCompras = usePermission('compras.write') // SCRUM-1127 — generar la versión en inglés llama a la IA
+  // SCRUM-1013 (Pre-QA H2/M2) — el vendedor (compras.logistica.view) recibe la orden SIN costos ni montos
+  // (el servidor los deja en null): no se muestran columnas de costo, total, pagos, PDF ni la carga de
+  // documentos del proveedor. Quien ve los montos (Compras, Operaciones) no cambia.
+  const moneyHidden = (order?.total_amount as number | null | undefined) === null
   const advance = useAdvancePurchaseOrder()
   const advanceRemainder = useAdvanceRemainderPurchaseOrder()
   const confirmPendingReceipts = useConfirmPendingOrderReceipts()
@@ -101,6 +113,8 @@ export default function OrderDetailPage() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<OrderDraft | null>(null)
   const [includeCostInDocs, setIncludeCostInDocs] = useState(true)
+  // SCRUM-1127 — un idioma por envío de correo; el español es el default de siempre.
+  const [emailLang, setEmailLang] = useState<'es' | 'en'>('es')
   const [showAgencyPicker, setShowAgencyPicker] = useState(false)
   const [agencySearch, setAgencySearch] = useState('')
   const [showNewAgencyForm, setShowNewAgencyForm] = useState(false)
@@ -121,7 +135,13 @@ export default function OrderDetailPage() {
     return <div className="text-slate-400 text-sm">…</div>
   }
 
-  const canEdit = order.status === 'por_aprobar' && canManageOrder
+  // SCRUM-852 — edición habilitada hasta antes de "Ordenado" (antes solo `por_aprobar`). Mismo
+  // guard que el backend (`PurchaseOrderController::update()`).
+  // SCRUM-1127 — el inglés solo es enviable si ya se generó y la orden no cambió después.
+  const englishUsable = order.translations?.en.exists === true && order.translations.en.stale === false
+  // Si el inglés dejó de ser enviable (la orden cambió), la selección vuelve a español A LA VISTA: nunca se manda un idioma distinto al que muestra el selector.
+  const effectiveEmailLang: 'es' | 'en' = englishUsable ? emailLang : 'es'
+  const canEdit = (order.status === 'por_aprobar' || order.status === 'pendiente_liquidar') && canManageOrder
   // SCRUM-208 (2026-08-07, segundo hallazgo de Gerencia Test) — el único paso que
   // `pending_remainder_status` bloquea de verdad es el AVANCE FINAL a "Recibido" (ver
   // `PurchaseOrderController::advance()`); cualquier otra etapa intermedia nunca estuvo
@@ -160,6 +180,7 @@ export default function OrderDetailPage() {
           shipping_type: draft.shippingType,
           who_pays_shipping: draft.whoPaysShipping,
           shipping_cost: draft.shippingCost !== '' ? Number(draft.shippingCost) : null,
+          ...buildAdditionalCostsPayload(draft),
           modality: draft.modality,
           estimated_arrival_date: draft.estimatedArrivalDate || null,
           lines: buildLinesPayload(draft),
@@ -198,7 +219,7 @@ export default function OrderDetailPage() {
             {orderStatusLabel(t, order.status, order.modality)}
           </SummaryField>
           <SummaryField label={t('compras:orders.detail.summary.orderDate')}>
-            {new Date(order.created_at).toLocaleDateString()}
+            {formatDateFromTimestamp(order.created_at)}
           </SummaryField>
           <SummaryField label={t('compras:orders.detail.summary.estimatedArrival')}>
             {order.estimated_arrival_date ?? '—'}
@@ -229,7 +250,7 @@ export default function OrderDetailPage() {
               <>
                 {t(`compras:newOrder.shipping.type${order.shipping_type.charAt(0).toUpperCase()}${order.shipping_type.slice(1)}`)}
                 {order.shipping_cost != null && (
-                  <span className="text-slate-400 font-normal"> · ${order.shipping_cost.toFixed(2)}</span>
+                  <span className="text-slate-400 font-normal"> · ${formatMoney(order.shipping_cost)}</span>
                 )}
                 {order.who_pays_shipping !== null && (
                   <span className="text-slate-400 font-normal">
@@ -366,7 +387,7 @@ export default function OrderDetailPage() {
               un menú de acciones secundario (mismo patrón que el dropdown del avatar en TopBar.tsx:
               trigger relative + backdrop fixed + panel absolute). Misma lógica/mutación, solo
               cambia dónde vive en el layout. */}
-          <div className="relative">
+          <div className={`relative ${moneyHidden ? 'hidden' : ''}`}>
             <Button
               variant="icon"
               onClick={() => setShowActionsMenu(v => !v)}
@@ -387,10 +408,25 @@ export default function OrderDetailPage() {
                     />
                     {t('compras:orders.detail.includeCost')}
                   </label>
+                  {/* SCRUM-1127 — idioma del adjunto (uno por envío). El inglés solo si ya se generó y está vigente. */}
+                  <fieldset className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700">
+                    <legend className="text-xs font-semibold text-slate-500 uppercase mb-1">{t('compras:orders.languages.emailLanguage')}</legend>
+                    <label className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer py-0.5">
+                      <input type="radio" name="email-lang" checked={effectiveEmailLang === 'es'} onChange={() => setEmailLang('es')} />
+                      {t('compras:orders.languages.spanish')}
+                    </label>
+                    <label className={`flex items-center gap-1.5 text-xs py-0.5 ${englishUsable ? 'text-slate-700 dark:text-slate-300 cursor-pointer' : 'text-slate-400 cursor-not-allowed'}`}>
+                      <input type="radio" name="email-lang" checked={effectiveEmailLang === 'en'} disabled={!englishUsable} onChange={() => setEmailLang('en')} />
+                      {t('compras:orders.languages.english')}
+                    </label>
+                    {!englishUsable && (
+                      <p className="text-xs text-slate-400 mt-1">{t('compras:orders.languages.generateFirst')}</p>
+                    )}
+                  </fieldset>
                   <button
                     type="button"
                     disabled={sendEmail.isPending}
-                    onClick={() => sendEmail.mutate({ id: order.id, includeCost: includeCostInDocs })}
+                    onClick={() => sendEmail.mutate({ id: order.id, includeCost: includeCostInDocs, lang: effectiveEmailLang })}
                     className="w-full text-left px-4 py-2.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium disabled:opacity-50"
                   >
                     {t('compras:orders.actions.sendEmail')}
@@ -399,7 +435,11 @@ export default function OrderDetailPage() {
                     <p className="px-4 py-1.5 text-xs text-emerald-600">{t('compras:orders.detail.emailSent')}</p>
                   )}
                   {sendEmail.isError && (
-                    <p className="px-4 py-1.5 text-xs text-red-600">{t('compras:orders.errors.sendEmailGeneric')}</p>
+                    <p className="px-4 py-1.5 text-xs text-red-600">
+                      {isAxiosError(sendEmail.error) && sendEmail.error.response?.status === 409 && typeof sendEmail.error.response.data?.message === 'string'
+                        ? (sendEmail.error.response.data.message as string)
+                        : t('compras:orders.errors.sendEmailGeneric')}
+                    </p>
                   )}
                 </div>
               </>
@@ -488,24 +528,26 @@ export default function OrderDetailPage() {
 
       {/* SCRUM-736 — "Pagos a Proveedores" sale del bloque principal (decisión 1): queda un
           trigger compacto, fuera del Card de resumen, que abre el mismo panel dentro de un modal. */}
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          className="!text-xs !px-3 !py-1.5 inline-flex items-center gap-1.5"
-          onClick={() => setShowPaymentsModal(true)}
-        >
-          <IcoDollarSign size={13} />
-          {t('compras:orders.detail.payments.title')}
-        </Button>
-      </div>
-      {showPaymentsModal && (
+      {!moneyHidden && (
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            className="!text-xs !px-3 !py-1.5 inline-flex items-center gap-1.5"
+            onClick={() => setShowPaymentsModal(true)}
+          >
+            <IcoDollarSign size={13} />
+            {t('compras:orders.detail.payments.title')}
+          </Button>
+        </div>
+      )}
+      {!moneyHidden && showPaymentsModal && (
         <PurchaseOrderPaymentsModal order={order} onClose={() => setShowPaymentsModal(false)} />
       )}
       {showProjectBreakdown && (
         <ProjectBreakdownModal orderId={order.id} onClose={() => setShowProjectBreakdown(false)} />
       )}
 
-      <ProviderConfirmationCard orderId={order.id} orderStatus={order.status} />
+      {!moneyHidden && <ProviderConfirmationCard orderId={order.id} orderStatus={order.status} />}
 
       {editing ? (
         <>
@@ -538,8 +580,8 @@ export default function OrderDetailPage() {
                 <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.factoryRef')}</th>
                 <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.publicRef')}</th>
                 <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.quantity')}</th>
-                <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.unitCost')}</th>
-                <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.subtotal')}</th>
+                {!moneyHidden && <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.unitCost')}</th>}
+                {!moneyHidden && <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.subtotal')}</th>}
                 <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:newOrder.lines.project')}</th>
                 <th className="text-left py-2 text-xs font-semibold text-slate-500 uppercase">{t('compras:orders.table.reception')}</th>
               </tr>
@@ -553,8 +595,8 @@ export default function OrderDetailPage() {
                   <td className="py-2 text-slate-600">{l.factory_reference ?? '—'}</td>
                   <td className="py-2 text-slate-600">{l.reference ?? '—'}</td>
                   <td className="py-2 text-slate-600">{l.quantity}</td>
-                  <td className="py-2 text-slate-600">${l.unit_cost.toFixed(2)}</td>
-                  <td className="py-2 font-semibold text-slate-800">${l.subtotal.toFixed(2)}</td>
+                  {!moneyHidden && <td className="py-2 text-slate-600">${formatMoney(l.unit_cost)}</td>}
+                  {!moneyHidden && <td className="py-2 font-semibold text-slate-800">${formatMoney(l.subtotal)}</td>}
                   <td className="py-2 text-slate-600">{l.sales_project_name ?? t('compras:newOrder.lines.projectNone')}</td>
                   <td className="py-2">
                     <ReceptionBadge status={l.reception_status} t={t} />
@@ -570,27 +612,57 @@ export default function OrderDetailPage() {
           </table>
           {/* SCRUM-736 — "y el monto total" (mockup): antes vivía en el grid superior junto al
               Estado, ahora baja junto a la tabla de líneas. */}
-          <div className="flex justify-end font-bold text-slate-800 text-sm mt-3 pt-3 border-t border-slate-100">
-            {t('compras:newOrder.lines.total')}: ${order.total_amount.toFixed(2)}
-          </div>
+          {!moneyHidden && (
+            <>
+              {/* SCRUM-1145 — desglose solo si hay envío aéreo pagado por Atlantic o costos
+                  adicionales; sin ellos, el total sigue siendo el de siempre. */}
+              {order.payable_total !== order.total_amount && (
+                <dl className="ml-auto max-w-xs space-y-1 mt-3 text-sm text-slate-600">
+                  <div className="flex justify-between"><dt>{t('compras:newOrder.additionalCosts.productsSubtotal')}</dt><dd>${formatMoney(order.total_amount)}</dd></div>
+                  {order.who_pays_shipping === 'atlantic' && order.shipping_type === 'aereo' && (order.shipping_cost ?? 0) > 0 && (
+                    <div className="flex justify-between"><dt>{t('compras:newOrder.additionalCosts.airShipping')}</dt><dd>${formatMoney(order.shipping_cost as number)}</dd></div>
+                  )}
+                  {([['import_cost', 'import'], ['freight_cost', 'freight'], ['handling_cost', 'handling'], ['other_cost', 'other']] as const).map(([field, key]) =>
+                    (order[field] ?? 0) > 0 ? (
+                      <div key={key} className="flex justify-between"><dt>{t(`compras:newOrder.additionalCosts.${key}`)}</dt><dd>${formatMoney(order[field] as number)}</dd></div>
+                    ) : null)}
+                </dl>
+              )}
+              <div className="flex justify-end font-bold text-slate-800 text-sm mt-3 pt-3 border-t border-slate-100">
+                {t('compras:newOrder.lines.total')}: ${formatMoney(order.payable_total)}
+              </div>
+            </>
+          )}
         </Card>
+      )}
+
+      {/* SCRUM-1127 — las dos versiones (español / inglés a pedido), ver y descargar cualquiera, ahora o después. */}
+      {!moneyHidden && (
+        <OrderLanguageVersions
+          orderId={order.id}
+          includeCost={includeCostInDocs}
+          english={order.translations?.en}
+          canGenerate={canWriteCompras}
+        />
       )}
 
       {/* SCRUM-736 (task 9) — botón full-width "Ver Orden (PDF)" al estilo del mockup; usa el
           mismo includeCostInDocs del menú de "Más acciones" y la misma mutación de siempre. */}
-      <Button
-        variant="primary"
-        className="w-full text-center mb-8"
-        loading={openPdf.isPending}
-        onClick={() => {
-          // Abrir la ventana sincrónico, atado al click — si se abre después del fetch
-          // async del PDF, el navegador la trata como popup no solicitado y la bloquea.
-          const targetWindow = window.open('', '_blank')
-          openPdf.mutate({ id: order.id, includeCost: includeCostInDocs, targetWindow })
-        }}
-      >
-        {t('compras:orders.actions.viewOrderPdf')}
-      </Button>
+      {!moneyHidden && (
+        <Button
+          variant="primary"
+          className="w-full text-center mb-8"
+          loading={openPdf.isPending}
+          onClick={() => {
+            // Abrir la ventana sincrónico, atado al click — si se abre después del fetch
+            // async del PDF, el navegador la trata como popup no solicitado y la bloquea.
+            const targetWindow = window.open('', '_blank')
+            openPdf.mutate({ id: order.id, includeCost: includeCostInDocs, targetWindow })
+          }}
+        >
+          {t('compras:orders.actions.viewOrderPdf')}
+        </Button>
+      )}
     </div>
   )
 }

@@ -73,8 +73,14 @@ beforeEach(() => {
 describe('ComprasHomePage', () => {
   it('muestra el saludo con el nombre como título principal, sin "Inicio" (SCRUM-175)', async () => {
     renderPage()
-    expect(await screen.findByText('compras:home.greeting:Lider Compras')).toBeInTheDocument()
+    expect(await screen.findByText('compras:home.greeting:Lider')).toBeInTheDocument()
     expect(screen.queryByText('compras:home.title')).not.toBeInTheDocument()
+  })
+
+  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+    mockedStore.mockReturnValue({ user: { id: 1, first_name: 'Lider Paola' } } as never)
+    renderPage()
+    expect(await screen.findByText('compras:home.greeting:Lider')).toBeInTheDocument()
   })
 
   it('muestra el monto comprado del mes', async () => {
@@ -126,6 +132,34 @@ describe('ComprasHomePage', () => {
 
     expect(await screen.findByText('compras:home.pendientes.detailTitle')).toBeInTheDocument()
     expect(screen.getByText('Aprobar o rechazar la orden.')).toBeInTheDocument()
+  })
+
+  it('SCRUM-871 — con más de 5 pendientes muestra "Ver más" y el modal lista todos', async () => {
+    const pendientes = Array.from({ length: 7 }, (_, i) => ({
+      type: 'orden_sin_aprobar' as const, priority: 'media' as const, order_id: i + 1,
+      provider: 'LightCorp', amount: 100, days: 1, suggestion: `Sugerencia ${i + 1}`,
+    }))
+    mockedApi.home.summary.mockResolvedValue(makeSummary({ pendientes }))
+    renderPage()
+
+    expect(await screen.findByText('7')).toBeInTheDocument()
+    expect(screen.getAllByText(/home\.pendientes\.text\.orden_sin_aprobar/)).toHaveLength(5)
+
+    fireEvent.click(screen.getByText('common:actions.viewMore'))
+    expect(screen.getAllByText(/home\.pendientes\.text\.orden_sin_aprobar/)).toHaveLength(5 + 7)
+  })
+
+  it('SCRUM-871 — con 5 pendientes o menos no muestra "Ver más"', async () => {
+    mockedApi.home.summary.mockResolvedValue(makeSummary({
+      pendientes: [{
+        type: 'orden_sin_aprobar', priority: 'media', order_id: 1,
+        provider: 'LightCorp', amount: 100, days: 1, suggestion: 'x',
+      }],
+    }))
+    renderPage()
+
+    await screen.findByText(/home\.pendientes\.text\.orden_sin_aprobar/)
+    expect(screen.queryByText('common:actions.viewMore')).not.toBeInTheDocument()
   })
 
   it('lista órdenes críticas y abre el detalle al hacer clic', async () => {

@@ -2,6 +2,8 @@ import type { CatalogProductCategory } from '@/types/compras'
 
 export type PipelineStage = 'lead' | 'design' | 'quote' | 'proposal' | 'approved' | 'lost'
 
+export type OrderApprovalStatus = 'pending' | 'approved'
+
 export interface PipelineCardSalesProject {
   id:   number
   name: string
@@ -16,11 +18,16 @@ export interface PipelineCardClientRef {
 export interface PipelineCardSubClientRef {
   id:            number
   business_name: string
+  /** SCRUM-1166 — solo lo manda el detalle de la cotización: el cliente HOY, para avisar si la cotización conserva otra marca. */
+  itbms_exento?: boolean
 }
 
 export interface PipelineCardOwner {
   id:   number
   name: string
+  // SCRUM-849.5 — solo lo expone Quote.owner (QuoteController::formatDetail); el resto de
+  // consumidores de este tipo (PipelineCard.owner, etc.) lo deja undefined, sin problema.
+  phone?: string | null
 }
 
 export interface PipelineCard {
@@ -30,11 +37,20 @@ export interface PipelineCard {
   master_client:     PipelineCardClientRef | null
   sub_client:        PipelineCardSubClientRef | null
   owner:             PipelineCardOwner
+  // SCRUM-849.4 — owner + compartido_con (asignación de Gerencia a uno o varios
+  // vendedores/diseñadores); siempre incluye al menos al owner.
+  assignees:         PipelineCardOwner[]
   amount:            number | null
   worked_area_m2:    number | null
   days_in_stage:     number
   is_stagnant:       boolean
   stage_changed_at:  string
+  // SCRUM-1128 — aprobación previa "Pasar a Pedido". `order_status` viene del estado real del paso
+  // a pedido (no de `stage`); solo tiene sentido en tarjetas aprobadas. Opcionales para no romper
+  // listados/mocks anteriores al campo.
+  order_status?:      OrderApprovalStatus | null
+  order_approved_by?: { id: number; name: string } | null
+  order_approved_at?: string | null
 }
 
 // SCRUM-690/691/693 (REQ-610/611/613, Batch D) — pantalla "Lista de Proyectos". Fila propia
@@ -96,6 +112,11 @@ export interface PipelineCardFileUrl {
 }
 
 export interface PipelineCardDetail extends PipelineCard {
+  // SCRUM-1121 — asociados del proyecto (los mismos que ven sus cotizaciones).
+  associates?:           Associate[]
+  // SCRUM-884 — quien creó el proyecto originalmente, inmutable (distinto de `owner`, que
+  // Gerencia puede reasignar). Null solo en tarjetas pre-existentes al campo, antes del backfill.
+  creator:               PipelineCardOwner | null
   delivery_type:          'single' | 'partial' | null
   observations:          string | null
   delivery_dates:        string[]
@@ -106,6 +127,10 @@ export interface PipelineCardDetail extends PipelineCard {
   // SCRUM-734 — id de la cotización confirmada más reciente del proyecto, o null
   // si nunca hubo ninguna. Gate + destino de "Ver cotizaciones de este proyecto".
   latest_quote_id:       number | null
+  // SCRUM-1128 — el backend ya resolvió: aprobada + sin pedido + usuario con permiso.
+  can_pass_to_order?:    boolean
+  /** SCRUM-1115 — folio de esa misma cotización (para ofrecer "Partir de COT-xxxx" al crear una cotización). */
+  latest_quote_folio?:   string | null
 }
 
 // Grupo 1d — REQ-019/020: creación manual desde Pipeline.
@@ -115,6 +140,8 @@ export interface PipelineCardCreatePayload {
   tag?:           string | null
   observations?:  string | null
   sub_client_id?: number | null
+  // SCRUM-849.4 — Gerencia-only; el backend lo ignora en silencio para cualquier otro rol.
+  assignee_ids?:  number[]
 }
 
 export interface PipelineCardUpdatePayload {
@@ -126,6 +153,37 @@ export interface PipelineCardUpdatePayload {
   delivery_type?:     'single' | 'partial' | null
   delivery_dates?:    string[]
   observations?:      string | null
+  // SCRUM-849.4 — Gerencia-only; el backend lo ignora en silencio para cualquier otro rol.
+  assignee_ids?:      number[]
+  // SCRUM-1027 — borrador de "Asignar productos a entrega" hecho dentro de la edición; el backend
+  // lo guarda en la misma transacción que las fechas.
+  product_deliveries?: PipelineCardProductDeliveryAssignmentPayload[]
+}
+
+// SCRUM-909 — "Asignar productos a entrega": fila de un producto de la cotización confirmada
+// del proyecto, con lo pedido/disponible (Bodega) y la fecha de entrega parcial ya asignada, si
+// la hay. Reconciliado con Backend Dev: `quote_item_id` (no `catalog_product_id`) es el
+// identificador real — un mismo producto de catálogo puede repetirse en 2 líneas distintas de la
+// misma cotización, cada una con su propia asignación. `catalog_product_id` queda como dato
+// informativo (null en ítems personalizados sin producto de Catálogo). `suggested_delivery_date`
+// viene calculado por el backend (disponible < pedido, o 0 → fecha más lejana) — una sola fuente
+// de verdad, el frontend no lo recalcula. `assigned_delivery_date`/`suggested_delivery_date`
+// solo pueden ser una de `PipelineCardDetail.delivery_dates`, el backend valida contra esa lista
+// al guardar.
+export interface PipelineCardProductDeliveryRow {
+  quote_item_id:            number
+  catalog_product_id:       number | null
+  code:                      string
+  name:                      string
+  quantity_ordered:          number
+  quantity_available:        number | null
+  assigned_delivery_date:    string | null
+  suggested_delivery_date:   string | null
+}
+
+export interface PipelineCardProductDeliveryAssignmentPayload {
+  quote_item_id:  number
+  delivery_date:  string | null
 }
 
 export interface MasterClientRef {
@@ -138,6 +196,7 @@ export interface SubClientRef {
   id:              number
   business_name:   string
   tax_id?:         string
+  tax_id_dv?:      string | null
   category?:       string | null
   // REQ-020 (Grupo 1d): advertir antes de crear un proyecto en Diseño vinculado a un
   // Subcliente sin contactos.
@@ -154,7 +213,9 @@ export const PIPELINE_STAGES: { id: PipelineStage; color: string }[] = [
   { id: 'quote',    color: '#a855f7' },
   { id: 'proposal', color: '#f97316' },
   { id: 'approved', color: '#16a34a' },
-  { id: 'lost',     color: '#64748b' },
+  // SCRUM-849.2 — antes '#64748b' (gris), se confundía con "siguiente etapa tras
+  // Aprobado". Rojo explícito, sin gris, columna con borde/fondo propios en PipelinePage.
+  { id: 'lost',     color: '#dc2626' },
 ]
 
 // ── Grupo 2 — pantalla Clientes (REQ-063 a REQ-070) ──────────────────────────
@@ -185,6 +246,103 @@ export interface ClientListResult {
   meta: { total: number; per_page: number; current_page: number; last_page: number }
 }
 
+// SCRUM-762 (épica SCRUM-749 — Migración ICG→AtlanticERP) — pestaña "Historial ICG", solo lectura.
+// Nunca incluye Pagos: legacy.pagos no referencia cliente en absoluto (ver docblock de
+// App\Modules\Legacy\Http\Controllers\SubClientHistoryController en atlanticerp-backend).
+export type LegacyHistoryEntidad = 'cotizaciones' | 'pedidos' | 'albaranes' | 'facturas'
+
+export interface LegacyHistoryRow {
+  id:     number
+  numero: string
+  fecha:  string | null
+  total:  string | null
+  estado: string | null
+}
+
+export interface LegacyHistoryResult {
+  data:         LegacyHistoryRow[]
+  total:        number
+  per_page:     number
+  current_page: number
+  last_page:    number
+}
+
+// Vista "gemela" tipo documento (cabecera + líneas), a pedido de Luis 2026-09-02 — sin
+// referencia visual real de ICG disponible, layout de ERP-POS estándar (decisión explícita).
+// Los campos por entidad son un subconjunto (ej. `fecha_entrega`/`albaran_relacionado` solo
+// existen para 'pedidos') — todos opcionales salvo los comunes a las 4 entidades.
+export interface LegacyDocumentCliente {
+  id:               number
+  nombre_comercial: string | null
+  razon_social:     string
+  cif:              string | null
+}
+
+// SCRUM-840 — contraparte de Albaranes de Compra (vinculado por Proveedor, no por Cliente). Forma
+// deliberadamente distinta de LegacyDocumentCliente (Proveedor no tiene `razon_social` en ICG).
+export interface LegacyDocumentProveedor {
+  id:               number
+  nombre_comercial: string | null
+  nombre:           string
+  cif:              string | null
+}
+
+export interface LegacyDocumentHeader {
+  folio:                string
+  // `cliente`/`icg_codcliente` ausentes por completo (no `null`) en el documento de Albaranes de
+  // Compra — ver `proveedor`/`icg_codproveedor` en su lugar.
+  cliente?:             LegacyDocumentCliente | null
+  icg_codcliente?:      number | null
+  proveedor?:           LegacyDocumentProveedor | null
+  icg_codproveedor?:    number | null
+  icg_codvendedor?:     number | null
+  fecha:                string | null
+  estado?:              string | null
+  total_neto:           string | null
+  total_bruto?:         string | null
+  total_impuestos?:     string | null
+  supresupuesto?:       string | null
+  // SCRUM-842 — campos libres por entidad (solo aplica a Cotizaciones/Pedidos/Albaranes venta)
+  proyecto?:            string | null
+  promocion?:           string | null
+  comision?:            string | null
+  observaciones?:       string | null
+  fecha_entrega?:       string | null
+  albaran_relacionado?: string | null
+  facturado?:           boolean
+  factura_relacionada?: string | null
+  sufactura?:           string | null
+  // SCRUM-841 — Facturación Electrónica (solo Facturas)
+  fe_qr?:                string | null
+  fe_auth_number?:       string | null
+  fe_serie?:              string | null
+  fe_numero?:             string | null
+  fe_fecha_emision?:      string | null
+  fe_fecha_recepcion?:    string | null
+  fe_error?:              string | null
+  fe_estado?:             string | null
+  orphan:               boolean
+}
+
+export interface LegacyDocumentItem {
+  codigo_articulo: number | null
+  referencia:      string | null
+  descripcion:     string | null
+  cantidad:        string | null
+  precio:          string | null
+  descuento?:      string | null
+  total:           string | null
+  costo?:          string | null
+}
+
+export interface LegacyDocumentResult {
+  entidad: LegacyHistoryEntidad
+  header:  LegacyDocumentHeader
+  // null = este tipo de documento nunca tuvo líneas en el origen (ej. Facturas) — distinto de
+  // un array vacío, que significaría "sí tiene líneas, cero en este caso puntual".
+  items: LegacyDocumentItem[] | null
+}
+
 export interface SubClientContact {
   id:    number
   name:  string
@@ -193,13 +351,66 @@ export interface SubClientContact {
   email: string | null
 }
 
+/** SCRUM-1002 — respuesta de `POST /ventas-diseno/clients/validate-tax-id` (DGI vía MSL). Nunca trae la respuesta cruda del PAC. */
+export interface TaxIdValidationResult {
+  /** false = no se pudo consultar (FE apagada, sin credenciales, MSL caído): NO significa que el RUC sea inválido. */
+  disponible: boolean
+  valido:     boolean | null
+  nombre:     string | null
+  dv:         string | null
+  tipo_ruc:   string | null
+  /** Estado del contribuyente que reporta la DGI (p. ej. "I"); su significado exacto está pendiente de confirmar con MSL. */
+  estado:     string | null
+  codigo:     'ok' | 'no_encontrado' | 'apagado' | 'sin_credenciales' | 'no_disponible'
+}
+
+/** SCRUM-1002 — fila del directorio de datos fiscales (`GET /ventas-diseno/clients/fiscal-directory`). */
+export interface FiscalDirectoryRow {
+  id:                 number
+  master_client_id:   number
+  master_client_name: string
+  business_name:      string
+  tax_id:             string
+  tax_id_dv:          string | null
+  /** SCRUM-1003 — tipo de cliente ante la DGI. */
+  receptor_tipo:      ReceptorTipo
+  /** true = ya tiene facturas o notas de crédito certificadas/pendientes: el backend rechazaría la edición (409). */
+  bloqueado:          boolean
+  /** SCRUM-1166 — cliente exento de ITBMS y el documento que respalda la exención. */
+  itbms_exento:             boolean
+  itbms_exencion_documento: string | null
+}
+
+export interface FiscalDirectoryResult {
+  data: FiscalDirectoryRow[]
+  meta: { total: number; per_page: number; current_page: number; last_page: number }
+}
+
+/** SCRUM-1003 — tipo de cliente ante la DGI: `01` Contribuyente (default) | `02` Consumidor Final (sin RUC ni DV). */
+export type ReceptorTipo = '01' | '02'
+
+/** SCRUM-1002/1003 — `PATCH /ventas-diseno/clients/sub-clients/{id}/tax-data`. Con `02` no se manda RUC ni DV. */
+export interface UpdateSubClientTaxDataPayload {
+  business_name: string
+  receptor_tipo: ReceptorTipo
+  tax_id?:       string
+  tax_id_dv?:    string
+}
+
 export interface SubClientDetail {
   id:                number
   master_client_id:  number
   business_name:     string
+  /** SCRUM-1003 — tipo de cliente ante la DGI. El backend siempre lo manda (`01` para filas anteriores). */
+  receptor_tipo?:    ReceptorTipo
   tax_id:            string
+  /** SCRUM-928 — dígito verificador del RUC. Null en subclientes anteriores al campo. */
+  tax_id_dv:         string | null
   delivery_address:  string | null
   category:          SubClientCategory | null
+  /** SCRUM-1166 — cliente exento de ITBMS (solo lectura en Ventas & Diseño). */
+  itbms_exento?:             boolean
+  itbms_exencion_documento?: string | null
   contacts:           SubClientContact[]
 }
 
@@ -222,18 +433,32 @@ export interface CreateClientPayload {
   name:                string
   default_price_type?: PriceType | null
   business_name:       string
-  tax_id:              string
+  /** SCRUM-1003 — `02` (Consumidor Final) no lleva RUC ni DV; si se omite es `01`. */
+  receptor_tipo?:      ReceptorTipo
+  tax_id?:             string
+  /** SCRUM-928 — DV del RUC, obligatorio al crear con `01` (1–2 dígitos). */
+  tax_id_dv?:          string
   delivery_address?:   string | null
   category?:           SubClientCategory | null
   contacts:            { name: string; role: ContactRole; phone?: string | null; email?: string | null }[]
+  /** SCRUM-873 — true cuando el Cliente Master/Subcliente se crea desde el flujo de Cotización
+   *  (nunca desde Pipeline): el backend usa esto para NO crear el Lead card duplicado que el
+   *  flujo normal de "Cliente nuevo" sí genera. Ver ClientsController::store()/StoreClientRequest. */
+  from_quote_context?: boolean
 }
 
 export interface CreateSubClientPayload {
   business_name:      string
-  tax_id:             string
+  /** SCRUM-1003 — ver CreateClientPayload.receptor_tipo. */
+  receptor_tipo?:     ReceptorTipo
+  tax_id?:            string
+  /** SCRUM-928 — ver CreateClientPayload.tax_id_dv. */
+  tax_id_dv?:         string
   delivery_address?:  string | null
   category?:          SubClientCategory | null
   contacts:           { name: string; role: ContactRole; phone?: string | null; email?: string | null }[]
+  /** SCRUM-873 — ver CreateClientPayload.from_quote_context. */
+  from_quote_context?: boolean
 }
 
 // ── Grupo 3 — pantalla Inicio (REQ-056 a REQ-062) ────────────────────────────
@@ -376,6 +601,45 @@ export interface Architect {
   name:   string
   phone:  string | null
   email:  string | null
+  // SCRUM-1121 — la tabla de Arquitectos es la base única de asociados.
+  type?:     AssociateType
+  document?: string | null
+}
+
+// SCRUM-1121 — asociados (arquitectos, diseñadores, contratistas, ingenieros, consultores y otros), base única reutilizable entre
+// Cotizaciones y Pipeline.
+export type AssociateType = 'architect' | 'designer' | 'contractor' | 'engineer' | 'consultant' | 'other'
+
+export const ASSOCIATE_TYPES: readonly AssociateType[] = ['architect', 'designer', 'contractor', 'engineer', 'consultant', 'other']
+
+export interface Associate {
+  id:       number
+  type:     AssociateType
+  name:     string
+  phone:    string | null
+  email:    string | null
+  document: string | null
+}
+
+export interface AssociateInput {
+  type:      AssociateType
+  name:      string
+  phone?:    string | null
+  email?:    string | null
+  document?: string | null
+}
+
+/** Cuerpo del 409 de POST /architects: `duplicate_exact` bloquea (usar el existente), `duplicate_similar` solo avisa. */
+export interface AssociateDuplicateResponse {
+  code:       'duplicate_exact' | 'duplicate_similar'
+  message:    string
+  duplicates: Associate[]
+}
+
+// SCRUM-907 — detalle de la pantalla "Arquitectos" del menú CRM: mismo shape de fila de
+// proyecto que ClientProjectRow (ClientProjectsModal), reutilizado tal cual por el backend.
+export interface ArchitectDetail extends Architect {
+  projects: ClientProjectRow[]
 }
 
 export interface SalesProjectRef {
@@ -422,6 +686,9 @@ export interface QuoteItemRef {
   // SCRUM-725 — true si este ítem, con el precio/descuento/tipo de precio
   // resultantes, cae por debajo del margen mínimo (nunca se expone el % real).
   below_min_margin:     boolean
+  // SCRUM-849.6 — miniatura ad-hoc (solo is_custom); para un ítem de Catálogo real,
+  // null (SCRUM-766 nunca resolvió photo_url de CatalogProduct desde este endpoint).
+  photo_url:            string | null
 }
 
 // REQ-036 (2026-07-12): ficha técnica del buscador de Catálogo — a propósito
@@ -436,6 +703,8 @@ export interface CatalogProductRef {
   photo_url:          string | null
   price_full:         number
   stock_quantity:     number | null
+  /** SCRUM-1196 — unidades en Showroom Obarrio, aparte del disponible (no suman). */
+  stock_showroom?:    number
 }
 
 // REQ-037 (2026-07-13): tab "Familias" del buscador de Catálogo.
@@ -485,6 +754,8 @@ export interface CatalogItem {
   family_id:                      number | null
   family_name:                    string | null
   disponible:                     number
+  /** SCRUM-1196 — unidades en Showroom Obarrio, aparte del disponible (no suman). */
+  stock_showroom?:                number
   en_camino:                      number
   has_technical_sheet:            boolean
   technical_sheet_filename:       string | null
@@ -498,6 +769,35 @@ export interface CatalogListResult {
   categories: { value: CatalogProductCategory; count: number }[]
   families:   { id: number; name: string }[]
 }
+
+/**
+ * SCRUM-998 — estado de una exportación del Catálogo en segundo plano (ZIP de volúmenes), `GET
+ * /ventas-diseno/catalog/pdf-exports/{export_id}`. Solo el solicitante o un superadmin la puede consultar.
+ */
+export type CatalogPdfExportState = 'queued' | 'running' | 'done' | 'failed'
+
+export interface CatalogPdfExportStatus {
+  export_id: string
+  status: CatalogPdfExportState
+  total_products: number
+  volumes: number
+  size_bytes: number | null
+  /** Mensaje seguro para el usuario cuando `status === 'failed'` (nunca una traza). */
+  error_message: string | null
+  created_at: string | null
+  finished_at: string | null
+  expires_at: string | null
+  /** URL firmada del ZIP (vale 15 min); `null` mientras no esté lista o si ya venció. */
+  download_url: string | null
+}
+
+/**
+ * SCRUM-998 — resultado de `catalog.sendPdf()`: hasta el máximo configurable el PDF plano se descarga en el momento
+ * (`queued: false`); por encima, el backend responde 202 y el catálogo se genera en segundo plano (`queued: true`).
+ */
+export type CatalogSendPdfResult =
+  | { queued: false }
+  | { queued: true; exportId: string; totalProducts: number; volumes: number }
 
 export interface CatalogTechnicalSheetUploadResult {
   id:                          number
@@ -523,6 +823,11 @@ export type QuoteDocumentStatus = 'draft' | 'sent' | 'approved'
 
 export interface QuoteDetail {
   id:                        number
+  // SCRUM-1121 — asociados del proyecto (o del borrador si la cotización aún no tiene proyecto).
+  associates?:               Associate[]
+  // SCRUM-1120 — 'cotizaya' = cotización de venta chica (módulo CotizaYA), aparte del flujo comercial.
+  origin?:                   'comercial' | 'cotizaya'
+  cotizaya?:                 { customer_name: string | null; customer_phone: string | null } | null
   status:                    QuoteStatus
   // Cotización-D (REQ-048/051): folio/generated_at quedan null mientras la
   // cotización siga siendo un borrador sin generar — ese es el gate que habilita
@@ -540,6 +845,8 @@ export interface QuoteDetail {
   ruc:                       string | null
   description:               string | null
   owner:                     PipelineCardOwner
+  // SCRUM-1195 — Responsable del proyecto (dueño de la tarjeta del Pipeline), el que imprime el PDF; solo lo trae GET /quotes/{id}. `owner` = quien generó la versión.
+  designer?:                 PipelineCardOwner
   architect:                 Architect | null
   delivery_type:             'single' | 'partial' | 'tbd' | null
   delivery_dates:            string[]
@@ -562,6 +869,9 @@ export interface QuoteDetail {
   discount_totals_amount:     number
   net_total:                   number
   itbms:                       number
+  /** SCRUM-1166 — cotización de un cliente exento de ITBMS; `itbms_percentage` es el porcentaje real que se aplicó (0 si es exenta). */
+  itbms_exento:                boolean
+  itbms_percentage:            number
   grand_total:                 number
   conditions_text:             string | null
   observations_preview:        string
@@ -585,6 +895,8 @@ export interface QuoteVersionRow {
   confirmed_at: string | null
   generated_by: string
   grand_total:  number
+  /** SCRUM-1143 — false si el usuario solo puede LEER esta versión (ej. Responsable ante la versión de Gerencia). Ausente = true. */
+  can_use_as_base?: boolean
 }
 
 export interface QuoteVersionsResult {
@@ -612,6 +924,8 @@ export interface QuotePayload {
   delivery_type?:              'single' | 'partial' | 'tbd' | null
   delivery_dates?:             string[]
   price_type?:                 QuotePriceType
+  /** SCRUM-1164 — «Aplicar a todos»: junto con `price_type`, quita el tipo de precio propio de cada partida. */
+  clear_item_price_overrides?: boolean
   discount_mode?:               QuoteDiscountMode
   global_discount_percent?:     number
   observations?:                string | null
@@ -626,6 +940,13 @@ export interface QuoteCreatePayload extends QuotePayload {
   from_pipeline_card_id?: number | null
   from_sub_client_id?:    number | null
 }
+
+/** SCRUM-912 (Senior Review, corrección) — `POST /ventas-diseno/quotes` con un payload sin
+ *  ningún dato real ya NO persiste nada (ver hasMeaningfulContent() en QuoteController): la
+ *  respuesta es `{persisted: false}` sin ningún campo de `QuoteDetail`, no un `QuoteDetail`
+ *  parcial. Antes esto se tipaba como `Promise<QuoteDetail>` sin más — el caller (QuotePage)
+ *  navegaba a `/quotes/undefined` cuando el backend legítimamente no creaba nada. */
+export type QuoteCreateResult = { persisted: false } | ({ persisted: true } & QuoteDetail)
 
 // ── Grupo 4 — pantalla Reportes (REQ-071 a 079) ──────────────────────────────
 
@@ -730,6 +1051,26 @@ export interface ReportSettingsValue {
 
 // REQ-033 (2026-07-12): porcentajes/divisores de las fórmulas de Tipo de
 // Precio, configurables sin deploy — ver PricingSettingsPanel.tsx.
+/**
+ * SCRUM-944/945 — tramo paramétrico de la comisión escalonada de vendedores (antes hardcodeada
+ * en `SalesTotalsService::percentFor()`). Mismo shape que `CommissionTier` de Admin&Cont (tabla
+ * separada a propósito, otro concepto de negocio) — ver `types/adminContab.ts`.
+ */
+export interface SalesCommissionTier {
+  id: number
+  monto_minimo: number
+  monto_maximo: number | null
+  porcentaje: number
+  orden: number
+}
+
+/**
+ * Un tramo dentro del guardado atómico (`PUT` de la tabla completa). `id` solo en filas ya
+ * existentes (se actualizan en el lugar, conservan su id y su historial de auditoría); las filas
+ * nuevas van sin `id`. `orden` = posición en la tabla.
+ */
+export type SalesCommissionTierInput = Omit<SalesCommissionTier, 'id'> & { id?: number }
+
 export interface PricingSettingsValue {
   project_discount_percent:            number
   special_additional_discount_percent: number
@@ -780,6 +1121,8 @@ export interface QuoteListRow {
   stage:            PipelineStage | null
   price_type:       QuotePriceType
   owner:            PipelineCardOwner
+  // SCRUM-1195 — Responsable del proyecto (dueño de la tarjeta del Pipeline); null sin tarjeta (borradores, CotizaYA). `owner` = quien generó la versión.
+  designer?:        { id: number; name: string } | null
   quote_date:       string
   document_status:  QuoteDocumentStatus
 }
@@ -881,4 +1224,46 @@ export interface OrderDetail extends OrderRow {
 
 export interface OrdersSettingsValue {
   margin_drop_threshold_pts: number
+}
+
+// SCRUM-1120 — CotizaYA: cotizaciones de venta chica, independientes del flujo comercial.
+export interface CotizaYaContactOption {
+  id:    number
+  name:  string
+  role:  string | null
+  phone: string | null
+  email: string | null
+}
+
+export interface CotizaYaContext {
+  configured:              boolean
+  master_client:           { id: number; name: string } | null
+  sub_client:              { id: number; business_name: string } | null
+  contacts:                CotizaYaContactOption[]
+  default_conditions_text: string
+}
+
+export interface CotizaYaListRow {
+  id:             number
+  folio:          string
+  customer_name:  string | null
+  customer_phone: string | null
+  description:    string | null
+  owner:          { id: number; name: string }
+  generated_at:   string | null
+  grand_total:    number
+}
+
+export interface CotizaYaListResult {
+  data: CotizaYaListRow[]
+  meta: { total: number; per_page: number; current_page: number; last_page: number }
+}
+
+/** Campos propios del formulario de CotizaYA (todos opcionales; el Cliente Master es siempre el fijo). */
+export interface CotizaYaFields {
+  cotizaya_customer_name?:  string | null
+  cotizaya_customer_phone?: string | null
+  description?:             string | null
+  observations?:            string | null
+  conditions_text?:         string | null
 }

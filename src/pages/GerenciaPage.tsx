@@ -2,13 +2,16 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
-import { useGerenciaHome, useGerenciaVendors, useGerenciaClients } from '@/hooks/useGerencia'
+import { useGerenciaHome, useGerenciaVendors, useGerenciaClients, useGerenciaExport } from '@/hooks/useGerencia'
 import { gerenciaApi } from '@/api/gerenciaApi'
 import { Card } from '@/components/ui/Card'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
 import GerenciaAprobacionesPanel from '@/components/gerencia/GerenciaAprobacionesPanel'
+import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
+import { firstNameOnly } from '@/lib/greeting'
+import { IcoDownload, IcoChevronDown } from '@/components/icons'
 import type { AprobacionItem, ChartMensualItem } from '@/types/gerencia'
 
 // ── helpers ────────────────────────────────────────────────────────────────────
@@ -31,7 +34,7 @@ function buildContextUrl(item: { type: string; id: number; action_url: string })
   switch (item.type) {
     case 'purchase_order': return `/compras/ordenes?order=${item.id}`
     case 'zona_libre':     return `/bodega/ordenes-zona-libre?zl=${item.id}`
-    case 'relocation':     return `/bodega/inventario?relocation=${item.id}`
+    case 'relocation':     return `/bodega/bodegas?relocation=${item.id}`   // SCRUM-1154: la bandeja vive en Bodegas, no en Inventario
     case 'adjustment':     return `/bodega/solicitud-ajuste?ajuste=${item.id}`
     case 'general_count':  return `/bodega/inventario-general?count=${item.id}`
     default:               return item.action_url
@@ -51,6 +54,14 @@ function todayStr(): string {
 function startOfMonth(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+}
+
+// SCRUM-855 — default del filtro de fechas del dashboard: 1 de enero del año en curso, calculado
+// en cada ingreso al módulo (nunca persiste el último filtro usado). Reemplaza a `startOfMonth()`
+// como default de `desde` — esa función se deja intacta porque `currentMonth()` (drill-down de
+// KPIs, RN3/RN4) sigue dependiendo de ella, es un concepto distinto al filtro desde/hasta.
+function startOfYear(): string {
+  return `${new Date().getFullYear()}-01-01`
 }
 
 // SCRUM-166 RN3/RN4: "Monto cotizado en el mes"/"Monto aprobado del mes" navegan
@@ -155,7 +166,7 @@ export default function GerenciaPage() {
   const { user }     = useAuthStore()
   const queryClient  = useQueryClient()
 
-  const [desde,       setDesde]       = useState(startOfMonth())
+  const [desde,       setDesde]       = useState(startOfYear())
   const [hasta,       setHasta]       = useState(today())
   const [vendedorId,  setVendedorId]  = useState<number | ''>('')
   const [clienteId,   setClienteId]   = useState<number | ''>('')
@@ -166,6 +177,11 @@ export default function GerenciaPage() {
   const [pendingAction, setPendingAction] = useState<{ item: AprobacionItem; action: 'aprobar' | 'rechazar' } | null>(null)
   const [detailItem,    setDetailItem]    = useState<AprobacionItem | null>(null)
   const isSuperadmin = user?.role === 'superadmin'
+
+  // SCRUM-862 — "Exportar reporte", mismo patrón de menú pdf/excel que ArqueoCajaPage.
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const [exportNoData,   setExportNoData]   = useState(false)
+  const exportMutation = useGerenciaExport()
 
   const { data: vendors } = useGerenciaVendors()
   const { data: clients } = useGerenciaClients()
@@ -208,11 +224,27 @@ export default function GerenciaPage() {
 
   const { data, isLoading, isError } = useGerenciaHome(isRangeInverted ? undefined : filters)
 
+  // SCRUM-908 — card cross-módulo estándar (SCRUM-871: máx 5 + "Ver más"), aparte del panel de
+  // aprobaciones ya existente arriba (con Aprobar/Rechazar inline) — decisión explícita de Luis
+  // (2026-09-21) de no fusionarlos.
+  const { data: approvalsPendingAll } = useQuery({
+    queryKey: ['gerencia-home-approvals-pending-all'],
+    queryFn:  () => gerenciaApi.homeApprovalsPendingAll(),
+  })
+
   function clearFilters() {
-    setDesde(startOfMonth())
+    setDesde(startOfYear())
     setHasta(today())
     setVendedorId('')
     setClienteId('')
+  }
+
+  function handleExport(format: 'pdf' | 'xlsx') {
+    setExportMenuOpen(false)
+    setExportNoData(false)
+    exportMutation.mutate({ filters, format }, {
+      onSuccess: result => setExportNoData(result.noData),
+    })
   }
 
   // ── loading / error ─────────────────────────────────────────────────────────
@@ -244,19 +276,44 @@ export default function GerenciaPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-            Bienvenido, {user?.first_name ?? 'Gerencia'}
+            Bienvenido, {firstNameOnly(user?.first_name) || 'Gerencia'}
           </h1>
           <p className="text-sm text-slate-400 dark:text-slate-500 mt-0.5 capitalize">
             {todayStr()} · pulso general del negocio
           </p>
         </div>
-        <button
-          disabled
-          title="Próximamente"
-          className="shrink-0 px-4 py-2 text-sm font-medium border border-slate-200 dark:border-slate-600 rounded-lg text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
-        >
-          Exportar reporte
-        </button>
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setExportMenuOpen(o => !o)}
+            disabled={exportMutation.isPending}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <IcoDownload size={14} />
+            {exportMutation.isPending ? 'Generando...' : 'Exportar reporte'}
+            <IcoChevronDown size={12} />
+          </button>
+          {exportMenuOpen && (
+            <div className="absolute right-0 mt-1 w-40 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg py-1 z-10">
+              <button type="button" onClick={() => handleExport('pdf')} className="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
+                PDF
+              </button>
+              <button type="button" onClick={() => handleExport('xlsx')} className="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
+                Excel
+              </button>
+            </div>
+          )}
+          {exportNoData && (
+            <p className="absolute right-0 top-full mt-1 w-56 text-[11px] text-amber-600 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg px-2 py-1.5">
+              No hay datos para exportar con los filtros seleccionados.
+            </p>
+          )}
+          {exportMutation.isError && (
+            <p className="absolute right-0 top-full mt-1 w-56 text-[11px] text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1.5">
+              No se pudo generar el reporte. Intenta de nuevo.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* ── Big KPIs (3 tarjetas) ───────────────────────────────────────────── */}
@@ -800,6 +857,11 @@ export default function GerenciaPage() {
           )}
         </Card>
       </div>
+
+      <ApprovalsPendingCard
+        items={approvalsPendingAll?.data ?? []}
+        title="Aprobaciones Pendientes — Todos los módulos"
+      />
 
       {showAprobacionesConfig && (
         <GerenciaAprobacionesPanel onClose={() => setShowAprobacionesConfig(false)} />

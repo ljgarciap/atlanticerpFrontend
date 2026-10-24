@@ -13,6 +13,7 @@ import {
 import type { InspectionReportField, InspectionReportFindingInput, InspectionReportMaterialInput } from '@/types/servicios'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { formatDateTimeShort } from '@/utils/dates'
 import { IcoChevronLeft, IcoClose } from '@/components/icons'
 import { useToastStore } from '@/store/toastStore'
 import SignaturePad from '@/components/servicios/SignaturePad'
@@ -453,7 +454,7 @@ interface SignatureScreenProps {
 }
 
 function SignatureScreen({ onBack, onConfirm, saving, signedAt, onBackToTicket }: SignatureScreenProps) {
-  const { t, i18n } = useTranslation('servicios')
+  const { t } = useTranslation('servicios')
 
   if (signedAt) {
     return (
@@ -462,7 +463,7 @@ function SignatureScreen({ onBack, onConfirm, saving, signedAt, onBackToTicket }
           {t('tickets.inspectionReport.mobile.saved')}
         </p>
         <p className="text-xs text-slate-500">
-          {t('tickets.inspectionReport.mobile.signedAt', { fecha: signedAt.toLocaleString(i18n.language) })}
+          {t('tickets.inspectionReport.mobile.signedAt', { fecha: formatDateTimeShort(signedAt.toISOString()) })}
         </p>
         <Button onClick={onBackToTicket}>{t('tickets.inspectionReport.mobile.backToTicket')}</Button>
       </div>

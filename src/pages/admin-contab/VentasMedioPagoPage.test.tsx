@@ -79,6 +79,35 @@ describe('VentasMedioPagoPage', () => {
     }
   })
 
+  it('SCRUM-880 — payment method columns after "Total" follow the business order', async () => {
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('F-4201')).toBeInTheDocument())
+
+    const headers = screen.getAllByRole('columnheader').map(th => th.textContent)
+    // Fijas antes de Total, sin cambios.
+    expect(headers.slice(0, 6)).toEqual([
+      'adminContab:reportes.ventasMedioPago.columnas.fecha',
+      'adminContab:reportes.ventasMedioPago.columnas.cliente',
+      'adminContab:reportes.ventasMedioPago.columnas.documento',
+      'adminContab:reportes.ventasMedioPago.columnas.baseImponible',
+      'adminContab:reportes.ventasMedioPago.columnas.itbms',
+      'adminContab:reportes.ventasMedioPago.columnas.total',
+    ])
+    // Métodos después de Total: Yappy y Link de pago antes de Tarjeta y Depósito bancario.
+    expect(headers.slice(6, 15)).toEqual([
+      'adminContab:reportes.ventasMedioPago.metodos.transferencia',
+      'adminContab:reportes.ventasMedioPago.metodos.cheque',
+      'adminContab:reportes.ventasMedioPago.metodos.efectivo',
+      'adminContab:reportes.ventasMedioPago.metodos.yappy',
+      'adminContab:reportes.ventasMedioPago.metodos.linkPago',
+      'adminContab:reportes.ventasMedioPago.metodos.tarjeta',
+      'adminContab:reportes.ventasMedioPago.metodos.depositoBancario',
+      'adminContab:reportes.ventasMedioPago.metodos.retencionImpuestos',
+      'adminContab:reportes.ventasMedioPago.metodos.ajustesCuenta',
+    ])
+  })
+
   it('shows the Pendientes section only when there are pending invoices', async () => {
     mockedApi.reports.ventasMedioPago.mockResolvedValue(makeReport({
       pendientes: [{ fecha: '2026-06-28', documento: 'F-4410', proyecto: 'Torres Pacífico — Bodega Norte', monto: 6200 }],

@@ -37,9 +37,15 @@ export default function WarehouseStockModal({ productId, onClose }: Props) {
             {(warehouseStock?.data ?? []).map(w => (
               <li key={w.warehouse_id} className="flex justify-between py-1.5 border-b border-slate-100">
                 <span className="text-slate-700">{w.warehouse_name}</span>
-                <span className="font-semibold text-slate-900">{w.quantity}</span>
+                <span className={w.quantity < 0 ? 'font-semibold text-red-600' : 'font-semibold text-slate-900'} data-testid={`warehouse-qty-${w.warehouse_id}`}>{w.quantity}</span>
               </li>
             ))}
+            {warehouseStock && warehouseStock.data.length > 0 && (
+              <li className="flex justify-between py-1.5 font-semibold text-slate-900" data-testid="warehouse-total">
+                <span>{t('compras:inventory.warehouseStock.total')}</span>
+                <span>{warehouseStock.data.reduce((sum, w) => sum + w.quantity, 0)}</span>
+              </li>
+            )}
             {warehouseStock && warehouseStock.data.length === 0 && (
               <li className="text-slate-400 text-xs py-2 text-center">{t('compras:inventory.warehouseStock.empty')}</li>
             )}

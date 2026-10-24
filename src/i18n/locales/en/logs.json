@@ -46,5 +46,45 @@
     "page": "Page {{current}} of {{last}}",
     "prev": "Previous",
     "next": "Next"
+  },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "Distribution of the interactions recorded in the system, by user, type, module and day",
+    "presetDays": "Last {{count}} days",
+    "from": "From",
+    "to": "To",
+    "maxRange": "Maximum {{max}} days",
+    "system": "System",
+    "empty": "No activity in this range",
+    "note": "An interaction is an event recorded in the audit trail: data changes, logins, exports, downloads and denied accesses. Regular reads and navigation are not recorded.",
+    "stats": {
+      "interactions": "Interactions",
+      "activeUsers": "Active users",
+      "dataChanges": "Data changes",
+      "accessDenied": "Denied accesses"
+    },
+    "charts": {
+      "byUser": "By user (top 10)",
+      "byType": "By interaction type",
+      "byModule": "By module",
+      "byDay": "By day"
+    },
+    "types": {
+      "created": "Creation",
+      "updated": "Edit",
+      "deleted": "Deletion",
+      "exported": "Export",
+      "downloaded": "Download",
+      "login": "Login",
+      "login_failed": "Failed login",
+      "access_denied": "Access denied",
+      "other": "Other"
+    },
+    "errors": {
+      "invalid": "Choose a valid start and end date.",
+      "inverted": "The end date cannot be before the start date.",
+      "tooLong": "The maximum range is {{max}} days.",
+      "load": "The activity could not be loaded."
+    }
   }
 }

@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PedidosPage from './PedidosPage'
 import {
-  useOrdersBoard, useOrdersBoardOptions, useAssistantLoad, useTeamMembersByRole, useConsolidatedPicking,
+  useOrdersBoard, useOrdersBoardOptions, useAssistantLoad, useOrderSellers, useTeamMembersByRole, useConsolidatedPicking,
   useOrderInvoiceStatus, useAssignPicker, useStartPicking,
   useOrderDetail, useOrderWarehouseBreakdown, useExportOrderItemsExcel,
   useOrderPickingSheet, useUpdatePickingSheet, useCompletePicking, useExportPickingSheetExcel,
@@ -20,6 +21,7 @@ vi.mock('@/hooks/useBodega', () => ({
   useOrdersBoard: vi.fn(),
   useOrdersBoardOptions: vi.fn(),
   useAssistantLoad: vi.fn(),
+  useOrderSellers: vi.fn(),
   useTeamMembersByRole: vi.fn(),
   useConsolidatedPicking: vi.fn(),
   // OrderCardTile (renderizado dentro del tablero) también depende de esto desde SCRUM-401.
@@ -49,6 +51,7 @@ vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
 const mockedUseOrdersBoard = vi.mocked(useOrdersBoard)
 const mockedUseOrdersBoardOptions = vi.mocked(useOrdersBoardOptions)
 const mockedUseAssistantLoad = vi.mocked(useAssistantLoad)
+const mockedUseOrderSellers = vi.mocked(useOrderSellers)
 const mockedUseTeamMembersByRole = vi.mocked(useTeamMembersByRole)
 const mockedUseConsolidatedPicking = vi.mocked(useConsolidatedPicking)
 const mockedUseOrderInvoiceStatus = vi.mocked(useOrderInvoiceStatus)
@@ -101,6 +104,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     direccion_entrega: null,
     cliente_master: 'Constructora Pacífico Holdings',
     subcliente: 'Constructora Pacífico',
+    observaciones: null,
     ...overrides,
   }
 }
@@ -117,16 +121,22 @@ const ASSISTANTS: AssistantLoad[] = [
 ]
 
 function renderPage(initialEntries: string[] = ['/bodega/pedidos']) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <PedidosPage />
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <PedidosPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
   mockedUseAssistantLoad.mockReturnValue({ data: { data: ASSISTANTS } } as ReturnType<typeof useAssistantLoad>)
+  mockedUseOrderSellers.mockReturnValue({
+    data: [{ id: 1, name: 'Mark' }, { id: 2, name: 'Felix' }],
+  } as ReturnType<typeof useOrderSellers>)
   mockedUseOrdersBoardOptions.mockReturnValue({
     data: boardResponse([
       card({ id: 1, cliente: 'Constructora Pacífico', vendedor: 'Mark' }),
@@ -177,7 +187,47 @@ describe('PedidosPage', () => {
     expect(screen.getByTestId('order-card-3')).toBeInTheDocument()
   })
 
-  it('combina search + asistente + chip en la misma llamada al backend (AND real, REQ-309/310)', () => {
+  // SCRUM-860 (rebote de Daniela, 2026-09-09) — pedido junto con la vista de tabla, que mezcla
+  // las 7 etapas en una sola lista sin la separación visual en columnas que ya tiene el tablero.
+  // Client-side sobre `cards` (mismo criterio que el agrupado por etapa del tablero), no manda
+  // ningún filtro nuevo al backend.
+  it('filtro por Estado (SCRUM-860) deja solo las tarjetas de la etapa seleccionada', () => {
+    mockedUseOrdersBoard.mockReturnValue({
+      data: boardResponse([
+        card({ id: 1, stage: 'asignado' }),
+        card({ id: 2, stage: 'asignado' }),
+        card({ id: 3, stage: 'entregado' }),
+      ]),
+      isLoading: false,
+    } as ReturnType<typeof useOrdersBoard>)
+    renderPage()
+
+    fireEvent.change(screen.getByDisplayValue('bodega:pedidos.filters.stage'), { target: { value: 'entregado' } })
+
+    expect(screen.queryByTestId('order-card-1')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('order-card-2')).not.toBeInTheDocument()
+    expect(screen.getByTestId('order-card-3')).toBeInTheDocument()
+  })
+
+  it('"Limpiar filtros" también resetea el filtro de Estado (SCRUM-860)', () => {
+    mockedUseOrdersBoard.mockReturnValue({
+      data: boardResponse([card({ id: 1, stage: 'asignado' }), card({ id: 2, stage: 'entregado' })]),
+      isLoading: false,
+    } as ReturnType<typeof useOrdersBoard>)
+    renderPage()
+
+    const stageSelect = screen.getByDisplayValue('bodega:pedidos.filters.stage') as HTMLSelectElement
+    fireEvent.change(stageSelect, { target: { value: 'entregado' } })
+    expect(screen.queryByTestId('order-card-1')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('bodega:pedidos.filters.clear'))
+
+    expect(stageSelect.value).toBe('')
+    expect(screen.getByTestId('order-card-1')).toBeInTheDocument()
+    expect(screen.getByTestId('order-card-2')).toBeInTheDocument()
+  })
+
+  it('combina search + asistente + chip en la misma llamada al backend (AND real, REQ-309/310)', async () => {
     mockedUseOrdersBoard.mockReturnValue({ data: boardResponse([]), isLoading: false } as ReturnType<typeof useOrdersBoard>)
     renderPage()
 
@@ -185,28 +235,25 @@ describe('PedidosPage', () => {
     fireEvent.change(screen.getByDisplayValue('bodega:pedidos.filters.assistant'), { target: { value: '1' } })
     fireEvent.click(screen.getByText('bodega:pedidos.chips.urgentes'))
 
-    const lastCallArgs = mockedUseOrdersBoard.mock.calls[mockedUseOrdersBoard.mock.calls.length - 1]?.[0]
-    expect(lastCallArgs).toMatchObject({ search: '2205', assistant_id: 1, chip: 'urgentes' })
+    // SCRUM-1176 — el texto de búsqueda llega a la consulta tras 250 ms sin teclear; el asistente y el chip, de inmediato.
+    await waitFor(() => {
+      const lastCallArgs = mockedUseOrdersBoard.mock.calls[mockedUseOrdersBoard.mock.calls.length - 1]?.[0]
+      expect(lastCallArgs).toMatchObject({ search: '2205', assistant_id: 1, chip: 'urgentes' })
+    })
   })
 
-  it('el filtro de Vendedor se aplica client-side sobre el resultado ya filtrado (sin id de vendedor en el board)', () => {
-    mockedUseOrdersBoard.mockReturnValue({
-      data: boardResponse([
-        card({ id: 1, vendedor: 'Mark' }),
-        card({ id: 2, vendedor: 'Felix' }),
-      ]),
-      isLoading: false,
-    } as ReturnType<typeof useOrdersBoard>)
-
+  // SCRUM-854 — reemplaza el filtro viejo client-side por nombre (sin id de vendedor en el board)
+  // por un filtro real de backend por seller_ids (multi-selección, OR entre seleccionados).
+  it('el filtro de Vendedor/Diseñador manda seller_ids reales al backend (SCRUM-854)', async () => {
+    mockedUseOrdersBoard.mockReturnValue({ data: boardResponse([]), isLoading: false } as ReturnType<typeof useOrdersBoard>)
     renderPage()
 
-    expect(screen.getByTestId('order-card-1')).toBeInTheDocument()
-    expect(screen.getByTestId('order-card-2')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('bodega:pedidos.filters.seller'))
+    expect(await screen.findByText('Felix')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Felix'))
 
-    fireEvent.change(screen.getByDisplayValue('bodega:pedidos.filters.seller'), { target: { value: 'Felix' } })
-
-    expect(screen.queryByTestId('order-card-1')).not.toBeInTheDocument()
-    expect(screen.getByTestId('order-card-2')).toBeInTheDocument()
+    const lastCallArgs = mockedUseOrdersBoard.mock.calls[mockedUseOrdersBoard.mock.calls.length - 1]?.[0]
+    expect(lastCallArgs).toMatchObject({ seller_ids: [2] })
   })
 
   it('"Limpiar filtros" resetea search/asistente/cliente/vendedor/chip', () => {

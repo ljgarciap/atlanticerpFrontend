@@ -56,7 +56,7 @@ export default function ReportsTechnicianBars({ period }: Props) {
             plugins: { legend: { display: false } },
             scales: {
               y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 11 } } },
-              x: { ticks: { font: { size: 11 } } },
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
             },
           }} />
         </div>

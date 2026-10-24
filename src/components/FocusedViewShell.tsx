@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { useTheme } from '@/hooks/useTheme'
+import ImpersonationBanner from './ImpersonationBanner'
 
 // SCRUM-359 (REQ-289) — vistas SECUNDARIAS de apoyo (Movimiento de Herramientas, Informe móvil):
 // RN1/RN2 piden que NO lleven el menú de navegación general de las 5 pestañas, a diferencia de
@@ -14,6 +15,8 @@ export default function FocusedViewShell() {
 
   return (
     <div className="min-h-screen bg-surface dark:bg-[#0f172a]">
+      {/* SCRUM-1158 — estas vistas no tienen TopBar: sin la franja, una sesión de Ver como pasaría desapercibida. */}
+      <ImpersonationBanner />
       <div className="max-w-[1600px] mx-auto px-6 py-6">
         <Outlet />
       </div>

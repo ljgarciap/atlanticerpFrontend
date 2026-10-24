@@ -12,6 +12,7 @@ import { IcoClose, IcoPencil } from '@/components/icons'
 import ServiciosSearchPickerModal from './ServiciosSearchPickerModal'
 import ServiceQuotePdfViewerModal from './ServiceQuotePdfViewerModal'
 import { useToastStore } from '@/store/toastStore'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   ticketId:     number
@@ -21,7 +22,7 @@ interface Props {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 
 /** SCRUM-296 — mismo redondeo que ServiceQuote::computeTotals() en el backend (round a 2 decimales). */
@@ -527,6 +528,7 @@ export default function ServiceQuoteModal({ ticketId, ticketNumero, onClose, onC
           emptyMessage={t('tickets.create.searchProductEmpty')}
           onSelect={pickProduct}
           onClose={() => setProductPickerOpen(false)}
+          showDemoModeBadge
         />
       )}
 

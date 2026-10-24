@@ -4,17 +4,24 @@
     "home": "Home",
     "pipeline": "Pipeline",
     "clients": "Clients",
+    "architects": "Architects",
     "quote": "Quote",
     "quotesList": "Quotes",
     "pedidos": "Orders",
+    "statusPedidos": "Order Status",
     "reports": "Reports",
-    "auditLog": "History"
+    "auditLog": "History",
+    "cotizaya": "CotizaYA"
   },
   "scope": {
     "own": "Home",
     "team": "Team"
   },
   "filters": {
+    "orders": "Orders",
+    "ordersAll": "Orders: all",
+    "ordersApproved": "Approved",
+    "ordersPending": "Pending approval",
     "all": "All",
     "finalStage": "Final Stage",
     "stagnant": "Stagnant",
@@ -59,11 +66,25 @@
     "photo": "Photo"
   },
   "modal": {
+    "passToOrder": {
+      "button": "Move to Order",
+      "confirmMessage": "Are you sure the necessary information exists to move this project to an order for delivery from the warehouse?",
+      "approve": "Approve",
+      "passedBy": "Moved to order by",
+      "approvedAt": "Approval date",
+      "abonoQuestion": "Do you want to register the payment for this project?",
+      "abonoRegister": "Register payment",
+      "abonoLater": "Not yet",
+      "error": "The project could not be moved to an order.",
+      "errorForbidden": "You do not have permission to move this project to an order.",
+      "errorNotApproved": "The project must be in Approved status to move to an order."
+    },
     "name": "Project name",
     "tag": "Tag",
     "masterClient": "Master Client",
     "subClient": "Sub Client",
     "owner": "Owner",
+    "creator": "Creator",
     "daysInStage": "Days in stage",
     "amount": "Amount",
     "amountNote": "Defined in Quotes",
@@ -86,6 +107,7 @@
     "createNew": "+ Create \"{{query}}\"",
     "createError": "Could not create. Check the data and try again.",
     "subClientTaxId": "Tax ID",
+    "subClientTaxIdDv": "DV",
     "reactivate": "Reactivate (move to Lead)",
     "moveToNext": "Move to {{stage}}",
     "markAsLost": "Mark as Lost",
@@ -97,11 +119,34 @@
     "stageChangeMissingSubClient": "Missing a linked Sub-client. Search or create one to continue.",
     "createQuoteMissingArea": "Missing worked area. Fill it in before creating the quote.",
     "createQuoteMissingFile": "Missing at least one design file. Upload one to continue.",
+    "createQuoteBaseTitle": "How do you want to create the quote?",
+    "createQuoteBaseDescription": "This project already has quote {{folio}}. You can start from it as a new version (sections, items, prices, quantities and discounts are copied) or start blank.",
+    "createQuoteFromBase": "Start from {{folio}} (new version)",
+    "createQuoteBlank": "Blank",
+    "createQuoteBaseCancel": "Cancel",
+    "createQuoteBaseError": "The new version could not be created. Please try again.",
+    "createQuoteBaseForbidden": "You do not have access to that quote because it belongs to another salesperson. You can create a blank one.",
     "uploadFileError": "Could not upload the file. Check the file type and try again.",
     "fileView": "View",
     "fileDownload": "Download",
     "fileUrlError": "Could not open the file. Please try again.",
+    "removeFile": "Remove",
+    "confirmRemoveFile": "Are you sure you want to remove this file from the project?",
+    "removeFileError": "Could not remove the file. Please try again.",
     "saveError": "Could not save. Check the data and try again.",
+    "assignProductsToDelivery": "Assign products to delivery",
+    "deliveryAssignmentIncomplete": "Assign a delivery date to every product before approving the project.",
+    "productAssignment": {
+      "title": "Assign products to delivery",
+      "code": "Code",
+      "name": "Name",
+      "ordered": "Ordered",
+      "available": "Available",
+      "dateAssignment": "Date assignment",
+      "unassigned": "Unassigned",
+      "empty": "This project has no quoted products yet.",
+      "saveError": "Could not save the assignment. Please try again."
+    },
     "newProject": {
       "title": "New Project",
       "typeLead": "Lead",
@@ -142,7 +187,8 @@
     "tabFamilies": "Families",
     "familyProductsCount": "{{count}} products",
     "familiesEmpty": "No families configured",
-    "selectAllProducts": "Select products"
+    "selectAllProducts": "Select products",
+    "showroom": "Showroom Obarrio: {{count}}"
   },
   "catalogScreen": {
     "resultsCount_one": "{{count}} product",
@@ -185,7 +231,8 @@
       "unavailable": "No stock available",
       "availableCompact": "{{count}} units",
       "unavailableCompact": "Out of stock",
-      "incoming": "+{{count}} incoming"
+      "incoming": "+{{count}} incoming",
+      "showroom": "In Showroom Obarrio: {{count}}"
     },
     "badge": {
       "ok": "Sheet",
@@ -214,7 +261,17 @@
       "error": "Could not upload the technical sheet."
     },
     "sendSuccess": "Catalog sent. The PDF download has started.",
-    "sendError": "Could not generate the catalog PDF."
+    "sendError": "Could not generate the catalog PDF.",
+    "sendQueued": "The catalog ({{count}} products) is too large for a single PDF: it is being generated as {{volumes}} volumes in a ZIP. We will let you know when it is ready.",
+    "exportBanner": {
+      "generating": "Generating the catalog: {{count}} products in {{volumes}} volumes. This can take a few minutes; we will also notify you when it is ready.",
+      "done": "Your catalog is ready: {{count}} products in {{volumes}} volumes ({{size}} MB in a ZIP).",
+      "download": "Download ZIP",
+      "failed": "The catalog could not be generated. Try again.",
+      "notFound": "That catalog export was not found (only the person who requested it can see it).",
+      "expired": "The file has expired. Generate the catalog again.",
+      "downloadError": "Could not start the download."
+    }
   },
   "priceType": {
     "public": "Public Price",
@@ -258,12 +315,72 @@
       "viewProjects": "View projects",
       "category": "Category",
       "taxId": "Tax ID",
+      "taxIdDv": "DV",
       "deliveryAddress": "Delivery address",
       "contacts": "Contacts",
       "addContact": "+ Add contact",
       "editContact": "Edit",
       "newQuote": "+ New quote",
-      "newQuoteUnavailable": "Available once Quote is implemented"
+      "newQuoteUnavailable": "Available once Quote is implemented",
+      "icgHistory": "ICG History",
+      "exentoItbms": "ITBMS-exempt"
+    },
+    "icgHistoryModal": {
+      "title": "ICG History — {{name}}",
+      "entidad": {
+        "cotizaciones": "Quotes",
+        "pedidos": "Orders",
+        "albaranes": "Delivery notes",
+        "facturas": "Invoices"
+      },
+      "numero": "Number",
+      "fecha": "Date",
+      "total": "Total",
+      "estado": "Status",
+      "empty": "No ICG history for this section",
+      "back": "Back to list",
+      "document": {
+        "folio": "Folio",
+        "cliente": "Client",
+        "clienteHuerfano": "ICG client #{{code}} (not linked to a Sub-client)",
+        "proveedor": "Supplier",
+        "proveedorHuerfano": "ICG supplier #{{code}} (not linked)",
+        "vendedorCodigo": "Salesperson (ICG code)",
+        "fecha": "Date",
+        "fechaEntrega": "Delivery date",
+        "estadoCodigo": "Status (ICG code)",
+        "totalNeto": "Net total",
+        "totalBruto": "Gross total",
+        "totalImpuestos": "Taxes",
+        "albaranRelacionado": "Related delivery note",
+        "facturaRelacionada": "Related invoice",
+        "facturado": "Invoiced",
+        "si": "Yes",
+        "no": "No",
+        "proyecto": "Project",
+        "promocion": "Promotion",
+        "comision": "Commission",
+        "observaciones": "Notes",
+        "feTitle": "Electronic Invoicing",
+        "feEstado": "DGI status",
+        "feAuthNumber": "Authorization number",
+        "feSerieNumero": "FE Series-Number",
+        "feFechaEmision": "Issue date",
+        "feFechaRecepcion": "DGI receipt date",
+        "feError": "DGI error",
+        "feQr": "QR",
+        "itemsTitle": "Line items",
+        "itemsArticulo": "Item",
+        "itemsReferencia": "Reference",
+        "itemsDescripcion": "Description",
+        "itemsCantidad": "Qty.",
+        "itemsPrecio": "Price",
+        "itemsDescuento": "Disc.",
+        "itemsTotal": "Total",
+        "itemsCosto": "Cost",
+        "itemsEmpty": "No line items",
+        "sinLineasOrigen": "This document type has no line items in the source — ICG never recorded them separately."
+      }
     },
     "createModal": {
       "titleClient": "Create client",
@@ -272,12 +389,12 @@
       "businessName": "Sub Client (Business Name)",
       "deliveryAddress": "Delivery address",
       "taxId": "Tax ID",
+      "taxIdDv": "DV",
       "category": "Category",
       "priceType": "Price type",
       "contacts": "Contacts",
       "addAnotherContact": "+ Add another contact",
       "requiredNote": "These fields are required and each contact needs at least a phone or email. This can't be saved without it.",
-      "leadRuleNote": "This client will be automatically added as a Lead in Pipeline.",
       "saveClient": "Save client",
       "saveSubClient": "Save sub client",
       "removeContact": "Remove"
@@ -289,11 +406,75 @@
       "stage": "Stage",
       "amount": "Amount",
       "empty": "No projects"
+    },
+    "taxIdValidation": {
+      "validar": "Validate tax ID",
+      "validando": "Validating…",
+      "validadoHoy": "Validated with the DGI today at {{hora}} (Panama time)",
+      "nombreOficial": "Official business name",
+      "dvOficial": "Official check digit",
+      "dvDifiere": "The entered check digit ({{ingresado}}) does not match the official one ({{oficial}}).",
+      "nombreDifiere": "The entered business name differs from the official one.",
+      "usarOficiales": "Use official data",
+      "coincide": "Matches what was entered.",
+      "noEncontrado": "This tax ID is not registered with the DGI. Check the number; you can still save.",
+      "noDisponible": {
+        "apagado": "Validation unavailable: electronic invoicing is turned off.",
+        "sinCredenciales": "Validation unavailable: the provider credentials are not configured.",
+        "generico": "Could not validate right now; you can save and validate later."
+      },
+      "errorGenerico": "Could not validate right now; you can save and validate later.",
+      "limite": "Too many requests in a row. Wait a minute and try again."
+    },
+    "editTaxData": {
+      "editar": "Edit tax data",
+      "title": "Edit the subclient's tax data",
+      "aviso": "This data is used as the recipient when invoicing electronically. Changes are recorded in the audit log, and are not allowed if the client already has invoices or credit notes certified with the DGI.",
+      "guardar": "Save changes",
+      "guardando": "Saving…",
+      "errorGenerico": "Could not save the changes. Try again.",
+      "avisoExento": "This client is ITBMS-exempt (document: {{documento}}). If you change its tax ID, check digit or type, Administration must review the exemption.",
+      "exencionARevisar": "Changes saved. This client is still marked ITBMS-exempt: let Administration know so they can review whether the exemption applies with the new tax ID or type.",
+      "entendido": "Understood"
+    },
+    "receptorTipo": {
+      "label": "Customer type for the DGI",
+      "contribuyente": "Taxpayer (with tax ID)",
+      "consumidorFinal": "Final consumer",
+      "consumidorFinalAyuda": "Invoiced as CONSUMIDOR FINAL, with no tax ID or check digit. The internal PDF keeps the customer's name and says so; the fiscal printed version is issued by the authorized provider (PAC).",
+      "soloMarkFelix": "Only Mark and Felix can mark a customer as Final consumer."
+    }
+  },
+  "architects": {
+    "title": "Architects",
+    "subtitle": "{{count}} architects",
+    "table": {
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "view": "View",
+      "empty": "No architects"
+    },
+    "detail": {
+      "title": "Architect detail",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "projects": "Associated projects",
+      "projectsEmpty": "No associated projects",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saveError": "Could not save the change"
     }
   },
   "quotesList": {
     "title": "Quotes",
     "newQuote": "+ New quote",
+    "view": {
+      "all": "All",
+      "draftsOnly": "Drafts only"
+    },
     "summary": {
       "pending": "Total pending quoted",
       "approved": "Approved",
@@ -314,7 +495,7 @@
       "amount": "Amount",
       "stage": "Stage",
       "priceType": "Price type",
-      "owner": "Owner",
+      "owner": "Responsible",
       "date": "Date",
       "status": "Status",
       "action": "Action",
@@ -339,6 +520,7 @@
     "description": "Description",
     "designer": "Designer in charge",
     "architect": "Architect",
+    "architectHint": "(include architect if they will earn commission)",
     "addExistingContact": "Add existing contact",
     "addNewContact": "+ Add new contact",
     "saveBeforeContacts": "Save the quote before adding contacts — the Sub Client hasn't been saved yet.",
@@ -347,6 +529,10 @@
       "needsSubClient": "First search or create a Master Client and Sub Client."
     },
     "priceTypeGeneral": "General price type",
+    "priceTypeApplyPrompt": "{{count}} line(s) have their own price type and would not change to “{{type}}”. Apply “{{type}}” to all?",
+    "priceTypeApplyAll": "Apply to all",
+    "priceTypeKeepOwn": "Keep their own",
+    "priceTypeOwnNote": "{{count}} line(s) use their own price type, different from the general one.",
     "pricingConfig": {
       "toggle": "Configure formulas",
       "title": "Price Type formulas",
@@ -364,6 +550,7 @@
     "noParts": "No line groups yet",
     "newPartName": "Line group name",
     "addPart": "+ Add line group",
+    "duplicatePart": "Duplicate",
     "subtotal": "Grand subtotal",
     "item": {
       "reference": "Reference",
@@ -378,6 +565,9 @@
       "total": "Total",
       "useGeneral": "Use general",
       "addItem": "+ Add item",
+      "addPhoto": "Add photo",
+      "changePhoto": "Change photo",
+      "uploadPhotoError": "Couldn't upload the photo. Please try again.",
       "subtotal": "Subtotal",
       "editPrice": "Edit price",
       "catalogPriceReference": "Catalog price",
@@ -403,7 +593,17 @@
     "validation": {
       "check": "Check quote",
       "complete": "The quote has all required fields complete.",
-      "missing": "Missing information"
+      "missing": "Missing information",
+      "field": {
+        "masterClient": "Master client: required",
+        "subClient": "Sub-client: required",
+        "ruc": "Tax ID: required",
+        "salesProject": "Project: required",
+        "description": "Description: required",
+        "deliveryDates": "Delivery date: required (or choose \"To be defined\")",
+        "contacts": "Contact: add at least one contact",
+        "items": "Items: add at least one item"
+      }
     },
     "saveDraft": "Save draft",
     "generate": "Save and generate quote",
@@ -430,15 +630,28 @@
     },
     "marginWarningModal": {
       "title": "Minimum margin warning",
-      "body": "This quote has one or more products and/or an overall margin below the {{percent}}% minimum allowed. Affected items have been highlighted for review. These changes may affect business profitability. Do you want to continue anyway?",
+      "body": "This quote has one or more products and/or an overall margin below the minimum allowed. Affected items have been highlighted for review. These changes may affect business profitability. Do you want to continue anyway?",
       "confirm": "Continue"
     },
     "belowMinMargin": {
-      "item": "This product fell below the minimum allowed margin ({{percent}}%)",
-      "global": "The discounts and adjustments applied leave the quote's overall margin below the minimum allowed ({{percent}}%). Review discounts or prices before continuing."
+      "item": "This product fell below the minimum allowed margin",
+      "global": "The discounts and adjustments applied leave the quote's overall margin below the minimum allowed. Review discounts or prices before continuing."
     },
     "downloadPdf": "Download PDF",
-    "returnToPipeline": "Back to Pipeline"
+    "returnToPipeline": "Back to Pipeline",
+    "collapsePart": "Collapse part",
+    "expandPart": "Expand part",
+    "collapseAll": "Collapse all",
+    "expandAll": "Expand all",
+    "dragPart": "Drag to move the part",
+    "dragItem": "Drag to move the product",
+    "partName": "Part name",
+    "reorderError": "The new order could not be saved. The quote was reloaded; please try again.",
+    "exencion": {
+      "exenta": "ITBMS-exempt client: this quote includes no ITBMS.",
+      "conservaExenta": "This quote keeps its ITBMS exemption even though the client is no longer marked exempt.",
+      "conservaItbms": "The client is now ITBMS-exempt, but this quote was already confirmed and keeps its ITBMS; it will be invoiced with it. If that is wrong, Administration can fix it with the correction credit note."
+    }
   },
   "document": {
     "folio": "Quote No.",
@@ -484,9 +697,9 @@
       "title": "Goals",
       "subtitle": "Real history (last 6 months) vs. configured Goal",
       "goal": "Goal",
-      "bar": "Sold",
+      "bar": "Achieved",
       "noGoal": "No Goal configured yet",
-      "currentMonth": "Current month (in progress)"
+      "currentMonth": "Current month"
     },
     "topVendors": {
       "title": "Top vendors",
@@ -558,6 +771,7 @@
     }
   },
   "home": {
+    "greeting": "Welcome, {{name}}",
     "subtitle": "Today you have {{events}} meetings and {{pendientes}} pending items",
     "wholeTeam": "Whole team",
     "newQuoteUnavailable": "Available once Quote is implemented",
@@ -573,7 +787,11 @@
     "calendar": {
       "title": "My calendar",
       "fullTitle": "Full calendar",
-      "view": { "day": "Day", "week": "Week", "month": "Month" },
+      "view": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
       "events": "events",
       "noEvents": "No events",
       "viewFull": "View full calendar",
@@ -587,7 +805,10 @@
       "listTitle": "Pending — full list",
       "detailTitle": "Pending item detail",
       "priority": "Priority",
-      "priorityLevel": { "high": "High", "medium": "Medium" },
+      "priorityLevel": {
+        "high": "High",
+        "medium": "Medium"
+      },
       "suggestion": "Suggested action",
       "go": "Go",
       "text": {
@@ -726,5 +947,131 @@
         "pendingValue": "—"
       }
     }
+  },
+  "salesCommissionTiers": {
+    "title": "Sales commission tiers",
+    "subtitle": "Applied to the vendor's total approved orders for the month. Separate table from Admin&Cont's Internal Commissions — a different business concept.",
+    "columnas": {
+      "porcentaje": "Commission %"
+    },
+    "vacio": "No tiers configured yet.",
+    "agregar": "Add tier",
+    "quitarFila": "Remove tier",
+    "guardar": "Save tiers",
+    "confirmarGuardar": "Save the tiers? This affects the commission % of every active vendor.",
+    "errores": {
+      "numeroRequerido": "Enter a number.",
+      "numeroInvalido": "Enter a valid number.",
+      "guardar": "The tiers could not be saved."
+    },
+    "form": {
+      "montoMinimo": "Minimum amount",
+      "montoMaximo": "Maximum amount",
+      "sinTope": "No cap (last tier)"
+    }
+  },
+  "cotizaya": {
+    "title": "CotizaYA",
+    "subtitle": "Small-sale quotes, independent of the commercial flow",
+    "button": "CotizaYA",
+    "searchPlaceholder": "Search by ID, customer, phone or description",
+    "empty": "There are no CotizaYA quotes yet",
+    "table": {
+      "id": "ID",
+      "customer": "Customer name",
+      "phone": "Phone",
+      "description": "Description",
+      "designer": "Designer",
+      "date": "Date",
+      "total": "Total",
+      "actions": "Actions",
+      "viewDetail": "View detail",
+      "downloadPdf": "Download PDF"
+    },
+    "form": {
+      "title": "New CotizaYA",
+      "back": "Back to CotizaYA",
+      "mainData": "Main data",
+      "customerName": "Customer name",
+      "customerPhone": "Phone",
+      "description": "Description",
+      "designer": "Designer in charge",
+      "contacts": "Contacts",
+      "contactsOptional": "(optional)",
+      "noContacts": "No contacts on file",
+      "observations": "Notes",
+      "parts": "Parts",
+      "noParts": "No parts yet",
+      "addPart": "+ Add part",
+      "partDefaultName": "Part {{n}}",
+      "totals": "Totals",
+      "subtotal": "General subtotal",
+      "itbms": "VAT (ITBMS)",
+      "total": "Total",
+      "conditions": "Terms",
+      "generate": "Generate",
+      "generating": "Generating…",
+      "notConfigured": "CotizaYA is not set up in this environment: the CotizaYA customer is missing.",
+      "missing": "Missing to generate: {{fields}}",
+      "genericError": "The action could not be completed. Please try again."
+    },
+    "detail": {
+      "title": "{{folio}}",
+      "back": "Back to CotizaYA",
+      "downloadPdf": "Download PDF",
+      "fixed": "Generated quote: it can only be viewed and downloaded as PDF.",
+      "customer": "Customer",
+      "phone": "Phone",
+      "description": "Description",
+      "designer": "Designer",
+      "date": "Date",
+      "contacts": "Contacts",
+      "observations": "Notes",
+      "conditions": "Terms",
+      "parts": "Parts",
+      "loadError": "The quote could not be loaded."
+    },
+    "pdfError": "The PDF could not be downloaded. Please try again."
+  },
+  "associates": {
+    "title": "Associates",
+    "hint": "Architects, designers, contractors, engineers, consultants and others. Saved once and shared between the quotes and the project.",
+    "empty": "No associates yet",
+    "searchPlaceholder": "Search by name, email, phone or document",
+    "searching": "Searching…",
+    "noResults": "No results",
+    "add": "Add",
+    "remove": "Remove",
+    "createNew": "Create new",
+    "types": {
+      "architect": "Architect",
+      "designer": "Designer",
+      "contractor": "Contractor",
+      "engineer": "Engineer",
+      "consultant": "Consultant",
+      "other": "Other"
+    },
+    "form": {
+      "title": "New associate",
+      "type": "Type",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "document": "Document / ID",
+      "needContact": "Enter at least a phone, email or document.",
+      "save": "Save and add",
+      "cancel": "Cancel",
+      "genericError": "The associate could not be created. Please try again."
+    },
+    "duplicate": {
+      "exactTitle": "This associate already exists",
+      "exactHelp": "Same email, phone or document. Use the one already saved.",
+      "similarTitle": "There is one with a similar name",
+      "similarHelp": "Check whether it is the same person before creating a new one.",
+      "useExisting": "Use this one",
+      "createAnyway": "Create anyway"
+    },
+    "addError": "The associate could not be added.",
+    "removeError": "The associate could not be removed."
   }
 }

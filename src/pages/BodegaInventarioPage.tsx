@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { operativeWarehouses } from '@/lib/warehouses'
 import { isAxiosError } from 'axios'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -13,12 +14,15 @@ import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose, IcoAlertTriangle, IcoBan, IcoBox, IcoCheck, IcoImage, IcoFileText } from '@/components/icons'
 import { TechnicalSpecModal } from '@/components/TechnicalSpecModal'
+import DemoModeBadge from '@/components/DemoModeBadge'
 import { NewAdjustmentRequestModal } from '@/pages/SolicitudAjustePage'
 import type {
   BodegaInventoryRow, BodegaInventoryEstado, BodegaInventoryChip, BodegaInventoryRotationFilter,
   BodegaInventoryFamilyListItem,
 } from '@/types/bodega'
 import type { ProductSearchResult } from '@/types/bodega'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchBodegaInventorySuggestions } from '@/utils/searchSuggestionsBodega'
 
 /**
  * SCRUM-329 Batch B2 (REQ-344→362, SCRUM-414→432) — "Ver Inventario" de Bodega.
@@ -67,7 +71,10 @@ export default function BodegaInventarioPage() {
     <div>
       <div className="flex flex-wrap gap-2 items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t('bodega:inventory.title')}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t('bodega:inventory.title')}</h1>
+            <DemoModeBadge />
+          </div>
           <p className="text-[12px] text-slate-500">{t('bodega:inventory.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -151,7 +158,7 @@ function ProductsTab() {
 
   const { data: families } = useBodegaInventoryFamiliesList()
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = warehousesData?.data ?? []
+  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
 
   const listParams: BodegaInventoryListParams = {
     search: query || undefined,
@@ -187,6 +194,7 @@ function ProductsTab() {
       {kpis && (
         <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
           <KpiCard label={t('bodega:inventory.kpis.total')} value={String(kpis.total_products)} color="#5BA5A0" />
+          <KpiCard label={t('bodega:inventory.kpis.withStock')} value={String(kpis.with_stock ?? 0)} color="#5BA5A0" />
           <KpiCard label={t('bodega:inventory.kpis.lowStock')} value={String(kpis.low_stock)} color="#d4a017" />
           <KpiCard label={t('bodega:inventory.kpis.outOfStock')} value={String(kpis.out_of_stock)} color="#dc6b6b" />
           <KpiCard
@@ -199,17 +207,24 @@ function ProductsTab() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <input
-          type="text"
+      {/* SCRUM-949 — el buscador en su propia fila: dentro de la fila compartida con los 6
+          selects de filtro, flex-1 (flex-basis 0%) cedía casi todo el espacio a los selects
+          (cuyo min-content no comprime tan agresivamente), dejando el input real en ~34-161px
+          reales aunque max-w-md subiera el tope. Fila propia = ancho garantizado. */}
+      <div className="max-w-md mb-2">
+        <AutocompleteInput
           value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          onChange={setSearch}
+          onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+          onEnterWithoutSelection={handleSearch}
+          fetchOptions={fetchBodegaInventorySuggestions}
+          minChars={2}
           placeholder={t('bodega:inventory.filters.searchPlaceholder')}
-          className="flex-1 max-w-sm px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          noResultsLabel={t('common:buscador.sinResultados')}
         />
-        <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
+      </div>
 
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
         <select value={categoria} onChange={e => { setCategoria(e.target.value); setPage(1) }}
           className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white dark:bg-slate-800">
           <option value="">{t('bodega:inventory.filters.category')}</option>
@@ -248,6 +263,7 @@ function ProductsTab() {
           {(data?.brands ?? []).map(b => <option key={b} value={b}>{b}</option>)}
         </select>
 
+        <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
         <Button variant="outline" onClick={clearFilters}>{t('bodega:inventory.filters.clear')}</Button>
       </div>
 
@@ -616,7 +632,8 @@ function WarehouseBreakdownModal({ row, onClose }: { row: BodegaInventoryRow; on
   // bodegas donde el producto tiene stock registrado, sin inventar cantidades donde no hay dato")
   // exige filtrar acá, sin tocar el servicio compartido (rompería el caso de uso legítimo de
   // Solicitud de Ajuste).
-  const warehouses = (data?.warehouses ?? []).filter(w => w.quantity > 0)
+  // SCRUM-1196 — todas las bodegas con saldo distinto de 0, también las NEGATIVAS (antes `> 0` las escondía y la suma no cuadraba con el Stock total).
+  const warehouses = (data?.warehouses ?? []).filter(w => w.quantity !== 0)
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -629,9 +646,15 @@ function WarehouseBreakdownModal({ row, onClose }: { row: BodegaInventoryRow; on
           {warehouses.map(w => (
             <li key={w.warehouse_id} className="flex justify-between py-1.5 border-b border-slate-100">
               <span>{w.name}</span>
-              <span className="font-medium">{w.quantity}</span>
+              <span className={w.quantity < 0 ? 'font-medium text-red-600' : 'font-medium'} data-testid={`bodega-warehouse-qty-${w.warehouse_id}`}>{w.quantity}</span>
             </li>
           ))}
+          {warehouses.length > 0 && (
+            <li className="flex justify-between py-1.5 font-semibold text-slate-900" data-testid="bodega-warehouse-total">
+              <span>{t('bodega:inventory.warehouseModal.total')}</span>
+              <span>{warehouses.reduce((sum, w) => sum + w.quantity, 0)}</span>
+            </li>
+          )}
           {data && warehouses.length === 0 && (
             <li className="text-slate-400 text-xs py-2">{t('bodega:inventory.warehouseModal.empty')}</li>
           )}

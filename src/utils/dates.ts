@@ -28,7 +28,39 @@ export function formatDateShort(iso: string): string {
 }
 
 /** Hora corta es-PA (`"2:34 p. m."`) para timestamps con hora real (`toIso8601String()`), a
- *  diferencia de `formatDateShort()`/`parseDateOnly()`, que son para fechas "date-only". */
+ *  diferencia de `formatDateShort()`/`parseDateOnly()`, que son para fechas "date-only".
+ *
+ *  SCRUM-883 — `timeZone: 'America/Panama'` explícito: sin esto, la hora mostrada depende del
+ *  reloj/timezone del sistema operativo del navegador de quien mira la pantalla, no de la hora de
+ *  Panamá (criterio de aceptación explícito del ticket). No se toca `formatDateShort()`/
+ *  `parseDateOnly()` — esas son fechas "date-only" sin componente de hora; forzar un timeZone ahí
+ *  reintroduciría el bug de SCRUM-787 (off-by-one) para cualquier viewer fuera de Panamá, ya que
+ *  `parseDateOnly()` depende de que la conversión se haga en el timezone LOCAL del navegador. */
 export function formatTimeShort(iso: string): string {
-  return new Date(iso).toLocaleTimeString('es-PA', { hour: 'numeric', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('es-PA', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Panama' })
+}
+
+/** Fecha+hora corta es-PA (`"12 sep 2026, 2:34 p. m."`) para timestamps con hora real — mismo
+ *  criterio de timezone explícito que `formatTimeShort()`. Reemplaza los `toLocaleDateString()`/
+ *  `toLocaleString()` directos que hoy dependen del reloj del navegador (SCRUM-883). */
+export function formatDateTimeShort(iso: string): string {
+  return new Date(iso).toLocaleString('es-PA', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
+    timeZone: 'America/Panama',
+  })
+}
+
+/**
+ * SCRUM-883 — solo la porción de FECHA de un timestamp REAL (con hora), en zona horaria de
+ * Panamá explícita — a diferencia de `formatDateShort()`/`parseDateOnly()` (para valores
+ * "date-only" puros, sin hora, ej. una columna `date` de Postgres). Usar esta función cuando el
+ * valor de origen es un timestamp (`created_at`, `scheduled_at`, `toIso8601String()`, etc.) y solo
+ * se quiere mostrar el día — sin esto, un evento cerca de medianoche Panamá puede mostrar el día
+ * calendario equivocado para un viewer en un timezone con offset distinto (ej. UTC o al este de
+ * Panamá), que es precisamente el bug que este ticket corrige.
+ */
+export function formatDateFromTimestamp(iso: string): string {
+  return new Date(iso).toLocaleDateString('es-PA', {
+    day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Panama',
+  })
 }

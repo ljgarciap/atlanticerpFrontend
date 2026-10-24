@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import VentasDisenoPedidosPage from './PedidosPage'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
+import { useAuthStore } from '@/store/authStore'
 import type { OrderListResult, OrderRow, OrderDetail } from '@/types/ventasDiseno'
 
 vi.mock('react-i18next', () => ({
@@ -17,10 +18,16 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
     orders: { list: vi.fn(), get: vi.fn() },
+    // SCRUM-854 — mismo endpoint que Pipeline/Cotizaciones/Reportes usan para poblar el
+    // UserMultiSelect de Vendedor/Diseñador.
+    home: { vendors: vi.fn() },
   },
 }))
 
-const mockedApi = vi.mocked(ventasDisenoApi, true)
+vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
+
+const mockedApi   = vi.mocked(ventasDisenoApi, true)
+const mockedStore = vi.mocked(useAuthStore)
 
 function makeRow(overrides: Partial<OrderRow> = {}): OrderRow {
   return {
@@ -43,10 +50,20 @@ function makeResult(overrides: Partial<OrderListResult> = {}): OrderListResult {
   }
 }
 
-function renderPage() {
+// SCRUM-854 — mockImplementation con selector (no mockReturnValue) porque `usePermission`
+// (ya usado acá para canConfigureThreshold) llama a useAuthStore con un selector propio, no
+// destructura {user} directo — mismo patrón que ReportsPage.test.tsx.
+function mockAuthState(user: Record<string, unknown> | null) {
+  mockedStore.mockImplementation(((selector?: (s: { user: unknown }) => unknown) => {
+    const state = { user }
+    return selector ? selector(state) : state
+  }) as never)
+}
+
+function renderPage(entry = '/') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <QueryClientProvider client={queryClient}>
         <VentasDisenoPedidosPage />
       </QueryClientProvider>
@@ -57,12 +74,37 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.orders.list.mockResolvedValue(makeResult())
+  mockedApi.home.vendors.mockResolvedValue([])
+  mockAuthState({ id: 1, role: 'designer', permissions: [] })
 })
 
 describe('VentasDisenoPedidosPage', () => {
   it('muestra el título de la pantalla', async () => {
     renderPage()
     expect(await screen.findByText('ventasDiseno:orders.title')).toBeInTheDocument()
+  })
+
+  // SCRUM-1119 — Compras ve Pedidos sin ventas_diseno.read: Catálogo y Cotizaciones llevarían a una redirección.
+  it('sin ventas_diseno.read (Compras) no muestra los botones Catálogo ni Ver cotizaciones', async () => {
+    mockAuthState({ id: 2, role: 'lider_compras', permissions: [] })
+    renderPage()
+    await screen.findByText('ventasDiseno:orders.title')
+    expect(screen.queryByText('ventasDiseno:orders.actions.catalog')).not.toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:orders.actions.viewQuotes')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1184 — «Pendientes de reposición» (Compras) enlaza a un pedido con ?search=<N° de pedido>.
+  it('SCRUM-1184: abre con el N° de pedido de la URL ya buscado', async () => {
+    mockAuthState({ id: 2, role: 'lider_compras', permissions: [] })
+    renderPage('/ventas-diseno/pedidos?search=PED-2026-0042')
+    await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(expect.objectContaining({ search: 'PED-2026-0042' })))
+  })
+
+  it('con ventas_diseno.read (Gerencia) muestra los botones Catálogo y Ver cotizaciones', async () => {
+    mockAuthState({ id: 9, role: 'management', permissions: ['ventas_diseno.read'] })
+    renderPage()
+    expect(await screen.findByText('ventasDiseno:orders.actions.catalog')).toBeInTheDocument()
+    expect(screen.getByText('ventasDiseno:orders.actions.viewQuotes')).toBeInTheDocument()
   })
 
   it('muestra las tarjetas KPI', async () => {
@@ -155,6 +197,51 @@ describe('VentasDisenoPedidosPage', () => {
     await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(
       expect.not.objectContaining({ search: expect.anything() }),
     ))
+  })
+
+  // SCRUM-854 (rebote de QA, 2026-09-09) — esta pantalla era la única de las 6 ubicaciones del
+  // ticket sin el filtro Vendedor/Diseñador.
+  describe('filtro Vendedor/Diseñador (SCRUM-854)', () => {
+    it('no se muestra para un vendedor (solo ve lo propio, sin utilidad para él)', async () => {
+      renderPage()
+      await screen.findByText('ventasDiseno:orders.table.empty')
+
+      expect(screen.queryByRole('button', { name: /userFilter/ })).not.toBeInTheDocument()
+      expect(mockedApi.home.vendors).not.toHaveBeenCalled()
+    })
+
+    it('gerencia puede filtrar pedidos por vendedores seleccionados', async () => {
+      mockAuthState({ id: 9, role: 'management', permissions: [] })
+      mockedApi.home.vendors.mockResolvedValue([
+        { id: 5, name: 'Vendedor Disenador Test 2' }, { id: 6, name: 'Vendedor Disenador Test 3' },
+      ])
+      renderPage()
+      await screen.findByText('ventasDiseno:orders.table.empty')
+
+      fireEvent.click(await screen.findByRole('button', { name: /userFilter/ }))
+      fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
+
+      await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(
+        expect.objectContaining({ owner_ids: [5] }),
+      ))
+    })
+
+    it('Borrar filtros también limpia la selección de vendedores', async () => {
+      mockAuthState({ id: 9, role: 'management', permissions: [] })
+      mockedApi.home.vendors.mockResolvedValue([{ id: 5, name: 'Vendedor Disenador Test 2' }])
+      renderPage()
+      await screen.findByText('ventasDiseno:orders.table.empty')
+
+      fireEvent.click(await screen.findByRole('button', { name: /userFilter/ }))
+      fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
+      await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(expect.objectContaining({ owner_ids: [5] })))
+
+      fireEvent.click(screen.getByText('ventasDiseno:orders.filters.clear'))
+
+      await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(
+        expect.not.objectContaining({ owner_ids: expect.anything() }),
+      ))
+    })
   })
 
   it('muestra el aviso de resultados aproximados', async () => {

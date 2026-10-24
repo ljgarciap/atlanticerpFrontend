@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,7 +34,15 @@ export default function ResetPasswordPage() {
   const [done, setDone]         = useState(false)
   const [apiError, setApiError] = useState('')
 
-  const token = searchParams.get('token') ?? ''
+  // SCRUM-1178 — el enlace nuevo trae el token en el fragmento (#token=…), que no viaja al servidor ni queda en sus logs; los
+  // correos enviados antes (?token=…) siguen funcionando durante su hora de vigencia.
+  const [token] = useState(() => {
+    const deHash = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token')
+    return deHash ?? searchParams.get('token') ?? ''
+  })
+  useEffect(() => {
+    if (token) window.history.replaceState(null, '', window.location.pathname)
+  }, [token])
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),

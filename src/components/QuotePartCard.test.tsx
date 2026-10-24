@@ -17,8 +17,8 @@ vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
     quotes: {
       parts: {
-        update: vi.fn(), remove: vi.fn(),
-        items: { create: vi.fn(), update: vi.fn(), remove: vi.fn(), bulkCreate: vi.fn(), previewPrice: vi.fn() },
+        update: vi.fn(), remove: vi.fn(), duplicate: vi.fn(),
+        items: { create: vi.fn(), update: vi.fn(), remove: vi.fn(), bulkCreate: vi.fn(), previewPrice: vi.fn(), uploadPhoto: vi.fn() },
       },
     },
     catalogProducts: { search: vi.fn(), get: vi.fn() },
@@ -33,7 +33,7 @@ function makeItem(overrides: Partial<QuoteItemRef> = {}): QuoteItemRef {
     id: 1, catalog_product_id: null, is_custom: true,
     reference: 'REF-1', description: 'Lámpara', quantity: 2, unit_price: 100, cost: null,
     price_type_override: null, discount_percent: null, effective_unit_price: 100, line_total: 200,
-    stock_quantity: null, below_min_margin: false,
+    stock_quantity: null, below_min_margin: false, photo_url: null,
     ...overrides,
   }
 }
@@ -46,7 +46,7 @@ function renderCard(part: QuotePartRef, canEdit = true, discountMode: 'line' | '
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <QuotePartCard quoteId={1} part={part} discountMode={discountMode} canEdit={canEdit} minMarginPercent={30} quotePriceType="public" />
+      <QuotePartCard quoteId={1} part={part} discountMode={discountMode} canEdit={canEdit} canSeeCost minMarginPercent={30} quotePriceType="public" />
     </QueryClientProvider>,
   )
 }
@@ -217,6 +217,55 @@ describe('QuotePartCard', () => {
     expect(descriptionInput).toBeDisabled()
   })
 
+  // SCRUM-1144 — el campo Referencia se ajusta al largo del código y muestra el código completo.
+  it('SCRUM-1144 — el campo Referencia se ensancha con el código y lo muestra completo (también en el tooltip)', () => {
+    const corta = 'ML-1'
+    const larga = 'ML-10097BWH-1-CODIGO-MUY-LARGO'
+    renderCard(makePart({ items: [
+      makeItem({ id: 1, reference: corta, catalog_product_id: 9, is_custom: false }),
+      makeItem({ id: 2, reference: larga, catalog_product_id: 10, is_custom: false }),
+    ] }))
+
+    const inputCorto = screen.getByDisplayValue(corta)
+    const inputLargo = screen.getByDisplayValue(larga)
+
+    // El ancho es `calc(<N>ch + 1.5rem)`: N crece con el código (cada carácter cuenta más de 1ch por las mayúsculas
+    // anchas) y el padding/borde del input se suma aparte (Pre-QA: sin eso se recortaba el último carácter).
+    const chOf = (el: HTMLElement) => Number(/calc\((\d+)ch \+ 1\.5rem\)/.exec(el.style.width)?.[1])
+
+    expect(inputLargo).toHaveAttribute('title', larga)
+    expect(inputLargo).not.toHaveClass('w-24')
+    expect(chOf(inputLargo)).toBeGreaterThan(chOf(inputCorto))
+    expect(chOf(inputLargo)).toBeGreaterThanOrEqual(larga.length * 1.4)
+    expect(inputCorto.style.width).toContain('1.5rem')
+  })
+
+  it('SCRUM-1144 — referencias casi iguales (ML-10097AWH / ML-10097BWH-1) se distinguen en la partida', () => {
+    renderCard(makePart({ items: [
+      makeItem({ id: 1, reference: 'ML-10097AWH', catalog_product_id: 9, is_custom: false }),
+      makeItem({ id: 2, reference: 'ML-10097BWH-1', catalog_product_id: 10, is_custom: false }),
+    ] }))
+
+    expect(screen.getByDisplayValue('ML-10097AWH')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('ML-10097BWH-1')).toBeInTheDocument()
+  })
+
+  // SCRUM-1138 — un producto de Catálogo con foto la muestra en la tabla de la cotización (antes solo los personalizados).
+  it('SCRUM-1138 — un ítem de Catálogo con foto muestra su miniatura, sin controles para cambiarla', () => {
+    renderCard(makePart({ items: [makeItem({ catalog_product_id: 9, is_custom: false, photo_url: 'https://cdn.test/public/catalog/9/foto-thumb.jpg' })] }))
+
+    expect(document.querySelector('img[src="https://cdn.test/public/catalog/9/foto-thumb.jpg"]')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:quote.item.changePhoto')).not.toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:quote.item.addPhoto')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1138 — un ítem de Catálogo sin foto no muestra miniatura ni botón de subir foto', () => {
+    renderCard(makePart({ items: [makeItem({ catalog_product_id: 9, is_custom: false, photo_url: null })] }))
+
+    expect(document.querySelector('td img')).not.toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:quote.item.addPhoto')).not.toBeInTheDocument()
+  })
+
   // SCRUM-725 — a diferencia de reference/description de arriba, el precio de venta
   // de un ítem de catálogo SÍ se puede modificar dentro de la cotización (viaja
   // como unit_price_override, nunca toca CatalogProduct::price_full).
@@ -294,6 +343,43 @@ describe('QuotePartCard', () => {
     expect(await screen.findByText('Esta referencia ya existe')).toBeInTheDocument()
   })
 
+  // SCRUM-849.6 rebote (Daniela, 2026-09-10) — la foto ad-hoc de un ítem personalizado no daba
+  // feedback visual de carga y no aparecía tras guardar. Root cause real: el <input type="file">
+  // se desmontaba en onBlur (el navegador dispara blur al ABRIR el diálogo nativo, no al
+  // cerrarlo), perdiendo el evento change posterior — invisible para fireEvent/setInputFiles
+  // porque acá nunca se simula un blur real, exactamente la razón por la que ni Pre-QA ni QA lo
+  // agarraron. Estos tests cubren el contrato del componente (mutation se dispara, éxito refresca,
+  // error se muestra) — la ausencia de onBlur en sí se verifica leyendo QuotePartCard.tsx.
+  describe('foto ad-hoc de ítem personalizado (SCRUM-849.6)', () => {
+    it('sube la foto seleccionada y no deja pendiente el picker tras elegir el archivo', async () => {
+      mockedApi.quotes.parts.items.uploadPhoto.mockResolvedValue({ ...makeItem(), photo_url: 'https://cdn.test/foto.jpg' })
+      renderCard(makePart())
+
+      fireEvent.click(screen.getByText('ventasDiseno:quote.item.addPhoto'))
+      const file = new File(['x'], 'foto.jpg', { type: 'image/jpeg' })
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+      fireEvent.change(fileInput, { target: { files: [file] } })
+
+      await waitFor(() => expect(mockedApi.quotes.parts.items.uploadPhoto).toHaveBeenCalledWith(1, 1, 1, file))
+      // El picker vuelve a ser el botón (no queda el <input type="file"> montado indefinidamente).
+      await waitFor(() => expect(document.querySelector('input[type="file"]')).not.toBeInTheDocument())
+    })
+
+    it('muestra el error del backend si falla la carga (antes fallaba en silencio)', async () => {
+      mockedApi.quotes.parts.items.uploadPhoto.mockRejectedValue({
+        isAxiosError: true, response: { data: { message: 'No se pudo leer el archivo de imagen subido' } },
+      })
+      renderCard(makePart())
+
+      fireEvent.click(screen.getByText('ventasDiseno:quote.item.addPhoto'))
+      const file = new File(['x'], 'foto.jpg', { type: 'image/jpeg' })
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+      fireEvent.change(fileInput, { target: { files: [file] } })
+
+      expect(await screen.findByText('No se pudo leer el archivo de imagen subido')).toBeInTheDocument()
+    })
+  })
+
   it('el botón Guardar de la línea solo aparece cuando el ítem cambió', () => {
     renderCard(makePart())
     expect(screen.queryByText('common:actions.save')).not.toBeInTheDocument()
@@ -308,7 +394,7 @@ describe('QuotePartCard', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const { rerender } = render(
       <QueryClientProvider client={queryClient}>
-        <QuotePartCard quoteId={1} part={makePart({ items: [makeItem({ discount_percent: 10 })] })} discountMode="line" canEdit minMarginPercent={30} quotePriceType="public" />
+        <QuotePartCard quoteId={1} part={makePart({ items: [makeItem({ discount_percent: 10 })] })} discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="public" />
       </QueryClientProvider>,
     )
     expect(screen.getByDisplayValue('10')).toBeInTheDocument()
@@ -318,7 +404,7 @@ describe('QuotePartCard', () => {
     // fix seguía mostrando "10" y reaparecía el botón Guardar.
     rerender(
       <QueryClientProvider client={queryClient}>
-        <QuotePartCard quoteId={1} part={makePart({ items: [makeItem({ discount_percent: null })] })} discountMode="line" canEdit minMarginPercent={30} quotePriceType="public" />
+        <QuotePartCard quoteId={1} part={makePart({ items: [makeItem({ discount_percent: null })] })} discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="public" />
       </QueryClientProvider>,
     )
 
@@ -449,6 +535,35 @@ describe('QuotePartCard', () => {
     expect(screen.getByText('ventasDiseno:catalog.insufficientStock')).toBeInTheDocument()
   })
 
+  // SCRUM-968 — el aviso va en una fila propia, fuera de la celda de Cantidad.
+  it('muestra el aviso de stock en una fila propia debajo del ítem, no dentro de la celda de Cantidad', () => {
+    renderCard(makePart({ items: [makeItem({ catalog_product_id: 9, is_custom: false, stock_quantity: 5, quantity: 2 })] }))
+
+    fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '8' } })
+
+    const warningCell = screen.getByText('ventasDiseno:catalog.insufficientStock').closest('td')
+    expect(warningCell).toHaveAttribute('colspan')
+    const quantityCell = screen.getByDisplayValue('8').closest('td')
+    expect(quantityCell).not.toContainElement(warningCell)
+    expect(warningCell?.closest('tr')).not.toBe(quantityCell?.closest('tr'))
+  })
+
+  // SCRUM-988 — el buscador muestra la referencia pública, no la de fábrica.
+  it('el buscador de catálogo muestra la referencia pública aunque el producto tenga referencia de fábrica', async () => {
+    mockedApi.catalogProducts.search.mockResolvedValue({
+      fuzzy: false,
+      data: [{ id: 9, reference: 'ML-10156EWH', factory_reference: 'MIG_LNP002849', description: 'Lámpara', brand: null, photo_url: null, price_full: 10, stock_quantity: 10 }],
+    })
+    renderCard(makePart({ items: [] }))
+
+    fireEvent.click(screen.getByText('ventasDiseno:quote.item.addItem'))
+    fireEvent.click(screen.getByText('ventasDiseno:catalog.searchButton'))
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'ML-10156EWH' } })
+
+    expect(await screen.findByText('ML-10156EWH', { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText('MIG_LNP002849', { exact: false })).not.toBeInTheDocument()
+  })
+
   // REQ-037 (2026-07-13) — tab "Familias", alta en lote.
   it('lista familias, muestra el detalle y agrega todos sus productos en lote', async () => {
     mockedApi.catalogProductFamilies.list.mockResolvedValue({
@@ -521,7 +636,7 @@ describe('QuotePartCard', () => {
         <QueryClientProvider client={queryClient}>
           <QuotePartCard
             quoteId={1} part={makePart({ items: [makeItem({ price_type_override: 'premium' })] })}
-            discountMode="line" canEdit minMarginPercent={30} quotePriceType="public"
+            discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="public"
           />
         </QueryClientProvider>,
       )
@@ -535,7 +650,7 @@ describe('QuotePartCard', () => {
         <QueryClientProvider client={queryClient}>
           <QuotePartCard
             quoteId={1} part={makePart({ items: [makeItem({ price_type_override: null })] })}
-            discountMode="line" canEdit minMarginPercent={30} quotePriceType="premium"
+            discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="premium"
           />
         </QueryClientProvider>,
       )
@@ -548,12 +663,56 @@ describe('QuotePartCard', () => {
         <QueryClientProvider client={queryClient}>
           <QuotePartCard
             quoteId={1} part={makePart({ items: [makeItem({ price_type_override: 'project' })] })}
-            discountMode="line" canEdit minMarginPercent={30} quotePriceType="public"
+            discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="public"
           />
         </QueryClientProvider>,
       )
       expect(screen.getByText('$100.00')).not.toBeDisabled()
       expect(screen.queryByText('ventasDiseno:quote.item.premiumIgnoresManualPrice')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('canSeeCost — visibilidad del costo para vendedores', () => {
+    it('muestra "---" en producto de inventario cuando canSeeCost es false', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(
+        <QueryClientProvider client={queryClient}>
+          <QuotePartCard
+            quoteId={1} part={makePart({ items: [makeItem({ cost: 45.5, catalog_product_id: 10, is_custom: false })] })}
+            discountMode="line" canEdit canSeeCost={false} minMarginPercent={30} quotePriceType="public"
+          />
+        </QueryClientProvider>,
+      )
+      expect(screen.getByText('---')).toBeInTheDocument()
+      expect(screen.queryByDisplayValue('45.5')).not.toBeInTheDocument()
+    })
+
+    it('muestra el costo editable en producto custom aunque canSeeCost sea false', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(
+        <QueryClientProvider client={queryClient}>
+          <QuotePartCard
+            quoteId={1} part={makePart({ items: [makeItem({ cost: 45.5, catalog_product_id: null, is_custom: true })] })}
+            discountMode="line" canEdit canSeeCost={false} minMarginPercent={30} quotePriceType="public"
+          />
+        </QueryClientProvider>,
+      )
+      expect(screen.queryByText('---')).not.toBeInTheDocument()
+      expect(screen.getByDisplayValue('45.5')).toBeInTheDocument()
+    })
+
+    it('muestra el input de costo cuando canSeeCost es true', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(
+        <QueryClientProvider client={queryClient}>
+          <QuotePartCard
+            quoteId={1} part={makePart({ items: [makeItem({ cost: 45.5 })] })}
+            discountMode="line" canEdit canSeeCost minMarginPercent={30} quotePriceType="public"
+          />
+        </QueryClientProvider>,
+      )
+      expect(screen.queryByText('---')).not.toBeInTheDocument()
+      expect(screen.getByDisplayValue('45.5')).toBeInTheDocument()
     })
   })
 })

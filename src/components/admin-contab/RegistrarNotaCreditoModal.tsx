@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import {
   usePaymentClients, useNotaCreditoItbmsRates, useNotaCreditoFacturas, useRegisterNotaCredito,
-  useBankAccounts,
+  useBankAccounts, useNotaCreditoDevolucionSignedDocumentUrl,
 } from '@/hooks/useAdminContab'
 import type {
   NotaCreditoTipo, NotaCreditoSubtipoAnulacion, NotaCreditoMotivoCorreccion, NotaCreditoResultado,
@@ -63,6 +63,12 @@ interface Props {
  * el POST que registra la nota. Batch 12 (SCRUM-565→570, REQ-488→490) conecta "Corrección de
  * datos" a la revisión previa real en vez del hint "próximamente".
  */
+/** Monto total (con ITBMS) sugerido para una devolución: Σ cantidad × precio sin ITBMS, más el ITBMS de la factura de origen. */
+function montoSugeridoDevolucion(d: Pick<NotaCreditoDevolucionPrecargada, 'productos' | 'factura_itbms_percentage'>): number {
+  const neto = d.productos.reduce((sum, p) => sum + p.cantidad * p.monto_unitario, 0)
+  return round2(neto * (1 + (d.factura_itbms_percentage ?? 0) / 100))
+}
+
 export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primaryApprovalThreshold, onClose, onRegistered, onRequestCorreccionPreview }: Props) {
   const { t } = useTranslation('adminContab')
   const esDevolucion = devolucionPrecargada != null
@@ -90,7 +96,22 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
   const [comprobante, setComprobante] = useState<File | null>(null)
   const [error, setError]             = useState<string | null>(null)
 
-  const { data: clientOptions = [] } = usePaymentClients(clientQuery)
+  // SCRUM-865 punto 2 — presign bajo demanda al hacer clic, mismo patrón que
+  // `useReturnSignedDocumentUrl` en Bodega (nunca viaja embebido en la precarga).
+  const signedDocumentUrl = useNotaCreditoDevolucionSignedDocumentUrl()
+  const [conformidadError, setConformidadError] = useState(false)
+  function handleViewConformidad() {
+    if (devolucionPrecargada === null || devolucionPrecargada === undefined) return
+    setConformidadError(false)
+    signedDocumentUrl.mutate(devolucionPrecargada.customer_return_id, {
+      onSuccess: ({ url }) => window.open(url, '_blank', 'noopener,noreferrer'),
+      onError:   () => setConformidadError(true),
+    })
+  }
+
+  // SCRUM-865 punto 1 — solo clientes con al menos una factura emitida (no aplica al resto de
+  // llamadores de usePaymentClients, ej. Pagos, que siguen viendo todos los clientes).
+  const { data: clientOptions = [] } = usePaymentClients(clientQuery, true)
   // REQ-480 RN1 — solo se piden las tasas cuando el motivo de corrección incluye ITBMS, no antes.
   const necesitaTasas = tipo === 'anulacion_completa' && subtipoAnulacion === 'correccion'
     && (motivoCorreccion === 'itbms' || motivoCorreccion === 'ambos')
@@ -99,19 +120,86 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
   const { data: bankAccounts = [] } = useBankAccounts()
   const registerMutation = useRegisterNotaCredito()
 
+  // SCRUM-932 — filtro cruzado Proyecto↔Cotización, resuelto local sobre `facturasCliente` ya
+  // cargada (mismo patrón que `RegistrarCobroModal.tsx`, SCRUM-931): sin request nueva. Solo
+  // aplica al modo manual — en Devolución la factura ya viene resuelta, sin selector.
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
+  const [selectedQuoteId, setSelectedQuoteId]     = useState<number | null>(null)
+
+  const projectOptions = useMemo(() => {
+    const byId = new Map<number, string>()
+    for (const f of facturasCliente) {
+      if (f.sales_project_id === null) continue
+      if (selectedQuoteId !== null && f.quote_id !== selectedQuoteId) continue
+      if (!byId.has(f.sales_project_id)) byId.set(f.sales_project_id, f.proyecto ?? `#${f.sales_project_id}`)
+    }
+    return Array.from(byId, ([id, name]) => ({ id, name }))
+  }, [facturasCliente, selectedQuoteId])
+
+  const quoteOptions = useMemo(() => {
+    const byId = new Map<number, string>()
+    for (const f of facturasCliente) {
+      if (f.quote_id === null) continue
+      if (selectedProjectId !== null && f.sales_project_id !== selectedProjectId) continue
+      if (!byId.has(f.quote_id)) byId.set(f.quote_id, f.cotizacion_folio ?? `#${f.quote_id}`)
+    }
+    return Array.from(byId, ([id, folio]) => ({ id, folio }))
+  }, [facturasCliente, selectedProjectId])
+
+  // Factura(s) que matchean la combinación elegida — nunca asume cardinalidad 1 (una cotización
+  // puede tener varias entregas facturadas por separado, ver SCRUM-929).
+  const visibleFacturas = useMemo(
+    () => facturasCliente.filter(f =>
+      (selectedProjectId === null || f.sales_project_id === selectedProjectId)
+      && (selectedQuoteId === null || f.quote_id === selectedQuoteId)),
+    [facturasCliente, selectedProjectId, selectedQuoteId],
+  )
+
+  // Si el filtro oculta la factura ya elegida en el <select>, se limpia — un <select> controlado
+  // cuyo `value` deja de matchear ninguna <option> queda con el ESTADO viejo (el número que se
+  // vería seleccionado en la UI no refleja `facturaOrigenId`), mismo bug de fondo que el que
+  // Senior Review encontró y corrigió en `RegistrarCobroModal.tsx` (SCRUM-931).
+  useEffect(() => {
+    if (facturaOrigenId !== null && !visibleFacturas.some(f => f.id === facturaOrigenId)) {
+      setFacturaOrigenId(null)
+    }
+  }, [visibleFacturas, facturaOrigenId])
+
+  function selectProject(id: number | null) {
+    setSelectedProjectId(id)
+    if (id !== null && selectedQuoteId !== null) {
+      const stillValid = facturasCliente.some(f => f.quote_id === selectedQuoteId && f.sales_project_id === id)
+      if (!stillValid) setSelectedQuoteId(null)
+    }
+  }
+
+  function selectQuote(id: number | null) {
+    setSelectedQuoteId(id)
+    // AC — elegir Cotización autocompleta/filtra el Proyecto al de esa cotización.
+    if (id !== null) {
+      const projectOfQuote = facturasCliente.find(f => f.quote_id === id)?.sales_project_id
+      if (projectOfQuote != null) setSelectedProjectId(projectOfQuote)
+    }
+  }
+
   // REQ-483 — en modo Devolución la factura de origen ya viene resuelta (monto/saldo/tasa de
   // ITBMS incluidos en la prop, RN3) — no hace falta pedirla a `notas-credito/clientes/.../facturas`.
   const facturaSeleccionada: NotaCreditoFacturaOrigen | null = useMemo(() => {
     if (esDevolucion && devolucionPrecargada) {
       return {
         id:               devolucionPrecargada.factura_origen_id,
-        numero:           devolucionPrecargada.referencia,
+        numero:           devolucionPrecargada.factura_origen_numero ?? devolucionPrecargada.referencia,
         monto:            devolucionPrecargada.factura_monto,
         saldo_pendiente:  devolucionPrecargada.factura_saldo_pendiente,
+        monto_acreditable:   devolucionPrecargada.monto_acreditable,
+        notas_previas_total: devolucionPrecargada.notas_previas_total,
         itbms_percentage: devolucionPrecargada.factura_itbms_percentage,
         // Devolución de mercancía nunca pasa por el bloque de Corrección de datos (que es lo único
         // que usa `itbms_rate_id`) — null acá es correcto, no un placeholder pendiente.
         itbms_rate_id: null,
+        // SCRUM-932 — Devolución no pasa por el selector de Proyecto/Cotización (la factura ya
+        // viene resuelta desde afuera) — null acá es correcto, no un placeholder pendiente.
+        sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
       }
     }
     return facturasCliente.find(f => f.id === facturaOrigenId) ?? null
@@ -151,10 +239,16 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
 
   // REQ-485 — en modo Devolución el monto arranca precargado con la suma de los productos
   // devueltos (sigue siendo editable, RN de REQ-485 — Devolución no queda bloqueada como Anulación).
+  // Los `monto_unitario` son precios SIN ITBMS (precio de cotización), pero el campo "Monto" es el
+  // total CON ITBMS (de ahí se deriva subtotal/ITBMS más abajo) — por eso se suma el ITBMS de la
+  // factura de origen. Sin esto la NC sale por el neto y deja el ITBMS sin acreditar (NC-0001, 2026-10-06).
   useEffect(() => {
     if (esDevolucion && devolucionPrecargada) {
-      const total = devolucionPrecargada.productos.reduce((sum, p) => sum + p.cantidad * p.monto_unitario, 0)
-      setMontoInput(String(round2(total)))
+      // El backend entrega el total ya calculado (`monto_sugerido`); el cálculo local solo cubre un backend que aún no lo envía.
+      const sugerido = devolucionPrecargada.monto_sugerido === undefined
+        ? montoSugeridoDevolucion(devolucionPrecargada)
+        : devolucionPrecargada.monto_sugerido
+      setMontoInput(sugerido === null ? '' : String(sugerido))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -164,6 +258,8 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
     setClientQuery(opt.name)
     setClientOpen(false)
     setFacturaOrigenId(null)
+    setSelectedProjectId(null)
+    setSelectedQuoteId(null)
   }
 
   // REQ-487 RN1 — imagen o PDF, mismo límite/tipos que el comprobante de Cobros. Validación
@@ -187,8 +283,18 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
 
   // REQ-484 RN4 — en Anulación completa el monto SIEMPRE es el total exacto de la factura elegida,
   // nunca editable a mano. En Descuento comercial / Devolución viene del input.
+  // SCRUM-1116 — "el monto exacto de la factura" es en realidad lo que AÚN se puede acreditar de ella: el total menos las
+  // notas previas aplicadas o pendientes (todos los tipos). Sin notas previas coincide con el total; los cobros no lo reducen.
   const esAnulacion = tipo === 'anulacion_completa'
-  const monto = esAnulacion ? (facturaSeleccionada?.monto ?? 0) : (Number(montoInput) || 0)
+  const montoAcreditable = facturaSeleccionada !== null
+    ? (facturaSeleccionada.monto_acreditable ?? facturaSeleccionada.monto)
+    : 0
+  const montoDigitado = Number(montoInput) || 0
+  const monto = esAnulacion ? montoAcreditable : montoDigitado
+  // Nada por acreditar (anulación) o monto digitado por encima de lo acreditable (descuento / devolución): se bloquea acá y
+  // el backend lo vuelve a validar.
+  const sinValorAcreditable = facturaSeleccionada !== null && round2(montoAcreditable) <= 0
+  const superaAcreditable = facturaSeleccionada !== null && !esAnulacion && round2(montoDigitado - montoAcreditable) > 0
 
   // REQ-485 — desglose subtotal/ITBMS a partir del monto, usando la tasa YA aplicada a la factura
   // de origen (no una tasa nueva).
@@ -210,9 +316,12 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
   // REQ-482 RN2/RN3 — umbral parejo para los 3 tipos, recalculado en tiempo real con el monto.
   const superaUmbral = primaryApprovalThreshold !== undefined && monto > primaryApprovalThreshold
 
-  // REQ-487 RN1/RN2 — obligatorio en Anulación completa (cualquier monto) o al superar el umbral,
-  // EXCEPTO en modo Devolución, donde nunca es obligatorio (RN2 pisa a RN1).
-  const comprobanteObligatorio = !esDevolucion && (esAnulacion || superaUmbral)
+  // SCRUM-865 punto 3 (REQ-495) — el comprobante es obligatorio para CUALQUIER tipo de nota,
+  // incluida Devolución de mercancía. El ticket es explícito ("de cualquier tipo") y el backend
+  // (`RegisterCreditNoteRequest`) ya lo exige sin condición: el documento firmado que trae la
+  // devolución desde Bodega es la firma del cliente sobre el formulario, no el comprobante de
+  // soporte de por qué se emite la nota — son evidencias distintas y el ticket pide las dos.
+  const comprobanteObligatorio = true
 
   // REQ-486 RN2 / REQ-480 — el subtipo "Corrección de datos" no aplica reducción de comisión, y
   // tampoco tiene submit real todavía: su "revisión previa + vista previa de factura nueva" es
@@ -226,6 +335,8 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
     && facturaSeleccionada !== null
     && !esCorreccionDeDatos
     && monto > 0
+    && !sinValorAcreditable
+    && !superaAcreditable
     && motivo.trim() !== ''
     && (!hayExcedente || (resultado !== '' && (resultado !== 'devuelto' || cuentaBancariaSalidaId !== null)))
     && (!comprobanteObligatorio || comprobante !== null)
@@ -305,7 +416,7 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
                 <input
                   type="text"
                   value={clientQuery}
-                  onChange={e => { setClientQuery(e.target.value); setClientOpen(true); setMasterClientId(null); setFacturaOrigenId(null) }}
+                  onChange={e => { setClientQuery(e.target.value); setClientOpen(true); setMasterClientId(null); setFacturaOrigenId(null); setSelectedProjectId(null); setSelectedQuoteId(null) }}
                   onFocus={() => setClientOpen(true)}
                   onBlur={() => setTimeout(() => setClientOpen(false), 150)}
                   placeholder={t('notasCredito.formulario.clientePlaceholder')}
@@ -324,6 +435,40 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
               </ul>
             )}
           </div>
+
+          {/* Proyecto / # de Cotización — SCRUM-932, filtrado cruzado sobre las facturas ya
+              cargadas de este cliente (sin request nueva, ver ADR-SCRUM932). Solo en modo manual —
+              en Devolución la factura ya viene resuelta, sin selector. */}
+          {!esDevolucion && masterClientId !== null && facturasCliente.length > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-sm">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                  {t('notasCredito.formulario.proyectoLabel')}
+                </span>
+                <select
+                  value={selectedProjectId ?? ''}
+                  onChange={e => selectProject(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
+                >
+                  <option value="">{t('notasCredito.formulario.proyectoTodos')}</option>
+                  {projectOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                  {t('notasCredito.formulario.cotizacionLabel')}
+                </span>
+                <select
+                  value={selectedQuoteId ?? ''}
+                  onChange={e => selectQuote(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
+                >
+                  <option value="">{t('notasCredito.formulario.cotizacionTodas')}</option>
+                  {quoteOptions.map(q => <option key={q.id} value={q.id}>{q.folio}</option>)}
+                </select>
+              </label>
+            </div>
+          )}
 
           {/* Tipo de nota — REQ-478 RN1/RN2, RN1 REQ-481 (nunca seleccionable a mano) */}
           <div>
@@ -475,6 +620,9 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
                     </div>
                   ))}
                 </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {t('notasCredito.formulario.productosSinItbmsHint', { pct: devolucionPrecargada.factura_itbms_percentage })}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -500,9 +648,19 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
                 <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
                   {t('notasCredito.formulario.conformidadLabel')}
                 </span>
-                <div className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-600 dark:text-slate-300">
-                  {devolucionPrecargada.conformidad}
-                </div>
+                {devolucionPrecargada.conformidad_disponible ? (
+                  <button
+                    type="button" className="text-primary text-xs underline" onClick={handleViewConformidad}
+                    disabled={signedDocumentUrl.isPending}
+                  >
+                    {t('notasCredito.formulario.conformidadVerDocumento')}
+                  </button>
+                ) : (
+                  <div className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-600 dark:text-slate-300">
+                    {t('notasCredito.formulario.precargaDatoNoDisponible')}
+                  </div>
+                )}
+                {conformidadError && <p className="text-red-600 text-[11px] mt-1">{t('notasCredito.formulario.conformidadError')}</p>}
               </div>
 
               {/* Banner de confirmación física — REQ-482 RN1 */}
@@ -527,7 +685,7 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm disabled:opacity-50"
               >
                 <option value="">{t('notasCredito.formulario.facturaOrigenPlaceholder')}</option>
-                {facturasCliente.map(f => (
+                {visibleFacturas.map(f => (
                   <option key={f.id} value={f.id}>
                     {f.numero} — {formatCurrency(f.monto)} ({t('notasCredito.formulario.facturaSaldoPendiente')}: {formatCurrency(f.saldo_pendiente)})
                   </option>
@@ -572,6 +730,31 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
                     className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
                   />
                 )}
+                {(facturaSeleccionada.notas_previas_total ?? 0) > 0 && (
+                  <span className="block mt-1 text-xs text-slate-500" data-testid="nota-credito-acreditable">
+                    {t('notasCredito.formulario.valorAcreditableReferencia', {
+                      acreditable: formatCurrency(montoAcreditable),
+                      previas: formatCurrency(facturaSeleccionada.notas_previas_total ?? 0),
+                    })}
+                  </span>
+                )}
+                {sinValorAcreditable && (
+                  <span role="alert" className="block mt-1 text-xs font-medium text-red-600" data-testid="nota-credito-sin-valor">
+                    {t('notasCredito.formulario.sinValorAcreditable', { numero: facturaSeleccionada.numero })}
+                  </span>
+                )}
+                {superaAcreditable && !sinValorAcreditable && (
+                  <span role="alert" className="block mt-1 text-xs font-medium text-red-600" data-testid="nota-credito-supera-acreditable">
+                    {t('notasCredito.formulario.montoSuperaAcreditable', { acreditable: formatCurrency(montoAcreditable) })}
+                  </span>
+                )}
+                <span className="block mt-1 text-xs text-slate-500">
+                  {t('notasCredito.formulario.facturaTotalReferencia', {
+                    numero: facturaSeleccionada.numero,
+                    monto: formatCurrency(facturaSeleccionada.monto),
+                    saldo: formatCurrency(facturaSeleccionada.saldo_pendiente),
+                  })}
+                </span>
               </label>
 
               <div className="grid grid-cols-2 gap-3 text-sm">

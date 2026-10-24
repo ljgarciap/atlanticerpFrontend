@@ -142,7 +142,8 @@ describe('VentasDisenoReportsPage', () => {
     renderPage()
 
     const chartProps = JSON.parse((await screen.findByTestId('mock-chart')).getAttribute('data-chart-props') ?? '{}')
-    const [soldDataset, goalDataset] = chartProps.datasets
+    // SCRUM-836 — Meta va primero (fondo gris/beige detrás de Alcanzado, mismo orden del mockup).
+    const [goalDataset, soldDataset] = chartProps.datasets
 
     expect(soldDataset.type).toBe('bar')
     expect(goalDataset.type).toBe('bar')
@@ -163,9 +164,12 @@ describe('VentasDisenoReportsPage', () => {
     renderPage()
 
     const chartProps = JSON.parse((await screen.findByTestId('mock-chart')).getAttribute('data-chart-props') ?? '{}')
-    const [soldDataset] = chartProps.datasets
+    // SCRUM-836 — Meta va primero (fondo gris/beige detrás de Alcanzado, mismo orden del mockup).
+    const [, soldDataset] = chartProps.datasets
 
-    expect(soldDataset.backgroundColor.slice(0, 5)).toEqual(Array(5).fill('#5BA5A0cc'))
+    // SCRUM-836 — Alcanzado pasa a teal sólido (#5BA5A0, sin alpha) para que ambos colores del
+    // mockup (Meta gris/beige vs Alcanzado teal) se distingan con nitidez.
+    expect(soldDataset.backgroundColor.slice(0, 5)).toEqual(Array(5).fill('#5BA5A0'))
     expect(soldDataset.backgroundColor[5]).toBe('#f59e0b')
   })
 

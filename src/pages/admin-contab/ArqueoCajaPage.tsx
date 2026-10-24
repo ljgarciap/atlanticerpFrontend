@@ -10,6 +10,7 @@ import {
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import {
   IcoTrendingUp, IcoChevronDown, IcoDownload, IcoAlertTriangle, IcoCheck, IcoClock, IcoPaperclip, IcoClose,
 } from '@/components/icons'
@@ -46,14 +47,15 @@ export default function ArqueoCajaPage() {
   const { t } = useTranslation(['common', 'adminContab'])
   const { user } = useAuthStore()
 
-  const isYaneth        = user?.role === 'asistente_administrativa'
+  // SCRUM-1139 — `lider_operaciones` (Mariam) recibe el mismo acceso que Yaneth en Admin&Cont, incluida la exclusión de REQ-521/523 (Proyectado/Vista real).
+  const isYaneth        = user?.role === 'asistente_administrativa' || user?.role === 'lider_operaciones'
   // Aclarado por Luis 2026-08-25 (Pre-QA Batch 18): REQ-521 le veda a Yaneth el PANEL de detalle
   // (facturas/comisiones línea por línea) y la Vista real 30/90d — no los 3 totales agregados del
   // encabezado, que REQ-520 sí le da. `canProjectedReal` sigue gateando toggle/chips + ambos
   // paneles de detalle + la Vista real; el fetch de `projected` para las tarjetas ya no depende de
   // esta flag (ver abajo).
   const canProjectedReal = !isYaneth
-  const canDailyCount    = user?.role === 'superadmin' || user?.role === 'lider_admin_contab' || user?.role === 'asistente_administrativa'
+  const canDailyCount    = user?.role === 'superadmin' || user?.role === 'lider_admin_contab' || isYaneth
   // REQ-528/529 — el historial (y su "Ver"/"Descargar resumen") es para los 4 roles del módulo,
   // a diferencia del Arqueo del día (`canDailyCount`), que excluye a Mark/Gerencia (`management`).
   const canViewHistorial = canDailyCount || user?.role === 'management'
@@ -393,7 +395,7 @@ function ArqueoDelDiaView(
 
   if (!dailyCount) return isFetching ? <p className="text-xs text-slate-400 text-center py-8">…</p> : null
 
-  const rows = [...dailyCount.cobros, ...dailyCount.notas_credito]
+  const rows = [...dailyCount.cobros, ...dailyCount.notas_credito, ...dailyCount.comisiones, ...(dailyCount.reversos ?? [])]
   const isAbierto = dailyCount.estado === 'abierto'
 
   return (
@@ -448,12 +450,18 @@ function ArqueoDelDiaView(
             {rows.length === 0 ? (
               <tr><td colSpan={3} className="text-center text-slate-400 py-6">{t('adminContab:arqueoCaja.arqueoDelDia.sinMovimientos')}</td></tr>
             ) : rows.map(row => {
-              const isCredit = row.movement_type === 'credit_note'
+              // SCRUM-879 — comisiones son salida real de dinero, mismo tratamiento visual (rojo,
+              // negativo) que una nota de crédito devuelta.
+              const isSalida = row.movement_type === 'credit_note' || row.movement_type === 'commission' || row.movement_type === 'reversal'
               return (
                 <tr key={`${row.movement_type}-${row.movement_id}`} className="border-b border-slate-50 dark:border-slate-800">
-                  <td className="py-2 pr-3 text-slate-700 dark:text-slate-200">{row.concepto}</td>
-                  <td className={`py-2 pr-3 font-medium ${isCredit ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                    {isCredit ? '-' : ''}{formatCurrency(row.monto)}
+                  <td className="py-2 pr-3 text-slate-700 dark:text-slate-200">
+                    {row.concepto}
+                    {/* SCRUM-1175 — nombre del cliente de la línea (las comisiones no tienen). */}
+                    {'cliente' in row && row.cliente && <div className="text-[10.5px] text-slate-400" data-testid="arqueo-fila-cliente">{row.cliente}</div>}
+                  </td>
+                  <td className={`py-2 pr-3 font-medium ${isSalida ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {isSalida ? '-' : ''}{formatCurrency(row.monto)}
                   </td>
                   <td className="py-2 pr-3">
                     <ObservationInput
@@ -478,12 +486,24 @@ function ArqueoDelDiaView(
           <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalNotasCredito')}</span>
           <span className="font-medium text-red-600 dark:text-red-400">-{formatCurrency(dailyCount.total_notas_credito)}</span>
         </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalComisiones')}</span>
+          <span className="font-medium text-red-600 dark:text-red-400">-{formatCurrency(dailyCount.total_comisiones)}</span>
+        </div>
+        {(dailyCount.total_reversos ?? 0) > 0 && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalReversos')}</span>
+            <span className="font-medium text-red-600 dark:text-red-400" data-testid="arqueo-total-reversos">-{formatCurrency(dailyCount.total_reversos ?? 0)}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm font-bold pt-1">
           <span className="text-slate-700 dark:text-slate-200">{t('adminContab:arqueoCaja.arqueoDelDia.totalNeto')}</span>
           <span className="text-slate-900 dark:text-slate-100">{formatCurrency(dailyCount.total_neto)}</span>
         </div>
       </div>
       <p className="text-[10.5px] text-slate-400 mt-2">{t('adminContab:arqueoCaja.arqueoDelDia.conciliacionNote')}</p>
+
+      <DayIndicators facturado={dailyCount.total_facturado_dia} pasadoAPedido={dailyCount.total_pasado_a_pedido_dia} t={t} />
 
       {/* REQ-525 RN1 — la sección solo aparece si hay al menos un cobro con retención. */}
       {dailyCount.retenciones.length > 0 && (
@@ -514,6 +534,26 @@ function ObservationInput(
       onBlur={() => { if (local !== value) onSave(local) }}
       className="w-full min-w-[160px] rounded-md border border-slate-200 dark:border-slate-700 dark:bg-slate-900 px-2 py-1 text-[11px] text-slate-600 dark:text-slate-300 disabled:opacity-60"
     />
+  )
+}
+
+/** SCRUM-934 — resumen tipo indicador bajo la tabla y los totales: cuánto se facturó y cuánto se
+ *  pasó a pedido en el día del arqueo. Informativo (no forma parte de `total_neto`). Solo se
+ *  muestra si el backend envía ambos valores — nunca un $0.00 inventado. Se reusa tal cual en el
+ *  arqueo activo y en el detalle del historial (ahí son los valores congelados al cerrar). */
+function DayIndicators({ facturado, pasadoAPedido, t }: { facturado?: number; pasadoAPedido?: number; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  if (facturado === undefined || pasadoAPedido === undefined) return null
+  return (
+    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2" data-testid="arqueo-indicadores-dia">
+      <div className="rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-2">
+        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalFacturadoDia')}</div>
+        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{formatCurrency(facturado)}</div>
+      </div>
+      <div className="rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-2">
+        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalPasadoAPedidoDia')}</div>
+        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{formatCurrency(pasadoAPedido)}</div>
+      </div>
+    </div>
   )
 }
 
@@ -654,8 +694,9 @@ function CerrarArqueoModal(
  *  que Mark/Gerencia nunca ven) — por eso vive fuera del `Card` de toggle/chips, siempre visible. */
 function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, unknown>) => string }) {
   const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState<number | 'all'>(20)
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const { data, isFetching } = useDailyCashCountHistory(page)
+  const { data, isFetching } = useDailyCashCountHistory(page, perPage)
 
   if (!data && !isFetching) return null
 
@@ -721,23 +762,12 @@ function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, u
             </tbody>
           </table>
 
-          {data.meta.last_page > 1 && (
-            <div className="flex items-center justify-end gap-2 mt-3">
-              <button
-                type="button" disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-                className="text-xs text-slate-500 dark:text-slate-400 disabled:opacity-40 hover:text-primary-dark"
-              >
-                {t('adminContab:arqueoCaja.historial.anterior')}
-              </button>
-              <span className="text-[11px] text-slate-400">{page} / {data.meta.last_page}</span>
-              <button
-                type="button" disabled={page >= data.meta.last_page} onClick={() => setPage(p => p + 1)}
-                className="text-xs text-slate-500 dark:text-slate-400 disabled:opacity-40 hover:text-primary-dark"
-              >
-                {t('adminContab:arqueoCaja.historial.siguiente')}
-              </button>
-            </div>
-          )}
+          <Pagination
+            meta={data.meta}
+            perPage={perPage}
+            onPageChange={setPage}
+            onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+          />
         </div>
       )}
 
@@ -785,11 +815,23 @@ function DetalleArqueoModal({ id, t, onClose }: { id: number; t: (key: string, o
                 <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalNotasCredito')}</span>
                 <span className="font-medium text-red-600 dark:text-red-400">-{formatCurrency(detail.total_notas_credito)}</span>
               </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalComisiones')}</span>
+                <span className="font-medium text-red-600 dark:text-red-400">-{formatCurrency(detail.total_comisiones)}</span>
+              </div>
+              {(detail.total_reversos ?? 0) > 0 && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">{t('adminContab:arqueoCaja.arqueoDelDia.totalReversos')}</span>
+                  <span className="font-medium text-red-600 dark:text-red-400">-{formatCurrency(detail.total_reversos ?? 0)}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm font-bold pt-1">
                 <span className="text-slate-700 dark:text-slate-200">{t('adminContab:arqueoCaja.arqueoDelDia.totalNeto')}</span>
                 <span className="text-slate-900 dark:text-slate-100">{formatCurrency(detail.total_neto)}</span>
               </div>
             </div>
+
+            <DayIndicators facturado={detail.total_facturado_dia} pasadoAPedido={detail.total_pasado_a_pedido_dia} t={t} />
 
             <div className="text-[11px] text-slate-500 dark:text-slate-400">
               {detail.cerrado_por && t('adminContab:arqueoCaja.historial.cerradoPor', { nombre: detail.cerrado_por })}

@@ -1,3 +1,4 @@
+import { impersonationBlock } from '@/lib/impersonationEligibility'
 import { useTranslation } from 'react-i18next'
 import type { UserListItem } from '@/api/usersApi'
 import type { RoleItem } from '@/api/rolesApi'
@@ -22,10 +23,17 @@ interface Props {
   onEdit:             (user: UserListItem) => void
   onToggleStatus:     (user: UserListItem) => void
   onResetMfa:         (user: UserListItem) => void
+  /** Reset de contraseña visible solo si el actor es superadmin por ROL (el backend usa `role:superadmin`). */
+  canResetPassword:   boolean
+  onResetPassword:    (user: UserListItem) => void
   onVisibility:       (user: UserListItem) => void
+  /** SCRUM-1158 — «Ver como»: visible solo si el actor es superadmin por ROL (el backend usa `role:superadmin`) y no está ya observando a alguien. */
+  canImpersonate?:    boolean
+  actorId?:           number
+  onImpersonate?:     (user: UserListItem) => void
 }
 
-export default function UserTable({ users, roles, loading, canManage, actorLevel, actorHasSuperadmin, onEdit, onToggleStatus, onResetMfa, onVisibility }: Props) {
+export default function UserTable({ users, roles, loading, canManage, actorLevel, actorHasSuperadmin, canResetPassword, onEdit, onToggleStatus, onResetMfa, onResetPassword, onVisibility, canImpersonate = false, actorId, onImpersonate }: Props) {
   const { t } = useTranslation(['common', 'security'])
   const roleName = (id: number | null) => roles.find(r => r.id === id)?.name
 
@@ -56,6 +64,10 @@ export default function UserTable({ users, roles, loading, canManage, actorLevel
 
   return (
     <Card variant="panel" className="overflow-hidden">
+      {/* SCRUM-850 — la tabla no hacía scroll horizontal, `overflow-hidden` del Card recortaba
+          columnas en viewports angostos. El wrapper interno scrollea; el Card conserva el
+          overflow-hidden para no perder el border-radius. */}
+      <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="bg-slate-50 text-left text-[11px] font-medium uppercase tracking-wide text-slate-500 border-b border-slate-200">
@@ -177,6 +189,36 @@ export default function UserTable({ users, roles, loading, canManage, actorLevel
                           {t('security:users.actions.resetMfa')}
                         </Button>
                       )}
+                      {/* Reset de contraseña — solo superadmin.all. La contraseña pasa a ser el
+                          correo de la persona y debe cambiarla al ingresar. Un usuario inactivo
+                          no se restablece (el backend responde 422). */}
+                      {canResetPassword && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => onResetPassword(user)}
+                          disabled={!user.is_active}
+                          title={user.is_active ? undefined : t('security:users.resetPassword.inactiveTooltip')}
+                          className="!text-xs !px-2.5 !py-1">
+                          {t('security:users.actions.resetPassword')}
+                        </Button>
+                      )}
+                      {/* SCRUM-1158 — «Ver como»: sesión de solo lectura con la vista y los permisos de esta persona. Deshabilitado, con la
+                          causa en el tooltip, para quien no se puede observar (uno mismo, superadmins, inactivos, invitados). */}
+                      {canImpersonate && onImpersonate && (() => {
+                        const blocked = impersonationBlock(user, actorId)
+                        return (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onImpersonate(user)}
+                            disabled={blocked !== null}
+                            title={blocked ? t(`security:impersonate.tooltips.${blocked}`) : undefined}
+                            className="!text-xs !px-2.5 !py-1">
+                            {t('security:users.actions.impersonate')}
+                          </Button>
+                        )
+                      })()}
                     </div>
                   </td>
                 )
@@ -185,6 +227,7 @@ export default function UserTable({ users, roles, loading, canManage, actorLevel
           ))}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

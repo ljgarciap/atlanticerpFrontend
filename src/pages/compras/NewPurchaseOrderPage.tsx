@@ -4,10 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { comprasApi } from '@/api/comprasApi'
+import { useAuthStore } from '@/store/authStore'
+import { clearSessionDraft, loadSessionDraft, saveSessionDraft, sessionDraftKey } from '@/lib/sessionDraft'
 import { useCreatePurchaseOrder, useOpenPurchaseOrderPdf, useSendPurchaseOrderEmail } from '@/hooks/useCompras'
 import ProviderFormDrawer from '@/components/compras/ProviderFormDrawer'
 import OrderLinesEditor, {
-  emptyOrderDraft, buildLinesPayload, type OrderDraft,
+  emptyOrderDraft, buildLinesPayload, buildAdditionalCostsPayload, type OrderDraft,
 } from '@/components/compras/OrderLinesEditor'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -19,15 +21,25 @@ import type { Provider } from '@/types/compras'
  * navegación, no query params — evita exponer costo/cantidad en la URL). InventarioPage arma
  * este objeto tras leer /inventory/{id}/order-prefill.
  */
-export interface NewOrderPrefillState {
-  providerId: number
-  product: {
-    id:          number
-    reference:   string
-    description: string
-    unitCost:    number
-    quantity:    number
-  }
+export interface NewOrderPrefillProduct {
+  id:          number
+  reference:   string
+  description: string
+  unitCost:    number
+  quantity:    number
+}
+
+/**
+ * SCRUM-1184 — «Pendientes de reposición» precarga VARIAS líneas del mismo proveedor (`products`); Inventario sigue mandando una sola (`product`).
+ * Una u otra, nunca ambas.
+ */
+export type NewOrderPrefillState = { providerId: number } & (
+  | { product: NewOrderPrefillProduct; products?: never }
+  | { products: NewOrderPrefillProduct[]; product?: never }
+)
+
+function prefillProductsOf(state: NewOrderPrefillState): NewOrderPrefillProduct[] {
+  return state.products ?? (state.product ? [state.product] : [])
 }
 
 /**
@@ -43,6 +55,20 @@ function createOrderErrorMessage(err: unknown, fallback: string): string {
   return firstFieldError ?? data?.message ?? fallback
 }
 
+/** SCRUM-1172 — lo que sobrevive a una recarga de la pantalla: proveedor elegido y borrador de la orden. */
+interface SavedNewOrder { providerId: number; providerName: string; draft: OrderDraft }
+function isSavedNewOrder(v: unknown): v is SavedNewOrder {
+  const o = v as Partial<SavedNewOrder> | null
+  if (typeof o !== 'object' || o === null || typeof o.providerId !== 'number' || typeof o.providerName !== 'string') return false
+  const d = o.draft as Partial<OrderDraft> | null | undefined
+  if (typeof d !== 'object' || d === null || !Array.isArray(d.lines)) return false
+  // Un borrador de forma válida pero con líneas malformadas dejaría la pantalla en blanco: se valida cada línea y cada campo que se renderiza.
+  return d.lines.every(l => typeof l === 'object' && l !== null && typeof l.key === 'string' && typeof l.reference === 'string'
+    && typeof l.description === 'string' && Number.isFinite(l.unitCost) && Number.isFinite(l.quantity))
+    && ['shippingCost', 'importCost', 'freightCost', 'handlingCost', 'otherCost', 'estimatedArrivalDate'].every(k => typeof (d as Record<string, unknown>)[k] === 'string')
+    && typeof d.shippingType === 'string' && typeof d.whoPaysShipping === 'string' && typeof d.modality === 'string'
+}
+
 export default function NewPurchaseOrderPage() {
   const { t } = useTranslation(['common', 'compras'])
   const navigate = useNavigate()
@@ -53,9 +79,14 @@ export default function NewPurchaseOrderPage() {
   const sendEmail = useSendPurchaseOrderEmail()
   const [includeCostInDocs, setIncludeCostInDocs] = useState(true)
 
+  // SCRUM-1172 — recargar la página ya no pierde la orden en curso. Solo en una orden nueva "desde cero": si se llega precargada desde Inventario (`prefill`) manda esa precarga.
+  const userId   = useAuthStore(s => s.user?.id)
+  const draftKey = prefill === null ? sessionDraftKey('compras-nueva-orden', userId) : null
+  const [restored] = useState(() => loadSessionDraft(draftKey, isSavedNewOrder))
+
   // ── Paso 1: Proveedor ──────────────────────────────────────────────────
-  const [providerId,   setProviderId]   = useState<number | null>(prefill?.providerId ?? null)
-  const [providerName, setProviderName] = useState('')
+  const [providerId,   setProviderId]   = useState<number | null>(prefill?.providerId ?? restored?.providerId ?? null)
+  const [providerName, setProviderName] = useState(restored?.providerName ?? '')
   const [providerSearch, setProviderSearch] = useState('')
   // SCRUM-729 — el listado quedaba permanentemente desplegado apenas había resultados,
   // sin importar si el campo tenía foco (regresión reportada por Daniela). Mismo patrón
@@ -84,22 +115,22 @@ export default function NewPurchaseOrderPage() {
   }, [prefillProviderDetail])
 
   // ── Paso 2/3: Productos + Líneas + envío ────────────────────────────────
-  const [draft, setDraft] = useState<OrderDraft>(() => prefill === null ? emptyOrderDraft() : {
+  const [draft, setDraft] = useState<OrderDraft>(() => prefill === null ? (restored?.draft ?? emptyOrderDraft()) : {
     ...emptyOrderDraft(),
-    lines: [{
-      key:                    `prefill-${prefill.product.id}`,
-      catalogProductId:       prefill.product.id,
+    lines: prefillProductsOf(prefill).map(product => ({
+      key:                    `prefill-${product.id}`,
+      catalogProductId:       product.id,
       newProduct:             null,
-      reference:              prefill.product.reference,
+      reference:              product.reference,
       factoryReference:       null,
-      description:            prefill.product.description,
-      unitCost:               prefill.product.unitCost,
-      quantity:               prefill.product.quantity,
+      description:            product.description,
+      unitCost:               product.unitCost,
+      quantity:               product.quantity,
       additionalCostAmount:   null,
       additionalCostType:     null,
       salesProjectId:         null,
       salesProjectLabel:      null,
-    }],
+    })),
   })
 
   // ── Paso 4: Orden creada ────────────────────────────────────────────────
@@ -127,6 +158,12 @@ export default function NewPurchaseOrderPage() {
     setConfirmChangeProvider(false)
   }
 
+  // Guarda el borrador en cada cambio; al crear la orden (o si queda vacío) se borra para no reabrirla.
+  useEffect(() => {
+    if (createdOrderId !== null || (providerId === null && draft.lines.length === 0)) clearSessionDraft(draftKey)
+    else if (providerId !== null) saveSessionDraft(draftKey, { providerId, providerName, draft })
+  }, [draftKey, createdOrderId, providerId, providerName, draft])
+
   const canSubmit = providerId !== null && draft.lines.length > 0 && !createOrder.isPending
 
   const handleSubmit = async () => {
@@ -137,6 +174,7 @@ export default function NewPurchaseOrderPage() {
         shipping_type: draft.shippingType,
         who_pays_shipping: draft.whoPaysShipping,
         shipping_cost: draft.shippingCost !== '' ? Number(draft.shippingCost) : null,
+        ...buildAdditionalCostsPayload(draft),
         modality: draft.modality,
         estimated_arrival_date: draft.estimatedArrivalDate || null,
         lines: buildLinesPayload(draft),

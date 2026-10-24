@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AxiosError, type AxiosResponse } from 'axios'
 import RevisionPreviaCorreccionModal from './RevisionPreviaCorreccionModal'
 import { adminContabApi } from '@/api/adminContabApi'
 import type { PreviewCorreccionPayload, PreviewCorreccionResponse } from '@/types/adminContab'
@@ -76,6 +77,22 @@ describe('RevisionPreviaCorreccionModal — REQ-489', () => {
     expect(mockedApi.notasCredito.registerCorreccion).not.toHaveBeenCalled()
   })
 
+  it('SCRUM-1009 — si el backend bloquea la corrección (422), muestra su mensaje y no el genérico', async () => {
+    const mensaje = 'La factura F-0024 ya tiene notas de crédito (NC-0013) — no se puede corregir.'
+    mockedApi.notasCredito.previewCorreccion.mockRejectedValue(
+      new AxiosError('Request failed', '422', undefined, undefined, { status: 422, data: { message: mensaje } } as AxiosResponse),
+    )
+    renderModal()
+    expect(await screen.findByText(mensaje)).toBeInTheDocument()
+    expect(screen.queryByText('notasCredito.correccion.previewError')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1009 — un fallo de red sin mensaje del backend conserva el error genérico', async () => {
+    mockedApi.notasCredito.previewCorreccion.mockRejectedValue(new Error('Network Error'))
+    renderModal()
+    expect(await screen.findByText('notasCredito.correccion.previewError')).toBeInTheDocument()
+  })
+
   it('RN2 (REQ-449) — "Ver factura" muestra los productos de la factura nueva con el mismo formato fiscal', async () => {
     mockedApi.notasCredito.previewCorreccion.mockResolvedValue(makePreview())
     renderModal()
@@ -135,5 +152,24 @@ describe('RevisionPreviaCorreccionModal — REQ-489', () => {
       comprobante: file,
     }))
     await waitFor(() => expect(onConfirmed).toHaveBeenCalled())
+  })
+
+  it('SCRUM-1019 — al confirmar, un 422/404 del backend (D1, bloqueo 1009 b, factura ya anulada) muestra su mensaje y no el genérico', async () => {
+    for (const status of [422, 404]) {
+      const mensaje = status === 404 ? 'La factura ya fue anulada.' : 'No se puede corregir: bloqueo del documento electrónico.'
+      mockedApi.notasCredito.previewCorreccion.mockResolvedValue(makePreview())
+      mockedApi.notasCredito.registerCorreccion.mockRejectedValue(
+        new AxiosError('Request failed', String(status), undefined, undefined, { status, data: { message: mensaje } } as AxiosResponse),
+      )
+      const { unmount } = renderModal()
+      await screen.findByText('F-0001')
+      fireEvent.change(screen.getByLabelText('notasCredito.formulario.comprobantePlaceholder'), {
+        target: { files: [new File(['x'], 'soporte.png', { type: 'image/png' })] },
+      })
+      fireEvent.click(screen.getByText('notasCredito.correccion.confirmarButton'))
+      expect(await screen.findByText(mensaje)).toBeInTheDocument()
+      expect(screen.queryByText('notasCredito.correccion.error')).not.toBeInTheDocument()
+      unmount()
+    }
   })
 })

@@ -18,6 +18,7 @@ vi.mock('@/api/comprasApi', () => ({
   comprasApi: {
     replacementRequests: {
       list: vi.fn(), generateOrder: vi.fn(), create: vi.fn(), search: vi.fn(), getSearch: vi.fn(),
+      approve: vi.fn(), reject: vi.fn(),
     },
     products: { search: vi.fn() },
     approvedProjects: { search: vi.fn() },
@@ -216,7 +217,7 @@ describe('ReplacementRequestsPage', () => {
     expect(screen.getByText('87.5%')).toBeInTheDocument()
   })
 
-  it('REQ-184 — "Generar solicitud" sin elegir proyecto de venta muestra error, no llama a la API', async () => {
+  it('SCRUM-818 (CA06) — "Generar solicitud" sin elegir proyecto de venta queda deshabilitado, no llama a la API', async () => {
     renderPage()
     await goToSearchTab()
     await pickOriginal()
@@ -228,10 +229,51 @@ describe('ReplacementRequestsPage', () => {
     fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
 
-    fireEvent.click(screen.getByText('compras:replacements.generateModal.submit'))
+    expect(screen.getByText('compras:replacements.generateModal.submit')).toBeDisabled()
 
-    await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.projectRequired')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('compras:replacements.generateModal.submit'))
     expect(mockedComprasApi.replacementRequests.create).not.toHaveBeenCalled()
+  })
+
+  it('SCRUM-818 (CA06) — sin ningún proyecto para el producto original, el picker muestra el mensaje específico', async () => {
+    mockedComprasApi.approvedProjects.search.mockResolvedValue({ data: [] })
+    renderPage()
+    await goToSearchTab()
+    await pickOriginal()
+
+    mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [CANDIDATE] })
+    fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
+    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
+    await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('compras:replacements.generateModal.projectPlaceholder'))
+
+    await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.noProjectForProduct')).toBeInTheDocument())
+    // El picker se llama con el catalog_product_id del producto ORIGINAL (el que se reemplaza).
+    expect(mockedComprasApi.approvedProjects.search).toHaveBeenCalledWith('', ORIGINAL.id)
+  })
+
+  // SCRUM-818 (rebote 2026-09-03, Hallazgo 5) — el margen que se muestra en el modal es el que
+  // manda el backend (`margin_percent`, calculado sobre Costo Total), NUNCA una fórmula propia
+  // recalculada con price_full/cost — margin_percent=30 deliberadamente distinto de lo que daría
+  // (price_full-cost)/price_full con este candidato (18-10)/18×100 ≈ 44.44%, para probar que no
+  // se recalcula acá.
+  it('SCRUM-818 — el margen mostrado en el modal es el que manda el backend, no uno recalculado', async () => {
+    renderPage()
+    await goToSearchTab()
+    await pickOriginal()
+
+    mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [{ ...CANDIDATE, margin_percent: 30 }] })
+    fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
+    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
+    await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
+
+    expect(screen.getByText('30%')).toBeInTheDocument()
+    expect(screen.queryByText('44.44%')).not.toBeInTheDocument()
   })
 
   it('REQ-184 — genera la solicitud con el proyecto elegido vía el picker restringido (nunca prompt())', async () => {
@@ -241,7 +283,7 @@ describe('ReplacementRequestsPage', () => {
       proposed_product_id: 2, proposed_product_name: CANDIDATE.description,
       sales_project_id: 9, sales_project_name: 'Proyecto Norte',
       margin_percent: 44.44, status: 'pendiente', requested_by_name: 'Designer',
-      generated_order_id: null, created_at: '2026-07-18T00:00:00Z',
+      generated_order_id: null, created_at: '2026-07-18T00:00:00Z', can_decide: false,
     })
 
     renderPage()
@@ -265,5 +307,87 @@ describe('ReplacementRequestsPage', () => {
       original_catalog_product_id: 1, proposed_catalog_product_id: 2, sales_project_id: 9,
     }))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.success')).toBeInTheDocument())
+  })
+
+  // SCRUM-818 — Aprobar/Rechazar en la pestaña Solicitudes (default), gateado por can_decide
+  // (calculado server-side, nunca reimplementado acá).
+  const REQUEST = {
+    id: 10, original_product_id: 1, original_product_name: 'Bombillo decorativo E27 Ámbar',
+    proposed_product_id: 2, proposed_product_name: 'Bombillo genérico E27',
+    sales_project_id: 9, sales_project_name: 'Proyecto Norte',
+    margin_percent: 20, status: 'pendiente' as const, requested_by_name: 'Designer',
+    generated_order_id: null, created_at: '2026-08-31T00:00:00Z', can_decide: true,
+  }
+
+  it('SCRUM-818 — muestra Aprobar/Rechazar cuando can_decide es true, y el margen en la tabla', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [REQUEST], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('20%')).toBeInTheDocument())
+    expect(screen.getByText('compras:replacements.actions.approve')).toBeInTheDocument()
+    expect(screen.getByText('compras:replacements.actions.reject')).toBeInTheDocument()
+  })
+
+  it('SCRUM-818 — no muestra Aprobar/Rechazar cuando can_decide es false', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [{ ...REQUEST, can_decide: false }], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('Bombillo decorativo E27 Ámbar')).toBeInTheDocument())
+    expect(screen.queryByText('compras:replacements.actions.approve')).not.toBeInTheDocument()
+    expect(screen.queryByText('compras:replacements.actions.reject')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-818 — clic en Aprobar llama a la API con el id de la solicitud', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [REQUEST], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.replacementRequests.approve.mockResolvedValue({ ...REQUEST, status: 'aprobada', can_decide: false })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:replacements.actions.approve')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('compras:replacements.actions.approve'))
+
+    await waitFor(() => expect(mockedComprasApi.replacementRequests.approve).toHaveBeenCalledWith(10))
+  })
+
+  it('SCRUM-818 — clic en Rechazar llama a la API con el id de la solicitud', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [REQUEST], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.replacementRequests.reject.mockResolvedValue({ ...REQUEST, status: 'rechazada', can_decide: false })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:replacements.actions.reject')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('compras:replacements.actions.reject'))
+
+    await waitFor(() => expect(mockedComprasApi.replacementRequests.reject).toHaveBeenCalledWith(10))
+  })
+
+  // SCRUM-818 (rebote 2026-09-03, Hallazgo 3) — "Generar orden" gateado por can_generate_order
+  // (calculado server-side, nunca por status/generated_order_id solos como antes — eso mostraba
+  // el botón a cualquiera con la fila visible, incluido Vendedor/Operaciones).
+  const REJECTED_REQUEST = { ...REQUEST, status: 'rechazada' as const, can_decide: false }
+
+  it('SCRUM-818 — muestra "Generar orden" cuando can_generate_order es true', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [{ ...REJECTED_REQUEST, can_generate_order: true }], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:replacements.actions.generateOrder')).toBeInTheDocument())
+  })
+
+  it('SCRUM-818 — NUNCA muestra "Generar orden" cuando can_generate_order es false, aunque esté Rechazada', async () => {
+    mockedComprasApi.replacementRequests.list.mockResolvedValue({
+      data: [{ ...REJECTED_REQUEST, can_generate_order: false }], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('Bombillo decorativo E27 Ámbar')).toBeInTheDocument())
+    expect(screen.queryByText('compras:replacements.actions.generateOrder')).not.toBeInTheDocument()
   })
 })

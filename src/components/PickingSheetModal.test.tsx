@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import PickingSheetModal from './PickingSheetModal'
 import {
@@ -51,6 +51,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     direccion_entrega: null,
     cliente_master: 'Constructora Pacífico Holdings',
     subcliente: 'Constructora Pacífico',
+    observaciones: null,
     ...overrides,
   }
 }
@@ -123,7 +124,7 @@ describe('PickingSheetModal', () => {
     expect(table.className).not.toMatch(/\bw-full\b/)
 
     const cols = table.querySelectorAll('colgroup col')
-    expect(cols).toHaveLength(9)
+    expect(cols).toHaveLength(10) // SCRUM-1196: se suma la columna «Bodega»
     const totalColsWidth = Array.from(cols).reduce((sum, col) => {
       const match = col.className.match(/w-\[(\d+)px\]/)
       return sum + (match ? Number(match[1]) : 0)
@@ -219,7 +220,7 @@ describe('PickingSheetModal', () => {
     fireEvent.change(input, { target: { value: '3' } })
     fireEvent.blur(input)
 
-    expect(updateMutateMock).toHaveBeenCalledWith({ orderId: 7, items: [{ order_item_id: 100, qty_picked: 3, picking_notes: '' }] })
+    expect(updateMutateMock).toHaveBeenCalledWith({ orderId: 7, items: [{ order_item_id: 100, qty_picked: 3, picking_notes: '' }] }, expect.anything())
   })
 
   it('REQ-316 RN1 — no permite completar sin marcar "Recogido" en todos los artículos', () => {
@@ -296,10 +297,130 @@ describe('PickingSheetModal', () => {
     expect(exportMutateMock).toHaveBeenCalledWith(7, expect.objectContaining({ onSuccess: expect.any(Function) }))
   })
 
+  it('"Descargar Excel" se oculta al imprimir con print:!hidden (print:hidden perdía contra !flex)', () => {
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+    const btn = screen.getByText('bodega:pedidos.pickingSheetModal.downloadExcel').closest('button') as HTMLElement
+    expect(btn.className).toContain('print:!hidden')
+    expect(btn.className).not.toMatch(/(^|\s)print:hidden/)
+  })
+
+  it('la tabla se ajusta al ancho del papel al imprimir (print-fit-table) y su contenedor no recorta (SCRUM-1129)', () => {
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+    const table = screen.getByTestId('picking-sheet-table')
+    expect(table.className).toContain('print-fit-table')
+    expect(table.parentElement?.className).toContain('print:overflow-visible')
+  })
+
   it('el botón "Cerrar" dispara onClose', () => {
     const onClose = vi.fn()
     render(<PickingSheetModal orderId={7} onClose={onClose} />)
     fireEvent.click(screen.getByText('common:actions.close'))
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  // ── SCRUM-1196 — columna «Bodega»: sale de Bodega Central por defecto, con opción de tomar parte de otra bodega de venta ──────────────
+
+  const CENTRAL = { warehouse_id: 1, name: 'Bodega Central', is_default: true, stock: 10, available: 10 }
+  const OBARRIO = { warehouse_id: 3, name: 'Showroom Obarrio', is_default: false, stock: 1, available: 1 }
+  const SALE = [{ id: 1, name: 'Bodega Central', is_default: true }, { id: 3, name: 'Showroom Obarrio', is_default: false }]
+
+  function sheetWithWarehouses(item: Record<string, unknown> = {}): OrderPickingSheetResponse {
+    return sheet({
+      sale_warehouses: SALE,
+      items: [{
+        id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null,
+        found_note: null, qty_requested: 11, qty_picked: 0, qty_reserved: 10, picking_notes: null, allocations: [], warehouse_options: [CENTRAL, OBARRIO], ...item,
+      }],
+    })
+  }
+
+  it('SCRUM-1196 — muestra de qué bodega sale la línea (Bodega Central) con su saldo, y arranca en lo reservado', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    const cell = screen.getByTestId('picking-warehouse-cell-100')
+    expect(cell).toHaveTextContent('Bodega Central')
+    expect(cell).toHaveTextContent('10')
+    // pidió 11 pero solo hay 10 reservados: arranca en 10, no en 11 (alistar más es imposible)
+    expect(screen.getByTestId('picking-alistada-locked-100')).toHaveTextContent('10')
+    expect(screen.queryByTestId('picking-warehouse-over-100')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1196 — si se alista más de lo que hay en Bodega Central avisa y explica que el resto queda como faltante', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByTestId('picking-edit-btn-100'))
+    fireEvent.change(screen.getByTestId('picking-alistada-input-100'), { target: { value: '11' } })
+
+    expect(screen.getByTestId('picking-warehouse-over-100')).toBeInTheDocument()
+  })
+
+  it('SCRUM-1196 — «Tomar de otra bodega» manda el reparto: 10 de Central y 1 de Showroom Obarrio', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByTestId('picking-extra-add-100'))
+    // alistar los 11 pedidos: 10 de Central + 1 de Obarrio
+    fireEvent.change(screen.getByTestId('picking-alistada-input-100'), { target: { value: '11' } })
+    expect(screen.queryByTestId('picking-warehouse-over-100')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('picking-recogido-100'))
+    fireEvent.click(screen.getByTestId('picking-completado-checkbox'))
+
+    expect(completeMutateMock).toHaveBeenCalledWith({
+      orderId: 7,
+      items: [{ order_item_id: 100, qty_picked: 11, allocations: [{ warehouse_id: 1, qty_picked: 10 }, { warehouse_id: 3, qty_picked: 1 }] }],
+    }, expect.anything())
+  })
+
+  it('SCRUM-1196 — el selector de otra bodega solo ofrece bodegas de venta con saldo (nunca Reclamos, Merma, etc.)', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByTestId('picking-extra-add-100'))
+    const select = within(screen.getByTestId('picking-extra-100')).getByRole('combobox')
+    expect(within(select).getAllByRole('option').map(o => o.textContent)).toEqual(['Showroom Obarrio (1)'])
+  })
+
+  it('SCRUM-1196 (Pre-QA B1) — «Quitar» persiste: manda el reparto completo, todo a la bodega por defecto', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByTestId('picking-extra-add-100'))
+    updateMutateMock.mockClear()
+    fireEvent.click(screen.getByTestId('picking-extra-remove-100'))
+
+    expect(updateMutateMock).toHaveBeenCalledWith({
+      orderId: 7,
+      items: [expect.objectContaining({ order_item_id: 100, qty_picked: 10, allocations: [{ warehouse_id: 1, qty_picked: 10 }] })],
+    })
+  })
+
+  it('SCRUM-1196 — sin saldo en otra bodega no se ofrece «Tomar de otra bodega»', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({
+      data: sheetWithWarehouses({ warehouse_options: [CENTRAL, { ...OBARRIO, stock: 0, available: 0 }] }), isLoading: false,
+    } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    expect(screen.queryByTestId('picking-extra-add-100')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1196 — en solo lectura muestra lo alistado por bodega; las líneas personalizadas no usan bodega', () => {
+    mockedUseOrderPickingSheet.mockReturnValue({
+      data: { ...sheetWithWarehouses({ qty_picked: 11, allocations: [
+        { warehouse_id: 1, qty_reserved: 10, qty_picked: 10, manual: false }, { warehouse_id: 3, qty_reserved: 1, qty_picked: 1, manual: true },
+      ] }), editable: false }, isLoading: false,
+    } as unknown as ReturnType<typeof useOrderPickingSheet>)
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+
+    const cell = screen.getByTestId('picking-warehouse-100')
+    expect(cell).toHaveTextContent('Bodega Central: 10')
+    expect(cell).toHaveTextContent('Showroom Obarrio: 1')
+  })
+
+  it('SCRUM-1196 — una línea sin producto de catálogo (sin opciones de bodega) muestra un guion', () => {
+    render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
+    expect(screen.getByTestId('picking-warehouse-100')).toHaveTextContent('—')
   })
 })

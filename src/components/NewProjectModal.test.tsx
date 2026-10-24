@@ -3,6 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import NewProjectModal from './NewProjectModal'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
+import { useAuthStore } from '@/store/authStore'
 import type { PipelineCardDetail } from '@/types/ventasDiseno'
 
 vi.mock('react-i18next', () => ({
@@ -18,10 +19,14 @@ vi.mock('@/api/ventasDisenoApi', () => ({
     pipeline: { create: vi.fn(), uploadFile: vi.fn(), contacts: { create: vi.fn() } },
     masterClients: { list: vi.fn(), create: vi.fn() },
     subClients: { list: vi.fn(), create: vi.fn() },
+    home: { vendors: vi.fn() },
   },
 }))
 
-const mockedApi = vi.mocked(ventasDisenoApi, true)
+vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
+
+const mockedApi   = vi.mocked(ventasDisenoApi, true)
+const mockedStore = vi.mocked(useAuthStore)
 
 function renderModal(onCreated = vi.fn()) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -39,6 +44,8 @@ beforeEach(() => {
   mockedApi.pipeline.create.mockResolvedValue(fakeCard)
   mockedApi.pipeline.uploadFile.mockResolvedValue({} as never)
   mockedApi.pipeline.contacts.create.mockResolvedValue({} as never)
+  mockedApi.home.vendors.mockResolvedValue([])
+  mockedStore.mockReturnValue({ user: { id: 1, role: 'designer' } } as never)
 })
 
 describe('NewProjectModal', () => {
@@ -107,6 +114,30 @@ describe('NewProjectModal', () => {
     await waitFor(() => expect(mockedApi.pipeline.create).toHaveBeenCalledWith({
       type: 'design', name: 'Proyecto Diseño', sub_client_id: 10, tag: null, observations: null,
     }))
+  })
+
+  it('crear un Subcliente nuevo desde Diseño manda from_design_context para no generar un Lead (SCRUM-1011)', async () => {
+    mockedApi.masterClients.list.mockResolvedValue([{ id: 1, name: 'Grupo Delta' }])
+    mockedApi.subClients.list.mockResolvedValue([])
+    mockedApi.subClients.create.mockResolvedValue({ id: 9, business_name: 'Nueva SA', tax_id: '155-1234-1-2026' } as never)
+
+    renderModal()
+    fireEvent.click(screen.getByText('ventasDiseno:modal.newProject.typeDesign'))
+
+    const [, masterField, subField] = screen.getAllByRole('textbox')
+    fireEvent.focus(masterField)
+    fireEvent.change(masterField, { target: { value: 'Delta' } })
+    fireEvent.mouseDown(await screen.findByText('Grupo Delta'))
+
+    fireEvent.focus(subField)
+    fireEvent.change(subField, { target: { value: 'Nueva SA' } })
+    fireEvent.mouseDown(await screen.findByText(/modal\.createNew/))
+
+    fireEvent.change(await screen.findByPlaceholderText('ventasDiseno:modal.subClientTaxId'), { target: { value: '155-1234-1-2026' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.subClientTaxIdDv'), { target: { value: '81' } })
+    fireEvent.click(screen.getByText('common:actions.confirm'))
+
+    await waitFor(() => expect(mockedApi.subClients.create).toHaveBeenCalledWith(1, 'Nueva SA', '155-1234-1-2026', '81', true))
   })
 
   it('crea un Lead con Etiqueta y Observaciones (REQ-019)', async () => {
@@ -206,5 +237,39 @@ describe('NewProjectModal', () => {
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.contactName'), { target: { value: 'Ana Pérez' } })
 
     expect(screen.getByText('ventasDiseno:modal.newProject.save')).toBeDisabled()
+  })
+
+  // SCRUM-849.4 — Gerencia puede asignar desde la creación.
+  it('Gerencia puede asignar a varios vendedores al crear', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    mockedApi.home.vendors.mockResolvedValue([
+      { id: 1, name: 'Ana Diaz' }, { id: 2, name: 'Beto Solis' },
+    ] as never)
+    renderModal()
+
+    const [nameInput] = screen.getAllByRole('textbox')
+    fireEvent.change(nameInput, { target: { value: 'Proyecto asignado' } })
+
+    fireEvent.click(await screen.findByRole('button', { name: /userFilter\.all/ }))
+    fireEvent.click(await screen.findByText('Ana Diaz'))
+    fireEvent.click(screen.getByText('Beto Solis'))
+    fireEvent.click(screen.getByText('ventasDiseno:modal.newProject.save'))
+
+    await waitFor(() => expect(mockedApi.pipeline.create).toHaveBeenCalledWith(
+      expect.objectContaining({ assignee_ids: [1, 2] }),
+    ))
+  })
+
+  it('sin selección de asignados, Gerencia crea igual sin mandar assignee_ids', async () => {
+    mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
+    renderModal()
+
+    const [nameInput] = screen.getAllByRole('textbox')
+    fireEvent.change(nameInput, { target: { value: 'Proyecto sin asignar' } })
+    fireEvent.click(screen.getByText('ventasDiseno:modal.newProject.save'))
+
+    await waitFor(() => expect(mockedApi.pipeline.create).toHaveBeenCalledWith(
+      expect.not.objectContaining({ assignee_ids: expect.anything() }),
+    ))
   })
 })

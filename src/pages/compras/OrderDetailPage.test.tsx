@@ -67,7 +67,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     status: 'ordenado', next_status: 'en_transito', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
     estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
-    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 500, currency: 'USD',
+    blocked_by_primary_approval: false, approved_by: null, approved_by_name: null, total_amount: 500, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null, additional_costs_total: 0, payable_total: 500, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-05T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -138,6 +138,27 @@ describe('OrderDetailPage', () => {
     fireEvent.click(screen.getByText('compras:orders.detail.payments.title'))
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.balance')).toBeInTheDocument())
     expect(screen.getByText('$500.00')).toBeInTheDocument()
+  })
+
+  // SCRUM-956 — valores monetarios deben llevar separador de miles, no solo decimales.
+  it('formatea costo unitario, subtotal, total y costo de envío con separador de miles', async () => {
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
+      total_amount: 61329.50, payable_total: 61329.50, shipping_type: 'maritimo', shipping_cost: 2500.75,
+      lines: [{
+        id: 1, catalog_product_id: 5, reference: 'REF-1', factory_reference: null, description: 'Lámpara LED',
+        quantity: 5, unit_cost: 12345.5, subtotal: 61727.5, additional_cost_percent: null,
+        additional_cost_amount: null, additional_cost_type: null,
+        sales_project_id: null, sales_project_name: null,
+        received_quantity: 0, reception_status: 'pendiente',
+      }],
+    }))
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:orders.detail.title 42')).toBeInTheDocument())
+    expect(screen.getByText('$12,345.50')).toBeInTheDocument() // costo unitario
+    expect(screen.getByText('$61,727.50')).toBeInTheDocument() // subtotal de la línea
+    expect(screen.getByText((_, el) => el?.tagName === 'DIV' && el.textContent === 'compras:newOrder.lines.total: $61,329.50')).toBeInTheDocument()
+    expect(screen.getByText((_, el) => el?.textContent === ' · $2,500.75')).toBeInTheDocument() // costo de envío
   })
 
   // Pre-QA 2026-08-13 (Servicios, REQ-274 RN3, SCRUM-344) — mismo gap que OrdersPage.test.tsx:
@@ -615,5 +636,37 @@ describe('OrderDetailPage', () => {
     // No hay ningún control de subida (input file / selector de categoría) en este card — la
     // subida sigue siendo exclusiva del checklist de Logística (decisión de Luis 2026-08-06).
     expect(screen.queryByText('compras:logistics.documents.upload')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1013 (Pre-QA H2/M2, decisión de Luis) — el vendedor (compras.logistica.view) recibe la orden SIN
+  // costos ni montos (el servidor los deja en null): la pantalla no muestra columnas de costo, total,
+  // pagos, PDF ni la carga de documentos del proveedor.
+  it('SCRUM-1013 — con montos enmascarados (vendedor) no muestra costo, total, pagos, PDF ni carga de documentos', async () => {
+    mockAuthState(['compras.logistica.view'])
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
+      total_amount: null as unknown as number, payable_total: null as unknown as number, shipping_cost: null, paid_amount: null as unknown as number,
+      lines: [{ ...makeDetail().lines[0], unit_cost: null as unknown as number, subtotal: null as unknown as number }],
+    }))
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:orders.detail.title 42')).toBeInTheDocument())
+    expect(screen.getByText('Lámpara LED')).toBeInTheDocument()
+    expect(screen.queryByText('compras:newOrder.lines.unitCost')).toBeNull()
+    expect(screen.queryByText('compras:newOrder.lines.subtotal')).toBeNull()
+    expect(screen.queryByText(/compras:newOrder\.lines\.total:/)).toBeNull()
+    expect(screen.queryByText('compras:orders.detail.payments.title')).toBeNull()
+    expect(screen.queryByText('compras:orders.actions.viewOrderPdf')).toBeNull()
+    expect(screen.queryByText('$NaN')).toBeNull()
+  })
+
+  it('SCRUM-1013 — con montos visibles (Compras/Operaciones) sigue mostrando todo igual que antes', async () => {
+    mockAuthState(['compras.limited.view'])
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail())
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('compras:orders.detail.title 42')).toBeInTheDocument())
+    expect(screen.getByText('compras:newOrder.lines.unitCost')).toBeInTheDocument()
+    expect(screen.getByText('compras:orders.detail.payments.title')).toBeInTheDocument()
+    expect(screen.getByText('compras:orders.actions.viewOrderPdf')).toBeInTheDocument()
   })
 })

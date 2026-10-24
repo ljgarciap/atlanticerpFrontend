@@ -40,7 +40,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: {
     internalTechnicians: {
-      list: vi.fn(), visitsToday: vi.fn(), create: vi.fn(), agenda: vi.fn(), stats: vi.fn(),
+      list: vi.fn(), visitsToday: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), agenda: vi.fn(), stats: vi.fn(),
       commissionCapture: vi.fn(), saveCommissionCapture: vi.fn(),
       slaSettings: vi.fn(), updateSlaSettings: vi.fn(), commission: vi.fn(),
     },
@@ -447,5 +447,75 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     // El SLA "Reclamos" (default 2 días) es uno de los 4 campos de esa sección — deshabilitado para Aaron.
     expect(modal.getByDisplayValue('2')).toBeDisabled()
     expect(modal.queryByText('technicians.internal.commissionModal.slaSave')).not.toBeInTheDocument()
+  })
+})
+
+describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
+  it('"Editar" abre el mismo formulario con los datos precargados y guarda con update()', async () => {
+    mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
+    mockedApi.internalTechnicians.update.mockResolvedValue(makeTechnician({ nombre: 'Carlos V.' }))
+    renderPage()
+
+    fireEvent.click(await screen.findByText('technicians.internal.card.edit'))
+    const modal = await screen.findByTestId('internal-technician-create-modal')
+    expect(within(modal).getByText('technicians.internal.createModal.editTitle')).toBeInTheDocument()
+    expect(within(modal).getByDisplayValue('Tecnico Servicios Test')).toBeInTheDocument()
+    expect(within(modal).getByDisplayValue('6000-0000')).toBeInTheDocument()
+
+    fireEvent.change(within(modal).getByDisplayValue('Tecnico Servicios Test'), { target: { value: 'Carlos V.' } })
+    fireEvent.click(within(modal).getByText('technicians.internal.createModal.save'))
+
+    await waitFor(() => expect(mockedApi.internalTechnicians.update).toHaveBeenCalledWith(
+      1, expect.objectContaining({ nombre: 'Carlos V.', telefono: '6000-0000', especialidad: 'general' }),
+    ))
+    expect(mockedApi.internalTechnicians.create).not.toHaveBeenCalled()
+  })
+
+  it('"Eliminar" pide confirmación y solo llama a remove() al confirmar', async () => {
+    mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
+    mockedApi.internalTechnicians.remove.mockResolvedValue(undefined)
+    renderPage()
+
+    fireEvent.click(await screen.findByText('technicians.internal.card.delete'))
+    const modal = await screen.findByTestId('internal-technician-delete-modal')
+    expect(mockedApi.internalTechnicians.remove).not.toHaveBeenCalled()
+
+    fireEvent.click(within(modal).getByText('technicians.internal.deleteModal.confirm'))
+    await waitFor(() => expect(mockedApi.internalTechnicians.remove).toHaveBeenCalledWith(1))
+  })
+
+  // Pre-QA SCRUM-1015 — la tarjeta "Activos hoy" (otra queryKey) quedaba desactualizada tras eliminar.
+  it('tras eliminar, también se vuelve a pedir las stats del equipo (tarjeta Activos hoy)', async () => {
+    mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
+    mockedApi.internalTechnicians.remove.mockResolvedValue(undefined)
+    renderPage()
+
+    fireEvent.click(await screen.findByText('technicians.internal.card.delete'))
+    await waitFor(() => expect(mockedApi.internalTechnicians.stats).toHaveBeenCalledTimes(1))
+    fireEvent.click(within(await screen.findByTestId('internal-technician-delete-modal')).getByText('technicians.internal.deleteModal.confirm'))
+
+    await waitFor(() => expect(mockedApi.internalTechnicians.stats).toHaveBeenCalledTimes(2))
+  })
+
+  it('cancelar la confirmación no elimina', async () => {
+    mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
+    renderPage()
+
+    fireEvent.click(await screen.findByText('technicians.internal.card.delete'))
+    const modal = await screen.findByTestId('internal-technician-delete-modal')
+    fireEvent.click(within(modal).getByText('technicians.internal.deleteModal.cancel'))
+
+    expect(screen.queryByTestId('internal-technician-delete-modal')).toBeNull()
+    expect(mockedApi.internalTechnicians.remove).not.toHaveBeenCalled()
+  })
+
+  it('un rol sin permiso de gestión (técnico) no ve Editar ni Eliminar', async () => {
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
+    renderPage()
+
+    await screen.findByText('Tecnico Servicios Test')
+    expect(screen.queryByText('technicians.internal.card.edit')).toBeNull()
+    expect(screen.queryByText('technicians.internal.card.delete')).toBeNull()
   })
 })

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
+import { useToastStore } from '@/store/toastStore'
 import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { PipelineCard, PipelineStage } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
@@ -11,6 +13,9 @@ import { Button } from '@/components/ui/Button'
 import { IcoClock } from '@/components/icons'
 import PipelineCardModal from '@/components/PipelineCardModal'
 import NewProjectModal from '@/components/NewProjectModal'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 type Chip = 'all' | 'final_stage' | 'stagnant' | 'approved'
 
@@ -18,7 +23,54 @@ export default function VentasDisenoPipelinePage() {
   const { t }     = useTranslation(['common', 'ventasDiseno', 'crm'])
   const navigate  = useNavigate()
   const { user }  = useAuthStore()
-  const canSeeTeam = user?.role === 'management' || user?.role === 'superadmin'
+  const canSeeTeam = hasGerenciaScope(user)
+  // SCRUM-1128 — Félix (`ventas_diseno.pipeline.read_all`) ve el Pipeline de TODO el equipo en solo
+  // lectura, pero no es Gerencia: sin esto el listado salía con scope='own' y le llegaba vacío (el
+  // backend solo da alcance de equipo con scope='team'). `canSeeTeam` se mantiene para lo que exige
+  // `ventas_diseno.read` (selector de dueños, /home/vendors): Félix no lo tiene y recibiría 403.
+  const readsAllPipeline = user?.permissions?.includes('ventas_diseno.pipeline.read_all') ?? false
+  const canViewTeamScope = canSeeTeam || readsAllPipeline
+  // SCRUM-1128 — Félix entra al Pipeline en solo lectura (más la acción "Pasar a Pedido" dentro del
+  // detalle de un proyecto aprobado). Sin permiso de edición del módulo se ocultan las acciones de
+  // escritura del tablero; el backend las rechaza igual (403). Sin permiso real de escritura => solo lectura.
+  // Sin el claim de módulo (Félix no tiene `modules.ventas_diseno`) NO se asume edición: se exige permiso real de escritura.
+  // SCRUM-1139 — `ventas_diseno.pipeline.edit` (Félix) habilita la edición del tablero SOLO en el Pipeline: es el
+  // permiso angosto gemelo de `pipeline.read_all`, no abre ninguna otra pantalla del módulo.
+  const canEditModule = user?.modules?.ventas_diseno?.edit === true || (user?.permissions?.includes('ventas_diseno.write') ?? false)
+  const hasPipelineEdit = user?.permissions?.includes('ventas_diseno.pipeline.edit') ?? false
+  const canEditPipeline = canEditModule || hasPipelineEdit
+  // Con solo `pipeline.edit` (sin edición del módulo) no se ofrece "Nueva cotización": llevaría a Cotizaciones, que esa persona no abre.
+  const canCreateQuoteFromPipeline = canEditModule
+  // El Catálogo exige `ventas_diseno.read`: quien solo tiene los permisos angostos del Pipeline (`read_all`/`pipeline.edit`, Félix) no lo abre
+  // (la ruta lo redirige), así que el botón sería un enlace muerto. Se oculta solo para ese perfil; el resto lo ve igual que antes.
+  const perms = user?.permissions ?? []
+  const pipelineOnlyAccess = (readsAllPipeline || hasPipelineEdit) && !perms.includes('ventas_diseno.read') && !perms.includes('superadmin.all')
+  const qc = useQueryClient()
+  const toast = useToastStore(s => s.show)
+
+  // SCRUM-849.1 — mover una tarjeta arrastrándola entre columnas, reusando el mismo
+  // endpoint/gate que ya usa el botón "Mover a..." del modal de detalle
+  // (PipelineCardModal): ninguna validación de negocio se resuelve acá, solo se muestra
+  // el mensaje que el backend ya devuelve si la transición no es válida.
+  const [draggedCardId, setDraggedCardId] = useState<number | null>(null)
+  const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null)
+  const dropMutation = useMutation({
+    mutationFn: ({ id, stage }: { id: number; stage: PipelineStage }) => ventasDisenoApi.pipeline.changeStage(id, stage),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline'] }),
+    onError: (err: unknown) => {
+      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
+      toast(message ?? t('ventasDiseno:modal.stageChangeError'), 'error')
+    },
+  })
+  function handleDrop(targetStage: PipelineStage) {
+    const cardId = draggedCardId
+    setDraggedCardId(null)
+    if (cardId === null) return
+    const card = allCards.find(c => c.id === cardId)
+    if (card && card.stage !== targetStage) {
+      dropMutation.mutate({ id: cardId, stage: targetStage })
+    }
+  }
 
   // REQ-022/065: "Ver proyectos" en Clientes navega a Pipeline con la tarjeta
   // resaltada vía ?card={id} — se abre el mismo modal de detalle que un click en el
@@ -43,7 +95,8 @@ export default function VentasDisenoPipelinePage() {
     v !== 'approved' && v !== 'proposal' && v !== 'stagnant' && PIPELINE_STAGES.some(s => s.id === v)
 
   const [scope,  setScope]  = useState<'own' | 'team'>(() => {
-    if (!canSeeTeam) return 'own'
+    if (!canViewTeamScope) return 'own'
+    if (!canSeeTeam) return 'team'
     if (params.get('scope') === 'team') return 'team'
     if (params.get('scope') === 'own') return 'own'
     return initialCardParam !== null || stageParam === 'approved' || stageParam === 'proposal' || stageParam === 'stagnant' || isOtherStageParam(stageParam) ? 'team' : 'own'
@@ -60,7 +113,19 @@ export default function VentasDisenoPipelinePage() {
   // único valor (SalesProject.tag es un enum de 3, 'both' ya ES "Diseño + Cotización",
   // no se combina mandando dos tags a la vez).
   const [tag, setTag] = useState<string | null>(() => params.get('tag'))
+  // SCRUM-1128 — filtro "Pedidos": clasifica por el estado real del paso a pedido, no por `stage`.
+  const [orders, setOrders] = useState<'approved' | 'pending' | ''>('')
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
+  // SCRUM-854 — multi-selección Vendedor/Diseñador, solo relevante en scope='team'. Sin
+  // selección = todo el equipo (mismo criterio que `WarehouseMultiSelect`/`UserMultiSelect`).
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
   const [order,  setOrder]  = useState<'days' | 'value'>(() => (params.get('order') === 'value' ? 'value' : 'days'))
   const [openCardId, setOpenCardId] = useState<number | null>(initialCardParam)
   // REQ-608 (Batch C, Dashboard CRM): "+ Nuevo Proyecto" del Dashboard navega acá con
@@ -68,9 +133,11 @@ export default function VentasDisenoPipelinePage() {
   const [showNewProject, setShowNewProject] = useState(() => params.get('openNewProject') === '1')
 
   const { data: cards, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-pipeline', scope, chip, stage, tag, search, order],
+    queryKey: ['ventas-diseno-pipeline', scope, chip, stage, tag, searchTerm, order, ownerIds, orders],
     queryFn:  () => ventasDisenoApi.pipeline.list({
-      scope, chip, stage: stage ?? undefined, tag: tag ?? undefined, search: search || undefined, order,
+      scope, chip, stage: stage ?? undefined, tag: tag ?? undefined, search: searchTerm || undefined, order,
+      orders: orders || undefined,
+      owner_ids: scope === 'team' && ownerIds.length > 0 ? ownerIds : undefined,
     }),
   })
 
@@ -82,6 +149,7 @@ export default function VentasDisenoPipelinePage() {
   const visibleStages = PIPELINE_STAGES.filter(s => {
     if (chip === 'final_stage') return s.id === 'proposal'
     if (chip === 'approved') return s.id === 'approved'
+    if (orders) return s.id === 'approved'
     if (stage) return s.id === stage
     return true
   })
@@ -104,15 +172,21 @@ export default function VentasDisenoPipelinePage() {
         <div className="flex gap-2 flex-wrap">
           {/* SCRUM-700 (REQ-620, Batch E) — habilitado: el módulo Catálogo ya existe (SCRUM-711
               lo dejaba visual-only "hasta que se desarrolle el módulo CRM"). */}
-          <Button variant="secondary" onClick={() => navigate('/ventas-diseno/catalog')}>
-            {t('ventasDiseno:kanban.actions.catalog')}
-          </Button>
-          <Button variant="secondary" onClick={() => setShowNewProject(true)}>
-            {t('ventasDiseno:kanban.actions.newProject')}
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/ventas-diseno/quotes')}>
-            {t('ventasDiseno:kanban.actions.newQuote')}
-          </Button>
+          {!pipelineOnlyAccess && (
+            <Button variant="secondary" onClick={() => navigate('/ventas-diseno/catalog')}>
+              {t('ventasDiseno:kanban.actions.catalog')}
+            </Button>
+          )}
+          {canEditPipeline && (
+            <Button variant="secondary" onClick={() => setShowNewProject(true)}>
+              {t('ventasDiseno:kanban.actions.newProject')}
+            </Button>
+          )}
+          {canCreateQuoteFromPipeline && (
+            <Button variant="secondary" onClick={() => navigate('/ventas-diseno/quotes')}>
+              {t('ventasDiseno:kanban.actions.newQuote')}
+            </Button>
+          )}
           {/* REQ-342 — Status de pedidos es una pantalla compartida con Bodega (Batch A4,
               SCRUM-407→413): mismo destino, el backend ya filtra a "solo lo propio" para
               este perfil. */}
@@ -132,7 +206,7 @@ export default function VentasDisenoPipelinePage() {
           className="border border-slate-200 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-[13px] w-full sm:min-w-[220px] sm:flex-1 focus:outline-none focus:border-[#5BA5A0]"
         />
 
-        {/* Alcance — solo Gerencia puede ver "Equipo" (REQ-002) */}
+        {/* Alcance — solo Gerencia puede ver "Equipo" (REQ-002); Félix queda fijo en Equipo, sin toggle */}
         {canSeeTeam && (
           <div className="flex rounded-lg border border-slate-200 overflow-hidden">
             <Button
@@ -156,6 +230,11 @@ export default function VentasDisenoPipelinePage() {
           </div>
         )}
 
+        {/* SCRUM-854 — solo visible en alcance "Equipo", igual que el selector viejo de Inicio. */}
+        {canSeeTeam && scope === 'team' && (
+          <UserMultiSelect users={teamVendors ?? []} selectedIds={ownerIds} onChange={setOwnerIds} />
+        )}
+
         {/* Chips rápidos — elegir cualquiera limpia el filtro puntual de stage/tag que
             haya llegado por deep-link (SCRUM-796), para que "Todos" saque de verdad
             del filtro heredado del Dashboard CRM. */}
@@ -173,6 +252,18 @@ export default function VentasDisenoPipelinePage() {
             {opt.label}
           </button>
         ))}
+
+        <select
+          value={orders}
+          onChange={e => setOrders(e.target.value as 'approved' | 'pending' | '')}
+          className={selectClass}
+          aria-label={t('ventasDiseno:filters.orders')}
+          data-testid="pipeline-orders-filter"
+        >
+          <option value="">{t('ventasDiseno:filters.ordersAll')}</option>
+          <option value="approved">{t('ventasDiseno:filters.ordersApproved')}</option>
+          <option value="pending">{t('ventasDiseno:filters.ordersPending')}</option>
+        </select>
 
         <select value={order} onChange={e => setOrder(e.target.value as 'days' | 'value')} className={selectClass}>
           <option value="days">{t('ventasDiseno:filters.orderByDays')}</option>
@@ -215,12 +306,35 @@ export default function VentasDisenoPipelinePage() {
               const stageCards = allCards.filter(c => c.stage === stage.id)
               const totalValue = stageCards.reduce((sum, c) => sum + (c.amount ?? 0), 0)
 
+              const isLost = stage.id === 'lost'
+              const isDropTarget = dragOverStage === stage.id
+
               return (
-                <div key={stage.id} className="bg-slate-100 dark:bg-slate-900 rounded-xl p-2.5 min-h-[200px] flex flex-col">
+                <div
+                  key={stage.id}
+                  data-testid={`pipeline-stage-${stage.id}`}
+                  onDragOver={e => { e.preventDefault(); if (draggedCardId !== null) setDragOverStage(stage.id) }}
+                  onDragLeave={() => setDragOverStage(cur => (cur === stage.id ? null : cur))}
+                  onDrop={e => { e.preventDefault(); setDragOverStage(null); handleDrop(stage.id) }}
+                  className={[
+                    isLost
+                      // SCRUM-849.2 — diferenciar PERDIDO del flujo normal: borde rojo fuerte +
+                      // fondo rojo claro tenue (mismo tono que Ventas y Diseño → Inicio → Final
+                      // Stage), nunca gris.
+                      ? 'bg-red-50/50 dark:bg-red-950/10 border-2 border-red-400 dark:border-red-800'
+                      : 'bg-slate-100 dark:bg-slate-900',
+                    'rounded-xl p-2.5 min-h-[200px] flex flex-col transition-colors',
+                    // SCRUM-849.1 — resalte de la columna mientras se arrastra una tarjeta encima.
+                    isDropTarget ? 'ring-2 ring-[#5BA5A0]' : '',
+                  ].join(' ')}
+                >
                   <div className="flex justify-between items-center pb-2.5 mb-2.5 shrink-0">
                     <div className="flex items-center gap-1.5">
                       <span className="inline-block w-2 h-2 rounded-full" style={{ background: stage.color }} />
-                      <span className="text-xs font-medium" style={{ color: stage.color }}>
+                      <span
+                        className={isLost ? 'text-xs font-bold uppercase' : 'text-xs font-medium'}
+                        style={{ color: stage.color }}
+                      >
                         {t(`ventasDiseno:stages.${stage.id}`)}
                       </span>
                     </div>
@@ -248,6 +362,9 @@ export default function VentasDisenoPipelinePage() {
                         card={c}
                         highlighted={c.id === initialCardParam}
                         onClick={() => setOpenCardId(c.id)}
+                        draggable={canEditPipeline}
+                        onDragStart={() => setDraggedCardId(c.id)}
+                        onDragEnd={() => { setDraggedCardId(null); setDragOverStage(null) }}
                       />
                     ))
                   )}
@@ -294,12 +411,25 @@ export default function VentasDisenoPipelinePage() {
   )
 }
 
-function PipelineCardTile({ card, highlighted, onClick }: { card: PipelineCard; highlighted: boolean; onClick: () => void }) {
+function PipelineCardTile({ card, highlighted, draggable, onClick, onDragStart, onDragEnd }: {
+  card: PipelineCard
+  highlighted: boolean
+  draggable: boolean
+  onClick: () => void
+  // SCRUM-849.1 — mover directo desde el tablero; el padre resuelve el drop real
+  // contra el endpoint de cambio de etapa (mismas validaciones de siempre).
+  onDragStart: () => void
+  onDragEnd: () => void
+}) {
   const { t } = useTranslation('ventasDiseno')
 
   return (
     <div
       onClick={onClick}
+      draggable={draggable}
+      data-testid={`pipeline-card-${card.id}`}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       className={[
         'bg-white dark:bg-slate-800 rounded-xl p-3.5 mb-2 cursor-pointer transition-all hover:shadow-md hover:-translate-y-px select-none',
         highlighted ? 'ring-2 ring-[#5BA5A0]' : '',

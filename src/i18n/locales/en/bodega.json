@@ -75,6 +75,7 @@
       }
     },
     "relocationRequests": {
+      "notPending": "Request #{{id}} is no longer pending approval (it was approved, rejected or does not exist). Switch the filter to \"All\" to see it.",
       "openButton": "Relocation requests",
       "title": "Relocation requests",
       "chips": {
@@ -102,11 +103,19 @@
       },
       "actions": {
         "approve": "Approve",
-        "reject": "Reject"
+        "reject": "Reject",
+        "viewDetail": "View details"
       },
       "empty": "No relocation requests with this filter.",
       "reasonModal": {
         "title": "Rejection reason"
+      },
+      "detailModal": {
+        "title": "Relocation details",
+        "reference": "Reference",
+        "description": "Description",
+        "rejectionReason": "Rejection reason",
+        "resolvedBy": "Resolved by"
       },
       "rejectModal": {
         "title": "Reject relocation",
@@ -131,6 +140,40 @@
         "required": "Write a location code.",
         "generic": "Could not save the location. Please try again."
       }
+    },
+    "zonaLibre": {
+      "badge": "View only",
+      "noticeTitle": "View only",
+      "noticeBody": "Lafayette Lighting data; not part of Atlantic inventory.",
+      "kpis": {
+        "products": "Lafayette products",
+        "available": "Available (Lafayette)",
+        "lastSync": "Last sync"
+      },
+      "filters": {
+        "search": "Search by reference, description or brand...",
+        "searchLabel": "Search the Lafayette catalog",
+        "withStock": "Only with availability"
+      },
+      "table": {
+        "image": "Image",
+        "lafayetteId": "Lafayette ref.",
+        "reference": "Reference",
+        "description": "Description",
+        "brand": "Brand",
+        "category": "Category",
+        "available": "Available (Lafayette)",
+        "price": "Lafayette price",
+        "caption": "Lafayette product catalog (view only)"
+      },
+      "resultsCount_one": "{{count}} product",
+      "resultsCount_other": "{{count}} products",
+      "empty": "No Lafayette products match your search.",
+      "notSynced": "The Lafayette catalog has not been synced yet.",
+      "notSyncedHint": "Products will appear after the first automatic sync.",
+      "error": "Could not load the Lafayette catalog.",
+      "retry": "Retry",
+      "help": "Need a product in AtlanticERP? Create it manually as a AtlanticERP product from Purchasing; it is not copied from this list."
     }
   },
   "kardex": {
@@ -295,6 +338,7 @@
       "assistant": "All assistants",
       "client": "All clients",
       "seller": "All sellers",
+      "stage": "All statuses",
       "clear": "Clear filters"
     },
     "chips": {
@@ -376,7 +420,8 @@
         "available": "Available",
         "viewWarehouses": "View warehouses",
         "noProduct": "Custom item, no associated warehouse",
-        "exportExcel": "Download Excel"
+        "exportExcel": "Download Excel",
+        "pendingReason": "Pending reason"
       }
     },
     "warehousesModal": {
@@ -405,6 +450,7 @@
     },
     "guideModal": {
       "title": "Delivery Guide",
+      "error": "Could not load the delivery guide.",
       "guideNumber": "Guide n°",
       "orderNumber": "Order #",
       "date": "Date",
@@ -461,7 +507,8 @@
         "foundAt": "Found at",
         "requested": "Requested",
         "picked": "Prepared",
-        "observations": "Notes"
+        "observations": "Notes",
+        "warehouse": "Warehouse"
       },
       "completedBy": "Picking completed by {{name}}",
       "missingRecogido": "{{count}} item is still missing the \"Picked\" checkbox.",
@@ -470,7 +517,18 @@
       "notesFailed": "Could not save the note. Please try again.",
       "completedFull": "Picking completed — the order moved to Packing.",
       "completedWithReview": "Picking completed with shortages — the order moved to Packing and an Inventory Review was created (Order #{{number}}).",
-      "print": "Print"
+      "print": "Print",
+      "warehouse": {
+        "fromCentral": "Ships from {{name}}",
+        "available": "Available: {{count}}",
+        "takeFromOther": "Take from another warehouse",
+        "removeOther": "Remove",
+        "otherWarehouse": "Other warehouse",
+        "otherQty": "Quantity from the other warehouse",
+        "overStock": "Only {{count}} can be picked from {{name}}. Lower the quantity or take the rest from another warehouse; whatever is not picked is left as a shortage (pending purchase).",
+        "qtyFailed": "The quantity could not be saved.",
+        "noStock": "No stock in sale warehouses"
+      }
     },
     "inventoryReviewModal": {
       "title": "Inventory Review",
@@ -552,6 +610,21 @@
         "tooLarge": "The file exceeds the 20MB maximum.",
         "saveFailed": "Could not confirm the signed guide. Please try again."
       }
+    },
+    "views": {
+      "table": "Table",
+      "board": "Board"
+    },
+    "table": {
+      "columns": {
+        "orderNumber": "Order #",
+        "client": "Client",
+        "seller": "Seller",
+        "assistant": "Assistant",
+        "deliveryDate": "Committed delivery date",
+        "stage": "Stage"
+      },
+      "empty": "No orders match the current filters."
     }
   },
   "home": {
@@ -714,9 +787,29 @@
         "label": "\"Top rotation\" item count",
         "help": "How many items make it into Home's \"Top rotation\" panel."
       },
+      "articulosCriticosTopN": {
+        "label": "\"Critical items\" item count",
+        "help": "How many items make it into Home's \"Critical items\" panel (ordered by importance)."
+      },
       "capacidadConcentracionPct": {
         "label": "Concentration % for the \"Capacity by warehouse\" alert",
         "help": "When a single warehouse concentrates this percentage or more of total inventory, the \"Capacity by warehouse\" report shows an alert suggesting redistribution."
+      },
+      "fraudeAjusteGrandeUnidades": {
+        "label": "Units to consider an adjustment \"large\"",
+        "help": "An inventory adjustment with this many units or more triggers a security alert, reviewable in the Security Alerts panel."
+      },
+      "fraudeHorarioFinHora": {
+        "label": "End of the \"overnight\" window (hour)",
+        "help": "Adjustments or relocations logged between midnight and this hour trigger a security alert."
+      },
+      "fraudeVentanaCorrelacionMinutos": {
+        "label": "Adjustment + relocation correlation window (minutes)",
+        "help": "If the same user adjusts and relocates the same product within this many minutes, a security alert is triggered."
+      },
+      "fraudeIpLookbackDias": {
+        "label": "Days to consider an IP \"known\"",
+        "help": "A Bodega action from an IP the user hasn't used in this many days triggers a security alert."
       }
     },
     "validation": {
@@ -727,7 +820,25 @@
     "save": "Save changes",
     "saved": "Changes saved",
     "saveError": "Could not save the settings",
-    "forbidden": "You don't have access to this screen."
+    "forbidden": "You don't have access to this screen.",
+    "warehouseRules": {
+      "title": "Warehouse rules",
+      "help": "Which warehouses can fulfil sales orders, which one is the default dispatch warehouse (always one, and a sales one) and which ones are excluded from «Available». Stock in an excluded sales warehouse (e.g. Showroom Obarrio) is shown separately to sellers.",
+      "loading": "Loading warehouses…",
+      "columns": {
+        "warehouse": "Warehouse",
+        "sale": "Allows sales",
+        "default": "Default dispatch",
+        "excludeAvailable": "Exclude from Available"
+      },
+      "aria": {
+        "sale": "{{name}}: allows sales",
+        "default": "{{name}}: default dispatch",
+        "excludeAvailable": "{{name}}: exclude from Available"
+      },
+      "saveError": "The change could not be saved.",
+      "saved": "Saved."
+    }
   },
   "inventory": {
     "title": "View Inventory",
@@ -746,6 +857,7 @@
     },
     "kpis": {
       "total": "Total products",
+      "withStock": "With stock",
       "lowStock": "Low stock",
       "outOfStock": "Out of stock",
       "inAttention": "In attention",
@@ -836,7 +948,8 @@
     },
     "warehouseModal": {
       "title": "Warehouses — {{reference}}",
-      "empty": "This product has no stock in any warehouse."
+      "empty": "This product has no stock in any warehouse.",
+      "total": "Total"
     },
     "porServirModal": {
       "title": "To serve — {{reference}}",
@@ -880,6 +993,9 @@
       },
       "products": {
         "searchPlaceholder": "Search by factory ref., public ref. or name...",
+        "noResults": "No product from this provider matches the search.",
+        "allAdded": "You have already added every available product from this provider.",
+        "noProducts": "This provider has no products in the catalog yet.",
         "table": {
           "factoryRef": "Factory ref.",
           "publicRef": "Public ref.",
@@ -990,6 +1106,7 @@
         "estimatedArrival": "Estimated arrival",
         "notes": "Notes",
         "notesEmpty": "No notes.",
+        "notFound": "The Zona Libre request was not found.",
         "lines": "Products",
         "total": "Total amount",
         "approvedBy": "Approved by",
@@ -1160,6 +1277,7 @@
       "viewForm": "View form",
       "viewDeliveryGuide": "View original guide",
       "viewSignedDocument": "View signed document",
+      "viewCreditNote": "View credit note",
       "uploadSigned": "Upload signed document",
       "confirmReception": "Confirm physical reception",
       "finalize": "Simulate finalization"
@@ -1169,6 +1287,7 @@
       "openFormFailed": "Could not open the form. Try again.",
       "openGuideFailed": "Could not open the delivery guide. Try again.",
       "openSignedDocumentFailed": "Could not open the signed document. Try again.",
+      "openCreditNoteFailed": "Could not open the credit note. Try again.",
       "finalizeFailed": "Could not finalize the return. Try again."
     },
     "detailModal": {

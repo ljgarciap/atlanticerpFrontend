@@ -75,6 +75,7 @@
       }
     },
     "relocationRequests": {
+      "notPending": "La solicitud #{{id}} ya no está pendiente de aprobación (fue aprobada, rechazada o no existe). Cambia el filtro a «Todas» para verla.",
       "openButton": "Solicitudes de reubicación",
       "title": "Solicitudes de reubicación",
       "chips": {
@@ -102,11 +103,19 @@
       },
       "actions": {
         "approve": "Aprobar",
-        "reject": "Rechazar"
+        "reject": "Rechazar",
+        "viewDetail": "Ver detalle"
       },
       "empty": "No hay solicitudes de reubicación con este filtro.",
       "reasonModal": {
         "title": "Motivo del rechazo"
+      },
+      "detailModal": {
+        "title": "Detalle de la reubicación",
+        "reference": "Referencia",
+        "description": "Descripción",
+        "rejectionReason": "Motivo del rechazo",
+        "resolvedBy": "Resuelta por"
       },
       "rejectModal": {
         "title": "Rechazar reubicación",
@@ -131,6 +140,41 @@
         "required": "Escribe un código de ubicación.",
         "generic": "No se pudo guardar la ubicación. Intenta de nuevo."
       }
+    },
+    "zonaLibre": {
+      "badge": "Solo consulta",
+      "noticeTitle": "Solo consulta",
+      "noticeBody": "Datos de Lafayette Lighting, no forman parte del inventario de Atlantic.",
+      "kpis": {
+        "products": "Productos de Lafayette",
+        "available": "Disponible (Lafayette)",
+        "lastSync": "Última sincronización"
+      },
+      "filters": {
+        "search": "Buscar por referencia, descripción o marca...",
+        "searchLabel": "Buscar en el catálogo de Lafayette",
+        "withStock": "Solo con disponibilidad"
+      },
+      "table": {
+        "image": "Imagen",
+        "lafayetteId": "Ref. Lafayette",
+        "reference": "Referencia",
+        "description": "Descripción",
+        "brand": "Marca",
+        "category": "Categoría",
+        "available": "Disponible (Lafayette)",
+        "price": "Precio Lafayette",
+        "caption": "Catálogo de productos de Lafayette (solo consulta)"
+      },
+      "resultsCount_one": "{{count}} producto",
+      "resultsCount_many": "{{count}} de productos",
+      "resultsCount_other": "{{count}} productos",
+      "empty": "No hay productos de Lafayette que coincidan con la búsqueda.",
+      "notSynced": "El catálogo de Lafayette aún no se ha sincronizado.",
+      "notSyncedHint": "Los productos aparecerán después de la primera sincronización automática.",
+      "error": "No se pudo cargar el catálogo de Lafayette.",
+      "retry": "Reintentar",
+      "help": "¿Necesita usar un producto en AtlanticERP? Créelo manualmente como producto de AtlanticERP desde Compras; no se copia desde esta lista."
     }
   },
   "kardex": {
@@ -295,6 +339,7 @@
       "assistant": "Todos los asistentes",
       "client": "Todos los clientes",
       "seller": "Todos los vendedores",
+      "stage": "Todos los estados",
       "clear": "Limpiar filtros"
     },
     "chips": {
@@ -376,7 +421,8 @@
         "available": "Disponible",
         "viewWarehouses": "Ver bodegas",
         "noProduct": "Artículo personalizado, sin bodega asociada",
-        "exportExcel": "Descargar Excel"
+        "exportExcel": "Descargar Excel",
+        "pendingReason": "Motivo del pendiente"
       }
     },
     "warehousesModal": {
@@ -405,6 +451,7 @@
     },
     "guideModal": {
       "title": "Guía de Entrega",
+      "error": "No se pudo cargar la guía de entrega.",
       "guideNumber": "Guía n°",
       "orderNumber": "Pedido #",
       "date": "Fecha",
@@ -461,7 +508,8 @@
         "foundAt": "Encontrado en",
         "requested": "Pedida",
         "picked": "Alistada",
-        "observations": "Observación"
+        "observations": "Observación",
+        "warehouse": "Bodega"
       },
       "completedBy": "Picking completado por {{name}}",
       "missingRecogido": "Falta marcar \"Recogido\" en {{count}} artículo.",
@@ -470,7 +518,18 @@
       "notesFailed": "No se pudo guardar la observación. Intenta de nuevo.",
       "completedFull": "Picking completado — el pedido avanzó a Packing.",
       "completedWithReview": "Picking completado con faltantes — el pedido avanzó a Packing y se generó una Revisión de Inventario (Pedido #{{number}}).",
-      "print": "Imprimir"
+      "print": "Imprimir",
+      "warehouse": {
+        "fromCentral": "Sale de {{name}}",
+        "available": "Disponible: {{count}}",
+        "takeFromOther": "Tomar de otra bodega",
+        "removeOther": "Quitar",
+        "otherWarehouse": "Otra bodega",
+        "otherQty": "Cantidad en la otra bodega",
+        "overStock": "Solo hay {{count}} para alistar en {{name}}. Baja la cantidad o toma el resto de otra bodega; lo que no se alista queda como faltante (pendiente de compra).",
+        "qtyFailed": "No se pudo guardar la cantidad.",
+        "noStock": "Sin saldo en bodegas de venta"
+      }
     },
     "inventoryReviewModal": {
       "title": "Revisión de Inventario",
@@ -552,6 +611,21 @@
         "tooLarge": "El archivo supera el máximo de 20MB.",
         "saveFailed": "No se pudo confirmar la guía firmada. Intenta de nuevo."
       }
+    },
+    "views": {
+      "table": "Tabla",
+      "board": "Tablero"
+    },
+    "table": {
+      "columns": {
+        "orderNumber": "N° Pedido",
+        "client": "Cliente",
+        "seller": "Vendedor",
+        "assistant": "Asistente",
+        "deliveryDate": "Fecha entrega comprometida",
+        "stage": "Etapa"
+      },
+      "empty": "No hay pedidos con los filtros actuales."
     }
   },
   "home": {
@@ -714,9 +788,29 @@
         "label": "Cantidad de artículos en \"Mayor rotación\"",
         "help": "Cuántos artículos entran en el top de \"Mayor rotación\" de Inicio."
       },
+      "articulosCriticosTopN": {
+        "label": "Cantidad de artículos en \"Artículos críticos\"",
+        "help": "Cuántos artículos entran en el top de \"Artículos críticos\" de Inicio (ordenados por importancia)."
+      },
       "capacidadConcentracionPct": {
         "label": "% de concentración para aviso de \"Capacidad por bodega\"",
         "help": "Cuando una sola bodega concentra este porcentaje o más del inventario total, el reporte \"Capacidad por bodega\" muestra un aviso sugiriendo redistribuir."
+      },
+      "fraudeAjusteGrandeUnidades": {
+        "label": "Unidades para considerar un ajuste \"grande\"",
+        "help": "Un ajuste de inventario con esta cantidad de unidades o más genera una alerta de seguridad, revisable en el panel de Alertas de seguridad."
+      },
+      "fraudeHorarioFinHora": {
+        "label": "Fin de la ventana de \"madrugada\" (hora)",
+        "help": "Ajustes o reubicaciones registrados entre la medianoche y esta hora generan una alerta de seguridad."
+      },
+      "fraudeVentanaCorrelacionMinutos": {
+        "label": "Ventana de correlación ajuste + reubicación (minutos)",
+        "help": "Si el mismo usuario ajusta y reubica el mismo producto dentro de esta cantidad de minutos, se genera una alerta de seguridad."
+      },
+      "fraudeIpLookbackDias": {
+        "label": "Días para considerar una IP \"conocida\"",
+        "help": "Una acción de Bodega desde una IP que el usuario no usó en estos últimos días genera una alerta de seguridad."
       }
     },
     "validation": {
@@ -727,7 +821,25 @@
     "save": "Guardar cambios",
     "saved": "Cambios guardados",
     "saveError": "No se pudo guardar la configuración",
-    "forbidden": "No tienes acceso a esta pantalla."
+    "forbidden": "No tienes acceso a esta pantalla.",
+    "warehouseRules": {
+      "title": "Reglas de bodega",
+      "help": "Qué bodegas pueden surtir pedidos de venta, cuál es la de despacho por defecto (siempre una, y de venta) y cuáles se excluyen del «Disponible». Lo de una bodega de venta excluida (p. ej. Showroom Obarrio) se muestra aparte a los vendedores.",
+      "loading": "Cargando bodegas…",
+      "columns": {
+        "warehouse": "Bodega",
+        "sale": "Permite ventas",
+        "default": "Despacho por defecto",
+        "excludeAvailable": "Excluir del Disponible"
+      },
+      "aria": {
+        "sale": "{{name}}: permite ventas",
+        "default": "{{name}}: despacho por defecto",
+        "excludeAvailable": "{{name}}: excluir del Disponible"
+      },
+      "saveError": "No se pudo guardar el cambio.",
+      "saved": "Guardado."
+    }
   },
   "inventory": {
     "title": "Ver Inventario",
@@ -746,6 +858,7 @@
     },
     "kpis": {
       "total": "Total de productos",
+      "withStock": "Con stock",
       "lowStock": "Bajo stock",
       "outOfStock": "Sin stock",
       "inAttention": "En atención",
@@ -836,7 +949,8 @@
     },
     "warehouseModal": {
       "title": "Bodegas — {{reference}}",
-      "empty": "Este producto no tiene stock en ninguna bodega."
+      "empty": "Este producto no tiene stock en ninguna bodega.",
+      "total": "Total"
     },
     "porServirModal": {
       "title": "Por servir — {{reference}}",
@@ -880,6 +994,9 @@
       },
       "products": {
         "searchPlaceholder": "Buscar por ref. fábrica, ref. pública o nombre...",
+        "noResults": "Ningún producto de este proveedor coincide con la búsqueda.",
+        "allAdded": "Ya agregaste todos los productos disponibles de este proveedor.",
+        "noProducts": "Este proveedor todavía no tiene productos en el catálogo.",
         "table": {
           "factoryRef": "Ref. fábrica",
           "publicRef": "Ref. pública",
@@ -990,6 +1107,7 @@
         "estimatedArrival": "Llegada estimada",
         "notes": "Notas",
         "notesEmpty": "Sin notas.",
+        "notFound": "No se encontró la solicitud de Zona Libre.",
         "lines": "Productos",
         "total": "Monto total",
         "approvedBy": "Aprobado por",
@@ -1160,6 +1278,7 @@
       "viewForm": "Ver formulario",
       "viewDeliveryGuide": "Ver guía original",
       "viewSignedDocument": "Ver documento firmado",
+      "viewCreditNote": "Ver nota de crédito",
       "uploadSigned": "Cargar documento firmado",
       "confirmReception": "Confirmar recepción física",
       "finalize": "Simular finalización"
@@ -1169,6 +1288,7 @@
       "openFormFailed": "No se pudo abrir el formulario. Intenta de nuevo.",
       "openGuideFailed": "No se pudo abrir la guía de entrega. Intenta de nuevo.",
       "openSignedDocumentFailed": "No se pudo abrir el documento firmado. Intenta de nuevo.",
+      "openCreditNoteFailed": "No se pudo abrir la nota de crédito. Intenta de nuevo.",
       "finalizeFailed": "No se pudo finalizar la devolución. Intenta de nuevo."
     },
     "detailModal": {

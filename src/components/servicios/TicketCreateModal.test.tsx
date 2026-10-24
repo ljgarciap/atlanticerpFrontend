@@ -8,6 +8,10 @@ import type { TicketDetail } from '@/types/servicios'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  // docs/specs/demo-mode.md — ServiciosSearchPickerModal ahora importa DemoModeBadge, que resuelve
+  // @/store/authStore -> @/i18n (real) -> requiere este export, aunque el picker de producto de
+  // este test no active el badge. Mismo fix ya aplicado en TicketDetailModal.test.tsx.
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 vi.mock('@/api/serviciosApi', () => ({
@@ -53,9 +57,9 @@ beforeEach(() => {
   mockedApi.lookup.products.mockResolvedValue([{ id: 500, reference: 'LUM-COL-014', name: 'Colgante LED', description: 'Colgante LED', brand: 'Atlantic', price_full: 89.9 }])
 })
 
-// REQ-246 RN6 — Cliente Master/Subcliente/Proyecto obligatorios, RN3 — descripción obligatoria.
+// REQ-246 — Cliente Master/Subcliente/Proyecto son opcionales desde 2026-10-07 (antes RN6 los exigía); RN3 — descripción obligatoria.
 describe('TicketCreateModal — validación (REQ-245/246)', () => {
-  it('Crear ticket queda deshabilitado hasta completar descripción y proyecto', async () => {
+  it('Crear ticket queda deshabilitado hasta completar descripción', async () => {
     renderModal()
 
     const submitBtn = await screen.findByText('tickets.create.submit')
@@ -64,7 +68,7 @@ describe('TicketCreateModal — validación (REQ-245/246)', () => {
     fireEvent.change(screen.getByPlaceholderText('tickets.create.descripcionPlaceholder'), {
       target: { value: 'Reclamo de producto' },
     })
-    expect(submitBtn).toBeDisabled() // todavía falta el proyecto (Cliente Master → Subcliente → Proyecto)
+    expect(submitBtn).not.toBeDisabled()
   })
 })
 
@@ -101,6 +105,26 @@ describe('TicketCreateModal — crear ticket', () => {
     const projectSelect = await screen.findByDisplayValue('tickets.create.proyectoPlaceholder')
     fireEvent.change(projectSelect, { target: { value: '100' } })
   }
+
+  it('permite crear un ticket sin proyecto asociado (sales_project_id = null)', async () => {
+    mockedApi.tickets.create.mockResolvedValue({ id: 55 } as TicketDetail)
+    const onCreated = vi.fn()
+    renderModal({ onCreated })
+
+    fireEvent.change(screen.getByPlaceholderText('tickets.create.descripcionPlaceholder'), {
+      target: { value: 'Ticket sin proyecto' },
+    })
+
+    const submitBtn = await screen.findByText('tickets.create.submit')
+    await waitFor(() => expect(submitBtn).not.toBeDisabled())
+    fireEvent.click(submitBtn)
+
+    await waitFor(() => expect(mockedApi.tickets.create).toHaveBeenCalledWith(expect.objectContaining({
+      descripcion: 'Ticket sin proyecto',
+      sales_project_id: null,
+    })))
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(55))
+  })
 
   it('envía el payload completo: proyecto, requerimientos marcados y producto agregado', async () => {
     mockedApi.tickets.create.mockResolvedValue({ id: 42 } as TicketDetail)

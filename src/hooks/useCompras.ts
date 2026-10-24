@@ -4,6 +4,7 @@ import type {
   ProviderPayload, PurchaseOrderPayload, ShippingInfoPayload, DocumentCategory, ComprasSettings,
   LiquidationAgencyPayload, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload, InventoryProductPayload,
   PurchaseOrderClaimPayload, ClaimListParams, ReportGranularity, CreateReplacementRequestPayload, GoodsReceiptPayload,
+  OrderDocLang,
 } from '@/types/compras'
 
 export function useProviders(params: ProviderListParams = {}) {
@@ -35,6 +36,40 @@ export function useUpdateProvider() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: ProviderPayload }) => comprasApi.providers.update(id, data),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/providers'] }),
+  })
+}
+
+/** SCRUM-819 — respaldo visual de datos bancarios, disponible recién con el proveedor ya guardado. */
+export function useUploadProviderBankImage() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => comprasApi.providers.uploadBankImage(id, file),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/providers'] }),
+  })
+}
+
+export function useDeleteProviderBankImage() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => comprasApi.providers.deleteBankImage(id),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/providers'] }),
+  })
+}
+
+/**
+ * ADR-SCRUM819 — poll cada 2s mientras la extracción esté pending/running, mismo criterio que
+ * useProviderConfirmationValidation (SCRUM-211): nunca por un número fijo de intentos, se detiene
+ * solo al llegar a completed/failed.
+ */
+export function useProviderBankExtraction(providerId: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['compras/providers', providerId, 'bank-image', 'extraction'],
+    queryFn:  () => comprasApi.providers.getBankExtraction(providerId as number),
+    enabled:  enabled && providerId !== null,
+    refetchInterval: query => {
+      const status = query.state.data?.status
+      return status === 'pending' || status === 'running' ? 2000 : false
+    },
   })
 }
 
@@ -133,16 +168,40 @@ export function useConfirmPendingOrderReceipts() {
  */
 export function useOpenPurchaseOrderPdf() {
   return useMutation({
-    mutationFn: async ({ id, includeCost, targetWindow }: { id: number; includeCost: boolean; targetWindow: Window | null }) => {
-      const blob = await comprasApi.orders.pdf(id, includeCost)
+    mutationFn: async ({ id, includeCost, targetWindow, lang = 'es', mode = 'view' }: {
+      id: number; includeCost: boolean; targetWindow: Window | null
+      /** SCRUM-1127 — `en` sirve la versión en inglés ya guardada (nunca llama a la IA). */
+      lang?: OrderDocLang
+      /** `download` baja el archivo en vez de abrirlo en otra pestaña. */
+      mode?: 'view' | 'download'
+    }) => {
+      const blob = await comprasApi.orders.pdf(id, includeCost, lang)
       const url = URL.createObjectURL(blob)
-      if (targetWindow) {
+      if (mode === 'download') {
+        const a = document.createElement('a')
+        a.href = url
+        a.download = lang === 'en' ? `purchase-order-${id}.pdf` : `orden-compra-${id}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+      } else if (targetWindow) {
         targetWindow.location.href = url
       } else {
         window.open(url, '_blank')
       }
       setTimeout(() => URL.revokeObjectURL(url), 60_000)
     },
+    // La ventana en blanco abierta al hacer click no debe quedar huérfana si el PDF no se pudo obtener.
+    onError: (_err, variables) => { variables.targetWindow?.close() },
+  })
+}
+
+// SCRUM-1127 — genera la versión en inglés de UNA orden (IA, síncrono, todo o nada). El detalle se refresca para mostrar el nuevo estado.
+export function useTranslatePurchaseOrder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => comprasApi.orders.translate(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['compras/orders'] }),
   })
 }
 
@@ -202,6 +261,18 @@ export function useGenerateReplacementOrder() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => comprasApi.replacementRequests.generateOrder(id),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/replacement-requests'] }),
+  })
+}
+
+/** SCRUM-818 — aprobar/rechazar una solicitud de sustitución (matriz de aprobación por margen). */
+export function useDecideReplacementRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, decision }: { id: number; decision: 'approve' | 'reject' }) =>
+      decision === 'approve'
+        ? comprasApi.replacementRequests.approve(id)
+        : comprasApi.replacementRequests.reject(id),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/replacement-requests'] }),
   })
 }
@@ -314,8 +385,8 @@ export function useDownloadClaimPdf() {
 
 export function useSendPurchaseOrderEmail() {
   return useMutation({
-    mutationFn: ({ id, includeCost }: { id: number; includeCost: boolean }) =>
-      comprasApi.orders.sendEmail(id, includeCost),
+    mutationFn: ({ id, includeCost, lang = 'es' }: { id: number; includeCost: boolean; lang?: OrderDocLang }) =>
+      comprasApi.orders.sendEmail(id, includeCost, lang),
   })
 }
 
@@ -562,8 +633,8 @@ function invalidateInventory(qc: ReturnType<typeof useQueryClient>) {
 export function useCreateInventoryProduct() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ data, technicalSheet }: { data: InventoryProductPayload; technicalSheet: { file: File } | { link: string } }) =>
-      comprasApi.inventory.create(data, technicalSheet),
+    mutationFn: ({ data, technicalSheet, photo }: { data: InventoryProductPayload; technicalSheet: { file: File } | { link: string }; photo: File }) =>
+      comprasApi.inventory.create(data, technicalSheet, photo),
     onSuccess:  () => invalidateInventory(qc),
   })
 }
@@ -620,6 +691,16 @@ export function useUploadInventoryTechnicalSheet() {
 export function useInventoryTechnicalSheetUrl() {
   return useMutation({
     mutationFn: (id: number) => comprasApi.inventory.technicalSheetUrl(id),
+  })
+}
+
+// SCRUM-830 — reemplazo de imagen del producto desde "Editar información".
+export function useUploadInventoryProductPhoto() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, photo }: { id: number; photo: File }) =>
+      comprasApi.inventory.uploadPhoto(id, photo),
+    onSuccess: () => invalidateInventory(qc),
   })
 }
 

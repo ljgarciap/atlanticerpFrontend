@@ -38,7 +38,8 @@ function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderD
   return {
     id: 12, provider_id: 1, provider_name: 'LightCorp', status: 'ordenado',
     modality: 'directo', requires_primary_approval: false, approved_by: null, approved_by_name: null,
-    total_amount: 100, currency: 'USD',
+    total_amount: 100, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null,
+    additional_costs_total: 0, payable_total: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-08-01T00:00:00Z', status_changed_at: '2026-08-01T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null,
@@ -76,8 +77,14 @@ beforeEach(() => {
 })
 
 describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
+  // SCRUM-1145 — el saldo a pagar parte del total a pagar (productos + envío aéreo + costos adicionales).
+  it('SCRUM-1145 — el saldo se calcula contra el total a pagar, no solo contra los productos', () => {
+    renderPanel(makeOrder({ total_amount: 100, payable_total: 180, additional_costs_total: 80, paid_amount: 30 }))
+    expect(screen.getByText('$150.00')).toBeInTheDocument() // 180 - 30
+  })
+
   it('valida en vivo: monto parcial muestra el saldo restante', async () => {
-    renderPanel(makeOrder({ total_amount: 100, paid_amount: 0 }))
+    renderPanel(makeOrder({ total_amount: 100, payable_total: 100, paid_amount: 0 }))
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.registerPayment')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:orders.detail.payments.registerPayment'))
@@ -87,7 +94,7 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
   })
 
   it('valida en vivo: monto que cubre el saldo muestra pago completo', async () => {
-    renderPanel(makeOrder({ total_amount: 100, paid_amount: 0 }))
+    renderPanel(makeOrder({ total_amount: 100, payable_total: 100, paid_amount: 0 }))
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.registerPayment')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:orders.detail.payments.registerPayment'))
@@ -97,7 +104,7 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
   })
 
   it('valida en vivo: monto que excede el saldo lo avisa y bloquea Guardar', async () => {
-    renderPanel(makeOrder({ total_amount: 100, paid_amount: 0 }))
+    renderPanel(makeOrder({ total_amount: 100, payable_total: 100, paid_amount: 0 }))
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.registerPayment')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:orders.detail.payments.registerPayment'))
@@ -114,6 +121,26 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     expect(screen.getByText('compras:orders.detail.payments.requestPayment').closest('button')).toBeDisabled()
     expect(screen.getByText('compras:orders.detail.payments.registerPayment').closest('button')).toBeDisabled()
     expect(screen.getByText('compras:orders.detail.payments.pendingAmountChangeBlocksActions')).toBeInTheDocument()
+  })
+
+  // SCRUM-956 — valores monetarios deben llevar separador de miles, no solo decimales.
+  it('formatea pagado, saldo pendiente y cambio de monto pendiente con separador de miles', async () => {
+    renderPanel(makeOrder({
+      total_amount: 125450.00, payable_total: 125450.00, paid_amount: 61329.50,
+      pending_amount_change: 2500.75, amount_change_requested_by: 2, payment_requested_at: null,
+    }))
+    await waitFor(() => expect(screen.getByText('$61,329.50')).toBeInTheDocument()) // pagado
+    expect(screen.getByText('$64,120.50')).toBeInTheDocument() // saldo pendiente (125450.00 - 61329.50)
+    expect(screen.getByText('compras:orders.detail.payments.pendingAmountChange amount=2,500.75')).toBeInTheDocument()
+  })
+
+  it('formatea el monto de cada pago del historial con separador de miles', async () => {
+    mockedComprasApi.payments.list.mockResolvedValue({
+      data: [{ id: 1, amount: 61329.50, registered_by_name: 'Ana', created_at: '2026-08-01T00:00:00Z', proof_url: 'https://example.test/proof.pdf' }],
+    } as never)
+
+    renderPanel(makeOrder({ total_amount: 100000, payable_total: 100000, paid_amount: 0 }))
+    expect(await screen.findByText('$61,329.50')).toBeInTheDocument()
   })
 
   it('"Aprobar cambio"/"Rechazar cambio" solo se muestran a Mark', async () => {

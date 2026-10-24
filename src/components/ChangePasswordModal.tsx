@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api/authApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { IcoClose, IcoCheck } from '@/components/icons'
+import { IcoClose } from '@/components/icons'
 
 const schema = z.object({
   current_password:          z.string().min(1),
@@ -26,10 +28,10 @@ interface Props { onClose: () => void }
 
 export default function ChangePasswordModal({ onClose }: Props) {
   const { t }      = useTranslation(['common', 'auth'])
-  const [success,  setSuccess]  = useState(false)
+  const navigate   = useNavigate()
   const [apiError, setApiError] = useState('')
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -41,8 +43,10 @@ export default function ChangePasswordModal({ onClose }: Props) {
         data.new_password,
         data.new_password_confirmation,
       )
-      setSuccess(true)
-      reset()
+      // SCRUM-1033: el backend invalida todos los access tokens previos al cambiar la contraseña (incluido el de esta
+      // sesión) y revoca los refresh tokens: se cierra la sesión localmente y se pide iniciar sesión de nuevo.
+      useAuthStore.getState().clearAuth()
+      navigate('/login', { replace: true, state: { passwordChanged: true } })
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 401 || status === 422) {
@@ -80,18 +84,6 @@ export default function ChangePasswordModal({ onClose }: Props) {
             {t('auth:changePassword.weakPassword')}
           </p>
 
-          {success ? (
-            <div className="text-center py-4">
-              <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-emerald-600"
-                style={{ background: '#d1f5e0' }}>
-                <IcoCheck size={22} />
-              </div>
-              <p className="font-semibold text-emerald-700 mb-4">{t('auth:changePassword.success')}</p>
-              <Button variant="ghost" onClick={onClose}>
-                {t('common:actions.close')}
-              </Button>
-            </div>
-          ) : (
             <form onSubmit={handleSubmit(onSubmit)} onFocus={() => setApiError('')} noValidate className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
@@ -149,7 +141,6 @@ export default function ChangePasswordModal({ onClose }: Props) {
                 {t('auth:changePassword.submit')}
               </Button>
             </form>
-          )}
         </Card>
       </div>
     </>

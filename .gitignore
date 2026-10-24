@@ -12,4 +12,12 @@ e2e/.tmp/
 docs/sandbox-changelog.md
 .DS_Store
 /.claude/worktrees
+/.claude/settings.json
 CLAUDE.md
+e2e/__screenshots__/
+
+# Llaves y certificados privados: NUNCA versionar (p. ej. la llave SSH de deploy ~/.ssh/atlanticerp/atlanticerp-key.pem).
+*.pem
+*.key
+id_rsa*
+*.p12

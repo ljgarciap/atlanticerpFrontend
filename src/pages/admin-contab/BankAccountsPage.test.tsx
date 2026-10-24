@@ -22,7 +22,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
-    bankAccounts: { list: vi.fn(), create: vi.fn(), deactivate: vi.fn(), reactivate: vi.fn() },
+    bankAccounts: { list: vi.fn(), create: vi.fn(), update: vi.fn(), deactivate: vi.fn(), reactivate: vi.fn() },
     bankMovements: { list: vi.fn(), assignAccount: vi.fn() },
   },
 }))
@@ -31,8 +31,8 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeAccounts(): BankAccount[] {
   return [
-    { id: 1, banco: 'Banistmo', tipo_cuenta: 'corriente', ultimos_4_digitos: '9034', moneda: 'USD', activa: true, movimientos_count: 3 },
-    { id: 2, banco: 'Banco General', tipo_cuenta: 'ahorro', ultimos_4_digitos: '1122', moneda: 'USD', activa: true, movimientos_count: 0 },
+    { id: 1, banco: 'Banistmo', tipo_cuenta: 'corriente', ultimos_4_digitos: '9034', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 3 },
+    { id: 2, banco: 'Banco General', tipo_cuenta: 'ahorro', ultimos_4_digitos: '1122', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
   ]
 }
 
@@ -58,7 +58,8 @@ beforeEach(() => {
   mockedApi.bankAccounts.list.mockResolvedValue(makeAccounts())
   mockedApi.bankMovements.list.mockImplementation((bankAccountId?: number) => {
     const all = makeMovements()
-    return Promise.resolve(bankAccountId === undefined ? all : all.filter(m => m.bank_account_id === bankAccountId))
+    const data = bankAccountId === undefined ? all : all.filter(m => m.bank_account_id === bankAccountId)
+    return Promise.resolve({ data, meta: { total: data.length, per_page: 20, current_page: 1, last_page: 1 } })
   })
 })
 
@@ -77,7 +78,7 @@ describe('BankAccountsPage', () => {
 
   it('al crear una cuenta, la pantalla cambia automáticamente a su tab (RN3 REQ-530)', async () => {
     mockedApi.bankAccounts.create.mockResolvedValue(
-      { id: 3, banco: 'Global Bank', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455', moneda: 'USD', activa: true, movimientos_count: 0 },
+      { id: 3, banco: 'Global Bank', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
     )
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.addButton'))
@@ -91,7 +92,7 @@ describe('BankAccountsPage', () => {
     }))
     // Tras crear, la nueva cuenta (id=3) queda seleccionada como tab activa — dispara el fetch de
     // movimientos filtrado a esa cuenta.
-    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(3))
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(3, 1, 20))
   })
 
   it('banco vacío y banco de solo espacios dan el mismo mensaje de obligatorio (rebote QA SCRUM-607)', async () => {
@@ -130,7 +131,7 @@ describe('BankAccountsPage', () => {
   it('la tab "Eliminadas" aparece con el conteo cuando hay cuentas inactivas', async () => {
     mockedApi.bankAccounts.list.mockResolvedValue([
       ...makeAccounts(),
-      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', moneda: 'USD', activa: false, movimientos_count: 2 },
+      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 2 },
     ])
     renderPage()
     expect(await screen.findByText('adminContab:cuentasBancarias.tabs.deleted (1)')).toBeInTheDocument()
@@ -156,10 +157,10 @@ describe('BankAccountsPage', () => {
   it('los movimientos se filtran al seleccionar la tab de una cuenta específica', async () => {
     renderPage()
     await screen.findByText('adminContab:cuentasBancarias.movimientos.fecha')
-    expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(undefined)
+    expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(undefined, 1, 20)
 
     fireEvent.click(screen.getByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
-    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(1, 1, 20))
   })
 
   it('en la tab "Todas", un movimiento sin cuenta muestra "Sin cuenta asignada" (RN3 REQ-533)', async () => {
@@ -185,7 +186,7 @@ describe('BankAccountsPage', () => {
   it('el selector de "Seleccionar cuenta" solo ofrece cuentas activas (RN2 REQ-534)', async () => {
     mockedApi.bankAccounts.list.mockResolvedValue([
       ...makeAccounts(),
-      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', moneda: 'USD', activa: false, movimientos_count: 0 },
+      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 0 },
     ])
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.seleccionarCuenta'))
@@ -200,5 +201,21 @@ describe('BankAccountsPage', () => {
 
     fireEvent.change(select.closest('select')!, { target: { value: '2' } })
     await waitFor(() => expect(mockedApi.bankMovements.assignAccount).toHaveBeenCalledWith(11, 2))
+  })
+
+  // SCRUM-947 — paginación estándar.
+  it('con más de una página de movimientos, cambiar de tab reinicia a la página 1', async () => {
+    mockedApi.bankMovements.list.mockResolvedValue({
+      data: makeMovements(),
+      meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 },
+    })
+    renderPage()
+    await screen.findByText('adminContab:cuentasBancarias.movimientos.fecha')
+
+    fireEvent.click(screen.getByText('2')) // página 2
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(undefined, 2, 20))
+
+    fireEvent.click(screen.getByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(1, 1, 20))
   })
 })

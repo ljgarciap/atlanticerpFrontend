@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useOrderStatusList } from '@/hooks/useBodega'
+import { usePermission } from '@/hooks/usePermission'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoChevronLeft } from '@/components/icons'
 import OrderStatusDetailModal from '@/components/OrderStatusDetailModal'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 /**
  * Batch A4 (SCRUM-407→413, REQ-337→343) — pantalla "Status de Pedidos". Solo lectura para todos
@@ -13,15 +15,22 @@ import OrderStatusDetailModal from '@/components/OrderStatusDetailModal'
  * propios) — el backend (`GET /bodega/orders/status`) ya aplica ese filtro por rol, el frontend
  * no lo replica ni agrega ningún gate de permiso extra acá.
  *
- * Intencionalmente NO está en el Sidebar (`Sidebar.tsx`) — se entra solo desde el botón "Status
- * de pedidos" del encabezado de `PedidosPage`.
+ * Se entra desde el botón "Status de pedidos" del encabezado de `PedidosPage`/Pipeline y, desde SCRUM-1159,
+ * desde el menú de Ventas & Diseño para quien no ve la pantalla Pedidos (Vendedor/Diseñador). `?search=` precarga el
+ * buscador (enlace del aviso de «pedido sin stock»).
  */
 export default function OrderStatusPage() {
   const { t } = useTranslation(['common', 'bodega'])
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const canOpenOrdersBoard = usePermission('bodega.read')
 
-  const [search, setSearch] = useState('')
-  const { data, isLoading } = useOrderStatusList(search.trim() || undefined)
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
+  const { data, isLoading } = useOrderStatusList(searchTerm || undefined)
   const rows = data?.data ?? []
 
   const [detailOrderId, setDetailOrderId] = useState<number | null>(null)
@@ -35,14 +44,17 @@ export default function OrderStatusPage() {
             {t('bodega:orderStatusPage.subtitle', { count: data?.total ?? 0 })}
           </p>
         </div>
-        {/* REQ-407 — volver al tablero de Pedidos. */}
-        <Button
-          variant="secondary"
-          onClick={() => navigate('/bodega/pedidos')}
-          className="!flex !items-center !gap-1.5"
-        >
-          <IcoChevronLeft size={14} /> {t('bodega:orderStatusPage.backToOrders')}
-        </Button>
+        {/* REQ-407 — volver al tablero de Pedidos. SCRUM-1159 (Pre-QA): solo para quien puede abrirlo (`bodega.read`); el vendedor llega por el
+            menú de Ventas & Diseño y ese tablero lo rebotaba en silencio a su inicio. */}
+        {canOpenOrdersBoard && (
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/bodega/pedidos')}
+            className="!flex !items-center !gap-1.5"
+          >
+            <IcoChevronLeft size={14} /> {t('bodega:orderStatusPage.backToOrders')}
+          </Button>
+        )}
       </div>
 
       <Card variant="panel" className="p-3 mb-3">

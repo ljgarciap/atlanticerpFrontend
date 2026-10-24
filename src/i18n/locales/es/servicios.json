@@ -121,7 +121,9 @@
         "firstVisitRate": "% 1ra visita",
         "tools": "Herramientas",
         "commission": "Comisión del mes",
-        "commissionResult": "Ver comisión"
+        "commissionResult": "Ver comisión",
+        "edit": "Editar",
+        "delete": "Eliminar"
       },
       "visitsModal": {
         "title": "Visitas hoy — {{nombre}}",
@@ -141,7 +143,9 @@
         "email": "Email",
         "cancel": "Cancelar",
         "save": "Guardar",
-        "error": "No se pudo registrar el técnico."
+        "error": "No se pudo registrar el técnico.",
+        "editTitle": "Editar técnico interno",
+        "editError": "No se pudo actualizar el técnico."
       },
       "agenda": {
         "filterLabel": "Filtrar por técnico",
@@ -200,6 +204,13 @@
         "amount": "Monto",
         "licenciaMedicaNote": "Licencia médica activa este mes — el peso de Puntualidad se redistribuyó entre los demás criterios.",
         "close": "Cerrar"
+      },
+      "deleteModal": {
+        "title": "Eliminar técnico",
+        "message": "¿Eliminar a {{nombre}}? Dejará de aparecer en el listado y de estar disponible para asignar servicios. Su historial se conserva.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar",
+        "error": "No se pudo eliminar el técnico."
       }
     },
     "external": {
@@ -453,7 +464,7 @@
       "title": "Servicios completados en el año"
     },
     "commission": {
-      "title": "Comisión — Carlos Vergara"
+      "title": "Comisión — Tecnico Servicios Test"
     },
     "library": {
       "title": "Biblioteca de documentos",

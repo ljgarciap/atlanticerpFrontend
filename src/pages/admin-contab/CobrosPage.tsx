@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { usePaymentSummary } from '@/hooks/useAdminContab'
+import { usePaymentSummary, usePaymentsConfig } from '@/hooks/useAdminContab'
 import type { PaymentEstado } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoDollarSign } from '@/components/icons'
 import RegistrarCobroModal from '@/components/admin-contab/RegistrarCobroModal'
+import RegistrarCobroV2Modal from '@/components/admin-contab/RegistrarCobroV2Modal'
 import HistorialCobrosPanel from '@/components/admin-contab/HistorialCobrosPanel'
 import DetalleCobroModal from '@/components/admin-contab/DetalleCobroModal'
+import SolicitudesReversoPanel from '@/components/admin-contab/SolicitudesReversoPanel'
 
 const VALID_ESTADOS: PaymentEstado[] = ['confirmado', 'esperando_confirmacion']
 function isPaymentEstado(v: string | null): v is PaymentEstado {
@@ -34,6 +36,8 @@ export default function CobrosPage() {
   const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null)
 
   const { data: summary } = usePaymentSummary()
+  // SCRUM-1168 F2 — el formulario nuevo (cobro con o sin factura) solo cuando el entorno tiene el concepto nuevo activo.
+  const { data: config } = usePaymentsConfig()
 
   useEffect(() => {
     const masterClientId = searchParams.get('master_client_id')
@@ -89,18 +93,27 @@ export default function CobrosPage() {
         ))}
       </div>
 
+      {/* SCRUM-1168 F4 — anulaciones pendientes de la decisión de Mark. */}
+      <SolicitudesReversoPanel />
+
       <HistorialCobrosPanel
         onSelectPayment={setSelectedPaymentId}
         initialEstado={isPaymentEstado(searchParams.get('estado')) ? searchParams.get('estado') as PaymentEstado : undefined}
       />
 
-      {modalOpen && (
+      {modalOpen && (config?.v2 ? (
+        <RegistrarCobroV2Modal
+          initialMasterClientId={preselectedClientId}
+          onClose={() => setModalOpen(false)}
+          onRegistered={() => setModalOpen(false)}
+        />
+      ) : (
         <RegistrarCobroModal
           initialMasterClientId={preselectedClientId}
           onClose={() => setModalOpen(false)}
           onRegistered={() => setModalOpen(false)}
         />
-      )}
+      ))}
 
       {selectedPaymentId !== null && (
         <DetalleCobroModal paymentId={selectedPaymentId} onClose={() => setSelectedPaymentId(null)} />

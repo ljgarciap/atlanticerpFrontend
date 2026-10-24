@@ -68,7 +68,10 @@ describe('ReportsConfigPanel', () => {
     renderPanel()
 
     await screen.findByText('Designer Demo')
-    const monthsInput = screen.getByDisplayValue('3')
+    // `findByDisplayValue` (async): `findByText('Designer Demo')` solo garantiza que resolvió el
+    // query de goals; el de settings (que trae el "3") puede llegar después — un `getByDisplayValue`
+    // síncrono acá era flaky en CI (ver feedback_flaky_controlled_value_assertions).
+    const monthsInput = await screen.findByDisplayValue('3')
     fireEvent.change(monthsInput, { target: { value: '4' } })
 
     fireEvent.click(screen.getAllByText('ventasDiseno:reports.config.save').slice(-1)[0])

@@ -24,6 +24,10 @@ vi.mock('react-i18next', () => ({
       return key
     },
   }),
+  // docs/specs/demo-mode.md — la pantalla ahora importa DemoModeBadge, que resuelve
+  // @/store/authStore -> @/i18n (real) -> requiere este export. Mismo fix ya aplicado en
+  // TicketDetailModal.test.tsx.
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 vi.mock('@/api/bodegaApi', () => ({
@@ -53,8 +57,8 @@ vi.mock('@/api/ventasDisenoApi', () => ({
 const mockedApi = vi.mocked(bodegaApi, true)
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Atlantic', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
-  { id: 2, name: 'Mermas', responsable: null, capacidad_pct: 10, modo_detalle: 'ubicacion_exacta' },
+  { id: 1, name: 'Atlantic', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
+  { id: 2, name: 'Mermas', responsable: null, capacidad_pct: 10, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
 ]
 
 function makeRow(overrides: Partial<BodegaInventoryRow> = {}): BodegaInventoryRow {
@@ -72,7 +76,7 @@ function makeRow(overrides: Partial<BodegaInventoryRow> = {}): BodegaInventoryRo
 function listResponse(overrides: Partial<BodegaInventoryListResponse> = {}): BodegaInventoryListResponse {
   return {
     fuzzy: false,
-    kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_por_servir: 3 },
+    kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_por_servir: 3 },
     data: [makeRow()],
     meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     providers: [{ id: 1, name: 'LightCorp' }],
@@ -103,6 +107,28 @@ beforeEach(() => {
 })
 
 describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
+  it('muestra el KPI "Con stock" aparte del total del catálogo (SCRUM-991)', async () => {
+    mockedApi.inventory.list.mockResolvedValue(listResponse({
+      kpis: { total_products: 40, with_stock: 7, low_stock: 0, out_of_stock: 0, in_attention: 0, total_por_servir: 0 },
+    }))
+
+    renderPage()
+
+    const card = (await screen.findByText('bodega:inventory.kpis.withStock')).parentElement
+    expect(card).toHaveTextContent('7')
+    expect(screen.getByText('bodega:inventory.kpis.total').parentElement).toHaveTextContent('40')
+  })
+
+  // SCRUM-990 — "Ver Inventario" es solo inventario de Atlantic: Zona Libre / Lafayette no aparece ni como filtro.
+  it('el filtro por bodega no ofrece una bodega de solo consulta', async () => {
+    const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
+    mockedApi.warehouses.list.mockResolvedValue({ data: [...WAREHOUSES, externa] })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Mermas' })).toBeInTheDocument())
+    expect(screen.queryByRole('option', { name: 'Catálogo Externo' })).not.toBeInTheDocument()
+  })
+
   it('renderiza encabezado, KPIs y la fila del producto', async () => {
     renderPage()
 

@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/Button'
 import { IcoEye, IcoAlertTriangle } from '@/components/icons'
 import ReportsConfigPanel from '@/components/ReportsConfigPanel'
 import CommissionsPanel from '@/components/CommissionsPanel'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend)
 
@@ -71,16 +73,27 @@ export default function VentasDisenoReportsPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuthStore()
-  const canSeeTeam = user?.role === 'management' || user?.role === 'superadmin'
+  const canSeeTeam = hasGerenciaScope(user)
   const canConfigure = usePermission('ventas_diseno.reports.configure')
 
   const [scope,  setScope]  = useState<'own' | 'team'>('own')
   const [period, setPeriod] = useState<ReportPeriod>('month')
   const [showConfig, setShowConfig] = useState(false)
+  // SCRUM-854 — multi-selección Vendedor/Diseñador, solo relevante en scope='team'. Sin
+  // selección = todo el equipo, y dispara un recálculo real de KPIs/gráficos (va en la query key).
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
 
   const { data: summary, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-reports-summary', scope, period],
-    queryFn:  () => ventasDisenoApi.reports.summary({ scope, period }),
+    queryKey: ['ventas-diseno-reports-summary', scope, period, ownerIds],
+    queryFn:  () => ventasDisenoApi.reports.summary({
+      scope, period,
+      owner_ids: scope === 'team' && ownerIds.length > 0 ? ownerIds : undefined,
+    }),
   })
 
   const { data: settings } = useQuery({
@@ -108,26 +121,31 @@ export default function VentasDisenoReportsPage() {
   const goalsChart = summary ? {
     labels: summary.meta.monthly_history.map(m => m.month),
     datasets: [
-      {
-        type: 'bar' as const,
-        label: t('ventasDiseno:reports.goals.bar'),
-        data: summary.meta.monthly_history.map(m => m.amount),
-        backgroundColor: summary.meta.monthly_history.map((_, i) => (i === currentMonthIndex ? '#f59e0b' : '#5BA5A0cc')),
-        borderColor: summary.meta.monthly_history.map((_, i) => (i === currentMonthIndex ? '#f59e0b' : '#5BA5A0')),
-        borderWidth: 1,
-        borderRadius: 4,
-      },
-      // El valor de Meta es único por vendedor (configurado por Gerencia, no varía
-      // mes a mes) — se repite igual en los 6 meses, ahora como barra en vez de línea.
+      // SCRUM-836 — Meta pasa de lima a gris/beige (--bg-soft del mockup), para no competir
+      // visualmente con Alcanzado: el mockup reserva el lima/teal para "lo logrado", Meta es
+      // solo la referencia de fondo.
       ...(summary.meta.goal_amount != null ? [{
         type: 'bar' as const,
         label: t('ventasDiseno:reports.goals.goal'),
         data: summary.meta.monthly_history.map(() => summary.meta.goal_amount),
-        backgroundColor: '#9fc54dcc',
-        borderColor: '#9fc54d',
+        backgroundColor: '#f7f5ef',
+        borderColor: '#e7e4dc',
         borderWidth: 1,
         borderRadius: 4,
       }] : []),
+      {
+        type: 'bar' as const,
+        label: t('ventasDiseno:reports.goals.bar'),
+        data: summary.meta.monthly_history.map(m => m.amount),
+        // SCRUM-836 — ámbar mantenido en #f59e0b (no el #D9A441 del mockup): mismo tono ya
+        // usado en toda la app para "en curso/pendiente" (dot de abajo, ReceptionBadge,
+        // BodegaHomePage) — decisión de Luis 2026-09-03, prioriza consistencia sobre fidelidad
+        // pixel-perfect al mockup.
+        backgroundColor: summary.meta.monthly_history.map((_, i) => (i === currentMonthIndex ? '#f59e0b' : '#5BA5A0')),
+        borderColor: summary.meta.monthly_history.map((_, i) => (i === currentMonthIndex ? '#f59e0b' : '#5BA5A0')),
+        borderWidth: 1,
+        borderRadius: 4,
+      },
     ],
   } : null
 
@@ -170,6 +188,9 @@ export default function VentasDisenoReportsPage() {
             </Button>
           </div>
         )}
+        {canSeeTeam && scope === 'team' && (
+          <UserMultiSelect users={teamVendors ?? []} selectedIds={ownerIds} onChange={setOwnerIds} />
+        )}
         <div className="flex rounded-lg border border-slate-200 overflow-hidden">
           {PERIODS.map(p => (
             <Button
@@ -205,17 +226,39 @@ export default function VentasDisenoReportsPage() {
                   // plugin apila el segundo label de un mes, necesita ese margen extra o el
                   // label apilado queda cortado contra el borde superior del canvas.
                   layout: { padding: { top: 34 } },
-                  plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
-                  scales: { y: { beginAtZero: true, ticks: { font: { size: 11 } } }, x: { ticks: { font: { size: 11 } } } },
+                  // SCRUM-836 — leyenda automática de Chart.js reemplazada por la fila custom de
+                  // abajo (Meta/Alcanzado/Mes en curso, igual al mockup) — el legend nativo solo
+                  // listaba los 2 datasets ("Vendido"/"Meta"), sin distinguir el mes en curso.
+                  plugins: { legend: { display: false } },
+                  // SCRUM-833 — sin gridlines en ningún eje; los montos ya se leen en las
+                  // etiquetas de valor que dibuja goalsValueLabelsPlugin sobre cada barra.
+                  scales: {
+                    y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                  },
                 }}
               />
             )}
-            {currentMonthIndex >= 0 && (
-              <p className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-2">
-                <span className="w-2 h-2 rounded-full bg-[#f59e0b]" />
-                {t('ventasDiseno:reports.goals.currentMonth')}
-              </p>
-            )}
+            <div className="flex flex-wrap gap-3 mt-2">
+              {/* SCRUM-836 — el swatch de Meta solo se muestra junto con su barra (mismo gate
+                  que el dataset de arriba: sin goal_amount no hay nada gris/beige que explicar). */}
+              {summary.meta.goal_amount != null && (
+                <span className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#f7f5ef] border border-[#e7e4dc]" />
+                  {t('ventasDiseno:reports.goals.goal')}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#5BA5A0]" />
+                {t('ventasDiseno:reports.goals.bar')}
+              </span>
+              {currentMonthIndex >= 0 && (
+                <span className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#f59e0b]" />
+                  {t('ventasDiseno:reports.goals.currentMonth')}
+                </span>
+              )}
+            </div>
             {summary.meta.goal_amount == null && (
               <p className="text-[11px] text-slate-400 mt-2">{t('ventasDiseno:reports.goals.noGoal')}</p>
             )}

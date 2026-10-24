@@ -1,5 +1,5 @@
 import api from './authApi'
-import type { Activity, CreatedShareLink, DashboardReminder, Document, DocumentVersion, KpiData, PaginatedProjects, Project, Reminder, ShareLink } from '@/types/project'
+import type { Activity, CreatedShareLink, CrmSettings, DashboardReminder, Document, DocumentVersion, KpiData, PaginatedProjects, Project, Reminder, ShareLink } from '@/types/project'
 
 export interface ProjectFilters {
   search?:    string
@@ -11,6 +11,9 @@ export interface ProjectFilters {
   despacho?:  string
   ubicacion?: string
   user_id?:   number
+  // SCRUM-854 — filtro multi-selección Vendedor/Diseñador (OR entre seleccionados), reemplaza
+  // el uso de `user_id` singular en este endpoint.
+  user_ids?:  number[]
   dialux?:    boolean
   per_page?:  number
   page?:      number
@@ -163,4 +166,14 @@ export const projectsApi = {
     api.get<{ data: { id: number; first_name: string; last_name: string }[] }>(
       '/crm/autocomplete/users', { params: { q: q || undefined } }
     ).then(r => r.data.data),
+
+  // ── Settings (SCRUM-944/945) ─────────────────────────────────────────────
+
+  settings: {
+    get: (): Promise<CrmSettings> =>
+      api.get<CrmSettings>('/crm/settings').then(r => r.data),
+
+    update: (data: Partial<CrmSettings>): Promise<CrmSettings> =>
+      api.put<CrmSettings>('/crm/settings', data).then(r => r.data),
+  },
 }

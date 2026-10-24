@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { PipelineStage } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
@@ -11,6 +12,9 @@ import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoEye } from '@/components/icons'
 import QuoteViewerModal from '@/components/QuoteViewerModal'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
+import { formatDateFromTimestamp } from '@/utils/dates'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
 const LISTED_STAGES: PipelineStage[] = ['quote', 'proposal', 'approved', 'lost']
 
@@ -24,13 +28,28 @@ export default function VentasDisenoQuotesListPage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const canSeeTeam = user?.role === 'management' || user?.role === 'superadmin'
+  const canSeeTeam = hasGerenciaScope(user)
 
   const [scope,  setScope]  = useState<'own' | 'team'>('own')
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante, pero la consulta solo sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  // Antes cada tecla mandaba su propia petición y una ráfaga llenó el cupo de PHP de producción (alarma de 503 del 2026-10-19).
+  const searchTerm = useDebouncedSearchTerm(search)
   const [stage,  setStage]  = useState<PipelineStage | ''>('')
+  // SCRUM-912 (criterios 6/7) — "Solo Borradores": separa visualmente las cotizaciones
+  // nuevas sin guardar de las ya formales/con folio. Nunca incluye los borradores de
+  // "nueva versión" de un proyecto ya confirmado (el backend ya los excluye).
+  const [view, setView] = useState<'all' | 'drafts'>('all')
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
+  // SCRUM-854 — multi-selección Vendedor/Diseñador, solo relevante en scope='team'. Sin
+  // selección = todos (mismo criterio que Pipeline/Lista de Proyectos).
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
   // SCRUM-734 — "Ver cotizaciones de este proyecto" desde Pipeline navega acá con
   // ?viewQuote=<id> para reutilizar exactamente este mismo modal, sin mecanismo aparte.
   const [searchParams] = useSearchParams()
@@ -44,11 +63,15 @@ export default function VentasDisenoQuotesListPage() {
   // per_page:'all' para no perder filas fuera de la página actual.
   const [mes] = useState<string | null>(() => searchParams.get('mes'))
 
-  const { data: result, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-quotes-list', scope, search, stage, page, perPage, mes],
+  const { data: result, isLoading, isPlaceholderData } = useQuery({
+    queryKey: ['ventas-diseno-quotes-list', scope, searchTerm, stage, view, page, perPage, mes, ownerIds],
+    // Mientras llega la búsqueda nueva se siguen mostrando los resultados anteriores, sin vaciar la tabla.
+    placeholderData: keepPreviousData,
     queryFn:  () => ventasDisenoApi.quotes.list({
-      scope, search: search || undefined, stage: stage || undefined,
+      scope, search: searchTerm || undefined, stage: stage || undefined,
+      view: view === 'drafts' ? 'drafts' : undefined,
       page: mes ? 1 : page, per_page: mes ? 'all' : perPage,
+      owner_ids: scope === 'team' && ownerIds.length > 0 ? ownerIds : undefined,
     }),
   })
 
@@ -58,6 +81,7 @@ export default function VentasDisenoQuotesListPage() {
   function clearFilters() {
     setSearch('')
     setStage('')
+    setOwnerIds([])
     setPage(1)
   }
 
@@ -100,10 +124,33 @@ export default function VentasDisenoQuotesListPage() {
               {t('ventasDiseno:scope.team')}
             </Button>
           </div>
+          {scope === 'team' && (
+            <UserMultiSelect users={teamVendors ?? []} selectedIds={ownerIds} onChange={ids => { setOwnerIds(ids); setPage(1) }} />
+          )}
         </Card>
       )}
 
-      {summary && (
+      <Card variant="panel" className="p-3 mb-3 flex flex-wrap gap-2 items-center">
+        <div className="flex rounded-lg border border-slate-200 overflow-hidden">
+          <Button
+            variant="secondary" active={view === 'all'} activeVariant="primary"
+            className="!rounded-none !border-0" onClick={() => { setView('all'); setPage(1) }}
+          >
+            {t('ventasDiseno:quotesList.view.all')}
+          </Button>
+          <Button
+            variant="secondary" active={view === 'drafts'} activeVariant="primary"
+            className="!rounded-none !border-0" onClick={() => { setView('drafts'); setPage(1) }}
+          >
+            {t('ventasDiseno:quotesList.view.draftsOnly')}
+          </Button>
+        </div>
+      </Card>
+
+      {/* SCRUM-912 — el resumen (pendiente/aprobado/perdido/conversión) se calcula
+          siempre sobre cotizaciones CONFIRMADAS (ver QuoteListService::summary()) —
+          no aplica a "Solo Borradores", donde daría todo en $0. */}
+      {view === 'all' && summary && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
           <Card variant="panel" className="p-4">
             <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">{t('ventasDiseno:quotesList.summary.pending')}</div>
@@ -150,7 +197,8 @@ export default function VentasDisenoQuotesListPage() {
         </div>
       )}
 
-      <Card variant="panel" className="p-0 overflow-hidden">
+      {/* Con los resultados anteriores a la vista mientras llega la búsqueda nueva, la tabla se atenúa en lugar de vaciarse. */}
+      <Card variant="panel" className={`p-0 overflow-hidden transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`} aria-busy={isPlaceholderData}>
         {isLoading ? (
           <p className="text-slate-400 text-sm p-4">{t('common:labels.loading')}</p>
         ) : rows.length === 0 ? (
@@ -192,8 +240,8 @@ export default function VentasDisenoQuotesListPage() {
                         ) : t('ventasDiseno:quotesList.table.noStage')}
                       </td>
                       <td className="px-3 py-2">{t(`ventasDiseno:priceType.${row.price_type}`)}</td>
-                      <td className="px-3 py-2">{row.owner.name}</td>
-                      <td className="px-3 py-2">{new Date(row.quote_date).toLocaleDateString()}</td>
+                      <td className="px-3 py-2">{(row.designer ?? row.owner).name}</td>
+                      <td className="px-3 py-2">{formatDateFromTimestamp(row.quote_date)}</td>
                       <td className="px-3 py-2">{t(`ventasDiseno:quotesList.status.${row.document_status}`)}</td>
                       <td className="px-3 py-2">
                         {/* SCRUM-796 (secc. 13, RN3.1 — corrección de una definición anterior

@@ -26,7 +26,16 @@
     "sessionInactivityHours": "Inactivity session expiration",
     "sessionInactivityHoursSuffix": "hours",
     "sessionInactivityHoursSave": "Save",
-    "sessionInactivityHoursError": "Enter a value between 1 and 720 hours."
+    "sessionInactivityHoursError": "Enter a value between 1 and 720 hours.",
+    "lafayetteGuarda": "Lafayette sync guard threshold",
+    "lafayetteGuardaHelp": "Minimum fraction of the already known catalog (the last successful sync) that a Lafayette sync must bring to be accepted and to hide the products that no longer come: 0.9 means 90%. If it brings less, the sync is left as partial and no product is hidden. Value between 0.5 and 1.0.",
+    "lafayetteGuardaPercent": "= {{percent}}%",
+    "lafayetteGuardaSave": "Save",
+    "lafayetteGuardaError": "Enter a value between 0.5 and 1.0.",
+    "lafayetteGuardaForbidden": "Only a superadmin can change this threshold.",
+    "lafayetteGuardaGeneric": "Could not save the threshold. Try again.",
+    "demoModeEnabled": "Enable Demo Mode",
+    "demoModeSubtitle": "Lets any user turn on their own Demo Mode (filters Catalog, Inventory and the product picker to only items with a photo, name and price)."
   },
   "timeoutOption": "{{min}} minutes",
   "timeoutOptionHours": "{{min}} minutes ({{hours}}h)",
@@ -45,14 +54,6 @@
   "admin": {
     "title": "System administration",
     "subtitle": "Superadmin-only operations",
-    "demoCleanup": {
-      "label": "Clear demo data",
-      "description": "Removes all [DEMO] projects and @atlantic.test users. This action cannot be undone.",
-      "confirm": "Are you sure? All demo data will be permanently deleted.",
-      "confirmBtn": "Yes, clear",
-      "cancelBtn": "Cancel",
-      "result": "Removed: {{projects}} projects and {{users}} demo users."
-    },
     "backup": {
       "label": "Data backup",
       "description": "Download a JSON file with all CRM projects, activities, reminders, and contacts.",

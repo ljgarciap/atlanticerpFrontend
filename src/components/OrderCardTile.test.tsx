@@ -4,7 +4,7 @@ import OrderCardTile from './OrderCardTile'
 import {
   useOrderInvoiceStatus, useAssignPicker, useStartPicking, useTeamMembersByRole,
   useAssignCourier, useDispatchOrder, useOrderDetail, useOrderWarehouseBreakdown,
-  useRegisterDelivery, useRegisterSignedGuide,
+  useRegisterDelivery, useRegisterSignedGuide, useDownloadOrderInvoicePdf,
 } from '@/hooks/useBodega'
 import { useAuthStore } from '@/store/authStore'
 import type { OrderCard } from '@/types/bodega'
@@ -15,6 +15,8 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/hooks/useBodega', () => ({
   useOrderInvoiceStatus: vi.fn(),
+  // SCRUM-832 — InvoiceStatusModal ahora usa este hook para "Ver / Imprimir PDF".
+  useDownloadOrderInvoicePdf: vi.fn(),
   useAssignPicker: vi.fn(),
   useStartPicking: vi.fn(),
   useTeamMembersByRole: vi.fn(),
@@ -69,6 +71,7 @@ beforeEach(() => {
   registerDeliveryMutateMock = vi.fn()
   registerSignedGuideMutateMock = vi.fn()
   mockedUseOrderInvoiceStatus.mockReturnValue({ mutate: invoiceMutateMock, isPending: false } as unknown as ReturnType<typeof useOrderInvoiceStatus>)
+  vi.mocked(useDownloadOrderInvoicePdf).mockReturnValue({ mutate: vi.fn(), isPending: false } as unknown as ReturnType<typeof useDownloadOrderInvoicePdf>)
   mockedUseAssignPicker.mockReturnValue({ mutate: assignPickerMutateMock, isPending: false } as unknown as ReturnType<typeof useAssignPicker>)
   mockedUseStartPicking.mockReturnValue({ mutate: startPickingMutateMock, isPending: false } as unknown as ReturnType<typeof useStartPicking>)
   // Mismo mock para las dos etapas ('picker' del formulario "Asignar Picker" SCRUM-383, 'courier'
@@ -268,6 +271,49 @@ describe('OrderCardTile', () => {
     expect(invoiceMutateMock).toHaveBeenCalledWith(1, expect.objectContaining({ onSuccess: expect.any(Function) }))
     expect(onOpenDetail).not.toHaveBeenCalled()
     expect(screen.getByTestId('invoice-status-message')).toHaveTextContent('Factura lista')
+  })
+
+  // SCRUM-832 — antes solo existía `status_message`; cuando el backend ya trae el detalle fiscal
+  // completo (estado 'facturada'), el modal debe mostrar la factura real, no el mensaje genérico.
+  it('SCRUM-832 — con detalle fiscal completo (estado facturada), muestra items/totales en vez del mensaje genérico', () => {
+    invoiceMutateMock.mockImplementation((_orderId, { onSuccess }) => {
+      onSuccess({
+        order_id: 1, order_number: '2205', invoice_ready: true, estado: 'facturada',
+        status_message: 'Factura F-0099 generada por Administración & Contabilidad.',
+        invoice_numero: 'F-0099', subtotal: 100, itbms: 7, total: 107, monto: 107,
+        saldo_aplicado: 0, total_a_pagar: 107,
+        items: [{ descripcion: 'Lámpara LED', cantidad: 2, precio_unitario: 50, subtotal: 100 }],
+      })
+    })
+    render(
+      <OrderCardTile order={order({ stage: 'por_despachar', invoice_ready: true })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />,
+    )
+
+    fireEvent.click(screen.getByTestId('invoice-view-button'))
+
+    expect(screen.queryByTestId('invoice-status-message')).not.toBeInTheDocument()
+    expect(screen.getByText('Lámpara LED')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:facturacion.detalle.verPdf')).toBeInTheDocument()
+  })
+
+  // SCRUM-832 — mismo diagnóstico que SCRUM-393 (`RegisterDeliveryModal`): la tarjeta raíz tiene
+  // `hover:-translate-y-px`; si el modal quedara anidado como hijo DOM de esa tarjeta, el overlay
+  // `fixed` se posicionaría relativo a ella en vez del viewport. El portal a `document.body` debe
+  // sacarlo de ese árbol.
+  it('SCRUM-832 — el modal de estado de factura se monta vía portal, fuera de la tarjeta', () => {
+    invoiceMutateMock.mockImplementation((_orderId, { onSuccess }) => {
+      onSuccess({ order_id: 1, order_number: '2205', invoice_ready: true, status_message: 'Esperando a Administración.' })
+    })
+    render(
+      <OrderCardTile order={order({ stage: 'por_despachar', invoice_ready: true, id: 1 })} onOpenDetail={vi.fn()} onOpenGuide={vi.fn()} onOpenPickingSheet={vi.fn()} onOpenInventoryReview={vi.fn()} />,
+    )
+
+    fireEvent.click(screen.getByTestId('invoice-view-button'))
+
+    const card = screen.getByTestId('order-card-1')
+    const message = screen.getByTestId('invoice-status-message')
+    expect(card.contains(message)).toBe(false)
+    expect(document.body.contains(message)).toBe(true)
   })
 
   it('cierra el modal de estado de factura sin disparar onOpenDetail', async () => {

@@ -1,3 +1,5 @@
+import { parseAuthError } from '@/lib/authErrors'
+
 // SCRUM-746 — "Sesión expira por inactividad consecutiva". El threat model
 // (atlanticerp-backend/docs/security/THREAT-MODEL-scrum746-session-inactivity.md, Hallazgo previo)
 // confirmó que sin esta pieza el ticket no tiene ningún efecto observable: el access token sigue
@@ -21,6 +23,9 @@
 // PreferencesService en atlanticerp-backend), suficientemente grande para cubrir la latencia de red del
 // propio refresh antes de que el token en curso venza.
 export const REFRESH_BUFFER_MS = 3 * 60 * 1000
+
+/** Espera por defecto tras un 429 del refresh si el backend no indica `retry_after`. */
+export const REFRESH_THROTTLED_DEFAULT_WAIT_MS = 60 * 1000
 
 export interface SilentRefreshDeps {
   /** Llama a POST /auth/refresh y devuelve el par de tokens rotado. */
@@ -67,9 +72,14 @@ export function createSilentRefreshHandler(
   bufferMs: number = REFRESH_BUFFER_MS
 ) {
   let inFlight: Promise<void> | null = null
+  // Un 429 de /auth/refresh (límite de intentos fallidos) es TRANSITORIO: no es que la sesión murió. Se
+  // recuerda hasta cuándo esperar y los siguientes requests autenticados exitosos vuelven a intentarlo
+  // recién pasada esa espera — sin temporizadores ni reintentos propios, así que no puede haber bucle.
+  let throttledUntil = 0
 
   return function handleAuthenticatedResponse(requestUrl: string): void {
     if (deps.isExcludedPath(requestUrl)) return
+    if (Date.now() < throttledUntil) return
 
     const { accessToken, refreshToken } = deps.getTokens()
     if (!accessToken || !refreshToken) return
@@ -88,7 +98,13 @@ export function createSilentRefreshHandler(
       .then(tokens => {
         deps.applyTokens(tokens.accessToken, tokens.refreshToken)
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        const parsed = parseAuthError(err)
+        if (parsed.status === 429) {
+          // No se cierra la sesión ni se limpian tokens: el access token sigue siendo válido hasta su `exp`.
+          throttledUntil = Date.now() + (parsed.retryAfter !== undefined ? parsed.retryAfter * 1000 : REFRESH_THROTTLED_DEFAULT_WAIT_MS)
+          return
+        }
         deps.onRefreshFailed()
       })
       .finally(() => {

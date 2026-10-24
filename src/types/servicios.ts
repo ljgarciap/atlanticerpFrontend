@@ -142,13 +142,14 @@ export interface TicketProductDetail {
 
 // REQ-245/246/247/249 — payload completo de "Nuevo ticket". `cliente`/`contacto`(nombre)/snapshot
 // del cliente NO se manda: el backend lo deriva de `sales_project_id` (RN1 de REQ-246, Servicios
-// nunca inventa datos de cliente, solo lee lo que ya eligió el usuario en el buscador).
+// nunca inventa datos de cliente, solo lee lo que ya eligió el usuario en el buscador). El proyecto es
+// OPCIONAL desde 2026-10-07 (decisión de negocio que revierte REQ-246 RN6): sin él el ticket queda sin cliente.
 export interface CreateTicketPayload {
   tipo:                       TicketType
   subtipo:                    TicketSubtype
   tipo_instalacion:           Exclude<TicketInstallationKind, null>
   descripcion:                string
-  sales_project_id:           number
+  sales_project_id:           number | null
   contacto?:                  string | null
   telefono?:                  string | null
   email?:                     string | null

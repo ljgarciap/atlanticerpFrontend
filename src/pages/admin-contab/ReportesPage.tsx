@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend } from 'chart.js'
+import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend, type Plugin } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
 import {
   useReportsFelixCommission, useReportsCartera, useReportsVentas, useReportsFlujoCaja,
@@ -10,6 +10,7 @@ import {
 import { Card } from '@/components/ui/Card'
 import { IcoBarChart, IcoTrendingUp, IcoChevronRight, IcoCheck, IcoFileText, IcoList, IcoBook, IcoDollarSign } from '@/components/icons'
 import type { ReportsPeriodo } from '@/types/adminContab'
+import { useAuthStore } from '@/store/authStore'
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend)
 
@@ -22,6 +23,52 @@ const NOTAS_COLORS = ['#5BA5A0', '#5BA5A0', '#C15A4A', '#C9A66B']
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+}
+
+// SCRUM-870 — valores en $ encima de cada barra, sin decimales (más legible a este tamaño de
+// fuente/barra que el formato completo de `formatCurrency`). Solo para las etiquetas de las 4
+// gráficas de barra, nunca para los KPIs/tooltips que ya usan `formatCurrency`.
+function formatCurrencyRounded(value: number): string {
+  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+}
+
+// SCRUM-870 punto 2 — formato abreviado para los rangos de la tarjeta de comisión de Felix (ej.
+// "$15K"), no para los montos exactos de la tarjeta (esos se quedan con `formatCurrency`).
+// - `bound: 'inclusive'` (default): trunca — el tope de un rango cerrado como 19999.99 se lee
+//   "$19K" (lo que cabe hasta ahí), y un piso como 15000 se lee "$15K".
+// - `bound: 'exclusive'`: redondea hacia arriba — el tope de "Menos de X" es un umbral exclusivo
+//   (monto_maximo = 14999.99), y debe leerse "$15K", no "$14K" (SCRUM-870 p2, rebote Pre-QA).
+function formatCompactK(value: number, bound: 'inclusive' | 'exclusive' = 'inclusive'): string {
+  const k = bound === 'exclusive' ? Math.ceil(value / 1000) : Math.floor(value / 1000)
+  return `$${k}K`
+}
+
+// SCRUM-870 — plugin local (no dependencia npm nueva) que dibuja el valor de cada barra encima
+// de ella; para valores negativos (Arqueo de Caja puede tener meses en rojo) el label se dibuja
+// debajo, ya que ahí es donde termina la barra. Compartido por las 4 gráficas de barra vía el
+// prop `plugins` de `react-chartjs-2` — nunca registrado globalmente con `ChartJS.register()`.
+const barValueLabelPlugin: Plugin<'bar'> = {
+  id: 'barValueLabel',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      const meta = chart.getDatasetMeta(datasetIndex)
+      if (meta.hidden) return
+      meta.data.forEach((bar, index) => {
+        const value = dataset.data[index]
+        if (typeof value !== 'number') return
+        const position = bar.tooltipPosition(false)
+        if (position.x === null || position.y === null) return
+        ctx.save()
+        ctx.fillStyle = '#64748b' // slate-500 — mismo tono ya usado para los ticks de los ejes
+        ctx.font = '600 9px system-ui, -apple-system, sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = value >= 0 ? 'bottom' : 'top'
+        ctx.fillText(formatCurrencyRounded(value), position.x, position.y + (value >= 0 ? -3 : 3))
+        ctx.restore()
+      })
+    })
+  },
 }
 
 /**
@@ -41,6 +88,12 @@ export default function ReportesPage() {
   const { t } = useTranslation(['common', 'adminContab'])
   const navigate = useNavigate()
   const [periodo, setPeriodo] = useState<ReportsPeriodo>('hoy')
+  // SCRUM-881 (Pre-QA, 2026-09-11) -- el backend ya bloqueaba GET /reports/felix-commission
+  // para asistente_administrativa (routes/admin-contab.php linea 396), pero esta tarjeta se
+  // renderizaba sin ningun gate de rol -- Yaneth veia el titulo "-- Felix" con el cuerpo vacio
+  // (fetch bloqueado en 403). Mismo allow-list que el backend.
+  const { user } = useAuthStore()
+  const canSeeFelixCommission = ['superadmin', 'lider_admin_contab', 'management'].includes(user?.role ?? '')
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
@@ -65,7 +118,7 @@ export default function ReportesPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FelixCommissionCard t={t} />
+        {canSeeFelixCommission && <FelixCommissionCard t={t} />}
         <CarteraPorCobrarCard t={t} onNavigate={() => navigate('/admin-contab/facturacion')} />
         <Cartera90CobradoCard t={t} onNavigate={() => navigate('/admin-contab/facturacion')} />
         <VentasCard t={t} periodo={periodo} onNavigate={() => navigate('/admin-contab/facturacion')} />
@@ -150,9 +203,13 @@ function FelixCommissionCard({ t }: { t: Translate }) {
                 className={`flex-1 rounded-lg px-3 py-2.5 text-center ${tier.es_actual ? 'bg-primary-soft border-[1.5px] border-primary-dark' : 'bg-slate-50 dark:bg-slate-800/60'}`}
               >
                 <div className={`text-[10.5px] font-semibold ${tier.es_actual ? 'text-primary-dark' : 'text-slate-600 dark:text-slate-300'}`}>
-                  {tier.monto_maximo === null
-                    ? t('adminContab:reportes.felixCommission.tramoDesde', { desde: formatCurrency(tier.monto_minimo), pct: tier.porcentaje })
-                    : t('adminContab:reportes.felixCommission.tramoRango', { desde: formatCurrency(tier.monto_minimo), hasta: formatCurrency(tier.monto_maximo), pct: tier.porcentaje })}
+                  {/* SCRUM-870 punto 2 — vuelve al formato del mockup original: "Menos de $15K" /
+                      "$15K – $19K" / "Más de $20K", en vez de USD extendido con decimales. */}
+                  {tier.monto_minimo === 0
+                    ? t('adminContab:reportes.felixCommission.tramoMenosDe', { hasta: formatCompactK(tier.monto_maximo ?? 0, 'exclusive'), pct: tier.porcentaje })
+                    : tier.monto_maximo === null
+                    ? t('adminContab:reportes.felixCommission.tramoDesde', { desde: formatCompactK(tier.monto_minimo), pct: tier.porcentaje })
+                    : t('adminContab:reportes.felixCommission.tramoRango', { desde: formatCompactK(tier.monto_minimo), hasta: formatCompactK(tier.monto_maximo), pct: tier.porcentaje })}
                 </div>
                 {tier.es_actual && (
                   <div className="flex items-center justify-center gap-1 text-[10px] text-primary-dark mt-0.5">
@@ -298,8 +355,9 @@ function VentasCard({ t, periodo, onNavigate }: { t: Translate; periodo: Reports
       ) : chartData && (
         <>
           <div className="h-32">
-            <Chart type="bar" data={chartData} options={{
+            <Chart type="bar" data={chartData} plugins={[barValueLabelPlugin]} options={{
               responsive: true, maintainAspectRatio: false,
+              layout: { padding: { top: 14 } },
               plugins: { legend: { display: false } },
               scales: {
                 y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 10 } } },
@@ -365,8 +423,9 @@ function ArqueoCajaCard({ t, periodo, onNavigate }: { t: Translate; periodo: Rep
             </div>
           ) : chartData && (
             <div className="h-28">
-              <Chart type="bar" data={chartData} options={{
+              <Chart type="bar" data={chartData} plugins={[barValueLabelPlugin]} options={{
                 responsive: true, maintainAspectRatio: false,
+                layout: { padding: { top: 14, bottom: 14 } },
                 plugins: { legend: { display: false } },
                 scales: {
                   y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 10 } } },
@@ -442,8 +501,9 @@ function ComisionesCard({ t, periodo, navigate }: { t: Translate; periodo: Repor
             <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500 dark:text-slate-400"><span className="w-2 h-2 rounded-sm" style={{ background: BLUE }} />{t('adminContab:reportes.comisiones.externas')}</div>
           </div>
           <div className="h-32">
-            <Chart type="bar" data={chartData} options={{
+            <Chart type="bar" data={chartData} plugins={[barValueLabelPlugin]} options={{
               responsive: true, maintainAspectRatio: false,
+              layout: { padding: { top: 14 } },
               plugins: { legend: { display: false } },
               scales: {
                 y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 10 } } },
@@ -484,8 +544,9 @@ function NotasCreditoCard({ t, onNavigate }: { t: Translate; onNavigate: () => v
         <div className="h-24 rounded-lg bg-slate-50 dark:bg-slate-900 animate-pulse" />
       ) : (
         <div className="h-24">
-          <Chart type="bar" data={chartData} options={{
+          <Chart type="bar" data={chartData} plugins={[barValueLabelPlugin]} options={{
             responsive: true, maintainAspectRatio: false,
+            layout: { padding: { top: 12 } },
             plugins: { legend: { display: false } },
             scales: {
               y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 9 } } },

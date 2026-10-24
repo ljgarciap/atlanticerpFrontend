@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { formatMoney } from '@/lib/money'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import type { PurchaseOrderDetail } from '@/types/compras'
 
 function paymentErrorMessage(err: unknown, fallback: string): string {
@@ -41,7 +42,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   const [newAmount, setNewAmount] = useState('')
 
   const payments = paymentsData?.data ?? []
-  const balance = order.total_amount - order.paid_amount
+  const balance = order.payable_total - order.paid_amount
   const canRequestAmountChange = payments.length === 0 && order.pending_amount_change === null
   // SCRUM-252 (hallazgo de Gerencia Test) — gate REAL, no solo informativo: mientras haya un
   // cambio de monto pendiente de aprobación, "Enviar a pago" y "Registrar pago" quedan
@@ -91,18 +92,18 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
         </div>
         <div>
           <span className="text-xs font-semibold text-slate-500 uppercase">{t('compras:orders.detail.payments.paid')}</span>
-          <p className="text-slate-800 font-medium">${order.paid_amount.toFixed(2)}</p>
+          <p className="text-slate-800 font-medium">${formatMoney(order.paid_amount)}</p>
         </div>
         <div>
           <span className="text-xs font-semibold text-slate-500 uppercase">{t('compras:orders.detail.payments.balance')}</span>
-          <p className="text-slate-800 font-medium">${balance.toFixed(2)}</p>
+          <p className="text-slate-800 font-medium">${formatMoney(balance)}</p>
         </div>
       </div>
 
       {hasPendingAmountChange && (
         <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs mb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: order.pending_amount_change?.toFixed(2) })}</span>
+            <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: formatMoney(order.pending_amount_change as number) })}</span>
             {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Mark;
                 Yirena (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
             {isMark && (
@@ -231,8 +232,8 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
           {payments.map(p => (
             <li key={p.id} className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-1.5 text-sm">
               <span>
-                <span className="font-semibold">${p.amount.toFixed(2)}</span>{' '}
-                <span className="text-slate-400">· {p.registered_by_name ?? '—'} · {new Date(p.created_at).toLocaleDateString()}</span>
+                <span className="font-semibold">${formatMoney(p.amount)}</span>{' '}
+                <span className="text-slate-400">· {p.registered_by_name ?? '—'} · {formatDateFromTimestamp(p.created_at)}</span>
               </span>
               <a href={p.proof_url} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs font-semibold">
                 {t('compras:orders.detail.payments.viewProof')}

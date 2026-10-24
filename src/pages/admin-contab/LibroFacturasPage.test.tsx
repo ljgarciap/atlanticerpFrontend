@@ -34,8 +34,8 @@ function makeReport(overrides: Partial<InvoiceBookReport> = {}): InvoiceBookRepo
   return {
     resumen: { facturas: 1, notas_credito: 1, base_imponible: 11074.76, itbms: 775.24, total: 11850 },
     documentos: [
-      { fecha: '2026-01-05', ruc: '8-745-1230', cliente: 'Torres Pacífico', tipo: 'Factura', motivo: null, documento: 'F-4201', base_imponible: 7850.47, porcentaje: 7, itbms: 549.53, total: 8400 },
-      { fecha: '2026-01-25', ruc: '155-987654-2-2025', cliente: 'Grupo Sensei', tipo: 'Nota de Crédito', motivo: 'Descuento comercial', documento: 'NC-0002', base_imponible: -140.19, porcentaje: 7, itbms: -9.81, total: -150 },
+      { fecha: '2026-01-05', ruc: '8-745-1230', cliente: 'Torres Pacífico', tipo: 'Factura', motivo: null, documento: 'F-4201', base_imponible: 7850.47, porcentaje: 7, itbms: 549.53, total: 8400, vendedor: 'Ana Pérez, Luis Mora' },
+      { fecha: '2026-01-25', ruc: '155-987654-2-2025', cliente: 'Grupo Sensei', tipo: 'Nota de Crédito', motivo: 'Descuento comercial', documento: 'NC-0002', base_imponible: -140.19, porcentaje: 7, itbms: -9.81, total: -150, vendedor: null },
     ],
     ...overrides,
   }
@@ -70,6 +70,17 @@ describe('LibroFacturasPage', () => {
     // Nota de crédito: total negativo — regex sin símbolo de moneda fijo, Node/ICU renderiza
     // es-PA como "USD 150.00", no "$150.00" (mismo gotcha ya documentado en ReportesPage.test.tsx).
     expect(screen.getByText(/^-.*150\.00$/)).toBeInTheDocument()
+  })
+
+  it('SCRUM-1175: muestra el vendedor de cada documento y «—» cuando no tiene', async () => {
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('F-4201')).toBeInTheDocument())
+    expect(screen.getByText('adminContab:reportes.libroFacturas.columnas.vendedor')).toBeInTheDocument()
+    const rows = screen.getAllByRole('row')
+    expect(rows.find(r => r.textContent?.includes('F-4201'))?.textContent).toContain('Ana Pérez, Luis Mora')
+    const nota = rows.find(r => r.textContent?.includes('NC-0002'))!
+    expect(nota.lastElementChild?.textContent).toBe('—')
   })
 
   it('changing tipo filter refetches immediately without pressing Filtrar', async () => {

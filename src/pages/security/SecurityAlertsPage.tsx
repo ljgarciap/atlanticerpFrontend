@@ -4,6 +4,7 @@ import type { AnomalyStatus, SecurityAnomaly } from '@/api/securityAnomaliesApi'
 import { useSecurityAnomalies, useConfirmAnomaly, useDismissAnomaly, useUnblockUser } from '@/hooks/useSecurityAnomalies'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { formatDateTimeShort } from '@/utils/dates'
 
 const SEVERITY_STYLES: Record<SecurityAnomaly['severity'], string> = {
   low:    'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400',
@@ -81,7 +82,7 @@ export default function SecurityAlertsPage() {
                     {t(`security:alerts.status.${anomaly.status}`)}
                   </span>
                   <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                    {new Date(anomaly.detected_at).toLocaleString()}
+                    {formatDateTimeShort(anomaly.detected_at)}
                   </span>
                 </div>
 

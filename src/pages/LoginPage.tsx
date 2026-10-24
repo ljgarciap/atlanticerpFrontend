@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { authApi } from '@/api/authApi'
+import { parseAuthError, isTooManyAttempts } from '@/lib/authErrors'
+import { useRetryCountdown, describeWait } from '@/hooks/useRetryCountdown'
 import { useAuthStore } from '@/store/authStore'
 import { getHomeRoute } from '@/lib/homeRoute'
-import { isMultiRoleResponse, isMfaRequiredResponse } from '@/types/auth'
+import { returnPathFor } from '@/lib/returnPath'
+import { isMfaRequiredResponse } from '@/types/auth'
 import AppLogo from '@/components/AppLogo'
-import RolePickerModal from '@/components/RolePickerModal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 
@@ -39,7 +41,28 @@ const inputCls = (hasError: boolean) =>
 export default function LoginPage() {
   const { t }    = useTranslation(['common', 'auth'])
   const navigate = useNavigate()
-  const { setAuth, setPendingRoleSelection, pendingRoleSelection } = useAuthStore()
+  // SCRUM-1033: el cambio de contraseña cierra todas las sesiones; ChangePassword* navega aquí con este flag.
+  const location = useLocation()
+  const locationState = location.state as { passwordChanged?: boolean } | null
+  const passwordChanged = locationState?.passwordChanged === true
+  // SCRUM-1159: ruta protegida que se pidió sin sesión (enlace de un correo o notificación): solo si es una ruta interna y, si la pidió la
+  // persona de una sesión que se cerró, solo para esa misma persona (ver `returnPathFor`). Se resuelve al entrar, cuando ya se sabe quién es.
+  const destinationFor = (userId: number, home: string) => returnPathFor(location.state, userId) ?? home
+  const { setAuth } = useAuthStore()
+  // Cierre de H2: la contraseña temporal venció con la sesión viva (el interceptor cerró la sesión y
+  // dejó este flag) o el propio login respondió 401 `password_reset_expired`.
+  const passwordResetExpiredFlag = useAuthStore(s => s.passwordResetExpired)
+  const setPasswordResetExpired  = useAuthStore(s => s.setPasswordResetExpired)
+  const [loginExpired, setLoginExpired] = useState(false)
+
+  // Cierre de H4: esperas por 429 `too_many_attempts`, una por cada formulario que puede recibirlo.
+  const loginWait  = useRetryCountdown()
+  const mfaWait    = useRetryCountdown()
+  const resendWait = useRetryCountdown()
+  const waitText = (seconds: number) => {
+    const { unit, count } = describeWait(seconds)
+    return t(`auth:errors.wait.${unit}`, { count })
+  }
 
   // MFA step state
   const [mfaState, setMfaState]         = useState<{ challengeId: string } | null>(null)
@@ -68,49 +91,57 @@ export default function LoginPage() {
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleLogin = async (data: LoginFormData) => {
+    if (loginWait.active) return
     setLoginError('')
+    setLoginExpired(false)
+    setPasswordResetExpired(false)
     try {
       const res = await authApi.login(data.email, data.password)
-      if (isMultiRoleResponse(res)) {
-        setPendingRoleSelection(res.selection_token, res.roles)
-      } else if (isMfaRequiredResponse(res)) {
+      if (isMfaRequiredResponse(res)) {
         setMfaState({ challengeId: res.mfa_challenge_id })
       } else {
         setAuth(res.user, res.accessToken, res.refreshToken)
         // SCRUM-175 — '/dashboard' ya no existe (SCRUM-711); navegar directo a la pantalla de
         // Inicio real del usuario evita el salto extra por el catch-all (y el loop infinito que
         // causaba pantalla en blanco para usuarios sin acceso a Ventas & Diseño, ver homeRoute.ts).
-        navigate(getHomeRoute(res.user), { replace: true })
+        navigate(destinationFor(res.user.id, getHomeRoute(res.user)), { replace: true })
       }
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      setLoginError(msg || t('auth:login.invalidCredentials'))
+      const parsed = parseAuthError(err)
+      if (parsed.code === 'password_reset_expired') {
+        // Mensaje propio (i18n) y enlace a "Olvidé mi contraseña": no se muestra el texto del backend.
+        setLoginExpired(true)
+      } else if (isTooManyAttempts(parsed)) {
+        loginWait.start(parsed.retryAfter ?? 60)
+      } else {
+        setLoginError(parsed.message || t('auth:login.invalidCredentials'))
+      }
     }
   }
 
   const handleMfaVerify = async (data: MfaFormData) => {
-    if (!mfaState) return
+    if (!mfaState || mfaWait.active) return
     setMfaError('')
     try {
       const res = await authApi.mfaVerify(mfaState.challengeId, data.code)
-      if (isMultiRoleResponse(res)) {
-        setPendingRoleSelection(res.selection_token, res.roles)
-      } else {
-        setAuth(res.user, res.accessToken, res.refreshToken)
-        // SCRUM-175 — '/dashboard' ya no existe (SCRUM-711); navegar directo a la pantalla de
-        // Inicio real del usuario evita el salto extra por el catch-all (y el loop infinito que
-        // causaba pantalla en blanco para usuarios sin acceso a Ventas & Diseño, ver homeRoute.ts).
-        navigate(getHomeRoute(res.user), { replace: true })
-      }
+      setAuth(res.user, res.accessToken, res.refreshToken)
+      // SCRUM-175 — '/dashboard' ya no existe (SCRUM-711); navegar directo a la pantalla de
+      // Inicio real del usuario evita el salto extra por el catch-all (y el loop infinito que
+      // causaba pantalla en blanco para usuarios sin acceso a Ventas & Diseño, ver homeRoute.ts).
+      navigate(destinationFor(res.user.id, getHomeRoute(res.user)), { replace: true })
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      setMfaError(msg || t('auth:mfa.invalidCode'))
+      const parsed = parseAuthError(err)
+      if (isTooManyAttempts(parsed)) {
+        mfaWait.start(parsed.retryAfter ?? 60)
+      } else {
+        setMfaError(parsed.message || t('auth:mfa.invalidCode'))
+      }
       mfaReset()
     }
   }
 
   const handleResend = async () => {
-    if (!mfaState || resendLoading) return
+    if (!mfaState || resendLoading || resendWait.active) return
     setResendLoading(true)
     setResendMessage('')
     try {
@@ -118,14 +149,17 @@ export default function LoginPage() {
       setMfaState({ challengeId: res.mfa_challenge_id })
       setResendMessage(t('auth:mfa.resendSuccess'))
       mfaReset()
-    } catch {
-      // silently ignore — resend is best-effort
+    } catch (err: unknown) {
+      // El reenvío es "best-effort" salvo el límite de intentos: ahí se avisa y se bloquea el botón.
+      const parsed = parseAuthError(err)
+      if (isTooManyAttempts(parsed)) resendWait.start(parsed.retryAfter ?? 60)
     } finally {
       setResendLoading(false)
     }
   }
 
   const handleBackToLogin = () => {
+    mfaWait.clear(); resendWait.clear()
     setMfaState(null)
     setMfaError('')
     setResendMessage('')
@@ -133,8 +167,6 @@ export default function LoginPage() {
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
-
-  if (pendingRoleSelection) return <RolePickerModal />
 
   return (
     <div
@@ -197,13 +229,25 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {mfaWait.active && (
+                <div role="alert" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  {t('auth:errors.tooManyAttempts', { time: waitText(mfaWait.remaining) })}
+                </div>
+              )}
+
+              {resendWait.active && (
+                <div role="alert" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  {t('auth:errors.tooManyAttempts', { time: waitText(resendWait.remaining) })}
+                </div>
+              )}
+
               {resendMessage && (
                 <div className="mb-4 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm text-center">
                   {resendMessage}
                 </div>
               )}
 
-              <Button type="submit" loading={mfaPending} className="w-full">
+              <Button type="submit" loading={mfaPending} disabled={mfaWait.active} className="w-full">
                 {mfaPending ? t('auth:mfa.submitting') : t('auth:mfa.submit')}
               </Button>
 
@@ -215,7 +259,7 @@ export default function LoginPage() {
                   type="button"
                   variant="ghost"
                   onClick={handleResend}
-                  disabled={resendLoading}
+                  disabled={resendLoading || resendWait.active}
                   className="!text-xs"
                 >
                   {resendLoading ? '...' : t('auth:mfa.resend')}
@@ -261,6 +305,30 @@ export default function LoginPage() {
               )}
             </div>
 
+            {/* Contraseña cambiada: se cerraron las sesiones (SCRUM-1033) */}
+            {passwordChanged && (
+              <div role="status" className="mb-4 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm">
+                {t('auth:changePassword.reloginNotice')}
+              </div>
+            )}
+
+            {/* Contraseña temporal vencida (cierre de H2) */}
+            {(loginExpired || passwordResetExpiredFlag) && (
+              <div role="alert" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                <p>{t('auth:errors.passwordResetExpired')}</p>
+                <Link to="/forgot-password" className="mt-1 inline-block font-semibold underline">
+                  {t('auth:login.forgotPassword')}
+                </Link>
+              </div>
+            )}
+
+            {/* Límite de intentos (cierre de H4) */}
+            {loginWait.active && (
+              <div role="alert" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                {t('auth:errors.tooManyAttempts', { time: waitText(loginWait.remaining) })}
+              </div>
+            )}
+
             {/* Error de API */}
             {loginError && (
               <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -269,7 +337,7 @@ export default function LoginPage() {
             )}
 
             {/* Botón */}
-            <Button type="submit" loading={loginPending} className="w-full">
+            <Button type="submit" loading={loginPending} disabled={loginWait.active} className="w-full">
               {loginPending ? t('common:actions.loggingIn') : t('common:actions.login')}
             </Button>
 
@@ -280,12 +348,6 @@ export default function LoginPage() {
                 className="text-xs font-medium transition text-primary hover:text-primary-dark dark:text-primary-light"
               >
                 {t('auth:login.forgotPassword')}
-              </Link>
-              <Link
-                to="/register"
-                className="text-xs font-medium transition text-primary hover:text-primary-dark dark:text-primary-light"
-              >
-                {t('auth:createAccount')}
               </Link>
             </div>
           </form>

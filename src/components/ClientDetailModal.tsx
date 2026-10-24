@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import CreateClientModal from '@/components/CreateClientModal'
 import ClientProjectsModal from '@/components/ClientProjectsModal'
+import SubClientIcgHistoryModal from '@/components/SubClientIcgHistoryModal'
+import EditSubClientTaxDataModal from '@/components/EditSubClientTaxDataModal'
+import { usePermission } from '@/hooks/usePermission'
 
 const CATEGORIES: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
 
@@ -27,6 +30,13 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const [editingContactId, setEditingContactId] = useState<number | null>(null)
   const [draft, setDraft] = useState({ name: '', role: 'client' as ContactRole, phone: '', email: '' })
   const [contactError, setContactError] = useState<string | null>(null)
+  const [showIcgHistory, setShowIcgHistory] = useState(false)
+  const [showEditTaxData, setShowEditTaxData] = useState(false)
+  // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Mark/Felix).
+  // SCRUM-1182 — los hooks se llaman SIEMPRE, todos, y se combinan después (`a || b` no ejecuta el segundo hook y cambia el número de hooks entre renders).
+  const hasVentasDisenoEdit = usePermission('ventas_diseno.edit')
+  const hasEditClientTaxData = usePermission('ventas_diseno.edit.client_tax_data')
+  const canEditTaxData = hasVentasDisenoEdit || hasEditClientTaxData
 
   function contactErrorMessage(err: unknown): string {
     const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
@@ -85,8 +95,20 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
         <div>
           <p className="font-semibold text-sm text-slate-900 dark:text-slate-100">{subClient.business_name}</p>
           <p className="text-[12px] text-slate-500 dark:text-slate-400">
-            {t('ventasDiseno:clients.detail.taxId')}: {subClient.tax_id}
+            {subClient.receptor_tipo === '02'
+              ? t('ventasDiseno:clients.receptorTipo.consumidorFinal')
+              : <>
+                  {t('ventasDiseno:clients.detail.taxId')}: {subClient.tax_id}
+                  {subClient.tax_id_dv && <> {t('ventasDiseno:clients.detail.taxIdDv')}: {subClient.tax_id_dv}</>}
+                </>}
             {subClient.delivery_address && <> · {subClient.delivery_address}</>}
+            {/* SCRUM-1166 — las cotizaciones y facturas de este cliente salen sin ITBMS. */}
+            {subClient.itbms_exento && (
+              <span data-testid={`chip-exento-${subClient.id}`} title={subClient.itbms_exencion_documento ?? undefined}
+                className="ml-2 inline-flex items-center rounded-full bg-primary-soft text-primary-dark px-2 py-0.5 text-[10.5px] font-medium align-middle">
+                {t('ventasDiseno:clients.detail.exentoItbms')}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -106,8 +128,26 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
           >
             {t('ventasDiseno:clients.detail.newQuote')}
           </Button>
+          <Button variant="secondary" onClick={() => setShowIcgHistory(true)}>
+            {t('ventasDiseno:clients.detail.icgHistory')}
+          </Button>
+          {canEditTaxData && (
+            <Button variant="secondary" onClick={() => setShowEditTaxData(true)}>
+              {t('ventasDiseno:clients.editTaxData.editar')}
+            </Button>
+          )}
         </div>
       </div>
+
+      {showEditTaxData && <EditSubClientTaxDataModal subClient={subClient} onClose={() => setShowEditTaxData(false)} />}
+
+      {showIcgHistory && (
+        <SubClientIcgHistoryModal
+          subClientId={subClient.id}
+          subClientName={subClient.business_name}
+          onClose={() => setShowIcgHistory(false)}
+        />
+      )}
 
       <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">
         {t('ventasDiseno:clients.detail.contacts')}

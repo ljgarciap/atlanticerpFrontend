@@ -1,0 +1,35 @@
+# =============================================================================
+# Auditoría semanal de dependencias — SCRUM-962 (épica SCRUM-959)
+#
+# Detecta vulnerabilidades NUEVAS entre pushes (dev/test no corren CI por ADR-009). Cuesta ~1 min/semana:
+# solo lee package-lock.json, no instala nada. Termina en ROJO únicamente si hay vulnerabilidades de
+# producción de severidad alta o crítica (`infra/audit.sh --strict`), para que llegue el aviso de GitHub;
+# el resto es reporte en el resumen del run. Ejecución manual: Actions → "Auditoría semanal de
+# dependencias" → Run workflow.
+# =============================================================================
+name: Auditoría semanal de dependencias
+
+on:
+  schedule:
+    - cron: '30 13 * * 1'   # lunes 13:30 UTC (08:30 Panamá)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: npm audit (rojo solo si hay alta o crítica)
+        run: infra/audit.sh --strict

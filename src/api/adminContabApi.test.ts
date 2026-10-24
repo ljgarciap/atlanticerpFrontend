@@ -2,12 +2,14 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import * as axiosModule from 'axios'
 import type { CreatePaymentPayload, Payment } from '@/types/adminContab'
 
-// Batch 6 del cuerpo principal (SCRUM-545, REQ-468) — cubre específicamente el bug real encontrado
-// en Senior Review de este mismo batch: `register()` con `comprobante` arma un FormData a mano, y
-// `String(true)`/`String(false)` da "true"/"false" — la regla `boolean` de Laravel solo acepta
-// 1/0/"1"/"0", así que un registro con comprobante + saldo a favor aplicado fallaba 422 en
-// silencio antes de este ajuste. Mismo patrón de mock de axios que authApi.test.ts (no hay
-// axios-mock-adapter/msw en este repo).
+// Batch 6 del cuerpo principal (SCRUM-545, REQ-468) — cubre `register()` con `comprobante`
+// (arma un FormData a mano, JSON en caso contrario). El bug original de esta suite (boolean
+// `aplicar_saldo_favor` serializado como "true"/"false" en vez de "1"/"0", que Laravel rechaza)
+// ya no aplica: SCRUM-902 §4.4 retiró ese campo booleano por completo (reemplazado por
+// `monto_saldo_cliente_aplicado`, un monto numérico) — `CreatePaymentPayload` no tiene ningún
+// campo boolean hoy, así que la rama `typeof value === 'boolean'` de `register()` queda sin
+// ejercitar por este payload (código defensivo, no cobertura perdida de un caso real). Mismo
+// patrón de mock de axios que authApi.test.ts (no hay axios-mock-adapter/msw en este repo).
 vi.mock('axios', () => {
   const instance = {
     interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
@@ -26,7 +28,7 @@ function basePayload(overrides: Partial<CreatePaymentPayload> = {}): CreatePayme
   return {
     master_client_id: 7,
     invoice_ids: [1, 2],
-    aplicar_saldo_favor: true,
+    monto_saldo_cliente_aplicado: 500,
     metodo_pago: 'transferencia',
     monto_recibido_estimado: 5700,
     bank_account_id: 1,
@@ -48,23 +50,15 @@ describe('adminContabApi.payments.register', () => {
     expect(config).toBeUndefined()
   })
 
-  it('con comprobante manda multipart y aplicar_saldo_favor=true serializa como "1", no "true"', async () => {
+  it('con comprobante manda multipart con el monto de saldo cliente como string', async () => {
     const file = new File(['x'], 'comprobante.pdf', { type: 'application/pdf' })
-    await adminContabApi.payments.register(basePayload({ comprobante: file, aplicar_saldo_favor: true }))
+    await adminContabApi.payments.register(basePayload({ comprobante: file, monto_saldo_cliente_aplicado: 500 }))
 
     const [, body, config] = mockInstance.post.mock.calls[0]
     expect(body).toBeInstanceOf(FormData)
     expect((config as { headers: Record<string, string> }).headers['Content-Type']).toBe('multipart/form-data')
-    expect((body as FormData).get('aplicar_saldo_favor')).toBe('1')
+    expect((body as FormData).get('monto_saldo_cliente_aplicado')).toBe('500')
     expect((body as FormData).get('comprobante')).toBe(file)
-  })
-
-  it('con comprobante y aplicar_saldo_favor=false serializa como "0", no "false"', async () => {
-    const file = new File(['x'], 'comprobante.pdf', { type: 'application/pdf' })
-    await adminContabApi.payments.register(basePayload({ comprobante: file, aplicar_saldo_favor: false }))
-
-    const body = mockInstance.post.mock.calls[0][1] as FormData
-    expect(body.get('aplicar_saldo_favor')).toBe('0')
   })
 
   it('con comprobante manda cada invoice_id como invoice_ids[] repetido', async () => {

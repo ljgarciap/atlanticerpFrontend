@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
+import { endImpersonation } from '@/lib/impersonation'
 import { authApi } from '@/api/authApi'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { settingsApi } from '@/api/settingsApi'
 import { applyTheme } from '@/hooks/useTheme'
+import { useDemoModeActive, invalidateDemoModeAffectedQueries } from '@/hooks/useDemoMode'
 import AppLogo from './AppLogo'
 import LanguageSelector from './LanguageSelector'
-import RoleSwitcher from './RoleSwitcher'
 import ChangePasswordModal from './ChangePasswordModal'
 import UserAvatar from './UserAvatar'
 import EditProfileDrawer from './EditProfileDrawer'
 import NotificationBell from './NotificationBell'
 import { Button } from '@/components/ui/Button'
+import { Toggle } from '@/components/ui/Toggle'
 import { IcoSun, IcoMoon } from '@/components/icons'
 
 interface Tab { id: string; label: string }
@@ -32,7 +34,7 @@ interface Props {
 
 export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backLink, onSidebarToggle }: Props) {
   const { t } = useTranslation(['common', 'auth'])
-  const { user, refreshToken, clearAuth } = useAuthStore()
+  const { user, clearAuth } = useAuthStore()
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [userMenuOpen,    setUserMenuOpen]    = useState(false)
@@ -60,8 +62,27 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
     saveTheme.mutate(next)
   }
 
+  // docs/specs/demo-mode.md (F2) — toggle PERSONAL, oculto por completo (no deshabilitado) si el
+  // gate GLOBAL está apagado. Ver docblock de useDemoModeActive() para el gotcha de permisos
+  // conocido (usuarios sin settings.global no pueden ver el gate global desde acá todavía).
+  const { globalGateOn, personalGateOn } = useDemoModeActive()
+
+  const toggleDemoMode = useMutation({
+    mutationFn: (v: boolean) => settingsApi.updatePreferences({ demo_mode_enabled: v }),
+    onSuccess: (data) => {
+      qc.setQueryData(['preferences'], data)
+      invalidateDemoModeAffectedQueries(qc)
+    },
+  })
+
+  const handleToggleDemoMode = () => toggleDemoMode.mutate(!personalGateOn)
+
   const handleLogout = async () => {
-    if (refreshToken) await authApi.logout(refreshToken)
+    // SCRUM-1158 — cerrar sesión durante «Ver como» cierra también la del superadmin: primero termina la observada (servidor) y vuelve
+    // a la real, para poder revocar SU refresh token en vez de dejarlo vivo en el servidor.
+    if (user?.impersonation) await endImpersonation()
+    const currentRefreshToken = useAuthStore.getState().refreshToken
+    if (currentRefreshToken) await authApi.logout(currentRefreshToken)
     localStorage.removeItem('atlanticerp_theme')
     clearAuth()
     navigate('/login', { replace: true })
@@ -102,10 +123,23 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
             style={{ background: '#d1ede9', color: '#1f6b66' }}>
             {user?.role ? t(`common:roles.${user.role}`, { defaultValue: user.role }) : ''}
           </span>
-          {/* RoleSwitcher — oculto en xs (accesible desde menú avatar) */}
-          <span className="hidden sm:flex"><RoleSwitcher /></span>
           {/* LanguageSelector — oculto en xs */}
           <span className="hidden sm:flex"><LanguageSelector /></span>
+
+          {/* Modo Demo — toggle personal, oculto por completo (no deshabilitado) si el superadmin
+              no habilitó el gate global (docs/specs/demo-mode.md, F2). Oculto en xs — accesible
+              desde el menú avatar, mismo criterio que theme/settings. */}
+          {globalGateOn && (
+            <span className="hidden sm:flex items-center gap-1.5" title={t('common:demoMode.toggleLabel')}>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('common:demoMode.toggleLabel')}</span>
+              <Toggle
+                checked={personalGateOn}
+                onChange={handleToggleDemoMode}
+                disabled={toggleDemoMode.isPending}
+                label={t('common:demoMode.toggleLabel')}
+              />
+            </span>
+          )}
 
           {/* Notificaciones — siempre visible, incluso en xs */}
           <NotificationBell />
@@ -150,10 +184,6 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
                       {user.first_name} {user.last_name}
                     </div>
                   )}
-                  {/* RoleSwitcher inline — solo visible en xs donde el header lo oculta */}
-                  <div className="sm:hidden px-4 py-1.5 border-b border-slate-100">
-                    <RoleSwitcher />
-                  </div>
                   {/* LanguageSelector inline — solo visible en xs donde el header lo oculta */}
                   <div className="sm:hidden px-4 py-1.5 border-b border-slate-100">
                     <LanguageSelector />
@@ -175,6 +205,19 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
                     {theme === 'dark' ? <IcoSun /> : <IcoMoon />}
                     {theme === 'dark' ? t('common:theme.light') : t('common:theme.dark')}
                   </button>
+                  {/* Modo Demo — inline en el dropdown, solo en xs (el header ya lo muestra en
+                      sm+); mismo gate de gate global que el control del header. */}
+                  {globalGateOn && (
+                    <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
+                      <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">{t('common:demoMode.toggleLabel')}</span>
+                      <Toggle
+                        checked={personalGateOn}
+                        onChange={handleToggleDemoMode}
+                        disabled={toggleDemoMode.isPending}
+                        label={t('common:demoMode.toggleLabel')}
+                      />
+                    </div>
+                  )}
                   {/* Settings — solo visible en xs donde el botón del header está oculto */}
                   <button
                     onClick={() => { setUserMenuOpen(false); navigate('/settings') }}

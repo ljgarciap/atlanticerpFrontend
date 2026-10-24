@@ -8,11 +8,18 @@ import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { Pendiente, FinalStageItem } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import CountBadge from '@/components/ui/CountBadge'
 import { IcoClock, IcoEye, IcoClose } from '@/components/icons'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
 import HomeItemDetailModal from '@/components/HomeItemDetailModal'
+import ShowMoreListModal from '@/components/ShowMoreListModal'
+import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
+import { formatInt } from '@/lib/money'
+import { MAX_HOME_CARD_ITEMS } from '@/lib/homeCards'
+import { firstNameOnly } from '@/lib/greeting'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
 type PipelineChip = 'all' | 'final_stage' | 'stagnant'
 
@@ -20,7 +27,7 @@ export default function VentasDisenoHomePage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const canSeeTeam = user?.role === 'management' || user?.role === 'superadmin'
+  const canSeeTeam = hasGerenciaScope(user)
 
   const [scope, setScope] = useState<'own' | 'team'>('own')
   const [vendorId, setVendorId] = useState<number | ''>('')
@@ -33,6 +40,8 @@ export default function VentasDisenoHomePage() {
   // listado completo antes del drill-down al detalle; acá el "+N más" no tenía ningún onClick.
   const [showPendientesList, setShowPendientesList] = useState(false)
   const [finalStageDetail, setFinalStageDetail] = useState<FinalStageItem | null>(null)
+  // SCRUM-871 — "Final Stage" no tenía "Ver más": los ítems más allá del cap quedaban ocultos sin aviso.
+  const [showAllFinalStage, setShowAllFinalStage] = useState(false)
 
   const ownerId = scope === 'team' && vendorId !== '' ? vendorId : undefined
 
@@ -40,6 +49,13 @@ export default function VentasDisenoHomePage() {
     queryKey: ['ventas-diseno-home-vendors'],
     queryFn: () => ventasDisenoApi.home.vendors(),
     enabled: canSeeTeam,
+  })
+
+  // SCRUM-908 — tarjeta "Aprobaciones Pendientes", siempre personal, no aplica al scope 'team'.
+  const { data: approvalsPending } = useQuery({
+    queryKey: ['ventas-diseno-home-approvals-pending'],
+    queryFn:  () => ventasDisenoApi.home.approvalsPending(),
+    enabled:  scope === 'own',
   })
 
   const { data: summary, isLoading: loadingSummary } = useQuery({
@@ -59,6 +75,9 @@ export default function VentasDisenoHomePage() {
     queryFn: () => ventasDisenoApi.pipeline.list({ scope, owner_id: ownerId }),
   })
 
+  // SCRUM-834 — monto acumulado por etapa, sumado en cliente a partir de PipelineCard.amount (ya
+  // viaja del backend, sin cambios de API): mismo criterio de visibilidad que `count` (respeta el
+  // chip Final Stage/Estancados activo).
   const stageCounts = useMemo(() => {
     const cards = pipelineCards ?? []
     return PIPELINE_STAGES.map(stage => {
@@ -68,7 +87,8 @@ export default function VentasDisenoHomePage() {
         : pipelineChip === 'stagnant'
           ? inStage.filter(c => c.is_stagnant)
           : inStage
-      return { stage, count: visible.length }
+      const amount = visible.reduce((sum, c) => sum + (c.amount ?? 0), 0)
+      return { stage, count: visible.length, amount }
     })
   }, [pipelineCards, pipelineChip])
 
@@ -76,12 +96,25 @@ export default function VentasDisenoHomePage() {
   const finalStage = summary?.final_stage ?? []
   const eventsToday = summary?.events_today_count ?? 0
 
+  // SCRUM-871 — fila reusada entre la lista corta (máx. MAX_HOME_CARD_ITEMS) y el modal "Ver más".
+  const renderFinalStageRow = (item: FinalStageItem, onSelect: () => void) => (
+    <button
+      onClick={onSelect}
+      className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-200"
+    >
+      <span className="font-semibold">{item.project_name}</span>
+      {item.client_name && <span className="text-slate-400"> · {item.client_name}</span>}
+    </button>
+  )
+
   return (
     <>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
+          {/* SCRUM-835 — saludo personalizado (antes decía "Inicio" a secas). SCRUM-863 — solo
+              primer nombre, alineado con Compras/Gerencia/Servicios. */}
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            {t('ventasDiseno:nav.home')}
+            {t('ventasDiseno:home.greeting', { name: firstNameOnly(user?.first_name) })}
           </h1>
           {!loadingSummary && (
             <p className="text-[12px] text-slate-500 dark:text-slate-400">
@@ -171,7 +204,11 @@ export default function VentasDisenoHomePage() {
             <button
               type="button"
               title={t('ventasDiseno:home.performance.viewCommissions')}
-              onClick={() => navigate('/ventas-diseno/reports#commissions')}
+              // SCRUM-712 (2026-09-01) — apunta al detalle real de Admin&Contab (Comisiones
+              // Internas, Batch 14/15), que ya filtra por vendedor salvo Gerencia
+              // (`view_team`) — antes iba al panel embebido de Reportes, que era solo un
+              // resumen. Ese panel viejo se deja intacto (decisión explícita de Luis).
+              onClick={() => navigate('/admin-contab/comisiones/internas')}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
             >
               <IcoEye size={16} />
@@ -221,7 +258,7 @@ export default function VentasDisenoHomePage() {
             </span>
           </div>
           <ul className="flex flex-col gap-1.5">
-            {pendientes.slice(0, 3).map((p, i) => (
+            {pendientes.slice(0, MAX_HOME_CARD_ITEMS).map((p, i) => (
               <li key={i}>
                 <button
                   onClick={() => setPendienteDetail(p)}
@@ -237,17 +274,12 @@ export default function VentasDisenoHomePage() {
             {pendientes.length === 0 && (
               <li className="text-[12px] text-slate-400 px-2">{t('ventasDiseno:home.pendientes.empty')}</li>
             )}
-            {pendientes.length > 3 && (
-              <li>
-                <button
-                  onClick={() => setShowPendientesList(true)}
-                  className="w-full text-left text-[11px] text-slate-400 hover:text-slate-600 hover:underline px-2 py-1"
-                >
-                  {t('ventasDiseno:home.pendientes.more', { count: pendientes.length - 3 })}
-                </button>
-              </li>
-            )}
           </ul>
+          {pendientes.length > MAX_HOME_CARD_ITEMS && (
+            <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowPendientesList(true)}>
+              {t('common:actions.viewMore')}
+            </Button>
+          )}
         </Card>
 
         {/* Final Stage — REQ-060. SCRUM-68: cn() concatena clases sin tailwind-merge, asi que
@@ -255,25 +287,25 @@ export default function VentasDisenoHomePage() {
             el orden en que Tailwind haya emitido cada clase en el CSS final (no el orden en el
             className). El prefijo "!" fuerza !important para que este panel se distinga siempre. */}
         <Card variant="panel" className="p-4 !bg-red-50/50 dark:!bg-red-950/10 !border-red-100 dark:!border-red-900/30">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t('ventasDiseno:home.finalStage.title')}
-          </h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {t('ventasDiseno:home.finalStage.title')}
+            </h3>
+            <CountBadge count={finalStage.length} tone="critical" />
+          </div>
           <ul className="flex flex-col gap-1.5">
-            {finalStage.slice(0, 4).map(item => (
-              <li key={item.id}>
-                <button
-                  onClick={() => setFinalStageDetail(item)}
-                  className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-200"
-                >
-                  <span className="font-semibold">{item.project_name}</span>
-                  {item.client_name && <span className="text-slate-400"> · {item.client_name}</span>}
-                </button>
-              </li>
+            {finalStage.slice(0, MAX_HOME_CARD_ITEMS).map(item => (
+              <li key={item.id}>{renderFinalStageRow(item, () => setFinalStageDetail(item))}</li>
             ))}
             {finalStage.length === 0 && (
               <li className="text-[12px] text-slate-400 px-2">{t('ventasDiseno:home.finalStage.empty')}</li>
             )}
           </ul>
+          {finalStage.length > MAX_HOME_CARD_ITEMS && (
+            <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllFinalStage(true)}>
+              {t('common:actions.viewMore')}
+            </Button>
+          )}
         </Card>
 
         {/* Pipeline de proyectos — REQ-061 */}
@@ -303,7 +335,7 @@ export default function VentasDisenoHomePage() {
             </div>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            {stageCounts.map(({ stage, count }) => (
+            {stageCounts.map(({ stage, count, amount }) => (
               <button
                 key={stage.id}
                 onClick={() => navigate('/ventas-diseno/pipeline')}
@@ -311,10 +343,15 @@ export default function VentasDisenoHomePage() {
               >
                 <span className="block text-lg font-bold" style={{ color: stage.color }}>{count}</span>
                 <span className="block text-[10px] text-slate-500 dark:text-slate-400">{t(`ventasDiseno:stages.${stage.id}`)}</span>
+                {/* SCRUM-834 — monto acumulado de la etapa, debajo del conteo (mockup 1__Ventas_Diseño_Home) */}
+                <span className="block text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">${formatInt(amount)}</span>
               </button>
             ))}
           </div>
         </Card>
+
+        {/* SCRUM-908 — siempre personal, no aplica al scope 'team'. */}
+        {scope === 'own' && <ApprovalsPendingCard items={approvalsPending?.data ?? []} />}
       </div>
 
       {showCalendar && (
@@ -403,6 +440,19 @@ export default function VentasDisenoHomePage() {
             label: t('common:actions.view'),
             onClick: () => navigate(`/ventas-diseno/pipeline?card=${finalStageDetail.id}`),
           }}
+        />
+      )}
+
+      {showAllFinalStage && (
+        <ShowMoreListModal
+          title={t('ventasDiseno:home.finalStage.title')}
+          items={finalStage}
+          onClose={() => setShowAllFinalStage(false)}
+          renderItem={item => (
+            <div key={item.id}>
+              {renderFinalStageRow(item, () => { setShowAllFinalStage(false); setFinalStageDetail(item) })}
+            </div>
+          )}
         />
       )}
     </>

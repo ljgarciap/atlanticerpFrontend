@@ -5,6 +5,7 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import type { AuditLogEntry } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { formatDateTimeShort } from '@/utils/dates'
 
 const ENTITY_TYPES = [
   'pipeline_card', 'pipeline_card_contact', 'pipeline_card_file',
@@ -139,7 +140,7 @@ export default function VentasDisenoAuditLogPage() {
                   const verb = actionVerb(entry.action)
                   return (
                     <tr key={entry.id} className="border-b border-slate-100 dark:border-slate-800">
-                      <td className="px-3 py-2 whitespace-nowrap">{new Date(entry.created_at).toLocaleString()}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{formatDateTimeShort(entry.created_at)}</td>
                       <td className="px-3 py-2">{entry.user?.name ?? t('ventasDiseno:auditLog.table.systemUser')}</td>
                       <td className="px-3 py-2">{verb ? t(`ventasDiseno:auditLog.action.${verb}`) : entry.action}</td>
                       <td className="px-3 py-2">

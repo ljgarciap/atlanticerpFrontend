@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
-import type { CatalogItem } from '@/types/ventasDiseno'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import type { CatalogItem, CatalogPdfExportStatus } from '@/types/ventasDiseno'
 import type { CatalogProductCategory } from '@/types/compras'
+import DemoModeBadge from '@/components/DemoModeBadge'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
@@ -66,8 +68,24 @@ export default function VentasDisenoCatalogPage() {
   const [sendingSelected, setSendingSelected] = useState(false)
   const [sendingFull, setSendingFull]         = useState(false)
 
+  // SCRUM-998 — catálogo grande generado en segundo plano (ZIP de volúmenes). El identificador viaja en `?export=`: lo pone
+  // `handleSend()` al recibir el 202 (para ver el avance de inmediato) y el enlace del aviso in-app (para abrir la descarga).
+  const [searchParams, setSearchParams] = useSearchParams()
+  const exportId = searchParams.get('export')
+  const { data: exportStatus, isError: exportError } = useQuery({
+    queryKey: ['catalog-pdf-export', exportId],
+    queryFn: () => ventasDisenoApi.catalog.pdfExport(exportId as string),
+    enabled: !!exportId,
+    retry: false,
+    refetchInterval: q => (q.state.data?.status === 'queued' || q.state.data?.status === 'running') ? 10_000 : false,
+  })
+
+  // SCRUM-992 — el input responde al instante, pero el request solo sale tras 250 ms sin teclear
+  // (mínimo 2 caracteres; vaciar restaura el listado). REQ-617 (tiempo real, sin botón) se mantiene.
+  const searchTerm = useDebouncedSearchTerm(search)
+
   const filters = {
-    search:    search || undefined,
+    search:    searchTerm || undefined,
     category:  category || undefined,
     family_id: familyId || undefined,
     stock:     stock || undefined,
@@ -76,6 +94,7 @@ export default function VentasDisenoCatalogPage() {
   const { data, isLoading } = useQuery({
     queryKey: [CATALOG_QUERY_KEY, filters, page, perPage],
     queryFn:  () => ventasDisenoApi.catalog.list({ ...filters, page, per_page: perPage }),
+    placeholderData: keepPreviousData,
   })
 
   const items      = data?.data ?? []
@@ -94,7 +113,11 @@ export default function VentasDisenoCatalogPage() {
   useEffect(() => {
     setSelected(new Set())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, familyId, stock])
+  }, [searchTerm, category, familyId, stock])
+
+  // La página se reinicia cuando cambia el término efectivo (no en cada tecla), para no disparar
+  // un request extra con el término viejo y page=1.
+  useEffect(() => { setPage(1) }, [searchTerm])
 
   function goToPage(next: number) {
     setPage(next)
@@ -141,8 +164,14 @@ export default function VentasDisenoCatalogPage() {
     const setLoading = mode === 'completo' ? setSendingFull : setSendingSelected
     setLoading(true)
     try {
-      await ventasDisenoApi.catalog.sendPdf(mode, mode === 'seleccionados' ? [...selected] : undefined)
-      showToast(t('ventasDiseno:catalogScreen.sendSuccess'), 'success')
+      const result = await ventasDisenoApi.catalog.sendPdf(mode, mode === 'seleccionados' ? [...selected] : undefined)
+      if (result.queued) {
+        // SCRUM-998 — demasiado grande para un PDF plano: se genera en volúmenes en segundo plano y se avisa al terminar.
+        showToast(t('ventasDiseno:catalogScreen.sendQueued', { count: result.totalProducts, volumes: result.volumes }), 'success')
+        setSearchParams({ export: result.exportId }, { replace: true })
+      } else {
+        showToast(t('ventasDiseno:catalogScreen.sendSuccess'), 'success')
+      }
     } catch {
       showToast(t('ventasDiseno:catalogScreen.sendError'), 'error')
     } finally {
@@ -156,9 +185,12 @@ export default function VentasDisenoCatalogPage() {
     <>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            {t('ventasDiseno:catalog.pageTitle')}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              {t('ventasDiseno:catalog.pageTitle')}
+            </h1>
+            <DemoModeBadge />
+          </div>
           {!isLoading && meta && (
             <p className="text-[12px] text-slate-500 dark:text-slate-400">
               {t('ventasDiseno:catalogScreen.resultsCount', { count: meta.total })}
@@ -180,6 +212,15 @@ export default function VentasDisenoCatalogPage() {
           )}
         </div>
       </div>
+
+      {exportId && (
+        <CatalogPdfExportBanner
+          exportId={exportId}
+          status={exportStatus}
+          notFound={exportError}
+          onDismiss={() => setSearchParams({}, { replace: true })}
+        />
+      )}
 
       {/* REQ-619 — selección + botones de envío */}
       <Card variant="panel" className="p-2.5 mb-3 flex flex-wrap items-center gap-3">
@@ -242,7 +283,7 @@ export default function VentasDisenoCatalogPage() {
           type="text"
           placeholder={t('ventasDiseno:catalogScreen.filters.searchPlaceholder')}
           value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
+          onChange={e => setSearch(e.target.value)}
           className="border border-slate-200 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-[13px] w-full sm:min-w-[260px] sm:flex-1 focus:outline-none focus:border-[#5BA5A0]"
         />
         <select value={category} onChange={e => { setCategory(e.target.value as CatalogProductCategory | ''); setPage(1) }} className={selectClass}>
@@ -394,6 +435,9 @@ function StockLabel({ item, compact }: { item: CatalogItem; compact?: boolean })
         : (zero ? t('ventasDiseno:catalogScreen.stock.unavailable') : t('ventasDiseno:catalogScreen.stock.available', { count: item.disponible }))}
       {item.en_camino > 0 && (
         <span className="text-slate-400"> · {t('ventasDiseno:catalogScreen.stock.incoming', { count: item.en_camino })}</span>
+      )}
+      {(item.stock_showroom ?? 0) > 0 && (
+        <span className="text-slate-400" data-testid={`catalog-showroom-${item.id}`}> · {t('ventasDiseno:catalogScreen.stock.showroom', { count: item.stock_showroom })}</span>
       )}
     </span>
   )
@@ -621,5 +665,83 @@ function UploadTechnicalSheetModal({ productId, onClose, onUploaded }: {
         </div>
       </Card>
     </div>
+  )
+}
+
+
+/**
+ * SCRUM-998 — estado de la exportación del Catálogo en segundo plano (ZIP de volúmenes): avance mientras se genera, botón de
+ * descarga cuando está lista y el motivo si falló. La URL firmada del ZIP vale solo 15 min, así que el botón vuelve a pedir el
+ * estado en el momento del clic en vez de reusar la que llegó con el polling. Solo el solicitante (o un superadmin) puede
+ * consultarla: para cualquier otra persona el backend responde 404 y se muestra como "no encontrada".
+ */
+function CatalogPdfExportBanner({ exportId, status, notFound, onDismiss }: {
+  exportId: string
+  status: CatalogPdfExportStatus | undefined
+  notFound: boolean
+  onDismiss: () => void
+}) {
+  const { t } = useTranslation(['common', 'ventasDiseno'])
+  const showToast = useToastStore(s => s.show)
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownload() {
+    setDownloading(true)
+    try {
+      const fresh = await ventasDisenoApi.catalog.pdfExport(exportId)
+      if (fresh.download_url) {
+        window.location.assign(fresh.download_url)
+      } else {
+        showToast(t('ventasDiseno:catalogScreen.exportBanner.expired'), 'error')
+      }
+    } catch {
+      showToast(t('ventasDiseno:catalogScreen.exportBanner.downloadError'), 'error')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  let body: React.ReactNode
+  if (notFound) {
+    body = <span>{t('ventasDiseno:catalogScreen.exportBanner.notFound')}</span>
+  } else if (!status) {
+    body = <span>{t('common:labels.loading')}</span>
+  } else if (status.status === 'done') {
+    body = (
+      <>
+        <span>
+          {t('ventasDiseno:catalogScreen.exportBanner.done', {
+            count: status.total_products, volumes: status.volumes,
+            size: status.size_bytes != null ? (status.size_bytes / (1024 * 1024)).toFixed(1) : '?',
+          })}
+        </span>
+        <Button variant="secondary" onClick={handleDownload} loading={downloading}>
+          {t('ventasDiseno:catalogScreen.exportBanner.download')}
+        </Button>
+      </>
+    )
+  } else if (status.status === 'failed') {
+    body = <span role="alert">{status.error_message ?? t('ventasDiseno:catalogScreen.exportBanner.failed')}</span>
+  } else {
+    body = (
+      <span>
+        {t('ventasDiseno:catalogScreen.exportBanner.generating', { count: status.total_products, volumes: status.volumes })}
+      </span>
+    )
+  }
+
+  return (
+    <Card variant="panel" className="p-2.5 mb-3 flex flex-wrap items-center gap-3 text-[12.5px] text-slate-700 dark:text-slate-200">
+      <IcoFileText size={16} />
+      {body}
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label={t('common:actions.close')}
+        className="ml-auto text-slate-400 hover:text-slate-600"
+      >
+        <IcoClose size={14} />
+      </button>
+    </Card>
   )
 }

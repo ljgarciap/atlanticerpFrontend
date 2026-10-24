@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
@@ -7,13 +7,20 @@ import { Card } from '@/components/ui/Card'
 export default function SessionExpiredModal() {
   const { t }            = useTranslation('common')
   const navigate         = useNavigate()
+  const location         = useLocation()
+  const lastUserId       = useAuthStore(s => s.lastUserId)
   const { sessionExpired, setSessionExpired } = useAuthStore()
 
   if (!sessionExpired) return null
 
   const handleGoToLogin = () => {
     setSessionExpired(false)
-    navigate('/login', { replace: true })
+    // SCRUM-1159 (Pre-QA N-2): conserva el destino que RequireAuth ya guardó al expirar la sesión (antes se perdía aquí). Si el modal aparece
+    // fuera de /login se guarda la ruta actual, ligada a la persona de la sesión que expiró.
+    const state = location.pathname === '/login'
+      ? location.state
+      : { from: `${location.pathname}${location.search}${location.hash}`, fromUserId: lastUserId }
+    navigate('/login', { replace: true, state })
   }
 
   return (

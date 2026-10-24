@@ -13,6 +13,9 @@ import esBodega    from './locales/es/bodega.json'
 import esServicios from './locales/es/servicios.json'
 import esAdminContab from './locales/es/adminContab.json'
 import esLogs      from './locales/es/logs.json'
+import esLumo      from './locales/es/lumo.json'
+import esSoporte   from './locales/es/soporte.json'
+import esManuales  from './locales/es/manuales.json'
 import enCommon   from './locales/en/common.json'
 import enAuth     from './locales/en/auth.json'
 import enSecurity from './locales/en/security.json'
@@ -25,18 +28,21 @@ import enBodega    from './locales/en/bodega.json'
 import enServicios from './locales/en/servicios.json'
 import enAdminContab from './locales/en/adminContab.json'
 import enLogs      from './locales/en/logs.json'
+import enLumo      from './locales/en/lumo.json'
+import enSoporte   from './locales/en/soporte.json'
+import enManuales  from './locales/en/manuales.json'
 
 const savedLang = localStorage.getItem('atlanticerp_lang') ?? 'es'
 
 i18n.use(initReactI18next).init({
   resources: {
-    es: { common: esCommon, auth: esAuth, security: esSecurity, settings: esSettings, crm: esCrm, ventasDiseno: esVentasDiseno, compras: esCompras, aiUsage: esAiUsage, bodega: esBodega, servicios: esServicios, adminContab: esAdminContab, logs: esLogs },
-    en: { common: enCommon, auth: enAuth, security: enSecurity, settings: enSettings, crm: enCrm, ventasDiseno: enVentasDiseno, compras: enCompras, aiUsage: enAiUsage, bodega: enBodega, servicios: enServicios, adminContab: enAdminContab, logs: enLogs },
+    es: { common: esCommon, auth: esAuth, security: esSecurity, settings: esSettings, crm: esCrm, ventasDiseno: esVentasDiseno, compras: esCompras, aiUsage: esAiUsage, bodega: esBodega, servicios: esServicios, adminContab: esAdminContab, logs: esLogs, lumo: esLumo, soporte: esSoporte, manuales: esManuales },
+    en: { common: enCommon, auth: enAuth, security: enSecurity, settings: enSettings, crm: enCrm, ventasDiseno: enVentasDiseno, compras: enCompras, aiUsage: enAiUsage, bodega: enBodega, servicios: enServicios, adminContab: enAdminContab, logs: enLogs, lumo: enLumo, soporte: enSoporte, manuales: enManuales },
   },
   lng:          savedLang,
   fallbackLng:  'en',
   defaultNS:    'common',
-  ns:           ['common', 'auth', 'security', 'settings', 'crm', 'ventasDiseno', 'compras', 'aiUsage', 'bodega', 'servicios', 'adminContab', 'logs'],
+  ns:           ['common', 'auth', 'security', 'settings', 'crm', 'ventasDiseno', 'compras', 'aiUsage', 'bodega', 'servicios', 'adminContab', 'logs', 'lumo', 'soporte', 'manuales'],
   interpolation: { escapeValue: false },
 })
 

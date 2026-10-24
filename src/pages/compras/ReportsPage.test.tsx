@@ -94,7 +94,7 @@ beforeEach(() => {
     open_count: 0, resolved_count: 0, claim_rate: null, provider_ranking: [],
   })
   mockedComprasApi.reports.inventoryAttention.mockResolvedValue({
-    total_products: 0, in_attention: 0, low_stock: 0, out_of_stock: 0, total_value: 0,
+    total_products: 0, with_stock: 0, in_attention: 0, low_stock: 0, out_of_stock: 0, total_value: 0,
   })
   mockedComprasApi.reports.liquidationImports.mockResolvedValue(makeLiquidation())
 })

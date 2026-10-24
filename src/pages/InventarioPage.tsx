@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
@@ -7,23 +7,26 @@ import {
   useToggleInventoryProductActive, useInventoryWarehouseStock, useInventoryOrderPrefill,
   useWarehouses, useGenerateFamilyPurchase, useInventoryFamily, useInventoryFamilies,
   useConfirmPendingInventory, useUploadInventoryTechnicalSheet, useInventoryTechnicalSheetUrl,
+  useUploadInventoryProductPhoto,
 } from '@/hooks/useCompras'
 import { comprasApi } from '@/api/comprasApi'
-import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
-import { IcoClose, IcoCheck, IcoAlertTriangle, IcoFileText, IcoSearch, IcoChevronDown, IcoChevronRight } from '@/components/icons'
+import { IcoClose, IcoCheck, IcoAlertTriangle, IcoFileText, IcoChevronDown, IcoChevronRight, IcoImage } from '@/components/icons'
 import { TechnicalSpecModal } from '@/components/TechnicalSpecModal'
 import { WarehouseMultiSelect } from '@/components/WarehouseMultiSelect'
 import { FamilyCombobox } from '@/components/compras/FamilyCombobox'
+import { ProviderMultiPicker, type ProviderOption } from '@/components/compras/ProviderMultiPicker'
 import WarehouseStockModal from '@/components/compras/WarehouseStockModal'
 import { InventoryProductsTable } from '@/components/compras/InventoryProductsTable'
-import { formatMoney, formatInt } from '@/lib/money'
+import { formatInt } from '@/lib/money'
 import { productDisplayName } from '@/lib/catalogProduct'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchInventorySuggestions } from '@/utils/searchSuggestionsCompras'
 import type {
-  InventoryChip, InventoryProductPayload, InventoryRotation, Provider,
+  InventoryChip, InventoryProductPayload, InventoryRotation,
 } from '@/types/compras'
 import type { NewOrderPrefillState } from '@/pages/compras/NewPurchaseOrderPage'
 
@@ -37,6 +40,12 @@ function createProductErrorMessage(err: unknown, fallback: string): string {
   const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
   const firstFieldError = data?.errors ? Object.values(data.errors)[0]?.[0] : undefined
   return firstFieldError ?? data?.message ?? fallback
+}
+
+/** SCRUM-1126 — proveedores del producto; cae al único `provider_id`/`provider_name` si el backend no manda `providers`. */
+function productProviders(product: { providers?: ProviderOption[]; provider_id?: number | null; provider_name?: string | null }): ProviderOption[] {
+  if (product.providers && product.providers.length > 0) return product.providers
+  return product.provider_id != null ? [{ id: product.provider_id, name: product.provider_name ?? `#${product.provider_id}` }] : []
 }
 
 type Tab = 'products' | 'families'
@@ -143,11 +152,12 @@ export default function InventarioPage() {
       {kpis && (
         <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
           <KpiCard label={t('compras:inventory.kpis.total')} value={formatInt(kpis.total_products)} color="#5BA5A0" />
+          <KpiCard label={t('compras:inventory.kpis.withStock')} value={formatInt(kpis.with_stock ?? 0)} color="#5BA5A0" />
           <KpiCard label={t('compras:inventory.kpis.lowStock')} value={formatInt(kpis.low_stock)} color="#d4a017" />
           <KpiCard label={t('compras:inventory.kpis.outOfStock')} value={formatInt(kpis.out_of_stock)} color="#dc6b6b" />
           <KpiCard label={t('compras:inventory.kpis.inAttention')} value={formatInt(kpis.in_attention)} color="#dc6b6b" />
           {!restricted && !previewVentas && (
-            <KpiCard label={t('compras:inventory.kpis.totalValue')} value={`$${formatMoney(kpis.total_value)}`} color="#9fc54d" />
+            <KpiCard label={t('compras:inventory.kpis.totalValue')} value={`$${formatInt(kpis.total_value)}`} color="#9fc54d" />
           )}
         </div>
       )}
@@ -190,15 +200,35 @@ function ProductsTab({ previewVentas }: {
   const initialChip = LINKABLE_CHIPS.includes(searchParams.get('chip') as InventoryChip)
     ? (searchParams.get('chip') as InventoryChip)
     : 'todos'
-  const [search, setSearch] = useState('')
-  const [query, setQuery] = useState('')
+  // SCRUM-1153 — la notificación de «sin stock» de Bodega llega con ?search={referencia}: el producto ya buscado.
+  const initialSearch = (searchParams.get('search') ?? '').trim().slice(0, 100)
+  const [search, setSearch] = useState(initialSearch)
+  const [query, setQuery] = useState(initialSearch)
   const [chip, setChip] = useState<InventoryChip>(initialChip)
   // SCRUM-743 — filtro multiselección de Bodegas. [] = sin selección = todas las bodegas
   // (RN6/criterio 6 del ticket) — se omite `warehouse_ids` en la llamada a useInventory cuando
   // está vacío, nunca se manda un array vacío al backend.
   const [warehouseIds, setWarehouseIds] = useState<number[]>([])
+  // SCRUM-1010 — filtro por familia (un solo valor, '' = todas). Las opciones salen de
+  // `useInventoryFamilies(1, 'all')`, el mismo universo completo que ya usa el detalle del producto.
+  const [familyId, setFamilyId] = useState('')
+  const { data: familyOptions } = useInventoryFamilies(1, 'all')
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
+  // Pre-QA SCRUM-1153: con Inventario ya abierto, la 2.ª notificación cambia `?search=` pero el componente sigue montado y el estado
+  // inicial no se reevalúa — la caja y la tabla se quedaban en el producto anterior. Se sincroniza cuando cambia el parámetro.
+  const searchParam = (searchParams.get('search') ?? '').trim().slice(0, 100)
+  useEffect(() => {
+    if (searchParam === '') return
+    setSearch(searchParam)
+    setQuery(searchParam)
+    // Pre-QA: un chip/filtro que el usuario dejó activo (p. ej. «Inactivos») dejaba la tabla vacía para el producto de la
+    // notificación hasta pulsar «Limpiar filtros»: llegar con una búsqueda nueva parte de los filtros del enlace, no de los viejos.
+    setChip(initialChip)
+    setWarehouseIds([])
+    setFamilyId('')
+    setPage(1)
+  }, [searchParam, initialChip])
   const [detailId, setDetailId] = useState<number | null>(null)
   // SCRUM-234 — botón "Generar orden" por fila (columna "Acción"): abre el detalle y dispara el
   // prefill de orden de una, sin reimplementar la lógica ya existente dentro del modal.
@@ -211,6 +241,7 @@ function ProductsTab({ previewVentas }: {
     search: query || undefined,
     chip: chip === 'todos' ? undefined : chip,
     warehouse_ids: warehouseIds.length > 0 ? warehouseIds : undefined,
+    family_id: familyId !== '' ? Number(familyId) : undefined,
     page, per_page: perPage,
   })
 
@@ -220,12 +251,14 @@ function ProductsTab({ previewVentas }: {
 
   const handleSearch = () => { setQuery(search); setPage(1) }
   const handleWarehouseFilterChange = (ids: number[]) => { setWarehouseIds(ids); setPage(1) }
-  const hasActiveFilters = search !== '' || query !== '' || chip !== 'todos' || warehouseIds.length > 0
+  const handleFamilyFilterChange = (value: string) => { setFamilyId(value); setPage(1) }
+  const hasActiveFilters = search !== '' || query !== '' || chip !== 'todos' || warehouseIds.length > 0 || familyId !== ''
   const handleClearFilters = () => {
     setSearch('')
     setQuery('')
     setChip('todos')
     setWarehouseIds([])
+    setFamilyId('')
     setPage(1)
   }
 
@@ -234,20 +267,42 @@ function ProductsTab({ previewVentas }: {
       {/* SCRUM-742 — título, subtítulo, acciones, toggle Compras/Ventas&Diseño y las 5 tarjetas
           KPI se movieron al padre InventarioPage (se ven arriba de ambas pestañas, no solo acá) —
           ver comentario en InventarioPage() más arriba en este archivo. */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:inventory.filters.searchPlaceholder')}
-          className="flex-1 max-w-sm px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+      {/* SCRUM-1022 (mismo fix que SCRUM-949 en Bodega → Ver Inventario) — el buscador en su propia fila
+          con el botón Buscar. Dentro de la fila compartida con los filtros, `flex-1` (flex-basis 0%) le
+          cedía el espacio a los selects y el input volvía a quedar diminuto cada vez que se sumaba un
+          filtro. Fila propia = ancho garantizado (hasta max-w-md). */}
+      <div className="flex gap-2 mb-2 items-center" data-testid="inventory-search-row">
+        <div className="flex-1 max-w-md">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchInventorySuggestions}
+            minChars={2}
+            placeholder={t('compras:inventory.filters.searchPlaceholder')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
         {/* SCRUM-743 — filtro multiselección de Bodegas, junto a los filtros existentes (no los
             reemplaza). Posición consistente con el dropdown "Todas las bodegas" del mockup de
             SCRUM-742, aunque ese sea single-select — ver nota en la spec del Analista. */}
         <WarehouseMultiSelect selectedIds={warehouseIds} onChange={handleWarehouseFilterChange} />
+        {/* SCRUM-1010 — filtro por familia, junto al de Bodegas. Un producto compartido aparece al
+            elegir cualquiera de sus familias; la búsqueda de texto no cambia (sigue siendo por
+            producto/referencia). */}
+        <select
+          value={familyId}
+          onChange={e => handleFamilyFilterChange(e.target.value)}
+          aria-label={t('compras:inventory.filters.familyLabel')}
+          className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        >
+          <option value="">{t('compras:inventory.filters.familiesAll')}</option>
+          {(familyOptions?.data ?? []).map(f => <option key={f.id} value={String(f.id)}>{f.name}</option>)}
+        </select>
         {CHIPS.map(c => (
           <Button
             key={c}
@@ -345,6 +400,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   const confirmPending = useConfirmPendingInventory()
   const uploadTechnicalSheet = useUploadInventoryTechnicalSheet()
   const technicalSheetUrl = useInventoryTechnicalSheetUrl()
+  const uploadPhoto = useUploadInventoryProductPhoto()
 
   // SCRUM-754 — este `families` alimenta el <select> de filtro por familia en ProductsTab
   // (necesita el universo completo, no una página) — distinto del `useInventoryFamilies()` sin
@@ -372,6 +428,8 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   // detrás todavía). Resolución documentada explícitamente en el comentario de Jira del ticket
   // para que Luis confirme o pida mover el control de edición a otro lado más adelante.
   const [reorderPoint, setReorderPoint] = useState('')
+  // SCRUM-1126 — Proveedores (múltiples) y Stock mínimo se editan en "Información del producto".
+  const [providers, setProviders] = useState<ProviderOption[]>([])
   const [rotation, setRotation] = useState<InventoryRotation | ''>('')
   const [pricingError, setPricingError] = useState<string | null>(null)
 
@@ -393,6 +451,20 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   const [category, setCategory] = useState('')
   const [barcode, setBarcode] = useState('')
   const [generalError, setGeneralError] = useState<string | null>(null)
+  // SCRUM-830 (CA09/RN14) — la imagen nueva se STAGEA localmente (preview vía blob URL) y solo se
+  // sube de verdad al confirmar "Guardar" de esta sección, junto con el resto de campos; cancelar
+  // la edición descarta el archivo sin haber llamado nunca al backend — la imagen anterior nunca
+  // se toca hasta que la nueva se confirma.
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null)
+  const photoInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (photoFile === null) { setPhotoPreviewUrl(null); return }
+    const url = URL.createObjectURL(photoFile)
+    setPhotoPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photoFile])
   // SCRUM-237 — validación de unicidad de Referencia pública EN VIVO (REQ-178), mismo criterio
   // que crear un producto nuevo.
   const [referenceCheck, setReferenceCheck] = useState<{ checking: boolean; message: string | null }>({
@@ -420,7 +492,6 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
     setHandlingCost(String(product.handling_cost ?? 0))
     setOtherCost(String(product.other_cost ?? 0))
     setPriceFull(String(product.price_full))
-    setReorderPoint(String(product.reorder_point ?? ''))
     setRotation(product.rotation ?? '')
     setPricingError(null)
     setEditing(true)
@@ -436,8 +507,11 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
     setFamilyId(product.family_id != null ? String(product.family_id) : '')
     setCategory(product.category ?? '')
     setBarcode(product.barcode ?? '')
+    setReorderPoint(String(product.reorder_point ?? ''))
+    setProviders(productProviders(product))
     setGeneralError(null)
     setReferenceCheck({ checking: false, message: null })
+    setPhotoFile(null)
     setEditingGeneral(true)
   }
 
@@ -487,7 +561,6 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
         freight_cost: Number(freightCost || 0),
         handling_cost: Number(handlingCost || 0),
         other_cost: Number(otherCost || 0),
-        reorder_point: reorderPoint !== '' ? Number(reorderPoint) : null,
         rotation: rotation || null,
       },
     }, {
@@ -499,6 +572,17 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   const handleSaveGeneral = () => {
     setConfirming(null)
     setGeneralError(null)
+
+    const finishAfterFields = () => {
+      // SCRUM-830 — la imagen viaja en su propio endpoint (POST /{id}/photo), pero como parte de
+      // la MISMA acción "Guardar" de esta sección — recién acá se dispara, nunca al seleccionarla.
+      if (photoFile === null) { setEditingGeneral(false); return }
+      uploadPhoto.mutate({ id, photo: photoFile }, {
+        onSuccess: () => { setPhotoFile(null); setEditingGeneral(false) },
+        onError:   err => setGeneralError(createProductErrorMessage(err, t('compras:inventory.errors.generic'))),
+      })
+    }
+
     update.mutate({
       id,
       data: {
@@ -508,9 +592,12 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
         family_id: familyId !== '' ? Number(familyId) : null,
         category: category || null,
         barcode: barcode || null,
+        reorder_point: reorderPoint !== '' ? Number(reorderPoint) : null,
+        provider_id: providers[0]?.id ?? null,
+        provider_ids: providers.map(p => p.id),
       },
     }, {
-      onSuccess: () => setEditingGeneral(false),
+      onSuccess: finishAfterFields,
       onError:   err => setGeneralError(createProductErrorMessage(err, t('compras:inventory.errors.generic'))),
     })
   }
@@ -547,15 +634,24 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <Card variant="modal" className="w-full max-w-lg max-h-[90vh] overflow-y-auto p-5">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            {/* SCRUM-237/238 — nombre del producto como título + categoría como subtítulo
-                (hallazgo de Gerencia Test 2026-08-09). `detail.title` se mantiene como texto
-                accesible (sr-only) — varios tests/QA ya lo usan como señal de "el modal abrió". */}
-            <h2 className="text-base font-bold text-slate-900">
-              <span className="sr-only">{t('compras:inventory.detail.title')}</span>
-              {productDisplayName(product)}
-            </h2>
-            {categoryLabel && <p className="text-xs text-slate-500 mt-0.5">{categoryLabel}</p>}
+          <div className="flex items-start gap-3">
+            {/* SCRUM-830 — imagen del producto, primer elemento del bloque de información, antes
+                del nombre (RN04). Imagen completa (photo_full_url), no la miniatura de la tabla. */}
+            <div className="w-14 h-14 shrink-0 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+              {product.photo_full_url ?? product.photo_url
+                ? <img src={product.photo_full_url ?? product.photo_url ?? undefined} alt="" className="w-full h-full object-cover" />
+                : <IcoImage size={20} className="text-slate-300" />}
+            </div>
+            <div>
+              {/* SCRUM-237/238 — nombre del producto como título + categoría como subtítulo
+                  (hallazgo de Gerencia Test 2026-08-09). `detail.title` se mantiene como texto
+                  accesible (sr-only) — varios tests/QA ya lo usan como señal de "el modal abrió". */}
+              <h2 className="text-base font-bold text-slate-900">
+                <span className="sr-only">{t('compras:inventory.detail.title')}</span>
+                {productDisplayName(product)}
+              </h2>
+              {categoryLabel && <p className="text-xs text-slate-500 mt-0.5">{categoryLabel}</p>}
+            </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
             <IcoClose />
@@ -571,9 +667,10 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
         <div className="grid grid-cols-4 gap-3 mb-4 text-sm">
           <Field label={t('compras:inventory.detail.rotation')} value={product.rotation ? t(`compras:inventory.rotation.${product.rotation}`) : '—'} />
           <Field label={t('compras:inventory.table.estado')} value={t(`compras:inventory.estado.${product.estado}`)} />
-          <Field label={t('compras:inventory.table.provider')} value={product.provider_name ?? '—'} />
+          <Field label={t('compras:inventory.table.provider')} value={productProviders(product).map(p => p.name).join(', ') || (product.provider_name ?? '—')} />
           <Field label={t('compras:inventory.detail.reorderPoint')} value={product.reorder_point ?? '—'} />
           <Field label={t('compras:inventory.table.disponible')} value={product.disponible} />
+          {(product.stock_showroom ?? 0) > 0 && <Field label={t('compras:inventory.table.showroomLabel')} value={product.stock_showroom ?? 0} />}
           <Field label={t('compras:inventory.table.porServir')} value={product.por_servir} />
           <Field label={t('compras:inventory.table.stock')} value={product.stock_quantity ?? '—'} />
           <Field label={t('compras:inventory.table.porIngresar')} value={product.por_ingresar ?? 0} />
@@ -631,11 +728,6 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
                   <label className="flex flex-col gap-1">
                     {t('compras:inventory.detail.otherCost')}
                     <input type="number" step="0.01" value={otherCost} onChange={e => setOtherCost(e.target.value)}
-                      className="px-2 py-1.5 border border-slate-200 rounded text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    {t('compras:inventory.detail.reorderPoint')}
-                    <input type="number" value={reorderPoint} onChange={e => setReorderPoint(e.target.value)}
                       className="px-2 py-1.5 border border-slate-200 rounded text-sm" />
                   </label>
                   <label className="flex flex-col gap-1">
@@ -717,6 +809,33 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 mb-2 text-sm">
+            {/* SCRUM-830 (RN05/RN07) — reemplazo de imagen; el archivo se stagea local (preview),
+                recién se sube al confirmar "Guardar" de esta sección (ver handleSaveGeneral). */}
+            <div className="flex flex-col gap-1 col-span-2">
+              {t('compras:inventory.detail.photo')}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 shrink-0 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+                  {photoPreviewUrl ?? product.photo_full_url ?? product.photo_url
+                    ? <img src={photoPreviewUrl ?? product.photo_full_url ?? product.photo_url ?? undefined} alt="" className="w-full h-full object-cover" />
+                    : <IcoImage size={20} className="text-slate-300" />}
+                </div>
+                <input
+                  ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) setPhotoFile(f); e.target.value = '' }}
+                />
+                <Button variant="outline" className="!text-xs" onClick={() => photoInputRef.current?.click()}>
+                  {t('compras:inventory.detail.changePhoto')}
+                </Button>
+                {photoFile !== null && (
+                  <button
+                    type="button" aria-label={t('compras:inventory.detail.removePhotoSelection') ?? ''}
+                    className="text-slate-400 hover:text-slate-600" onClick={() => setPhotoFile(null)}
+                  >
+                    <IcoClose size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
             <label className="flex flex-col gap-1 col-span-2">
               {t('compras:inventory.detail.name')}
               <input type="text" value={name} onChange={e => setName(e.target.value)}
@@ -759,6 +878,20 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
               value={familyId === '' ? '' : Number(familyId)}
               onChange={id => setFamilyId(id === '' ? '' : String(id))}
             />
+            <div className="col-span-2">
+              <ProviderMultiPicker
+                id="cp-edit-providers"
+                label={t('compras:inventory.detail.providers')}
+                selected={providers}
+                onChange={setProviders}
+                required
+              />
+            </div>
+            <label className="flex flex-col gap-1">
+              {t('compras:inventory.detail.reorderPoint')}
+              <input type="number" min="0" value={reorderPoint} onChange={e => setReorderPoint(e.target.value)}
+                className="px-2 py-1.5 border border-slate-200 rounded text-sm" />
+            </label>
             <label className="flex flex-col gap-1 col-span-2">
               {t('compras:inventory.detail.description')}
               <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
@@ -777,10 +910,12 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
                       family: familyId !== ''
                         ? families?.data.find(f => f.id === Number(familyId))?.name ?? '—'
                         : t('compras:inventory.detail.familyNone'),
+                      providers: providers.map(p => p.name).join(', ') || '—',
+                      reorderPoint: reorderPoint === '' ? '—' : reorderPoint,
                     })}
                   </p>
                   <div className="flex gap-2">
-                    <Button className="!text-xs" loading={update.isPending} onClick={handleSaveGeneral}>{t('compras:inventory.actions.confirm')}</Button>
+                    <Button className="!text-xs" loading={update.isPending || uploadPhoto.isPending} onClick={handleSaveGeneral}>{t('compras:inventory.actions.confirm')}</Button>
                     <Button variant="outline" className="!text-xs" onClick={() => setConfirming(null)}>{t('compras:inventory.actions.cancel')}</Button>
                   </div>
                 </div>
@@ -791,8 +926,8 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
                     <Button variant="outline" className="!text-xs" onClick={startEditGeneral}>{t('compras:inventory.actions.editGeneral')}</Button>
                   ) : (
                     <>
-                      <Button className="!text-xs" disabled={referenceCheck.message !== null} onClick={() => setConfirming('general')}>{t('compras:inventory.actions.save')}</Button>
-                      <Button variant="outline" className="!text-xs" onClick={() => { setEditingGeneral(false); setGeneralError(null) }}>{t('compras:inventory.actions.cancel')}</Button>
+                      <Button className="!text-xs" disabled={referenceCheck.message !== null || providers.length === 0} onClick={() => setConfirming('general')}>{t('compras:inventory.actions.save')}</Button>
+                      <Button variant="outline" className="!text-xs" onClick={() => { setEditingGeneral(false); setGeneralError(null); setPhotoFile(null) }}>{t('compras:inventory.actions.cancel')}</Button>
                     </>
                   )}
                 </div>
@@ -1054,15 +1189,8 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
   const { data: warehousesData } = useWarehouses()
 
   // ── Proveedor: buscador + desplegable (mismo patrón que NewPurchaseOrderPage) ──
-  const [providerId, setProviderId] = useState<number | null>(null)
-  const [providerName, setProviderName] = useState('')
-  const [providerSearch, setProviderSearch] = useState('')
-  const [providerListOpen, setProviderListOpen] = useState(false)
-  const { data: providerResults } = useQuery({
-    queryKey: ['compras/providers/picker', providerSearch],
-    queryFn:  () => comprasApi.providers.list({ search: providerSearch || undefined, per_page: 20 }),
-    enabled:  providerId === null,
-  })
+  // SCRUM-1126 — varios proveedores por producto; el primero es el principal (`provider_id`).
+  const [selectedProviders, setSelectedProviders] = useState<ProviderOption[]>([])
 
   // ── Datos generales ──
   const [name, setName] = useState('')
@@ -1106,16 +1234,25 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
   const [fichaFile, setFichaFile] = useState<File | null>(null)
   const [fichaLink, setFichaLink] = useState('')
 
+  // SCRUM-830 (RN01/RN03) — imagen del producto, obligatoria; staged localmente igual que la
+  // ficha técnica, se sube en el MISMO POST de creación (ver comprasApi.inventory.create).
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null)
+  const photoInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (photoFile === null) { setPhotoPreviewUrl(null); return }
+    const url = URL.createObjectURL(photoFile)
+    setPhotoPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photoFile])
+
   const [formError, setFormError] = useState<string | null>(null)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
 
-  const selectProvider = (p: Provider) => {
-    setProviderId(p.id); setProviderName(p.name); setProviderSearch(''); setProviderListOpen(false)
-  }
-
   const hasAnyData = [
-    name, description, factoryReference, reference, brand, barcode, cost, additionalCostAmount, priceFull, providerName,
-  ].some(v => v.trim() !== '') || fichaFile !== null || fichaLink.trim() !== ''
+    name, description, factoryReference, reference, brand, barcode, cost, additionalCostAmount, priceFull,
+  ].some(v => v.trim() !== '') || fichaFile !== null || fichaLink.trim() !== '' || photoFile !== null || selectedProviders.length > 0
     || Object.values(warehouseStocks).some(v => v.trim() !== '' && v !== '0')
 
   const requestClose = () => { if (hasAnyData) setConfirmDiscard(true); else onClose() }
@@ -1124,13 +1261,13 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
   // ser obligatoria para poder crear el producto, ahora forzada también en backend (ver
   // StoreInventoryProductRequest) — esto ya no es solo un candado de UI.
   const hasTechnicalSheet = fichaFile !== null || fichaLink.trim() !== ''
-  const canSubmit = providerId !== null && name.trim() !== '' && factoryReference.trim() !== ''
+  const canSubmit = selectedProviders.length > 0 && name.trim() !== '' && factoryReference.trim() !== ''
     && reference.trim() !== '' && brand.trim() !== '' && barcode.trim() !== '' && category !== ''
     && cost !== '' && resolvedAdditionalCost !== null && priceFull !== '' && reorderPoint !== ''
-    && hasTechnicalSheet
+    && hasTechnicalSheet && photoFile !== null
 
   const handleSubmit = () => {
-    if (!canSubmit || providerId === null) return
+    if (!canSubmit || photoFile === null) return
     setFormError(null)
 
     const initialStock = Object.entries(warehouseStocks)
@@ -1140,7 +1277,8 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
     const payload: InventoryProductPayload = {
       reference, factory_reference: factoryReference, name, description, brand, barcode,
       price_full: Number(priceFull), cost: Number(cost), other_cost: resolvedAdditionalCost ?? 0,
-      reorder_point: Number(reorderPoint), provider_id: providerId,
+      reorder_point: Number(reorderPoint),
+      provider_id: selectedProviders[0].id, provider_ids: selectedProviders.map(p => p.id),
       family_id: familyId === '' ? null : familyId,
       category, rotation,
       initial_stock: initialStock,
@@ -1150,7 +1288,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
     // unión no-nula antes de armar el objeto que espera create().
     const technicalSheet = fichaFile !== null ? { file: fichaFile } : { link: fichaLink.trim() }
 
-    create.mutate({ data: payload, technicalSheet }, {
+    create.mutate({ data: payload, technicalSheet, photo: photoFile }, {
       onSuccess: () => onClose(),
       onError: err => setFormError(createProductErrorMessage(err, t('compras:inventory.errors.generic'))),
     })
@@ -1199,46 +1337,13 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
             <textarea id="cp-description" value={description} onChange={e => setDescription(e.target.value)} rows={3} className={inputCls} />
           </div>
 
-          <div className="relative">
-            <label htmlFor="cp-provider-search" className="block text-xs font-semibold text-slate-600 mb-1">{t('compras:inventory.detail.provider')} *</label>
-            {providerId !== null ? (
-              <div className="flex items-center justify-between px-3 py-2 border border-slate-300 rounded-lg bg-slate-50">
-                <span className="font-medium text-slate-800">{providerName}</span>
-                <button type="button" className="text-xs text-primary underline" onClick={() => { setProviderId(null); setProviderName('') }}>
-                  {t('compras:newOrder.provider.change')}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="relative">
-                  <IcoSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="cp-provider-search"
-                    value={providerSearch}
-                    onChange={e => { setProviderSearch(e.target.value); setProviderListOpen(true) }}
-                    onFocus={() => setProviderListOpen(true)}
-                    onBlur={() => setTimeout(() => setProviderListOpen(false), 150)}
-                    placeholder={t('compras:newOrder.provider.searchPlaceholder') ?? ''}
-                    className={inputCls + ' pl-8'}
-                  />
-                </div>
-                {providerListOpen && (providerResults?.data.length ?? 0) > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {providerResults!.data.map(p => (
-                      <li key={p.id}>
-                        <button
-                          type="button" onMouseDown={() => selectProvider(p)}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50"
-                        >
-                          {p.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </div>
+          <ProviderMultiPicker
+            id="cp-provider-search"
+            label={t('compras:inventory.detail.providers')}
+            selected={selectedProviders}
+            onChange={setSelectedProviders}
+            required
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -1339,6 +1444,27 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         <p className="text-[11px] text-slate-400 mb-4">{t('compras:inventory.create.initialStockHint')}</p>
+
+        {/* SCRUM-830 (RN03) — imagen obligatoria, ubicada inmediatamente antes de "Ficha técnica"
+            (orden pedido por el ticket). Staged localmente, viaja en el mismo POST de creación. */}
+        <h3 className="text-xs font-bold uppercase text-slate-400 mb-2">{t('compras:inventory.create.photoSection')} *</h3>
+        <div className="mb-4 flex items-center gap-3">
+          <div className="w-14 h-14 shrink-0 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+            {photoPreviewUrl
+              ? <img src={photoPreviewUrl} alt="" className="w-full h-full object-cover" />
+              : <IcoImage size={20} className="text-slate-300" />}
+          </div>
+          <div>
+            <input
+              ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) setPhotoFile(f); e.target.value = '' }}
+            />
+            <Button type="button" variant="outline" className="!text-xs" onClick={() => photoInputRef.current?.click()}>
+              {photoFile === null ? t('compras:inventory.create.photoUpload') : t('compras:inventory.create.photoChange')}
+            </Button>
+            {photoFile === null && <p className="text-[11px] text-slate-400 mt-1">{t('compras:inventory.create.photoHint')}</p>}
+          </div>
+        </div>
 
         {/* SCRUM-237/426 — mismo mecanismo de documento/link que la edición (ProductDetailModal
             más arriba), pero staged localmente hasta el submit — ahora enviado en el MISMO POST
@@ -1473,7 +1599,7 @@ function FamiliesTab({ previewVentas }: { previewVentas: boolean }) {
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                         {t('compras:inventory.families.totalValueLabel')}
                       </p>
-                      <p className="text-sm font-semibold text-slate-700">${formatMoney(f.total_value)}</p>
+                      <p className="text-sm font-semibold text-slate-700">${formatInt(f.total_value)}</p>
                     </div>
                   )}
                   {canManage && (

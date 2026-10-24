@@ -35,9 +35,10 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeProject(overrides: Partial<ArchitectCommissionProject> = {}): ArchitectCommissionProject {
   return {
-    pipeline_card_id: 1, numero_pedido: 'PED-0001', cliente: 'Cliente Test', fecha_pedido: '2026-08-05',
+    pipeline_card_id: 1, numero_pedido: 'PED-0001', proyecto_nombre: 'Proyecto Test', cliente: 'Cliente Test', fecha_pedido: '2026-08-05',
     monto_proyecto: 34000, total_facturado: 34000, total_cobrado: 34000,
     porcentaje: 10, comision: 3400, impuesto: 238, total: 3638, estado: 'pendiente_factura_arquitecto',
+    estado_cobro_cliente: 'cobrado',
     cuenta_cobro: { nombre_archivo: 'cuenta.pdf', uploaded_at: '2026-08-10T00:00:00Z' },
     comprobante_retencion: null, fecha_pago: null,
     porcentaje_pendiente: null, porcentaje_pendiente_motivo: null, bank_account: null,

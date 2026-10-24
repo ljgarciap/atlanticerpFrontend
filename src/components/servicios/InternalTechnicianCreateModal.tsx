@@ -12,6 +12,8 @@ import type { InternalTechnician, InternalTechnicianSpecialty } from '@/types/se
 interface Props {
   onClose:   () => void
   onCreated: (technician: InternalTechnician) => void
+  // SCRUM-1015 — con `technician` el mismo formulario edita (datos precargados, PUT) en vez de crear.
+  technician?: InternalTechnician
 }
 
 interface FormState {
@@ -27,22 +29,31 @@ const INPUT_CLASSES = 'w-full rounded-lg border border-slate-200 dark:border-sla
 
 // REQ-259 — alta de técnico interno. RN1: nombre/especialidad obligatorios, teléfono/correo
 // opcionales. RN2/RN3/RN4 (iniciales, color único, estado inicial) las resuelve el backend.
-export default function InternalTechnicianCreateModal({ onClose, onCreated }: Props) {
+export default function InternalTechnicianCreateModal({ onClose, onCreated, technician }: Props) {
   const { t }   = useTranslation('servicios')
   const toast   = useToastStore(s => s.show)
-  const [form, setForm] = useState<FormState>(EMPTY)
+  const isEdit  = technician !== undefined
+  const [form, setForm] = useState<FormState>(technician ? {
+    nombre: technician.nombre, telefono: technician.telefono ?? '', email: technician.email ?? '',
+    especialidad: technician.especialidad,
+  } : EMPTY)
 
   const mutation = useMutation({
-    mutationFn: () => serviciosApi.internalTechnicians.create({
-      nombre:       form.nombre.trim(),
-      telefono:     form.telefono.trim() || undefined,
-      email:        form.email.trim() || undefined,
-      especialidad: form.especialidad,
-    }),
+    mutationFn: () => {
+      const payload = {
+        nombre:       form.nombre.trim(),
+        telefono:     form.telefono.trim() || undefined,
+        email:        form.email.trim() || undefined,
+        especialidad: form.especialidad,
+      }
+      return technician
+        ? serviciosApi.internalTechnicians.update(technician.id, payload)
+        : serviciosApi.internalTechnicians.create(payload)
+    },
     onSuccess: onCreated,
     onError: (err) => {
       const msg = isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined
-      toast(msg ?? t('technicians.internal.createModal.error'), 'error')
+      toast(msg ?? t(isEdit ? 'technicians.internal.createModal.editError' : 'technicians.internal.createModal.error'), 'error')
     },
   })
 
@@ -57,7 +68,7 @@ export default function InternalTechnicianCreateModal({ onClose, onCreated }: Pr
       <Card variant="modal" className="w-full max-w-md" data-testid="internal-technician-create-modal">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
           <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            {t('technicians.internal.createModal.title')}
+            {t(isEdit ? 'technicians.internal.createModal.editTitle' : 'technicians.internal.createModal.title')}
           </h2>
           <Button variant="icon" onClick={onClose}><IcoClose /></Button>
         </div>

@@ -19,6 +19,8 @@ import ProjectBreakdownModal from '@/components/compras/ProjectBreakdownModal'
 import ProviderConfirmationPanel from '@/components/compras/ProviderConfirmationPanel'
 import type { PurchaseOrderSummary, DocumentCategory, ApprovedProject } from '@/types/compras'
 import { IcoAlertTriangle, IcoCheck, IcoFile, IcoClose } from '@/components/icons'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchOrderSuggestions } from '@/utils/searchSuggestionsCompras'
 
 type Chip = 'all' | 'retrasados'
 
@@ -103,14 +105,17 @@ export default function LogisticsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:logistics.filters.searchPlaceholder')}
-          className="flex-1 max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-xs">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchOrderSuggestions}
+            placeholder={t('compras:logistics.filters.searchPlaceholder')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
         <select
           value={providerId}
@@ -267,11 +272,11 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
   // Un blur que no cambió nada respecto al último valor guardado NO dispara la mutation — evita
   // pisar un dato real con `null` solo porque el usuario hizo click en el campo y salió sin editar.
   const handleBlurContainer = () => {
-    if (containerNumber === (detail?.container_number ?? '')) return
+    if (!canAdvance || containerNumber === (detail?.container_number ?? '')) return
     updateShipping.mutate({ id: order.id, data: { container_number: containerNumber || null } })
   }
   const handleBlurCarrier = () => {
-    if (carrier === (detail?.carrier ?? '')) return
+    if (!canAdvance || carrier === (detail?.carrier ?? '')) return
     updateShipping.mutate({ id: order.id, data: { carrier: carrier || null } })
   }
 
@@ -392,10 +397,11 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
           <input
             type="text"
             value={containerNumber}
-            placeholder={t('compras:logistics.shippingInfo.container')}
+            placeholder={canAdvance ? t('compras:logistics.shippingInfo.container') : '—'}
             onChange={e => setContainerNumber(e.target.value)}
             onBlur={handleBlurContainer}
-            className="w-full mt-0.5 px-2 py-1.5 border border-slate-200 rounded text-xs"
+            readOnly={!canAdvance}
+            className={`w-full mt-0.5 px-2 py-1.5 border border-slate-200 rounded text-xs ${canAdvance ? '' : 'bg-slate-50 text-slate-600 cursor-default focus:outline-none'}`}
           />
         </label>
         <label className="block">
@@ -403,10 +409,11 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
           <input
             type="text"
             value={carrier}
-            placeholder={t('compras:logistics.shippingInfo.carrier')}
+            placeholder={canAdvance ? t('compras:logistics.shippingInfo.carrier') : '—'}
             onChange={e => setCarrier(e.target.value)}
             onBlur={handleBlurCarrier}
-            className="w-full mt-0.5 px-2 py-1.5 border border-slate-200 rounded text-xs"
+            readOnly={!canAdvance}
+            className={`w-full mt-0.5 px-2 py-1.5 border border-slate-200 rounded text-xs ${canAdvance ? '' : 'bg-slate-50 text-slate-600 cursor-default focus:outline-none'}`}
           />
         </label>
       </div>

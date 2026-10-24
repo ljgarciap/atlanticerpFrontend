@@ -112,7 +112,12 @@ export default function RevisionPreviaCorreccionModal({ params, onBack, onClose,
 
           {previewMutation.isPending && <p className="text-sm text-slate-400">…</p>}
           {previewMutation.isError && (
-            <p className="text-red-600 text-sm">{t('notasCredito.correccion.previewError')}</p>
+            // SCRUM-1009 — el backend bloquea la corrección con un 422 y un mensaje claro (p. ej. la factura
+            // ya tiene notas de crédito): se muestra tal cual en vez del genérico.
+            <p className="text-red-600 text-sm">
+              {(isAxiosError<{ message?: string }>(previewMutation.error) ? previewMutation.error.response?.data.message : undefined)
+                ?? t('notasCredito.correccion.previewError')}
+            </p>
           )}
 
           {preview && (

@@ -6,9 +6,12 @@ import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoAlertTriangle } from '@/components/icons'
 import { formatMoney } from '@/lib/money'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import NewClaimModal from '@/components/compras/NewClaimModal'
 import ClaimDetailModal from '@/components/compras/ClaimDetailModal'
 import type { PurchaseOrderClaimSummary, ClaimChip } from '@/types/compras'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchClaimSuggestions } from '@/utils/searchSuggestionsCompras'
 
 const CHIPS: ClaimChip[] = ['todos', 'atencion', 'reportado', 'en_revision', 'resuelto']
 const RESOLUTION_TYPES = [
@@ -80,14 +83,17 @@ export default function ClaimsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:claims.filters.searchPlaceholder') ?? ''}
-          className="flex-1 max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-xs">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchClaimSuggestions}
+            placeholder={t('compras:claims.filters.searchPlaceholder') ?? ''}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
         <select
           value={providerId}
@@ -212,7 +218,7 @@ function ClaimRow({ claim, onView }: { claim: PurchaseOrderClaimSummary; onView:
           <option value="resuelto">{t('compras:claims.status.resuelto')}</option>
         </select>
       </td>
-      <td className="px-4 py-3 text-slate-600">{new Date(claim.created_at).toLocaleDateString()}</td>
+      <td className="px-4 py-3 text-slate-600">{formatDateFromTimestamp(claim.created_at)}</td>
       <td className="px-4 py-3 text-slate-400">{claim.service_ticket ?? '—'}</td>
       <td className="px-4 py-3 text-right">
         <Button variant="outline" className="!px-3 !py-1.5 !text-xs" onClick={onView}>

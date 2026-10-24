@@ -49,6 +49,7 @@ function makeCard(overrides: Partial<PipelineCard> = {}): PipelineCard {
     master_client: { id: 1, name: 'Grupo Delta' },
     sub_client: { id: 1, business_name: 'Delta Residencial' },
     owner: { id: 1, name: 'Ana Diaz' },
+    assignees: [{ id: 1, name: 'Ana Diaz' }],
     amount: null, worked_area_m2: null, days_in_stage: 2, is_stagnant: false,
     stage_changed_at: '2026-07-01T00:00:00Z',
     ...overrides,
@@ -82,13 +83,33 @@ beforeEach(() => {
   mockedApi.home.vendors.mockResolvedValue([])
   mockedApi.calendar.list.mockResolvedValue({ data: [], source_unavailable: false })
   mockedApi.pipeline.list.mockResolvedValue([])
-  mockedStore.mockReturnValue({ user: { id: 1, role: 'designer' } } as never)
+  mockedStore.mockReturnValue({ user: { id: 1, role: 'designer', first_name: 'Ana', last_name: 'Diaz' } } as never)
 })
 
 describe('VentasDisenoHomePage', () => {
-  it('muestra el título de la pantalla', async () => {
+  it('muestra el saludo personalizado con solo el primer nombre del usuario (SCRUM-835/SCRUM-863)', async () => {
     renderPage()
-    expect(await screen.findByText('ventasDiseno:nav.home')).toBeInTheDocument()
+    expect(await screen.findByText('ventasDiseno:home.greeting:Ana')).toBeInTheDocument()
+  })
+
+  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'designer', first_name: 'Ana Maria', last_name: 'Diaz' } } as never)
+    renderPage()
+    expect(await screen.findByText('ventasDiseno:home.greeting:Ana')).toBeInTheDocument()
+  })
+
+  it('muestra el monto acumulado por etapa en el Pipeline (SCRUM-834)', async () => {
+    mockedApi.pipeline.list.mockResolvedValue([
+      makeCard({ id: 1, stage: 'lead', amount: 120000 }),
+      makeCard({ id: 2, stage: 'lead', amount: 90000 }),
+      makeCard({ id: 3, stage: 'design', amount: null }),
+    ])
+    renderPage()
+
+    // Etapas sin proyectos (o con amount null) muestran $0 — varias etapas vacías coinciden con
+    // el mismo texto, por eso se cuenta en vez de exigir una sola coincidencia.
+    expect(await screen.findByText('$210,000')).toBeInTheDocument()
+    expect((await screen.findAllByText('$0')).length).toBeGreaterThan(0)
   })
 
   it('el botón Catálogo navega a la pantalla de Catálogo (SCRUM-741)', async () => {
@@ -136,8 +157,8 @@ describe('VentasDisenoHomePage', () => {
     expect(screen.getByText('Priorizar el contacto.')).toBeInTheDocument()
   })
 
-  it('SCRUM-67 (hallazgo QA Gerencia Test) — "+N pendientes más" abre el listado completo con drill-down al detalle', async () => {
-    const pendientes = Array.from({ length: 5 }, (_, i) => ({
+  it('SCRUM-67/SCRUM-871 — "Ver más" abre el listado completo con drill-down al detalle', async () => {
+    const pendientes = Array.from({ length: 7 }, (_, i) => ({
       type: 'no_contact' as const, priority: 'medium' as const, card_id: i + 1,
       client: `Cliente ${i + 1}`, project: `Proyecto ${i + 1}`, assignee: 'Ana Diaz',
       days: 10 + i, suggestion: `Sugerencia ${i + 1}`,
@@ -145,21 +166,21 @@ describe('VentasDisenoHomePage', () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({ pendientes }))
     renderPage()
 
-    // Solo 3 visibles en la tarjeta, badge muestra el total real (5).
-    expect(await screen.findAllByText(/home\.pendientes\.text\.no_contact/)).toHaveLength(3)
+    // Máx. 5 visibles en la tarjeta (SCRUM-871), badge muestra el total real (7).
+    expect(await screen.findAllByText(/home\.pendientes\.text\.no_contact/)).toHaveLength(5)
 
-    fireEvent.click(screen.getByText('ventasDiseno:home.pendientes.more:2'))
+    fireEvent.click(screen.getByText('common:actions.viewMore'))
 
     const listTitle = await screen.findByText('ventasDiseno:home.pendientes.listTitle')
     const listModal = listTitle.closest('[class*="max-w-md"]') as HTMLElement
-    // El listado completo muestra los 5, no solo los 2 restantes (la tarjeta de fondo sigue
-    // en el DOM con sus 3, por eso se acota la búsqueda al modal).
-    expect(within(listModal).getAllByText(/home\.pendientes\.text\.no_contact/)).toHaveLength(5)
+    // El listado completo muestra los 7 (la tarjeta de fondo sigue en el DOM con sus 5, por eso
+    // se acota la búsqueda al modal).
+    expect(within(listModal).getAllByText(/home\.pendientes\.text\.no_contact/)).toHaveLength(7)
 
     // Drill-down: clic en un item del listado abre el detalle individual y cierra el listado.
-    fireEvent.click(within(listModal).getAllByText(/home\.pendientes\.text\.no_contact/)[4])
+    fireEvent.click(within(listModal).getAllByText(/home\.pendientes\.text\.no_contact/)[6])
     expect(await screen.findByText('ventasDiseno:home.pendientes.detailTitle')).toBeInTheDocument()
-    expect(screen.getByText('Sugerencia 5')).toBeInTheDocument()
+    expect(screen.getByText('Sugerencia 7')).toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:home.pendientes.listTitle')).not.toBeInTheDocument()
   })
 
@@ -176,6 +197,21 @@ describe('VentasDisenoHomePage', () => {
     expect(await screen.findByText('Falta firma')).toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:home.finalStage.nextStep:3')).toBeInTheDocument()
     expect(screen.getByText('$4,275.5')).toBeInTheDocument()
+  })
+
+  it('SCRUM-871 — Final Stage con más de 5 muestra badge, cap y "Ver más"', async () => {
+    const finalStage = Array.from({ length: 6 }, (_, i) => ({
+      id: i + 1, project_name: `Proyecto ${i + 1}`, client_name: `Cliente ${i + 1}`,
+      notes: null, days_in_stage: 1, amount: null,
+    }))
+    mockedApi.home.summary.mockResolvedValue(makeSummary({ final_stage: finalStage }))
+    renderPage()
+
+    expect(await screen.findByText('6')).toBeInTheDocument()
+    expect(screen.getAllByText(/Proyecto \d/)).toHaveLength(5)
+
+    fireEvent.click(screen.getByText('common:actions.viewMore'))
+    expect(screen.getAllByText(/Proyecto \d/)).toHaveLength(5 + 6)
   })
 
   // SCRUM-765 — desde el detalle de Final Stage, el botón "Ver" lleva al Pipeline con el
@@ -280,7 +316,11 @@ describe('VentasDisenoHomePage', () => {
     fireEvent.click(await screen.findByTitle('ventasDiseno:home.performance.viewCommissions'))
   })
 
-  it('el ícono de ojo de comisiones navega a Reportes con el ancla #commissions (SCRUM-65)', async () => {
+  it('el ícono de ojo de comisiones navega al detalle real de Admin&Cont (SCRUM-712)', async () => {
+    // SCRUM-712 (2026-09-01): antes navegaba a /ventas-diseno/reports#commissions (panel
+    // embebido, solo resumen) — ahora apunta a Comisiones Internas de Admin&Contab, que ya
+    // filtra por vendedor salvo Gerencia (view_team). El panel viejo de Reportes se deja intacto
+    // (decisión explícita de Luis), esto solo cambia a dónde navega el ícono de ojo.
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       performance: { goal_amount: 10000, current_amount: 4000, progress_percent: 40, commission_amount: 80 },
     }))
@@ -290,14 +330,14 @@ describe('VentasDisenoHomePage', () => {
         <QueryClientProvider client={queryClient}>
           <Routes>
             <Route path="/ventas-diseno/home" element={<VentasDisenoHomePage />} />
-            <Route path="/ventas-diseno/reports" element={<ReportsProbe />} />
+            <Route path="/admin-contab/comisiones/internas" element={<ReportsProbe />} />
           </Routes>
         </QueryClientProvider>
       </MemoryRouter>,
     )
 
     fireEvent.click(await screen.findByTitle('ventasDiseno:home.performance.viewCommissions'))
-    expect(await screen.findByText('REPORTS_PROBE #commissions')).toBeInTheDocument()
+    expect(await screen.findByText('REPORTS_PROBE')).toBeInTheDocument()
   })
 
   it('el resumen de Pipeline cuenta las tarjetas por etapa', async () => {
