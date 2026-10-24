@@ -121,7 +121,9 @@
         "firstVisitRate": "1st-visit %",
         "tools": "Tools",
         "commission": "Monthly commission",
-        "commissionResult": "View commission"
+        "commissionResult": "View commission",
+        "edit": "Edit",
+        "delete": "Delete"
       },
       "visitsModal": {
         "title": "Today's visits — {{nombre}}",
@@ -141,7 +143,9 @@
         "email": "Email",
         "cancel": "Cancel",
         "save": "Save",
-        "error": "Could not register the technician."
+        "error": "Could not register the technician.",
+        "editTitle": "Edit internal technician",
+        "editError": "The technician could not be updated."
       },
       "agenda": {
         "filterLabel": "Filter by technician",
@@ -200,6 +204,13 @@
         "amount": "Amount",
         "licenciaMedicaNote": "Medical leave active this month — Punctuality's weight was redistributed among the other criteria.",
         "close": "Close"
+      },
+      "deleteModal": {
+        "title": "Delete technician",
+        "message": "Delete {{nombre}}? They will no longer be listed or available for new assignments. Their history is kept.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "error": "The technician could not be deleted."
       }
     },
     "external": {
@@ -453,7 +464,7 @@
       "title": "Services completed this year"
     },
     "commission": {
-      "title": "Commission — Carlos Vergara"
+      "title": "Commission — Tecnico Servicios Test"
     },
     "library": {
       "title": "Document library",

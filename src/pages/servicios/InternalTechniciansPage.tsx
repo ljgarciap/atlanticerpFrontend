@@ -9,6 +9,7 @@ import InternalTechnicianCard from '@/components/servicios/InternalTechnicianCar
 import InternalTechnicianVisitsModal from '@/components/servicios/InternalTechnicianVisitsModal'
 import InternalTechnicianDetailModal from '@/components/servicios/InternalTechnicianDetailModal'
 import InternalTechnicianCreateModal from '@/components/servicios/InternalTechnicianCreateModal'
+import InternalTechnicianDeleteConfirmModal from '@/components/servicios/InternalTechnicianDeleteConfirmModal'
 import InternalTechnicianAgendaView from '@/components/servicios/InternalTechnicianAgendaView'
 import InternalTechnicianStatCards from '@/components/servicios/InternalTechnicianStatCards'
 import InternalTechnicianCommissionModal from '@/components/servicios/InternalTechnicianCommissionModal'
@@ -51,7 +52,15 @@ export default function InternalTechniciansPage() {
   // completa") — ambos navegan acá con `?view=agenda`, siempre SIN filtro de técnico (arranca en
   // 'team' cuando no viene el query param, mismo default de siempre).
   const [view, setView]         = useState<ViewMode>(searchParams.get('view') === 'agenda' ? 'agenda' : 'team')
+  // SCRUM-1015 — invalidar por prefijo: TanStack compara la queryKey elemento a elemento, así que
+  // ['servicios-internal-technicians'] NO alcanza ni las tarjetas de stats ni la agenda ni el
+  // listado de Herramientas (`...-stats`, `...-agenda`, `...-list`), que quedaban desactualizadas.
+  const refreshTechnicians = () => void qc.invalidateQueries({
+    predicate: q => typeof q.queryKey[0] === 'string' && q.queryKey[0].startsWith('servicios-internal-technicians'),
+  })
   const [createOpen, setCreateOpen] = useState(false)
+  const [editFor, setEditFor]       = useState<InternalTechnician | null>(null)
+  const [deleteFor, setDeleteFor]   = useState<InternalTechnician | null>(null)
   const [visitsFor, setVisitsFor]   = useState<InternalTechnician | null>(null)
   const [detailFor, setDetailFor]   = useState<InternalTechnician | null>(null)
   const [commissionFor, setCommissionFor] = useState<InternalTechnician | null>(null)
@@ -109,6 +118,8 @@ export default function InternalTechniciansPage() {
               canManageCommission={canManageComm}
               onViewCommissionResult={setCommissionResultFor}
               canViewCommissionResult={canViewCommissionResultFor(user, tech)}
+              onEdit={canAdd ? setEditFor : undefined}
+              onDelete={canAdd ? setDeleteFor : undefined}
             />
           ))}
         </div>
@@ -119,7 +130,27 @@ export default function InternalTechniciansPage() {
           onClose={() => setCreateOpen(false)}
           onCreated={() => {
             setCreateOpen(false)
-            void qc.invalidateQueries({ queryKey: ['servicios-internal-technicians'] })
+            refreshTechnicians()
+          }}
+        />
+      )}
+      {editFor && (
+        <InternalTechnicianCreateModal
+          technician={editFor}
+          onClose={() => setEditFor(null)}
+          onCreated={() => {
+            setEditFor(null)
+            refreshTechnicians()
+          }}
+        />
+      )}
+      {deleteFor && (
+        <InternalTechnicianDeleteConfirmModal
+          technician={deleteFor}
+          onClose={() => setDeleteFor(null)}
+          onDeleted={() => {
+            setDeleteFor(null)
+            refreshTechnicians()
           }}
         />
       )}

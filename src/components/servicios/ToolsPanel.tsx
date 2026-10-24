@@ -10,6 +10,7 @@ import ToolPurchaseRequestModal from './ToolPurchaseRequestModal'
 import { TOOL_ESTADOS } from '@/types/servicios'
 import type { Tool, ToolEstado } from '@/types/servicios'
 import { IcoPlus } from '@/components/icons'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const BODEGA = 'bodega'
 
@@ -28,6 +29,10 @@ export default function ToolsPanel() {
   const canEdit = canManageTools(user?.role)
 
   const [search, setSearch]         = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [estado, setEstado]         = useState<ToolEstado | ''>('')
   const [assignedTo, setAssignedTo] = useState<string>('')   // '' | 'bodega' | technician id
   const [createOpen, setCreateOpen]           = useState(false)
@@ -39,9 +44,9 @@ export default function ToolsPanel() {
   })
 
   const { data: tools = [], isLoading } = useQuery({
-    queryKey: ['servicios-tools', search, estado, assignedTo],
+    queryKey: ['servicios-tools', searchTerm, estado, assignedTo],
     queryFn:  () => serviciosApi.tools.list({
-      search:      search || undefined,
+      search:      searchTerm || undefined,
       estado:      estado || undefined,
       assigned_to: assignedTo === '' ? undefined : assignedTo === BODEGA ? BODEGA : Number(assignedTo),
     }),

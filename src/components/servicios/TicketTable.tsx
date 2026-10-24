@@ -5,6 +5,7 @@ import TechnicianBadge from './TechnicianBadge'
 import TicketStatusSelect from './TicketStatusSelect'
 import { QuoteIndicator, InspectionReportIndicator } from './TicketIndicators'
 import { IcoEye, IcoClock } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   tickets:       Ticket[]
@@ -20,7 +21,7 @@ interface Props {
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 
 // REQ-216 — Vista Tabla, listado principal. Orden por defecto (aplicado por el llamador, ver
@@ -63,7 +64,7 @@ export default function TicketTable({ tickets, canEditStatus, onViewDetail, onSc
                   {ticket.numero}
                 </td>
                 <td className="px-3 py-2.5">
-                  <div className="font-medium text-slate-800 dark:text-slate-100">{ticket.cliente}</div>
+                  <div className="font-medium text-slate-800 dark:text-slate-100">{ticket.cliente ?? '—'}</div>
                   {ticket.descripcion && (
                     <div className="text-[12px] text-slate-400 max-w-[220px] truncate">{ticket.descripcion}</div>
                   )}

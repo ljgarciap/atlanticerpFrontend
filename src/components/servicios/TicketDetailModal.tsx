@@ -19,6 +19,7 @@ import ServiceQuoteModal from './ServiceQuoteModal'
 import RequirementsChecklist from './RequirementsChecklist'
 import ServiciosSearchPickerModal from './ServiciosSearchPickerModal'
 import { useToastStore } from '@/store/toastStore'
+import { formatDateTimeShort, formatDateFromTimestamp, formatTimeShort } from '@/utils/dates'
 
 // REQ-238 RN5 — Aaron/Líder de Servicios (superadmin incluido) o el técnico interno ASIGNADO a
 // este ticket puntual — distinto de `canEdit` (edición global del ticket, solo Aaron/superadmin),
@@ -77,18 +78,16 @@ interface EditDraft {
 
 function formatDateTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString()
+  return formatDateTimeShort(iso)
 }
-
-const TIME_ONLY = { hour: '2-digit', minute: '2-digit' } as const
 
 // SCRUM-804 — fecha/hora del historial de reagendamientos, mostradas por separado (ver mockup:
 // "Fecha anterior" / "Hora anterior" como campos independientes, no un solo datetime combinado).
 function formatDateOnly(iso: string): string {
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 function formatTimeOnly(iso: string): string {
-  return new Date(iso).toLocaleTimeString([], TIME_ONLY)
+  return formatTimeShort(iso)
 }
 
 // Visual Review 2026-08-03 (Batch 2) — "Horario de trabajo/visita" del mockup no tiene columna
@@ -96,9 +95,9 @@ function formatTimeOnly(iso: string): string {
 // scheduled_ends_at. Sin scheduled_ends_at, muestra solo la hora de inicio.
 function formatWorkSchedule(startIso: string | null, endIso: string | null): string {
   if (!startIso) return '—'
-  const start = new Date(startIso).toLocaleTimeString([], TIME_ONLY)
+  const start = formatTimeShort(startIso)
   if (!endIso) return start
-  const end = new Date(endIso).toLocaleTimeString([], TIME_ONLY)
+  const end = formatTimeShort(endIso)
   return `${start} – ${end}`
 }
 
@@ -771,6 +770,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
             setProductPickerOpen(false)
           }}
           onClose={() => setProductPickerOpen(false)}
+          showDemoModeBadge
         />
       )}
     </div>

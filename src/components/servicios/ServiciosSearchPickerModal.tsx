@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import DemoModeBadge from '@/components/DemoModeBadge'
 import { IcoClose, IcoSearch } from '@/components/icons'
 
 interface Props<T> {
@@ -14,6 +15,10 @@ interface Props<T> {
   emptyMessage: string
   onSelect:     (item: T) => void
   onClose:      () => void
+  // docs/specs/demo-mode.md (F3) — este componente es genérico (master client/subcliente/
+  // producto, ver docblock abajo); el badge solo aplica a la instancia que busca PRODUCTOS
+  // (los otros 2 no pasan por CatalogProduct::scopeVisibleForDemoMode()) — cada consumidor decide.
+  showDemoModeBadge?: boolean
 }
 
 // REQ-246 RN2/RN3 (Cliente Master/Subcliente) + REQ-247 RN3 (Productos) — mismo mecanismo de
@@ -22,6 +27,7 @@ interface Props<T> {
 // TicketCreateModal (master, subcliente, producto).
 export default function ServiciosSearchPickerModal<T>({
   title, queryKey, fetchResults, itemKey, renderItem, emptyMessage, onSelect, onClose,
+  showDemoModeBadge,
 }: Props<T>) {
   const { t }      = useTranslation('servicios')
   const [search, setSearch]           = useState('')
@@ -41,7 +47,10 @@ export default function ServiciosSearchPickerModal<T>({
     <div className="fixed inset-0 z-[70] flex items-start sm:items-center justify-center bg-black/40 p-4">
       <Card variant="modal" className="w-full max-w-sm my-4 flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[80vh]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h2>
+            {showDemoModeBadge && <DemoModeBadge />}
+          </div>
           <Button variant="icon" onClick={onClose}><IcoClose /></Button>
         </div>
 

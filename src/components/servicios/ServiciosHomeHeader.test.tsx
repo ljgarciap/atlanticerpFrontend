@@ -72,9 +72,21 @@ describe('ServiciosHomeHeader (REQ-206 / SCRUM-269)', () => {
     renderHeader()
 
     await waitFor(() => {
-      expect(screen.getByText('home.greeting:Lider Servicios')).toBeInTheDocument()
+      expect(screen.getByText('home.greeting:Lider')).toBeInTheDocument()
     })
     expect(screen.queryByText(/^Test$/)).not.toBeInTheDocument()
+  })
+
+  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+    mockedStore.mockReturnValue({ user: makeUser({ first_name: 'Lider Jose', last_name: 'Test' }) } as never)
+    mockedApi.internalTechnicians.stats.mockResolvedValue(makeTeamStats())
+    mockedApi.tickets.stats.mockResolvedValue(makeTicketStats())
+
+    renderHeader()
+
+    await waitFor(() => {
+      expect(screen.getByText('home.greeting:Lider')).toBeInTheDocument()
+    })
   })
 
   // Escenario 2 — resumen del día: visitas del equipo + pendientes de equipo, sin importar el rol.

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import type { ToolKardexTipo } from '@/types/servicios'
+import { formatDateTimeShort } from '@/utils/dates'
 
 const TIPOS: ToolKardexTipo[] = ['ingreso', 'damaged', 'worn', 'lost']
 
@@ -162,7 +163,7 @@ export default function ToolKardexPage() {
             {entries.map(entry => (
               <tr key={entry.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                  {new Date(entry.created_at).toLocaleString()}
+                  {formatDateTimeShort(entry.created_at)}
                 </td>
                 <td className="px-4 py-3 text-slate-800 dark:text-slate-100 font-semibold">{entry.tool_nombre}</td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">

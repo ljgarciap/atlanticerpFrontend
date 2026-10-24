@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
 import { IcoChevronLeft, IcoChevronRight } from '@/components/icons'
-import type { CommissionCriterio } from '@/types/servicios'
+import type { CommissionCriterio, ReportsPeriodParams } from '@/types/servicios'
 
 const CRITERIOS: CommissionCriterio[] = ['calidad', 'satisfaccion', 'sla', 'puntualidad', 'actitud']
 
@@ -35,8 +35,19 @@ function periodLabel(period: { year: number; month: number }, locale: string): s
  * "Tecnico Servicios Test" en internal_technicians — mismo query key ya cacheado por TanStack Query en
  * InternalTechniciansPage (`servicios-internal-technicians`), no se duplica la llamada de red.
  * Si no califica: no se renderiza nada Y la query de comisión nunca se dispara (`enabled: false`).
+ *
+ * `globalPeriod` — SCRUM-911: el filtro general de la página (arriba, `ReportsPeriodSelect`)
+ * manda sobre el mes de esta tarjeta. El estado `period` de acá abajo sigue existiendo para que
+ * las flechas de navegación local (revisar meses puntuales SOLO de esta tarjeta) funcionen sin
+ * tocar el resto de los indicadores, pero cada cambio de `globalPeriod` lo resetea — antes de este
+ * fix el panel quedaba anclado en su propio mes inicial para siempre, ignorando el filtro general
+ * (UAT-046 RECHAZADO).
  */
-export default function ReportsCommissionSection() {
+interface Props {
+  globalPeriod: ReportsPeriodParams
+}
+
+export default function ReportsCommissionSection({ globalPeriod }: Props) {
   const { t, i18n } = useTranslation('servicios')
   const user = useAuthStore(s => s.user)
 
@@ -57,8 +68,15 @@ export default function ReportsCommissionSection() {
 
   const now = new Date()
   const currentPeriod = { year: now.getFullYear(), month: now.getMonth() + 1 }
-  const [period, setPeriod] = useState(currentPeriod)
+  const [period, setPeriod] = useState<ReportsPeriodParams>(globalPeriod)
   const isCurrentPeriod = period.year === currentPeriod.year && period.month === currentPeriod.month
+
+  // El filtro general manda: cada vez que cambia, resincroniza el mes local — la navegación con
+  // las flechas queda disponible de nuevo desde ahí, pero nunca sobrevive a un cambio del filtro
+  // general (SCRUM-911).
+  useEffect(() => {
+    setPeriod(globalPeriod)
+  }, [globalPeriod.year, globalPeriod.month])
 
   function shiftPeriod(delta: number) {
     setPeriod(p => {

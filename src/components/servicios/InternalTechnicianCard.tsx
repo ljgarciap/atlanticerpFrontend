@@ -13,6 +13,9 @@ interface Props {
   // Gerencia ve el resultado calculado", nunca Aaron (que sí puede CAPTURAR sin ver el total).
   onViewCommissionResult?: (technician: InternalTechnician) => void
   canViewCommissionResult?: boolean
+  // SCRUM-1015 — editar/eliminar; solo se pasan cuando el usuario puede gestionar técnicos.
+  onEdit?:   (technician: InternalTechnician) => void
+  onDelete?: (technician: InternalTechnician) => void
 }
 
 function initials(nombre: string): string {
@@ -31,7 +34,7 @@ const STATUS_DOT: Record<InternalTechnician['estado'], string> = {
 // abre el detalle (teléfono/correo/especialidad).
 export default function InternalTechnicianCard({
   technician: t, onViewVisits, onViewDetail, onViewCommission, canManageCommission,
-  onViewCommissionResult, canViewCommissionResult,
+  onViewCommissionResult, canViewCommissionResult, onEdit, onDelete,
 }: Props) {
   const { i18n } = useTranslation('servicios')
 
@@ -96,6 +99,21 @@ export default function InternalTechnicianCard({
         <Button variant="outline" className="!text-xs !py-1.5" onClick={() => onViewCommissionResult(t)}>
           {i18n.t('servicios:technicians.internal.card.commissionResult')}
         </Button>
+      )}
+
+      {(onEdit || onDelete) && (
+        <div className="flex gap-2">
+          {onEdit && (
+            <Button variant="secondary" className="!text-xs !py-1.5 flex-1" onClick={() => onEdit(t)}>
+              {i18n.t('servicios:technicians.internal.card.edit')}
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="outline" className="!text-xs !py-1.5 flex-1" onClick={() => onDelete(t)}>
+              {i18n.t('servicios:technicians.internal.card.delete')}
+            </Button>
+          )}
+        </div>
       )}
     </Card>
   )

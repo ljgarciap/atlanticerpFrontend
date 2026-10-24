@@ -9,6 +9,7 @@ import ExternalTechnicianCreateModal from '@/components/servicios/ExternalTechni
 import ExternalTechnicianDetailModal from '@/components/servicios/ExternalTechnicianDetailModal'
 import { IcoPlus } from '@/components/icons'
 import type { ExternalTechnicianStatus } from '@/types/servicios'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 type StatusChip = ExternalTechnicianStatus | ''
 
@@ -27,14 +28,18 @@ export default function ExternalTechniciansPage() {
   const canEdit  = canManage(user?.role)
 
   const [search, setSearch]     = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [chip, setChip]         = useState<StatusChip>('')
   const [createOpen, setCreateOpen] = useState(false)
   const [detailId, setDetailId]     = useState<number | null>(null)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['servicios-external-technicians', search, chip],
+    queryKey: ['servicios-external-technicians', searchTerm, chip],
     queryFn:  () => serviciosApi.externalTechnicians.list({
-      search: search || undefined,
+      search: searchTerm || undefined,
       estado: chip || undefined,
     }),
   })

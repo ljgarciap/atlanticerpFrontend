@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoPencil, IcoAlertTriangle } from '@/components/icons'
 import { useToastStore } from '@/store/toastStore'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import type { ExternalTechnicianDeactivationConfirmationResponse } from '@/types/servicios'
 
 interface Props {
@@ -23,7 +24,7 @@ function formatTarifa(visible: boolean, value: number | string | null): string {
 // REQ-265/266/267 — ficha del técnico externo: tarifa (editar + historial + mostrar/ocultar),
 // activar/inactivar (con advertencia si tiene proyectos activos), proyectos asignados.
 export default function ExternalTechnicianDetailModal({ technicianId, canEdit, onClose }: Props) {
-  const { t, i18n } = useTranslation('servicios')
+  const { t } = useTranslation('servicios')
   const toast        = useToastStore(s => s.show)
   const qc           = useQueryClient()
 
@@ -175,7 +176,7 @@ export default function ExternalTechnicianDetailModal({ technicianId, canEdit, o
                     {technician.rate_history.map((entry, i) => (
                       <li key={i} className="flex justify-between">
                         <span>${Number(entry.tarifa_dia).toFixed(2)}{entry.changed_by ? ` — ${entry.changed_by}` : ''}</span>
-                        <span>{new Date(entry.created_at).toLocaleDateString(i18n.language)}</span>
+                        <span>{formatDateFromTimestamp(entry.created_at)}</span>
                       </li>
                     ))}
                   </ul>

@@ -15,6 +15,7 @@ import ServiciosSinResponderPanel from '@/components/servicios/ServiciosSinRespo
 import InsumosPendientesPanel from '@/components/servicios/InsumosPendientesPanel'
 import EstadoTicketsPanel from '@/components/servicios/EstadoTicketsPanel'
 import TicketDetailModal from '@/components/servicios/TicketDetailModal'
+import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { IcoPlus, IcoCalendar } from '@/components/icons'
 
 // REQ-245 RN4 — MISMO criterio que TicketsPage.tsx `canCreateTicket()` (técnico interno/garantías
@@ -57,6 +58,11 @@ export default function ServiciosHomePage() {
   const { data, isLoading } = useQuery({
     queryKey: ['servicios-home-summary'],
     queryFn:  () => serviciosApi.home.summary(),
+  })
+  // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+  const { data: approvalsPending } = useQuery({
+    queryKey: ['servicios-home-approvals-pending'],
+    queryFn:  () => serviciosApi.home.approvalsPending(),
   })
 
   return (
@@ -103,6 +109,7 @@ export default function ServiciosHomePage() {
             <InsumosPendientesPanel data={data?.insumos_pendientes} onViewTicket={setDetailTicketId} />
           </div>
           <EstadoTicketsPanel />
+          <ApprovalsPendingCard items={approvalsPending?.data ?? []} />
         </div>
       )}
 

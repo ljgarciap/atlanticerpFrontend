@@ -8,6 +8,10 @@ import type { ServiceQuoteDetail } from '@/types/servicios'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => (opts ? `${key}:${JSON.stringify(opts)}` : key) }),
+  // docs/specs/demo-mode.md — ServiciosSearchPickerModal ahora importa DemoModeBadge, que resuelve
+  // @/store/authStore -> @/i18n (real) -> requiere este export. Mismo fix ya aplicado en
+  // TicketDetailModal.test.tsx.
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 vi.mock('@/api/serviciosApi', () => ({

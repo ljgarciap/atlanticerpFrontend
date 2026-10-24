@@ -152,7 +152,7 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
     mutationFn: async () => {
       const ticket = await serviciosApi.tickets.create({
         tipo, subtipo, tipo_instalacion: tipoInstalacion, descripcion: descripcion.trim(),
-        sales_project_id: project!.id,
+        sales_project_id: project?.id ?? null,
         contacto: contacto.trim() || null,
         telefono: telefono.trim() || null,
         email: email.trim() || null,
@@ -191,7 +191,7 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
 
   const subtypeOptions = SUBTYPES_BY_TIPO[tipo] ?? []
   const excludedProductIds = productos.map(p => p.catalog_product_id)
-  const canSave = descripcion.trim() !== '' && project !== null && !mutation.isPending
+  const canSave = descripcion.trim() !== '' && !mutation.isPending
 
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-0 sm:p-4">
@@ -420,6 +420,7 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
           emptyMessage={project ? t('tickets.create.searchProductEmptyByProject') : t('tickets.create.searchProductEmpty')}
           onSelect={pickProduct}
           onClose={() => setActivePicker(null)}
+          showDemoModeBadge
         />
       )}
     </div>

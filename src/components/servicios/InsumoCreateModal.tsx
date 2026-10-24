@@ -63,6 +63,7 @@ export default function InsumoCreateModal({ excludedProductIds, onClose, onCreat
         emptyMessage={t('insumos.createModal.searchEmpty')}
         onSelect={setProduct}
         onClose={onClose}
+        showDemoModeBadge
       />
     )
   }

@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoBook, IcoEye } from '@/components/icons'
 import type { ReportsBibliotecaFilters, ReportsBibliotecaTipoDocumento, ReportsBibliotecaEstado } from '@/types/servicios'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 const EMPTY_FILTERS: ReportsBibliotecaFilters = { search: '', tipo_documento: undefined, estado: undefined }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString()
+  return formatDateFromTimestamp(iso)
 }
 
 /**
