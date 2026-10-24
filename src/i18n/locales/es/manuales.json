@@ -1,0 +1,85 @@
+{
+  "title": "Manuales de usuario",
+  "subtitle": "Guías en PDF y video para cada módulo de AtlanticERP.",
+  "listLabel": "Listado de manuales",
+  "filters": {
+    "module": "Módulo",
+    "moduleAll": "Todos los módulos",
+    "type": "Tipo",
+    "typeAll": "Todos",
+    "typePdf": "PDF",
+    "typeVideo": "Video",
+    "search": "Buscar por nombre",
+    "clearSearch": "Limpiar búsqueda",
+    "clear": "Limpiar filtros"
+  },
+  "modules": {
+    "crm": "CRM",
+    "ventasDiseno": "Ventas & Diseño",
+    "compras": "Compras",
+    "bodega": "Bodega",
+    "servicios": "Servicios",
+    "adminContab": "Administración & Contabilidad",
+    "gerencia": "Gerencia"
+  },
+  "count_one": "{{count}} manual",
+  "count_other": "{{count}} manuales",
+  "type": { "pdf": "PDF", "video": "Video" },
+  "card": {
+    "view": "Ver",
+    "play": "Reproducir",
+    "download": "Descargar",
+    "viewAria": "Ver {{name}}",
+    "playAria": "Reproducir {{name}}",
+    "downloadAria": "Descargar {{name}}"
+  },
+  "empty": {
+    "module": "No hay manuales disponibles para este módulo",
+    "search": "Ningún manual coincide con tu búsqueda",
+    "catalog": "Aún no hay manuales publicados."
+  },
+  "loading": "Cargando manuales...",
+  "error": {
+    "load": "No se pudieron cargar los manuales.",
+    "open": "No se pudo abrir el manual. Intenta de nuevo."
+  },
+  "retry": "Reintentar",
+  "video": {
+    "preparing": "Preparando video...",
+    "error": "No se pudo reproducir el video.",
+    "close": "Cerrar"
+  },
+  "admin": {
+    "button": "Administrar",
+    "panelLabel": "Administrar manuales",
+    "upload": "Subir manual",
+    "selectFile": "Seleccionar archivo",
+    "dropHint": "Arrastra un archivo o selecciona uno",
+    "limits": "PDF hasta {{pdf}} MB. Video MP4 o WebM hasta {{video}} MB.",
+    "module": "Módulo",
+    "modulePlaceholder": "Selecciona un módulo",
+    "name": "Nombre visible",
+    "errType": "Formato no permitido. Usa PDF, MP4 o WebM.",
+    "errSizePdf": "El PDF supera el límite de {{max}} MB.",
+    "errSizeVideo": "El video supera el límite de {{max}} MB.",
+    "preparing": "Preparando subida...",
+    "uploading": "Subiendo... {{pct}}%",
+    "progress": "{{pct}}% · {{loaded}} de {{total}}",
+    "finalizing": "Finalizando...",
+    "cancel": "Cancelar",
+    "cancelled": "Subida cancelada.",
+    "uploadError": "No se pudo subir el archivo. Puedes reintentar.",
+    "uploadRejected": "El archivo fue rechazado y no se subió.",
+    "discard": "Descartar",
+    "uploaded": "Manual subido",
+    "published": "Manuales publicados",
+    "publishedEmpty": "Aún no hay manuales publicados.",
+    "delete": "Eliminar",
+    "deleteAria": "Eliminar {{name}}",
+    "deleteTitle": "Eliminar manual",
+    "deleteBody": "«{{name}}» dejará de estar disponible para todos los usuarios.",
+    "deleted": "Manual eliminado",
+    "deleteError": "No se pudo eliminar el manual.",
+    "configError": "No se pudo cargar la configuración de subida."
+  }
+}

@@ -3,13 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/authStore'
 import type { TFunction } from 'i18next'
 import { authApi } from '@/api/authApi'
 import AppLogo from '@/components/AppLogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { IcoCheck } from '@/components/icons'
 
 function buildSchema(t: TFunction) {
   return z.object({
@@ -29,11 +30,11 @@ type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 export default function ChangePasswordPage() {
   const { t } = useTranslation(['common', 'auth'])
-  const [success, setSuccess] = useState(false)
+  const navigate = useNavigate()
   const [apiError, setApiError] = useState('')
 
   const schema = useMemo(() => buildSchema(t), [t])
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -45,8 +46,10 @@ export default function ChangePasswordPage() {
         data.new_password,
         data.new_password_confirmation,
       )
-      setSuccess(true)
-      reset()
+      // SCRUM-1033: el backend invalida todos los access tokens previos al cambiar la contraseña (incluido el de esta
+      // sesión) y revoca los refresh tokens: se cierra la sesión localmente y se pide iniciar sesión de nuevo.
+      useAuthStore.getState().clearAuth()
+      navigate('/login', { replace: true, state: { passwordChanged: true } })
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status
       if (status === 401) {
@@ -84,18 +87,6 @@ export default function ChangePasswordPage() {
             {t('auth:changePassword.weakPassword')}
           </p>
 
-          {success ? (
-            <div className="text-center py-4">
-              <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-emerald-600"
-                style={{ background: '#d1f5e0' }}>
-                <IcoCheck size={22} />
-              </div>
-              <p className="font-semibold text-emerald-700 mb-4">{t('auth:changePassword.success')}</p>
-              <Button type="button" variant="ghost" onClick={() => setSuccess(false)}>
-                {t('common:actions.cancel')}
-              </Button>
-            </div>
-          ) : (
             <form onSubmit={handleSubmit(onSubmit)} onFocus={() => setApiError('')} noValidate className="space-y-4">
 
               <div>
@@ -153,7 +144,6 @@ export default function ChangePasswordPage() {
                 {isSubmitting ? '…' : t('auth:changePassword.submit')}
               </Button>
             </form>
-          )}
         </Card>
       </main>
     </div>

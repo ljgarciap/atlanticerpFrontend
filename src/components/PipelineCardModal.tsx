@@ -1,17 +1,22 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
-import type { ContactRole, PipelineCardFile, PipelineFileType, PipelineStage } from '@/types/ventasDiseno'
+import { useAuthStore } from '@/store/authStore'
+import type { ContactRole, PipelineCardDetail, PipelineCardFile, PipelineCardProductDeliveryAssignmentPayload, PipelineFileType, PipelineStage } from '@/types/ventasDiseno'
 import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { IcoClose, IcoClock, IcoFile, IcoPencil, IcoDownload } from '@/components/icons'
+import { IcoClose, IcoClock, IcoFile, IcoPencil, IcoDownload, IcoTrash } from '@/components/icons'
 import ClientPicker from '@/components/ClientPicker'
 import PipelineFileViewerModal from '@/components/PipelineFileViewerModal'
+import ProductDeliveryAssignmentModal from '@/components/ProductDeliveryAssignmentModal'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
 import { sanitizeUnsignedDecimalInput } from '@/lib/decimalInput'
+import { formatDateTimeShort } from '@/utils/dates'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
 // Flujo lineal Lead → Diseño → Cotización → Propuesta → Aprobado (REQ-011/014/016/017).
 // "lost" se alcanza desde cualquier etapa activa sin gate; se sale de "lost" únicamente
@@ -22,6 +27,13 @@ const STAGE_FLOW: Record<Exclude<PipelineStage, 'lost'>, PipelineStage | null> =
 
 const FILE_TYPES: PipelineFileType[] = ['design', 'signed_quote', 'approval_proof', 'proposal', 'photo']
 
+// SCRUM-909 (rebote 2026-09-14) — antes el campo "Fecha estimada de entrega" (y "Asignar
+// productos a entrega") era visible en las 5 etapas por igual (ver docblock de SCRUM-874 más
+// abajo). Vuelve a acotarse a las 3 etapas donde el backend realmente permite guardarlo — ya no
+// es un callejón sin salida en Cotización porque `PipelineController::update()` ahora también
+// acepta esa etapa (antes solo Propuesta/Aprobado).
+const DELIVERY_DATE_STAGES: PipelineStage[] = ['quote', 'proposal', 'approved']
+
 interface Props {
   cardId:  number
   onClose: () => void
@@ -31,11 +43,64 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const qc = useQueryClient()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
+  // SCRUM-849.4 — solo Gerencia puede reasignar (mismo criterio de rol que canViewTeamV2()
+  // en el backend, ver PipelineController::update()); para cualquier otro rol, la
+  // asignación queda de solo lectura, listando a todos los asignados.
+  const canSeeTeam = hasGerenciaScope(user)
+  const readsPipelineOnly = (user?.permissions?.includes('ventas_diseno.pipeline.read_all') ?? false)
+    && !(user?.permissions?.includes('ventas_diseno.read') ?? false)
+  // SCRUM-1139 — Félix además edita el Pipeline (`ventas_diseno.pipeline.edit`): sigue SIN `ventas_diseno.read`
+  // (no abre cotizaciones ni clientes), pero recupera los controles de escritura del propio tablero.
+  const hasPipelineEdit = user?.permissions?.includes('ventas_diseno.pipeline.edit') ?? false
+  const readsPipelineReadOnly = readsPipelineOnly && !hasPipelineEdit
 
   const { data: card, isLoading } = useQuery({
     queryKey: ['ventas-diseno-pipeline-card', cardId],
     queryFn:  () => ventasDisenoApi.pipeline.get(cardId),
   })
+
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+    enabled:  canSeeTeam,
+  })
+
+  // SCRUM-884 (rebote 2026-09-16) — cuando quien crea el proyecto es Gerencia (Mark/David/Will),
+  // queda en `assigneeIds` (owner_id) pero `teamVendors` nunca lo incluye (es la lista de
+  // vendedores/diseñadores, no de Gerencia). `UserMultiSelect` solo renderiza como "chip"
+  // removible a quien esté en la lista `users` que recibe — sin este id ahí, no había forma de
+  // desmarcarlo, aunque sí se podía con cualquier creador vendedor/diseñador (esos sí están en
+  // `teamVendors`). Unión con los asignados actuales de la tarjeta para que cualquiera ya asignado
+  // (sea o no vendedor/diseñador) siempre aparezca como removible; no cambia a quién se puede
+  // agregar de nuevo (eso lo sigue acotando `teamVendors`, sin tocar).
+  const assignableUsers = useMemo(() => {
+    const base = teamVendors ?? []
+    const knownIds = new Set(base.map(u => u.id))
+    const currentAssignees = (card?.assignees ?? []).filter(a => !knownIds.has(a.id))
+
+    return [...base, ...currentAssignees]
+  }, [teamVendors, card?.assignees])
+
+  // SCRUM-909 — solo tiene sentido con Entrega Parcial. Se consulta acá (no solo dentro del
+  // modal de asignación) para poder gatear "Mover a Aprobado" (criterio 4) sin depender de que
+  // el usuario haya abierto el modal en esta sesión.
+  const [showProductAssignmentModal, setShowProductAssignmentModal] = useState(false)
+  // SCRUM-1115 — diálogo "Crear cotización": partir de la última cotización confirmada o en blanco.
+  const [showQuoteBaseDialog, setShowQuoteBaseDialog] = useState(false)
+  const [quoteBaseError, setQuoteBaseError] = useState<string | null>(null)
+  // SCRUM-1027 — borrador de asignaciones hecho dentro de la edición (null = sin tocar). Se envía
+  // en el mismo PUT que las fechas y se descarta al cancelar o guardar.
+  const [productDraft, setProductDraft] = useState<PipelineCardProductDeliveryAssignmentPayload[] | null>(null)
+  const { data: productDeliveryRows } = useQuery({
+    queryKey: ['ventas-diseno-pipeline-card-product-delivery-assignments', cardId],
+    queryFn:  () => ventasDisenoApi.pipeline.productDeliveryAssignments.list(cardId),
+    // SCRUM-1128 — el endpoint exige `ventas_diseno.read`; Félix (solo `pipeline.read_all`, sin `.read`)
+    // recibiría 403. Se excluye solo ese caso: superadmin llega con `superadmin.all`, no con `.read`.
+    enabled:  card?.delivery_type === 'partial' && !readsPipelineReadOnly,
+  })
+  const hasUnassignedProductDelivery = card?.delivery_type === 'partial'
+    && (productDeliveryRows ?? []).some(p => !p.assigned_delivery_date)
 
   const [name,           setName]           = useState('')
   const [tag,            setTag]            = useState('')
@@ -45,6 +110,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   const [observations,   setObservations]   = useState('')
   const [masterClient,   setMasterClient]   = useState<{ id: number; label: string } | null>(null)
   const [subClient,      setSubClient]      = useState<{ id: number; label: string } | null>(null)
+  const [assigneeIds,    setAssigneeIds]    = useState<number[]>([])
 
   // Contacto nuevo
   const [contactName,  setContactName]  = useState('')
@@ -75,17 +141,29 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     masterClientInputRef.current?.focus()
   }
 
+  const dialogOpenRef = useRef(false)
+  const closePassToOrderDialogRef = useRef<(() => void) | null>(null)
+
   // SCRUM-76 — Escape cierra el modal, igual que el botón "Cerrar"/la X.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+      // SCRUM-1128 — con un diálogo de "Pasar a Pedido" abierto, Escape no debe cerrar el modal
+      // entero (se perdería la pregunta del abono).
+      if (e.key === 'Escape' && !dialogOpenRef.current) onClose()
+      // Escape sobre la confirmación de "Pasar a Pedido" equivale a Cancelar (no mientras envía).
+      else if (e.key === 'Escape' && closePassToOrderDialogRef.current) closePassToOrderDialogRef.current()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
+  // SCRUM-829 — este efecto reseedea el form en cada refetch de la query (upload de archivo,
+  // agregar/editar/quitar contacto y cambio de etapa invalidan la misma queryKey). Si el usuario
+  // está editando, un refetch de fondo no debe pisar cambios sin guardar; el guard de abajo evita
+  // ese revert sin afectar el reseed normal (carga inicial / vista no editando).
   useEffect(() => {
     if (!card) return
+    if (isEditing) return
     setName(card.sales_project.name)
     setTag(card.sales_project.tag ?? '')
     setWorkedAreaM2(card.worked_area_m2 != null ? String(card.worked_area_m2) : '')
@@ -94,7 +172,8 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     setObservations(card.observations ?? '')
     setMasterClient(card.master_client ? { id: card.master_client.id, label: card.master_client.name } : null)
     setSubClient(card.sub_client ? { id: card.sub_client.id, label: card.sub_client.business_name } : null)
-  }, [card])
+    setAssigneeIds(card.assignees.map(a => a.id))
+  }, [card, isEditing])
 
   // SCRUM-78 — "Cancelar" descarta cambios sin guardar y vuelve a modo vista, sin cerrar el
   // modal. Mismo seed que el efecto de arriba, reusado acá para no duplicar la lista de campos.
@@ -108,7 +187,9 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     setObservations(card.observations ?? '')
     setMasterClient(card.master_client ? { id: card.master_client.id, label: card.master_client.name } : null)
     setSubClient(card.sub_client ? { id: card.sub_client.id, label: card.sub_client.business_name } : null)
+    setAssigneeIds(card.assignees.map(a => a.id))
     setSaveError(null)
+    setProductDraft(null)
     setIsEditing(false)
   }
 
@@ -123,10 +204,21 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       delivery_type:      (deliveryType || null) as 'single' | 'partial' | null,
       delivery_dates:      deliveryDates,
       observations:        observations || null,
+      // SCRUM-1027 — solo asignaciones cuya fecha sigue en el borrador de fechas (si el usuario
+      // quitó una fecha después de asignarla, esa entrada ya no aplica y el backend la rechazaría).
+      ...(productDraft !== null && deliveryType === 'partial'
+        ? { product_deliveries: productDraft.filter(d => d.delivery_date === null || deliveryDates.includes(d.delivery_date)) }
+        : {}),
+      // SCRUM-849.4 — Gerencia-only; el backend lo ignora en silencio para cualquier otro rol,
+      // pero no vale la pena mandarlo si ni siquiera se muestra el control para editarlo.
+      ...(canSeeTeam ? { assignee_ids: assigneeIds } : {}),
     }),
     onSuccess: () => {
       setSaveError(null)
       setIsEditing(false)
+      setProductDraft(null)
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card-product-delivery-assignments', cardId] })
+      qc.removeQueries({ queryKey: ['ventas-diseno-pipeline-card-product-delivery-assignments-draft', cardId] })
       // SCRUM-677 — guardar puede ser justo la acción que resuelve el dato que
       // faltaba para el gate de avance de etapa (ej. Cliente Master, superficie
       // trabajada). stageError/quoteGateError quedaban pegados en pantalla
@@ -200,6 +292,70 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     },
   })
 
+  // SCRUM-1128 — "Pasar a Pedido": el estado Aprobado de Pipeline ya no genera el pedido de Bodega;
+  // lo genera esta acción explícita, solo para quien tiene el permiso (Gerencia y Félix). El backend
+  // vuelve a validar permiso e idempotencia — esto solo decide qué se muestra.
+  const canPassToOrder = user?.permissions?.includes('ventas_diseno.pass_to_order') ?? false
+  const [showPassToOrderDialog, setShowPassToOrderDialog] = useState(false)
+  const [showAbonoAsk, setShowAbonoAsk] = useState(false)
+  dialogOpenRef.current = showPassToOrderDialog || showAbonoAsk
+  const [passToOrderError, setPassToOrderError] = useState<string | null>(null)
+  // Candado síncrono: `isPending` de la mutation se actualiza con un render de retraso y dos clics
+  // seguidos alcanzarían a disparar dos requests (el backend igual es idempotente).
+  const passToOrderInFlight = useRef(false)
+  const passToOrderMutation = useMutation({
+    mutationFn: () => ventasDisenoApi.pipeline.passToOrder(cardId),
+    onSuccess: () => {
+      setPassToOrderError(null)
+      setShowPassToOrderDialog(false)
+      setShowAbonoAsk(true)
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card', cardId] })
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline'] })
+    },
+    onError: (err: unknown) => {
+      passToOrderInFlight.current = false
+      const status = isAxiosError(err) ? err.response?.status : undefined
+      if (status === 409) {
+        // Ya había pasado a pedido (otro usuario, otra pestaña o un clic previo): no es un error,
+        // se refresca con el estado actual y no se vuelve a preguntar por el abono.
+        const current = isAxiosError<{ data?: PipelineCardDetail }>(err) ? err.response?.data.data : undefined
+        if (current) qc.setQueryData(['ventas-diseno-pipeline-card', cardId], current)
+        setPassToOrderError(null)
+        setShowPassToOrderDialog(false)
+        qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card', cardId] })
+        qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline'] })
+        return
+      }
+      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
+      const fallback = status === 403 ? t('ventasDiseno:modal.passToOrder.errorForbidden')
+        : status === 422 ? t('ventasDiseno:modal.passToOrder.errorNotApproved')
+        : t('ventasDiseno:modal.passToOrder.error')
+      setPassToOrderError(message ?? fallback)
+    },
+  })
+  closePassToOrderDialogRef.current = showPassToOrderDialog && !passToOrderMutation.isPending
+    ? () => { setPassToOrderError(null); setShowPassToOrderDialog(false) }
+    : null
+
+  function handleRegisterAbono() {
+    if (!card) return
+    setShowAbonoAsk(false)
+    // La decisión de registrar o no el abono nunca revierte el pedido ya generado.
+    navigate('/admin-contab/abonos', {
+      state: {
+        abonoPrefill: {
+          masterClientId:   card.master_client?.id ?? null,
+          masterClientName: card.master_client?.name ?? '',
+          subClientId:      card.sub_client?.id ?? null,
+          salesProjectId:   card.sales_project.id,
+          projectName:      card.sales_project.name,
+          quoteId:          card.latest_quote_id ?? null,
+          quoteFolio:       card.latest_quote_folio ?? '',
+        },
+      },
+    })
+  }
+
   const [uploadFileError, setUploadFileError] = useState<string | null>(null)
   const uploadFileMutation = useMutation({
     mutationFn: ({ type, file }: { type: PipelineFileType; file: File }) =>
@@ -218,7 +374,15 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       if (type === 'signed_quote' && card?.stage === 'quote') {
         changeStageMutation.mutate('proposal')
       } else if (type === 'approval_proof' && card?.stage === 'proposal') {
-        changeStageMutation.mutate('approved')
+        // SCRUM-909 (criterio 4) — defensa en profundidad en frontend: si el proyecto es
+        // Entrega Parcial y falta asignar fecha a algún producto, ni siquiera se intenta el
+        // auto-avance (el backend igual lo rechazaría, pero evita el roundtrip fallido y deja
+        // el mismo mensaje que el botón manual de abajo).
+        if (hasUnassignedProductDelivery) {
+          setStageError(t('ventasDiseno:modal.deliveryAssignmentIncomplete'))
+        } else {
+          changeStageMutation.mutate('approved')
+        }
       }
     },
     // REQ-052 criterio 2 — el 422 de "extensions:" no puede quedar silencioso:
@@ -265,6 +429,24 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     })
   }
 
+  const [removingFileId, setRemovingFileId] = useState<number | null>(null)
+  async function handleRemoveFile(file: PipelineCardFile) {
+    if (!confirm(t('ventasDiseno:modal.confirmRemoveFile'))) return
+    setRemovingFileId(file.id)
+    setUploadFileError(null)
+    try {
+      await ventasDisenoApi.pipeline.deleteFile(cardId, file.id)
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card', cardId] })
+    } catch (err) {
+      // Mismo patrón que la subida: si el servidor explica el motivo (p. ej. un proyecto Aprobado no permite quitar
+      // archivos de diseño, propuesta, cotización firmada ni comprobante de aprobación) se muestra ese motivo.
+      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
+      setUploadFileError(message ?? t('ventasDiseno:modal.removeFileError'))
+    } finally {
+      setRemovingFileId(null)
+    }
+  }
+
   const searchMasterClients = useCallback(
     (q: string) => ventasDisenoApi.masterClients.list(q).then(opts => opts.map(o => ({ id: o.id, label: o.name }))),
     [],
@@ -280,14 +462,57 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     [masterClient],
   )
   const createSubClient = useCallback(
-    (q: string, taxId: string) => masterClient
-      ? ventasDisenoApi.subClients.create(masterClient.id, q, taxId).then(c => ({ id: c.id, label: c.business_name }))
+    (q: string, taxId: string, _extra2: string, taxIdDv: string) => masterClient
+      ? ventasDisenoApi.subClients.create(masterClient.id, q, taxId, taxIdDv).then(c => ({ id: c.id, label: c.business_name }))
       : Promise.reject(new Error('no master client')),
     [masterClient],
   )
 
   const stage = PIPELINE_STAGES.find(s => s.id === card?.stage)
-  const canEdit = card?.can_edit ?? false
+  // SCRUM-1128 — el acceso de solo lectura del Pipeline nunca ve controles de escritura, aunque el payload
+  // diga can_edit=true: el backend ya le responde 403 en cualquier escritura. SCRUM-1139 — con
+  // `pipeline.edit` deja de ser solo lectura y manda `can_edit` del payload, como para cualquier editor.
+  const canEdit = (card?.can_edit ?? false) && !readsPipelineReadOnly
+
+  // SCRUM-909 (criterio 4) — la única transición del STAGE_FLOW que aterriza en 'approved' es
+  // proposal->approved; bloquear "Mover a Aprobado" (botón genérico o auto-avance por archivo)
+  // cuando el proyecto es Entrega Parcial y algún producto sigue sin fecha asignada. Defensa en
+  // profundidad — el backend valida lo mismo, esto solo evita el roundtrip fallido y da el
+  // mensaje antes del clic.
+  const nextStageForCard = card ? STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] : null
+  const deliveryAssignmentBlocksApproval = nextStageForCard === 'approved' && hasUnassignedProductDelivery
+
+  // SCRUM-1115 — un proyecto restaurado desde Perdido vuelve a Lead/Diseño con su historial de cotizaciones: ofrecer partir de la
+  // última confirmada (nueva versión, precarga partidas/ítems/precios) en vez de obligar a empezar en blanco. Sin historial no
+  // cambia nada. Los gates de abajo (contacto/cliente en Lead, superficie/archivo en Diseño) ya pasaron cuando se llega acá.
+  function proceedToCreateQuote() {
+    if (!card) return
+    if (card.latest_quote_id != null) {
+      setQuoteBaseError(null)
+      setShowQuoteBaseDialog(true)
+      return
+    }
+    navigate(`/ventas-diseno/quotes?fromPipelineCard=${card.id}`)
+  }
+
+  const quoteFromBaseMutation = useMutation({
+    mutationFn: (quoteId: number) => ventasDisenoApi.quotes.duplicate(quoteId),
+    onSuccess: (draft) => {
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-quotes-list'] })
+      setShowQuoteBaseDialog(false)
+      navigate(`/ventas-diseno/quotes/${draft.id}`)
+    },
+    onError: (err: unknown) => {
+      // 403: la cotización es de otro vendedor y quien abre la tarjeta no ve el equipo (el backend responde un texto genérico de
+      // autorización): se explica y se deja "En blanco" disponible, que sí puede hacer.
+      if (isAxiosError(err) && err.response?.status === 403) {
+        setQuoteBaseError(t('ventasDiseno:modal.createQuoteBaseForbidden'))
+        return
+      }
+      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
+      setQuoteBaseError(message ?? t('ventasDiseno:modal.createQuoteBaseError'))
+    },
+  })
 
   // "Crear cotizacion" bypasea changeStageMutation (no cambia la etapa, ver
   // REQ-050) asi que necesita su propio gate -- distinto segun la etapa:
@@ -314,7 +539,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
         setQuoteGateError(t('ventasDiseno:modal.stageChangeMissingSubClient'))
         return
       }
-      navigate(`/ventas-diseno/quotes?fromPipelineCard=${card.id}`)
+      proceedToCreateQuote()
       return
     }
 
@@ -328,11 +553,94 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       fileInputRefs.current.design?.click()
       return
     }
-    navigate(`/ventas-diseno/quotes?fromPipelineCard=${card.id}`)
+    proceedToCreateQuote()
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-0 sm:p-4">
+      {showQuoteBaseDialog && card && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" data-testid="quote-base-dialog">
+          <Card variant="modal" className="w-full max-w-md p-5">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">{t('ventasDiseno:modal.createQuoteBaseTitle')}</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+              {t('ventasDiseno:modal.createQuoteBaseDescription', { folio: card.latest_quote_folio ?? '' })}
+            </p>
+            {quoteBaseError && (
+              <div role="alert" className="mb-3 px-3 py-2 rounded-lg border text-[12px] font-medium bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300">
+                {quoteBaseError}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="accent"
+                disabled={quoteFromBaseMutation.isPending}
+                loading={quoteFromBaseMutation.isPending}
+                onClick={() => { setQuoteBaseError(null); quoteFromBaseMutation.mutate(card.latest_quote_id as number) }}
+              >
+                {t('ventasDiseno:modal.createQuoteFromBase', { folio: card.latest_quote_folio ?? '' })}
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={quoteFromBaseMutation.isPending}
+                onClick={() => { setShowQuoteBaseDialog(false); navigate(`/ventas-diseno/quotes?fromPipelineCard=${card.id}`) }}
+              >
+                {t('ventasDiseno:modal.createQuoteBlank')}
+              </Button>
+              <Button variant="secondary" disabled={quoteFromBaseMutation.isPending} onClick={() => setShowQuoteBaseDialog(false)}>
+                {t('ventasDiseno:modal.createQuoteBaseCancel')}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+      {showPassToOrderDialog && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" data-testid="pass-to-order-dialog">
+          <Card variant="modal" className="w-full max-w-md p-5">
+            <p className="text-sm text-slate-700 dark:text-slate-200 mb-4">{t('ventasDiseno:modal.passToOrder.confirmMessage')}</p>
+            {passToOrderError && (
+              <div role="alert" className="mb-3 px-3 py-2 rounded-lg border text-[12px] font-medium bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300">
+                {passToOrderError}
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                disabled={passToOrderMutation.isPending}
+                onClick={() => { setPassToOrderError(null); setShowPassToOrderDialog(false) }}
+              >
+                {t('common:actions.cancel')}
+              </Button>
+              <Button
+                variant="accent"
+                disabled={passToOrderMutation.isPending}
+                loading={passToOrderMutation.isPending}
+                onClick={() => {
+                  if (passToOrderInFlight.current) return
+                  passToOrderInFlight.current = true
+                  passToOrderMutation.mutate()
+                }}
+              >
+                {t('ventasDiseno:modal.passToOrder.approve')}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+      {showAbonoAsk && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" data-testid="abono-ask-dialog">
+          <Card variant="modal" className="w-full max-w-md p-5">
+            <p className="text-sm text-slate-700 dark:text-slate-200 mb-4">{t('ventasDiseno:modal.passToOrder.abonoQuestion')}</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setShowAbonoAsk(false)}>
+                {t('ventasDiseno:modal.passToOrder.abonoLater')}
+              </Button>
+              <Button variant="accent" onClick={handleRegisterAbono}>
+                {t('ventasDiseno:modal.passToOrder.abonoRegister')}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
       <Card variant="modal" className="w-full max-w-2xl my-4 flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[90vh]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
           <div className="flex items-center gap-2">
@@ -349,7 +657,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
           ) : (
             <>
-              {!canEdit && (
+              {!canEdit && !(readsPipelineReadOnly && card.stage !== 'lost' && card.stage !== 'approved') && (
                 <div className="mb-4 px-3 py-2 rounded-lg border text-[12px] font-medium bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300">
                   {card.stage === 'lost'
                     ? t('ventasDiseno:modal.notEditableLost')
@@ -441,6 +749,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                       onCreate={createSubClient}
                       disabled={!canEdit || !masterClient}
                       extraFieldLabel={t('ventasDiseno:modal.subClientTaxId')}
+                      dvFieldLabel={t('ventasDiseno:modal.subClientTaxIdDv')}
                     />
                   </>
                 ) : (
@@ -464,7 +773,26 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                     {t('ventasDiseno:modal.owner')}
                   </label>
-                  <p className="text-sm text-slate-700 dark:text-slate-200 py-1.5">{card.owner.name}</p>
+                  {/* SCRUM-849.4 — solo Gerencia puede reasignar, y solo en modo edición; para
+                      cualquier otro caso, lista de solo lectura de TODOS los asignados (antes
+                      solo mostraba al owner, aunque ya hubiera compartido_con). */}
+                  {isEditing && canSeeTeam ? (
+                    <UserMultiSelect users={assignableUsers} selectedIds={assigneeIds} onChange={setAssigneeIds} />
+                  ) : (
+                    <p className="text-sm text-slate-700 dark:text-slate-200 py-1.5">
+                      {card.assignees.map(a => a.name).join(', ')}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+                    {t('ventasDiseno:modal.creator')}
+                  </label>
+                  {/* SCRUM-884 — Creador es inmutable, siempre de solo lectura, distinto del
+                      campo Responsable de arriba (que Gerencia sí puede reasignar). */}
+                  <p className="text-sm text-slate-700 dark:text-slate-200 py-1.5">
+                    {card.creator?.name ?? '—'}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
@@ -499,6 +827,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   )}
                 </div>
 
+                {DELIVERY_DATE_STAGES.includes(card.stage) && (
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                     {t('ventasDiseno:modal.deliveryType')}
@@ -516,8 +845,24 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                         // no aparecía ningún input de fecha para tipearla (el botón "+" tampoco
                         // se muestra para 'single') — callejón sin salida real, bloqueaba el
                         // gate Propuesta→Aprobado. Mismo bug ya corregido en QuotePage.tsx.
-                        if (v === 'single' && deliveryDates.length < 1) {
+                        //
+                        // Rebote SCRUM-817: `< 1` solo cubría la lista vacía — al volver de
+                        // Parcial con 2, 3 o más fechas, la condición no disparaba y los campos
+                        // adicionales quedaban pegados, rompiendo el guardado. `!== 1` colapsa
+                        // siempre a exactamente 1 campo (mismo criterio ya usado en
+                        // QuotePage.tsx:926).
+                        if (v === 'single' && deliveryDates.length !== 1) {
                           setDeliveryDates([''])
+                        }
+                        // SCRUM-874 — revertir a "—" (vacío) dejaba deliveryDates intacto (ej.
+                        // ['', ''] recién sembrado sin completar), así que Guardar seguía
+                        // mandando entradas vacías al backend (`delivery_dates.*: date` las
+                        // rechaza con 422) aunque delivery_type ya fuera null — el error
+                        // quedaba pegado en pantalla sin ninguna forma de resolverlo salvo
+                        // Cancelar. Vaciar la lista acá deja que el próximo Guardar mande
+                        // delivery_dates: [] y limpie el error en el onSuccess de saveMutation.
+                        if (v === '') {
+                          setDeliveryDates([])
                         }
                       }}
                       className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm disabled:bg-slate-50 disabled:text-slate-400"
@@ -531,14 +876,39 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                       {deliveryType ? t(`ventasDiseno:modal.delivery${deliveryType === 'single' ? 'Single' : 'Partial'}`) : '—'}
                     </p>
                   )}
+                  {/* SCRUM-909 — solo con Entrega Parcial seleccionada; ver criterio 1. No
+                      gateado por isEditing: es una acción propia (abre su propio modal),
+                      no un campo de este formulario. SCRUM-1128 — oculto para el acceso de solo
+                      lectura del Pipeline (Félix): el modal pide asignaciones que exigen
+                      ventas_diseno.read y mostraba 2×403 con un texto engañoso. */}
+                  {deliveryType === 'partial' && !readsPipelineReadOnly && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => setShowProductAssignmentModal(true)}
+                      className="!mt-1.5"
+                    >
+                      {t('ventasDiseno:modal.assignProductsToDelivery')}
+                    </Button>
+                  )}
+                  {/* SCRUM-909 (criterio 4) — aviso proactivo, no solo al intentar Aprobar. */}
+                  {hasUnassignedProductDelivery && (
+                    <p className="mt-1.5 text-[11px] font-semibold text-amber-600">
+                      {t('ventasDiseno:modal.deliveryAssignmentIncomplete')}
+                    </p>
+                  )}
                 </div>
+                )}
               </div>
 
-              {/* SCRUM-78 — el criterio define los campos de fecha para Propuesta/
-                  Aprobado; antes aparecian en cualquier etapa apenas se elegia un
-                  Tipo de entrega. El selector sigue visible siempre (se puede
-                  precargar), solo se ocultan los inputs de fecha. */}
-              {deliveryType && (card.stage === 'proposal' || card.stage === 'approved') && (
+              {/* SCRUM-78 originalmente restringía estos inputs a Propuesta/Aprobado. SCRUM-874
+                  (Gerencia Test) reportó que en Lead/Diseño/Cotización el selector de Tipo de
+                  entrega sigue exigiendo la fecha al guardar (delivery_dates.*: date en
+                  UpdatePipelineCardRequest, sin gate de etapa en el backend) pero el input para
+                  cargarla nunca aparecía — callejón sin salida real, igual que el bug de
+                  QuotePage/2026-07-11 arriba. El criterio de negocio pasaba a ser el mismo en las
+                  5 etapas. SCRUM-909 lo vuelve a acotar a DELIVERY_DATE_STAGES (ver ese
+                  docblock) — ya no hay callejón sin salida porque Cotización ahora sí guarda. */}
+              {DELIVERY_DATE_STAGES.includes(card.stage) && deliveryType && (
                 <div className="mb-3">
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                     {t('ventasDiseno:modal.deliveryDates')}
@@ -636,6 +1006,17 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                                   >
                                     <IcoDownload size={13} />
                                   </button>
+                                  {canEdit && isEditing && (
+                                    <button
+                                      type="button"
+                                      onClick={() => { void handleRemoveFile(f) }}
+                                      disabled={removingFileId === f.id}
+                                      className="shrink-0 text-slate-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50"
+                                      title={t('ventasDiseno:modal.removeFile')}
+                                    >
+                                      <IcoTrash size={13} />
+                                    </button>
+                                  )}
                                 </li>
                               ))}
                             </ul>
@@ -802,7 +1183,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 Aprobado, de solo lectura) siempre que el proyecto tenga al menos 1
                 cotización confirmada; a diferencia de "Crear cotización" no depende
                 de canEdit, es una acción de navegación, no de edición. */}
-            {card?.latest_quote_id != null && (
+            {card?.latest_quote_id != null && !readsPipelineOnly && (
               <Button
                 variant="secondary"
                 onClick={() => navigate(`/ventas-diseno/quotes-list?viewQuote=${card.latest_quote_id}`)}
@@ -810,7 +1191,9 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 {t('ventasDiseno:modal.viewProjectQuotes')}
               </Button>
             )}
-            {card?.stage === 'lost' && (
+            {/* SCRUM-1128 — `can_edit` es false en Perdido para todos los roles, así que no sirve
+                de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Félix). */}
+            {card?.stage === 'lost' && !readsPipelineReadOnly && (
               <Button
                 variant="accent"
                 onClick={() => changeStageMutation.mutate('lead')}
@@ -834,8 +1217,15 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 {STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] && STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] !== 'quote' && (
                   <Button
                     variant="secondary"
-                    onClick={() => changeStageMutation.mutate(STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>]!)}
-                    disabled={changeStageMutation.isPending}
+                    onClick={() => {
+                      // SCRUM-909 (criterio 4) — ver docblock de deliveryAssignmentBlocksApproval.
+                      if (deliveryAssignmentBlocksApproval) {
+                        setStageError(t('ventasDiseno:modal.deliveryAssignmentIncomplete'))
+                        return
+                      }
+                      changeStageMutation.mutate(STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>]!)
+                    }}
+                    disabled={changeStageMutation.isPending || deliveryAssignmentBlocksApproval}
                     loading={changeStageMutation.isPending}
                   >
                     {t('ventasDiseno:modal.moveToNext', {
@@ -846,7 +1236,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 {/* REQ-050: precarga la cotización nueva con Cliente Master/Subcliente/
                     RUC/Proyecto/primer contacto de esta tarjeta — solo tiene sentido
                     antes de que la tarjeta ya esté en Cotización o más adelante. */}
-                {(card.stage === 'lead' || card.stage === 'design') && (
+                {(card.stage === 'lead' || card.stage === 'design') && !readsPipelineOnly && (
                   <Button
                     variant="secondary"
                     onClick={handleCreateQuoteClick}
@@ -877,7 +1267,30 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 {t('common:actions.cancel')}
               </Button>
             ) : (
-              <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
+              <>
+                {/* SCRUM-1128 — a la izquierda de "Cerrar": botón (pendiente) o quién/cuándo (ya pasado). */}
+                {card?.stage === 'approved' && card.order_status === 'pending' && card.can_pass_to_order === true && canPassToOrder && (
+                  <Button
+                    variant="accent"
+                    onClick={() => { setPassToOrderError(null); setShowPassToOrderDialog(true) }}
+                  >
+                    {t('ventasDiseno:modal.passToOrder.button')}
+                  </Button>
+                )}
+                {card?.stage === 'approved' && card.order_status === 'approved' && card.order_approved_by && (
+                  <div className="text-[12px] text-slate-600 dark:text-slate-300 leading-tight self-center" data-testid="pass-to-order-info">
+                    <p>
+                      <span className="font-semibold">{t('ventasDiseno:modal.passToOrder.passedBy')}:</span> {card.order_approved_by.name}
+                    </p>
+                    {card.order_approved_at && (
+                      <p>
+                        <span className="font-semibold">{t('ventasDiseno:modal.passToOrder.approvedAt')}:</span> {formatDateTimeShort(card.order_approved_at)}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
+              </>
             )}
             {/* SCRUM-78 — "Guardar" solo tiene sentido en modo edición; en modo vista no hay
                 cambios pendientes que guardar. */}
@@ -900,6 +1313,24 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
           mimeType={viewingFile.mimeType}
           onClose={() => setViewingFile(null)}
           onDownload={() => handleDownloadFile(viewingFile.file)}
+        />
+      )}
+      {showProductAssignmentModal && card && (
+        <ProductDeliveryAssignmentModal
+          cardId={cardId}
+          // SCRUM-909 (rebote 2026-09-14) — en modo edición, `card.delivery_dates` sigue siendo
+          // el valor YA GUARDADO en el servidor (el efecto de arriba que resincroniza `deliveryDates`
+          // desde `card` se desactiva a propósito mientras isEditing, ver su docblock) — si el
+          // usuario acaba de definir fechas parciales sin guardar todavía, este modal recibía la
+          // lista vieja (vacía la primera vez), por eso el selector de fecha no mostraba nada
+          // hasta guardar y reabrir. Usa el estado local (el borrador sin guardar) mientras se
+          // edita, y el valor del servidor el resto del tiempo.
+          deliveryDates={isEditing ? deliveryDates : card.delivery_dates}
+          canEdit={canEdit}
+          onClose={() => setShowProductAssignmentModal(false)}
+          // SCRUM-1027 — en edición no se llama a la API (las fechas del borrador no existen en
+          // BD todavía): la selección vuelve acá y viaja con el guardado del proyecto.
+          {...(isEditing ? { onSaveDraft: setProductDraft, initialDraft: productDraft } : {})}
         />
       )}
     </div>

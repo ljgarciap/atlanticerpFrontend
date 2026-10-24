@@ -132,4 +132,34 @@ describe('createSilentRefreshHandler', () => {
     await vi.waitFor(() => expect(deps.onRefreshFailed).toHaveBeenCalledTimes(1))
     expect(deps.applyTokens).not.toHaveBeenCalled()
   })
+
+  it('un 429 en /auth/refresh NO cierra la sesión y no reintenta hasta pasada la espera (B9)', async () => {
+    deps.refresh = vi.fn().mockRejectedValue({ response: { status: 429, data: { code: 'too_many_attempts', retry_after: 30 } } })
+    const handle = createSilentRefreshHandler(deps)
+
+    handle('/crm/projects')
+    await vi.waitFor(() => expect(deps.refresh).toHaveBeenCalledTimes(1))
+    await new Promise(r => setTimeout(r, 0))
+
+    expect(deps.onRefreshFailed).not.toHaveBeenCalled()
+    handle('/crm/projects')
+    await new Promise(r => setTimeout(r, 0))
+    expect(deps.refresh).toHaveBeenCalledTimes(1) // en espera: sin bucle de reintentos
+  })
+
+  it('pasada la espera del 429 vuelve a intentar el refresh', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    try {
+      deps.refresh = vi.fn().mockRejectedValueOnce({ response: { status: 429, data: { retry_after: 30 } } })
+        .mockResolvedValue({ accessToken: 'n', refreshToken: 'r' })
+      const handle = createSilentRefreshHandler(deps)
+      handle('/crm/projects')
+      await vi.waitFor(() => expect(deps.refresh).toHaveBeenCalledTimes(1))
+      await new Promise(r => setTimeout(r, 0))
+      vi.setSystemTime(Date.now() + 31_000)
+      handle('/crm/projects')
+      await vi.waitFor(() => expect(deps.refresh).toHaveBeenCalledTimes(2))
+      expect(deps.onRefreshFailed).not.toHaveBeenCalled()
+    } finally { vi.useRealTimers() }
+  })
 })

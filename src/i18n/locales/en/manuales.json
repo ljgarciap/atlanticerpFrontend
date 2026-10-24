@@ -1,0 +1,85 @@
+{
+  "title": "User manuals",
+  "subtitle": "PDF and video guides for each AtlanticERP module.",
+  "listLabel": "Manuals list",
+  "filters": {
+    "module": "Module",
+    "moduleAll": "All modules",
+    "type": "Type",
+    "typeAll": "All",
+    "typePdf": "PDF",
+    "typeVideo": "Video",
+    "search": "Search by name",
+    "clearSearch": "Clear search",
+    "clear": "Clear filters"
+  },
+  "modules": {
+    "crm": "CRM",
+    "ventasDiseno": "Sales & Design",
+    "compras": "Purchasing",
+    "bodega": "Warehouse",
+    "servicios": "Services",
+    "adminContab": "Administration & Accounting",
+    "gerencia": "Management"
+  },
+  "count_one": "{{count}} manual",
+  "count_other": "{{count}} manuals",
+  "type": { "pdf": "PDF", "video": "Video" },
+  "card": {
+    "view": "View",
+    "play": "Play",
+    "download": "Download",
+    "viewAria": "View {{name}}",
+    "playAria": "Play {{name}}",
+    "downloadAria": "Download {{name}}"
+  },
+  "empty": {
+    "module": "No manuals available for this module",
+    "search": "No manuals match your search",
+    "catalog": "No manuals published yet."
+  },
+  "loading": "Loading manuals...",
+  "error": {
+    "load": "Manuals could not be loaded.",
+    "open": "The manual could not be opened. Please try again."
+  },
+  "retry": "Retry",
+  "video": {
+    "preparing": "Preparing video...",
+    "error": "The video could not be played.",
+    "close": "Close"
+  },
+  "admin": {
+    "button": "Manage",
+    "panelLabel": "Manage manuals",
+    "upload": "Upload manual",
+    "selectFile": "Select file",
+    "dropHint": "Drag a file or select one",
+    "limits": "PDF up to {{pdf}} MB. MP4 or WebM video up to {{video}} MB.",
+    "module": "Module",
+    "modulePlaceholder": "Select a module",
+    "name": "Display name",
+    "errType": "Unsupported format. Use PDF, MP4 or WebM.",
+    "errSizePdf": "The PDF exceeds the {{max}} MB limit.",
+    "errSizeVideo": "The video exceeds the {{max}} MB limit.",
+    "preparing": "Preparing upload...",
+    "uploading": "Uploading... {{pct}}%",
+    "progress": "{{pct}}% · {{loaded}} of {{total}}",
+    "finalizing": "Finishing...",
+    "cancel": "Cancel",
+    "cancelled": "Upload cancelled.",
+    "uploadError": "The file could not be uploaded. You can retry.",
+    "uploadRejected": "The file was rejected and was not uploaded.",
+    "discard": "Discard",
+    "uploaded": "Manual uploaded",
+    "published": "Published manuals",
+    "publishedEmpty": "No manuals published yet.",
+    "delete": "Delete",
+    "deleteAria": "Delete {{name}}",
+    "deleteTitle": "Delete manual",
+    "deleteBody": "\"{{name}}\" will no longer be available to any user.",
+    "deleted": "Manual deleted",
+    "deleteError": "The manual could not be deleted.",
+    "configError": "Upload settings could not be loaded."
+  }
+}

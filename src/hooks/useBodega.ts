@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { bodegaApi, type BodegaInventoryListParams } from '@/api/bodegaApi'
 import type {
   AdjustmentRequestLineDraft, BodegaConfirmArrivalPayload, BodegaSettings, OrderBoardFilters,
@@ -8,7 +8,7 @@ import type {
   PickingSheetItemPayload, InventoryReviewDecisionPayload,
   BodegaReportPeriodKey,
   RegisterDeliveryPayload, RegisterSignedGuidePayload,
-  BodegaTeamMemberRole,
+  BodegaTeamMemberRole, ZonaLibreCatalogoParams,
 } from '@/types/bodega'
 
 // SCRUM-451→456 (REQ-381→386) — pantalla "Bodegas".
@@ -17,6 +17,17 @@ export function useWarehousesList() {
     queryKey:  ['bodega/warehouses'],
     queryFn:   () => bodegaApi.warehouses.list(),
     staleTime: 60_000,
+  })
+}
+
+/** SCRUM-990 — catálogo de Lafayette de solo consulta (Bodega > Zona Libre). `keepPreviousData`: al cambiar de página, filtro u
+ * orden se mantiene la tabla anterior (con opacidad) en vez de saltar a un esqueleto. Paginado del lado del servidor. */
+export function useZonaLibreCatalogo(params: ZonaLibreCatalogoParams, enabled = true) {
+  return useQuery({
+    queryKey:        ['bodega/zona-libre/productos', params],
+    queryFn:         () => bodegaApi.zonaLibre.productos(params),
+    placeholderData: keepPreviousData,
+    enabled,
   })
 }
 
@@ -207,6 +218,15 @@ export function useAssistantLoad() {
   })
 }
 
+/** SCRUM-854, rebote de Pre-QA — opciones (id+nombre) del filtro seller_ids en Pedidos, gateado
+ * por bodega.read (permiso real de esta pantalla), no ventas_diseno.read. */
+export function useOrderSellers() {
+  return useQuery({
+    queryKey: ['bodega/orders/sellers'],
+    queryFn:  () => bodegaApi.orders.sellers(),
+  })
+}
+
 /** REQ-332 — modal "Ver detalle". */
 export function useOrderDetail(id: number | null) {
   return useQuery({
@@ -261,6 +281,15 @@ export function useConsolidatedPicking(pickerId: number | null) {
 export function useOrderInvoiceStatus() {
   return useMutation({
     mutationFn: (orderId: number) => bodegaApi.orders.invoice(orderId),
+  })
+}
+
+/** SCRUM-832 — "Ver / Imprimir PDF" de la factura real desde Bodega, mismo patrón que
+ * `useDownloadInvoicePdf()` de Admin&Cont. */
+export function useDownloadOrderInvoicePdf() {
+  return useMutation({
+    mutationFn: ({ orderId, orderNumber }: { orderId: number; orderNumber: string }) =>
+      bodegaApi.orders.invoicePdf(orderId, orderNumber),
   })
 }
 
@@ -469,6 +498,14 @@ export function useBodegaHomeSummary(filters: { scope?: 'own' | 'team'; owner_id
   return useQuery({
     queryKey: ['bodega/home/summary', filters],
     queryFn:  () => bodegaApi.home.summary(filters),
+  })
+}
+
+/** SCRUM-908 — tarjeta "Aprobaciones Pendientes". Siempre personal, no se filtra por `scope`/`owner_id`. */
+export function useBodegaApprovalsPending() {
+  return useQuery({
+    queryKey: ['bodega/home/approvals-pending'],
+    queryFn:  () => bodegaApi.home.approvalsPending(),
   })
 }
 
@@ -801,7 +838,7 @@ export function useUploadReturnSignedDocument() {
   })
 }
 
-/** SCRUM-476 — "Ver formulario", GET con efecto lateral consumido on-demand (mismo criterio que
+/** SCRUM-476 — "Ver formulario", acción con efecto lateral (POST desde SCRUM-1180) consumida on-demand (mismo criterio que
  * `useOrderStatusDocument`). */
 export function useReturnFormUrl() {
   return useMutation({ mutationFn: (id: number) => bodegaApi.returns.formUrl(id) })
@@ -815,6 +852,12 @@ export function useReturnSignedDocumentUrl() {
 /** SCRUM-477 — "Ver guía de entrega original". */
 export function useReturnDeliveryGuideUrl() {
   return useMutation({ mutationFn: (id: number) => bodegaApi.returns.deliveryGuideUrl(id) })
+}
+
+/** SCRUM-865 punto 2 — "Ver nota de crédito" para una devolución ya finalizada (con
+ * `credit_note_id`). Devuelve el PDF como Blob; el componente lo abre en pestaña nueva. */
+export function useReturnCreditNotePdf() {
+  return useMutation({ mutationFn: (id: number) => bodegaApi.returns.creditNotePdf(id) })
 }
 
 /** SCRUM-479/480 — "Confirmar recepción física", suma de vuelta al inventario y pasa a
@@ -869,5 +912,27 @@ export function useBodegaInventorySummaryReport(period: BodegaReportPeriodKey) {
   return useQuery({
     queryKey: ['bodega/reports/inventory-summary', period],
     queryFn:  () => bodegaApi.reports.inventorySummary(period),
+  })
+}
+
+/** SCRUM-1196 — reglas de bodega para ventas (superadmin). */
+export function useWarehouseSaleRules(enabled = true) {
+  return useQuery({
+    queryKey: ['bodega/settings/warehouses'],
+    queryFn:  () => bodegaApi.warehouseRules.list(),
+    enabled,
+  })
+}
+
+export function useUpdateWarehouseSaleRule() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof bodegaApi.warehouseRules.update>[1] }) => bodegaApi.warehouseRules.update(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bodega/settings/warehouses'] })
+      // El Disponible y la hoja de picking dependen de estas reglas: nada cacheado debe seguir mostrando lo anterior.
+      qc.invalidateQueries({ queryKey: ['compras/inventory'] })
+      qc.invalidateQueries({ queryKey: ['bodega/orders'] })
+    },
   })
 }

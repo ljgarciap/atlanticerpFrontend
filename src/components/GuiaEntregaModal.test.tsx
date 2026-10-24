@@ -45,6 +45,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     direccion_entrega: null,
     cliente_master: 'Constructora Pacífico Holdings',
     subcliente: 'Constructora Pacífico',
+    observaciones: null,
     ...overrides,
   }
 }
@@ -58,6 +59,18 @@ beforeEach(() => {
 })
 
 describe('GuiaEntregaModal', () => {
+  /**
+   * SCRUM-930 (Pre-QA, CRÍTICO) — un 403 (rol sin acceso al endpoint, antes de que Admin&Contab
+   * tuviera el permiso) se veía idéntico a "Cargando..." para siempre porque no existía esta rama.
+   */
+  it('SCRUM-930 — un error de la query muestra el mensaje de error, no "Cargando..." para siempre', () => {
+    mockedUseOrderDetail.mockReturnValue({ data: undefined, isLoading: false, isError: true } as ReturnType<typeof useOrderDetail>)
+    render(<GuiaEntregaModal orderId={1} onClose={vi.fn()} />)
+
+    expect(screen.getByText('bodega:pedidos.guideModal.error')).toBeInTheDocument()
+    expect(screen.queryByText('common:labels.loading')).not.toBeInTheDocument()
+  })
+
   it('RN2 — antes de firmarse (no "entregado") la firma queda pendiente, aunque ya haya repartidor asignado', () => {
     mockedUseOrderDetail.mockReturnValue({ data: detail({ stage: 'despachado' }), isLoading: false } as ReturnType<typeof useOrderDetail>)
     render(<GuiaEntregaModal orderId={1} onClose={vi.fn()} />)
@@ -136,6 +149,31 @@ describe('GuiaEntregaModal', () => {
 
     expect(screen.getByText('6000-1234')).toBeInTheDocument()
     expect(screen.getByText('juan.perez@example.com')).toBeInTheDocument()
+  })
+
+  /**
+   * Rebote SCRUM-894 (Daniela, 2026-09-13) — el preview mostraba TODOS los items sin filtrar y
+   * caía a `qty_requested` cuando `qty_delivered` era 0, mismo bug ya corregido en
+   * `guia-entrega-pdf.blade.php` pero nunca en este componente (por eso modal y PDF descargado
+   * mostraban cosas distintas). Caso real: 1 producto con 10 unidades realmente entregadas en
+   * esta tarjeta y otro con 0 (sin stock) — el segundo no debe aparecer, y el primero debe
+   * mostrar su cantidad real (10), nunca la pedida originalmente.
+   */
+  it('RN — la tabla de artículos solo muestra lo realmente entregado en esta tarjeta, nunca qty_requested como fallback', () => {
+    mockedUseOrderDetail.mockReturnValue({
+      data: detail({
+        items: [
+          { id: 20, catalog_product_id: 1, reference: 'COLG-COC-602', factory_reference: null, description: 'Colgante cocina 602', location: 'A-1', qty_requested: 10, qty_reserved: 10, qty_picked: 10, qty_delivered: 10, shortage_reason: null },
+          { id: 21, catalog_product_id: 2, reference: 'BARRA-COC-601', factory_reference: null, description: 'Barra cocina 601', location: 'A-2', qty_requested: 10, qty_reserved: 0, qty_picked: 0, qty_delivered: 0, shortage_reason: 'sin_stock' },
+        ],
+      }),
+      isLoading: false,
+    } as ReturnType<typeof useOrderDetail>)
+    render(<GuiaEntregaModal orderId={1} onClose={vi.fn()} />)
+
+    expect(screen.getByText('COLG-COC-602')).toBeInTheDocument()
+    expect(screen.getByText('10')).toBeInTheDocument()
+    expect(screen.queryByText('BARRA-COC-601')).not.toBeInTheDocument()
   })
 
   it('muestra "no generada" cuando el pedido todavía no tiene una Guía de Entrega', () => {

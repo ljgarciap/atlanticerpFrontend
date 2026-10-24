@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -24,12 +25,16 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/api/authApi', () => ({ authApi: { logout: vi.fn() } }))
 vi.mock('@/api/settingsApi', () => ({
-  settingsApi: { getPreferences: vi.fn(), updatePreferences: vi.fn() },
+  settingsApi: {
+    getPreferences: vi.fn(), updatePreferences: vi.fn(),
+    // docs/specs/demo-mode.md — useDemoModeActive() (usado por el toggle personal del header)
+    // consulta esto también; sin el mock, la queryFn real llamaría a axios en el test.
+    getDemoModeStatus: vi.fn(),
+  },
 }))
 vi.mock('@/hooks/useTheme', () => ({ applyTheme: vi.fn() }))
 vi.mock('./AppLogo', () => ({ default: () => <div /> }))
 vi.mock('./LanguageSelector', () => ({ default: () => <div /> }))
-vi.mock('./RoleSwitcher', () => ({ default: () => <div /> }))
 vi.mock('./ChangePasswordModal', () => ({ default: () => <div /> }))
 vi.mock('./UserAvatar', () => ({ default: () => <div /> }))
 vi.mock('./EditProfileDrawer', () => ({ default: () => <div /> }))
@@ -58,7 +63,12 @@ function renderTopBar(moduleLabel: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockedSettingsApi.getPreferences.mockResolvedValue({ theme: 'light', language: 'es', session_timeout_min: 30 })
+  mockedSettingsApi.getPreferences.mockResolvedValue({
+    theme: 'light', language: 'es', session_timeout_min: 30, demo_mode_enabled: false,
+  })
+  // Default: gate global apagado -> el toggle de Modo Demo no debe aparecer salvo que un test lo
+  // encienda explícitamente (ver docs/specs/demo-mode.md, criterio "oculto por completo").
+  mockedSettingsApi.getDemoModeStatus.mockResolvedValue({ enabled: false })
   useAuthStore.setState({ user: baseUser() })
 })
 
@@ -82,5 +92,33 @@ describe('TopBar — badge de rol legible (SCRUM-58)', () => {
     useAuthStore.setState({ user: baseUser({ role: 'lider_compras' }) })
     renderTopBar('Compras')
     expect(screen.getByText('Líder de Compras')).toBeInTheDocument()
+  })
+})
+
+// docs/specs/demo-mode.md (F2) — el toggle personal debe estar oculto por completo (no
+// deshabilitado) cuando el gate global está apagado, y visible/funcional cuando está encendido.
+describe('TopBar — toggle personal de Modo Demo', () => {
+  it('no aparece si el gate global (system_settings.demo_mode_enabled) está apagado', async () => {
+    renderTopBar('Catálogo')
+    await waitFor(() => expect(mockedSettingsApi.getDemoModeStatus).toHaveBeenCalled())
+    expect(screen.queryByRole('switch', { name: /demoMode.toggleLabel|Modo Demo/i })).not.toBeInTheDocument()
+  })
+
+  it('aparece y llama updatePreferences al activarlo cuando el gate global está encendido', async () => {
+    mockedSettingsApi.getDemoModeStatus.mockResolvedValue({ enabled: true })
+    mockedSettingsApi.updatePreferences.mockResolvedValue({
+      theme: 'light', language: 'es', session_timeout_min: 30, demo_mode_enabled: true,
+    })
+
+    renderTopBar('Catálogo')
+
+    const toggle = await screen.findByRole('switch', { name: /demoMode.toggleLabel|Modo Demo/i })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+
+    await userEvent.click(toggle)
+
+    await waitFor(() => {
+      expect(mockedSettingsApi.updatePreferences).toHaveBeenCalledWith({ demo_mode_enabled: true })
+    })
   })
 })

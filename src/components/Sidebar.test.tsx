@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { useAuthStore } from '@/store/authStore'
 import { useUnsavedQuoteGuard } from '@/store/unsavedQuoteGuard'
@@ -21,11 +21,13 @@ const LABELS: Record<string, Record<string, string>> = {
     'nav.ordenesZonaLibre': 'Órdenes Zona Libre', 'nav.inventarioGeneral': 'Inventario general',
     'nav.devoluciones': 'Devoluciones',
     'nav.settings': 'Configuración', 'nav.security': 'Seguridad',
+    'nav.configuracionGlobal': 'Configuración global',
   },
   ventasDiseno: {
     'nav.module': 'Ventas & Diseño', 'nav.home': 'Inicio', 'nav.pipeline': 'Pipeline',
     'nav.clients': 'Clientes', 'nav.quotesList': 'Cotizaciones', 'nav.reports': 'Reportes',
-    'nav.auditLog': 'Historial', 'nav.pedidos': 'Pedidos',
+    'nav.auditLog': 'Historial', 'nav.pedidos': 'Pedidos', 'nav.cotizaya': 'CotizaYA',
+    'nav.statusPedidos': 'Status de Pedidos',
   },
   crm: {
     'nav.module': 'CRM', 'nav.dashboard': 'Dashboard CRM', 'nav.projectList': 'Lista de Proyectos',
@@ -43,6 +45,14 @@ const LABELS: Record<string, Record<string, string>> = {
   adminContab: {
     'nav.fiscal': 'Configuración Fiscal', 'nav.empresa': 'Datos de la Empresa',
     'nav.cuentasBancarias': 'Cuentas Bancarias', 'nav.facturacion': 'Facturación',
+    'nav.movimientosMenu': 'Movimientos', 'nav.cobros': 'Cobros', 'nav.tesoreriaMenu': 'Tesorería',
+    // SCRUM-882 — labels agregados para el test de gate por rol más abajo.
+    'nav.home': 'Inicio', 'nav.comisionesMenu': 'Comisiones', 'nav.comisionesInternas': 'Internas',
+    'nav.comisionesExternas': 'Externas', 'nav.reportes': 'Reportes',
+    // SCRUM-930 (F5).
+    'nav.estadoCuentaMenu': 'Estado de Cuenta',
+    // SCRUM-1002.
+    'nav.clientesFiscal': 'Datos fiscales de clientes',
   },
 }
 
@@ -64,6 +74,10 @@ function baseUser(overrides: Partial<UserInfo> = {}): UserInfo {
     role: 'designer', permissions: [], modules: {},
     ...overrides,
   }
+}
+
+function LocationProbe() {
+  return <span data-testid="location">{useLocation().pathname}</span>
 }
 
 function renderSidebar(initialPath = '/') {
@@ -107,8 +121,17 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
   // Hallazgo de Luis (2026-08-22) — "Admin. & Contab." tenía 5 batches de pantallas reales
   // construidas (Config Fiscal, Datos de la Empresa, Cuentas Bancarias, Facturación) pero el
   // sidebar seguía linkeando a un único placeholder "Próximamente" — ninguna las mostraba.
-  it('"Admin. & Contab." muestra las 4 pantallas reales, no un único link placeholder', () => {
-    useAuthStore.setState({ user: baseUser({ modules: { admin_contab: noModule({ view: true }) } }) })
+  //
+  // SCRUM-825 (2026-09-01) — actualizado tras la reorganización del menú: Facturación sigue
+  // siendo item plano de nivel 1, pero Cuentas Bancarias pasó a vivir dentro del dropdown
+  // "Tesorería" (necesita su propio click para expandirse), y Configuración Fiscal/Datos de la
+  // Empresa se movieron fuera de Admin&Cont, a la sección "Configuración" (RN6/RN7).
+  it('"Admin. & Contab." muestra las pantallas reales, no un único link placeholder', () => {
+    // SCRUM-882 — role explícito de la allow-list de acceso completo (ver
+    // ADMIN_CONTAB_FULL_ACCESS_ROLES en Sidebar.tsx): este test verifica la estructura del menú
+    // para un actor con acceso pleno, no el gate por rol en sí (eso lo cubre el describe de
+    // SCRUM-882 más abajo) — el role placeholder de baseUser ('designer') ya no alcanza sin él.
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', modules: { admin_contab: noModule({ view: true }) } }) })
     renderSidebar()
 
     // Cada sección es un accordion colapsado por defecto (SCRUM-58) — hay que abrirla para ver
@@ -117,10 +140,109 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     // alternaría abierto→cerrado, así que se clickea solo la primera.
     fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
 
+    expect(screen.getAllByText('Facturación').length).toBeGreaterThan(0)
+    // SCRUM-930 (F5) — "Estado de Cuenta" entre Inicio y Facturación, mismo nivel (item plano,
+    // no dentro de ningún dropdown).
+    expect(screen.getAllByText('Estado de Cuenta').length).toBeGreaterThan(0)
+
+    // "Tesorería" es un NavDropdown anidado dentro de la sección — necesita su propio click.
+    fireEvent.click(screen.getAllByText('Tesorería')[0])
+    expect(screen.getAllByText('Cuentas Bancarias').length).toBeGreaterThan(0)
+
+    // Configuración Fiscal/Datos de la Empresa viven ahora en la sección "Configuración"
+    // (SCRUM-825 RN6/RN7, t('nav.settings') del namespace común — no confundir con el "Ajustes"
+    // de Servicios, otro namespace), no dentro de Admin&Cont — es su propia sección-accordion
+    // (mismo mecanismo que "Admin. & Contab." arriba), necesita su propio click para expandirse.
+    fireEvent.click(screen.getAllByText('Configuración')[0])
     expect(screen.getAllByText('Configuración Fiscal').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Datos de la Empresa').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Cuentas Bancarias').length).toBeGreaterThan(0)
+  })
+
+  // SCRUM-825 RN2/RN5 — Cobros existía como pantalla (CobrosPage) sin ningún link de sidebar.
+  it('"Movimientos" agrupa Cobros y Notas Crédito y Devoluciones', () => {
+    // SCRUM-882 — mismo motivo que el test anterior: role explícito de la allow-list.
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', modules: { admin_contab: noModule({ view: true }) } }) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+    fireEvent.click(screen.getAllByText('Movimientos')[0])
+
+    expect(screen.getAllByText('Cobros').length).toBeGreaterThan(0)
+  })
+
+  // SCRUM-1139 — `lider_operaciones` (Mariam) recibe el módulo por override de visibilidad y espeja a la asistente.
+  it.each(['lider_operaciones', 'asistente_administrativa'])('%s ve las secciones completas de Admin. & Contab.', role => {
+    useAuthStore.setState({ user: baseUser({ role, modules: { admin_contab: noModule({ view: true }) } }) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+
     expect(screen.getAllByText('Facturación').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Estado de Cuenta').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Movimientos').length).toBeGreaterThan(0)
+  })
+
+  // SCRUM-882 — vendedor_disenador tiene admin_contab.view=true (lo necesita para sus propias
+  // Comisiones Internas) pero el backend le devuelve datos vacíos en el resto de las pantallas del
+  // módulo; el síntoma reportado era que el sidebar igual las mostraba (pantallas vacías en vez de
+  // ítems ocultos). Ver ADMIN_CONTAB_FULL_ACCESS_ROLES en Sidebar.tsx.
+  it('vendedor_disenador solo ve "Comisiones → Internas" dentro de Admin. & Contab., el resto queda oculto', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { admin_contab: noModule({ view: true }) } }) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+
+    expect(screen.queryByText('Inicio')).not.toBeInTheDocument()
+    expect(screen.queryByText('Facturación')).not.toBeInTheDocument()
+    expect(screen.queryByText('Estado de Cuenta')).not.toBeInTheDocument()
+    expect(screen.queryByText('Movimientos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tesorería')).not.toBeInTheDocument()
+    expect(screen.queryByText('Reportes')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByText('Comisiones')[0])
+    expect(screen.getAllByText('Internas').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Externas')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1002 — Felix/Mark editan los datos fiscales de un cliente desde Admin&Cont (no tienen la pantalla Clientes).
+  describe('"Datos fiscales de clientes" (SCRUM-1002)', () => {
+    function abrirConfiguracion(user: Partial<UserInfo>) {
+      useAuthStore.setState({ user: baseUser({ modules: { admin_contab: noModule({ view: true }) }, ...user }) })
+      renderSidebar()
+      fireEvent.click(screen.getAllByText('Configuración')[0])
+    }
+
+    it('aparece para quien tiene acceso completo a Admin&Cont y el permiso angosto de edición', () => {
+      abrirConfiguracion({ role: 'lider_admin_contab', permissions: ['ventas_diseno.edit.client_tax_data'] })
+      expect(screen.getAllByText('Datos fiscales de clientes').length).toBeGreaterThan(0)
+    })
+
+    it('no aparece sin el permiso, aunque tenga acceso completo a Admin&Cont', () => {
+      abrirConfiguracion({ role: 'lider_admin_contab', permissions: [] })
+      expect(screen.queryByText('Datos fiscales de clientes')).not.toBeInTheDocument()
+    })
+
+    it('no aparece para un vendedor/diseñador con ventas_diseno.edit: él ya tiene el botón en Clientes y la ruta le está vedada', () => {
+      // SCRUM-1012: ni siquiera existe el grupo Configuración para él (sin Empresa/Fiscal/Seguridad/Global).
+      useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { admin_contab: noModule({ view: true }) }, permissions: ['ventas_diseno.edit'] }) })
+      renderSidebar()
+      expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
+      expect(screen.queryByText('Datos fiscales de clientes')).not.toBeInTheDocument()
+    })
+  })
+
+  // SCRUM-930 (F5) — el ítem no navega dentro del AppShell (no hay ruta de sidebar para Estado de
+  // Cuenta): abre el mismo popup que ya usa el botón de Facturación, sin cliente preseleccionado,
+  // para que "Cerrar Ventana" (window.close(), ver EstadoCuentaPage.tsx) siga funcionando.
+  it('"Estado de Cuenta" abre el popup existente (window.open), no navega en la SPA', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', modules: { admin_contab: noModule({ view: true }) } }) })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+    fireEvent.click(screen.getAllByText('Estado de Cuenta')[0])
+
+    expect(openSpy).toHaveBeenCalledWith('/admin-contab/facturacion/estado-cuenta', '_blank')
   })
 })
 
@@ -477,12 +599,92 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
     expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
   })
 
-  it('sí muestra "Pedidos" para un vendedor_disenador (ve solo lo propio, ver REQ-629 — Batch F)', () => {
+  // SCRUM-1119 — Pedidos muestra márgenes, montos y estado de compra: solo Compras y Gerencia.
+  it('NO muestra "Pedidos" para un vendedor_disenador (SCRUM-1119)', () => {
     useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
+    expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1159 — quien no ve «Pedidos» (márgenes y montos) sí tiene «Status de Pedidos»: consulta de solo lectura de sus propios pedidos.
+  it('vendedor_disenador ve «Status de Pedidos» y al hacer clic navega a /bodega/pedidos/status (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Sidebar isOpen={false} onClose={vi.fn()} collapsed={false} onToggleCollapse={vi.fn()} />
+        <LocationProbe />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
+    expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
+    fireEvent.click(screen.getAllByText('Status de Pedidos')[0])
+    expect(screen.getByTestId('location')).toHaveTextContent('/bodega/pedidos/status')
+  })
+
+  // SCRUM-1159 (rebote) — Daniela busca la consulta de pedidos bajo Bodega: el vendedor la ve también ahí (sin abrirle «Pedidos» del tablero).
+  it('vendedor_disenador ve «Status de Pedidos» también bajo Bodega y no ve «Pedidos» del tablero (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Sidebar isOpen={false} onClose={vi.fn()} collapsed={false} onToggleCollapse={vi.fn()} />
+        <LocationProbe />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getAllByText('Bodega')[0])
+    expect(screen.queryByText('nav.pedidos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Inicio Bodega')).not.toBeInTheDocument()
+    // Una entrada en Ventas & Diseño y otra bajo Bodega; la de Bodega es la última del menú.
+    const entradas = screen.getAllByText('Status de Pedidos')
+    expect(entradas).toHaveLength(2)
+    fireEvent.click(entradas[1])
+    expect(screen.getByTestId('location')).toHaveTextContent('/bodega/pedidos/status')
+  })
+
+  it('quien tiene Bodega completo NO recibe «Status de Pedidos» duplicado bajo Bodega (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_bodega', permissions: ['bodega.read'], modules: { bodega: noModule({ view: true }), ventas_diseno: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Bodega')[0])
+    expect(screen.getAllByText('nav.pedidos').length).toBeGreaterThan(0)
+    // Bajo Bodega ya tiene el módulo completo: nunca más de una entrada (a lo sumo la de Ventas & Diseño).
+    expect(screen.queryAllByText('Status de Pedidos').length).toBeLessThan(2)
+  })
+
+  it('superadmin NO ve «Status de Pedidos» en el menú: ya tiene «Pedidos», que enlaza a esa pantalla (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'superadmin', permissions: ['superadmin.all'], modules: { ventas_diseno: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
+    expect(screen.queryByText('Status de Pedidos')).not.toBeInTheDocument()
+  })
+
+  it.each(['lider_operaciones', 'lider_bodega', 'lider_servicios'])('NO muestra "Pedidos" para %s (SCRUM-1119)', role => {
+    useAuthStore.setState({ user: baseUser({ role, modules: { ventas_diseno: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
+    expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
+  })
+
+  it('superadmin ve "Pedidos" en Ventas & Diseño (SCRUM-1119)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'superadmin', permissions: ['superadmin.all'], modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
     expect(screen.getAllByText('Pedidos').length).toBeGreaterThan(0)
   })
+
+  it('lider_compras ve "Pedidos de venta" en su sección Compras, aunque no tenga Ventas & Diseño (SCRUM-1119)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_compras', permissions: [], modules: { compras: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Compras · Inventario')[0])
+    expect(screen.getAllByText('nav.salesOrders').length).toBeGreaterThan(0)
+  })
+
+  it('un usuario de Compras que no es lider_compras no ve "Pedidos de venta" (SCRUM-1119)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'asistente_compras', permissions: ['compras.read'], modules: { compras: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Compras · Inventario')[0])
+    expect(screen.queryByText('nav.salesOrders')).not.toBeInTheDocument()
+  })
+
 })
 
 // SCRUM-729 — regresión real reportada por Daniela: "Nueva Orden" (/compras/ordenes/nueva)
@@ -492,7 +694,8 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
 // promovidos a e2e/) para que esta regresión no vuelva a colarse en silencio.
 describe('Sidebar — menú lateral de Compras no resalta dos ítems a la vez (SCRUM-729)', () => {
   function comprasUser() {
-    return baseUser({ modules: { compras: noModule({ view: true }) } })
+    // SCRUM-1157 — un usuario real de Compras trae compras.read/.write en el JWT (el menú filtra por el guard de cada ruta).
+    return baseUser({ permissions: ['compras.read', 'compras.write'], modules: { compras: noModule({ view: true }) } })
   }
 
   it('en /compras/ordenes/nueva resalta únicamente "Nueva Orden", no "Ver Órdenes"', () => {
@@ -527,8 +730,8 @@ describe('Sidebar — Configuración / Seguridad (SCRUM-711)', () => {
     expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
   })
 
-  it('muestra Configuración > Seguridad para un usuario con permiso security.users', () => {
-    useAuthStore.setState({ user: baseUser({ permissions: ['security.users'] }) })
+  it('muestra Configuración > Seguridad para Gerencia (management) con permiso security.users', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'management', permissions: ['security.users'] }) })
     renderSidebar()
     expect(screen.getAllByText('Configuración').length).toBeGreaterThan(0)
     // SCRUM-711 3ra vuelta — el grupo nace colapsado, hay que abrirlo para ver "Seguridad".
@@ -550,11 +753,89 @@ describe('Sidebar — Configuración / Seguridad (SCRUM-711)', () => {
   // por modules.view — tiene que chequear menuVisibility directamente.
   it('con permiso security.users pero configuracion.root oculto por UAT, no muestra Configuración', () => {
     useAuthStore.setState({ user: baseUser({
+      role: 'management',
       permissions: ['security.users'],
       menuVisibility: { configuracion: { root: false } },
     }) })
     renderSidebar()
     expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
+  })
+})
+
+// SCRUM-1012 — Configuración (grupo del menú principal) exclusiva de Gerencia (management) +
+// superadmin; Admin&Cont conserva solo sus 3 ítems (Empresa, Fiscal, Datos fiscales de clientes).
+describe('Sidebar — Configuración exclusiva de Gerencia (SCRUM-1012)', () => {
+  it.each(['management', 'superadmin'] as const)('%s ve Configuración > Seguridad', (role) => {
+    useAuthStore.setState({ user: baseUser({ role, permissions: ['security.users', 'security.levels'] }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Configuración')[0])
+    expect(screen.getAllByText('Seguridad').length).toBeGreaterThan(0)
+  })
+
+  it.each(['vendedor_disenador', 'lider_compras', 'lider_bodega', 'lider_servicios', 'tecnico_servicios'])(
+    '%s NO ve el grupo Configuración ni Seguridad aunque tenga security.users/levels por permiso individual',
+    (role) => {
+      useAuthStore.setState({ user: baseUser({ role, permissions: ['security.users', 'security.levels'] }) })
+      renderSidebar()
+      expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
+      expect(screen.queryByText('Seguridad')).not.toBeInTheDocument()
+    },
+  )
+
+  // Pre-QA 1012: Vendedor/Diseñador tienen admin_contab.view por Comisiones, y eso les mostraba Empresa/Fiscal.
+  it.each(['vendedor_disenador'])('%s con admin_contab.view (Comisiones) NO ve Empresa, Fiscal ni un grupo Configuración vacío', (role) => {
+    useAuthStore.setState({ user: baseUser({
+      role,
+      modules: { admin_contab: noModule({ view: true }) },
+      permissions: ['ventas_diseno.edit'],
+    }) })
+    renderSidebar()
+    expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
+    expect(screen.queryByText('Datos de la Empresa')).not.toBeInTheDocument()
+    expect(screen.queryByText('Configuración Fiscal')).not.toBeInTheDocument()
+    expect(screen.queryByText('Datos fiscales de clientes')).not.toBeInTheDocument()
+  })
+
+  it('lider_admin_contab ve los 3 ítems de Admin&Cont en Configuración y NO ve Seguridad', () => {
+    useAuthStore.setState({ user: baseUser({
+      role: 'lider_admin_contab',
+      modules: { admin_contab: noModule({ view: true }) },
+      permissions: ['security.users', 'ventas_diseno.edit'],
+    }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Configuración')[0])
+    expect(screen.getAllByText('Datos de la Empresa').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Configuración Fiscal').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Datos fiscales de clientes').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Seguridad')).not.toBeInTheDocument()
+  })
+})
+
+// SCRUM-944/945 — vista consolidada de valores paramétricos de negocio, último ítem del grupo
+// "Configuración", gate estricto de superadmin.all (mismo criterio que Auditoría de uso de IA /
+// Configuración de Bodega, ver canSeeGlobalSettings en Sidebar.tsx).
+describe('Sidebar — Configuración global (SCRUM-944/945)', () => {
+  it('un superadmin ve "Configuración global" dentro de Configuración', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'superadmin', permissions: ['superadmin.all'] }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Configuración')[0])
+    expect(screen.getAllByText('Configuración global').length).toBeGreaterThan(0)
+  })
+
+  it('un usuario con security.users pero sin superadmin.all NO ve "Configuración global"', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'management', permissions: ['security.users'] }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Configuración')[0])
+    expect(screen.queryAllByText('Configuración global')).toHaveLength(0)
+  })
+
+  it('un usuario de Admin&Cont sin superadmin.all NO ve "Configuración global"', () => {
+    useAuthStore.setState({ user: baseUser({
+      role: 'lider_admin_contab', modules: { admin_contab: noModule({ view: true }) }, permissions: [],
+    }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Configuración')[0])
+    expect(screen.queryAllByText('Configuración global')).toHaveLength(0)
   })
 })
 
@@ -625,7 +906,7 @@ describe('Sidebar — UAT oculta un módulo de negocio pese al permiso plano por
 
   it('con acceso a Ventas & Diseño y compras SIN ocultar por UAT, sigue viendo Inventario en modo restringido (REQ-168, no regresiona)', () => {
     useAuthStore.setState({ user: baseUser({
-      role: 'management',
+      role: 'management', permissions: ['ventas_diseno.read'],
       modules: { ventas_diseno: noModule({ view: true }), compras: noModule({ view: false }) },
     }) })
     renderSidebar()
@@ -751,3 +1032,372 @@ describe('Sidebar — override de visibilidad de ítems de menú por usuario (SC
     expect(screen.getAllByText('Bodegas').length).toBeGreaterThan(0)
   })
 })
+
+// SCRUM-1157 — Mariam (lider_operaciones): `modules.compras.view` true pero solo permisos de consulta (compras.limited.view +
+// compras.sustitutos.manage, sin compras.read/.write). El menú no debe listar pantallas cuya ruta la redirige a inicio.
+describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157)', () => {
+  const visible = (text: string) => screen.queryAllByText(text).length > 0
+
+  const openCompras = () => {
+    fireEvent.click(screen.getAllByText('Compras · Inventario')[0])
+    // Se abren los desplegables para que la ausencia de un hijo sea por permiso, no por colapso.
+    for (const menu of ['nav.ordersMenu', 'nav.catalogStockMenu', 'nav.paymentsMenu']) {
+      const el = screen.queryAllByText(menu)[0]
+      if (el) fireEvent.click(el)
+    }
+  }
+
+  it('lider_operaciones (consulta + sustitutos) ve solo Órdenes, Logística, Inventario, Ingresos y Sustitutos', () => {
+    useAuthStore.setState({ user: baseUser({
+      role: 'lider_operaciones',
+      permissions: ['compras.view', 'compras.limited.view', 'compras.sustitutos.manage', 'ventas_diseno.read'],
+      modules: { compras: noModule({ view: true }) },
+    }) })
+    renderSidebar()
+    openCompras()
+
+    for (const ok of ['nav.orders', 'nav.logistics', 'Inventario', 'nav.goodsReceipts', 'nav.replacements']) {
+      expect(visible(ok), ok).toBe(true)
+    }
+    for (const fantasma of ['nav.newOrder', 'nav.providers', 'nav.claims', 'nav.reports', 'nav.payments', 'nav.agencies', 'nav.paymentsMenu']) {
+      expect(visible(fantasma), fantasma).toBe(false)
+    }
+  })
+
+  // Pre-QA de SCRUM-1157 (C-1): Mariam tiene el módulo Compras en solo lectura por persona (`modules.compras.view=false`) y solo permisos de
+  // consulta. Su aterrizaje /compras/ordenes y sus pantallas de consulta deben estar en el menú.
+  const mariam = (extra: string[] = []) => baseUser({
+    role: 'lider_operaciones',
+    permissions: ['compras.limited.view', 'compras.sustitutos.manage', 'ventas_diseno.read', 'admin_contab.view', ...extra],
+    modules: { compras: noModule({ view: false }), admin_contab: noModule({ view: true }), ventas_diseno: noModule({ view: true }) },
+  })
+  const count = (text: string) => screen.queryAllByText(text).length
+
+  it('con compras.limited.view y el módulo en solo lectura ve Ver Órdenes, Logística, Inventario, Ingresos y Sustitutos, y nada más de Compras', () => {
+    useAuthStore.setState({ user: mariam() })
+    renderSidebar()
+    openCompras()
+
+    for (const ok of ['nav.orders', 'nav.logistics', 'Inventario', 'nav.goodsReceipts', 'nav.replacements']) {
+      expect(visible(ok), ok).toBe(true)
+    }
+    for (const no of ['nav.newOrder', 'nav.providers', 'nav.claims', 'nav.reports', 'nav.payments', 'nav.agencies', 'nav.paymentsMenu']) {
+      expect(visible(no), no).toBe(false)
+    }
+  })
+
+  it('sin compras.sustitutos.manage no ve Comparación de Referencias (su ruta lo rebotaría)', () => {
+    useAuthStore.setState({ user: baseUser({
+      role: 'lider_operaciones', permissions: ['compras.limited.view'], modules: { compras: noModule({ view: false }) },
+    }) })
+    renderSidebar()
+    openCompras()
+
+    expect(visible('nav.orders')).toBe(true)
+    expect(visible('nav.replacements')).toBe(false)
+  })
+
+  it('no duplica Inventario, Sustitutos ni Órdenes (los links sueltos de Ventas & Diseño y Logística ceden al menú de consulta)', () => {
+    useAuthStore.setState({ user: mariam(['compras.logistica.view']) })
+    renderSidebar()
+    openCompras()
+
+    // El menú se pinta dos veces (drawer móvil y escritorio): cada ítem aparece exactamente una vez por pintado.
+    const veces = count('nav.ordersMenu')
+    expect(veces).toBeGreaterThan(0)
+    for (const label of ['Inventario', 'nav.replacements', 'nav.logistics', 'nav.orders', 'nav.catalogStockMenu']) {
+      expect(count(label), label).toBe(veces)
+    }
+  })
+
+  it('sin compras.limited.view y sin el módulo no aparece ningún menú de Compras de consulta', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_operaciones', permissions: ['admin_contab.view'], modules: { admin_contab: noModule({ view: true }) } }) })
+    renderSidebar()
+
+    expect(visible('Compras · Inventario')).toBe(false)
+  })
+
+  it('un usuario con compras.read ve el menú completo de Compras (sin regresión)', () => {
+    useAuthStore.setState({ user: baseUser({
+      role: 'lider_compras', permissions: ['compras.read', 'compras.write'],
+      modules: { compras: noModule({ view: true }) },
+    }) })
+    renderSidebar()
+    openCompras()
+
+    for (const ok of ['nav.orders', 'nav.newOrder', 'nav.logistics', 'nav.providers', 'nav.claims', 'nav.reports', 'nav.payments', 'nav.agencies', 'nav.goodsReceipts', 'nav.replacements']) {
+      expect(visible(ok), ok).toBe(true)
+    }
+  })
+})
+
+// SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Mark (403 para el resto del roster de Admin&Cont, Félix y
+// Mariam incluidos): el menú solo las ofrece al aprobador Mark (flag `mark_approver`) y a superadmin.
+describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)', () => {
+  const adminUser = (role: string, mark: boolean | undefined, permissions: string[] = []) => baseUser({
+    role, permissions,
+    modules: { admin_contab: noModule({ view: true }) },
+    flags: { approve_large_amounts: false, manage_users: false, ...(mark === undefined ? {} : { mark_approver: mark }) },
+  })
+  const abrirConfiguracion = () => { const c = screen.queryAllByText('Configuración')[0]; if (c) fireEvent.click(c) }
+  const visible = (text: string) => screen.queryAllByText(text).length > 0
+
+  it.each(['lider_operaciones', 'lider_admin_contab'])('%s que no es el aprobador Mark NO ve Empresa ni Fiscal', role => {
+    useAuthStore.setState({ user: adminUser(role, false) })
+    renderSidebar()
+    abrirConfiguracion()
+    expect(visible('Datos de la Empresa')).toBe(false)
+    expect(visible('Configuración Fiscal')).toBe(false)
+  })
+
+  it('el aprobador Mark (flag true) ve Empresa y Fiscal', () => {
+    useAuthStore.setState({ user: adminUser('management', true) })
+    renderSidebar()
+    abrirConfiguracion()
+    expect(visible('Datos de la Empresa')).toBe(true)
+    expect(visible('Configuración Fiscal')).toBe(true)
+  })
+
+  it('superadmin las ve aunque el flag sea false (el backend lo deja pasar por superadmin.all)', () => {
+    useAuthStore.setState({ user: adminUser('superadmin', false, ['superadmin.all']) })
+    renderSidebar()
+    abrirConfiguracion()
+    expect(visible('Datos de la Empresa')).toBe(true)
+    expect(visible('Configuración Fiscal')).toBe(true)
+  })
+
+  it('una sesión abierta antes del cambio (sin el flag) conserva el menú hasta renovarla', () => {
+    useAuthStore.setState({ user: adminUser('management', undefined) })
+    renderSidebar()
+    abrirConfiguracion()
+    expect(visible('Datos de la Empresa')).toBe(true)
+    expect(visible('Configuración Fiscal')).toBe(true)
+  })
+
+  it('lo demás de Administración no cambia para quien no es Mark (Facturación sigue visible)', () => {
+    useAuthStore.setState({ user: adminUser('lider_operaciones', false) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+    expect(visible('Facturación')).toBe(true)
+  })
+})
+
+// SCRUM-1013 (rebote de Daniela, 2026-10-02) / SCRUM-1021 — el vendedor no tiene los módulos Compras ni
+// Bodega; solo dos permisos angostos de consulta. Su menú: Inventario + Comparación de Referencias
+// (como antes de 1013) + Órdenes → Logística y Envío, y Bodega → Bodegas. Nunca el menú completo.
+describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 rebote, SCRUM-1021)', () => {
+  const vendedor = (permissions: string[]) => baseUser({
+    role: 'vendedor_disenador', permissions: ['ventas_diseno.read', 'ventas_diseno.edit', ...permissions],
+    modules: { ventas_diseno: noModule({ view: true }) },
+  })
+  // El Sidebar renderiza el menú dos veces (drawer móvil + escritorio): se consulta por "alguna ocurrencia".
+  const visible = (text: string) => screen.queryAllByText(text).length > 0
+
+  it('con compras.logistica.view ve Inventario, Comparación de Referencias y Órdenes → Logística, y nada más de Compras', () => {
+    useAuthStore.setState({ user: vendedor(['compras.logistica.view']) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Compras · Inventario')[0])
+    expect(visible('Inventario')).toBe(true)
+    expect(visible('nav.replacements')).toBe(true)
+    fireEvent.click(screen.getAllByText('nav.ordersMenu')[0])
+    expect(visible('nav.logistics')).toBe(true)
+
+    for (const oculto of ['nav.home', 'nav.providers', 'nav.reports', 'nav.claims', 'nav.newOrder', 'nav.orders', 'nav.goodsReceipts', 'nav.payments', 'nav.agencies']) {
+      expect(visible(oculto), oculto).toBe(false)
+    }
+  })
+
+  it('sin compras.logistica.view no aparece Órdenes ni Logística', () => {
+    useAuthStore.setState({ user: vendedor([]) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Compras · Inventario')[0])
+    expect(visible('nav.ordersMenu')).toBe(false)
+    expect(visible('nav.logistics')).toBe(false)
+    expect(visible('Inventario')).toBe(true)
+  })
+
+  it('con bodega.warehouses.view ve solo Bodega → Bodegas', () => {
+    useAuthStore.setState({ user: vendedor(['bodega.warehouses.view']) })
+    renderSidebar()
+
+    expect(visible('Bodega')).toBe(true)
+    fireEvent.click(screen.getAllByText('Bodega')[0])
+    expect(visible('Bodegas')).toBe(true)
+    for (const oculto of ['Inicio Bodega', 'nav.pedidos', 'Movimientos', 'Ver inventario', 'Devoluciones']) {
+      expect(visible(oculto), oculto).toBe(false)
+    }
+  })
+
+  it('sin bodega.warehouses.view no hay Bodega → Bodegas (SCRUM-1159: solo «Status de Pedidos» bajo Bodega)', () => {
+    useAuthStore.setState({ user: vendedor([]) })
+    renderSidebar()
+
+    expect(visible('Bodegas')).toBe(false)
+    fireEvent.click(screen.getAllByText('Bodega')[0])
+    for (const oculto of ['Inicio Bodega', 'nav.pedidos', 'Movimientos', 'Ver inventario', 'Devoluciones']) {
+      expect(visible(oculto), oculto).toBe(false)
+    }
+  })
+
+  it('un usuario con bodega.read sigue viendo el menú completo de Bodega (no cambia para Bodega)', () => {
+    useAuthStore.setState({ user: baseUser({ permissions: ['bodega.read'], modules: { bodega: noModule({ view: true }) } }) })
+    renderSidebar()
+
+    fireEvent.click(screen.getAllByText('Bodega')[0])
+    expect(visible('Inicio Bodega')).toBe(true)
+    expect(visible('Bodegas')).toBe(true)
+    expect(visible('Movimientos')).toBe(true)
+  })
+})
+
+// SCRUM-1120 — CotizaYA: ítem de menú inmediatamente después de Cotizaciones, dentro de Ventas & Diseño.
+describe('Sidebar — CotizaYA (SCRUM-1120)', () => {
+  it('aparece en Ventas & Diseño justo después de Cotizaciones', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
+
+    const labels = screen.getAllByRole('button').map(b => b.textContent?.trim())
+    const quotes = labels.indexOf('Cotizaciones')
+    expect(quotes).toBeGreaterThan(-1)
+    expect(labels[quotes + 1]).toBe('CotizaYA')
+  })
+
+  it('no aparece para quien no tiene Ventas & Diseño', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_compras', permissions: [], modules: { compras: noModule({ view: true }) } }) })
+    renderSidebar()
+    expect(screen.queryByText('CotizaYA')).not.toBeInTheDocument()
+  })
+})
+
+describe('Sidebar — Félix: Pipeline solo lectura (SCRUM-1128)', () => {
+  it('con ventas_diseno.pipeline.read_all ve únicamente el ítem Pipeline de CRM, nada más del módulo', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('CRM')[0])
+    expect(screen.getAllByText('Pipeline').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Clientes')).not.toBeInTheDocument()
+    expect(screen.queryByText('Lista de Proyectos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Cotizaciones')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ventas & Diseño')).not.toBeInTheDocument()
+  })
+
+  // SCRUM-1139 — Félix edita el Pipeline con `pipeline.edit`, pero el Sidebar sigue mostrándole solo ese ítem.
+  it('con read_all + pipeline.edit ve únicamente el ítem Pipeline de CRM, sin ítems de otros módulos', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} }) })
+    renderSidebar()
+    fireEvent.click(screen.getAllByText('CRM')[0])
+    expect(screen.getAllByText('Pipeline').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Clientes')).not.toBeInTheDocument()
+    expect(screen.queryByText('Lista de Proyectos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Cotizaciones')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ventas & Diseño')).not.toBeInTheDocument()
+  })
+
+  it('solo con pipeline.edit (sin read_all ni read) no ve Pipeline', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.edit'], modules: {} }) })
+    renderSidebar()
+    expect(screen.queryByText('Pipeline')).not.toBeInTheDocument()
+  })
+
+  it('sin ese permiso ni ventas_diseno.read no ve Pipeline', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: [], modules: {} }) })
+    renderSidebar()
+    expect(screen.queryByText('Pipeline')).not.toBeInTheDocument()
+  })
+})
+
+// SCRUM-1168 — con el concepto nuevo de cobros (flag `cobros_v2` del login) el menú Movimientos ofrece «Compensaciones» y deja de ofrecer
+// «Registrar abono» (el dinero que entra sin factura ahora es un cobro). Sin el flag, todo sigue como siempre.
+describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1168)', () => {
+  const felix = (cobrosV2: boolean | undefined) => baseUser({
+    role: 'lider_admin_contab',
+    modules: { admin_contab: noModule({ view: true }) },
+    flags: { approve_large_amounts: false, manage_users: false, ...(cobrosV2 === undefined ? {} : { cobros_v2: cobrosV2 }) },
+  })
+  const abrirMovimientos = () => {
+    fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
+    fireEvent.click(screen.getAllByText('Movimientos')[0])
+  }
+  const visible = (text: string) => screen.queryAllByText(text).length > 0
+
+  it('con cobros_v2 ve «Compensaciones» y no «Registrar abono»', () => {
+    useAuthStore.setState({ user: felix(true) })
+    renderSidebar()
+    abrirMovimientos()
+    expect(visible('nav.compensaciones')).toBe(true)
+    expect(visible('nav.registrarAbono')).toBe(false)
+    expect(visible('nav.saldoFavor')).toBe(false)   // F5 — el saldo a favor se usa desde Compensaciones
+    expect(visible('Cobros')).toBe(true)
+  })
+
+  it.each([false, undefined])('sin el concepto nuevo (flag %s) ve «Registrar abono» y no «Compensaciones»', flag => {
+    useAuthStore.setState({ user: felix(flag) })
+    renderSidebar()
+    abrirMovimientos()
+    expect(visible('nav.registrarAbono')).toBe(true)
+    expect(visible('nav.saldoFavor')).toBe(true)
+    expect(visible('nav.compensaciones')).toBe(false)
+  })
+})
+
+// SCRUM-1181 — el Sidebar llamaba a `usePermission` dentro de `||`: según el resultado de la primera, la segunda NO se ejecutaba y cambiaba la
+// cantidad de hooks entre renders. Con la misma instancia montada (entrar o salir de «Ver como usuario» cambia la identidad en sitio) React
+// lanzaba «Rendered more/fewer hooks» y la pantalla quedaba en blanco.
+describe('Sidebar — cambio de identidad en sitio sin romper las reglas de hooks (SCRUM-1181)', () => {
+  const HOOKS_ERROR = /order of Hooks|Rendered (more|fewer) hooks/i
+
+  // Con la primera operación de cada `||` en true (acorta) frente a todas en false (evalúa la segunda): dos conteos de hooks distintos.
+  const withShortCircuitPermissions = () => baseUser({
+    role: 'management', permissions: ['security.users', 'ventas_diseno.edit.client_tax_data'],
+    modules: { ventas_diseno: noModule({ view: true }), admin_contab: noModule({ view: true }) },
+  })
+  const withoutPermissions = () => baseUser({ id: 2, role: 'designer', permissions: [], modules: { ventas_diseno: noModule({ view: true }) } })
+
+  function expectNoHooksError(spy: { mock: { calls: unknown[][] } }) {
+    const logged = spy.mock.calls.map(c => String(c[0]) + ' ' + String(c[1] ?? '')).filter(m => HOOKS_ERROR.test(m))
+    expect(logged).toEqual([])
+  }
+
+  it('pasar de permisos que acortan a permisos vacíos en la misma instancia no lanza ni registra error de hooks', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    useAuthStore.setState({ user: withShortCircuitPermissions() })
+    renderSidebar()
+
+    expect(() => act(() => { useAuthStore.setState({ user: withoutPermissions() }) })).not.toThrow()
+
+    expectNoHooksError(spy)
+    expect(screen.getAllByText('Ventas & Diseño').length).toBeGreaterThan(0)   // sigue renderizando el menú de la identidad nueva
+    spy.mockRestore()
+  })
+
+  it('y de permisos vacíos a permisos que acortan (el sentido contrario: salir de la sesión observada)', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    useAuthStore.setState({ user: withoutPermissions() })
+    renderSidebar()
+
+    expect(() => act(() => { useAuthStore.setState({ user: withShortCircuitPermissions() }) })).not.toThrow()
+
+    expectNoHooksError(spy)
+    expect(screen.getAllByText('Ventas & Diseño').length).toBeGreaterThan(0)
+    spy.mockRestore()
+  })
+
+  it('varios cambios seguidos de identidad (ida y vuelta) tampoco rompen', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    useAuthStore.setState({ user: withShortCircuitPermissions() })
+    renderSidebar()
+
+    expect(() => {
+      act(() => { useAuthStore.setState({ user: withoutPermissions() }) })
+      act(() => { useAuthStore.setState({ user: withShortCircuitPermissions() }) })
+      act(() => { useAuthStore.setState({ user: withoutPermissions() }) })
+    }).not.toThrow()
+
+    expectNoHooksError(spy)
+    spy.mockRestore()
+  })
+})
+

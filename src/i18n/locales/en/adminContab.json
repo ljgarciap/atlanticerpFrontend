@@ -1,17 +1,24 @@
 {
   "nav": {
     "home": "Home",
+    "estadoCuentaMenu": "Account Statement",
     "fiscal": "Fiscal Configuration",
     "empresa": "Company Profile",
     "arqueoCaja": "Cash Count",
     "cuentasBancarias": "Bank Accounts",
     "facturacion": "Invoicing",
+    "movimientosMenu": "Movements",
+    "cobros": "Collections",
     "notasCredito": "Credit Notes & Returns",
     "comisionesMenu": "Commissions",
     "comisionesInternas": "Internal",
     "comisionesExternas": "External",
+    "tesoreriaMenu": "Treasury",
     "cajaChica": "Petty cash",
-    "reportes": "Reports"
+    "reportes": "Reports",
+    "fraudSettings": "Fraud alerts",
+    "clientesFiscal": "Clients tax data",
+    "compensaciones": "Compensations"
   },
   "fiscal": {
     "title": "Fiscal Configuration",
@@ -20,7 +27,8 @@
     "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
     "saveError": "Could not save the fiscal configuration",
     "validation": {
-      "required": "This field is required."
+      "required": "This field is required.",
+      "feReintentoMaxHoras": "Enter a whole number between 1 and 720."
     },
     "restricted": {
       "title": "Restricted access",
@@ -36,7 +44,9 @@
         "direccionFiscal": "Fiscal address",
         "regimenTributario": "Tax regime",
         "diasCreditoFactura": "Credit term (days)",
-        "pettyCashMaxIntentosRechazo": "Petty cash — max. rejection attempts"
+        "pettyCashMaxIntentosRechazo": "Petty cash — max. rejection attempts",
+        "feReintentoMaxHoras": "FE max. retry hours",
+        "feReintentoMaxHorasAyuda": "Maximum hours to retry a document before manual action is required (1–720)"
       },
       "regimen": {
         "general": "General regime taxpayer",
@@ -52,8 +62,9 @@
         "ultimaSincronizacion": "Last sync"
       },
       "ambiente": {
+        "apagado": "Off",
         "production": "Production",
-        "testing": "Testing"
+        "testing": "Testing (sandbox)"
       },
       "connectionStatus": {
         "conectado": "Connected",
@@ -201,7 +212,15 @@
       "tipoCuenta": "Account type",
       "moneda": "Currency",
       "estado": "Status",
-      "movimientosCount": "Movements in history"
+      "movimientosCount": "Movements in history",
+      "numeroCuentaCompleto": "Full account number"
+    },
+    "numeroCuentaCompleto": {
+      "hint": "Only used on Account Statement and Invoices — documents the client needs in order to pay by wire transfer.",
+      "empty": "Not set",
+      "editButton": "Edit",
+      "saveButton": "Save",
+      "saveError": "Could not save the account number."
     },
     "tipos": {
       "corriente": "Checking Account",
@@ -260,7 +279,12 @@
       "todosClientes": "All clients",
       "todosProyectos": "All projects",
       "todosEstados": "All statuses",
-      "limpiar": "Clear filters"
+      "cobro": "Collection status",
+      "todasCobro": "All (collection)",
+      "cobradas": "Collected",
+      "porCobrar": "To collect",
+      "limpiar": "Clear filters",
+      "vendedor": "Seller"
     },
     "columnas": {
       "entrega": "Delivery / Milestone",
@@ -280,9 +304,12 @@
       "incobrable": "Uncollectible"
     },
     "generarFactura": "Generate invoice",
+    "saldoAFavor": "Credit balance {{monto}}",
+    "saldoAFavorTitulo": "Available credit balance applicable to this invoice",
     "resultCount": "Showing {{visible}} of {{total}} deliveries",
     "empty": "No deliveries match the applied filters.",
     "clienteClickHint": "View Account Statement",
+    "entregasParciales": "{{count}} partial deliveries",
     "preview": {
       "title": "Preview",
       "subtitle": "Review the invoice before saving — the invoice number is assigned on confirm",
@@ -305,6 +332,29 @@
         "cantidad": "Qty.",
         "precioUnitario": "Unit price",
         "subtotal": "Subtotal"
+      },
+      "restanteDespues": "After this invoice, {{monto}} will remain to be invoiced on this order.",
+      "receptor": {
+        "titulo": "The customer's tax ID is not validated",
+        "tituloAviso": "Tax ID not validated",
+        "razonSocial": "Legal name",
+        "ruc": "Tax ID",
+        "dv": "Check digit",
+        "usarDgi": "Use the tax authority's data",
+        "validarGuardar": "Validate and save",
+        "errorGuardar": "The tax ID could not be validated",
+        "edicionBloqueada": "This customer already has invoices or credit notes certified by the tax authority, so it cannot be corrected from here.",
+        "sinPermiso": "Ask someone with permission to correct tax data to update this customer's tax ID.",
+        "tituloNombreDistinto": "The legal name differs from the tax authority's",
+        "nombreEnAtlanticERP": "In AtlanticERP:",
+        "nombreEnDgi": "At the tax authority:",
+        "actualizarCliente": "Update the customer with the tax authority's legal name",
+        "consumidorFinal": {
+          "facturar": "Invoice as final consumer",
+          "titulo": "This invoice will be issued to a final consumer",
+          "detalle": "It goes out without a tax ID or check digit. The customer keeps their document and the decision is recorded.",
+          "quitar": "Invoice with the customer's document"
+        }
       }
     },
     "crear": {
@@ -320,7 +370,8 @@
       "entregasLabel": "Deliveries pending invoice:",
       "verVistaPrevia": "See preview",
       "seleccionaEntrega": "Select at least one delivery to invoice.",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "soloPorEntrega": "This order is invoiced by delivery — use the buttons in the main table."
     },
     "exportar": {
       "label": "Export report",
@@ -329,6 +380,7 @@
     },
     "confirmError": "Could not save the invoice",
     "detalle": {
+      "vendedorResponsable": "Responsible seller",
       "title": "Delivery detail",
       "pasoCotizacion": "Quote",
       "pasoFactura": "Invoice",
@@ -348,7 +400,56 @@
       "aprobar": "Approve",
       "rechazar": "Reject",
       "registrarCobro": "Record payment",
-      "cerrar": "Close"
+      "cerrar": "Close",
+      "facturacionElectronica": {
+        "title": "Electronic invoicing",
+        "noAplica": "Electronic invoicing disabled",
+        "pendiente": "Certifying with the PAC…",
+        "certificado": "Certified",
+        "rechazado": "Rejected by the DGI",
+        "errorConfiguracion": "Could not certify (configuration error) — not a DGI rejection",
+        "enEsperaNc": "Waiting for the cancellation credit note",
+        "cufe": "CUFE",
+        "verQr": "View QR",
+        "motivo": "Reason",
+        "verJson": "View JSON that would be sent to the PAC",
+        "accion": {
+          "reintentar": "Retry certification",
+          "reconciliar": "Reconcile with MSL",
+          "confirmarReconciliar": "MSL will be asked what actually happened to this document and its status in AtlanticERP will be reconciled. If MSL already certified it, its CUFE is recorded; if MSL does not have it and it is still within the retry window, it will be resent. Every attempt is logged.",
+          "actualizarEstado": "Update status",
+          "confirmarTitulo": "Confirm the fiscal action",
+          "confirmarReintentar": "This document will be sent again to the DGI through MSL. If the cause of the rejection was not fixed, it will probably be rejected again. Every attempt is recorded.",
+          "confirmarActualizar": "MSL will be asked for the status of this document. If MSL does not have it in its queue, it will be sent again to get a definitive answer from the DGI. Every attempt is recorded.",
+          "confirmar": "Confirm",
+          "cancelar": "Cancel",
+          "enviando": "Sending…",
+          "errorGenerico": "The action could not be completed. Please try again in a few minutes.",
+          "ya9022": "MSL reports this number was already sent for certification (9022): the document probably already exists at the DGI, but the CUFE cannot be recovered through the API. The document status was not changed; contact MSL to confirm."
+        },
+        "transmisiones": {
+          "ver": "View PAC transmissions (payload and response)",
+          "vacio": "No transmissions have been recorded for this document yet.",
+          "error": "Could not load the transmissions.",
+          "request": "Request sent",
+          "respuesta": "Response received",
+          "copiar": "Copy",
+          "copiado": "Copied",
+          "sinHttp": "no response",
+          "requestId": "request_id",
+          "resultado": {
+            "certificado": "Certified",
+            "rechazado": "Rejected",
+            "pendiente": "Pending",
+            "error_configuracion": "Configuration error",
+            "sin_respuesta": "No response from the PAC"
+          },
+          "operacion": {
+            "certificar": "Certification",
+            "consultar_estado": "Status check"
+          }
+        }
+      }
     },
     "aging": {
       "title": "Accounts receivable aging",
@@ -356,6 +457,17 @@
       "rango": "{{desde}}–{{hasta}} days",
       "masDe": "+{{desde}} days",
       "cantidad": "{{cantidad}} invoices"
+    },
+    "estadoCuenta": "Account statement",
+    "generarFacturaEntrega": "Generate invoice for this delivery",
+    "entregaSecuencia": "Delivery {{seq}} of {{total}}",
+    "tipoFactura": {
+      "parcial": "Partial",
+      "completo": "Full"
+    },
+    "facturarCompleto": {
+      "restante": "{{monto}} left to invoice on this order",
+      "boton": "Invoice full order"
     }
   },
   "cobros": {
@@ -380,13 +492,38 @@
       "retencion_impuestos": "Tax withholding",
       "ajuste_cuenta": "Account adjustment"
     },
+    "v2": {
+      "titulo": "Register payment",
+      "subtitulo": "Money received. You can apply it to invoices now or leave it as the client's credit balance to compensate later.",
+      "montoLabel": "Amount received",
+      "aplicarLabel": "Apply to invoices now (optional)",
+      "aplicarAyuda": "Enter how much of this payment goes to each invoice; it can be a partial payment. Whatever you don't apply stays as the client's credit balance.",
+      "sinFacturasPendientes": "This client has no invoices pending collection: the payment will be kept as credit balance.",
+      "pendiente": "Pending",
+      "montoAAplicar": "Amount to apply to {{numero}}",
+      "aplicarTodo": "Apply all",
+      "excedeFactura": "One of the invoices receives more than it has pending.",
+      "aplicaMasQueElCobro": "What is applied to invoices exceeds the amount received.",
+      "resumenRecibido": "Amount received",
+      "resumenAplicado": "Applied to invoices",
+      "resumenSaldoAFavor": "Will remain as the client's credit balance",
+      "implicacionSaldo": "{{monto}} will be available as the client's credit balance, pending compensation.",
+      "implicacionConfirmacion": "This method awaits confirmation: what is applied to invoices will be applied once the payment is confirmed.",
+      "sinCuentaAplicarTodo": "A tax withholding or an account adjustment must be applied in full to invoices.",
+      "registrar": "Register payment"
+    },
     "registrarModal": {
       "title": "Register new payment",
       "clienteLabel": "Client",
       "clientePlaceholder": "Search client...",
+      "proyectoLabel": "Project",
+      "proyectoTodos": "All projects",
+      "cotizacionLabel": "Quote #",
+      "cotizacionTodas": "All quotes",
       "facturasLabel": "Open invoices",
       "cargandoFacturas": "Loading invoices...",
       "sinFacturasPendientes": "This client has no invoices pending payment.",
+      "sinFacturasParaFiltro": "No open invoice matches the chosen Project/Quote.",
       "totalFacturas": "Total selected invoices",
       "aplicarSaldoFavor": "Apply available credit balance ({{monto}}) to this payment",
       "saldoFavorAplicadoLine": "Credit balance applied",
@@ -394,6 +531,7 @@
       "metodoPagoLabel": "Payment method",
       "cuentaBancariaLabel": "Destination bank account",
       "cuentaBancariaPlaceholder": "Select account...",
+      "cuentaBancariaOtros": "Other",
       "numeroDocumentoRetencionLabel": "Withholding document N° (DGI)",
       "comentarioAjusteLabel": "Adjustment comment",
       "comentarioAjusteRequired": "The comment is required.",
@@ -436,7 +574,8 @@
       "sinComprobante": "Not attached",
       "estados": {
         "confirmado": "Confirmed",
-        "esperando_confirmacion": "Awaiting confirmation"
+        "esperando_confirmacion": "Awaiting confirmation",
+        "anulado": "Voided"
       }
     },
     "detalle": {
@@ -453,12 +592,55 @@
       "confirmacion": "Confirmation",
       "confirmadoPorLine": "{{numero}} — confirmed by {{nombre}} on {{fecha}}",
       "facturasAplicadas": "Applied invoice(s)",
+      "cotizaciones": "Quote(s)",
+      "guiasEntrega": "Delivery Guide(s)",
+      "abonos": "Advance payment(s)",
+      "abonoNumero": "Advance #{{id}}",
+      "notasCredito": "Credit note(s)",
       "cerrar": "Close",
       "error": "Could not load the payment detail.",
       "verComprobante": "View payment proof",
       "verRecibo": "View receipt",
       "marcarConfirmado": "Mark as confirmed",
-      "confirmarError": "Could not confirm the payment."
+      "confirmarError": "Could not confirm the payment.",
+      "saldoSinAplicar": "Client credit balance (not applied to invoices)",
+      "sinFacturas": "This payment was not applied to any invoice: it is the client's credit balance.",
+      "ajustes": {
+        "tituloPrevio": "This payment no longer fits its invoices completely. On confirming:",
+        "tituloAplicado": "Payment confirmed with adjustments:",
+        "facturaLinea": "Invoice {{numero}}: {{aplicado}} of {{solicitado}} will be applied.",
+        "excedente": "{{monto}} goes to the client's credit balance, pending compensation.",
+        "saldoInsuficiente": "The client credit this payment was going to use is no longer available ({{monto}}): that part stays pending on the invoice.",
+        "confirmarIgual": "Confirm anyway",
+        "cancelar": "Cancel"
+      },
+      "anular": {
+        "boton": "Void payment",
+        "titulo": "Request voiding this payment",
+        "ayuda": "Mark must approve it. Once approved its applications are reversed, the money leaves the cash position on the voiding day and the payment stays as voided in the history.",
+        "motivoLabel": "Reason for voiding",
+        "motivoPlaceholder": "E.g. wrong amount, duplicate payment, wrong client...",
+        "enviar": "Send request",
+        "cancelar": "Cancel",
+        "enviada": "Voiding request sent: pending Mark's approval.",
+        "error": "Could not send the request.",
+        "anuladoTitulo": "Payment voided",
+        "anuladoDetalle": "Voided on {{fecha}}. Reason: {{motivo}}",
+        "pendienteTitulo": "Voiding pending approval",
+        "pendienteDetalle": "Reason: {{motivo}}. Mark must approve or reject it.",
+        "rechazadaTitulo": "Voiding request rejected",
+        "rechazadaDetalle": "Rejection reason: {{motivo}}"
+      },
+      "editar": {
+        "boton": "Fix details",
+        "titulo": "Fix reference or receipt",
+        "ayuda": "Once registered, only the reference and the receipt can be fixed. To change amount, method, account or applications, void the payment and register it again.",
+        "referencia": "Reference",
+        "comprobante": "New receipt",
+        "guardar": "Save",
+        "guardado": "Details updated.",
+        "error": "Could not save."
+      }
     },
     "comprobanteModal": {
       "title": "Payment proof",
@@ -500,23 +682,38 @@
       "saldoAFavor": "Client's credit balance",
       "pagoA": "Pay to",
       "cuentaNumero": "Account number",
+      "tipoCuenta": "Account type",
+      "banco": "Bank",
       "responsable": "Responsible",
       "multiplesProyectos": "This client has {{count}} projects.",
       "sinProyecto": "No project",
       "subtotalProyecto": "Project subtotal",
       "tipoFactura": "Invoice",
       "tipoCobro": "Payment",
+      "tipoCompensacion": "Compensation",
+      "tipoDevolucionSaldo": "Balance refund",
+      "tipoDescuento": "Discount",
+      "tipoDevolucion": "Return",
+      "tipoAnulacion": "Void",
       "guiaSi": "Yes",
       "columnas": {
         "fecha": "Date",
         "proyecto": "Project / Order",
         "numeroFactura": "Invoice N°",
+        "cobro": "Payment",
         "concepto": "Concept",
         "cotizacion": "Quote N°",
         "guiaEntrega": "Delivery Note",
         "debito": "Debit",
         "credito": "Credit",
-        "saldo": "Balance"
+        "saldo": "Balance",
+        "antiguedadCartera": "Aging"
+      },
+      "antiguedad": {
+        "dias0a30": "0–30 days",
+        "dias31a60": "31–60 days",
+        "dias61a90": "61–90 days",
+        "dias91mas": "+91 days"
       }
     },
     "regimen": {
@@ -571,15 +768,25 @@
       "correccionRevisarButton": "Review and continue",
       "referenciaLabel": "Reference (Delivery Note / Quote)",
       "productosDevueltosLabel": "Returned products",
+      "productosSinItbmsHint": "Prices exclude ITBMS. The suggested amount already includes the source invoice's ITBMS ({{pct}}%).",
+      "facturaTotalReferencia": "Invoice {{numero}} total: {{monto}} · Outstanding balance: {{saldo}}",
       "personaDevuelveLabel": "Person returning",
       "proyectoLabel": "Project",
+      "proyectoTodos": "All projects",
+      "cotizacionLabel": "Quote #",
+      "cotizacionTodas": "All quotes",
       "conformidadLabel": "Signed conformity document",
+      "conformidadVerDocumento": "View signed document",
+      "conformidadError": "Couldn't open the document. Try again.",
       "devolucionAviso": "Warehouse already confirmed the physical re-entry of this product — only the amount and note generation are left.",
       "precargaDatoNoDisponible": "Not available — Warehouse doesn't record this data",
       "facturaOrigenLabel": "Source invoice",
       "facturaOrigenPlaceholder": "Select the invoice...",
+      "valorAcreditableReferencia": "Already credited by previous notes: {{previas}} · Value still creditable: {{acreditable}}",
+      "sinValorAcreditable": "Invoice {{numero}} is already fully credited by previous notes: there is nothing left to cancel.",
+      "montoSuperaAcreditable": "The amount exceeds the value that can still be credited on the invoice ({{acreditable}}).",
       "facturaSaldoPendiente": "outstanding balance",
-      "montoLabel": "Amount",
+      "montoLabel": "Total amount (incl. ITBMS)",
       "subtotalLabel": "Subtotal",
       "itbmsLabel": "ITBMS",
       "motivoLabel": "Reason",
@@ -637,12 +844,16 @@
       "subtotal": "Subtotal",
       "itbms": "ITBMS",
       "estado": "Status",
+      "cotizacion": "Quote",
+      "guiaEntrega": "Delivery Guide",
       "facturaOrigen": "Source invoice",
       "registradoPor": "Registered by",
       "cuentaBancariaSalida": "Outgoing bank account",
       "aprobadoRechazadoPor": "Approved/rejected by",
       "motivo": "Reason",
       "motivoRechazo": "Rejection reason",
+      "facturaNueva": "Replacement invoice",
+      "avisoCorreccionSinCertificar": "The original invoice shows as cancelled in AtlanticERP but remains valid with the DGI until this note is certified. The replacement invoice will be issued automatically once it is.",
       "trazabilidadBodegaTitle": "Warehouse traceability",
       "cerrar": "Close",
       "error": "Couldn't load the note detail.",
@@ -693,6 +904,89 @@
       "volverButton": "Go back and edit",
       "confirmarButton": "Confirm and generate new invoice",
       "error": "Couldn't register the correction. Try again."
+    }
+  },
+  "abonos": {
+    "title": "Register advance payment",
+    "subtitle": "Simple registration of an advance payment received, without having to pick specific invoices from a list — the client is located in cascade (Master client → Sub-client → Project → Invoice) down to whatever level of detail is available.",
+    "registrarButton": "+ Register advance payment",
+    "panelTitle": "Registered advance payments",
+    "buscador": {
+      "searchPlaceholder": "Search by client, sub-client, project or invoice...",
+      "filtroCliente": "All clients",
+      "filtroMetodo": "All methods",
+      "filtroEstado": "All statuses",
+      "desde": "From",
+      "hasta": "To",
+      "limpiarFiltros": "Clear filters",
+      "resultCount": "Showing {{mostrados}} of {{total}} advance payments"
+    },
+    "vacio": "No advance payment has been registered yet.",
+    "footnote": "* An advance payment stays \"Pending confirmation\" until someone verifies the money is already reflected in the bank and marks it as confirmed — same criterion used in Payments, since the system has no real banking integration. While it's \"Pending confirmation\", all of its data remains editable from the detail view.",
+    "columnas": {
+      "fecha": "Date",
+      "clienteMaster": "Master client",
+      "subCliente": "Sub-client",
+      "proyecto": "Project",
+      "factura": "Invoice",
+      "asociadoA": "Linked to",
+      "monto": "Amount",
+      "metodoPago": "Payment method",
+      "estado": "Status"
+    },
+    "nivel": {
+      "cliente": "Master client",
+      "proyecto": "Project",
+      "factura": "Invoice"
+    },
+    "estados": {
+      "por_confirmar": "Pending confirmation",
+      "confirmado": "Confirmed"
+    },
+    "form": {
+      "tituloRegistrar": "Register advance payment",
+      "tituloDetalle": "Advance payment — {{referencia}}",
+      "clienteMasterLabel": "Master client",
+      "clienteMasterPlaceholder": "Search client...",
+      "limpiarBusqueda": "Clear search",
+      "subClienteLabel": "Sub-client",
+      "subClientePlaceholder": "— Not specified —",
+      "subClienteDisabledHint": "— Select a master client first —",
+      "proyectoLabel": "Project",
+      "proyectoLabelRequerido": "Project *",
+      "proyectoPlaceholder": "Search project...",
+      "proyectoDisabledHint": "— Select a sub-client first —",
+      "cotizacionLabel": "Quote #",
+      "cotizacionPlaceholder": "Search quote...",
+      "facturaLabel": "Invoice",
+      "facturaPlaceholder": "— Not specified —",
+      "facturaDisabledHint": "— Select a project first —",
+      "facturaMontoHint": "Invoice amount: {{monto}}",
+      "montoLabel": "Advance payment amount",
+      "montoExcedeFactura": "The advance payment amount exceeds the invoice amount — the excess will become a customer credit balance once collected.",
+      "metodoPagoLabel": "Payment method",
+      "cuentaBancariaLabel": "Bank account",
+      "cuentaBancariaOtros": "Other",
+      "referenciaLabel": "Transaction reference",
+      "referenciaPlaceholder": "Transfer #, check, authorization...",
+      "comprobanteLabel": "Payment receipt (optional)",
+      "comprobanteDragText": "Click or drag a file to attach the receipt",
+      "comprobanteHint": "JPG, PNG or PDF · max. 10MB",
+      "comprobanteInvalidType": "The receipt must be JPG, PNG or PDF.",
+      "comprobanteTooLarge": "The receipt can't exceed 10MB.",
+      "bannerEditable": "This advance payment is \"Pending confirmation\" — all fields are editable until it's marked as confirmed.",
+      "bannerConfirmado": "This advance payment is already confirmed and registered as a transaction — its data can't be edited.",
+      "errorSubclienteSinProyecto": "When choosing a sub-client, the project becomes required.",
+      "errorGenerico": "Couldn't save the advance payment. Try again.",
+      "cancelar": "Cancel",
+      "guardar": "Save",
+      "guardarAbono": "Save advance payment",
+      "cerrar": "Close",
+      "editar": "✎ Edit",
+      "verComprobante": "View receipt",
+      "verRecibo": "View receipt",
+      "marcarConfirmado": "✓ Mark as confirmed",
+      "confirmarPregunta": "Confirm that the money for this advance payment is already reflected in the bank? Once confirmed, its data can't be edited."
     }
   },
   "comisionesInternas": {
@@ -804,8 +1098,8 @@
       "pagadaTotalSub": "paid historically",
       "pagadoEsteMes": "Paid this month",
       "pagadoEsteMesSub": "real cash outflow",
-      "pendienteFactura": "Pending architect invoice",
-      "pendienteFacturaSub": "client already paid, awaiting invoice",
+      "pendienteFactura": "Pending collection account",
+      "pendienteFacturaSub": "client already paid, awaiting collection account",
       "aunNoGenerada": "Not yet generated",
       "aunNoGeneradaSub": "referred clients who haven't paid"
     },
@@ -830,7 +1124,7 @@
     "sinRegimen": "No regime",
     "sinProyectos": "No projects registered yet.",
     "vacio": "No architects for this filter.",
-    "footnote": "Each architect and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending architect invoice\" — the architect's receipt must be uploaded before it can be marked paid.",
+    "footnote": "Each architect and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending collection account\" — the architect's collection account must be uploaded before it can be marked paid.",
     "detalle": {
       "cliente": "Client",
       "pedido": "Order #",
@@ -871,7 +1165,7 @@
     },
     "estados": {
       "aun_no_generada": "Not yet generated",
-      "pendiente_factura_arquitecto": "Pending invoice",
+      "pendiente_factura_arquitecto": "Pending collection account",
       "pagada": "Paid"
     },
     "regimenes": {
@@ -963,6 +1257,8 @@
       "totalCobrado": "Total collected today",
       "totalNotasCredito": "Credit notes and cash refunds",
       "totalNeto": "Net total for the day",
+      "totalFacturadoDia": "Total invoiced for the day",
+      "totalPasadoAPedidoDia": "Total moved to orders for the day",
       "observacionGeneralTitle": "General note for the day",
       "observacionGeneralPlaceholder": "E.g. Saturday, slow due to holiday...",
       "conciliacionNote": "Bank reconciliation is handled in Bank Accounts, not here.",
@@ -978,7 +1274,8 @@
         "confirmBody": "Once confirmed, the cash count moves to the history as \"Pending Management approval\" and can no longer be edited.",
         "confirmar": "Confirm closing",
         "error": "Could not close the cash count."
-      }
+      },
+      "totalReversos": "Voided payments and client refunds"
     },
     "estados": {
       "abierto": "open",
@@ -1121,6 +1418,7 @@
         "fechaCreacion": "Creation date",
         "total": "Total",
         "estado": "Status",
+        "formaPago": "Payment method",
         "realizadoPor": "Created by"
       },
       "ver": "View"
@@ -1200,6 +1498,7 @@
       "comision": "Commission for Felix (to date)",
       "tramoRango": "{{desde}} – {{hasta}} → {{pct}}%",
       "tramoDesde": "Over {{desde}} → {{pct}}%",
+      "tramoMenosDe": "Under {{hasta}} → {{pct}}%",
       "rangoActualTag": "Current tier",
       "footnote": "The more past-due receivables (+90 days) collected, the higher the commission — an incentive for good collection management. This is a live figure: it can keep rising through the month — the cutoff that defines the final commission is the 30th. It resets to $0 every month."
     },
@@ -1272,7 +1571,6 @@
         "mes": "Month",
         "num": "No.",
         "importe": "Amount",
-        "media": "Average",
         "transferencia": "Transfer",
         "cheque": "Check",
         "efectivo": "Cash",
@@ -1312,7 +1610,8 @@
         "baseImponible": "Taxable Base",
         "porcentaje": "%",
         "itbms": "ITBMS Amount",
-        "total": "Total"
+        "total": "Total",
+        "vendedor": "Seller"
       }
     },
     "ventasMedioPago": {
@@ -1434,5 +1733,195 @@
     "antiguedad": {
       "title": "Accounts receivable aging"
     }
+  },
+  "fraudSettings": {
+    "title": "Fraud alerts",
+    "subtitle": "Admin&Cont fraud alert business thresholds — adjustable without a new deploy",
+    "fields": {
+      "fraudeMontoDesviaciones": {
+        "label": "Standard deviations for out-of-range amount",
+        "help": "A payment or commission that exceeds the recent average by this many standard deviations triggers a security alert. Without enough history (fewer than 10 recent payments), the alert is not evaluated."
+      },
+      "fraudeMontoVentanaDias": {
+        "label": "Window (days) to calculate the usual amount",
+        "help": "How many days back are considered when calculating the average and standard deviation of recent amounts."
+      },
+      "fraudeAprobacionesRepetidasN": {
+        "label": "Repeated approvals count",
+        "help": "If the same user confirms this many payments or more within the configured minute window, a security alert is triggered."
+      },
+      "fraudeAprobacionesRepetidasMinutos": {
+        "label": "Repeated approvals window (minutes)",
+        "help": "Time window in which repeated approvals from the same user are counted."
+      }
+    },
+    "validation": {
+      "required": "This field is required.",
+      "integer": "Must be a whole number.",
+      "range": "Must be between {{min}} and {{max}}."
+    },
+    "save": "Save changes",
+    "saved": "Changes saved",
+    "saveError": "Could not save the settings",
+    "forbidden": "You don't have access to this screen."
+  },
+  "clientesFiscal": {
+    "title": "Clients tax data",
+    "subtitle": "Validate and correct the business name, tax ID and check digit used to invoice each subclient electronically.",
+    "buscar": "Search by business name, tax ID or client",
+    "columnas": {
+      "razonSocial": "Business name",
+      "cliente": "Client",
+      "ruc": "Tax ID",
+      "dv": "Check digit",
+      "itbms": "VAT (ITBMS)"
+    },
+    "editar": "Edit tax data",
+    "bloqueado": "Locked",
+    "bloqueadoAyuda": "It already has invoices or credit notes certified (or pending) with the DGI: its tax data cannot be edited.",
+    "vacio": "No clients match the search.",
+    "error": "Could not load the list.",
+    "sinPermiso": "You do not have permission to edit clients' tax data.",
+    "exento": "Exempt",
+    "noExento": "—",
+    "exencion": {
+      "titulo": "Mark client as ITBMS-exempt",
+      "tituloQuitar": "Remove the ITBMS exemption",
+      "ayuda": "From now on, new quotes and drafts for this client carry no ITBMS and are invoiced at 0%. Confirmed quotes and issued invoices do not change.",
+      "ayudaQuitar": "New quotes and drafts for this client include ITBMS again. Confirmed quotes and issued invoices do not change.",
+      "documento": "Document backing the exemption",
+      "documentoPlaceholder": "E.g. Resolution 201-1234 or Law 8 of 2010",
+      "documentoActual": "Current document",
+      "marcar": "Mark exempt",
+      "quitar": "Remove exemption",
+      "marcarAccion": "Mark exempt",
+      "quitarAccion": "Remove exemption",
+      "cancelar": "Cancel",
+      "cerrar": "Close",
+      "marcada": "The client is now ITBMS-exempt.",
+      "quitada": "The client's ITBMS exemption was removed.",
+      "borradores": "{{count}} draft quote updated.",
+      "borradores_other": "{{count}} draft quotes updated.",
+      "error": "Could not save the change.",
+      "avisoConfirmadas": "{{count}} confirmed quote not yet invoiced keeps its ITBMS and will be invoiced with it. If that is wrong, fix it with the correction credit note after invoicing.",
+      "avisoConfirmadas_other": "{{count}} confirmed quotes not yet invoiced keep their ITBMS and will be invoiced with it. If that is wrong, fix them with the correction credit note after invoicing.",
+      "avisoConfirmadasQuitar": "{{count}} confirmed quote not yet invoiced keeps its exemption and will be invoiced without ITBMS.",
+      "avisoConfirmadasQuitar_other": "{{count}} confirmed quotes not yet invoiced keep their exemption and will be invoiced without ITBMS."
+    }
+  },
+  "compensaciones": {
+    "title": "Compensations",
+    "subtitle": "Each client's available money (payments on account, advances and credit-note balance) to apply to their pending invoices. You decide how much goes to each invoice; nothing changes until you confirm.",
+    "kpiTotal": "Total credit balance",
+    "kpiClientes": "Clients with credit balance",
+    "searchPlaceholder": "Search client...",
+    "filtroSigno": "Balance",
+    "signoTodos": "All balances",
+    "signoPositivo": "Positive (more credit than owed)",
+    "signoNegativo": "Negative (owes more)",
+    "resultCount": "{{count}} clients",
+    "columnas": {
+      "cliente": "Client",
+      "aFavor": "Credit",
+      "pendiente": "Owes",
+      "neto": "Net",
+      "facturas": "Pending inv.",
+      "ultimoMovimiento": "Last movement"
+    },
+    "compensar": "Compensate",
+    "vacio": "No clients with a credit balance or recent movement.",
+    "cerrar": "Close",
+    "cargando": "Loading...",
+    "errorCargar": "Could not load the client's detail.",
+    "errorPreview": "Could not prepare the preview.",
+    "errorConfirmar": "Could not confirm the compensation.",
+    "modal": {
+      "subtitulo": "Choose how much of the credit goes to each invoice (full or partial).",
+      "saldoAFavor": "Credit balance",
+      "pendiente": "Pending invoices",
+      "aAplicar": "To apply now",
+      "confirmada": "Compensation {{folio}} confirmed for {{monto}}.",
+      "descargarDocumento": "Download document",
+      "fuentes": "Where the money comes from",
+      "sinFuentes": "This client has no available money.",
+      "facturas": "Pending invoices",
+      "usarSugerencia": "Use suggestion",
+      "limpiar": "Clear",
+      "sinFacturas": "This client has no invoices pending collection.",
+      "colFactura": "Invoice",
+      "colProyecto": "Project / quote",
+      "colPendiente": "Pending",
+      "colAplicar": "Apply",
+      "montoAAplicar": "Amount to apply to {{numero}}",
+      "excedeFactura": "An invoice receives more than it has pending.",
+      "excedeSaldo": "What you ask for exceeds the available credit balance ({{monto}}).",
+      "previaTitulo": "After confirming it will look like this:",
+      "previaFactura": "Invoice {{numero}}: {{aplicado}} applied, {{despues}} left pending.",
+      "previaSaldo": "Client credit balance: from {{antes}} to {{despues}}.",
+      "confirmar": "Confirm compensation",
+      "volver": "Back to edit",
+      "traza": "Client movement history",
+      "cruces": "Previous compensations",
+      "revisar": "Review and confirm"
+    },
+    "tiposMovimiento": {
+      "ingreso": "Income",
+      "aplicacion": "Application",
+      "desaplicacion": "Reversal of application",
+      "anulacion": "Voiding",
+      "devolucion": "Refund",
+      "historico": "Historical",
+      "reclasificacion": "Reclassification"
+    },
+    "reverso": {
+      "desaplicar": "Unapply",
+      "reversado": "reversed",
+      "reversarCruce": "Reverse crossing",
+      "tituloMovimiento": "Unapply {{etiqueta}}",
+      "tituloCruce": "Reverse crossing {{etiqueta}}",
+      "ayuda": "The money returns to the client's credit balance and the invoice gets its pending balance back. It stays in the history with your name and the reason; no approval needed.",
+      "motivo": "Reason (required)",
+      "confirmar": "Confirm reversal",
+      "cancelar": "Cancel",
+      "hecho": "Reversed: {{etiqueta}}.",
+      "error": "Could not reverse."
+    },
+    "devolucion": {
+      "boton": "Refund",
+      "titulo": "Refund money from {{etiqueta}}",
+      "ayuda": "Mark must approve it. Once approved the money leaves the chosen account or cash box today and is deducted from the client's credit balance.",
+      "monto": "Amount to refund",
+      "cuenta": "Outgoing account or cash box",
+      "referencia": "Outgoing reference",
+      "comprobante": "Receipt (required)",
+      "motivo": "Reason for the refund",
+      "enviar": "Send request",
+      "cancelar": "Cancel",
+      "enviada": "Refund request sent: pending Mark's approval.",
+      "error": "Could not send the request."
+    }
+  },
+  "solicitudesReverso": {
+    "titulo": "Payment voiding requests",
+    "ayudaMark": "Approve or reject. Approving reverses the payment's applications, takes the money out of the cash position today and, if an order's commission was already settled, records a deduction for the seller's next settlement.",
+    "ayudaOtros": "Pending Mark's decision.",
+    "anular": "Void payment {{recibo}}",
+    "detalle": "Requested by {{quien}} on {{fecha}}",
+    "motivo": "Reason",
+    "aprobar": "Approve",
+    "rechazar": "Reject",
+    "cancelar": "Cancel",
+    "confirmarAprobar": "Confirm the voiding? The payment's applications are reversed and the money leaves the cash position today.",
+    "confirmarSi": "Yes, void the payment",
+    "motivoRechazo": "Rejection reason (required)",
+    "aprobada": "Payment voided.",
+    "descuentoComision": "A deduction of {{monto}} was recorded on the commission of the next settlement.",
+    "rechazada": "Request rejected.",
+    "error": "Could not record the decision.",
+    "devolver": "Refund money to client",
+    "referencia": "Reference",
+    "verComprobante": "View receipt",
+    "confirmarAprobarDevolucion": "Confirm the refund? The money leaves the chosen account or cash box today and is deducted from the client's credit balance.",
+    "aprobadaDevolucion": "Refund recorded."
   }
 }

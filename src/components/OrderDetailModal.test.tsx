@@ -47,6 +47,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     direccion_entrega: null,
     cliente_master: 'Constructora Pacífico Holdings',
     subcliente: 'Constructora Pacífico',
+    observaciones: null,
     ...overrides,
   }
 }
@@ -118,6 +119,46 @@ describe('OrderDetailModal', () => {
 
     fireEvent.click(screen.getByTestId('toggle-items'))
     expect(screen.getByText('FAB-9001')).toBeInTheDocument()
+  })
+
+  // SCRUM-1149 — las Observaciones del proyecto en el Pipeline se ven en el detalle del pedido.
+  it('SCRUM-1149 — muestra las observaciones del proyecto y respeta los saltos de línea', () => {
+    mockedUseOrderDetail.mockReturnValue({
+      data: detail({ observaciones: 'COMENTARIOS 1 ENTREGA EN BODEGA\nLlamar antes' }),
+      isLoading: false,
+    } as ReturnType<typeof useOrderDetail>)
+    render(<OrderDetailModal orderId={1} onClose={vi.fn()} onOpenPickingSheet={vi.fn()} />)
+
+    const obs = screen.getByText((_, el) => el?.tagName === 'P' && el.textContent === 'COMENTARIOS 1 ENTREGA EN BODEGA\nLlamar antes')
+    expect(obs).toHaveClass('whitespace-pre-line')
+    expect(screen.queryByText('bodega:pedidos.detailModal.noObservations')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-1149 — sin observaciones muestra "Sin observaciones."', () => {
+    mockedUseOrderDetail.mockReturnValue({ data: detail({ observaciones: null }), isLoading: false } as ReturnType<typeof useOrderDetail>)
+    render(<OrderDetailModal orderId={1} onClose={vi.fn()} onOpenPickingSheet={vi.fn()} />)
+
+    expect(screen.getByText('bodega:pedidos.detailModal.noObservations')).toBeInTheDocument()
+  })
+
+  // SCRUM-1148 — el motivo/comentario del artículo pendiente es visible en el detalle, aun tras un despacho parcial.
+  it('SCRUM-1148 — muestra el motivo del pendiente de cada artículo (código traducido y texto libre de "Otra")', () => {
+    mockedUseOrderDetail.mockReturnValue({
+      data: detail({
+        items: [
+          { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Candelabro', location: 'A-1', qty_requested: 5, qty_reserved: 5, qty_picked: 5, qty_delivered: 3, shortage_reason: 'otra:Llega el martes con el proveedor' },
+          { id: 11, catalog_product_id: 2, reference: 'LAM-02', factory_reference: null, description: 'Lámpara', location: 'A-2', qty_requested: 2, qty_reserved: 2, qty_picked: 2, qty_delivered: 0, shortage_reason: 'sin_stock' },
+          { id: 12, catalog_product_id: 3, reference: 'FOC-03', factory_reference: null, description: 'Foco', location: 'A-3', qty_requested: 1, qty_reserved: 1, qty_picked: 1, qty_delivered: 1, shortage_reason: null },
+        ],
+      }),
+      isLoading: false,
+    } as ReturnType<typeof useOrderDetail>)
+    render(<OrderDetailModal orderId={1} onClose={vi.fn()} onOpenPickingSheet={vi.fn()} />)
+    fireEvent.click(screen.getByTestId('toggle-items'))
+
+    expect(screen.getByTestId('pending-reason-10')).toHaveTextContent('bodega:pedidos.registerDeliveryModal.shortageReasons.otra: Llega el martes con el proveedor')
+    expect(screen.getByTestId('pending-reason-11')).toHaveTextContent('bodega:pedidos.registerDeliveryModal.shortageReasons.sin_stock')
+    expect(screen.getByTestId('pending-reason-12')).toHaveTextContent('—')
   })
 
   it('Lote 4 (SCRUM-402) — título es el proyecto/cliente con la etapa como subtítulo, no "Pedido #N"', () => {

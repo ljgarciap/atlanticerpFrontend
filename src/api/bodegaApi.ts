@@ -1,6 +1,7 @@
 import api from './authApi'
+import type { ApprovalPendingItem } from '@/lib/homeCards'
 import type {
-  AdjustmentRequestLineDraft, AdjustmentRequestListResponse, AssistantLoad, KardexListResponse,
+  AdjustmentRequestLineDraft, AdjustmentRequestListResponse, AssistantLoad, BodegaSeller, KardexListResponse,
   OrderBoardFilters, OrderBoardResponse, OrderDetail,
   OrderStatusDetail, OrderStatusDocument, OrderStatusListResponse,
   PhysicalWarehouse, ProductSearchResult, ProductWarehouseStockResponse, WarehouseDetailResponse,
@@ -15,6 +16,7 @@ import type {
   InventoryReviewDecisionPayload, ResolveInventoryReviewResponse,
   ZonaLibreProvider, ZonaLibreRequestListResponse, ZonaLibreRequestDetail, ZonaLibreRequestPayload,
   ZonaLibreStatusFilter, ZonaLibreProductWarehouseBreakdownResponse,
+  ZonaLibreCatalogoParams, ZonaLibreCatalogoResponse,
   GeneralCountChip, GeneralCountCreatePayload, GeneralCountCreateResponse, GeneralCountDetail,
   GeneralCountEvaluatePayload, GeneralCountListResponse, GeneralCountRow,
   CustomerReturnStatusFilter, CustomerReturnListResponse, CustomerReturnDetail,
@@ -26,6 +28,7 @@ import type {
   RegisterDeliveryPayload, RegisterDeliveryResponse, AssignCourierResponse, DispatchResponse,
   RegisterSignedGuidePayload, RegisterSignedGuideResponse,
   BodegaRutasDiaResponse,
+  WarehouseSaleRule,
 } from '@/types/bodega'
 
 // SCRUM-329 Batch B2 — parámetros de filtro de "Ver Inventario". Nombres verificados contra
@@ -167,6 +170,12 @@ export const bodegaApi = {
     assistantLoad: (): Promise<{ data: AssistantLoad[] }> =>
       api.get<{ data: AssistantLoad[] }>('/bodega/orders/assistant-load').then(r => r.data),
 
+    // SCRUM-854, rebote de Pre-QA — reemplaza a ventasDisenoApi.home.vendors() como fuente del
+    // filtro seller_ids: ese endpoint requiere ventas_diseno.read, que los roles reales de esta
+    // pantalla (lider_bodega/asistente_bodega/etc.) no tienen.
+    sellers: (): Promise<BodegaSeller[]> =>
+      api.get<{ data: BodegaSeller[] }>('/bodega/orders/sellers').then(r => r.data.data),
+
     detail: (id: number): Promise<OrderDetail> =>
       api.get<OrderDetail>(`/bodega/orders/${id}`).then(r => r.data),
 
@@ -183,10 +192,22 @@ export const bodegaApi = {
     consolidatedPicking: (pickerId: number): Promise<OrderConsolidatedPickingResponse> =>
       api.get<OrderConsolidatedPickingResponse>('/bodega/orders/consolidated-picking', { params: { picker_id: pickerId } }).then(r => r.data),
 
-    // SCRUM-401 (REQ-331) — alcance reducido (ver `OrderInvoiceStatusResponse`), solo
-    // `invoice_ready` + `status_message`, nunca precios.
+    // SCRUM-401 (REQ-331) — `invoice_ready` + `status_message`. SCRUM-832 amplió el shape con el
+    // detalle fiscal completo cuando `invoice_ready === true` (ver `OrderInvoiceStatusResponse`).
     invoice: (orderId: number): Promise<OrderInvoiceStatusResponse> =>
       api.get<OrderInvoiceStatusResponse>(`/bodega/orders/${orderId}/invoice`).then(r => r.data),
+
+    // SCRUM-832 — mismo patrón blob que `adminContabApi.invoices.downloadPdf()` (el endpoint
+    // exige el header Authorization, una navegación plana no lo manda).
+    invoicePdf: async (orderId: number, orderNumber: string): Promise<void> => {
+      const res = await api.get(`/bodega/orders/${orderId}/invoice/pdf`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data as Blob)
+      const a   = document.createElement('a')
+      a.href     = url
+      a.download = `factura-${orderNumber}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    },
 
     // SCRUM-390 (REQ-320) — descarga a Excel de la tabla de detalle de artículos (el otro lugar,
     // Hoja de Picking, es un bloque separado sin pantalla en el frontend todavía). Blob (no una
@@ -277,6 +298,10 @@ export const bodegaApi = {
 
     summary: (filters: { scope?: 'own' | 'team'; owner_id?: number } = {}): Promise<BodegaHomeSummary> =>
       api.get<BodegaHomeSummary>('/bodega/home/summary', { params: filters }).then(r => r.data),
+
+    // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+    approvalsPending: (): Promise<{ data: ApprovalPendingItem[] }> =>
+      api.get<{ data: ApprovalPendingItem[] }>('/bodega/home/approvals-pending').then(r => r.data),
   },
 
   // Fix de regresión cruzada (2026-07-28) — `/bodega/home/team` quedó fijo a solo Asistentes
@@ -302,6 +327,15 @@ export const bodegaApi = {
 
     update: (data: Partial<BodegaSettings>): Promise<BodegaSettings> =>
       api.put<BodegaSettings>('/bodega/settings', data).then(r => r.data),
+  },
+
+  // SCRUM-1196 — «Reglas de bodega»: qué bodegas surten ventas, cuál es la de despacho por defecto y cuáles se excluyen del Disponible.
+  warehouseRules: {
+    list: (): Promise<WarehouseSaleRule[]> =>
+      api.get<{ data: WarehouseSaleRule[] }>('/bodega/settings/warehouses').then(r => r.data.data),
+
+    update: (id: number, data: Partial<Pick<WarehouseSaleRule, 'permite_venta' | 'despacho_por_defecto' | 'excluye_disponible'>>): Promise<WarehouseSaleRule> =>
+      api.put<WarehouseSaleRule>(`/bodega/settings/warehouses/${id}`, data).then(r => r.data),
   },
 
   // SCRUM-329 Batch B2 (REQ-344→362, SCRUM-414→432) — "Ver Inventario". Rutas verificadas contra
@@ -360,6 +394,12 @@ export const bodegaApi = {
   zonaLibre: {
     provider: (): Promise<ZonaLibreProvider> =>
       api.get<ZonaLibreProvider>('/bodega/zona-libre/provider').then(r => r.data),
+
+    // SCRUM-990 — catálogo de Lafayette de SOLO CONSULTA (tabla propia `lafayette_productos`). Un único GET: no existe
+    // ninguna ruta de escritura sobre esto en el backend (lo afirma un test de rutas). El contrato exacto lo fija
+    // `ZonaLibreCatalogoContractTest` (atlanticerp-backend) y los tipos de `ZonaLibreCatalogo*` en `types/bodega.ts`.
+    productos: (params?: ZonaLibreCatalogoParams): Promise<ZonaLibreCatalogoResponse> =>
+      api.get<ZonaLibreCatalogoResponse>('/bodega/zona-libre/productos', { params }).then(r => r.data),
 
     requests: {
       list: (params?: { status?: ZonaLibreStatusFilter; page?: number; per_page?: number | 'all' }): Promise<ZonaLibreRequestListResponse> =>
@@ -463,13 +503,19 @@ export const bodegaApi = {
     signedDocumentUrl: (id: number): Promise<ReturnDocumentUrlResponse> =>
       api.get<ReturnDocumentUrlResponse>(`/bodega/returns/${id}/signed-document`).then(r => r.data),
 
-    // GET con efecto lateral (genera/regenera el PDF presignado) — mismo criterio que
-    // `orders.status.document`, consumido como mutation on-demand.
+    // SCRUM-1180 — POST sin cuerpo: generar/regenerar el PDF presignado escribe (auditoría y archivo), y un GET no debe escribir. La respuesta
+    // `{ url }` es la misma de antes; se consume como mutation on-demand (mismo criterio que `orders.status.document`).
     formUrl: (id: number): Promise<ReturnDocumentUrlResponse> =>
-      api.get<ReturnDocumentUrlResponse>(`/bodega/returns/${id}/form`).then(r => r.data),
+      api.post<ReturnDocumentUrlResponse>(`/bodega/returns/${id}/form`).then(r => r.data),
 
     deliveryGuideUrl: (id: number): Promise<ReturnDocumentUrlResponse> =>
-      api.get<ReturnDocumentUrlResponse>(`/bodega/returns/${id}/delivery-guide`).then(r => r.data),
+      api.post<ReturnDocumentUrlResponse>(`/bodega/returns/${id}/delivery-guide`).then(r => r.data),
+
+    // SCRUM-865 punto 2 — "Ver nota de crédito" en la fila Finalizada. A diferencia de
+    // formUrl/signedDocumentUrl (que presignan S3 y devuelven { url }), este endpoint streamea el
+    // PDF y exige el header Authorization — mismo patrón blob que `orders.invoicePdf`.
+    creditNotePdf: (id: number): Promise<Blob> =>
+      api.get(`/bodega/returns/${id}/credit-note-pdf`, { responseType: 'blob' }).then(r => r.data as Blob),
 
     confirmReception: (id: number, payload: ConfirmReturnReceptionPayload): Promise<CustomerReturnDetail> =>
       api.post<CustomerReturnDetail>(`/bodega/returns/${id}/confirm-reception`, payload).then(r => r.data),

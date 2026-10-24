@@ -1,7 +1,7 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { Link, MemoryRouter } from 'react-router-dom'
 import InventarioPage from './InventarioPage'
 import { comprasApi } from '@/api/comprasApi'
 import type { InventoryProduct, TechnicalSpec } from '@/types/compras'
@@ -32,7 +32,7 @@ vi.mock('@/api/comprasApi', () => ({
       list: vi.fn(), get: vi.fn(), create: vi.fn(), update: vi.fn(),
       toggleActive: vi.fn(), warehouseStock: vi.fn(), orderPrefill: vi.fn(), confirmPending: vi.fn(),
       checkReference: vi.fn().mockResolvedValue({ available: true }),
-      uploadTechnicalSheet: vi.fn(), technicalSheetUrl: vi.fn(),
+      uploadTechnicalSheet: vi.fn(), technicalSheetUrl: vi.fn(), uploadPhoto: vi.fn(),
     },
     warehouses: { list: vi.fn() },
     // SCRUM-764 — list() propio de Compras, reemplaza el mock de ventasDisenoApi.catalogProductFamilies
@@ -52,7 +52,7 @@ function makeProduct(overrides: Partial<InventoryProduct> = {}): InventoryProduc
     price_full: 20, stock_quantity: 10, por_servir: 0, disponible: 10, por_ingresar: 0, en_camino: 0,
     estado: 'disponible', is_active: true,
     cost: 12, margin_percent: 40, factory_reference: null,
-    provider_id: null, provider_name: null, barcode: null,
+    provider_id: 1, provider_name: 'LightCorp', barcode: null,
     ...overrides,
   }
 }
@@ -87,6 +87,11 @@ function renderPage(initialEntries: string[] = ['/inventario']) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // SCRUM-830 — jsdom no implementa URL.createObjectURL/revokeObjectURL, usadas para el preview
+  // de la imagen del producto antes de subirla (mismo patrón ya usado en
+  // ProviderFormDrawer.test.tsx/OrderDetailModal.test.tsx).
+  Object.defineProperty(URL, 'createObjectURL', { value: vi.fn().mockReturnValue('blob:mock-photo-url'), configurable: true })
+  Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true })
   mockedComprasApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Atlantic' }] })
   mockedComprasApi.families.list.mockResolvedValue({
     restricted: false, can_manage: true, data: [],
@@ -95,8 +100,11 @@ beforeEach(() => {
   mockedComprasApi.providers.list.mockResolvedValue({
     fuzzy: false,
     kpis: { total_providers: 1, average_rating: null, low_rating_count: 0, active_categories: 0, categories: [] },
-    data: [{ id: 9, name: 'LightCorp', category: null, origin: 'internacional', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null }],
-    meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    data: [
+      { id: 9, name: 'LightCorp', category: null, origin: 'internacional', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null },
+      { id: 10, name: 'Otra SA', category: null, origin: 'local', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null },
+    ],
+    meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
   })
 })
 
@@ -104,7 +112,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('modo restringido no muestra botón crear ni columna de costo', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [{ id: 1, reference: 'REF-1', description: 'Bombillo E27', brand: null, photo_url: null,
         category: null, rotation: null, reorder_point: null, warehouses: [],
         price_full: 20, stock_quantity: 10, por_servir: 0, disponible: 10,
@@ -126,10 +134,24 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('compras:inventory.table.provider')).toBeInTheDocument()
   })
 
+  it('muestra el KPI "Con stock" aparte del total del catálogo (SCRUM-991)', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: true, can_manage: false,
+      kpis: { total_products: 40, with_stock: 7, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+
+    renderPage()
+
+    const card = (await screen.findByText('compras:inventory.kpis.withStock')).parentElement
+    expect(card).toHaveTextContent('7')
+    expect(screen.getByText('compras:inventory.kpis.total').parentElement).toHaveTextContent('40')
+  })
+
   it('modo completo muestra botón crear, columna de costo y toggle de vista', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -150,7 +172,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('modo completo con cost NULL (dato real de producción) muestra "—" en vez de crashear', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ cost: null, margin_percent: null })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -166,7 +188,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-773 (CA4) — compras.limited.view (Líder de Operaciones): ve costos (restricted=false) pero NO ve Proveedores/+Crear nuevo producto/+Nueva orden de compra (can_manage=false)', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -189,7 +211,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-231 — modo Compras muestra "+ Nueva orden de compra" y navega a /compras/ordenes/nueva', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -206,7 +228,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-231 — modo Ventas & Diseño oculta "+ Nueva orden de compra" igual que "+ Crear nuevo producto"', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -217,11 +239,11 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.queryByText('compras:inventory.actions.createOrder')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-232 — los 5 KPIs usan separador de miles (formato en-US)', async () => {
+  it('SCRUM-232/843 — los 5 KPIs usan separador de miles (formato en-US), Valor total del inventario sin decimales', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
       kpis: {
-        total_products: 1234, low_stock: 2500, out_of_stock: 3400, in_attention: 5678,
+        total_products: 1234, with_stock: 0, low_stock: 2500, out_of_stock: 3400, in_attention: 5678,
         total_value: 134658.16,
       },
       data: [makeProduct()],
@@ -235,13 +257,13 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('2,500')).toBeInTheDocument()
     expect(screen.getByText('3,400')).toBeInTheDocument()
     expect(screen.getByText('5,678')).toBeInTheDocument()
-    expect(screen.getByText('$134,658.16')).toBeInTheDocument()
+    expect(screen.getByText('$134,658')).toBeInTheDocument()
   })
 
   it('SCRUM-233 — "Limpiar filtros" solo aparece con un filtro activo y resetea búsqueda + chip', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -266,7 +288,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('click en el chip En atención dispara el filtro correspondiente', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -283,7 +305,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('REQ-204 (Reportes) — llega con ?chip=en_atencion ya filtrado, no en Todos', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -297,7 +319,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('REQ-112 (Inicio de Compras) — llega con ?chip=bajo_stock ya filtrado, sin botón propio en el filtro', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -312,7 +334,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('REQ-112 (Inicio de Compras) — llega con ?chip=sin_stock ya filtrado', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -323,10 +345,91 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     ))
   })
 
+  // SCRUM-1153 — la notificación de «sin stock» de Bodega lleva a Inventario con el producto ya buscado.
+  it('SCRUM-1153 — llega con ?search={referencia}: el listado ya viene buscado y el campo lo muestra', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+
+    renderPage(['/inventario?search=ML-10097BWH-1'])
+
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'ML-10097BWH-1' }),
+    ))
+    expect(screen.getByDisplayValue('ML-10097BWH-1')).toBeInTheDocument()
+  })
+
+  // Pre-QA SCRUM-1153 — estando YA en Inventario, la 2.ª notificación cambia ?search= (misma ruta, otro parámetro): la caja y la tabla
+  // deben seguir al parámetro, no quedarse en el producto anterior.
+  it('SCRUM-1153 — con Inventario ya abierto, un nuevo ?search= actualiza la búsqueda', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/inventario?search=EX-00004']}>
+          <InventarioPage />
+          <Link to="/inventario?search=EX-00008">segunda notificación</Link>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(expect.objectContaining({ search: 'EX-00004' })))
+    expect(screen.getByDisplayValue('EX-00004')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('segunda notificación'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'EX-00008', page: 1 })))
+    expect(screen.getByDisplayValue('EX-00008')).toBeInTheDocument()
+    expect(screen.queryByDisplayValue('EX-00004')).not.toBeInTheDocument()
+  })
+
+  // Pre-QA — un chip que el usuario dejó activo no debe esconder el producto de la notificación nueva.
+  it('SCRUM-1153 — un nuevo ?search= parte de los filtros del enlace, no de los chips que el usuario dejó activos', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/inventario']}>
+          <InventarioPage />
+          <Link to="/inventario?search=EX-00008">notificación</Link>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalled())
+    fireEvent.click(screen.getByText('compras:inventory.chips.inactivos'))
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenLastCalledWith(expect.objectContaining({ chip: 'inactivos' })))
+
+    fireEvent.click(screen.getByText('notificación'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'EX-00008', chip: undefined })))
+  })
+
+  it('SCRUM-1153 — sin ?search el listado no se filtra por texto', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+
+    renderPage(['/inventario'])
+
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalled())
+    expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(expect.objectContaining({ search: undefined }))
+  })
+
   it('ignora un valor de ?chip inválido y usa Todos por default', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -340,7 +443,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('click en una fila abre el detalle del producto', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -358,7 +461,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-244 (REQ-181, rebote 2026-08-12) — columna Bodega(s) muestra un acceso compacto y clickeable, no la lista vertical', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({
         warehouses: [
           { warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 2 },
@@ -392,7 +495,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-244 (REQ-181) — sin stock en ninguna bodega, la columna Bodega(s) muestra "—" sin acceso clickeable', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ warehouses: [] })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -407,7 +510,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     const spec = makeTechnicalSpec()
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -431,7 +534,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-425 (REQ-355) — producto sin ficha técnica (creado antes de la feature) muestra estado vacío, no 12 campos en blanco', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -452,7 +555,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-773 (compras.limited.view) — ve costo/margen en el detalle pero no puede editar precio/info general ni subir ficha técnica ni usar Acciones finales', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -477,7 +580,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('editar recalcula el margen en vivo antes de guardar', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ price_full: 100, cost: 50, margin_percent: 50 })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -502,7 +605,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('editar "Información general" es independiente de Precios y confirma antes de guardar (RN4, SCRUM-237)', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -550,7 +653,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   async function openCreateModalAndSelectProvider() {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     renderPage()
@@ -558,7 +661,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.click(await screen.findByText('compras:inventory.actions.create'))
     await waitFor(() => expect(screen.getByText('compras:inventory.create.title')).toBeInTheDocument())
 
-    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.provider')} *`), { target: { value: 'Light' } })
+    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.providers')} *`), { target: { value: 'Light' } })
     // El picker de proveedor usa onMouseDown (no onClick), mismo motivo que NewPurchaseOrderPage:
     // dispara ANTES del blur del input de búsqueda, que si no cerraría la lista primero.
     fireEvent.mouseDown(await screen.findByText('LightCorp'))
@@ -597,6 +700,15 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.click(screen.getByText('compras:inventory.detail.technicalSheetDoc.saveLink'))
   }
 
+  // SCRUM-830 — la imagen del producto ahora también es obligatoria para poder enviar el
+  // formulario de creación, con su propio input de archivo (independiente del de ficha técnica).
+  function selectPhoto(file: File = new File(['contenido'], 'foto.jpg', { type: 'image/jpeg' })): File {
+    const input = document.querySelector('input[type="file"][accept="image/jpeg,image/png,image/webp"]')
+    if (!(input instanceof HTMLInputElement)) throw new Error('input de imagen no encontrado')
+    fireEvent.change(input, { target: { files: [file] } })
+    return file
+  }
+
   it('crear producto envía el payload correcto (proveedor obligatorio, costo adicional resuelto a $, stock inicial por bodega)', async () => {
     mockedComprasApi.inventory.create.mockResolvedValue(makeProduct({ reference: 'REF-1' }))
     await openCreateModalAndSelectProvider()
@@ -604,6 +716,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fillRequiredFields()
     fireEvent.change(screen.getByLabelText('Atlantic'), { target: { value: '5' } })
     fillTechnicalSheetLink()
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
@@ -617,10 +730,12 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
         initial_stock: [{ warehouse_id: 1, quantity: 5 }],
       }),
       expect.anything(),
+      expect.anything(),
     ))
     // Ya no manda technical_spec (ver docblock de StoreInventoryProductRequest, backend).
     expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.not.objectContaining({ technical_spec: expect.anything() }),
+      expect.anything(),
       expect.anything(),
     )
   })
@@ -635,6 +750,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       { target: { value: 'Colgante de metal negro, 3 luces, incluye bombillos LED' } },
     )
     fillTechnicalSheetLink()
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
@@ -643,6 +759,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
         name: 'Lámpara colgante',
         description: 'Colgante de metal negro, 3 luces, incluye bombillos LED',
       }),
+      expect.anything(),
       expect.anything(),
     ))
   })
@@ -655,6 +772,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.change(screen.getByLabelText('compras:newOrder.newProduct.additionalCost *'), { target: { value: '10' } })
     fireEvent.change(screen.getByLabelText('compras:newOrder.newProduct.additionalCost', { selector: 'select' }), { target: { value: 'porcentaje' } })
     fillTechnicalSheetLink()
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
@@ -662,13 +780,14 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.objectContaining({ other_cost: 10 }),
       expect.anything(),
+      expect.anything(),
     ))
   })
 
   it('sin proveedor seleccionado, "Crear producto" queda deshabilitado', async () => {
     await openCreateModalAndSelectProvider()
     // Deshace la selección de proveedor para probar el gate.
-    fireEvent.click(screen.getByText('compras:newOrder.provider.change'))
+    fireEvent.click(screen.getByLabelText(/compras:inventory\.providersPicker\.remove/))
     fillRequiredFields()
 
     expect(screen.getByText('compras:inventory.create.submit').closest('button')).toBeDisabled()
@@ -680,11 +799,13 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await openCreateModalAndSelectProvider()
     fillRequiredFields()
     fillTechnicalSheetLink()
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.objectContaining({ initial_stock: [] }),
+      expect.anything(),
       expect.anything(),
     ))
   })
@@ -692,9 +813,35 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('sin ficha técnica (ni archivo ni link), "Crear producto" queda deshabilitado (SCRUM-426)', async () => {
     await openCreateModalAndSelectProvider()
     fillRequiredFields()
+    selectPhoto()
 
     expect(screen.getByText('compras:inventory.create.submit').closest('button')).toBeDisabled()
     expect(mockedComprasApi.inventory.create).not.toHaveBeenCalled()
+  })
+
+  it('sin imagen, "Crear producto" queda deshabilitado (SCRUM-830)', async () => {
+    await openCreateModalAndSelectProvider()
+    fillRequiredFields()
+    fillTechnicalSheetLink()
+
+    expect(screen.getByText('compras:inventory.create.submit').closest('button')).toBeDisabled()
+    expect(mockedComprasApi.inventory.create).not.toHaveBeenCalled()
+  })
+
+  it('seleccionar una imagen habilita "Crear producto" y la envía en el mismo POST (SCRUM-830)', async () => {
+    mockedComprasApi.inventory.create.mockResolvedValue(makeProduct())
+    await openCreateModalAndSelectProvider()
+    fillRequiredFields()
+    fillTechnicalSheetLink()
+
+    const file = new File(['foto'], 'producto.jpg', { type: 'image/jpeg' })
+    selectPhoto(file)
+
+    fireEvent.click(screen.getByText('compras:inventory.create.submit'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
+      expect.anything(), expect.anything(), file,
+    ))
   })
 
   it('"Cargar ficha técnica" con un link se envía en el MISMO POST de creación (SCRUM-426 — antes se subía después, en 2 llamadas)', async () => {
@@ -707,11 +854,12 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       target: { value: 'https://proveedor.example.com/ficha.pdf' },
     })
     fireEvent.click(screen.getByText('compras:inventory.detail.technicalSheetDoc.saveLink'))
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
-      expect.anything(), { link: 'https://proveedor.example.com/ficha.pdf' },
+      expect.anything(), { link: 'https://proveedor.example.com/ficha.pdf' }, expect.anything(),
     ))
     // Ya no hay una segunda llamada "mejor esfuerzo" separada después de crear el producto.
     expect(mockedComprasApi.inventory.uploadTechnicalSheet).not.toHaveBeenCalled()
@@ -733,6 +881,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await openCreateModalAndSelectProvider()
     fillRequiredFields({ reference: 'DUP-1' })
     fillTechnicalSheetLink()
+    selectPhoto()
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
@@ -757,7 +906,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     // "abre el mismo formulario completo de crear una orden, precargado").
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ provider_id: 7 })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -789,7 +938,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-242 — sin proveedor asignado avisa en vez de ofrecer un botón que no puede funcionar', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ provider_id: null })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -815,7 +964,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-237 — el desglose de costo (importación/flete/manejo/otros) se suma en el margen en vivo y se envía al guardar', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({ price_full: 100, cost: 50 })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -851,7 +1000,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-237 — asignar familia en Información general envía family_id al guardar', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -876,7 +1025,14 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     const familyInput = screen.getByLabelText('compras:inventory.detail.family', { exact: false })
     fireEvent.focus(familyInput)
     fireEvent.change(familyInput, { target: { value: 'Kit Baño' } })
-    fireEvent.mouseDown(await screen.findByText('Kit Baño'))
+    // SCRUM-1010 — el filtro por familia de Productos también lista "Kit Baño" como <option>: se elige la
+    // opción del combobox, no la del select nativo.
+    const comboOption = await waitFor(() => {
+      const el = screen.getAllByText('Kit Baño').find(e => e.tagName !== 'OPTION')
+      expect(el).toBeDefined()
+      return el as HTMLElement
+    })
+    fireEvent.mouseDown(comboOption)
     fireEvent.click(screen.getByText('compras:inventory.actions.save'))
     fireEvent.click(screen.getByText('compras:inventory.actions.confirm'))
 
@@ -885,11 +1041,74 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     ))
   })
 
+  // ── SCRUM-830 — reemplazo de imagen desde "Editar información" ────────────
+
+  it('SCRUM-830 — seleccionar una nueva imagen no sube nada hasta confirmar "Guardar", y ahí la sube con el id correcto', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      data: [makeProduct()],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.inventory.get.mockResolvedValue(makeProduct())
+    mockedComprasApi.inventory.warehouseStock.mockResolvedValue({ data: [] })
+    mockedComprasApi.inventory.update.mockResolvedValue(makeProduct())
+    mockedComprasApi.inventory.uploadPhoto.mockResolvedValue({ id: 1, photo_url: 'blob:new', photo_full_url: 'blob:new', has_uploaded_photo: true })
+
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('REF-1'))
+    await waitFor(() => expect(screen.getByText('compras:inventory.detail.title')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
+
+    const file = new File(['nueva'], 'nueva.png', { type: 'image/png' })
+    const photoInput = document.querySelector('input[type="file"][accept="image/jpeg,image/png,image/webp"]') as HTMLInputElement
+    fireEvent.change(photoInput, { target: { files: [file] } })
+
+    // Todavía no se sube — recién al confirmar "Guardar" de esta sección.
+    expect(mockedComprasApi.inventory.uploadPhoto).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.save'))
+    fireEvent.click(screen.getByText('compras:inventory.actions.confirm'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.update).toHaveBeenCalledWith(1, expect.anything()))
+    await waitFor(() => expect(mockedComprasApi.inventory.uploadPhoto).toHaveBeenCalledWith(1, file))
+  })
+
+  it('SCRUM-830 (CA09) — cancelar "Editar información" descarta la imagen seleccionada sin subir nada', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      data: [makeProduct()],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.inventory.get.mockResolvedValue(makeProduct())
+    mockedComprasApi.inventory.warehouseStock.mockResolvedValue({ data: [] })
+
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('REF-1'))
+    await waitFor(() => expect(screen.getByText('compras:inventory.detail.title')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
+    const file = new File(['nueva'], 'nueva.png', { type: 'image/png' })
+    const photoInput = document.querySelector('input[type="file"][accept="image/jpeg,image/png,image/webp"]') as HTMLInputElement
+    fireEvent.change(photoInput, { target: { files: [file] } })
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.cancel'))
+
+    expect(mockedComprasApi.inventory.uploadPhoto).not.toHaveBeenCalled()
+    expect(mockedComprasApi.inventory.update).not.toHaveBeenCalled()
+    // Volvió a modo vista — el botón "Editar información" está de nuevo disponible.
+    expect(screen.getByText('compras:inventory.actions.editGeneral')).toBeInTheDocument()
+  })
+
   it('SCRUM-236 (REQ-173) — con unidades "Por ingresar" bloquea inactivar y permite confirmarlas', async () => {
     const withPending = makeProduct({ por_ingresar: 10, disponible: 0 })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [withPending],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -913,7 +1132,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-234 — la tabla en modo Compras muestra Categoría/Rotación/Bodega(s)/Por servir/Stock mínimo', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({
         category: 'bombillos', rotation: 'alta', reorder_point: 5, por_servir: 3,
         warehouses: [{ warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 7 }],
@@ -936,7 +1155,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-238 (rebote Daniela 2026-08-12, decisión Luis 2026-08-14) — la tabla en modo Ventas & Diseño muestra Categoría/Rotación/Bodega(s)/Proveedor/Por ingresar/En camino pero NO costo', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [makeProduct({ category: 'bombillos', rotation: 'media', provider_name: 'Proveedor Uno', por_ingresar: 4, en_camino: 6 })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -960,7 +1179,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [product],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -989,7 +1208,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [product],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1015,7 +1234,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     const product = makeProduct({ category: 'bombillos' })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [product],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1042,7 +1261,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     const product = makeProduct({ category: 'bombillos' })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [product],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1062,7 +1281,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-237 — editar "Información del producto" envía category y barcode', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1090,7 +1309,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-237 (REQ-178) — validación de referencia pública EN VIVO muestra el error del backend', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1118,7 +1337,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     const product = makeProduct({ has_technical_sheet: false, technical_sheet_filename: null })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [product],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1142,6 +1361,81 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       1, { file },
     ))
   })
+
+  const setupProductWithList = (product: ReturnType<typeof makeProduct>) => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      data: [product],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.inventory.get.mockResolvedValue(product)
+    mockedComprasApi.inventory.warehouseStock.mockResolvedValue({ data: [] })
+    mockedComprasApi.inventory.update.mockResolvedValue(product)
+  }
+
+  const openProductDetail = async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('REF-1'))
+    await waitFor(() => expect(screen.getByText('compras:inventory.detail.productInfoSection')).toBeInTheDocument())
+  }
+
+  it('SCRUM-1126 — editar Información del producto permite cambiar Proveedores (varios) y Stock mínimo y los envía', async () => {
+    setupProductWithList(makeProduct({ reorder_point: 5, provider_id: 1, provider_name: 'LightCorp', providers: [{ id: 1, name: 'LightCorp' }] }))
+    await openProductDetail()
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
+    fireEvent.change(await screen.findByDisplayValue('5'), { target: { value: '12' } })
+    fireEvent.change(screen.getByLabelText('compras:inventory.detail.providers *'), { target: { value: 'Otra' } })
+    fireEvent.mouseDown(await screen.findByText('Otra SA'))
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.save'))
+    fireEvent.click(screen.getByText('compras:inventory.actions.confirm'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.update).toHaveBeenCalledWith(
+      1, expect.objectContaining({ reorder_point: 12, provider_id: 1, provider_ids: [1, 10] }),
+    ))
+  })
+
+  it('SCRUM-1126 — no se puede guardar la información del producto sin ningún proveedor', async () => {
+    setupProductWithList(makeProduct({ provider_id: 1, provider_name: 'LightCorp', providers: [{ id: 1, name: 'LightCorp' }] }))
+    await openProductDetail()
+
+    fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
+    fireEvent.click(await screen.findByLabelText(/compras:inventory\.providersPicker\.remove/))
+
+    expect(screen.getByText('compras:inventory.actions.save').closest('button')).toBeDisabled()
+    expect(mockedComprasApi.inventory.update).not.toHaveBeenCalled()
+  })
+
+  it('SCRUM-1126 — el detalle muestra todos los proveedores asociados', async () => {
+    setupProductWithList(makeProduct({
+      provider_id: 1, provider_name: 'LightCorp',
+      providers: [{ id: 1, name: 'LightCorp' }, { id: 2, name: 'Otra SA' }],
+    }))
+    await openProductDetail()
+
+    expect(screen.getAllByText('LightCorp, Otra SA').length).toBeGreaterThan(0)
+  })
+
+  it('SCRUM-1126 — al crear un producto se pueden asignar varios proveedores y viajan en provider_ids', async () => {
+    mockedComprasApi.inventory.create.mockResolvedValue(makeProduct())
+    await openCreateModalAndSelectProvider()
+    fireEvent.change(screen.getByLabelText('compras:inventory.detail.providers *'), { target: { value: 'Otra' } })
+    fireEvent.mouseDown(await screen.findByText('Otra SA'))
+
+    fillRequiredFields()
+    fillTechnicalSheetLink()
+    selectPhoto()
+    fireEvent.click(screen.getByText('compras:inventory.create.submit'))
+
+    await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ provider_id: 9, provider_ids: [9, 10] }),
+      expect.anything(),
+      expect.anything(),
+    ))
+  })
 })
 
 describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
@@ -1155,7 +1449,7 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
     })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 1, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct()],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
@@ -1262,11 +1556,96 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
   })
 })
 
+// SCRUM-1022 — el buscador vuelve a quedar diminuto si comparte fila con los filtros (flex-1 = flex-basis 0%).
+describe('InventarioPage — ancho del buscador (SCRUM-1022)', () => {
+  it('el buscador está en su propia fila con el botón Buscar, fuera de la fila flex-wrap de filtros', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      data: [makeProduct()],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+
+    const row = screen.getByTestId('inventory-search-row')
+    expect(row.className).not.toContain('flex-wrap')
+    expect(row.querySelector('input')).not.toBeNull()
+    expect(row.querySelector('select')).toBeNull()
+    // El contenedor del input tiene un tope de ancho cómodo (max-w-md), no el max-w-sm anterior.
+    expect(row.querySelector('input')?.closest('div.flex-1')?.className).toContain('max-w-md')
+    // Y los filtros siguen existiendo en otra fila: la búsqueda funcional no cambió de lugar lógico.
+    expect(screen.getByLabelText('compras:inventory.filters.familyLabel')).toBeInTheDocument()
+  })
+})
+
+describe('InventarioPage — filtro por familia (SCRUM-1010)', () => {
+  beforeEach(() => {
+    mockedComprasApi.families.list.mockResolvedValue({
+      restricted: false, can_manage: true,
+      data: [
+        { id: 20, name: 'Flua Luna S', description: null, product_count: 25, total_value: null },
+        { id: 21, name: 'Mylight Riel Magnético Mini', description: null, product_count: 38, total_value: null },
+      ],
+      meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
+      data: [makeProduct()],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+  })
+
+  it('el select ofrece "todas" y las familias, y por defecto no manda family_id', async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+
+    const select = screen.getByLabelText('compras:inventory.filters.familyLabel') as HTMLSelectElement
+    await waitFor(() => expect(within(select).getByText('Flua Luna S')).toBeInTheDocument())
+    expect(within(select).getByText('compras:inventory.filters.familiesAll')).toBeInTheDocument()
+    expect(within(select).getByText('Mylight Riel Magnético Mini')).toBeInTheDocument()
+    expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(expect.objectContaining({ family_id: undefined }))
+  })
+
+  it('elegir una familia manda family_id numérico y vuelve a la página 1', async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    const select = screen.getByLabelText('compras:inventory.filters.familyLabel')
+    await waitFor(() => expect(within(select).getByText('Flua Luna S')).toBeInTheDocument())
+
+    fireEvent.change(select, { target: { value: '20' } })
+
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
+      expect.objectContaining({ family_id: 20, page: 1 }),
+    ))
+  })
+
+  it('se combina con la búsqueda de texto y "Limpiar filtros" lo quita', async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
+    const select = screen.getByLabelText('compras:inventory.filters.familyLabel')
+    await waitFor(() => expect(within(select).getByText('Flua Luna S')).toBeInTheDocument())
+
+    fireEvent.change(select, { target: { value: '21' } })
+    await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
+      expect.objectContaining({ family_id: 21 }),
+    ))
+
+    fireEvent.click(screen.getByText('compras:inventory.filters.clear'))
+
+    // La consulta sin filtro ya está en la caché de React Query, así que no hay una llamada nueva a la
+    // API que afirmar: el criterio observable es que el select vuelve a "todas" y desaparece el botón.
+    await waitFor(() => expect((screen.getByLabelText('compras:inventory.filters.familyLabel') as HTMLSelectElement).value).toBe(''))
+    expect(screen.queryByText('compras:inventory.filters.clear')).not.toBeInTheDocument()
+  })
+})
+
 describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)', () => {
   it('lista familias como cards, con valor total colapsado, y expande inline a la tabla completa de Productos', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({
@@ -1283,8 +1662,9 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
     fireEvent.click(screen.getByText('compras:inventory.tabs.families'))
 
     // Valor total visible en la card COLAPSADA (mockup), sin necesidad de expandir.
+    // SCRUM-843 — sin decimales, mismo criterio que el KPI "Valor total del inventario".
     await waitFor(() => expect(screen.getByText('Kit Baño')).toBeInTheDocument())
-    expect(screen.getByText('$50.00')).toBeInTheDocument()
+    expect(screen.getByText('$50')).toBeInTheDocument()
     expect(screen.queryByText('FAM-A')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('family-toggle-1'))
@@ -1299,7 +1679,7 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
   it('"Generar compra" está disponible directo en la card colapsada, sin expandir primero', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({
@@ -1327,7 +1707,7 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
   it('oculta "Generar compra" y el valor total en modo restringido (RN REQ-180, SCRUM-243)', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({
@@ -1355,7 +1735,7 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
   it('SCRUM-773 (CA4) — compras.limited.view: ve el valor total de la familia (restricted=false) pero NO "Generar compra" (can_manage=false)', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: false,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({
@@ -1378,7 +1758,7 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
     // "Generar compra" quedaba visible aunque el usuario estuviera en modo Ventas & Diseño.
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({
@@ -1407,7 +1787,7 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
     // asignado.") nunca se mostraba: el componente solo revisaba generatePurchase.isSuccess.
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
-      kpis: { total_products: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
       data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
     })
     mockedComprasApi.families.list.mockResolvedValue({

@@ -4,6 +4,7 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoAlertTriangle, IcoCheck } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   orderId: number
@@ -53,7 +54,7 @@ export default function PedidoDetailModal({ orderId, onClose }: Props) {
                 <div className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5">
                   {t('ventasDiseno:orders.detail.headerSub', {
                     project: order.sales_project?.name ?? '—',
-                    date:    new Date(order.approved_at).toLocaleDateString(),
+                    date:    formatDateFromTimestamp(order.approved_at),
                     owner:   order.owner.name,
                   })}
                 </div>

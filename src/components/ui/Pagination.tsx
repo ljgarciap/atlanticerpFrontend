@@ -14,6 +14,10 @@ interface Props {
   perPage:         number | 'all'
   onPageChange:    (page: number) => void
   onPerPageChange: (perPage: number | 'all') => void
+  /** SCRUM-990 — opciones de tamaño de página propias (por defecto 10/20/50/100). */
+  perPageOptions?: readonly number[]
+  /** SCRUM-990 — `false` oculta la opción "Todos": un listado de ~25.800 filas (catálogo de Lafayette) nunca se carga entero. */
+  allowAll?:       boolean
 }
 
 const PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
@@ -29,7 +33,7 @@ const PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
  * pantalla en su propio `useState` inicial (este componente no tiene default propio) — ver
  * docs/changelog.md para la lista de pantallas migradas en este batch.
  */
-export function Pagination({ meta, perPage, onPageChange, onPerPageChange }: Props) {
+export function Pagination({ meta, perPage, onPageChange, onPerPageChange, perPageOptions = PER_PAGE_OPTIONS, allowAll = true }: Props) {
   const { t } = useTranslation('common')
   const lastPage = meta.last_page
 
@@ -48,10 +52,10 @@ export function Pagination({ meta, perPage, onPageChange, onPerPageChange }: Pro
           onChange={e => onPerPageChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
           className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary/30 bg-white"
         >
-          {PER_PAGE_OPTIONS.map(n => (
+          {perPageOptions.map(n => (
             <option key={n} value={n}>{n} {t('pagination.perPage')}</option>
           ))}
-          <option value="all">{t('pagination.all')}</option>
+          {allowAll && <option value="all">{t('pagination.all')}</option>}
         </select>
       </div>
       {lastPage > 1 && (

@@ -192,3 +192,21 @@ export const ACTIVITY_META: Record<TipoActividad, { color: string; icon: string 
   visita:   { color: '#f59e0b', icon: 'IcoMapPin' },
   otro:     { color: '#64748b', icon: 'IcoClock' },
 }
+
+/** SCRUM-944/945 — umbrales de días configurables de CRM, ver `App\Modules\CRM\Services\CrmSettingsService`. */
+export interface CrmSettings {
+  /** Días hacia adelante desde hoy para "entrega próxima" (Dashboard + filtro urgency=proximo). */
+  entrega_proxima_dias: number
+  /** Días hacia atrás de actividad para que un proyecto cuente como "reciente" (filtro freshness=recent). */
+  freshness_recent_dias: number
+  /** Días sin actividad a partir de los cuales un proyecto cuenta como "frío"/stale. */
+  freshness_stale_dias: number
+  /** SCRUM-998 — máximo de productos para un PDF de Catálogo plano y síncrono; por encima se genera un ZIP de volúmenes en segundo plano. */
+  catalog_pdf_max_single_products: number
+  /** SCRUM-998 — máximo de productos CON foto para un PDF plano; por encima se genera el ZIP en segundo plano (cada foto remota es una descarga). */
+  catalog_pdf_max_single_photos: number
+  /** SCRUM-998 — productos por volumen (un PDF por tanda) del ZIP en segundo plano. */
+  catalog_pdf_volume_size: number
+  /** SCRUM-998 — días que se conserva el ZIP generado antes de borrarlo. */
+  catalog_pdf_export_retention_days: number
+}

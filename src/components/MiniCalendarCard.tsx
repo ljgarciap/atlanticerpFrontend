@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { OutlookCalendarEvent } from '@/types/calendar'
 import { startOfWeek, startOfMonth, addDays, toDateKey, isSameDay } from '@/lib/dateGrid'
+import { formatTimeShort } from '@/utils/dates'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -53,7 +54,7 @@ export default function MiniCalendarCard({ view, events, today = new Date(), onS
             <div className="flex items-baseline gap-2">
               {e.start_at && (
                 <span className="font-semibold shrink-0">
-                  {new Date(e.start_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTimeShort(e.start_at)}
                 </span>
               )}
               <span className="truncate">{e.title || t('ventasDiseno:home.calendar.untitled')}</span>

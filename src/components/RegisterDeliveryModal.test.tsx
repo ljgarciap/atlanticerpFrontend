@@ -41,7 +41,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
       },
     ],
     documents: [], contacto_cliente: null, contacto_telefono: null, contacto_correo: null, direccion_entrega: null,
-    cliente_master: 'Constructora Pacífico Holdings', subcliente: 'Constructora Pacífico',
+    cliente_master: 'Constructora Pacífico Holdings', subcliente: 'Constructora Pacífico', observaciones: null,
     ...overrides,
   }
 }
@@ -98,6 +98,17 @@ describe('RegisterDeliveryModal', () => {
     fireEvent.click(screen.getByTestId('register-delivery-save'))
     expect(screen.getByTestId('register-delivery-motivo-error-100')).toBeInTheDocument()
     expect(mutateMock).not.toHaveBeenCalled()
+  })
+
+  // SCRUM-1148 (Pre-QA) — el texto libre de "Otra" tiene tope de 250 (el backend lo valida; antes devolvía 500).
+  it('SCRUM-1148 — el texto libre de "Otra" tiene un tope de 250 caracteres', () => {
+    render(<RegisterDeliveryModal orderId={23} onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByTestId('register-delivery-edit-100'))
+    fireEvent.change(screen.getByTestId('register-delivery-qty-100'), { target: { value: '4' } })
+    fireEvent.change(screen.getByTestId('register-delivery-motivo-100'), { target: { value: 'otra' } })
+
+    expect(screen.getByTestId('register-delivery-motivo-detalle-100')).toHaveAttribute('maxlength', '250')
   })
 
   it('RN1 (REQ-324) — "Otra" exige texto libre obligatorio', () => {

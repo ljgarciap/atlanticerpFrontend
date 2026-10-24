@@ -4,19 +4,22 @@ import { queryClient } from '@/lib/queryClient'
 import { useAuthStore } from '@/store/authStore'
 import { useDevLiveReload } from '@/hooks/useDevLiveReload'
 import { getHomeRoute } from '@/lib/homeRoute'
+import { hasGerenciaScope } from '@/lib/gerenciaScope'
 import type { Role } from '@/types/auth'
 import AppShell             from '@/components/AppShell'
 import FocusedViewShell     from '@/components/FocusedViewShell'
 import SecurityLayout       from '@/components/SecurityLayout'
 import AiUsagePage          from '@/pages/AiUsagePage'
+import GlobalSettingsPage   from '@/pages/GlobalSettingsPage'
 import LogsPage             from '@/pages/LogsPage'
+import AuditActivityPage    from '@/pages/AuditActivityPage'
 import LoginPage            from '@/pages/LoginPage'
 import ForgotPasswordPage   from '@/pages/auth/ForgotPasswordPage'
 import ResetPasswordPage    from '@/pages/auth/ResetPasswordPage'
-import RegisterPage         from '@/pages/auth/RegisterPage'
 import ChangePasswordPage from '@/pages/ChangePasswordPage'
 import ComprasHomePage      from '@/pages/compras/ComprasHomePage'
 import ComprasProvidersPage from '@/pages/compras/ProvidersPage'
+import ComprasSettingsPage from '@/pages/compras/ComprasSettingsPage'
 import NewPurchaseOrderPage from '@/pages/compras/NewPurchaseOrderPage'
 import OrdersPage        from '@/pages/compras/OrdersPage'
 import OrderDetailPage   from '@/pages/compras/OrderDetailPage'
@@ -28,6 +31,7 @@ import AgencyDetailPage    from '@/pages/compras/AgencyDetailPage'
 import PaymentsPage        from '@/pages/compras/PaymentsPage'
 import ClaimsPage          from '@/pages/compras/ClaimsPage'
 import ReplacementRequestsPage from '@/pages/compras/ReplacementRequestsPage'
+import ReplenishmentPage from '@/pages/compras/ReplenishmentPage'
 import ComprasReportsPage from '@/pages/compras/ReportsPage'
 import VentasPage        from '@/pages/VentasPage'
 import InventarioPage    from '@/pages/InventarioPage'
@@ -64,6 +68,9 @@ import FacturacionPage   from '@/pages/admin-contab/FacturacionPage'
 import EstadoCuentaPage from '@/pages/admin-contab/EstadoCuentaPage'
 import CobrosPage from '@/pages/admin-contab/CobrosPage'
 import NotasCreditoPage from '@/pages/admin-contab/NotasCreditoPage'
+import AbonosPage from '@/pages/admin-contab/AbonosPage'
+import SaldoFavorPage from '@/pages/admin-contab/SaldoFavorPage'
+import CompensacionesPage from '@/pages/admin-contab/CompensacionesPage'
 import ComisionesInternasPage from '@/pages/admin-contab/ComisionesInternasPage'
 import ComisionesExternasPage from '@/pages/admin-contab/ComisionesExternasPage'
 import ArqueoCajaPage from '@/pages/admin-contab/ArqueoCajaPage'
@@ -73,17 +80,29 @@ import MensualClientePage from '@/pages/admin-contab/MensualClientePage'
 import MensualClienteAcumuladoPage from '@/pages/admin-contab/MensualClienteAcumuladoPage'
 import LibroFacturasPage from '@/pages/admin-contab/LibroFacturasPage'
 import VentasMedioPagoPage from '@/pages/admin-contab/VentasMedioPagoPage'
+import FraudSettingsPage from '@/pages/admin-contab/FraudSettingsPage'
+import ClientesFiscalPage from '@/pages/admin-contab/ClientesFiscalPage'
 import GerenciaPage      from '@/pages/GerenciaPage'
+import LumoBitacorasPage from '@/pages/LumoBitacorasPage'
+import SoportePage       from '@/pages/SoportePage'
+import ManualesPage      from '@/pages/ManualesPage'
+import LegacyMigrationDashboardPage from '@/pages/LegacyMigrationDashboardPage'
+import LegacyPagosPage from '@/pages/LegacyPagosPage'
+import VistaIcgPage from '@/pages/VistaIcgPage'
 import OperacionesPage   from '@/pages/OperacionesPage'
 import VentasDisenoHomePage     from '@/pages/ventas-diseno/HomePage'
 import VentasDisenoPipelinePage from '@/pages/ventas-diseno/PipelinePage'
 import VentasDisenoClientsPage  from '@/pages/ventas-diseno/ClientsPage'
+import VentasDisenoArchitectsPage from '@/pages/ventas-diseno/ArchitectsPage'
 import VentasDisenoQuotePage    from '@/pages/ventas-diseno/QuotePage'
 import VentasDisenoReportsPage  from '@/pages/ventas-diseno/ReportsPage'
 import VentasDisenoQuotesListPage from '@/pages/ventas-diseno/QuotesListPage'
 import VentasDisenoAuditLogPage from '@/pages/ventas-diseno/AuditLogPage'
 import VentasDisenoCatalogPage  from '@/pages/ventas-diseno/CatalogPage'
 import VentasDisenoPedidosPage  from '@/pages/ventas-diseno/PedidosPage'
+import VentasDisenoCotizaYaPage       from '@/pages/ventas-diseno/CotizaYaPage'
+import VentasDisenoCotizaYaFormPage   from '@/pages/ventas-diseno/CotizaYaFormPage'
+import VentasDisenoCotizaYaDetailPage from '@/pages/ventas-diseno/CotizaYaDetailPage'
 import CrmDashboardPage     from '@/pages/crm/DashboardPage'
 import CrmProjectsListPage  from '@/pages/crm/ProjectsListPage'
 import SettingsPage       from '@/pages/SettingsPage'
@@ -93,14 +112,12 @@ import SecurityLevelsPage  from '@/pages/security/SecurityLevelsPage'
 import DepartmentsPage     from '@/pages/security/DepartmentsPage'
 import RolesPage           from '@/pages/security/RolesPage'
 import SecurityAlertsPage  from '@/pages/security/SecurityAlertsPage'
+import ImpersonationSessionsPage from '@/pages/security/ImpersonationSessionsPage'
 import NotificationRulesPage from '@/pages/security/NotificationRulesPage'
+import RequireAuth from '@/components/RequireAuth'
+import GuestOnly from '@/components/GuestOnly'
 import SessionExpiredModal from '@/components/SessionExpiredModal'
 import Toaster              from '@/components/Toaster'
-
-function RequireAuth({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore(s => s.user)
-  return user ? <>{children}</> : <Navigate to="/login" replace />
-}
 
 // Ruta desconocida o legado (ej. /dashboard, eliminada en SCRUM-711) — mismo criterio de
 // resolución por módulo que el resto de los guards de acá arriba (getHomeRoute ya devuelve
@@ -117,15 +134,12 @@ function CatchAllRedirect() {
 // src/lib/homeRoute.ts para el detalle completo. El fallback ahora se resuelve por usuario
 // según sus módulos reales en vez de un módulo fijo.
 
-function GuestOnly({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore(s => s.user)
-  return user ? <Navigate to={getHomeRoute(user)} replace /> : <>{children}</>
-}
-
-function RequireRole({ children, roles }: { children: React.ReactNode; roles?: Role[] }) {
+// `orGerenciaScope` (SCRUM-1150): además de los roles, deja pasar a quien tenga el alcance de Gerencia por persona
+// (`ventas_diseno.gerencia_scope`). Solo para rutas de CRM y Ventas & Diseño.
+function RequireRole({ children, roles, orGerenciaScope }: { children: React.ReactNode; roles?: Role[]; orGerenciaScope?: boolean }) {
   const user = useAuthStore(s => s.user)
   if (!user) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user.role)) return <Navigate to={getHomeRoute(user)} replace />
+  if (roles && !roles.includes(user.role) && !(orGerenciaScope && hasGerenciaScope(user))) return <Navigate to={getHomeRoute(user)} replace />
   return <>{children}</>
 }
 
@@ -149,7 +163,6 @@ export default function App() {
           <Route path="/login"           element={<GuestOnly><LoginPage /></GuestOnly>} />
           <Route path="/forgot-password" element={<GuestOnly><ForgotPasswordPage /></GuestOnly>} />
           <Route path="/reset-password"  element={<GuestOnly><ResetPasswordPage /></GuestOnly>} />
-          <Route path="/register"        element={<GuestOnly><RegisterPage /></GuestOnly>} />
 
           {/* Authenticated shell — all app routes live inside */}
           <Route element={<RequireAuth><AppShell /></RequireAuth>}>
@@ -174,7 +187,7 @@ export default function App() {
             <Route path="/crm" element={<Navigate to="/ventas-diseno/pipeline" replace />} />
             <Route path="/crm/dashboard" element={
               <RequirePermission permission="ventas_diseno.read">
-                <RequireRole roles={['management', 'superadmin']}>
+                <RequireRole roles={['management', 'superadmin']} orGerenciaScope>
                   <CrmDashboardPage />
                 </RequireRole>
               </RequirePermission>
@@ -193,13 +206,19 @@ export default function App() {
               </RequirePermission>
             } />
             <Route path="/ventas-diseno/pipeline" element={
-              <RequirePermission permission="ventas_diseno.read">
+              <RequirePermission permission={['ventas_diseno.read', 'ventas_diseno.pipeline.read_all']}>
                 <VentasDisenoPipelinePage />
               </RequirePermission>
             } />
             <Route path="/ventas-diseno/clients" element={
               <RequirePermission permission="ventas_diseno.read">
                 <VentasDisenoClientsPage />
+              </RequirePermission>
+            } />
+            {/* SCRUM-907 — pantalla "Arquitectos" del menú CRM. */}
+            <Route path="/ventas-diseno/architects" element={
+              <RequirePermission permission="ventas_diseno.read">
+                <VentasDisenoArchitectsPage />
               </RequirePermission>
             } />
             {/* Grupo 4 (Reportes) — ver memory/project_backlog_ventas_diseno_req.md */}
@@ -214,12 +233,31 @@ export default function App() {
                 <VentasDisenoQuotesListPage />
               </RequirePermission>
             } />
-            {/* Epic CRM Batch F (SCRUM-703→710, REQ-623→630) — "Pedidos" queda en Ventas & Diseño
+            {/* SCRUM-1119 — Pedidos muestra márgenes y montos: solo Compras, Gerencia y superadmin (el backend
+                lo exige por rol también; Compras no tiene ventas_diseno.read, por eso no es RequirePermission).
+                Epic CRM Batch F (SCRUM-703→710, REQ-623→630) — "Pedidos" queda en Ventas & Diseño
                 (no en CRM, ver hoja CRM del Excel: ÁREA="Ventas & Diseño") — placeholder hasta
                 Batch F, mismo patrón que el resto de módulos sin pantalla real todavía. */}
             <Route path="/ventas-diseno/pedidos" element={
-              <RequirePermission permission="ventas_diseno.read">
+              <RequireRole roles={['lider_compras', 'management', 'superadmin']} orGerenciaScope>
                 <VentasDisenoPedidosPage />
+              </RequireRole>
+            } />
+            {/* SCRUM-1120 — CotizaYA: cotizaciones de venta chica, independientes del flujo comercial.
+                Mismos permisos que Cotizaciones (leer para ver, escribir para crear). */}
+            <Route path="/ventas-diseno/cotizaya" element={
+              <RequirePermission permission="ventas_diseno.read">
+                <VentasDisenoCotizaYaPage />
+              </RequirePermission>
+            } />
+            <Route path="/ventas-diseno/cotizaya/nueva" element={
+              <RequirePermission permission="ventas_diseno.write">
+                <VentasDisenoCotizaYaFormPage />
+              </RequirePermission>
+            } />
+            <Route path="/ventas-diseno/cotizaya/:id" element={
+              <RequirePermission permission="ventas_diseno.read">
+                <VentasDisenoCotizaYaDetailPage />
               </RequirePermission>
             } />
             <Route path="/ventas-diseno/quotes/:id?" element={
@@ -246,14 +284,28 @@ export default function App() {
             {/* Compras — SCRUM-183→196 (Proveedores + Nueva Orden) + SCRUM-201→209 (Ver Órdenes,
                 REQ-138→146), ver docs/specs/compras-proveedores-sprint2.md */}
             <Route path="/compras" element={<Navigate to="/compras/inicio" replace />} />
+            {/* SCRUM-908 (Pre-QA 2026-09-21) — antes exigía compras.read a secas: un
+                Vendedor/Diseñador responsable de proyecto puede tener una aprobación real
+                pendiente (replacement_request, decidible vía ventas_diseno.edit) sin tener
+                ningún permiso de Compras, y nunca llegaba a ver su propia tarjeta de
+                Aprobaciones Pendientes. Ampliado a la unión de los permisos nativos que dan
+                acceso a algún tipo de aprobación del módulo (decisión de Luis) — ve el Home
+                completo de Compras, no solo la tarjeta. */}
             <Route path="/compras/inicio" element={
-              <RequirePermission permission="compras.read">
+              <RequirePermission permission={['compras.read', 'compras.edit', 'compras.approve', 'compras.zona-libre.approve', 'compras.sustitutos.manage', 'ventas_diseno.edit']}>
                 <ComprasHomePage />
               </RequirePermission>
             } />
             <Route path="/compras/proveedores" element={
               <RequirePermission permission="compras.read">
                 <ComprasProvidersPage />
+              </RequirePermission>
+            } />
+            {/* SCRUM-861 punto 3 — "Ajustes de Compras" salió de Proveedores, ruta propia,
+                mismo patrón que /bodega/configuracion y /servicios/ajustes. */}
+            <Route path="/compras/configuracion" element={
+              <RequirePermission permission="compras.settings.configure">
+                <ComprasSettingsPage />
               </RequirePermission>
             } />
             <Route path="/compras/ordenes" element={
@@ -268,17 +320,25 @@ export default function App() {
                 <NewPurchaseOrderPage />
               </RequirePermission>
             } />
+            <Route path="/compras/reposicion" element={
+              // SCRUM-1184 — la pantalla existe para generar órdenes de compra: mismo permiso que Nueva Orden (compras.write).
+              <RequirePermission permission="compras.write">
+                <ReplenishmentPage />
+              </RequirePermission>
+            } />
             <Route path="/compras/ordenes/:id" element={
               // bodega.read también puede ver el detalle (solo lectura) — botón "Ver orden" del
               // panel "Por recibir" de Bodega Home (SCRUM-371/REQ-301). compras.limited.view
               // (SCRUM-771) por el mismo motivo que la lista.
-              <RequirePermission permission={["compras.read", "bodega.read", "compras.limited.view"]}>
+              <RequirePermission permission={["compras.read", "bodega.read", "compras.limited.view", "compras.logistica.view"]}>
                 <OrderDetailPage />
               </RequirePermission>
             } />
             <Route path="/compras/logistica" element={
-              // SCRUM-771 — misma pantalla/endpoint que Ver Órdenes para este rol.
-              <RequirePermission permission={["compras.read", "compras.limited.view"]}>
+              // SCRUM-771 — misma pantalla/endpoint que Ver Órdenes para este rol. SCRUM-1013 (rebote):
+              // compras.logistica.view es el permiso angosto del vendedor — solo esta pantalla y el
+              // detalle de la orden, nunca Ver Órdenes ni el resto de Compras.
+              <RequirePermission permission={["compras.read", "compras.limited.view", "compras.logistica.view"]}>
                 <LogisticsPage />
               </RequirePermission>
             } />
@@ -322,7 +382,10 @@ export default function App() {
               // SCRUM-771 (corrección 2026-08-18) — Líder de Operaciones ya no tiene compras.read
               // general (ver User::effectivePermissionsV2() en atlanticerp-backend), solo el permiso
               // angosto de Sustitutos (acceso completo, no solo lectura).
-              <RequirePermission permission={["compras.read", "compras.sustitutos.manage"]}>
+              // SCRUM-818 — ventas_diseno.edit agregado: el vendedor/diseñador responsable del
+              // proyecto necesita esta pantalla para crear/ver/decidir SUS propias solicitudes
+              // (scoping real por proyecto en el backend, ver ReplacementRequestController).
+              <RequirePermission permission={["compras.read", "compras.sustitutos.manage", "ventas_diseno.edit"]}>
                 <ReplacementRequestsPage />
               </RequirePermission>
             } />
@@ -342,8 +405,13 @@ export default function App() {
                 <PedidosPage />
               </RequirePermission>
             } />
+            {/* SCRUM-897 — se agrega `admin_contab.view` al permiso de entrada: Administración →
+                Facturación replica este mismo botón/pantalla (Felix/Yaneth/Mark/Gerencia no tienen
+                `bodega.read` ni `ventas_diseno.read`). Backend Dev ya amplió el roster real en
+                `OrderStatusController::resolveAccess()` (SCRUM-897) — este permiso de ruta solo
+                evita el flash de "acceso denegado" del lado del cliente antes de llegar al backend. */}
             <Route path="/bodega/pedidos/status" element={
-              <RequirePermission permission={['bodega.read', 'ventas_diseno.read']}>
+              <RequirePermission permission={['bodega.read', 'ventas_diseno.read', 'admin_contab.view']}>
                 <OrderStatusPage />
               </RequirePermission>
             } />
@@ -354,7 +422,9 @@ export default function App() {
               </RequirePermission>
             } />
             <Route path="/bodega/bodegas" element={
-              <RequirePermission permission="bodega.read">
+              // SCRUM-1021 — bodega.warehouses.view: el vendedor consulta las bodegas (Zona Libre incluida)
+              // sin el resto del módulo Bodega.
+              <RequirePermission permission={["bodega.read", "bodega.warehouses.view"]}>
                 <BodegasPage />
               </RequirePermission>
             } />
@@ -444,7 +514,15 @@ export default function App() {
 
             {/* Business modules (placeholders) */}
             <Route path="/ventas"        element={<VentasPage />} />
-            <Route path="/inventario"    element={<InventarioPage />} />
+            {/* SCRUM-1010 — misma regla de acceso que el backend (InventoryController::resolveAccess):
+                superadmin, compras.read, compras.limited.view (Líder de Operaciones) o ventas_diseno.read
+                (modo restringido). Antes cualquier rol autenticado entraba y veía "No hay familias
+                creadas todavía" ante el 403. */}
+            <Route path="/inventario"    element={
+              <RequirePermission permission={['compras.read', 'compras.limited.view', 'ventas_diseno.read']}>
+                <InventarioPage />
+              </RequirePermission>
+            } />
             {/* SCRUM-58 — 4 módulos del catálogo de 7 (ModuleCatalog.php) sin pantallas
                 reales todavía: admin_contab, gerencia, operaciones.
                 "compras" ya no es placeholder — ver rutas reales arriba (SCRUM-183→209).
@@ -508,54 +586,100 @@ export default function App() {
                 provisional mientras Inicio no estaba implementado, ver nota previa de este
                 comentario en el historial de git). */}
             <Route path="/admin-contab"  element={<Navigate to="/admin-contab/inicio" replace />} />
+            {/* SCRUM-882 — mismo hallazgo/fix ya aplicado a /admin-contab/reportes (SCRUM-643→647):
+                vendedor_disenador tiene `admin_contab.view=true` (lo necesita para Comisiones
+                Internas) y llegaba acá por URL directa a un shell vacío. `RequireRole` anidado
+                dentro de `RequirePermission`, mismo roster que routes/admin-contab.php. */}
             <Route path="/admin-contab/inicio" element={
               <RequirePermission permission="admin_contab.view">
-                <InicioPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <InicioPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch Configuración Fiscal (SCRUM-632→637, REQ-555→560) — este gate de entrada es
                 el normal del router (mismo criterio que el resto de rutas); el gate real (Mark,
                 no un permiso de nivel) vive en el 403 del backend, ver FiscalConfigPage. */}
             <Route path="/admin-contab/fiscal" element={
-              <RequirePermission permission="admin_contab.view">
-                <FiscalConfigPage />
-              </RequirePermission>
+              <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                <RequirePermission permission="admin_contab.view">
+                  <FiscalConfigPage />
+                </RequirePermission>
+              </RequireRole>
             } />
             {/* Batch Datos de la Empresa (SCRUM-638→642, REQ-561→565) — mismo criterio que
                 /admin-contab/fiscal: gate de entrada normal del router, gate real (Mark) en el
                 403 del backend, ver CompanyProfilePage. */}
             <Route path="/admin-contab/empresa" element={
-              <RequirePermission permission="admin_contab.view">
-                <CompanyProfilePage />
-              </RequirePermission>
+              <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                <RequirePermission permission="admin_contab.view">
+                  <CompanyProfilePage />
+                </RequirePermission>
+              </RequireRole>
             } />
             {/* Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas
                 Bancarias. A diferencia de Fiscal/Empresa, NO es exclusiva de Mark — el backend
                 gatea cada acción por rol (Felix/Yaneth/Gerencia), sin 403 en el GET general. */}
+            {/* SCRUM-882 — mismo fix que /admin-contab/inicio arriba: vendedor_disenador no debe
+                llegar acá por URL directa (Tesorería no forma parte de lo que ve este rol). */}
             <Route path="/admin-contab/cuentas-bancarias" element={
               <RequirePermission permission="admin_contab.view">
-                <BankAccountsPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <BankAccountsPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 2 del cuerpo principal (SCRUM-513→518, REQ-436→441) — Facturación. Mismo
-                criterio que Cuentas Bancarias: no exclusiva de Mark, gate por rol en el backend. */}
+                criterio que Cuentas Bancarias: no exclusiva de Mark, gate por rol en el backend.
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/facturacion" element={
               <RequirePermission permission="admin_contab.view">
-                <FacturacionPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <FacturacionPage />
+                </RequireRole>
               </RequirePermission>
             } />
-            {/* Batch 5 del cuerpo principal (SCRUM-539→544) — reemplaza el placeholder de REQ-451. */}
+            {/* Batch 5 del cuerpo principal (SCRUM-539→544) — reemplaza el placeholder de REQ-451.
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/cobros" element={
               <RequirePermission permission="admin_contab.view">
-                <CobrosPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <CobrosPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 10 del cuerpo principal (SCRUM-553→558, REQ-476→481) — apertura de Notas
                 Crédito y Devoluciones. Mismo criterio que Facturación/Cobros: no exclusiva de
-                Mark, gate por rol en el backend. Sin submit real todavía (Batch 11). */}
+                Mark, gate por rol en el backend. Sin submit real todavía (Batch 11).
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/notas-credito" element={
               <RequirePermission permission="admin_contab.view">
-                <NotasCreditoPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <NotasCreditoPage />
+                </RequireRole>
+              </RequirePermission>
+            } />
+            {/* SCRUM-902/903 — mismo gate que Cobros/Notas Crédito, mismo nivel del menú Movimientos. */}
+            <Route path="/admin-contab/abonos" element={
+              <RequirePermission permission="admin_contab.view">
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <AbonosPage />
+                </RequireRole>
+              </RequirePermission>
+            } />
+            {/* SCRUM-1168 F3 — Compensaciones (concepto nuevo de cobros): mismo gate que Cobros y Saldo a favor. */}
+            <Route path="/admin-contab/compensaciones" element={
+              <RequirePermission permission="admin_contab.view">
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <CompensacionesPage />
+                </RequireRole>
+              </RequirePermission>
+            } />
+            <Route path="/admin-contab/saldo-favor" element={
+              <RequirePermission permission="admin_contab.view">
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <SaldoFavorPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 14 del cuerpo principal (SCRUM-575→579, REQ-498→502) — Comisiones Internas.
@@ -571,27 +695,37 @@ export default function App() {
             {/* Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Mismo gate
                 `admin_contab.view` — a diferencia de Internas, la audiencia acá es únicamente
                 Felix/Yaneth/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
-                ADR-SCRUM585-590-batch16-comisiones-externas.md. */}
+                ADR-SCRUM585-590-batch16-comisiones-externas.md.
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio (a diferencia
+                de Comisiones Internas, acá no hay versión acotada para vendedor_disenador). */}
             <Route path="/admin-contab/comisiones/externas" element={
               <RequirePermission permission="admin_contab.view">
-                <ComisionesExternasPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <ComisionesExternasPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 18 (SCRUM-597→601, REQ-520→524) — Arqueo / Flujo de Caja, parte 1. Mismo gate
                 `admin_contab.view` de entrada que el resto del módulo — la restricción fina de
                 Yaneth (sin Proyectado/Real 30-90d) vive dentro de la página, no acá (ver
-                ADR-SCRUM597-601-batch18-arqueo-caja.md). */}
+                ADR-SCRUM597-601-batch18-arqueo-caja.md).
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/arqueo-caja" element={
               <RequirePermission permission="admin_contab.view">
-                <ArqueoCajaPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <ArqueoCajaPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 20 (SCRUM-612→617, REQ-535→540) — Caja Chica. Mismo gate de entrada
                 `admin_contab.view` que el resto del módulo — el gate fino por rol (registrar/
-                generar reporte solo Felix/Yaneth, aprobar exclusivo Mark) vive en el backend. */}
+                generar reporte solo Felix/Yaneth, aprobar exclusivo Mark) vive en el backend.
+                SCRUM-882 — RequireRole agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/caja-chica" element={
               <RequirePermission permission="admin_contab.view">
-                <PettyCashPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <PettyCashPage />
+                </RequireRole>
               </RequirePermission>
             } />
             {/* Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. CORREGIDO 2026-08-27
@@ -607,7 +741,7 @@ export default function App() {
                 routes/admin-contab.php, sección Reportes). */}
             <Route path="/admin-contab/reportes" element={
               <RequirePermission permission="admin_contab.view">
-                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'management']}>
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
                   <ReportesPage />
                 </RequireRole>
               </RequirePermission>
@@ -618,14 +752,14 @@ export default function App() {
                 medio construir. Alcanzables por URL directa mientras tanto. */}
             <Route path="/admin-contab/reportes/mensual-cliente" element={
               <RequirePermission permission="admin_contab.view">
-                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'management']}>
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
                   <MensualClientePage />
                 </RequireRole>
               </RequirePermission>
             } />
             <Route path="/admin-contab/reportes/mensual-cliente-acumulado" element={
               <RequirePermission permission="admin_contab.view">
-                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'management']}>
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
                   <MensualClienteAcumuladoPage />
                 </RequireRole>
               </RequirePermission>
@@ -635,16 +769,32 @@ export default function App() {
                 directa mientras tanto. */}
             <Route path="/admin-contab/reportes/libro-facturas" element={
               <RequirePermission permission="admin_contab.view">
-                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'management']}>
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
                   <LibroFacturasPage />
                 </RequireRole>
               </RequirePermission>
             } />
             <Route path="/admin-contab/reportes/ventas-medio-pago" element={
               <RequirePermission permission="admin_contab.view">
-                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'management']}>
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
                   <VentasMedioPagoPage />
                 </RequireRole>
+              </RequirePermission>
+            } />
+            {/* SCRUM-1002 — validar/editar los datos fiscales de un cliente desde Admin&Cont (Mark, Felix). Entrada
+                normal del router; el gate real (permiso de edición) está en la página y en el backend. */}
+            <Route path="/admin-contab/datos-fiscales-clientes" element={
+              <RequirePermission permission="admin_contab.view">
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <ClientesFiscalPage />
+                </RequireRole>
+              </RequirePermission>
+            } />
+            {/* REQ-635 (SCRUM-811) — administración de umbrales de alertas de fraude,
+                superadmin.all estricto (mismo gate que /bodega/configuracion). */}
+            <Route path="/admin-contab/configuracion-fraude" element={
+              <RequirePermission permission="superadmin.all">
+                <FraudSettingsPage />
               </RequirePermission>
             } />
             <Route path="/gerencia"      element={
@@ -654,10 +804,60 @@ export default function App() {
             } />
             <Route path="/operaciones"   element={<OperacionesPage />} />
 
+            {/* SCRUM-925 — el Sidebar ya oculta el link a quien no tiene lumo.view; esto es
+                defensa en profundidad para quien entre por URL directa (Arquitecto, 2026-09-16). */}
+            <Route path="/lumo" element={
+              <RequirePermission permission="lumo.view">
+                <LumoBitacorasPage />
+              </RequirePermission>
+            } />
+
+            {/* SCRUM-923 — visible a cualquier usuario autenticado, sin RequirePermission
+                (decisión de Luis 2026-09-16). */}
+            <Route path="/soporte" element={<SoportePage />} />
+
+            {/* SCRUM-984 — visible a cualquier usuario autenticado; el panel de carga se gatea por
+                manuales.manage dentro de la página. */}
+            <Route path="/manuales" element={<ManualesPage />} />
+
+            {/* SCRUM-816 — dashboard de migración ICG. Gate role:superadmin exclusivo (ajuste
+                2026-09-04 a pedido de Luis — antes incluía management/Gerencia, mismo criterio
+                que Pagos ICG/Vista ICG abajo). No hay módulo propio en el JWT para esta épica,
+                ver docblock de LegacyMigrationDashboardController. */}
+            <Route path="/migracion/dashboard" element={
+              <RequireRole roles={['superadmin']}>
+                <LegacyMigrationDashboardPage />
+              </RequireRole>
+            } />
+
+            {/* SCRUM-827 — legacy.pagos, gate role:superadmin exclusivo (audiencia solo equipo
+                técnico, más restrictivo que el dashboard de arriba). */}
+            <Route path="/migracion/pagos" element={
+              <RequireRole roles={['superadmin']}>
+                <LegacyPagosPage />
+              </RequireRole>
+            } />
+
+            {/* "Vista ICG" (SCRUM-749, 2026-09-03) — pantalla propia bajo Migración con una
+                pestaña por entidad, sin partir de un Subcliente puntual. Gate role:superadmin
+                exclusivo, mismo criterio que Pagos ICG arriba. */}
+            <Route path="/migracion/vista" element={
+              <RequireRole roles={['superadmin']}>
+                <VistaIcgPage />
+              </RequireRole>
+            } />
+
             {/* Auditoría de uso de IA (pedido de Luis 2026-07-20) */}
             <Route path="/auditoria/uso-ia" element={
               <RequirePermission permission="superadmin.all">
                 <AiUsagePage />
+              </RequirePermission>
+            } />
+
+            {/* SCRUM-1020 — dashboard de actividad sobre audit_logs, mismo gate. */}
+            <Route path="/auditoria/actividad" element={
+              <RequirePermission permission="superadmin.all">
+                <AuditActivityPage />
               </RequirePermission>
             } />
 
@@ -668,20 +868,33 @@ export default function App() {
               </RequirePermission>
             } />
 
+            {/* SCRUM-944/945 — vista consolidada de superadmin sobre valores paramétricos de
+                negocio de todos los módulos. Agrega, no reemplaza — ver docstring de
+                GlobalSettingsPage. */}
+            <Route path="/configuracion/global" element={
+              <RequirePermission permission="superadmin.all">
+                <GlobalSettingsPage />
+              </RequirePermission>
+            } />
+
             {/* Dev sandbox */}
             <Route path="/test" element={<TestPage />} />
 
             {/* Security */}
             <Route path="/security" element={<Navigate to="/security/users" replace />} />
             <Route path="/security/users" element={
-              <RequirePermission permission="security.users">
-                <SecurityLayout><UsersPage /></SecurityLayout>
-              </RequirePermission>
+              <RequireRole roles={['management', 'superadmin']}>
+                <RequirePermission permission="security.users">
+                  <SecurityLayout><UsersPage /></SecurityLayout>
+                </RequirePermission>
+              </RequireRole>
             } />
             <Route path="/security/levels" element={
-              <RequirePermission permission="security.levels">
-                <SecurityLayout><SecurityLevelsPage /></SecurityLayout>
-              </RequirePermission>
+              <RequireRole roles={['management', 'superadmin']}>
+                <RequirePermission permission="security.levels">
+                  <SecurityLayout><SecurityLevelsPage /></SecurityLayout>
+                </RequirePermission>
+              </RequireRole>
             } />
             <Route path="/security/departments" element={
               <RequireRole roles={['superadmin', 'management']}>
@@ -691,6 +904,11 @@ export default function App() {
             <Route path="/security/alerts" element={
               <RequirePermission permission="superadmin.all">
                 <SecurityLayout><SecurityAlertsPage /></SecurityLayout>
+              </RequirePermission>
+            } />
+            <Route path="/security/impersonations" element={
+              <RequirePermission permission="superadmin.all">
+                <SecurityLayout><ImpersonationSessionsPage /></SecurityLayout>
               </RequirePermission>
             } />
             <Route path="/security/notification-rules" element={
@@ -731,9 +949,13 @@ export default function App() {
                 REQ-440, que vivía dentro de AppShell. RN1 pide explícitamente que esta pantalla NO
                 lleve el menú de navegación principal — se abre en pestaña nueva desde Facturación
                 (`FacturacionPage.tsx::openEstadoCuenta`), mismo criterio que Kardex arriba. */}
+            {/* SCRUM-882 — RequireRole agregado, mismo criterio que /admin-contab/facturacion (esta
+                pantalla se abre desde ahí, mismo público). */}
             <Route path="/admin-contab/facturacion/estado-cuenta" element={
               <RequirePermission permission="admin_contab.view">
-                <EstadoCuentaPage />
+                <RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']}>
+                  <EstadoCuentaPage />
+                </RequireRole>
               </RequirePermission>
             } />
           </Route>

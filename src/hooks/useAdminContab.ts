@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminContabApi } from '@/api/adminContabApi'
 import { rangeForPill } from '@/lib/dateGrid'
 import type {
-  FiscalSettingsPayload, CreateItbmsRatePayload,
+  FiscalSettingsPayload, FraudSettings, CreateItbmsRatePayload, FeAccionFiscal,
   CompanyProfilePayload, CreateLocationPayload, CreateContactPayload,
-  CreateBankAccountPayload, InvoiceListFilters, CreateInvoicePayload, InvoiceExportFormat,
-  PaymentMethod, CreatePaymentPayload, PaymentHistorialFilters, AccountStatementFilters,
+  CreateBankAccountPayload, UpdateBankAccountPayload, InvoiceListFilters, CreateInvoicePayload, CorrectReceptorPayload, InvoiceExportFormat, InvoiceModo,
+  PaymentMethod, CreatePaymentPayload, CreatePaymentV2Payload, PaymentHistorialFilters, AccountStatementFilters,
+  CompensacionesFilters, CompensacionLinea,
   CreateNotaCreditoPayload, PreviewCorreccionPayload, RegisterCorreccionPayload,
   NotaCreditoHistorialFilters, NotaCreditoDecisionPayload,
   CreateCommissionTierPayload, CommissionInternalFilters, CommissionExportFormat,
@@ -15,15 +16,18 @@ import type {
   PettyCashNewExpenseLine, CreatePettyCashReportPayload, UpdatePettyCashExpensePayload,
   ReportsPeriodo, ClientCollectionReportParams,
   InvoiceBookReportParams, PaymentMethodSalesReportParams,
+  AbonoFilters, AbonoPayload, SaldoFavorFilters,
 } from '@/types/adminContab'
 
 const FISCAL_SETTINGS_KEY  = ['admin-contab', 'fiscal-settings']
+const FRAUD_SETTINGS_KEY   = ['admin-contab', 'fraud-settings']
 const ITBMS_RATES_KEY      = ['admin-contab', 'itbms-rates']
 const COMPANY_PROFILE_KEY  = ['admin-contab', 'company-profile']
 const LOCATIONS_KEY        = ['admin-contab', 'locations']
 const CONTACTS_KEY         = ['admin-contab', 'contacts']
 const BANK_ACCOUNTS_KEY    = ['admin-contab', 'bank-accounts']
-const bankMovementsKey     = (bankAccountId?: number) => ['admin-contab', 'bank-movements', bankAccountId ?? 'all']
+const bankMovementsKey     = (bankAccountId?: number, page?: number, perPage?: number | 'all') =>
+  ['admin-contab', 'bank-movements', bankAccountId ?? 'all', page ?? 1, perPage ?? 20]
 
 export function useFiscalSettings() {
   return useQuery({
@@ -39,6 +43,22 @@ export function useUpdateFiscalSettings() {
   return useMutation({
     mutationFn: (data: Partial<FiscalSettingsPayload>) => adminContabApi.fiscalSettings.update(data),
     onSuccess: (data) => qc.setQueryData(FISCAL_SETTINGS_KEY, data),
+  })
+}
+
+export function useFraudSettings(enabled = true) {
+  return useQuery({
+    queryKey: FRAUD_SETTINGS_KEY,
+    queryFn:  () => adminContabApi.fraudSettings.get(),
+    enabled,
+  })
+}
+
+export function useUpdateFraudSettings() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Partial<FraudSettings>) => adminContabApi.fraudSettings.update(data),
+    onSuccess: (data) => qc.setQueryData(FRAUD_SETTINGS_KEY, data),
   })
 }
 
@@ -170,6 +190,15 @@ export function useCreateBankAccount() {
   })
 }
 
+// SCRUM-857 — antes no existía ningún update parcial (solo activar/desactivar).
+export function useUpdateBankAccount() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateBankAccountPayload }) => adminContabApi.bankAccounts.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: BANK_ACCOUNTS_KEY }),
+  })
+}
+
 export function useDeactivateBankAccount() {
   const qc = useQueryClient()
   return useMutation({
@@ -186,10 +215,10 @@ export function useReactivateBankAccount() {
   })
 }
 
-export function useBankMovements(bankAccountId?: number) {
+export function useBankMovements(bankAccountId?: number, page?: number, perPage?: number | 'all') {
   return useQuery({
-    queryKey: bankMovementsKey(bankAccountId),
-    queryFn:  () => adminContabApi.bankMovements.list(bankAccountId),
+    queryKey: bankMovementsKey(bankAccountId, page, perPage),
+    queryFn:  () => adminContabApi.bankMovements.list(bankAccountId, page, perPage),
   })
 }
 
@@ -225,10 +254,17 @@ export function useInvoiceList(filters: InvoiceListFilters) {
   })
 }
 
+// SCRUM-1175 — opciones del filtro «Vendedor» de Facturación.
+export function useInvoiceSellers() {
+  return useQuery({
+    queryKey: ['admin-contab', 'invoices', 'sellers'],
+    queryFn:  () => adminContabApi.invoices.sellers().then(r => r.data),
+  })
+}
+
 export function useInvoicePreview() {
   return useMutation({
-    mutationFn: ({ orderIds, aplicarSaldoFavor }: { orderIds: number[]; aplicarSaldoFavor?: boolean }) =>
-      adminContabApi.invoices.preview(orderIds, aplicarSaldoFavor),
+    mutationFn: ({ orderIds, modo }: { orderIds: number[]; modo?: InvoiceModo }) => adminContabApi.invoices.preview(orderIds, modo),
   })
 }
 
@@ -239,6 +275,14 @@ export function useCreateInvoice() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices'] })
     },
+  })
+}
+
+/** Guarda de RUC al facturar — corrige el receptor desde la vista previa (valida contra la DGI antes de guardar). */
+export function useCorrectInvoiceReceptor() {
+  return useMutation({
+    mutationFn: ({ subClientId, data }: { subClientId: number; data: CorrectReceptorPayload }) =>
+      adminContabApi.invoices.correctReceptor(subClientId, data),
   })
 }
 
@@ -256,10 +300,12 @@ export function useInvoiceExport() {
 const invoiceDetailKey = (orderId: number) => ['admin-contab', 'invoices', 'detail', orderId]
 const INVOICE_AGING_KEY = ['admin-contab', 'invoices', 'aging']
 
-export function useInvoiceDetail(orderId: number | null) {
+// SCRUM-929 — la key incluye `invoiceId` (una tarjeta puede tener más de una factura activa: la
+// raíz con su parcial y el completo).
+export function useInvoiceDetail(orderId: number | null, invoiceId?: number | null) {
   return useQuery({
-    queryKey: invoiceDetailKey(orderId ?? -1),
-    queryFn:  () => adminContabApi.invoices.detail(orderId as number),
+    queryKey: [...invoiceDetailKey(orderId ?? -1), invoiceId ?? null],
+    queryFn:  () => adminContabApi.invoices.detail(orderId as number, invoiceId ?? undefined),
     enabled:  orderId !== null,
   })
 }
@@ -267,8 +313,8 @@ export function useInvoiceDetail(orderId: number | null) {
 export function useMarkUncollectible() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ orderId, motivo }: { orderId: number; motivo: string }) =>
-      adminContabApi.invoices.markUncollectible(orderId, motivo),
+    mutationFn: ({ orderId, motivo, invoiceId }: { orderId: number; motivo: string; invoiceId?: number }) =>
+      adminContabApi.invoices.markUncollectible(orderId, motivo, invoiceId),
     onSuccess: (_data, { orderId }) => {
       qc.invalidateQueries({ queryKey: invoiceDetailKey(orderId) })
       qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices', 'list'] })
@@ -279,8 +325,8 @@ export function useMarkUncollectible() {
 export function useDecideUncollectible() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ orderId, approve }: { orderId: number; approve: boolean }) =>
-      adminContabApi.invoices.decideUncollectible(orderId, approve),
+    mutationFn: ({ orderId, approve, invoiceId }: { orderId: number; approve: boolean; invoiceId?: number }) =>
+      adminContabApi.invoices.decideUncollectible(orderId, approve, invoiceId),
     onSuccess: (_data, { orderId }) => {
       qc.invalidateQueries({ queryKey: invoiceDetailKey(orderId) })
       qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices', 'list'] })
@@ -298,15 +344,57 @@ export function useInvoiceAging() {
 
 export function useDownloadInvoicePdf() {
   return useMutation({
-    mutationFn: ({ orderId, orderNumber }: { orderId: number; orderNumber: string }) =>
-      adminContabApi.invoices.downloadPdf(orderId, orderNumber),
+    mutationFn: ({ orderId, orderNumber, invoiceId }: { orderId: number; orderNumber: string; invoiceId?: number }) =>
+      adminContabApi.invoices.downloadPdf(orderId, orderNumber, invoiceId),
+  })
+}
+
+/** SCRUM-943 — `useMutation` a propósito, no `useQuery`: se dispara solo al expandir "Ver JSON",
+ *  nunca al abrir el modal. */
+export function useInvoiceFePreview() {
+  return useMutation({
+    mutationFn: ({ orderId, invoiceId }: { orderId: number; invoiceId?: number }) =>
+      adminContabApi.invoices.fePreview(orderId, invoiceId),
+  })
+}
+
+/** SCRUM-1007 — reintentar la certificación / actualizar el estado de una factura. Al terminar (también si la DGI
+ *  vuelve a rechazar, que es un resultado y no un error) se invalida el detalle y los listados: cambió `fe_estado`. */
+export function useInvoiceFeAccion() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ accion, orderId, invoiceId }: { accion: FeAccionFiscal; orderId: number; invoiceId?: number }) =>
+      accion === 'reintentar'
+        ? adminContabApi.invoices.feReintentar(orderId, invoiceId)
+        : adminContabApi.invoices.feActualizarEstado(orderId, invoiceId),
+    onSettled: () => { void qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices'] }) },
+  })
+}
+
+/** SCRUM-1019 — reconciliar una factura con MSL. Invalida (no setQueryData): la respuesta es más angosta que el detalle. */
+export function useInvoiceFeReconciliar() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, invoiceId }: { orderId: number; invoiceId?: number }) =>
+      adminContabApi.invoices.feReconciliar(orderId, invoiceId),
+    onSettled: () => { void qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices'] }) },
+  })
+}
+
+/** SCRUM-987 — historial de transmisiones al PAC. Mutation por el mismo motivo que el preview:
+ *  se dispara solo al expandir el visor (nunca al abrir el modal), y trae PII del receptor. */
+export function useInvoiceFeTransmisiones() {
+  return useMutation({
+    mutationFn: ({ orderId, invoiceId }: { orderId: number; invoiceId?: number }) =>
+      adminContabApi.invoices.feTransmisiones(orderId, invoiceId),
   })
 }
 
 // Batch 5 del cuerpo principal (SCRUM-539→544) — Cobros.
 
 const PAYMENT_SUMMARY_KEY = ['admin-contab', 'payments', 'summary']
-const paymentClientsKey   = (search: string) => ['admin-contab', 'payments', 'clients', search]
+const paymentClientsKey   = (search: string, onlyWithInvoice = false, onlyWithPendingInvoice = false) =>
+  ['admin-contab', 'payments', 'clients', search, onlyWithInvoice, onlyWithPendingInvoice]
 const openInvoicesKey     = (masterClientId: number | null) => ['admin-contab', 'payments', 'open-invoices', masterClientId ?? -1]
 const defaultBankAccountKey = (metodoPago: PaymentMethod | null) => ['admin-contab', 'payments', 'default-bank-account', metodoPago ?? '']
 
@@ -317,10 +405,10 @@ export function usePaymentSummary() {
   })
 }
 
-export function usePaymentClients(search: string) {
+export function usePaymentClients(search: string, onlyWithInvoice = false, onlyWithPendingInvoice = false) {
   return useQuery({
-    queryKey: paymentClientsKey(search),
-    queryFn:  () => adminContabApi.payments.searchClients(search),
+    queryKey: paymentClientsKey(search, onlyWithInvoice, onlyWithPendingInvoice),
+    queryFn:  () => adminContabApi.payments.searchClients(search, onlyWithInvoice, onlyWithPendingInvoice),
   })
 }
 
@@ -348,6 +436,33 @@ export function useRegisterPayment() {
       qc.invalidateQueries({ queryKey: PAYMENT_SUMMARY_KEY })
       qc.invalidateQueries({ queryKey: ['admin-contab', 'payments', 'open-invoices'] })
       qc.invalidateQueries({ queryKey: ['admin-contab', 'payments', 'historial'] })
+      // SCRUM-858 — sin esto, el modal de detalle de Facturación (`puede_registrar_cobro`) podía
+      // seguir mostrando "Registrar cobro" hasta que el staleTime global (30s) expirara, porque
+      // esta mutación nunca tocaba `invoiceDetailKey`. Invalidación por prefijo (sin orderId
+      // puntual): el payload trae `invoice_ids`, no los `orderId` de Entrega que arma esa key.
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices', 'detail'] })
+    },
+  })
+}
+
+// SCRUM-1168 F2 — concepto nuevo de cobros.
+
+const PAYMENTS_CONFIG_KEY = ['admin-contab', 'payments', 'config']
+
+export function usePaymentsConfig() {
+  return useQuery({ queryKey: PAYMENTS_CONFIG_KEY, queryFn: () => adminContabApi.payments.config(), staleTime: 60_000 })
+}
+
+export function useRegisterPaymentV2() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreatePaymentV2Payload) => adminContabApi.payments.registerV2(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: PAYMENT_SUMMARY_KEY })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'payments', 'open-invoices'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'payments', 'historial'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices', 'detail'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'saldo-favor'] })
     },
   })
 }
@@ -404,6 +519,198 @@ export function useConfirmPayment() {
   })
 }
 
+// SCRUM-1168 F0 — aviso previo a confirmar un cobro: ¿se aplica tal cual o parte pasa a saldo a favor?
+export function useConfirmPaymentPreview() {
+  return useMutation({ mutationFn: (id: number) => adminContabApi.payments.confirmPreview(id) })
+}
+
+// SCRUM-902 — Registrar Abono (4O).
+
+const ABONOS_LIST_KEY   = (filters: AbonoFilters) => ['admin-contab', 'abonos', 'list', filters]
+const abonoDetailKey    = (id: number | null) => ['admin-contab', 'abonos', 'detail', id ?? -1]
+const abonoSubClientesKey = (masterClientId: number | null) => ['admin-contab', 'abonos', 'sub-clientes', masterClientId ?? -1]
+const abonoProyectosKey   = (subClientId: number | null) => ['admin-contab', 'abonos', 'proyectos', subClientId ?? -1]
+const abonoFacturasKey    = (salesProjectId: number | null) => ['admin-contab', 'abonos', 'facturas', salesProjectId ?? -1]
+const abonoInvoicesForSubClientKey = (subClientId: number | null) => ['admin-contab', 'abonos', 'facturas-por-subcliente', subClientId ?? -1]
+
+export function useAbonos(filters: AbonoFilters) {
+  return useQuery({
+    queryKey: ABONOS_LIST_KEY(filters),
+    queryFn:  () => adminContabApi.abonos.list(filters),
+  })
+}
+
+export function useAbonoDetail(id: number | null) {
+  return useQuery({
+    queryKey: abonoDetailKey(id),
+    queryFn:  () => adminContabApi.abonos.detail(id as number),
+    enabled:  id !== null,
+  })
+}
+
+export function useAbonoSubClientes(masterClientId: number | null) {
+  return useQuery({
+    queryKey: abonoSubClientesKey(masterClientId),
+    queryFn:  () => adminContabApi.abonos.subClientes(masterClientId as number),
+    enabled:  masterClientId !== null,
+  })
+}
+
+export function useAbonoProyectos(subClientId: number | null) {
+  return useQuery({
+    queryKey: abonoProyectosKey(subClientId),
+    queryFn:  () => adminContabApi.abonos.proyectos(subClientId as number),
+    enabled:  subClientId !== null,
+  })
+}
+
+export function useAbonoFacturas(salesProjectId: number | null) {
+  return useQuery({
+    queryKey: abonoFacturasKey(salesProjectId),
+    queryFn:  () => adminContabApi.abonos.facturas(salesProjectId as number),
+    enabled:  salesProjectId !== null,
+  })
+}
+
+/** SCRUM-933 — reemplaza, para el buscador cruzado Proyecto↔# Cotización de "Registrar Abono",
+ *  las 2 llamadas de arriba (proyectos+facturas) con una sola lista ya enriquecida. */
+export function useAbonoInvoicesForSubClient(subClientId: number | null) {
+  return useQuery({
+    queryKey: abonoInvoicesForSubClientKey(subClientId),
+    queryFn:  () => adminContabApi.abonos.invoicesForSubClient(subClientId as number),
+    enabled:  subClientId !== null,
+  })
+}
+
+function invalidateAbonos(qc: ReturnType<typeof useQueryClient>, id?: number) {
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'abonos', 'list'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'saldo-favor'] })
+  if (id !== undefined) qc.invalidateQueries({ queryKey: abonoDetailKey(id) })
+}
+
+export function useRegisterAbono() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: AbonoPayload) => adminContabApi.abonos.register(payload),
+    onSuccess: () => invalidateAbonos(qc),
+  })
+}
+
+export function useUpdateAbono() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: AbonoPayload }) => adminContabApi.abonos.update(id, payload),
+    onSuccess: (abono) => invalidateAbonos(qc, abono.id),
+  })
+}
+
+export function useConfirmAbono() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => adminContabApi.abonos.confirm(id),
+    onSuccess: (abono) => invalidateAbonos(qc, abono.id),
+  })
+}
+
+// SCRUM-955 — mismo patrón que useDownloadPaymentReceipt().
+export function useDownloadAbonoReceipt() {
+  return useMutation({
+    mutationFn: ({ id, numeroRecibo }: { id: number; numeroRecibo: string }) =>
+      adminContabApi.abonos.downloadReceiptPdf(id, numeroRecibo),
+  })
+}
+
+// SCRUM-903 — Saldo a Favor de Clientes (4N), solo lectura.
+export function useSaldoFavor(filters: SaldoFavorFilters) {
+  return useQuery({
+    queryKey: ['admin-contab', 'saldo-favor', filters],
+    queryFn:  () => adminContabApi.saldoFavor.list(filters),
+  })
+}
+
+// SCRUM-1168 F3 — Compensaciones.
+
+export function useCompensacionClientes(filters: CompensacionesFilters) {
+  return useQuery({
+    queryKey: ['admin-contab', 'compensaciones', 'clientes', filters],
+    queryFn:  () => adminContabApi.compensaciones.clientes(filters),
+  })
+}
+
+export function useCompensacionCliente(masterClientId: number | null) {
+  return useQuery({
+    queryKey: ['admin-contab', 'compensaciones', 'cliente', masterClientId ?? -1],
+    queryFn:  () => adminContabApi.compensaciones.cliente(masterClientId as number),
+    enabled:  masterClientId !== null,
+  })
+}
+
+export function usePreviewCompensacion() {
+  return useMutation({ mutationFn: ({ masterClientId, lines }: { masterClientId: number; lines: CompensacionLinea[] }) => adminContabApi.compensaciones.preview(masterClientId, lines) })
+}
+
+export function useConfirmCompensacion() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ masterClientId, lines }: { masterClientId: number; lines: CompensacionLinea[] }) => adminContabApi.compensaciones.confirm(masterClientId, lines),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'compensaciones'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'saldo-favor'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'payments'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices'] })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'account-statement'] })
+    },
+  })
+}
+
+// SCRUM-1168 F4 — reversos.
+
+function invalidateReversos(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'compensaciones'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'payments'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'invoices'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'saldo-favor'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'reversal-requests'] })
+  qc.invalidateQueries({ queryKey: ['admin-contab', 'account-statement'] })
+}
+
+export function useReverseCompensacion() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.compensaciones.reverse(id, motivo), onSuccess: () => invalidateReversos(qc) })
+}
+
+export function useUnapplyMovement() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.compensaciones.unapply(id, motivo), onSuccess: () => invalidateReversos(qc) })
+}
+
+export function useRequestPaymentVoid() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.payments.requestVoid(id, motivo), onSuccess: () => invalidateReversos(qc) })
+}
+
+export function useRequestRefund() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: ({ masterClientId, form }: { masterClientId: number; form: FormData }) => adminContabApi.reversals.requestRefund(masterClientId, form), onSuccess: () => invalidateReversos(qc) })
+}
+
+export function useUpdatePaymentDatos() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: ({ id, form }: { id: number; form: FormData }) => adminContabApi.payments.updateDatos(id, form), onSuccess: () => invalidateReversos(qc) })
+}
+
+export function useReversalRequests(params: { estado?: string; tipo?: string; page?: number; per_page?: number | 'all' }) {
+  return useQuery({ queryKey: ['admin-contab', 'reversal-requests', params], queryFn: () => adminContabApi.reversals.list(params) })
+}
+
+export function useDecideReversal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, aprobar, motivoRechazo }: { id: number; aprobar: boolean; motivoRechazo?: string }) => adminContabApi.reversals.decide(id, aprobar, motivoRechazo),
+    onSuccess: () => invalidateReversos(qc),
+  })
+}
+
 // Batch 8 del cuerpo principal (SCRUM-529→533, REQ-452→456) — Estado de Cuenta.
 
 const accountStatementClientsKey  = (search: string) => ['admin-contab', 'account-statement', 'clients', search]
@@ -433,6 +740,13 @@ export function useGenerateAccountStatement() {
 export function useDownloadAccountStatementExcel() {
   return useMutation({
     mutationFn: (filters: AccountStatementFilters) => adminContabApi.accountStatement.downloadExcel(filters),
+  })
+}
+
+// SCRUM-857 (REQ-456) — documento real, reemplaza el window.print() que usaba el botón "Descargar PDF".
+export function useDownloadAccountStatementPdf() {
+  return useMutation({
+    mutationFn: (filters: AccountStatementFilters) => adminContabApi.accountStatement.downloadPdf(filters),
   })
 }
 
@@ -518,11 +832,52 @@ export function useNotaCreditoDetalle(id: number | null) {
   })
 }
 
+/** SCRUM-943 — mismo criterio que `useInvoiceFePreview()`. */
+export function useNotaCreditoFePreview() {
+  return useMutation({
+    mutationFn: (id: number) => adminContabApi.notasCredito.fePreview(id),
+  })
+}
+
+/** SCRUM-1007 — mismo criterio que `useInvoiceFeAccion()`, para notas de crédito. */
+export function useNotaCreditoFeAccion() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ accion, id }: { accion: FeAccionFiscal; id: number }) =>
+      accion === 'reintentar' ? adminContabApi.notasCredito.feReintentar(id) : adminContabApi.notasCredito.feActualizarEstado(id),
+    onSettled: () => { void qc.invalidateQueries({ queryKey: ['admin-contab', 'notas-credito'] }) },
+  })
+}
+
+/** SCRUM-1019 — mismo criterio que `useInvoiceFeReconciliar()`, para notas de crédito. */
+export function useNotaCreditoFeReconciliar() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => adminContabApi.notasCredito.feReconciliar(id),
+    onSettled: () => { void qc.invalidateQueries({ queryKey: ['admin-contab', 'notas-credito'] }) },
+  })
+}
+
+/** SCRUM-987 — mismo criterio que `useInvoiceFeTransmisiones()`. */
+export function useNotaCreditoFeTransmisiones() {
+  return useMutation({
+    mutationFn: (id: number) => adminContabApi.notasCredito.feTransmisiones(id),
+  })
+}
+
 // REQ-491 — precarga de una fila de la cola de Bodega. Mutation (no query) porque se dispara al
 // hacer clic en la fila, no al montar un componente.
 export function useNotaCreditoDevolucionDetail() {
   return useMutation({
     mutationFn: (customerReturnId: number) => adminContabApi.notasCredito.devolucionDetail(customerReturnId),
+  })
+}
+
+// SCRUM-865 punto 2 — mismo patrón mutation-on-click que arriba, se dispara al abrir el
+// documento, no al montar.
+export function useNotaCreditoDevolucionSignedDocumentUrl() {
+  return useMutation({
+    mutationFn: (customerReturnId: number) => adminContabApi.notasCredito.devolucionSignedDocumentUrl(customerReturnId),
   })
 }
 
@@ -820,7 +1175,7 @@ export function useCashPositionExport() {
 // Batch 19 (SCRUM-602→606, REQ-525→529) — Arqueo / Flujo de Caja, parte 2. Ver
 // ADR-SCRUM602-606-batch19-arqueo-caja-parte2.md.
 
-const DAILY_CASH_COUNT_HISTORY_KEY = (page: number) => ['admin-contab', 'cash-position', 'history', page]
+const DAILY_CASH_COUNT_HISTORY_KEY = (page: number, perPage?: number | 'all') => ['admin-contab', 'cash-position', 'history', page, perPage ?? 20]
 const dailyCashCountHistoryDetailKey = (id: number | null) => ['admin-contab', 'cash-position', 'history-detail', id ?? -1]
 
 // REQ-526 — al cerrar, el arqueo activo avanza solo (REQ-527 RN3): invalidar la query del activo
@@ -837,10 +1192,10 @@ export function useCloseDailyCashCount() {
   })
 }
 
-export function useDailyCashCountHistory(page: number) {
+export function useDailyCashCountHistory(page: number, perPage?: number | 'all') {
   return useQuery({
-    queryKey: DAILY_CASH_COUNT_HISTORY_KEY(page),
-    queryFn:  () => adminContabApi.cashPosition.history(page),
+    queryKey: DAILY_CASH_COUNT_HISTORY_KEY(page, perPage),
+    queryFn:  () => adminContabApi.cashPosition.history(page, perPage),
   })
 }
 
@@ -893,9 +1248,15 @@ export function useUploadRetentionAttachment() {
 // Batch 20 (SCRUM-612→617, REQ-535→540) — Caja Chica.
 
 const PETTY_CASH_SUMMARY_KEY = ['admin-contab', 'petty-cash', 'summary']
-const PETTY_CASH_PENDING_KEY = ['admin-contab', 'petty-cash', 'pending']
-const PETTY_CASH_REPORTS_KEY = ['admin-contab', 'petty-cash', 'reports']
-const PETTY_CASH_REJECTED_KEY = ['admin-contab', 'petty-cash', 'rejected']
+// SCRUM-947 — page/perPage entran en la key para que cada página/tamaño cachee por separado; los
+// prefijos (sin page/perPage) siguen sirviendo para invalidar TODAS las páginas/tamaños de una
+// (React Query matchea por prefijo).
+const PETTY_CASH_PENDING_PREFIX = ['admin-contab', 'petty-cash', 'pending']
+const PETTY_CASH_REPORTS_PREFIX = ['admin-contab', 'petty-cash', 'reports']
+const PETTY_CASH_REJECTED_PREFIX = ['admin-contab', 'petty-cash', 'rejected']
+const PETTY_CASH_PENDING_KEY = (page = 1, perPage: number | 'all' = 20) => [...PETTY_CASH_PENDING_PREFIX, page, perPage]
+const PETTY_CASH_REPORTS_KEY = (page = 1, perPage: number | 'all' = 20) => [...PETTY_CASH_REPORTS_PREFIX, page, perPage]
+const PETTY_CASH_REJECTED_KEY = (page = 1, perPage: number | 'all' = 20) => [...PETTY_CASH_REJECTED_PREFIX, page, perPage]
 const pettyCashReportDetailKey = (numero: string) => ['admin-contab', 'petty-cash', 'reports', numero]
 const pettyCashExpenseDetailKey = (id: number) => ['admin-contab', 'petty-cash', 'expenses', id]
 
@@ -903,14 +1264,14 @@ export function usePettyCashSummary() {
   return useQuery({ queryKey: PETTY_CASH_SUMMARY_KEY, queryFn: () => adminContabApi.pettyCash.summary() })
 }
 
-export function usePettyCashPending() {
-  return useQuery({ queryKey: PETTY_CASH_PENDING_KEY, queryFn: () => adminContabApi.pettyCash.pending() })
+export function usePettyCashPending(page = 1, perPage: number | 'all' = 20) {
+  return useQuery({ queryKey: PETTY_CASH_PENDING_KEY(page, perPage), queryFn: () => adminContabApi.pettyCash.pending(page, perPage) })
 }
 
 function invalidatePettyCashLists(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: PETTY_CASH_SUMMARY_KEY })
-  qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-  qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_KEY })
+  qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+  qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_PREFIX })
 }
 
 export function useCreatePettyCashExpenses() {
@@ -929,8 +1290,8 @@ export function useGeneratePettyCashReport() {
   })
 }
 
-export function usePettyCashReports() {
-  return useQuery({ queryKey: PETTY_CASH_REPORTS_KEY, queryFn: () => adminContabApi.pettyCash.reports() })
+export function usePettyCashReports(page = 1, perPage: number | 'all' = 20) {
+  return useQuery({ queryKey: PETTY_CASH_REPORTS_KEY(page, perPage), queryFn: () => adminContabApi.pettyCash.reports(page, perPage) })
 }
 
 export function usePettyCashReportDetail(numero: string | null) {
@@ -958,7 +1319,7 @@ export function useApprovePettyCashReport() {
     // real de GET /reports/{numero}, que sí trae el shape completo.
     onSuccess: (_data, numero) => {
       qc.invalidateQueries({ queryKey: pettyCashReportDetailKey(numero) })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_PREFIX })
       qc.invalidateQueries({ queryKey: PETTY_CASH_SUMMARY_KEY })
     },
   })
@@ -972,8 +1333,8 @@ export function useDownloadPettyCashReportPdf() {
 
 // Batch 21 (SCRUM-618→623, REQ-541→546) — rechazo/reapertura de líneas.
 
-export function usePettyCashRejected() {
-  return useQuery({ queryKey: PETTY_CASH_REJECTED_KEY, queryFn: () => adminContabApi.pettyCash.rejected() })
+export function usePettyCashRejected(page = 1, perPage: number | 'all' = 20) {
+  return useQuery({ queryKey: PETTY_CASH_REJECTED_KEY(page, perPage), queryFn: () => adminContabApi.pettyCash.rejected(page, perPage) })
 }
 
 export function usePettyCashExpenseDetail(id: number | null) {
@@ -994,8 +1355,8 @@ export function useUpdatePettyCashExpense() {
     // campos (fecha/proveedor/descripción/montos) y no se actualizan solas.
     onSuccess: (detail) => {
       qc.setQueryData(pettyCashExpenseDetailKey(detail.id), detail)
-      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_PREFIX })
     },
   })
 }
@@ -1006,8 +1367,8 @@ export function useAddPettyCashExpenseAttachment() {
     mutationFn: ({ id, foto }: { id: number; foto: File }) => adminContabApi.pettyCash.addAttachment(id, foto),
     onSuccess: (detail) => {
       qc.setQueryData(pettyCashExpenseDetailKey(detail.id), detail)
-      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_PREFIX })
       if (detail.reporte_numero) qc.invalidateQueries({ queryKey: pettyCashReportDetailKey(detail.reporte_numero) })
     },
   })
@@ -1023,9 +1384,9 @@ export function useRejectPettyCashExpense() {
     mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.pettyCash.rejectExpense(id, motivo),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: PETTY_CASH_SUMMARY_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_PREFIX })
       qc.invalidateQueries({ queryKey: pettyCashExpenseDetailKey(id) })
     },
   })
@@ -1037,9 +1398,9 @@ export function useRejectPettyCashReport() {
     mutationFn: ({ numero, motivo }: { numero: string; motivo: string }) => adminContabApi.pettyCash.rejectReport(numero, motivo),
     onSuccess: (_data, { numero }) => {
       qc.invalidateQueries({ queryKey: pettyCashReportDetailKey(numero) })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REPORTS_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_PREFIX })
       qc.invalidateQueries({ queryKey: PETTY_CASH_SUMMARY_KEY })
       // SCRUM-621 rebote — rechazar el reporte completo deja stale el detalle unificado
       // (editable/puede_reabrir) de cada línea que tenía abierta su propia query cacheada;
@@ -1057,8 +1418,8 @@ export function useReopenPettyCashExpense() {
     mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.pettyCash.reopenExpense(id, motivo),
     onSuccess: (detail) => {
       qc.setQueryData(pettyCashExpenseDetailKey(detail.id), detail)
-      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_KEY })
-      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_KEY })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_PENDING_PREFIX })
+      qc.invalidateQueries({ queryKey: PETTY_CASH_REJECTED_PREFIX })
       qc.invalidateQueries({ queryKey: PETTY_CASH_SUMMARY_KEY })
     },
   })
@@ -1206,6 +1567,14 @@ export function useHomePendientes() {
   return useQuery({
     queryKey: HOME_PENDIENTES_KEY,
     queryFn:  () => adminContabApi.home.pendientes(),
+  })
+}
+
+// SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+export function useHomeApprovalsPending() {
+  return useQuery({
+    queryKey: ['admin-contab', 'home', 'approvals-pending'],
+    queryFn:  () => adminContabApi.home.approvalsPending(),
   })
 }
 

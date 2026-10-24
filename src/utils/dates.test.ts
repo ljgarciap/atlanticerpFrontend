@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseDateOnly, formatDateShort } from './dates'
+import { parseDateOnly, formatDateShort, formatTimeShort, formatDateTimeShort } from './dates'
 
 // SCRUM-787 — verificación directa del bug real (ver docblock de dates.ts): antes de este helper,
 // `new Date("2026-08-24")` renderizaba "23 ago 2026" en cualquier timezone con offset negativo
@@ -23,5 +23,23 @@ describe('parseDateOnly / formatDateShort (SCRUM-787)', () => {
     const d = parseDateOnly('2026-08-24T03:15:00-05:00')
     // No debe reinterpretarse como date-only — new Date() ya lo resuelve bien.
     expect(d.toISOString()).toBe(new Date('2026-08-24T03:15:00-05:00').toISOString())
+  })
+})
+
+// SCRUM-883 — la hora mostrada debe ser siempre la de Panamá (GMT-5), sin importar el timezone
+// del proceso que corre el test/navegador. Un mismo instante UTC debe verse igual acá que en
+// cualquier otra máquina, a diferencia del bug que este ticket corrige (antes dependía del reloj
+// del sistema operativo del viewer).
+describe('formatTimeShort / formatDateTimeShort (SCRUM-883, timezone Panamá explícito)', () => {
+  it('muestra la hora de Panamá para un instante UTC, sin importar el timezone del proceso', () => {
+    // 2026-09-12T19:30:00Z = 2:30 p.m. en America/Panama (GMT-5, sin horario de verano)
+    expect(formatTimeShort('2026-09-12T19:30:00Z')).toContain('2:30')
+  })
+
+  it('formatDateTimeShort combina fecha y hora, ambas en America/Panama', () => {
+    const result = formatDateTimeShort('2026-09-12T19:30:00Z')
+    expect(result).toContain('12')
+    expect(result).toContain('sept')
+    expect(result).toContain('2:30')
   })
 })

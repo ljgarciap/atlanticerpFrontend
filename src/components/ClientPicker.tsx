@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import { Button } from '@/components/ui/Button'
@@ -11,13 +11,13 @@ import { Button } from '@/components/ui/Button'
 // QuotePage.tsx); Proyecto/Cliente Master/Subcliente siguen usando el default
 // {id, label} sin tocar nada.
 export default function ClientPicker<T extends { id: number; label: string }>({
-  label, value, onSelect, search, onCreate, disabled, extraFieldLabel, extraFieldLabel2, inputRef,
+  label, value, onSelect, search, onCreate, disabled, extraFieldLabel, extraFieldLabel2, dvFieldLabel, inputRef, hint,
 }: {
   label:    string
   value:    string
   onSelect: (opt: T) => void
   search:   (q: string) => Promise<T[]>
-  onCreate: (q: string, extra: string, extra2: string) => Promise<T>
+  onCreate: (q: string, extra: string, extra2: string, dv: string) => Promise<T>
   disabled: boolean
   /** Cuando se pasa, "+ Crear nuevo" abre un segundo campo antes de poder
    *  confirmar (ej. RUC para Subcliente) en vez de crear con el primer campo solo.
@@ -27,9 +27,18 @@ export default function ClientPicker<T extends { id: number; label: string }>({
   /** SCRUM-122 — segundo campo opcional del mini-form de creación (ej. Correo
    *  para Arquitecto). Solo tiene efecto si `extraFieldLabel` también está seteado. */
   extraFieldLabel2?: string
+  /** SCRUM-928 — tercer campo del mini-form: DV del RUC (solo dígitos, 1–2 caracteres). Desde SCRUM-1140 es OPCIONAL:
+   *  una cédula puede no tener DV y la guarda de facturación lo exige solo si la DGI lo trae. Independiente de la regla
+   *  "al menos uno" de los dos campos anteriores. Solo tiene efecto si `extraFieldLabel` también está seteado. */
+  dvFieldLabel?: string
   /** REQ-011 criterio 2 — permite que un padre enfoque/abra este picker
    *  programaticamente (ej. al bloquear un intento de avance por falta de cliente). */
   inputRef?: React.Ref<HTMLInputElement>
+  /** SCRUM-873 — texto aclaratorio chico justo debajo del label (ej. "incluir
+   *  arquitecto si va a comisionar"), para dejar explícito que el campo es
+   *  opcional sin depender solo de la ausencia de "*" junto al label. Opcional,
+   *  no afecta a los demás callers que no lo pasan. */
+  hint?: string
 }) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const [query,   setQuery]   = useState(value)
@@ -39,19 +48,37 @@ export default function ClientPicker<T extends { id: number; label: string }>({
   const [draftQuery, setDraftQuery] = useState<string | null>(null)
   const [extraValue, setExtraValue] = useState('')
   const [extraValue2, setExtraValue2] = useState('')
+  const [dvValue, setDvValue] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => { setQuery(value) }, [value])
 
+  // SCRUM-938 — carrera entre la búsqueda vacía de onFocus y la del último caracter tipeado: si la
+  // de onFocus responde después, pisaba el desplegable con la lista sin filtrar. Cada llamada se
+  // numera y una respuesta solo se aplica si sigue siendo la más reciente en vuelo.
+  const searchSeq = useRef(0)
+
   const runSearch = useCallback((q: string) => {
-    search(q).then(opts => { setOptions(opts); setOpen(true) }).catch(() => setOptions([]))
+    const seq = ++searchSeq.current
+    search(q)
+      .then(opts => { if (seq === searchSeq.current) { setOptions(opts); setOpen(true) } })
+      .catch(() => { if (seq === searchSeq.current) setOptions([]) })
   }, [search])
 
-  async function doCreate(q: string, extra: string, extra2: string) {
+  // SCRUM-1176 — escribir no manda una petición por tecla: la búsqueda sale tras 250 ms sin teclear. Enfocar el campo sí busca de inmediato.
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cancelPendingSearch = () => { if (typingTimer.current !== null) { clearTimeout(typingTimer.current); typingTimer.current = null } }
+  const runSearchDebounced = useCallback((q: string) => {
+    cancelPendingSearch()
+    typingTimer.current = setTimeout(() => { typingTimer.current = null; runSearch(q) }, 250)
+  }, [runSearch])
+  useEffect(() => cancelPendingSearch, [])
+
+  async function doCreate(q: string, extra: string, extra2: string, dv: string) {
     setError(null)
     setCreating(true)
     try {
-      const created = await onCreate(q, extra, extra2)
+      const created = await onCreate(q, extra, extra2, dv)
       onSelect(created)
       // Solo se cierra el mini-form al confirmar con éxito — si el backend rechaza (422),
       // se queda abierto con lo ya tipeado para corregir, en vez de perder los datos
@@ -59,6 +86,7 @@ export default function ClientPicker<T extends { id: number; label: string }>({
       setDraftQuery(null)
       setExtraValue('')
       setExtraValue2('')
+      setDvValue('')
     } catch (err) {
       const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
       setError(message ?? t('ventasDiseno:modal.createError'))
@@ -70,13 +98,14 @@ export default function ClientPicker<T extends { id: number; label: string }>({
   return (
     <div className="relative w-full">
       <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">{label}</label>
+      {hint && <p className="-mt-0.5 mb-1 text-[11px] text-slate-400">{hint}</p>}
       <input
         ref={inputRef}
         type="text"
         value={query}
         disabled={disabled}
-        onChange={e => { setQuery(e.target.value); runSearch(e.target.value) }}
-        onFocus={() => runSearch(query)}
+        onChange={e => { setQuery(e.target.value); runSearchDebounced(e.target.value) }}
+        onFocus={() => { cancelPendingSearch(); runSearch(query) }}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm disabled:bg-slate-50 disabled:text-slate-400 focus:border-[#5BA5A0] focus:outline-none"
       />
@@ -106,7 +135,7 @@ export default function ClientPicker<T extends { id: number; label: string }>({
                   setDraftQuery(query)
                   setOpen(false)
                 } else {
-                  void doCreate(query, '', '')
+                  void doCreate(query, '', '', '')
                 }
               }}
               className="cursor-pointer px-3 py-1.5 text-sm font-semibold text-[#5BA5A0]"
@@ -136,12 +165,22 @@ export default function ClientPicker<T extends { id: number; label: string }>({
               className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
             />
           )}
+          {dvFieldLabel && (
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder={dvFieldLabel}
+              value={dvValue}
+              onChange={e => setDvValue(e.target.value.replace(/\D/g, '').slice(0, 2))}
+              className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+            />
+          )}
           <div className="flex gap-2 justify-end">
-            <Button variant="secondary" onClick={() => { setDraftQuery(null); setExtraValue(''); setExtraValue2('') }}>
+            <Button variant="secondary" onClick={() => { setDraftQuery(null); setExtraValue(''); setExtraValue2(''); setDvValue('') }}>
               {t('common:actions.cancel')}
             </Button>
             <Button
-              onClick={() => void doCreate(draftQuery, extraValue, extraValue2)}
+              onClick={() => void doCreate(draftQuery, extraValue, extraValue2, dvValue)}
               disabled={(extraFieldLabel2 ? (!extraValue.trim() && !extraValue2.trim()) : !extraValue.trim()) || creating}
               loading={creating}
             >

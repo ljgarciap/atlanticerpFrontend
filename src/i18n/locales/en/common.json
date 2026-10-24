@@ -1,9 +1,17 @@
 {
+  "errors": {
+    "generic": "The operation could not be completed. Please try again."
+  },
   "appName": "AtlanticERP",
   "brand": "ATLANTIC",
   "brandSubtitle": "CRM · Commercial Tracking System",
   "poweredBy": "Powered by AtlanticERP",
   "module": "CRM",
+  "home": {
+    "approvalsPending": {
+      "title": "Pending Approvals"
+    }
+  },
   "nav": {
     "pipeline": "Pipeline",
     "security": "Security",
@@ -25,11 +33,81 @@
     "servicios": "Services",
     "adminContab": "Admin. & Accounting",
     "gerencia": "Management",
+    "migracion": "Migration",
+    "migracionDashboard": "ICG Migration",
+    "migracionPagos": "ICG Payments",
+    "migracionVista": "ICG View",
     "operaciones": "Operations",
     "auditoria": "Audit",
     "consumoIa": "AI Consumption",
+    "actividad": "Activity",
     "logs": "Logs",
-    "settings": "Settings"
+    "settings": "Settings",
+    "lumo": "LUMO",
+    "soporte": "Support",
+    "manuales": "User manuals",
+    "configuracionGlobal": "Global settings"
+  },
+  "globalSettings": {
+    "title": "Global settings",
+    "subtitle": "All parametric business values, grouped by module — superadmin only. Does not replace any existing screen.",
+    "tabs": {
+      "fiscal": "Fiscal",
+      "fraude": "Fraud alerts (Admin & Accounting)",
+      "compras": "Purchasing",
+      "pricing": "Pricing (Sales & Design)",
+      "orders": "Orders (Sales & Design)",
+      "conditions": "Conditions (Sales & Design)",
+      "reports": "Reports (Sales & Design)",
+      "bodega": "Warehouse",
+      "servicios": "Services",
+      "crm": "CRM",
+      "salesCommissions": "Sales commission",
+      "global": "Global"
+    },
+    "globalTab": {
+      "title": "Global values",
+      "subtitle": "Numeric values shared across all modules (retention, size limits, archiving windows).",
+      "empty": "There are no configurable global values.",
+      "loadError": "Global values could not be loaded.",
+      "saveError": "The value could not be saved.",
+      "operatorPasswordLabel": "Your password (to confirm this change)",
+      "passwordRequired": "Confirm with your current password to save this setting.",
+      "reauthFailed": "Incorrect password.",
+      "throttledWait": "Too many attempts. Try again in {{time}}.",
+      "range": "Allowed range: {{min}} to {{max}}",
+      "rangeError": "Enter a whole number between {{min}} and {{max}}.",
+      "groups": {
+        "security": "Security",
+        "auth": "Authentication",
+        "documents": "Documents",
+        "notifications": "Notifications",
+        "audit_logs": "Audit",
+        "impersonation": "View as user"
+      },
+      "help": {
+        "password_reset_free_per_hour": "How many individual resets an operator can do per hour without typing their password; past the limit it is required. 0 = always required.",
+        "password_reset_expiration_hours": "After this period an unchanged temporary password stops working and the account must be reset again.",
+        "password_reset_enabled": "Off by default in production: turn it on only during the agreed window to reset passwords and turn it off afterwards.",
+        "impersonation_max_minutes": "After this time the session ends on its own and is not renewed.",
+        "impersonation_alert_sessions_per_day": "Above this number of sessions in a day, superadmins receive a security alert.",
+        "impersonation_alert_targets_per_hour": "Viewing more distinct people than this in an hour sends superadmins a security alert.",
+        "impersonation_alert_blocked_writes_per_session": "Above this number of blocked write attempts within a single session, superadmins receive a security alert (a sign of a script)."
+      },
+      "labels": {
+        "password_reset_free_per_hour": "Resets per hour without operator password",
+        "password_reset_expiration_hours": "Lifetime of the temporary password after a reset (hours)",
+        "password_reset_enabled": "Enable password resets",
+        "impersonation_max_minutes": "Maximum length of a View as user session (minutes)",
+        "impersonation_reason_min_length": "Minimum length of the View as user reason (characters)",
+        "impersonation_alert_sessions_per_day": "Alert: View as sessions per superadmin per day",
+        "impersonation_alert_targets_per_hour": "Alert: distinct people viewed per hour",
+        "impersonation_alert_blocked_writes_per_session": "Alert: blocked writes per View as session",
+        "documents_max_size_mb": "Maximum document size (MB)",
+        "notifications_archive_read_after_days": "Archive read notifications after (days)",
+        "audit_logs_retention_months": "Hot retention of audit logs (months)"
+      }
+    }
   },
   "actions": {
     "login": "Sign in",
@@ -39,6 +117,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
+    "closeWindow": "Close window",
+    "viewMore": "View more",
     "edit": "Edit",
     "delete": "Delete",
     "activate": "Activate",
@@ -105,11 +185,18 @@
     "perPage": "/ page",
     "all": "All"
   },
+  "buscador": {
+    "sinResultados": "No results"
+  },
   "theme": {
     "light": "Light mode",
     "dark": "Dark mode",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode"
+  },
+  "demoMode": {
+    "toggleLabel": "Demo Mode",
+    "badge": "Demo Mode active"
   },
   "notifications": {
     "title": "Notifications",
@@ -117,5 +204,26 @@
     "markAllRead": "Mark all as read",
     "viewLink": "View"
   },
-  "comingSoon": "{{module}} module coming soon."
+  "comingSoon": "{{module}} module coming soon.",
+  "userFilter": {
+    "all": "Seller/Designer",
+    "count_one": "{{count}} selected",
+    "count_other": "{{count}} selected",
+    "search": "Search by name...",
+    "clear": "Clear",
+    "empty": "No results",
+    "remove": "Remove {{name}}"
+  },
+  "impersonation": {
+    "bannerAria": "View as user session active",
+    "viewingAs": "Viewing as {{name}}",
+    "readOnly": "Read only",
+    "startedBy": "Support session by {{actor}}",
+    "remaining": "Time left: {{time}}",
+    "exit": "Exit",
+    "exiting": "Exiting",
+    "readOnlyToast": "Read-only mode: changes are not saved while you view the app as another person.",
+    "endedToast": "The View as session has ended. You are back in your own account.",
+    "originLostToast": "The View as session has ended and your original session is no longer available. Please sign in again."
+  }
 }

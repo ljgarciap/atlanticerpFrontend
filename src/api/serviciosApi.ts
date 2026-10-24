@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios'
 import api from './authApi'
+import type { ApprovalPendingItem } from '@/lib/homeCards'
 import type { OutlookCalendarEvent } from '@/types/calendar'
 import type { CalendarPill } from '@/lib/dateGrid'
 import type {
@@ -38,6 +39,10 @@ export const serviciosApi = {
   home: {
     summary: (): Promise<HomeSummary> =>
       api.get<HomeSummary>('/servicios/home/summary').then(r => r.data),
+
+    // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+    approvalsPending: (): Promise<{ data: ApprovalPendingItem[] }> =>
+      api.get<{ data: ApprovalPendingItem[] }>('/servicios/home/approvals-pending').then(r => r.data),
 
     // REQ-211 RN2a(c) — override manual de Gerencia (RN: rol validado en la ruta).
     updateInstallationGoal: (data: UpdateInstallationGoalPayload): Promise<InstallationGoalResult> =>
@@ -228,6 +233,13 @@ export const serviciosApi = {
     // REQ-259 — alta (RN5: solo Aaron/Líder de Servicios, ver la ruta).
     create: (data: CreateInternalTechnicianPayload): Promise<InternalTechnician> =>
       api.post<InternalTechnician>('/servicios/internal-technicians', data).then(r => r.data),
+
+    // SCRUM-1015 — editar (mismo formulario del alta) y eliminar (soft delete, el backend responde
+    // 422 con el motivo si el técnico aún tiene servicios sin cerrar o herramientas asignadas).
+    update: (id: number, data: CreateInternalTechnicianPayload): Promise<InternalTechnician> =>
+      api.put<InternalTechnician>(`/servicios/internal-technicians/${id}`, data).then(r => r.data),
+    remove: (id: number): Promise<void> =>
+      api.delete(`/servicios/internal-technicians/${id}`).then(() => undefined),
 
     // REQ-260 — Agenda equipo. `technicianId` acota a un único técnico (RN2). SCRUM-803 — `view`
     // ('day'|'week'|'month', default 'day' en el backend) + `date` (Y-m-d, default hoy) acotan el

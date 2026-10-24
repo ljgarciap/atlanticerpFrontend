@@ -46,5 +46,45 @@
     "page": "Página {{current}} de {{last}}",
     "prev": "Anterior",
     "next": "Siguiente"
+  },
+  "activity": {
+    "title": "Actividad",
+    "subtitle": "Distribución de las interacciones registradas en el sistema, por usuario, tipo, módulo y día",
+    "presetDays": "Últimos {{count}} días",
+    "from": "Desde",
+    "to": "Hasta",
+    "maxRange": "Máximo {{max}} días",
+    "system": "Sistema",
+    "empty": "Sin actividad en este rango",
+    "note": "Una interacción es un evento registrado en la auditoría: cambios de datos, inicios de sesión, exportaciones, descargas y accesos denegados. Las consultas y la navegación normales no se registran.",
+    "stats": {
+      "interactions": "Interacciones",
+      "activeUsers": "Usuarios activos",
+      "dataChanges": "Cambios de dato",
+      "accessDenied": "Accesos denegados"
+    },
+    "charts": {
+      "byUser": "Por usuario (top 10)",
+      "byType": "Por tipo de interacción",
+      "byModule": "Por módulo",
+      "byDay": "Por día"
+    },
+    "types": {
+      "created": "Creación",
+      "updated": "Edición",
+      "deleted": "Eliminación",
+      "exported": "Exportación",
+      "downloaded": "Descarga",
+      "login": "Inicio de sesión",
+      "login_failed": "Inicio de sesión fallido",
+      "access_denied": "Acceso denegado",
+      "other": "Otros"
+    },
+    "errors": {
+      "invalid": "Elige una fecha inicial y una final válidas.",
+      "inverted": "La fecha final no puede ser anterior a la inicial.",
+      "tooLong": "El rango máximo es de {{max}} días.",
+      "load": "No se pudo cargar la actividad."
+    }
   }
 }

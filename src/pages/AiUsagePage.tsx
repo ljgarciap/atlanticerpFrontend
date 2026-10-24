@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAiUsage } from '@/hooks/useAiUsage'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
+import { formatDateTimeShort } from '@/utils/dates'
 
 function formatCost(value: number | null): string {
   if (value === null) return '—'
@@ -89,7 +90,7 @@ export default function AiUsagePage() {
             {entries.map(entry => (
               <tr key={entry.id} className="border-b border-slate-50 dark:border-slate-700/60 last:border-0">
                 <td className="px-4 py-2.5 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
-                  {new Date(entry.created_at).toLocaleString()}
+                  {formatDateTimeShort(entry.created_at)}
                 </td>
                 <td className="px-4 py-2.5 text-slate-700 dark:text-slate-200">
                   {entry.requested_by?.name ?? t('aiUsage:unknownUser')}

@@ -7,6 +7,7 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   quoteId: number
@@ -30,6 +31,13 @@ interface Props {
  * versión" navegue DENTRO del mismo modal sin cerrarlo, re-pidiendo el PDF
  * de la versión elegida.
  */
+/** SCRUM-1115 — "Usar como base" (nueva versión) mientras la tarjeta esté en Lead, Diseño o Cotización: un proyecto restaurado desde
+ *  Perdido vuelve a Lead/Diseño con su historial y antes solo podía empezar una cotización en blanco. Propuesta/Aprobado (congelada)
+ *  y Perdido siguen sin ofrecerlo; el backend (`QuoteService::duplicate`) aplica la misma regla. */
+function canCreateNewVersion(cardStage: string | null | undefined): boolean {
+  return cardStage === 'lead' || cardStage === 'design' || cardStage === 'quote'
+}
+
 export default function QuoteViewerModal({ quoteId, onClose }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const navigate = useNavigate()
@@ -37,12 +45,12 @@ export default function QuoteViewerModal({ quoteId, onClose }: Props) {
   const [viewingId, setViewingId] = useState(quoteId)
   const [useAsBaseError, setUseAsBaseError] = useState<string | null>(null)
 
-  const { data: quote, isLoading } = useQuery({
+  const { data: quote, isLoading, isError: quoteIsError } = useQuery({
     queryKey: ['ventas-diseno-quote', viewingId],
     queryFn:  () => ventasDisenoApi.quotes.get(viewingId),
   })
 
-  const { data: pdfBlob } = useQuery({
+  const { data: pdfBlob, isError: pdfIsError } = useQuery({
     queryKey: ['ventas-diseno-quote-pdf', viewingId],
     queryFn:  () => ventasDisenoApi.quotes.pdf(viewingId, false),
   })
@@ -88,7 +96,13 @@ export default function QuoteViewerModal({ quoteId, onClose }: Props) {
         </div>
 
         <div className="overflow-y-auto px-5 py-4 flex-1">
-          {isLoading || !quote ? (
+          {/* SCRUM-930/931/932 — antes, un 403/404/500 real en cualquiera de las 2 queries dejaba
+              el modal en "Cargando" para siempre (isLoading pasa a false en error, pero quote/pdfUrl
+              siguen undefined, cayendo en la misma rama que "todavía cargando") — mismo hallazgo de
+              Pre-QA ya corregido en GuiaEntregaModal, replicado acá. */}
+          {quoteIsError || pdfIsError ? (
+            <p className="text-red-600 dark:text-red-400 text-sm py-6 text-center">{t('ventasDiseno:quotesList.viewer.error')}</p>
+          ) : isLoading || !quote ? (
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
           ) : !pdfUrl ? (
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
@@ -125,7 +139,7 @@ export default function QuoteViewerModal({ quoteId, onClose }: Props) {
                       <td className="py-1.5 pr-2">{v.folio ?? '—'}</td>
                       <td className="py-1.5 pr-2">
                         {v.confirmed_at
-                          ? new Date(v.confirmed_at).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+                          ? formatDateFromTimestamp(v.confirmed_at)
                           : '—'}
                       </td>
                       <td className="py-1.5 pr-2">{v.generated_by}</td>
@@ -142,7 +156,7 @@ export default function QuoteViewerModal({ quoteId, onClose }: Props) {
                         {/* RN2.3/2.4 — solo mientras la tarjeta siga en etapa Cotización, sobre
                             cualquier versión del historial (Pre-QA SCRUM-734: pasa v.id de esta
                             fila, nunca viewingId a ciegas). */}
-                        {versionsResult.card_stage === 'quote' && (
+                        {canCreateNewVersion(versionsResult.card_stage) && v.can_use_as_base !== false && (
                           <button
                             type="button" className="text-xs font-semibold text-[#5BA5A0] hover:text-[#3D7E7A] disabled:opacity-50"
                             disabled={useAsBaseMutation.isPending}
@@ -179,7 +193,7 @@ export default function QuoteViewerModal({ quoteId, onClose }: Props) {
               gate de etapa que ya usa la tabla de versiones (RN2.3/2.4) — solo mientras
               la tarjeta sigue en Cotización. Usa el id real de la única versión, nunca
               `viewingId` a ciegas (mismo cuidado que el hallazgo de Pre-QA de arriba). */}
-          {quote?.confirmed_at != null && versionsResult?.versions.length === 1 && versionsResult.card_stage === 'quote' && (
+          {quote?.confirmed_at != null && versionsResult?.versions.length === 1 && versionsResult.versions[0].can_use_as_base !== false && canCreateNewVersion(versionsResult.card_stage) && (
             <Button
               variant="secondary"
               disabled={useAsBaseMutation.isPending}

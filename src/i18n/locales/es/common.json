@@ -1,9 +1,17 @@
 {
+  "errors": {
+    "generic": "No se pudo completar la operación. Intenta de nuevo."
+  },
   "appName": "AtlanticERP",
   "brand": "ATLANTIC",
   "brandSubtitle": "CRM · Sistema de seguimiento comercial",
   "poweredBy": "Powered by AtlanticERP",
   "module": "CRM",
+  "home": {
+    "approvalsPending": {
+      "title": "Aprobaciones Pendientes"
+    }
+  },
   "nav": {
     "pipeline": "Pipeline",
     "security": "Seguridad",
@@ -25,11 +33,81 @@
     "servicios": "Servicios",
     "adminContab": "Admin. & Contab.",
     "gerencia": "Gerencia",
+    "migracion": "Migración",
+    "migracionDashboard": "Migración ICG",
+    "migracionPagos": "Pagos ICG",
+    "migracionVista": "Vista ICG",
     "operaciones": "Operaciones",
     "auditoria": "Auditoría",
     "consumoIa": "Consumo IA",
+    "actividad": "Actividad",
     "logs": "Logs",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "lumo": "LUMO",
+    "soporte": "Soporte",
+    "manuales": "Manuales de usuario",
+    "configuracionGlobal": "Configuración global"
+  },
+  "globalSettings": {
+    "title": "Configuración global",
+    "subtitle": "Todos los valores paramétricos de negocio, agrupados por módulo — exclusivo de superadmin. No reemplaza ninguna pantalla existente.",
+    "tabs": {
+      "fiscal": "Fiscal",
+      "fraude": "Alertas de fraude (Admin. & Contab.)",
+      "compras": "Compras",
+      "pricing": "Precios (Ventas y Diseño)",
+      "orders": "Pedidos (Ventas y Diseño)",
+      "conditions": "Condiciones (Ventas y Diseño)",
+      "reports": "Reportes (Ventas y Diseño)",
+      "bodega": "Bodega",
+      "servicios": "Servicios",
+      "crm": "CRM",
+      "salesCommissions": "Comisión de vendedores",
+      "global": "Global"
+    },
+    "globalTab": {
+      "title": "Valores globales",
+      "subtitle": "Valores numéricos transversales a todos los módulos (retención, límites de tamaño, plazos de archivado).",
+      "empty": "No hay valores globales configurables.",
+      "loadError": "No se pudieron cargar los valores globales.",
+      "saveError": "No se pudo guardar el valor.",
+      "operatorPasswordLabel": "Tu contraseña (para confirmar este cambio)",
+      "passwordRequired": "Confirma con tu contraseña actual para guardar este ajuste.",
+      "reauthFailed": "Contraseña incorrecta.",
+      "throttledWait": "Demasiados intentos. Vuelve a intentarlo en {{time}}.",
+      "range": "Rango permitido: {{min}} a {{max}}",
+      "rangeError": "Ingresa un número entero entre {{min}} y {{max}}.",
+      "groups": {
+        "security": "Seguridad",
+        "auth": "Autenticación",
+        "documents": "Documentos",
+        "notifications": "Notificaciones",
+        "audit_logs": "Auditoría",
+        "impersonation": "Ver como usuario"
+      },
+      "help": {
+        "password_reset_free_per_hour": "Cuántos restablecimientos individuales puede hacer un operador por hora sin escribir su contraseña; pasado el tope, la pide. 0 = siempre la pide.",
+        "password_reset_expiration_hours": "Pasado este plazo, una contraseña temporal sin cambiar deja de funcionar y hay que restablecerla de nuevo.",
+        "password_reset_enabled": "En producción está apagado por defecto: enciéndelo solo durante la ventana acordada para restablecer contraseñas y apágalo al terminar.",
+        "impersonation_max_minutes": "Pasado este plazo la sesión termina sola y no se renueva.",
+        "impersonation_alert_sessions_per_day": "Al superar este número de sesiones en un día, los superadmins reciben una alerta de seguridad.",
+        "impersonation_alert_targets_per_hour": "Al observar a más personas distintas que este número en una hora, los superadmins reciben una alerta de seguridad.",
+        "impersonation_alert_blocked_writes_per_session": "Al superar este número de intentos de escritura bloqueados dentro de una sola sesión, los superadmins reciben una alerta de seguridad (señal de un script)."
+      },
+      "labels": {
+        "password_reset_free_per_hour": "Restablecimientos por hora sin contraseña del operador",
+        "password_reset_expiration_hours": "Vigencia de la contraseña temporal tras un restablecimiento (horas)",
+        "password_reset_enabled": "Habilitar el restablecimiento de contraseñas",
+        "impersonation_max_minutes": "Duración máxima de una sesión de Ver como usuario (minutos)",
+        "impersonation_reason_min_length": "Largo mínimo del motivo de Ver como usuario (caracteres)",
+        "impersonation_alert_sessions_per_day": "Alerta: sesiones de Ver como por superadmin al día",
+        "impersonation_alert_targets_per_hour": "Alerta: personas distintas observadas por hora",
+        "impersonation_alert_blocked_writes_per_session": "Alerta: escrituras bloqueadas por sesión de Ver como",
+        "documents_max_size_mb": "Tamaño máximo de documento (MB)",
+        "notifications_archive_read_after_days": "Archivar notificaciones leídas después de (días)",
+        "audit_logs_retention_months": "Retención de logs de auditoría en caliente (meses)"
+      }
+    }
   },
   "actions": {
     "login": "Iniciar sesión",
@@ -39,6 +117,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "close": "Cerrar",
+    "closeWindow": "Cerrar ventana",
+    "viewMore": "Ver más",
     "edit": "Editar",
     "delete": "Eliminar",
     "activate": "Activar",
@@ -105,11 +185,18 @@
     "perPage": "/ pág",
     "all": "Todos"
   },
+  "buscador": {
+    "sinResultados": "Sin resultados"
+  },
   "theme": {
     "light": "Modo claro",
     "dark": "Modo oscuro",
     "switchToLight": "Cambiar a modo claro",
     "switchToDark": "Cambiar a modo oscuro"
+  },
+  "demoMode": {
+    "toggleLabel": "Modo Demo",
+    "badge": "Modo Demo activo"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -117,5 +204,26 @@
     "markAllRead": "Marcar todas como leídas",
     "viewLink": "Ver"
   },
-  "comingSoon": "Módulo de {{module}} próximamente."
+  "comingSoon": "Módulo de {{module}} próximamente.",
+  "userFilter": {
+    "all": "Vendedor/Diseñador",
+    "count_one": "{{count}} seleccionado",
+    "count_other": "{{count}} seleccionados",
+    "search": "Buscar por nombre...",
+    "clear": "Limpiar",
+    "empty": "Sin resultados",
+    "remove": "Quitar {{name}}"
+  },
+  "impersonation": {
+    "bannerAria": "Sesión de Ver como usuario activa",
+    "viewingAs": "Viendo como {{name}}",
+    "readOnly": "Solo lectura",
+    "startedBy": "Sesión de soporte de {{actor}}",
+    "remaining": "Tiempo restante: {{time}}",
+    "exit": "Salir",
+    "exiting": "Saliendo",
+    "readOnlyToast": "Modo solo lectura: no se guardan cambios mientras ves la app como otra persona.",
+    "endedToast": "La sesión de Ver como terminó. Volviste a tu cuenta.",
+    "originLostToast": "La sesión de Ver como terminó y tu sesión original ya no está disponible. Inicia sesión de nuevo."
+  }
 }

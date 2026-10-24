@@ -1,21 +1,22 @@
 import api from './authApi'
+import type { ApprovalPendingItem } from '@/lib/homeCards'
 import type {
   ProviderListResponse, ProviderDetail, ProviderPayload,
-  PurchaseOrderListResponse, PurchaseOrderDetail, PurchaseOrderPayload,
-  ApprovedProject, ComprasSettings, ComprasCatalogProduct,
+  PurchaseOrderListResponse, PurchaseOrderDetail, PurchaseOrderPayload, OrderTranslationStatus, OrderDocLang,
+  ApprovedProject, ComprasSettings, ComprasCatalogProduct, ComprasCatalogProductPage,
   ShippingInfoPayload, PurchaseOrderDocument, DocumentCategory,
-  LiquidationAgency, LiquidationAgencyPayload, ProviderConfirmationValidation,
+  LiquidationAgency, LiquidationAgencyPayload, ProviderConfirmationValidation, ProviderBankExtraction,
   LiquidationAgencySummaryResponse, LiquidationAgencyDetail,
   LiquidationAgencyContact, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload,
   PurchaseOrderPayment,
   PurchaseOrderClaimListResponse, PurchaseOrderClaimDetail, PurchaseOrderClaimPayload, PurchaseOrderClaimPhoto,
   ClaimListParams,
-  ReplacementRequest, ReplacementRequestListResponse, CreateReplacementRequestPayload, SubstituteSearchPoll,
+  ReplenishmentResponse, ReplacementRequest, ReplacementRequestListResponse, CreateReplacementRequestPayload, SubstituteSearchPoll,
   ReportGranularity, PurchasedByPeriodResponse, ProviderRatingResponse, ClaimsReportResponse,
   InventoryKpis, LiquidationImportsResponse, PurchaseOpportunityResponse,
   InventoryListResponse, InventoryProduct, InventoryProductPayload, InventoryChip,
   Warehouse, WarehouseStockRow, OrderPrefill, InventoryFamilyDetail, InventoryFamilyListResponse, ConfirmPendingResponse,
-  InventoryTechnicalSheetResponse,
+  InventoryTechnicalSheetResponse, InventoryPhotoResponse,
   GoodsReceiptEligibleOrder, GoodsReceiptOrderProducts, GoodsReceiptDetail, GoodsReceiptListResponse,
   GoodsReceiptPayload, GoodsReceiptPartialInfo, GoodsReceiptInvoiceMatchPoll,
   ComprasHomeSummary,
@@ -67,6 +68,9 @@ export interface InventoryListParams {
   // serializa el array como `warehouse_ids[]=<id>&warehouse_ids[]=<id>...` (default, sin
   // paramsSerializer custom) — forma que el backend ya espera, ver diseño técnico del batch.
   warehouse_ids?: number[]
+  // SCRUM-1010 — filtro por UNA familia (select). Ausente = todas. Resuelto en el backend (subconsulta
+  // sobre el pivot de familias): un producto compartido aparece al filtrar por cualquiera de las suyas.
+  family_id?: number
 }
 
 // SCRUM-183→196 (REQ-120→133) — mismo patrón anidado por sub-recurso que ventasDisenoApi.
@@ -83,6 +87,24 @@ export const comprasApi = {
 
     update: (id: number, data: ProviderPayload): Promise<ProviderDetail> =>
       api.put<ProviderDetail>(`/compras/providers/${id}`, data).then(r => r.data),
+
+    // SCRUM-819 — respaldo visual de datos bancarios. Subir reemplaza cualquier imagen previa.
+    uploadBankImage: (id: number, file: File): Promise<ProviderDetail> => {
+      const form = new FormData()
+      form.append('file', file)
+      return api.post<ProviderDetail>(`/compras/providers/${id}/bank-image`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    },
+
+    deleteBankImage: (id: number): Promise<ProviderDetail> =>
+      api.delete<ProviderDetail>(`/compras/providers/${id}/bank-image`).then(r => r.data),
+
+    // ADR-SCRUM819 — poll del resultado de extracción automática. Igual criterio que
+    // documents.getValidation: la key es el provider (entity), no un job_id — el backend resuelve
+    // el AiAnalysis más reciente para ese proveedor.
+    getBankExtraction: (id: number): Promise<ProviderBankExtraction> =>
+      api.get<ProviderBankExtraction>(`/compras/providers/${id}/bank-image/extraction`).then(r => r.data),
   },
 
   orders: {
@@ -123,16 +145,21 @@ export const comprasApi = {
     // REQ-149/136 — PDF real (dompdf) en 2 versiones. Blob (no una URL directa): el endpoint
     // exige JWT vía header Authorization, que una navegación de browser plana (<a href>,
     // window.open) no puede mandar — se pide con axios y se abre desde un object URL.
-    pdf: (id: number, includeCost: boolean): Promise<Blob> =>
+    pdf: (id: number, includeCost: boolean, lang: OrderDocLang = 'es'): Promise<Blob> =>
       api.get(`/compras/orders/${id}/pdf`, {
-        params: { include_cost: includeCost ? '1' : '0' },
+        params: { include_cost: includeCost ? '1' : '0', lang },
         responseType: 'blob',
       }).then(r => r.data as Blob),
 
     // REQ-136 — envío por correo al proveedor (encolado, no síncrono).
-    sendEmail: (id: number, includeCost: boolean): Promise<{ message: string }> =>
-      api.post<{ message: string }>(`/compras/orders/${id}/send-email`, { include_cost: includeCost })
+    // SCRUM-1127 — un idioma por envío; `en` exige la versión en inglés vigente (el backend responde 409 si no).
+    sendEmail: (id: number, includeCost: boolean, lang: OrderDocLang = 'es'): Promise<{ message: string }> =>
+      api.post<{ message: string }>(`/compras/orders/${id}/send-email`, { include_cost: includeCost, lang })
         .then(r => r.data),
+
+    // SCRUM-1127 — genera (o regenera) la versión en inglés con IA; queda guardada. Síncrono: tarda unos segundos.
+    translate: (id: number): Promise<{ translations: { en: OrderTranslationStatus } }> =>
+      api.post<{ translations: { en: OrderTranslationStatus } }>(`/compras/orders/${id}/translation`).then(r => r.data),
 
     // REQ-156 — contenedor/naviera/llegada real, editable sin importar el estado de la orden.
     updateShippingInfo: (id: number, data: ShippingInfoPayload): Promise<PurchaseOrderDetail> =>
@@ -230,8 +257,14 @@ export const comprasApi = {
   },
 
   approvedProjects: {
-    search: (search = ''): Promise<{ data: ApprovedProject[] }> =>
-      api.get<{ data: ApprovedProject[] }>('/compras/approved-projects', { params: { search } }).then(r => r.data),
+    // SCRUM-818 — `catalogProductId` opcional: cuando se pasa, el backend filtra a solo
+    // proyectos que contienen ESE producto en una cotización aprobada (y scopea a "solo mis
+    // proyectos" para quien no tiene acceso completo a Compras). Sin el parámetro, comportamiento
+    // idéntico al de siempre — Nueva Orden sigue usando esta misma función sin pasarlo.
+    search: (search = '', catalogProductId?: number): Promise<{ data: ApprovedProject[] }> =>
+      api.get<{ data: ApprovedProject[] }>('/compras/approved-projects', {
+        params: { search, catalog_product_id: catalogProductId },
+      }).then(r => r.data),
   },
 
   // REQ-151 (SCRUM-214, hallazgo Pre-QA 2026-08-05) — el "Filtro de Proyecto" de Logística NO
@@ -263,6 +296,13 @@ export const comprasApi = {
       api.get<{ data: ComprasCatalogProduct[]; fuzzy: boolean }>('/compras/products', {
         params: { provider_id: providerId, search, original_catalog_product_id: originalCatalogProductId },
       }).then(r => r.data),
+
+    // SCRUM-1163 — listado paginado en servidor (con `meta.total` real) para los pickers de Nueva Orden; `excludeIds` = productos ya agregados.
+    searchPage: (params: { providerId?: number; search: string; page: number; perPage: number; excludeIds: number[] }): Promise<ComprasCatalogProductPage> =>
+      api.get<ComprasCatalogProductPage>('/compras/products', {
+        params: { provider_id: params.providerId, search: params.search, page: params.page, per_page: params.perPage, exclude_ids: params.excludeIds },
+        paramsSerializer: { indexes: false },   // exclude_ids[]=1&exclude_ids[]=2: sin corchetes PHP lo lee como escalar y lo ignora
+      }).then(r => r.data),
   },
 
   settings: {
@@ -284,7 +324,9 @@ export const comprasApi = {
     // SCRUM-426 — la ficha técnica (documento/link, Caso A/B de SCRUM-237) ahora es obligatoria
     // y viaja en el MISMO request que crea el producto (backend la procesa dentro de la misma
     // transacción) — multipart en vez de JSON porque puede incluir un archivo real.
-    create: (data: InventoryProductPayload, technicalSheet: { file: File } | { link: string }): Promise<InventoryProduct> => {
+    // SCRUM-830 — imagen del producto ahora obligatoria, viaja en el MISMO request (mismo criterio
+    // que la ficha técnica: nunca un producto sin imagen en la base, ni siquiera transitoriamente).
+    create: (data: InventoryProductPayload, technicalSheet: { file: File } | { link: string }, photo: File): Promise<InventoryProduct> => {
       const formData = new FormData()
       Object.entries(data).forEach(([key, value]) => {
         if (value === undefined || value === null) return
@@ -295,10 +337,17 @@ export const comprasApi = {
           })
           return
         }
+        // SCRUM-1126 — un arreglo simple (provider_ids) viaja como `clave[]` repetida: `String([9, 10])` daba "9,10" y
+        // Laravel respondía 422 "debe ser un arreglo", con lo que NINGÚN alta de producto funcionaba.
+        if (Array.isArray(value)) {
+          value.forEach((item: unknown) => formData.append(`${key}[]`, String(item)))
+          return
+        }
         formData.append(key, String(value))
       })
       if ('file' in technicalSheet) formData.append('file', technicalSheet.file)
       else formData.append('link', technicalSheet.link)
+      formData.append('photo', photo)
 
       return api.post<InventoryProduct>('/compras/inventory', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -341,6 +390,16 @@ export const comprasApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then(r => r.data)
     },
+
+    // SCRUM-830 — reemplazo de imagen desde "Editar información" (creación va dentro de create()).
+    uploadPhoto: (id: number, photo: File): Promise<InventoryPhotoResponse> => {
+      const formData = new FormData()
+      formData.append('photo', photo)
+
+      return api.post<InventoryPhotoResponse>(`/compras/inventory/${id}/photo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    },
   },
 
   warehouses: {
@@ -368,6 +427,15 @@ export const comprasApi = {
       api.get<LiquidationImportsResponse>('/compras/reports/liquidation-imports', { params: { period, anchor } }).then(r => r.data),
   },
 
+  // SCRUM-1184 — Pendientes de reposición.
+  replenishment: {
+    get: (): Promise<ReplenishmentResponse> =>
+      api.get<ReplenishmentResponse>('/compras/replenishment').then(r => r.data),
+    /** Guarda el proveedor elegido para un producto. `expectedProviderId`: el principal que la pantalla cree que tiene (null = sin proveedor); 409 si cambió. */
+    assignProvider: (productId: number, providerId: number, expectedProviderId: number | null): Promise<{ catalog_product_id: number; provider_id: number | null }> =>
+      api.put(`/compras/replenishment/products/${productId}/provider`, { provider_id: providerId, expected_provider_id: expectedProviderId }).then(r => r.data),
+  },
+
   replacementRequests: {
     list: (status?: string, page?: number, per_page?: number | 'all'): Promise<ReplacementRequestListResponse> =>
       api.get<ReplacementRequestListResponse>('/compras/replacement-requests', { params: { status, page, per_page } }).then(r => r.data),
@@ -378,6 +446,13 @@ export const comprasApi = {
 
     generateOrder: (id: number): Promise<{ order_id: number }> =>
       api.post<{ order_id: number }>(`/compras/replacement-requests/${id}/generate-order`).then(r => r.data),
+
+    // SCRUM-818 — aprobar/rechazar, disponible cuando el backend informa can_decide=true.
+    approve: (id: number): Promise<ReplacementRequest> =>
+      api.post<ReplacementRequest>(`/compras/replacement-requests/${id}/approve`).then(r => r.data),
+
+    reject: (id: number): Promise<ReplacementRequest> =>
+      api.post<ReplacementRequest>(`/compras/replacement-requests/${id}/reject`).then(r => r.data),
 
     // SCRUM-245 (REQ-182/183, ADR-SCRUM245) — búsqueda por foto/ficha técnica con IA.
     search: (originalCatalogProductId: number, familyId: number, file: File): Promise<{ job_id: string }> => {
@@ -494,6 +569,10 @@ export const comprasApi = {
   home: {
     summary: (): Promise<ComprasHomeSummary> =>
       api.get<ComprasHomeSummary>('/compras/home/summary').then(r => r.data),
+
+    // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+    approvalsPending: (): Promise<{ data: ApprovalPendingItem[] }> =>
+      api.get<{ data: ApprovalPendingItem[] }>('/compras/home/approvals-pending').then(r => r.data),
   },
 
   // REQ-113 — panel "Mi calendario", solo lectura de Outlook (desbloqueado 2026-07-21).

@@ -102,6 +102,16 @@ describe('RegisterSignedGuideModal', () => {
     )
   })
 
+  // SCRUM-832 — mismo fix de jitter que SCRUM-393/RegisterDeliveryModal: el modal debe montarse
+  // vía createPortal directo en document.body, no anidado bajo el contenedor de render() (que en
+  // OrderCardTile real sería la tarjeta con `hover:-translate-y-px`, causante del bug).
+  it('SCRUM-832 — se monta vía portal en document.body', () => {
+    render(<RegisterSignedGuideModal order={order()} onClose={vi.fn()} />)
+
+    const modal = screen.getByTestId('signed-guide-modal')
+    expect(modal.parentElement).toBe(document.body)
+  })
+
   it('un error real del backend se muestra inline', () => {
     mutateMock.mockImplementation((_vars, { onError }) => {
       onError({ isAxiosError: true, response: { status: 422, data: { message: 'El pedido no está en la etapa Despachado.', errors: { order: ['El pedido no está en la etapa Despachado.'] } } } })

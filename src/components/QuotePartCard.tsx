@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
+import { Droppable, Draggable, type DraggableProvided, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
+import { useQuotePartsApi } from '@/components/quote/QuotePartsApiContext'
+import { useQuoteDnd } from '@/components/quote/QuoteDndContext'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 import type {
   QuotePartRef, QuoteItemRef, QuoteItemPayload, QuoteItemPriceTypeOverride, QuoteDiscountMode, QuotePriceType,
   CatalogProductRef, CatalogProductFamilyRef, CatalogProductFamilyDetail, QuoteItemPricePreview,
 } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { IcoClose } from '@/components/icons'
+import { IcoClose, IcoChevronDown, IcoChevronRight, IcoGripVertical } from '@/components/icons'
 import { sanitizeUnsignedDecimalInput, clampPercentInput } from '@/lib/decimalInput'
 import { formatMoney } from '@/lib/money'
 
@@ -129,21 +133,22 @@ function CatalogProductPicker({ onSelect, onSelectFamily, onCancel }: {
   const [familiesLoaded, setFamiliesLoaded] = useState(false)
   const [familyDetail, setFamilyDetail] = useState<CatalogProductFamilyDetail | null>(null)
 
-  function runSearch(q: string) {
-    setQuery(q)
-    // SCRUM-796 (secc. 6) — el backend ya no busca por heurística (FuzzySearchService),
-    // solo coincidencia exacta/parcial — `fuzzy` en la respuesta quedó fijo en `false`
-    // por compatibilidad de shape con otros buscadores del módulo, así que el banner de
-    // "resultado aproximado" que existía acá ya no aplica nunca, se retira.
-    ventasDisenoApi.catalogProducts.search(q).then(res => {
-      setResults(res.data); setSearched(true)
-    }).catch(() => { setResults([]); setSearched(true) })
-  }
-
-  // SCRUM-734 (sección 9) — catálogo completo visible al abrir la lupa sin
-  // escribir nada, en vez de una lista vacía hasta el primer tipeo.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { runSearch('') }, [])
+  // SCRUM-992 — el input responde al instante; el request sale tras 250 ms sin teclear (mínimo 2
+  // caracteres, vaciar restaura el catálogo completo). Una respuesta obsoleta nunca pisa a la última.
+  // SCRUM-796 (secc. 6) — el backend ya no busca por heurística (FuzzySearchService), solo
+  // coincidencia exacta/parcial — `fuzzy` en la respuesta quedó fijo en `false` por compatibilidad
+  // de shape con otros buscadores del módulo, así que el banner de "resultado aproximado" que
+  // existía acá ya no aplica nunca, se retira.
+  // SCRUM-734 (sección 9) — el catálogo completo se ve al abrir la lupa sin escribir nada (término
+  // inicial vacío), en vez de una lista vacía hasta el primer tipeo.
+  const searchTerm = useDebouncedSearchTerm(query)
+  useEffect(() => {
+    let cancelled = false
+    ventasDisenoApi.catalogProducts.search(searchTerm).then(res => {
+      if (!cancelled) { setResults(res.data); setSearched(true) }
+    }).catch(() => { if (!cancelled) { setResults([]); setSearched(true) } })
+    return () => { cancelled = true }
+  }, [searchTerm])
 
   function openFamiliesTab() {
     setMode('families')
@@ -167,7 +172,7 @@ function CatalogProductPicker({ onSelect, onSelectFamily, onCancel }: {
           {familyDetail.products.map(product => (
             <li key={product.id} className="px-2 py-1.5 text-xs flex justify-between gap-2">
               <span>
-                <span className="font-semibold">{product.factory_reference ?? product.reference}</span> — {product.description}
+                <span className="font-semibold">{product.reference}</span> — {product.description}
               </span>
               <span className="shrink-0 text-slate-500">${formatMoney(product.price_full)}</span>
             </li>
@@ -191,11 +196,11 @@ function CatalogProductPicker({ onSelect, onSelectFamily, onCancel }: {
       <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
         <div className="flex gap-3">
           {preview.photo_url && (
-            <img src={preview.photo_url} alt={preview.description} className="w-20 h-20 object-cover rounded-md shrink-0" />
+            <img src={preview.photo_url} alt={preview.description} className="w-20 h-20 object-contain rounded-md shrink-0 bg-white" />
           )}
           <div className="text-xs space-y-1">
             <p className="font-semibold text-sm text-slate-900 dark:text-slate-100">{preview.description}</p>
-            <p className="text-slate-500">{t('ventasDiseno:quote.item.reference')}: {preview.factory_reference ?? preview.reference}</p>
+            <p className="text-slate-500">{t('ventasDiseno:quote.item.reference')}: {preview.reference}</p>
             {preview.brand && <p className="text-slate-500">{t('ventasDiseno:catalog.brand')}: {preview.brand}</p>}
             <p className="text-slate-500">
               {t('ventasDiseno:catalog.available')}: {preview.stock_quantity ?? t('ventasDiseno:catalog.unlimited')}
@@ -234,7 +239,7 @@ function CatalogProductPicker({ onSelect, onSelectFamily, onCancel }: {
         <>
           <input
             autoFocus placeholder={t('ventasDiseno:catalog.searchPlaceholder')} value={query}
-            onChange={e => runSearch(e.target.value)}
+            onChange={e => setQuery(e.target.value)}
             className={`${inputCls} w-full mb-2`}
           />
           {searched && results.length === 0 && (
@@ -248,7 +253,7 @@ function CatalogProductPicker({ onSelect, onSelectFamily, onCancel }: {
                   className="w-full text-left px-2 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-between gap-2"
                 >
                   <span>
-                    <span className="font-semibold">{product.factory_reference ?? product.reference}</span> — {product.description}
+                    <span className="font-semibold">{product.reference}</span> — {product.description}
                   </span>
                   <span className="shrink-0 text-slate-500">${formatMoney(product.price_full)}</span>
                 </button>
@@ -287,33 +292,51 @@ interface Props {
   part:             QuotePartRef
   discountMode:     QuoteDiscountMode
   canEdit:          boolean
+  canSeeCost:       boolean
   // SCRUM-725 (decisión de Luis, 2026-08-05) — porcentaje real, ya no oculto.
   minMarginPercent: number
   // SCRUM-725 (fix 2026-08-06) — necesario para saber si el tipo de precio EFECTIVO
   // de cada ítem es "premium" (override propio, o "usar general" heredando este
   // valor) y así deshabilitar el precio manual, que esa fórmula ignora por completo.
   quotePriceType:   QuotePriceType
+  // SCRUM-1161 — colapsar (solo visual) y asa de arrastre; los pone QuotePartsList. Sin ellos, la tarjeta se ve como siempre.
+  collapsed?:          boolean
+  onToggleCollapsed?:  () => void
+  dragHandleProps?:    DraggableProvidedDragHandleProps | null
 }
 
-export default function QuotePartCard({ quoteId, part, discountMode, canEdit, minMarginPercent, quotePriceType }: Props) {
+export default function QuotePartCard({
+  quoteId, part, discountMode, canEdit, canSeeCost, minMarginPercent, quotePriceType,
+  collapsed = false, onToggleCollapsed, dragHandleProps,
+}: Props) {
+  const dnd = useQuoteDnd()
+  const nameRef = useRef<HTMLTextAreaElement>(null)
+  const partsApi = useQuotePartsApi()
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const qc = useQueryClient()
   const invalidate = () => qc.invalidateQueries({ queryKey: ['ventas-diseno-quote', quoteId] })
 
   const [name, setName] = useState(part.name)
+  // SCRUM-1161 — el nombre se ajusta al contenido (varias líneas): nunca se corta, al editar ni al reabrir.
+  useLayoutEffect(() => {
+    const el = nameRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [name, collapsed])
   const [showNewItem, setShowNewItem] = useState(false)
   const [showCatalogPicker, setShowCatalogPicker] = useState(false)
   const [newItem, setNewItem] = useState<ItemDraft>(emptyDraft())
   const [error, setError] = useState<string | null>(null)
 
   // SCRUM-796 (secc. 5) — búsqueda dinámica mientras se escribe en Referencia, alternativa
-  // adicional al botón "Buscar en catálogo" (que sigue intacto). Debounce simple (300ms) —
-  // no existe ningún hook reusable de debounce hoy en el repo.
+  // adicional al botón "Buscar en catálogo" (que sigue intacto). Debounce de 300 ms; SCRUM-992:
+  // mínimo 2 caracteres antes de disparar.
   const [refResults, setRefResults] = useState<CatalogProductRef[]>([])
   const [refDropdownOpen, setRefDropdownOpen] = useState(false)
   useEffect(() => {
     const q = newItem.reference.trim()
-    if (newItem.catalog_product_id != null || q === '') {
+    if (newItem.catalog_product_id != null || q.length < 2) {
       setRefResults([]); setRefDropdownOpen(false)
       return
     }
@@ -327,22 +350,28 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
   }, [newItem.reference, newItem.catalog_product_id])
 
   const renameMutation = useMutation({
-    mutationFn: (newName: string) => ventasDisenoApi.quotes.parts.update(quoteId, part.id, newName),
+    mutationFn: (newName: string) => partsApi.update(quoteId, part.id, newName),
     onSuccess: invalidate,
   })
   const deletePartMutation = useMutation({
-    mutationFn: () => ventasDisenoApi.quotes.parts.remove(quoteId, part.id),
+    mutationFn: () => partsApi.remove(quoteId, part.id),
+    onSuccess: invalidate,
+  })
+  // SCRUM-849.7 — copia productos/referencias/descripciones/cantidades a una partida nueva e
+  // independiente; la original nunca se toca.
+  const duplicatePartMutation = useMutation({
+    mutationFn: () => partsApi.duplicate(quoteId, part.id),
     onSuccess: invalidate,
   })
   const createItemMutation = useMutation({
-    mutationFn: (draft: ItemDraft) => ventasDisenoApi.quotes.parts.items.create(quoteId, part.id, toPayload(draft)),
+    mutationFn: (draft: ItemDraft) => partsApi.items.create(quoteId, part.id, toPayload(draft)),
     onSuccess: () => { setShowNewItem(false); setShowCatalogPicker(false); setNewItem(emptyDraft()); setError(null); invalidate() },
     onError: (err: unknown) => setError(errorMessage(err, t('ventasDiseno:modal.createError'))),
   })
   // REQ-037: alta en lote — a diferencia de createItemMutation, no pasa por el
   // draft de "nuevo ítem" (no hay cantidad/precio que confirmar por producto).
   const bulkCreateItemMutation = useMutation({
-    mutationFn: (catalogProductIds: number[]) => ventasDisenoApi.quotes.parts.items.bulkCreate(quoteId, part.id, catalogProductIds),
+    mutationFn: (catalogProductIds: number[]) => partsApi.items.bulkCreate(quoteId, part.id, catalogProductIds),
     onSuccess: () => { setShowNewItem(false); setShowCatalogPicker(false); setError(null); invalidate() },
     onError: (err: unknown) => setError(errorMessage(err, t('ventasDiseno:modal.createError'))),
   })
@@ -356,7 +385,7 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
 
   function selectCatalogProduct(product: CatalogProductRef) {
     setNewItem(d => ({
-      ...d, catalog_product_id: product.id, reference: product.factory_reference ?? product.reference,
+      ...d, catalog_product_id: product.id, reference: product.reference,
       description: product.description, unit_price: String(product.price_full),
       stock_quantity: product.stock_quantity,
     }))
@@ -371,25 +400,67 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 mb-3">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <input
-          type="text" value={name} disabled={!canEdit}
-          onChange={e => setName(e.target.value)}
+      <div className="flex items-start gap-2 mb-2">
+        {dnd.enabled && dragHandleProps && (
+          <span
+            {...dragHandleProps}
+            aria-label={t('ventasDiseno:quote.dragPart')}
+            title={t('ventasDiseno:quote.dragPart')}
+            data-testid={`part-drag-handle-${part.id}`}
+            className="mt-1 text-slate-400 hover:text-slate-600 cursor-grab shrink-0"
+          >
+            <IcoGripVertical />
+          </span>
+        )}
+        {onToggleCollapsed && (
+          <button
+            type="button" onClick={onToggleCollapsed}
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? t('ventasDiseno:quote.expandPart') : t('ventasDiseno:quote.collapsePart')}
+            title={collapsed ? t('ventasDiseno:quote.expandPart') : t('ventasDiseno:quote.collapsePart')}
+            data-testid={`part-toggle-${part.id}`}
+            className="mt-1 text-slate-500 hover:text-slate-700 shrink-0"
+          >
+            {collapsed ? <IcoChevronRight /> : <IcoChevronDown />}
+          </button>
+        )}
+        <textarea
+          ref={nameRef} rows={1} value={name} disabled={!canEdit}
+          aria-label={t('ventasDiseno:quote.partName')}
+          onChange={e => setName(e.target.value.replace(/\n/g, ' '))}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
           onBlur={() => { if (name.trim() && name !== part.name) renameMutation.mutate(name) }}
-          className="font-semibold text-sm rounded-md border border-transparent hover:border-slate-300 focus:border-[#5BA5A0] px-2 py-1 bg-transparent focus:outline-none disabled:text-slate-400"
+          className="flex-1 min-w-0 resize-none overflow-hidden font-semibold text-sm rounded-md border border-transparent hover:border-slate-300 focus:border-[#5BA5A0] px-2 py-1 bg-transparent focus:outline-none disabled:text-slate-400"
         />
+        {collapsed && (
+          <span className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap shrink-0" data-testid={`part-collapsed-subtotal-${part.id}`}>
+            {t('ventasDiseno:quote.item.subtotal')}: ${formatMoney(part.subtotal)}
+          </span>
+        )}
         {canEdit && (
-          <button onClick={() => deletePartMutation.mutate()} className="text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">
+          <button
+            onClick={() => duplicatePartMutation.mutate()}
+            disabled={duplicatePartMutation.isPending}
+            className="mt-1 text-slate-500 hover:text-slate-700 text-xs font-semibold shrink-0"
+          >
+            {t('ventasDiseno:quote.duplicatePart')}
+          </button>
+        )}
+        {canEdit && (
+          <button onClick={() => deletePartMutation.mutate()} className="mt-1 text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">
             {t('common:actions.delete')}
           </button>
         )}
       </div>
 
+      {/* SCRUM-1161 — colapsar solo oculta (no desmonta): lo escrito sin guardar en un producto no se pierde. */}
+      <div hidden={collapsed} data-testid={`part-content-${part.id}`}>
       {part.items.length > 0 && (
         <div className="overflow-x-auto mb-2">
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-[10px] font-bold uppercase tracking-wide text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                {dnd.enabled && <th className="py-1 w-5"></th>}
                 <th className="py-1 pr-2">{t('ventasDiseno:quote.item.reference')}</th>
                 <th className="py-1 pr-2">{t('ventasDiseno:quote.item.description')}</th>
                 <th className="py-1 pr-2">{t('ventasDiseno:quote.item.quantity')}</th>
@@ -401,15 +472,34 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
                 {canEdit && <th className="py-1"></th>}
               </tr>
             </thead>
-            <tbody>
-              {part.items.map(item => (
-                <QuoteItemRow
-                  key={item.id} quoteId={quoteId} partId={part.id} item={item}
-                  discountMode={discountMode} canEdit={canEdit} onSaved={invalidate}
-                  minMarginPercent={minMarginPercent} quotePriceType={quotePriceType}
-                />
-              ))}
-            </tbody>
+            {dnd.enabled ? (
+              <Droppable droppableId={`items-${part.id}`} type="ITEM">
+                {dropProvided => (
+                  <tbody ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
+                    {part.items.map((item, index) => (
+                      <QuoteItemRow
+                        key={item.id} quoteId={quoteId} partId={part.id} item={item} index={index}
+                        discountMode={discountMode} canEdit={canEdit} canSeeCost={canSeeCost}
+                        onSaved={invalidate}
+                        minMarginPercent={minMarginPercent} quotePriceType={quotePriceType}
+                      />
+                    ))}
+                    {dropProvided.placeholder}
+                  </tbody>
+                )}
+              </Droppable>
+            ) : (
+              <tbody>
+                {part.items.map((item, index) => (
+                  <QuoteItemRow
+                    key={item.id} quoteId={quoteId} partId={part.id} item={item} index={index}
+                    discountMode={discountMode} canEdit={canEdit} canSeeCost={canSeeCost}
+                    onSaved={invalidate}
+                    minMarginPercent={minMarginPercent} quotePriceType={quotePriceType}
+                  />
+                ))}
+              </tbody>
+            )}
           </table>
         </div>
       )}
@@ -455,11 +545,16 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
                             className="w-full text-left px-2 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-between gap-2"
                           >
                             <span className="min-w-0">
-                              <span className="font-semibold">{product.factory_reference ?? product.reference}</span>
+                              <span className="font-semibold">{product.reference}</span>
                               {' — '}{product.description}
                             </span>
                             <span className="shrink-0 flex items-center gap-1.5">
                               <StockBadge stock={product.stock_quantity} />
+                              {(product.stock_showroom ?? 0) > 0 && (
+                                <span className="shrink-0 text-[10px] text-slate-500 whitespace-nowrap" data-testid={`showroom-${product.id}`}>
+                                  {t('ventasDiseno:catalog.showroom', { count: product.stock_showroom })}
+                                </span>
+                              )}
                               <span className="text-slate-500">${formatMoney(product.price_full)}</span>
                             </span>
                           </button>
@@ -547,6 +642,7 @@ export default function QuotePartCard({ quoteId, part, discountMode, canEdit, mi
       <p className="text-right text-xs font-semibold text-slate-600 dark:text-slate-300 mt-2">
         {t('ventasDiseno:quote.item.subtotal')}: ${formatMoney(part.subtotal)}
       </p>
+      </div>
     </div>
   )
 }
@@ -568,6 +664,7 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
   onClose: () => void
   onSaved: () => void
 }) {
+  const partsApi = useQuotePartsApi()
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const [priceDraft, setPriceDraft] = useState(String(item.unit_price))
   const [preview, setPreview] = useState<QuoteItemPricePreview | null>(null)
@@ -591,7 +688,7 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
     }
 
     const handle = setTimeout(() => {
-      ventasDisenoApi.quotes.parts.items.previewPrice(quoteId, partId, item.id, price)
+      partsApi.items.previewPrice(quoteId, partId, item.id, price)
         .then(setPreview)
         .catch(() => setPreview(null))
     }, 300)
@@ -600,7 +697,7 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
   }, [priceDraft, quoteId, partId, item.id])
 
   const saveMutation = useMutation({
-    mutationFn: () => ventasDisenoApi.quotes.parts.items.update(
+    mutationFn: () => partsApi.items.update(
       quoteId, partId, item.id, toPayload({ ...draftFromItem(item), unit_price: priceDraft }),
     ),
     onSuccess: () => onSaved(),
@@ -664,21 +761,26 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
 }
 
 function QuoteItemRow({
-  quoteId, partId, item, discountMode, canEdit, onSaved, minMarginPercent, quotePriceType,
+  quoteId, partId, item, index, discountMode, canEdit, canSeeCost, onSaved, minMarginPercent, quotePriceType,
 }: {
   quoteId:          number
   partId:           number
   item:             QuoteItemRef
+  index:            number
   discountMode:     QuoteDiscountMode
   canEdit:          boolean
+  canSeeCost:       boolean
   onSaved:          () => void
   minMarginPercent: number
   quotePriceType:   QuotePriceType
 }) {
+  const partsApi = useQuotePartsApi()
+  const dnd = useQuoteDnd()
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const [draft, setDraft] = useState<ItemDraft>(draftFromItem(item))
   const [error, setError] = useState<string | null>(null)
   const [showPriceModal, setShowPriceModal] = useState(false)
+  const [showPhotoPicker, setShowPhotoPicker] = useState(false)
 
   // SCRUM-133 (REQ-041): cuando el servidor cambia el ítem por una vía indirecta
   // — ej. cambiar el modo de descuento a "Global" resetea discount_percent a 0
@@ -702,13 +804,23 @@ function QuoteItemRow({
   const isDirty = Object.keys(draft).some(key => draft[key as keyof ItemDraft] !== original[key as keyof ItemDraft])
 
   const updateMutation = useMutation({
-    mutationFn: () => ventasDisenoApi.quotes.parts.items.update(quoteId, partId, item.id, toPayload(draft)),
+    mutationFn: () => partsApi.items.update(quoteId, partId, item.id, toPayload(draft)),
     onSuccess: () => { setError(null); onSaved() },
     onError: (err: unknown) => setError(errorMessage(err, t('ventasDiseno:modal.createError'))),
   })
   const deleteMutation = useMutation({
-    mutationFn: () => ventasDisenoApi.quotes.parts.items.remove(quoteId, partId, item.id),
+    mutationFn: () => partsApi.items.remove(quoteId, partId, item.id),
     onSuccess: onSaved,
+  })
+  // SCRUM-849.6 — foto ad-hoc, solo para ítems personalizados (RN del ticket: un producto real
+  // de Catálogo administra su imagen desde Compras → Inventario, no desde acá).
+  // Rebote de Daniela (2026-09-10): faltaba onError acá — un 422 (item no-custom o cotización ya
+  // confirmada) o el 503 del circuit breaker de S3 fallaban en silencio, sin ningún mensaje, dando
+  // la impresión de "no está cargando" pese a que sí se había intentado.
+  const uploadPhotoMutation = useMutation({
+    mutationFn: (file: File) => partsApi.items.uploadPhoto(quoteId, partId, item.id, file),
+    onSuccess: () => { setError(null); onSaved() },
+    onError: (err: unknown) => setError(errorMessage(err, t('ventasDiseno:quote.item.uploadPhotoError'))),
   })
 
   // REQ-035: reference/description/unit_price/cost de un ítem de catálogo
@@ -724,21 +836,96 @@ function QuoteItemRow({
   const effectivePriceType = draft.price_type_override || quotePriceType
   const priceOverrideDisabled = !canEdit || effectivePriceType === 'premium'
 
-  return (
-    <tr className="border-b border-slate-100 dark:border-slate-800">
+  // SCRUM-1161 — la fila principal se arma aparte para poder envolverla en un Draggable (solo con arrastre disponible).
+  const renderRow = (p?: DraggableProvided, dragging = false) => (
+    <tr
+      ref={p?.innerRef} {...p?.draggableProps}
+      // Al arrastrar, la fila sale del flujo de la tabla: `display: table` evita que sus celdas se encojan.
+      style={dragging ? { ...p?.draggableProps.style, display: 'table' } : p?.draggableProps.style}
+      className={`border-b border-slate-100 dark:border-slate-800${dragging ? ' bg-white dark:bg-slate-800 shadow-md' : ''}`}
+    >
+      {dnd.enabled && (
+        <td className="py-1 pr-1 align-middle w-5">
+          {p && (
+            <span
+              {...p.dragHandleProps}
+              aria-label={t('ventasDiseno:quote.dragItem')}
+              title={t('ventasDiseno:quote.dragItem')}
+              data-testid={`item-drag-handle-${item.id}`}
+              className="inline-block text-slate-400 hover:text-slate-600 cursor-grab"
+            >
+              <IcoGripVertical size={14} />
+            </span>
+          )}
+        </td>
+      )}
       <td className="py-1 pr-2">
-        <input value={draft.reference} disabled={!canEdit || locked} onChange={e => setDraft(d => ({ ...d, reference: e.target.value }))} className={`${inputCls} w-24`} />
+        {/* SCRUM-1144 — el ancho sigue al largo del código (antes `w-24` fijo lo cortaba y, con referencias casi
+            iguales como ML-10097AWH / ML-10097BWH-1, no se podía saber cuál quedó agregada). `ch` es el ancho del
+            dígito «0», más angosto que las mayúsculas (M, W, O), así que cada carácter cuenta 1.4ch; el padding y el
+            borde del input (box-sizing: border-box) se suman aparte con `+ 1.5rem`, o el último carácter se recorta
+            (Pre-QA: ML-NOPHOTO se veía ML-NOPHOTC). `title` muestra el código completo al pasar el cursor. */}
+        <input
+          value={draft.reference} disabled={!canEdit || locked}
+          onChange={e => setDraft(d => ({ ...d, reference: e.target.value }))}
+          title={draft.reference}
+          style={{ width: `calc(${Math.max(8, Math.ceil(draft.reference.length * 1.4) + 2)}ch + 1.5rem)` }}
+          className={`${inputCls} max-w-none`}
+        />
       </td>
       <td className="py-1 pr-2">
         <input value={draft.description} disabled={!canEdit || locked} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} className={`${inputCls} w-32`} />
+        {/* SCRUM-849.6 — foto ad-hoc, solo ítems personalizados (un producto de Catálogo
+            trae la suya propia, sin control acá). SCRUM-1138 — la miniatura se muestra para cualquier
+            ítem con foto (también los de Catálogo, que antes no la mostraban); subir/cambiar la foto
+            sigue siendo solo de los personalizados. */}
+        {(item.is_custom || item.photo_url) && (
+          <div className="mt-1 flex items-center gap-1.5">
+            {item.photo_url && (
+              <img src={item.photo_url} alt="" className="w-8 h-8 object-contain rounded border border-slate-200 bg-white shrink-0" />
+            )}
+            {item.is_custom && canEdit && (
+              showPhotoPicker ? (
+                // Input montado solo mientras se elige el archivo (en vez de un <input type="file">
+                // siempre en el DOM) — así no colisiona con queries genéricas tipo
+                // getByDisplayValue('') del resto de la fila (un file input siempre reporta value='').
+                // Rebote de Daniela (2026-09-10) — root cause real: al abrir el diálogo nativo del
+                // SO, el navegador dispara blur sobre este input ANTES de que el usuario termine de
+                // elegir el archivo (no al cerrarlo) — con onBlur desmontando este input, React lo
+                // saca del árbol mientras el diálogo nativo sigue abierto, y el evento `change`
+                // posterior (al elegir el archivo) nunca llega a ningún listener. Invisible para
+                // Playwright/setInputFiles(), que nunca abre el diálogo real — solo lo sufre un
+                // usuario real. Sin onBlur: cancelar el diálogo simplemente deja el input visible,
+                // costo de UX menor comparado con una carga que nunca ocurre.
+                <input
+                  type="file" accept="image/png,image/jpeg,image/webp" autoFocus
+                  disabled={uploadPhotoMutation.isPending}
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    setShowPhotoPicker(false)
+                    if (file) uploadPhotoMutation.mutate(file)
+                  }}
+                  className="text-[10px] w-28"
+                />
+              ) : (
+                // Rebote de Daniela (2026-09-10) — "no muestra nada de ayuda visual que me
+                // permita ver si la foto sí cargó o no": el texto "Cargando..." era demasiado
+                // débil. Reusa Button+Spinner (mismo patrón que el resto de la cotización, ver
+                // saveMutation arriba) en vez de un <button> de solo texto.
+                <Button
+                  type="button" variant="secondary" loading={uploadPhotoMutation.isPending}
+                  onClick={() => setShowPhotoPicker(true)}
+                  className="!text-[10px] !py-0.5 !px-1.5"
+                >
+                  {item.photo_url ? t('ventasDiseno:quote.item.changePhoto') : t('ventasDiseno:quote.item.addPhoto')}
+                </Button>
+              )
+            )}
+          </div>
+        )}
       </td>
       <td className="py-1 pr-2">
         <input type="number" value={draft.quantity} disabled={!canEdit} onChange={e => setDraft(d => ({ ...d, quantity: e.target.value }))} className={`${inputCls} w-14`} />
-        {shortage !== null && (
-          <div className="text-[10px] text-amber-600 mt-0.5 whitespace-nowrap">
-            {t('ventasDiseno:catalog.insufficientStock', { count: shortage })}
-          </div>
-        )}
       </td>
       <td className="py-1 pr-2">
         {/* SCRUM-734 (sección 9, RN9.1) — el precio ya no se edita escribiendo
@@ -775,12 +962,16 @@ function QuoteItemRow({
         )}
       </td>
       <td className="py-1 pr-2">
-        <input
-          type="number" value={draft.cost} disabled={!canEdit || locked}
-          onChange={e => setDraft(d => ({ ...d, cost: e.target.value }))}
-          title={t('ventasDiseno:quote.item.costHint')}
-          className={`${inputCls} w-20`}
-        />
+        {canSeeCost || item.catalog_product_id === null ? (
+          <input
+            type="number" value={draft.cost} disabled={!canEdit || locked}
+            onChange={e => setDraft(d => ({ ...d, cost: e.target.value }))}
+            title={t('ventasDiseno:quote.item.costHint')}
+            className={`${inputCls} w-20`}
+          />
+        ) : (
+          <span className="inline-block w-20 text-center text-slate-400">---</span>
+        )}
       </td>
       {discountMode === 'line' && (
         <td className="py-1 pr-2">
@@ -827,5 +1018,24 @@ function QuoteItemRow({
         </td>
       )}
     </tr>
+  )
+
+  return (
+    <>
+    {dnd.enabled ? (
+      <Draggable draggableId={`item-${item.id}`} index={index} isDragDisabled={!canEdit || dnd.disabled}>
+        {(p, snap) => renderRow(p, snap.isDragging)}
+      </Draggable>
+    ) : renderRow()}
+    {/* SCRUM-968 — fila propia debajo del ítem: el aviso ya no vive dentro de la celda de Cantidad,
+        así que no ensancha esa columna ni desplaza el resto de la tabla. */}
+    {shortage !== null && (
+      <tr className="border-b border-slate-100 dark:border-slate-800">
+        <td colSpan={dnd.enabled ? 10 : 9} className="pb-1 text-[11px] text-amber-600">
+          {t('ventasDiseno:catalog.insufficientStock', { count: shortage })}
+        </td>
+      </tr>
+    )}
+    </>
   )
 }

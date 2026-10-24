@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import NotificationBell from './NotificationBell'
 import { notificationsApi } from '@/api/notificationsApi'
 
@@ -31,6 +31,10 @@ vi.mock('@/api/notificationsApi', () => ({
 }))
 
 const mockedApi = vi.mocked(notificationsApi)
+
+function LocationProbe() {
+  return <span data-testid="location">{useLocation().pathname}</span>
+}
 
 function renderBell() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -107,6 +111,38 @@ describe('NotificationBell', () => {
     fireEvent.click(await screen.findByText('Proyecto cerrado'))
 
     await waitFor(() => expect(mockedApi.markRead).toHaveBeenCalledWith(1))
+  })
+
+  // SCRUM-1167 — la notificación debe llevar a la acción; sin enlace no navega ni aparenta ser clicable.
+  it('navega al enlace de la notificación y la marca como leída', async () => {
+    mockedApi.list.mockResolvedValue({
+      data: [
+        { id: 7, content: { subject: 'Recordatorio Zona Libre', body: 'x' }, link_url: '/bodega/ordenes-zona-libre', is_read: false, read_at: null, created_at: '2026-07-01T00:00:00Z' },
+        { id: 8, content: { subject: 'Aviso sin enlace', body: 'x' }, link_url: null, is_read: true, read_at: '2026-07-02', created_at: '2026-07-02T00:00:00Z' },
+      ],
+      meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/inicio']}>
+          <NotificationBell />
+          <LocationProbe />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    fireEvent.click(screen.getByTitle('Notifications'))
+    expect(await screen.findByText('Aviso sin enlace')).toBeInTheDocument()
+    expect(screen.getByText('Aviso sin enlace').closest('button')).toHaveAttribute('data-has-link', 'false')
+    expect(screen.getByText('Recordatorio Zona Libre').closest('button')).toHaveAttribute('data-has-link', 'true')
+
+    fireEvent.click(screen.getByText('Aviso sin enlace'))
+    expect(screen.getByTestId('location')).toHaveTextContent('/inicio')
+
+    fireEvent.click(screen.getByText('Recordatorio Zona Libre'))
+    await waitFor(() => expect(mockedApi.markRead).toHaveBeenCalledWith(7))
+    expect(screen.getByTestId('location')).toHaveTextContent('/bodega/ordenes-zona-libre')
   })
 
   it('marca todas como leídas al hacer click en el botón', async () => {

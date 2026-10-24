@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { isAxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { useTeamMembersByRole, useRegisterSignedGuide } from '@/hooks/useBodega'
@@ -92,7 +93,11 @@ export default function RegisterSignedGuideModal({ order, onClose }: Props) {
     )
   }
 
-  return (
+  // SCRUM-832 — mismo bug de jitter/intermitencia que SCRUM-393 (ver docblock de
+  // `RegisterDeliveryModal`, causa raíz confirmada ahí): `OrderCardTile` renderiza este modal como
+  // hijo directo de su tarjeta raíz, que tiene `hover:-translate-y-px`, convirtiéndola en
+  // "containing block" de este `position: fixed`. Portal a `document.body`, mismo fix.
+  return createPortal(
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="signed-guide-modal">
       <Card variant="modal" className="w-full max-w-sm p-5">
         <div className="flex items-center justify-between mb-1">
@@ -183,6 +188,7 @@ export default function RegisterSignedGuideModal({ order, onClose }: Props) {
           </Button>
         </div>
       </Card>
-    </div>
+    </div>,
+    document.body,
   )
 }

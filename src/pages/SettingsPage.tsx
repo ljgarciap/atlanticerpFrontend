@@ -1,14 +1,18 @@
 import { useState } from 'react'
+import { isAxiosError } from 'axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n'
 import { settingsApi } from '@/api/settingsApi'
-import { adminApi, type DemoCleanupResult } from '@/api/adminApi'
+import { adminApi } from '@/api/adminApi'
 import { authApi } from '@/api/authApi'
 import { useAuthStore } from '@/store/authStore'
 import { applyTheme } from '@/hooks/useTheme'
+import { parseApiValidationError } from '@/lib/apiValidationError'
+import { invalidateDemoModeAffectedQueries } from '@/hooks/useDemoMode'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Toggle } from '@/components/ui/Toggle'
 
 const LANGUAGES = [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }]
 const THEMES    = [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]
@@ -27,17 +31,6 @@ export default function SettingsPage() {
   const isAdmin       = hasAllAccess || permissions.includes('settings.global')
   const isSuperadmin  = hasAllAccess
   const canManageAiKey = hasAllAccess
-
-  const [confirmingCleanup, setConfirmingCleanup] = useState(false)
-  const [cleanupResult, setCleanupResult]         = useState<DemoCleanupResult | null>(null)
-
-  const cleanupDemo = useMutation({
-    mutationFn: adminApi.cleanupDemo,
-    onSuccess: (data) => {
-      setConfirmingCleanup(false)
-      setCleanupResult(data)
-    },
-  })
 
   const MFA_MODES = [
     { value: 'disabled', label: t('settings:global.mfaModeDisabled') },
@@ -74,7 +67,13 @@ export default function SettingsPage() {
 
   const updateSystem = useMutation({
     mutationFn: settingsApi.updateSystemSettings,
-    onSuccess:  (data) => qc.setQueryData(['system-settings'], data),
+    onSuccess:  (data, variables) => {
+      qc.setQueryData(['system-settings'], data)
+      // docs/specs/demo-mode.md — cambiar el gate global debe reflejarse de inmediato en
+      // Catálogo/Inventario/selector de producto de este mismo navegador (el resto del equipo
+      // lo ve al refrescar, el toggle es personal por usuario, no hay push en vivo entre sesiones).
+      if ('demo_mode_enabled' in variables) invalidateDemoModeAffectedQueries(qc)
+    },
   })
 
   return (
@@ -146,57 +145,6 @@ export default function SettingsPage() {
           </div>
 
           <div className="px-6 py-5 space-y-3">
-            <div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('settings:admin.demoCleanup.label')}</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{t('settings:admin.demoCleanup.description')}</p>
-            </div>
-
-            {cleanupResult && !confirmingCleanup && (
-              <p className="text-xs text-[#5BA5A0] font-medium">
-                {t('settings:admin.demoCleanup.result', {
-                  projects: cleanupResult.deleted_projects,
-                  users:    cleanupResult.deleted_users,
-                })}
-              </p>
-            )}
-
-            {!confirmingCleanup && (
-              <Button
-                type="button"
-                variant="danger"
-                onClick={() => { setCleanupResult(null); setConfirmingCleanup(true) }}
-                className="!px-4 !py-2 !text-xs">
-                {t('settings:admin.demoCleanup.label')}
-              </Button>
-            )}
-
-            {confirmingCleanup && (
-              <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 px-4 py-3 space-y-3">
-                <p className="text-xs text-red-700 dark:text-red-400 font-medium">{t('settings:admin.demoCleanup.confirm')}</p>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="danger"
-                    disabled={cleanupDemo.isPending}
-                    loading={cleanupDemo.isPending}
-                    onClick={() => cleanupDemo.mutate()}
-                    className="!px-4 !py-1.5 !text-xs">
-                    {cleanupDemo.isPending ? t('common:labels.loading') : t('settings:admin.demoCleanup.confirmBtn')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={cleanupDemo.isPending}
-                    onClick={() => setConfirmingCleanup(false)}
-                    className="!px-4 !py-1.5 !text-xs">
-                    {t('settings:admin.demoCleanup.cancelBtn')}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <hr className="border-slate-100 dark:border-slate-700" />
-
             {/* Backup / export */}
             <div>
               <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('settings:admin.backup.label')}</p>
@@ -280,6 +228,36 @@ export default function SettingsPage() {
                     disabled={updateSystem.isPending}
                   />
                 </SettingRow>
+
+                {/* SCRUM-990 — umbral de la guarda del sincronizador de Lafayette (regla dura: todo umbral de negocio en una tabla paramétrica
+                    con vista de administración). Solo SUPERADMIN: el backend lo exige (403 con settings.global sin superadmin.all), así que
+                    ni se muestra a quien solo tiene settings.global. */}
+                {isSuperadmin && (
+                  <div>
+                    <SettingRow label={t('settings:global.lafayetteGuarda')}>
+                      <LafayetteGuardaRatioInput
+                        value={system?.lafayette_guarda_min_ratio ?? 0.9}
+                        onSave={(ratio, handlers) => updateSystem.mutate({ lafayette_guarda_min_ratio: ratio }, handlers)}
+                        disabled={updateSystem.isPending}
+                      />
+                    </SettingRow>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('settings:global.lafayetteGuardaHelp')}</p>
+                  </div>
+                )}
+
+                {/* docs/specs/demo-mode.md — gate GLOBAL. Solo habilita que cada usuario pueda
+                    prender su propio toggle personal (TopBar); no filtra nada por sí solo. */}
+                <div>
+                  <SettingRow label={t('settings:global.demoModeEnabled')}>
+                    <Toggle
+                      checked={system?.demo_mode_enabled ?? false}
+                      onChange={v => updateSystem.mutate({ demo_mode_enabled: v })}
+                      disabled={updateSystem.isPending}
+                      label={t('settings:global.demoModeEnabled')}
+                    />
+                  </SettingRow>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('settings:global.demoModeSubtitle')}</p>
+                </div>
 
                 {updateSystem.isSuccess && (
                   <p className="text-xs text-[#5BA5A0] font-medium">{t('settings:saved')}</p>
@@ -757,6 +735,88 @@ function ShareLinksExpirationInput({
 
 // SCRUM-746 — mismo patrón que ShareLinksExpirationInput, rango 1-720 en vez de 1-365 (ver
 // PreferencesService::MIN_SESSION_INACTIVITY_HOURS/MAX_SESSION_INACTIVITY_HOURS en backend).
+/** Rango que acepta el backend para `lafayette_guarda_min_ratio` (`SettingsController`: numeric|min:0.5|max:1). */
+const LAFAYETTE_GUARDA_MIN = 0.5
+const LAFAYETTE_GUARDA_MAX = 1
+
+/**
+ * SCRUM-990 — umbral de la guarda del sincronizador de Lafayette (0,5 a 1,0 inclusive). Valida en el cliente el mismo rango que el backend y
+ * traduce sus rechazos: 422 con error en esta clave -> el mensaje de rango; 403 (settings.global sin superadmin.all) -> solo superadmin.
+ * Muestra el equivalente en porcentaje (0,9 = 90 %).
+ */
+function LafayetteGuardaRatioInput({
+  value, onSave, disabled,
+}: {
+  value: number
+  onSave: (ratio: number, handlers: { onSuccess: () => void; onError: (err: unknown) => void }) => void
+  disabled?: boolean
+}) {
+  const { t } = useTranslation('settings')
+  const [draft, setDraft] = useState<string>('')
+  const [error, setError] = useState('')
+
+  const shown = draft !== '' ? draft : String(value)
+  const shownNumber = Number(shown)
+  const percent = Number.isFinite(shownNumber) && shown !== '' ? Math.round(shownNumber * 100) : null
+
+  const inRange = (n: number) => Number.isFinite(n) && n >= LAFAYETTE_GUARDA_MIN && n <= LAFAYETTE_GUARDA_MAX
+
+  const handleSave = () => {
+    const ratio = draft !== '' ? Number(draft) : value
+    if (!inRange(ratio)) {
+      setError(t('settings:global.lafayetteGuardaError'))
+      return
+    }
+    setError('')
+    onSave(ratio, {
+      onSuccess: () => setDraft(''),
+      onError: err => {
+        const status = isAxiosError(err) ? err.response?.status : undefined
+        if (status === 403) { setError(t('settings:global.lafayetteGuardaForbidden')); return }
+        if (status === 422) {
+          const fieldErrors = parseApiValidationError(err)?.fields['lafayette_guarda_min_ratio']
+          setError(fieldErrors ? t('settings:global.lafayetteGuardaError') : t('settings:global.lafayetteGuardaGeneric'))
+          return
+        }
+        setError(t('settings:global.lafayetteGuardaGeneric'))
+      },
+    })
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          inputMode="decimal"
+          step={0.01}
+          min={LAFAYETTE_GUARDA_MIN}
+          max={LAFAYETTE_GUARDA_MAX}
+          value={shown}
+          onChange={e => { setDraft(e.target.value); setError('') }}
+          disabled={disabled}
+          aria-label={t('settings:global.lafayetteGuarda')}
+          aria-invalid={error !== ''}
+          className="w-20 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#5BA5A0] disabled:opacity-60"
+        />
+        {percent !== null && (
+          <span className="text-xs text-slate-400 dark:text-slate-500">{t('settings:global.lafayetteGuardaPercent', { percent })}</span>
+        )}
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={disabled}
+          loading={disabled}
+          className="!px-3 !py-1.5 !text-xs"
+        >
+          {t('settings:global.lafayetteGuardaSave')}
+        </Button>
+      </div>
+      {error && <p role="alert" className="text-[11px] text-red-500 dark:text-red-400">{error}</p>}
+    </div>
+  )
+}
+
 function SessionInactivityHoursInput({
   value, onSave, disabled,
 }: {

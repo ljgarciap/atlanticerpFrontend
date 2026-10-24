@@ -60,6 +60,7 @@ vi.mock('./Sidebar', () => ({
   default: ({ collapsed }: { collapsed: boolean }) => <div data-testid="sidebar" data-collapsed={String(collapsed)} />,
 }))
 vi.mock('@/hooks/useTheme', () => ({ useTheme: () => {} }))
+vi.mock('@/lib/impersonation', () => ({ endImpersonation: vi.fn() }))
 
 function baseUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
@@ -176,3 +177,21 @@ describe('AppShell — migración one-time de sidebar colapsado (SCRUM-711)', ()
     expect(screen.getByTestId('sidebar')).toHaveAttribute('data-collapsed', 'false')
   })
 })
+
+// SCRUM-1158 — la franja «Viendo como …» vive en el shell: sin ella una sesión de Ver como pasaría desapercibida.
+describe('AppShell — franja de Ver como usuario (SCRUM-1158)', () => {
+  it('no hay franja en una sesión normal', () => {
+    useAuthStore.setState({ user: baseUser() })
+    renderShell(['/ventas-diseno/home'])
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('con una sesión de Ver como activa la franja aparece y no desaparece al navegar', () => {
+    useAuthStore.setState({
+      user: baseUser({ impersonation: { id: 'imp-1', actor_id: 9, actor_name: 'Super', target_name: 'Vera', expires_at: '2099-01-01T00:00:00Z' } }),
+    })
+    renderShell(['/ventas-diseno/home'])
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+})
+

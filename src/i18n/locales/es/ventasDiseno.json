@@ -4,17 +4,24 @@
     "home": "Inicio",
     "pipeline": "Pipeline",
     "clients": "Clientes",
+    "architects": "Arquitectos",
     "quote": "Cotización",
     "quotesList": "Cotizaciones",
     "pedidos": "Pedidos",
+    "statusPedidos": "Status de Pedidos",
     "reports": "Reportes",
-    "auditLog": "Historial"
+    "auditLog": "Historial",
+    "cotizaya": "CotizaYA"
   },
   "scope": {
     "own": "Inicio",
     "team": "Equipo"
   },
   "filters": {
+    "orders": "Pedidos",
+    "ordersAll": "Pedidos: todos",
+    "ordersApproved": "Aprobados",
+    "ordersPending": "Por aprobar",
     "all": "Todos",
     "finalStage": "Final Stage",
     "stagnant": "Estancados",
@@ -59,11 +66,25 @@
     "photo": "Foto"
   },
   "modal": {
+    "passToOrder": {
+      "button": "Pasar a Pedido",
+      "confirmMessage": "¿Está seguro de que existe la información necesaria para pasar este proyecto a pedido para entrega en Bodega?",
+      "approve": "Aprobar",
+      "passedBy": "Pasado a pedido por",
+      "approvedAt": "Fecha de aprobación",
+      "abonoQuestion": "¿Desea registrar el cobro de este proyecto?",
+      "abonoRegister": "Registrar cobro",
+      "abonoLater": "No registrar aún",
+      "error": "No se pudo pasar el proyecto a pedido.",
+      "errorForbidden": "No tienes permiso para pasar este proyecto a pedido.",
+      "errorNotApproved": "El proyecto debe estar en estado Aprobado para pasar a pedido."
+    },
     "name": "Nombre del proyecto",
     "tag": "Etiqueta",
     "masterClient": "Cliente Master",
     "subClient": "Subcliente",
     "owner": "Responsable",
+    "creator": "Creador",
     "daysInStage": "Días en etapa",
     "amount": "Valor",
     "amountNote": "Se define en Cotizaciones",
@@ -86,6 +107,7 @@
     "createNew": "+ Crear \"{{query}}\"",
     "createError": "No se pudo crear. Revisá los datos e intentá de nuevo.",
     "subClientTaxId": "RUC",
+    "subClientTaxIdDv": "DV",
     "reactivate": "Reactivar (mover a Lead)",
     "moveToNext": "Mover a {{stage}}",
     "markAsLost": "Marcar como Perdido",
@@ -97,11 +119,34 @@
     "stageChangeMissingSubClient": "Falta vincular un Subcliente. Busca o crea uno para continuar.",
     "createQuoteMissingArea": "Falta la superficie trabajada. Completala antes de crear la cotización.",
     "createQuoteMissingFile": "Falta al menos un archivo de diseño. Cargá uno para continuar.",
+    "createQuoteBaseTitle": "¿Cómo querés crear la cotización?",
+    "createQuoteBaseDescription": "Este proyecto ya tiene la cotización {{folio}}. Podés partir de ella como nueva versión (se copian partidas, ítems, precios, cantidades y descuentos) o empezar en blanco.",
+    "createQuoteFromBase": "Partir de {{folio}} (nueva versión)",
+    "createQuoteBlank": "En blanco",
+    "createQuoteBaseCancel": "Cancelar",
+    "createQuoteBaseError": "No se pudo crear la nueva versión. Intentá de nuevo.",
+    "createQuoteBaseForbidden": "No tenés acceso a esa cotización porque es de otro vendedor. Podés crear una en blanco.",
     "uploadFileError": "No se pudo cargar el archivo. Revisá el tipo de archivo e intentá de nuevo.",
     "fileView": "Ver",
     "fileDownload": "Descargar",
     "fileUrlError": "No se pudo abrir el archivo. Intentá de nuevo.",
+    "removeFile": "Quitar",
+    "confirmRemoveFile": "¿Querés quitar este archivo del proyecto?",
+    "removeFileError": "No se pudo quitar el archivo. Intentá de nuevo.",
     "saveError": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
+    "assignProductsToDelivery": "Asignar productos a entrega",
+    "deliveryAssignmentIncomplete": "Asigná una fecha de entrega a todos los productos antes de aprobar el proyecto.",
+    "productAssignment": {
+      "title": "Asignar productos a entrega",
+      "code": "Código",
+      "name": "Nombre",
+      "ordered": "Pedido",
+      "available": "Disponible",
+      "dateAssignment": "Asignación de fecha",
+      "unassigned": "Sin asignar",
+      "empty": "Este proyecto no tiene productos cotizados todavía.",
+      "saveError": "No se pudo guardar la asignación. Intentá de nuevo."
+    },
     "newProject": {
       "title": "Nuevo Proyecto",
       "typeLead": "Lead",
@@ -142,7 +187,8 @@
     "tabFamilies": "Familias",
     "familyProductsCount": "{{count}} productos",
     "familiesEmpty": "No hay familias configuradas",
-    "selectAllProducts": "Seleccionar productos"
+    "selectAllProducts": "Seleccionar productos",
+    "showroom": "Showroom Obarrio: {{count}}"
   },
   "catalogScreen": {
     "resultsCount_one": "{{count}} producto",
@@ -185,7 +231,8 @@
       "unavailable": "Sin stock disponible",
       "availableCompact": "{{count}} unid.",
       "unavailableCompact": "Sin stock",
-      "incoming": "+{{count}} en camino"
+      "incoming": "+{{count}} en camino",
+      "showroom": "En Showroom Obarrio: {{count}}"
     },
     "badge": {
       "ok": "Ficha",
@@ -214,7 +261,17 @@
       "error": "No se pudo cargar la ficha técnica."
     },
     "sendSuccess": "Catálogo enviado. La descarga del PDF comenzó.",
-    "sendError": "No se pudo generar el PDF del catálogo."
+    "sendError": "No se pudo generar el PDF del catálogo.",
+    "sendQueued": "El catálogo ({{count}} productos) es demasiado grande para un solo PDF: se está generando en {{volumes}} volúmenes en un ZIP. Te avisaremos cuando esté listo.",
+    "exportBanner": {
+      "generating": "Generando el catálogo: {{count}} productos en {{volumes}} volúmenes. Esto puede tardar unos minutos; también te avisaremos cuando esté listo.",
+      "done": "Tu catálogo está listo: {{count}} productos en {{volumes}} volúmenes ({{size}} MB en un ZIP).",
+      "download": "Descargar ZIP",
+      "failed": "No se pudo generar el catálogo. Intenta de nuevo.",
+      "notFound": "No se encontró esa exportación de catálogo (solo la puede ver quien la pidió).",
+      "expired": "El archivo ya venció. Genera el catálogo de nuevo.",
+      "downloadError": "No se pudo iniciar la descarga."
+    }
   },
   "priceType": {
     "public": "Precio Público",
@@ -258,12 +315,72 @@
       "viewProjects": "Ver proyectos",
       "category": "Categoría",
       "taxId": "RUC",
+      "taxIdDv": "DV",
       "deliveryAddress": "Dirección de entrega",
       "contacts": "Contactos",
       "addContact": "+ Agregar contacto",
       "editContact": "Editar",
       "newQuote": "+ Nueva cotización",
-      "newQuoteUnavailable": "Disponible cuando Cotización esté implementada"
+      "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
+      "icgHistory": "Historial ICG",
+      "exentoItbms": "Exento de ITBMS"
+    },
+    "icgHistoryModal": {
+      "title": "Historial ICG — {{name}}",
+      "entidad": {
+        "cotizaciones": "Cotizaciones",
+        "pedidos": "Pedidos",
+        "albaranes": "Albaranes",
+        "facturas": "Facturas"
+      },
+      "numero": "Número",
+      "fecha": "Fecha",
+      "total": "Total",
+      "estado": "Estado",
+      "empty": "Sin historial de ICG para esta sección",
+      "back": "Volver a la lista",
+      "document": {
+        "folio": "Folio",
+        "cliente": "Cliente",
+        "clienteHuerfano": "Cliente ICG #{{code}} (sin vincular a un Subcliente)",
+        "proveedor": "Proveedor",
+        "proveedorHuerfano": "Proveedor ICG #{{code}} (sin vincular)",
+        "vendedorCodigo": "Vendedor (código ICG)",
+        "fecha": "Fecha",
+        "fechaEntrega": "Fecha de entrega",
+        "estadoCodigo": "Estado (código ICG)",
+        "totalNeto": "Total neto",
+        "totalBruto": "Total bruto",
+        "totalImpuestos": "Impuestos",
+        "albaranRelacionado": "Albarán relacionado",
+        "facturaRelacionada": "Factura relacionada",
+        "facturado": "Facturado",
+        "si": "Sí",
+        "no": "No",
+        "proyecto": "Proyecto",
+        "promocion": "Promoción",
+        "comision": "Comisión",
+        "observaciones": "Observaciones",
+        "feTitle": "Facturación Electrónica",
+        "feEstado": "Estado DGI",
+        "feAuthNumber": "Número de autorización",
+        "feSerieNumero": "Serie-Número FE",
+        "feFechaEmision": "Fecha de emisión",
+        "feFechaRecepcion": "Fecha de recepción DGI",
+        "feError": "Error DGI",
+        "feQr": "QR",
+        "itemsTitle": "Líneas",
+        "itemsArticulo": "Artículo",
+        "itemsReferencia": "Referencia",
+        "itemsDescripcion": "Descripción",
+        "itemsCantidad": "Cant.",
+        "itemsPrecio": "Precio",
+        "itemsDescuento": "Desc.",
+        "itemsTotal": "Total",
+        "itemsCosto": "Costo",
+        "itemsEmpty": "Sin líneas",
+        "sinLineasOrigen": "Este tipo de documento no tiene líneas en el origen — ICG nunca las registró por separado."
+      }
     },
     "createModal": {
       "titleClient": "Crear cliente",
@@ -272,12 +389,12 @@
       "businessName": "Subcliente (Razón Social)",
       "deliveryAddress": "Dirección de entrega",
       "taxId": "RUC",
+      "taxIdDv": "DV",
       "category": "Categoría",
       "priceType": "Tipo de precio",
       "contacts": "Contactos",
       "addAnotherContact": "+ Agregar otro contacto",
       "requiredNote": "Estos campos son obligatorios y deben tener al menos un teléfono o correo por contacto. Sin esto no se puede guardar.",
-      "leadRuleNote": "Este cliente se agregará automáticamente como Lead en Pipeline.",
       "saveClient": "Guardar cliente",
       "saveSubClient": "Guardar subcliente",
       "removeContact": "Quitar"
@@ -289,11 +406,75 @@
       "stage": "Etapa",
       "amount": "Valor",
       "empty": "Sin proyectos"
+    },
+    "taxIdValidation": {
+      "validar": "Validar RUC",
+      "validando": "Validando…",
+      "validadoHoy": "Validado con la DGI hoy {{hora}} (hora de Panamá)",
+      "nombreOficial": "Razón social oficial",
+      "dvOficial": "DV oficial",
+      "dvDifiere": "El DV ingresado ({{ingresado}}) no coincide con el oficial ({{oficial}}).",
+      "nombreDifiere": "La razón social ingresada es distinta a la oficial.",
+      "usarOficiales": "Usar datos oficiales",
+      "coincide": "Coincide con lo ingresado.",
+      "noEncontrado": "El RUC/Cédula no figura en la DGI. Revisa el número; puedes guardar igual.",
+      "noDisponible": {
+        "apagado": "Validación no disponible: la facturación electrónica está apagada.",
+        "sinCredenciales": "Validación no disponible: falta configurar las credenciales del proveedor.",
+        "generico": "No se pudo validar ahora; puedes guardar y validar después."
+      },
+      "errorGenerico": "No se pudo validar ahora; puedes guardar y validar después.",
+      "limite": "Demasiadas consultas seguidas. Espera un minuto e inténtalo de nuevo."
+    },
+    "editTaxData": {
+      "editar": "Editar datos fiscales",
+      "title": "Editar datos fiscales del subcliente",
+      "aviso": "Estos datos son los que se usan como receptor al facturar electrónicamente. Cambiarlos queda registrado en la bitácora, y no se permite si el cliente ya tiene facturas o notas de crédito certificadas ante la DGI.",
+      "guardar": "Guardar cambios",
+      "guardando": "Guardando…",
+      "errorGenerico": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "avisoExento": "Este cliente está exento de ITBMS (documento: {{documento}}). Si cambias su RUC, DV o tipo, Administración debe revisar la exención.",
+      "exencionARevisar": "Se guardaron los cambios. Este cliente sigue marcado como exento de ITBMS: avisa a Administración para que revise si la exención aplica con el nuevo RUC o tipo.",
+      "entendido": "Entendido"
+    },
+    "receptorTipo": {
+      "label": "Tipo de cliente ante la DGI",
+      "contribuyente": "Contribuyente (con RUC)",
+      "consumidorFinal": "Consumidor final",
+      "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin RUC ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
+      "soloMarkFelix": "Solo Mark y Felix pueden marcar un cliente como Consumidor final."
+    }
+  },
+  "architects": {
+    "title": "Arquitectos",
+    "subtitle": "{{count}} arquitectos",
+    "table": {
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "view": "Ver",
+      "empty": "Sin arquitectos"
+    },
+    "detail": {
+      "title": "Detalle del arquitecto",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "projects": "Proyectos asociados",
+      "projectsEmpty": "Sin proyectos asociados",
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saveError": "No se pudo guardar el cambio"
     }
   },
   "quotesList": {
     "title": "Cotizaciones",
     "newQuote": "+ Nueva cotización",
+    "view": {
+      "all": "Todas",
+      "draftsOnly": "Solo Borradores"
+    },
     "summary": {
       "pending": "Total cotizado vigente",
       "approved": "Aprobado",
@@ -330,7 +511,8 @@
     "viewer": {
       "title": "Cotización",
       "close": "Cerrar",
-      "edit": "Editar"
+      "edit": "Editar",
+      "error": "No se pudo cargar la cotización. Intenta de nuevo o contacta a soporte si el problema persiste."
     }
   },
   "quote": {
@@ -339,6 +521,7 @@
     "description": "Descripción",
     "designer": "Diseñador a cargo",
     "architect": "Arquitecto",
+    "architectHint": "(incluir arquitecto si va a comisionar)",
     "addExistingContact": "Agregar contacto existente",
     "addNewContact": "+ Agregar contacto nuevo",
     "saveBeforeContacts": "Guarda la cotización antes de agregar contactos — el Subcliente todavía no está guardado.",
@@ -347,6 +530,10 @@
       "needsSubClient": "Primero escribe o busca Cliente Master y Subcliente."
     },
     "priceTypeGeneral": "Tipo de precio general",
+    "priceTypeApplyPrompt": "{{count}} partida(s) tienen su propio tipo de precio y no cambiarían a «{{type}}». ¿Aplicar «{{type}}» a todas?",
+    "priceTypeApplyAll": "Aplicar a todos",
+    "priceTypeKeepOwn": "Mantener los propios",
+    "priceTypeOwnNote": "{{count}} partida(s) usan un tipo de precio propio, distinto del general.",
     "pricingConfig": {
       "toggle": "Configurar fórmulas",
       "title": "Fórmulas de Tipo de Precio",
@@ -364,6 +551,7 @@
     "noParts": "Sin partidas todavía",
     "newPartName": "Nombre de la partida",
     "addPart": "+ Agregar partida",
+    "duplicatePart": "Duplicar",
     "subtotal": "Subtotal general",
     "item": {
       "reference": "Referencia",
@@ -378,6 +566,9 @@
       "total": "Total",
       "useGeneral": "Usar el general",
       "addItem": "+ Agregar ítem",
+      "addPhoto": "Agregar foto",
+      "changePhoto": "Cambiar foto",
+      "uploadPhotoError": "No se pudo cargar la foto. Intentalo de nuevo.",
       "subtotal": "Subtotal",
       "editPrice": "Editar precio",
       "catalogPriceReference": "Precio de catálogo",
@@ -397,13 +588,24 @@
       "title": "Totales",
       "discount": "Descuento",
       "net": "Neto",
-      "itbms": "ITBMS (7%)",
-      "grandTotal": "Total"
+      "itbms": "ITBMS ({{percentage}}%)",
+      "grandTotal": "Total",
+      "itbmsExento": "ITBMS (Exento)"
     },
     "validation": {
       "check": "Verificar cotización",
       "complete": "La cotización tiene todos los campos obligatorios completos.",
-      "missing": "Falta información"
+      "missing": "Falta información",
+      "field": {
+        "masterClient": "Cliente Master: es obligatorio",
+        "subClient": "Subcliente: es obligatorio",
+        "ruc": "RUC / Cédula: es obligatorio",
+        "salesProject": "Proyecto: es obligatorio",
+        "description": "Descripción: es obligatoria",
+        "deliveryDates": "Fecha de entrega: es obligatoria (o elige \"Por definir\")",
+        "contacts": "Contacto: agrega al menos un contacto",
+        "items": "Ítems: agrega al menos un ítem"
+      }
     },
     "saveDraft": "Guardar borrador",
     "generate": "Guardar y generar cotización",
@@ -430,15 +632,28 @@
     },
     "marginWarningModal": {
       "title": "Advertencia de margen mínimo",
-      "body": "La cotización contiene uno o más productos y/o un margen global por debajo del mínimo permitido del {{percent}}%. Los elementos afectados han sido resaltados para facilitar su revisión. Estos cambios pueden afectar la rentabilidad del negocio. ¿Desea continuar de todas formas?",
+      "body": "La cotización contiene uno o más productos y/o un margen global por debajo del mínimo permitido. Los elementos afectados han sido resaltados para facilitar su revisión. Estos cambios pueden afectar la rentabilidad del negocio. ¿Desea continuar de todas formas?",
       "confirm": "Continuar"
     },
     "belowMinMargin": {
-      "item": "Este producto quedó por debajo del margen mínimo permitido ({{percent}}%)",
-      "global": "Los descuentos y ajustes aplicados dejan el margen total de la cotización por debajo del mínimo permitido ({{percent}}%). Revise los descuentos o precios antes de continuar."
+      "item": "Este producto quedó por debajo del margen mínimo permitido",
+      "global": "Los descuentos y ajustes aplicados dejan el margen total de la cotización por debajo del mínimo permitido. Revise los descuentos o precios antes de continuar."
     },
     "downloadPdf": "Descargar PDF",
-    "returnToPipeline": "Volver a Pipeline"
+    "returnToPipeline": "Volver a Pipeline",
+    "collapsePart": "Colapsar partida",
+    "expandPart": "Expandir partida",
+    "collapseAll": "Colapsar todas",
+    "expandAll": "Expandir todas",
+    "dragPart": "Arrastrar para mover la partida",
+    "dragItem": "Arrastrar para mover el producto",
+    "partName": "Nombre de la partida",
+    "reorderError": "No se pudo guardar el nuevo orden. Se recargó la cotización; intenta de nuevo.",
+    "exencion": {
+      "exenta": "Cliente exento de ITBMS: esta cotización no incluye ITBMS.",
+      "conservaExenta": "Esta cotización conserva su exención de ITBMS, aunque el cliente ya no está marcado como exento.",
+      "conservaItbms": "El cliente ahora está exento de ITBMS, pero esta cotización ya estaba confirmada y conserva su ITBMS; se facturará con él. Si no corresponde, Administración puede corregirlo con la nota de crédito de corrección."
+    }
   },
   "document": {
     "folio": "Cotización N°",
@@ -484,9 +699,9 @@
       "title": "Metas",
       "subtitle": "Historial real (últimos 6 meses) vs. Meta configurada",
       "goal": "Meta",
-      "bar": "Vendido",
+      "bar": "Alcanzado",
       "noGoal": "Sin Meta configurada todavía",
-      "currentMonth": "Mes en curso (parcial)"
+      "currentMonth": "Mes en curso"
     },
     "topVendors": {
       "title": "Top de vendedores",
@@ -558,6 +773,7 @@
     }
   },
   "home": {
+    "greeting": "Bienvenido, {{name}}",
     "subtitle": "Hoy tienes {{events}} reuniones y {{pendientes}} pendientes",
     "wholeTeam": "Equipo completo",
     "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
@@ -573,7 +789,11 @@
     "calendar": {
       "title": "Mi calendario",
       "fullTitle": "Calendario completo",
-      "view": { "day": "Día", "week": "Semana", "month": "Mes" },
+      "view": {
+        "day": "Día",
+        "week": "Semana",
+        "month": "Mes"
+      },
       "events": "eventos",
       "noEvents": "Sin eventos",
       "viewFull": "Ver calendario completo",
@@ -587,7 +807,10 @@
       "listTitle": "Pendientes — detalle completo",
       "detailTitle": "Detalle del pendiente",
       "priority": "Prioridad",
-      "priorityLevel": { "high": "Alta", "medium": "Media" },
+      "priorityLevel": {
+        "high": "Alta",
+        "medium": "Media"
+      },
       "suggestion": "Acción sugerida",
       "go": "Ir",
       "text": {
@@ -726,5 +949,131 @@
         "pendingValue": "—"
       }
     }
+  },
+  "salesCommissionTiers": {
+    "title": "Tabla de comisión de vendedores",
+    "subtitle": "Se aplica sobre el total de pedidos aprobados del vendedor en el mes. Tabla separada de Comisiones Internas de Admin&Cont — otro concepto de negocio.",
+    "columnas": {
+      "porcentaje": "% de comisión"
+    },
+    "vacio": "Sin tramos configurados todavía.",
+    "agregar": "Agregar tramo",
+    "quitarFila": "Quitar tramo",
+    "guardar": "Guardar tramos",
+    "confirmarGuardar": "¿Confirmas guardar los tramos? Afecta el % de comisión de todos los vendedores activos.",
+    "errores": {
+      "numeroRequerido": "Ingresa un número.",
+      "numeroInvalido": "Ingresa un número válido.",
+      "guardar": "No se pudieron guardar los tramos."
+    },
+    "form": {
+      "montoMinimo": "Monto mínimo",
+      "montoMaximo": "Monto máximo",
+      "sinTope": "Sin tope (último tramo)"
+    }
+  },
+  "cotizaya": {
+    "title": "CotizaYA",
+    "subtitle": "Cotizaciones de venta chica, independientes del flujo comercial",
+    "button": "CotizaYA",
+    "searchPlaceholder": "Buscar por ID, cliente, teléfono o descripción",
+    "empty": "Todavía no hay cotizaciones de CotizaYA",
+    "table": {
+      "id": "ID",
+      "customer": "Nombre de cliente",
+      "phone": "Teléfono",
+      "description": "Descripción",
+      "designer": "Diseñador",
+      "date": "Fecha",
+      "total": "Total",
+      "actions": "Acciones",
+      "viewDetail": "Ver detalle",
+      "downloadPdf": "Descargar PDF"
+    },
+    "form": {
+      "title": "Nueva CotizaYA",
+      "back": "Volver a CotizaYA",
+      "mainData": "Datos principales",
+      "customerName": "Nombre del cliente",
+      "customerPhone": "Teléfono",
+      "description": "Descripción",
+      "designer": "Diseñador a cargo",
+      "contacts": "Contactos",
+      "contactsOptional": "(opcional)",
+      "noContacts": "Sin contactos registrados",
+      "observations": "Observaciones",
+      "parts": "Partidas",
+      "noParts": "Sin partidas todavía",
+      "addPart": "+ Agregar partida",
+      "partDefaultName": "Partida {{n}}",
+      "totals": "Totales",
+      "subtotal": "Subtotal general",
+      "itbms": "ITBMS",
+      "total": "Total",
+      "conditions": "Condiciones",
+      "generate": "Generar",
+      "generating": "Generando…",
+      "notConfigured": "CotizaYA no está configurado en este entorno: falta el cliente CotizaYA.",
+      "missing": "Falta para generar: {{fields}}",
+      "genericError": "No se pudo completar la acción. Intentá de nuevo."
+    },
+    "detail": {
+      "title": "{{folio}}",
+      "back": "Volver a CotizaYA",
+      "downloadPdf": "Descargar PDF",
+      "fixed": "Cotización generada: solo se puede consultar y descargar en PDF.",
+      "customer": "Cliente",
+      "phone": "Teléfono",
+      "description": "Descripción",
+      "designer": "Diseñador",
+      "date": "Fecha",
+      "contacts": "Contactos",
+      "observations": "Observaciones",
+      "conditions": "Condiciones",
+      "parts": "Partidas",
+      "loadError": "No se pudo cargar la cotización."
+    },
+    "pdfError": "No se pudo descargar el PDF. Intentá de nuevo."
+  },
+  "associates": {
+    "title": "Asociados",
+    "hint": "Arquitectos, diseñadores, contratistas, ingenieros, consultores y otros. Se guardan una sola vez y se comparten entre las cotizaciones y el proyecto.",
+    "empty": "Sin asociados todavía",
+    "searchPlaceholder": "Buscar por nombre, correo, teléfono o documento",
+    "searching": "Buscando…",
+    "noResults": "Sin resultados",
+    "add": "Agregar",
+    "remove": "Quitar",
+    "createNew": "Crear nuevo",
+    "types": {
+      "architect": "Arquitecto",
+      "designer": "Diseñador",
+      "contractor": "Contratista",
+      "engineer": "Ingeniero",
+      "consultant": "Consultor",
+      "other": "Otro"
+    },
+    "form": {
+      "title": "Nuevo asociado",
+      "type": "Tipo",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "document": "Documento / identificación",
+      "needContact": "Indicá al menos un teléfono, correo o documento.",
+      "save": "Guardar y agregar",
+      "cancel": "Cancelar",
+      "genericError": "No se pudo crear el asociado. Intentá de nuevo."
+    },
+    "duplicate": {
+      "exactTitle": "Ya existe este asociado",
+      "exactHelp": "Mismo correo, teléfono o documento. Usá el que ya está guardado.",
+      "similarTitle": "Hay uno con un nombre parecido",
+      "similarHelp": "Verificá si es la misma persona antes de crear uno nuevo.",
+      "useExisting": "Usar este",
+      "createAnyway": "Crear igual"
+    },
+    "addError": "No se pudo agregar el asociado.",
+    "removeError": "No se pudo quitar el asociado."
   }
 }

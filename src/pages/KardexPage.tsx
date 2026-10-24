@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import type { KardexTipo } from '@/types/bodega'
+import { formatDateTimeShort } from '@/utils/dates'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchKardexSuggestions } from '@/utils/searchSuggestionsBodega'
 
 const TIPOS: KardexTipo[] = ['Entrada', 'Salida', 'Ajuste', 'Reubicación', 'Devolución']
 
@@ -43,14 +46,17 @@ export default function KardexPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && (setQuery(search), setPage(1))}
-          placeholder={t('bodega:kardex.filters.search')}
-          className="flex-1 max-w-sm px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-sm">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={() => { setQuery(search); setPage(1) }}
+            fetchOptions={fetchKardexSuggestions}
+            placeholder={t('bodega:kardex.filters.search')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <select
           value={tipo}
           onChange={e => { setTipo(e.target.value); setPage(1) }}
@@ -95,7 +101,7 @@ export default function KardexPage() {
             )}
             {rows.map(m => (
               <tr key={m.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{new Date(m.fecha).toLocaleString()}</td>
+                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateTimeShort(m.fecha)}</td>
                 <td className="px-4 py-3 text-slate-800 font-semibold">{m.producto.reference}</td>
                 <td className="px-4 py-3 text-slate-600">{m.bodega}</td>
                 <td className="px-4 py-3 text-slate-600">{m.tipo}</td>

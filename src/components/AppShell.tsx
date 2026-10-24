@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/hooks/useTheme'
 import TopBar from './TopBar'
 import Sidebar from './Sidebar'
+import ImpersonationBanner from './ImpersonationBanner'
 
 // SCRUM-58 — el topbar decía "CRM" fijo en toda la app, incluidas las 6 pantallas de
 // Ventas & Diseño. Mapea el pathname actual a "{módulo}" o "{módulo} · {pantalla}".
@@ -23,6 +24,7 @@ function moduleLabel(pathname: string, t: (key: string) => string, tVd: (key: st
   if (pathname.startsWith('/ventas-diseno/')) {
     const screen = pathname.startsWith('/ventas-diseno/home')        ? tVd('nav.home')
       : pathname.startsWith('/ventas-diseno/quotes-list')            ? tVd('nav.quotesList')
+      : pathname.startsWith('/ventas-diseno/cotizaya')               ? tVd('nav.cotizaya')
       : pathname.startsWith('/ventas-diseno/pedidos')                ? tVd('nav.pedidos')
       : pathname.startsWith('/ventas-diseno/quotes')                 ? tVd('nav.quote')
       : pathname.startsWith('/ventas-diseno/reports')                ? tVd('nav.reports')
@@ -86,6 +88,8 @@ export default function AppShell() {
 
       {/* Right column: TopBar + content */}
       <div className="flex flex-col flex-1 overflow-hidden print:overflow-visible">
+        {/* SCRUM-1158 — franja fija «Viendo como …» mientras dure una sesión de Ver como usuario; no renderiza nada en una sesión normal. */}
+        <ImpersonationBanner />
         <TopBar
           moduleLabel={moduleLabel(pathname, t, tVd, tCrm)}
           onSidebarToggle={() => setSidebarOpen(o => !o)}

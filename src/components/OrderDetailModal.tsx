@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOrderDetail, useOrderWarehouseBreakdown, useExportOrderItemsExcel } from '@/hooks/useBodega'
 import type { OrderItemDetail } from '@/types/bodega'
-import { Card } from '@/components/ui/Card'
+import FullScreenWindow from '@/components/FullScreenWindow'
 import { Button } from '@/components/ui/Button'
-import { IcoClose, IcoChevronDown, IcoChevronRight, IcoDownload } from '@/components/icons'
+import { IcoChevronDown, IcoChevronRight, IcoDownload } from '@/components/icons'
 import OrderItemWarehousesModal from '@/components/OrderItemWarehousesModal'
 
 interface Props {
@@ -37,6 +37,15 @@ interface Props {
  * `contacto_cliente`/`direccion_entrega`/`items[].factory_reference` vienen de
  * `OrderBoardService::detail()` (nombres en español, mismo criterio que el resto del payload).
  */
+/** SCRUM-1148 — `shortage_reason` guarda el código del motivo del pendiente (`sin_stock`, `danado`...) o
+ *  `otra:<texto libre>`; devuelve el texto legible (nunca el código crudo), o null si el artículo no tiene pendiente. */
+function shortageLabel(code: string | null, t: (key: string) => string): string | null {
+  if (code === null || code === '') return null
+  if (code.startsWith('otra:')) return `${t('bodega:pedidos.registerDeliveryModal.shortageReasons.otra')}: ${code.slice('otra:'.length)}`
+  const known = ['sin_stock', 'no_encontrado', 'danado', 'reservado_otro_pedido', 'referencia_equivocada', 'otra']
+  return known.includes(code) ? t(`bodega:pedidos.registerDeliveryModal.shortageReasons.${code}`) : code
+}
+
 export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet }: Props) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: order, isLoading } = useOrderDetail(orderId)
@@ -66,14 +75,6 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
     })
   }
 
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   const summaryText = order
     ? t('bodega:pedidos.detailModal.summaryAggregate', {
       products: order.items_summary.product_count,
@@ -82,22 +83,15 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
     : ''
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-0 sm:p-4">
-      <Card variant="modal" className="w-full max-w-xl my-4 flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[90vh]">
-        <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              {order ? (order.proyecto ?? order.cliente ?? t('bodega:pedidos.detailModal.title', { number: order.order_number })) : t('common:labels.loading')}
-            </h2>
-            {order && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                {t('bodega:pedidos.detailModal.stageSubtitle', { stage: t(`bodega:pedidos.stages.${order.stage}`) })}
-              </p>
-            )}
-          </div>
-          <Button variant="icon" onClick={onClose}><IcoClose /></Button>
-        </div>
-
+    <FullScreenWindow
+      title={order ? (order.proyecto ?? order.cliente ?? t('bodega:pedidos.detailModal.title', { number: order.order_number })) : t('common:labels.loading')}
+      subtitle={order && (
+        <p className="text-xs text-slate-500 mt-0.5">
+          {t('bodega:pedidos.detailModal.stageSubtitle', { stage: t(`bodega:pedidos.stages.${order.stage}`) })}
+        </p>
+      )}
+      onClose={onClose}
+    >
         <div className="overflow-y-auto px-5 py-4 flex-1">
           {isLoading || !order ? (
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
@@ -145,7 +139,13 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
 
               <div className="mb-3">
                 <SectionLabel>{t('bodega:pedidos.detailModal.observations')}</SectionLabel>
-                <p className="text-sm text-slate-400 py-1.5">{t('bodega:pedidos.detailModal.noObservations')}</p>
+                {/* SCRUM-1149 — observaciones del proyecto en el Pipeline (instrucciones de entrega); `whitespace-pre-line`
+                    conserva los saltos de línea que escribió el vendedor. */}
+                {order.observaciones !== null && order.observaciones !== undefined ? (
+                  <p className="text-sm text-slate-700 dark:text-slate-200 py-1.5 whitespace-pre-line">{order.observaciones}</p>
+                ) : (
+                  <p className="text-sm text-slate-400 py-1.5">{t('bodega:pedidos.detailModal.noObservations')}</p>
+                )}
               </div>
 
               {/* RN1 — colapsado por defecto. */}
@@ -186,6 +186,7 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
                         <Th>{t('bodega:pedidos.detailModal.items.requested')}</Th>
                         <Th>{t('bodega:pedidos.detailModal.items.available')}</Th>
                         <Th>{t('bodega:pedidos.detailModal.items.viewWarehouses')}</Th>
+                        <Th>{t('bodega:pedidos.detailModal.items.pendingReason')}</Th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -210,6 +211,11 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
                             >
                               {t('bodega:pedidos.detailModal.items.viewWarehouses')}
                             </Button>
+                          </td>
+                          {/* SCRUM-1148 — motivo/comentario del artículo pendiente: permanente, se ve en la tarjeta original
+                              (ya con despacho parcial) y en la Faltante, sin importar el estado del pedido. */}
+                          <td className="px-3 py-2 text-slate-600 dark:text-slate-300 break-words max-w-xs" data-testid={`pending-reason-${item.id}`}>
+                            {shortageLabel(item.shortage_reason, t) ?? '—'}
                           </td>
                         </tr>
                       ))}
@@ -240,7 +246,6 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
           )}
           <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
         </div>
-      </Card>
 
       {warehousesForItem && warehousesForItem.catalog_product_id !== null && (
         <OrderItemWarehousesModal
@@ -251,7 +256,7 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
           onClose={() => setWarehousesForItem(null)}
         />
       )}
-    </div>
+    </FullScreenWindow>
   )
 }
 

@@ -111,6 +111,34 @@ html.dark .hover\:bg-slate-100:hover { background-color: #2d3d52; }
     inset: 0;
     background: #fff;
   }
+  /* SCRUM-1129 — `visibility:hidden` oculta el fondo pero no lo saca del flujo: el layout de la app
+     (h-screen) y el tablero de fondo seguían midiendo ~1800px y generaban páginas en blanco. Se
+     colapsa el árbol de la app al imprimir; `.print-target` ya es `position:absolute` y no se recorta. */
+  body.printing-modal #root {
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  /* La hoja de picking usa columnas de ancho fijo (~1180px) pensadas para pantalla; en papel A4 se
+     cortaban PEDIDA/ALISTADA/OBSERVACIÓN. Se ajusta al ancho de la página. */
+  body.printing-modal .print-fit-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: auto !important;
+    font-size: 9px;
+  }
+  body.printing-modal .print-fit-table col {
+    width: auto !important;
+  }
+  body.printing-modal .print-fit-table th,
+  body.printing-modal .print-fit-table td {
+    padding: 3px 4px !important;
+    overflow-wrap: anywhere;
+  }
+  body.printing-modal .print-fit-table input:not([type="checkbox"]) {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 /* ── Documento de cotización — nunca oscuro al imprimir/descargar PDF ───────

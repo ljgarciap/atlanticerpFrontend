@@ -45,6 +45,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     direccion_entrega: null,
     cliente_master: 'Constructora Pacífico Holdings',
     subcliente: 'Constructora Pacífico',
+    observaciones: null,
     ...overrides,
   }
 }

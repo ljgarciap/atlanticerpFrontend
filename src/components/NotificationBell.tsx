@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notificationsApi, type Notification } from '@/api/notificationsApi'
 import { Button } from '@/components/ui/Button'
 import { IcoBell } from '@/components/icons'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 const POLL_INTERVAL_MS = 45_000
 
@@ -90,7 +91,11 @@ export default function NotificationBell() {
                 <button
                   key={n.id}
                   onClick={() => handleClickNotification(n)}
-                  className={`w-full text-left px-4 py-2.5 text-xs border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 ${
+                  data-has-link={n.link_url ? 'true' : 'false'}
+                  // SCRUM-1167 — solo una notificación con enlace se ve clicable; sin enlace el clic solo la marca como leída.
+                  className={`w-full text-left px-4 py-2.5 text-xs border-b border-slate-50 dark:border-slate-700/50 ${
+                    n.link_url ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700' : 'cursor-default'
+                  } ${
                     n.is_read ? 'text-slate-500 dark:text-slate-400' : 'text-slate-800 dark:text-slate-100 font-medium'
                   }`}>
                   <div className="flex items-start gap-2">
@@ -98,7 +103,7 @@ export default function NotificationBell() {
                     <div className="flex-1 min-w-0">
                       <p className="truncate">{n.content.subject}</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        {new Date(n.created_at).toLocaleDateString()}
+                        {formatDateFromTimestamp(n.created_at)}
                       </p>
                     </div>
                   </div>

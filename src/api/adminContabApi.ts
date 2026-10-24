@@ -1,13 +1,20 @@
 import api from './authApi'
+import type { ApprovalPendingItem } from '@/lib/homeCards'
 import type { OutlookCalendarEvent } from '@/types/calendar'
 import type {
-  FiscalSettings, FiscalSettingsPayload, ItbmsRate, CreateItbmsRatePayload,
+  FiscalSettings, FiscalSettingsPayload, FraudSettings, ItbmsRate, CreateItbmsRatePayload,
   CompanyProfile, CompanyProfilePayload, Location, CreateLocationPayload, Contact, CreateContactPayload,
-  BankAccount, CreateBankAccountPayload, BankMovement,
-  InvoiceSummary, InvoiceListFilters, InvoiceListResult, InvoicePreviewResponse, CreateInvoicePayload,
-  CreateInvoiceResult, InvoiceExportFormat, InvoiceDetail, InvoiceAgingResult,
+  BankAccount, CreateBankAccountPayload, UpdateBankAccountPayload, BankMovement, BankMovementListResponse,
+  InvoiceSummary, InvoiceListFilters, InvoiceListResult, InvoicePreviewResponse, CreateInvoicePayload, CorrectReceptorPayload, ReceptorValidacion,
+  CreateInvoiceResult, InvoiceExportFormat, InvoiceDetail, InvoiceAgingResult, InvoiceModo, InvoicePendingResult,
   PaymentSummary, PaymentClientOption, OpenInvoicesResult, CreatePaymentPayload, Payment, PaymentMethod,
-  PaymentHistorialFilters, PaymentHistorialResult, PaymentDetail, PaymentAttachmentDetail,
+  Abono, AbonoFilters, AbonoListResponse, AbonoPayload, AbonoSubClienteOption, AbonoProyectoOption, AbonoFacturaOption,
+  AbonoInvoiceForSubClient,
+  SaldoFavorFilters, SaldoFavorResult,
+  PaymentHistorialFilters, PaymentHistorialResult, PaymentDetail, PaymentAttachmentDetail, ConfirmacionAjustes,
+  PaymentsConfig, CreatePaymentV2Payload,
+  CompensacionesFilters, CompensacionesResult, CompensacionClienteDetalle, CompensacionLinea, CompensacionVistaPrevia, Compensacion,
+  ReversalRequest, ReversalRequestsResult,
   AccountStatementClientOption, AccountStatementProjectOption, AccountStatement, AccountStatementFilters,
   NotaCreditoResumenMes, NotaCreditoItbmsRateOption, NotaCreditoFacturaOrigen,
   CreateNotaCreditoPayload, NotaCredito,
@@ -22,8 +29,9 @@ import type {
   DailyCashCount, UpdateDailyCashCountEntryPayload, CashFlowExportView,
   DailyCashCountHistoryResult, UploadRetentionAttachmentResult,
   PettyCashSummary, PettyCashPendingResult, PettyCashNewExpenseLine, PettyCashReportListItem,
+  PettyCashReportListResponse, PettyCashRejectedResult,
   PettyCashReportDetail, PettyCashApproveResponse, CreatePettyCashReportPayload,
-  PettyCashRejectedLine, PettyCashExpenseDetail, UpdatePettyCashExpensePayload,
+  PettyCashExpenseDetail, UpdatePettyCashExpensePayload,
   RejectPettyCashExpenseResponse, RejectPettyCashReportResponse,
   ReportsPeriodo, ReportsFelixCommission, ReportsCartera, ReportsVentas, ReportsFlujoCaja,
   CarteraCommissionTier, CreateCarteraCommissionTierPayload,
@@ -34,6 +42,7 @@ import type {
   HomePendientes,
   HomeResumenMes,
   HomeVencidosPorVencer,
+  FiscalDocumentPreviewResult, FeTransmision, FeAccionResultado,
 } from '@/types/adminContab'
 
 // Batch Configuración Fiscal (SCRUM-632→637). Pantalla exclusiva de Mark — el backend devuelve
@@ -45,6 +54,16 @@ export const adminContabApi = {
 
     update: (data: Partial<FiscalSettingsPayload>): Promise<FiscalSettings> =>
       api.put<FiscalSettings>('/admin-contab/fiscal-settings', data).then(r => r.data),
+  },
+
+  // REQ-635 (SCRUM-811) — umbrales de alertas de fraude, mismo patrón REST que
+  // `bodegaApi.settings` (GET/PUT sobre un solo recurso `/settings`, sin id).
+  fraudSettings: {
+    get: (): Promise<FraudSettings> =>
+      api.get<FraudSettings>('/admin-contab/settings').then(r => r.data),
+
+    update: (data: Partial<FraudSettings>): Promise<FraudSettings> =>
+      api.put<FraudSettings>('/admin-contab/settings', data).then(r => r.data),
   },
 
   itbmsRates: {
@@ -104,12 +123,23 @@ export const adminContabApi = {
 
   // Batch 1 del cuerpo principal (SCRUM-607→611). NO exclusiva de Mark — varios roles, el backend
   // gatea quién puede ver/editar cada acción (403 normal, no "acceso restringido" de pantalla).
+  // SCRUM-1166 — exención de ITBMS de un cliente fiscal (sub-cliente): la marca solo quien tiene el permiso angosto; marcar exige el documento.
+  clientesFiscal: {
+    setItbmsExemption: (subClientId: number, data: { exento: true; documento: string } | { exento: false }): Promise<{
+      id: number; itbms_exento: boolean; itbms_exencion_documento: string | null; itbms_exento_at: string | null; borradores_actualizados: number; confirmadas_sin_facturar: number
+    }> => api.put(`/admin-contab/clientes/${subClientId}/exencion-itbms`, data).then(r => r.data),
+  },
+
   bankAccounts: {
     list: (): Promise<BankAccount[]> =>
       api.get<BankAccount[]>('/admin-contab/bank-accounts').then(r => r.data),
 
     create: (data: CreateBankAccountPayload): Promise<BankAccount> =>
       api.post<BankAccount>('/admin-contab/bank-accounts', data).then(r => r.data),
+
+    // SCRUM-857 — antes no existía ningún update parcial (solo activar/desactivar).
+    update: (id: number, data: UpdateBankAccountPayload): Promise<BankAccount> =>
+      api.put<BankAccount>(`/admin-contab/bank-accounts/${id}`, data).then(r => r.data),
 
     deactivate: (id: number): Promise<BankAccount> =>
       api.put<BankAccount>(`/admin-contab/bank-accounts/${id}/deactivate`).then(r => r.data),
@@ -119,9 +149,10 @@ export const adminContabApi = {
   },
 
   bankMovements: {
-    list: (bankAccountId?: number): Promise<BankMovement[]> =>
-      api.get<BankMovement[]>('/admin-contab/bank-movements', {
-        params: bankAccountId !== undefined ? { bank_account_id: bankAccountId } : undefined,
+    // SCRUM-947 — pagina server-side (antes devolvía el array completo).
+    list: (bankAccountId?: number, page?: number, perPage?: number | 'all'): Promise<BankMovementListResponse> =>
+      api.get<BankMovementListResponse>('/admin-contab/bank-movements', {
+        params: { bank_account_id: bankAccountId, page, per_page: perPage },
       }).then(r => r.data),
 
     assignAccount: (id: number, bankAccountId: number): Promise<BankMovement> =>
@@ -137,15 +168,27 @@ export const adminContabApi = {
     list: (filters: InvoiceListFilters): Promise<InvoiceListResult> =>
       api.get<InvoiceListResult>('/admin-contab/invoices', { params: filters }).then(r => r.data),
 
-    // aplicarSaldoFavor default true — RN1 REQ-442, la vista previa ofrece aplicar el saldo por defecto.
-    preview: (orderIds: number[], aplicarSaldoFavor = true): Promise<InvoicePreviewResponse> =>
-      api.post<InvoicePreviewResponse>('/admin-contab/invoices/preview', {
-        order_ids: orderIds,
-        aplicar_saldo_favor: aplicarSaldoFavor,
-      }).then(r => r.data),
+    // SCRUM-1175 — opciones del filtro «Vendedor»: responsables de pedidos facturables.
+    sellers: (): Promise<{ data: { id: number; name: string }[] }> =>
+      api.get<{ data: { id: number; name: string }[] }>('/admin-contab/invoices/sellers').then(r => r.data),
+
+    // SCRUM-902 §4.3 — `aplicar_saldo_favor` retirado: la factura siempre se genera por su
+    // monto completo, el saldo a favor (si lo hay) se aplica únicamente en Cobros.
+    // SCRUM-929 (ADR §4.1) — `modo` es a nivel de llamada (todos los `orderIds` lo comparten), no
+    // por id; omitido = 'completo' (compatibilidad con pre-929).
+    preview: (orderIds: number[], modo?: InvoiceModo): Promise<InvoicePreviewResponse> =>
+      api.post<InvoicePreviewResponse>('/admin-contab/invoices/preview', { order_ids: orderIds, modo }).then(r => r.data),
 
     create: (data: CreateInvoicePayload): Promise<CreateInvoiceResult> =>
       api.post<CreateInvoiceResult>('/admin-contab/invoices', data).then(r => r.data),
+
+    // Guarda de RUC al facturar — el backend valida los datos contra la DGI ANTES de guardarlos (422 si no coinciden).
+    correctReceptor: (subClientId: number, data: CorrectReceptorPayload): Promise<{ receptor: ReceptorValidacion }> =>
+      api.patch<{ receptor: ReceptorValidacion }>(`/admin-contab/invoices/receptors/${subClientId}`, data).then(r => r.data),
+
+    // SCRUM-929 (ADR §4.4) — paso 3 del wizard "+ Crear Factura".
+    pending: (salesProjectId: number): Promise<{ results: InvoicePendingResult[] }> =>
+      api.get<{ results: InvoicePendingResult[] }>('/admin-contab/invoices/pending', { params: { sales_project_id: salesProjectId } }).then(r => r.data),
 
     // REQ-446 — descarga directa, mismo patrón que ventasDisenoApi.projects.exportCsv().
     export: async (format: InvoiceExportFormat, filters: Omit<InvoiceListFilters, 'view'>): Promise<void> => {
@@ -161,23 +204,44 @@ export const adminContabApi = {
       URL.revokeObjectURL(url)
     },
 
-    // Batch 4 (SCRUM-524→528).
-    detail: (orderId: number): Promise<InvoiceDetail> =>
-      api.get<InvoiceDetail>(`/admin-contab/invoices/${orderId}/detail`).then(r => r.data),
+    // Batch 4 (SCRUM-524→528). SCRUM-929 (ADR §4.6) — `invoiceId` opcional elige la factura cuando
+    // la tarjeta tiene más de una (la raíz con su parcial y el completo); sin él rige la regla
+    // central (parcial vigente → completo vigente → recién después las anuladas).
+    detail: (orderId: number, invoiceId?: number): Promise<InvoiceDetail> =>
+      api.get<InvoiceDetail>(`/admin-contab/invoices/${orderId}/detail`, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
 
-    markUncollectible: (orderId: number, motivo: string): Promise<InvoiceDetail> =>
-      api.post<InvoiceDetail>(`/admin-contab/invoices/${orderId}/mark-uncollectible`, { motivo }).then(r => r.data),
+    // SCRUM-943 — JSON que se armaría para el PAC, sin certificar (validar estructura, sobre todo
+    // en pac_ambiente: apagado).
+    fePreview: (orderId: number, invoiceId?: number): Promise<FiscalDocumentPreviewResult> =>
+      api.get<FiscalDocumentPreviewResult>(`/admin-contab/invoices/${orderId}/fe-preview`, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
 
-    decideUncollectible: (orderId: number, approve: boolean): Promise<InvoiceDetail> =>
-      api.put<InvoiceDetail>(`/admin-contab/invoices/${orderId}/uncollectible-decision`, { approve }).then(r => r.data),
+    // SCRUM-987 — historial de transmisiones al PAC (solo Mark/superadmin; 403 para el resto).
+    feTransmisiones: (orderId: number, invoiceId?: number): Promise<FeTransmision[]> =>
+      api.get<{ data: FeTransmision[] }>(`/admin-contab/invoices/${orderId}/fe-transmisiones`, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data.data),
+
+    // SCRUM-1007 — acciones fiscales manuales (solo Mark/superadmin; 409 con `codigo` si la precondición falla).
+    feReintentar: (orderId: number, invoiceId?: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/invoices/${orderId}/fe-reintentar`, undefined, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
+    /** SCRUM-1019 — reconciliar con MSL; 200 incluso en `ventana_vencida`/`ya_certificado_9022`. */
+    feReconciliar: (orderId: number, invoiceId?: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/invoices/${orderId}/fe-reconciliar`, undefined, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
+    feActualizarEstado: (orderId: number, invoiceId?: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/invoices/${orderId}/fe-actualizar-estado`, undefined, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
+
+    // SCRUM-929 (ADR §4.8) — `invoiceId` opcional: obligatorio si el pedido tiene varias facturas activas.
+    markUncollectible: (orderId: number, motivo: string, invoiceId?: number): Promise<InvoiceDetail> =>
+      api.post<InvoiceDetail>(`/admin-contab/invoices/${orderId}/mark-uncollectible`, { motivo, invoice_id: invoiceId }).then(r => r.data),
+
+    decideUncollectible: (orderId: number, approve: boolean, invoiceId?: number): Promise<InvoiceDetail> =>
+      api.put<InvoiceDetail>(`/admin-contab/invoices/${orderId}/uncollectible-decision`, { approve, invoice_id: invoiceId }).then(r => r.data),
 
     aging: (): Promise<InvoiceAgingResult> =>
       api.get<InvoiceAgingResult>('/admin-contab/invoices/aging').then(r => r.data),
 
     // Mismo patrón blob que export() — el endpoint exige el JWT en header, no se puede abrir con
     // un <a href> plano.
-    downloadPdf: async (orderId: number, orderNumber: string): Promise<void> => {
-      const res = await api.get(`/admin-contab/invoices/${orderId}/pdf`, { responseType: 'blob' })
+    downloadPdf: async (orderId: number, orderNumber: string, invoiceId?: number): Promise<void> => {
+      const res = await api.get(`/admin-contab/invoices/${orderId}/pdf`, { responseType: 'blob', params: invoiceId ? { invoice_id: invoiceId } : undefined })
       const url = URL.createObjectURL(res.data as Blob)
       const a   = document.createElement('a')
       a.href     = url
@@ -192,9 +256,16 @@ export const adminContabApi = {
     summary: (): Promise<PaymentSummary> =>
       api.get<PaymentSummary>('/admin-contab/payments/summary').then(r => r.data),
 
-    searchClients: (search: string): Promise<PaymentClientOption[]> =>
-      api.get<{ data: PaymentClientOption[] }>('/admin-contab/payments/clients', { params: { search } })
-        .then(r => r.data.data),
+    // SCRUM-865 punto 1 — `onlyWithInvoice` (default false, sin cambios para Pagos) restringe a
+    // clientes con al menos una factura emitida; lo usa el formulario "Registrar nueva nota".
+    // SCRUM-905 — `onlyWithPendingInvoice` (default false) es MÁS angosto: solo clientes con al
+    // menos una factura con saldo pendiente > 0 (no incobrable/anulada). No confundir con
+    // `onlyWithInvoice` de arriba (cualquier factura, pagada o no) — son 2 filtros distintos,
+    // usados por 2 formularios distintos (Notas de Crédito vs. Registrar cobro).
+    searchClients: (search: string, onlyWithInvoice = false, onlyWithPendingInvoice = false): Promise<PaymentClientOption[]> =>
+      api.get<{ data: PaymentClientOption[] }>('/admin-contab/payments/clients', {
+        params: { search, only_with_invoice: onlyWithInvoice, only_with_pending_invoice: onlyWithPendingInvoice },
+      }).then(r => r.data.data),
 
     openInvoices: (masterClientId: number): Promise<OpenInvoicesResult> =>
       api.get<OpenInvoicesResult>('/admin-contab/payments/open-invoices', { params: { master_client_id: masterClientId } })
@@ -217,12 +288,43 @@ export const adminContabApi = {
         if (key === 'comprobante') { form.append('comprobante', value as File); continue }
         if (key === 'invoice_ids') { (value as number[]).forEach(id => form.append('invoice_ids[]', String(id))); continue }
         // Laravel's `boolean` rule solo acepta 1/0/"1"/"0" — "true"/"false" (lo que da
-        // String(bool) en JS) lo rechaza, así que un multipart con aplicar_saldo_favor:true fallaba
-        // 422 en silencio antes de este ajuste.
+        // String(bool) en JS) lo rechaza en un multipart.
         if (typeof value === 'boolean') { form.append(key, value ? '1' : '0'); continue }
         form.append(key, String(value))
       }
       return api.post<Payment>('/admin-contab/payments', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    },
+
+    // SCRUM-1168 F5 — corregir referencia y/o comprobante de un cobro ya registrado (nada contable).
+    updateDatos: (id: number, form: FormData): Promise<{ id: number; referencia: string | null }> =>
+      api.post<{ id: number; referencia: string | null }>(`/admin-contab/payments/${id}/datos`, form).then(r => r.data),
+
+    // SCRUM-1168 F4 — solicitar la anulación de un cobro (la decide Mark).
+    requestVoid: (id: number, motivo: string): Promise<ReversalRequest> =>
+      api.post<ReversalRequest>(`/admin-contab/payments/${id}/anular`, { motivo }).then(r => r.data),
+
+    // SCRUM-1168 F2 — concepto nuevo de cobros: configuración (bandera) y registro con o sin factura.
+    config: (): Promise<PaymentsConfig> =>
+      api.get<PaymentsConfig>('/admin-contab/payments/config').then(r => r.data),
+
+    registerV2: (payload: CreatePaymentV2Payload): Promise<PaymentDetail> => {
+      const form = new FormData()
+      form.append('master_client_id', String(payload.master_client_id))
+      form.append('monto_recibido', String(payload.monto_recibido))
+      form.append('metodo_pago', payload.metodo_pago)
+      if (payload.bank_account_id !== null) form.append('bank_account_id', String(payload.bank_account_id))
+      payload.aplicaciones.forEach((a, i) => {
+        form.append(`aplicaciones[${i}][invoice_id]`, String(a.invoice_id))
+        form.append(`aplicaciones[${i}][monto]`, String(a.monto))
+      })
+      if (payload.numero_documento_retencion) form.append('numero_documento_retencion', payload.numero_documento_retencion)
+      if (payload.comentario_ajuste) form.append('comentario_ajuste', payload.comentario_ajuste)
+      if (payload.referencia) form.append('referencia', payload.referencia)
+      if (payload.comprobante) form.append('comprobante', payload.comprobante)
+
+      return api.post<PaymentDetail>('/admin-contab/payments/cobro', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then(r => r.data)
     },
@@ -264,6 +366,10 @@ export const adminContabApi = {
     confirm: (id: number): Promise<PaymentDetail> =>
       api.put<PaymentDetail>(`/admin-contab/payments/${id}/confirm`).then(r => r.data),
 
+    // SCRUM-1168 F0 — qué pasaría al confirmar ahora (null = se aplica tal cual); no cambia nada.
+    confirmPreview: (id: number): Promise<{ ajustes_confirmacion: ConfirmacionAjustes | null }> =>
+      api.get<{ ajustes_confirmacion: ConfirmacionAjustes | null }>(`/admin-contab/payments/${id}/confirm-preview`).then(r => r.data),
+
     // Batch 19 (SCRUM-602→606, REQ-525) — constancia de retención, tabla propia
     // (`payment_retention_attachments`), distinta del comprobante de `attachment()` de arriba (ver
     // ADR-SCRUM602-606 §6). "Subir"/"Reemplazar" es el mismo endpoint, mismo criterio que
@@ -297,6 +403,9 @@ export const adminContabApi = {
           sales_project_id: filters.salesProjectId ?? undefined,
           desde: filters.desde || undefined,
           hasta: filters.hasta || undefined,
+          // SCRUM-947 — paginación estándar sobre `movimientos`.
+          page: filters.page,
+          per_page: filters.per_page,
         },
       }).then(r => r.data),
 
@@ -315,6 +424,27 @@ export const adminContabApi = {
       const a   = document.createElement('a')
       a.href     = url
       a.download = `estado-cuenta-${filters.masterClientId}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    },
+
+    // SCRUM-857 (REQ-456) — documento real generado en servidor (dompdf), reemplaza el
+    // `window.print()` de la pantalla en vivo que usaba este mismo botón antes. Mismo patrón blob
+    // que downloadExcel.
+    downloadPdf: async (filters: AccountStatementFilters): Promise<void> => {
+      const res = await api.get('/admin-contab/account-statement/pdf', {
+        params: {
+          master_client_id: filters.masterClientId,
+          sales_project_id: filters.salesProjectId ?? undefined,
+          desde: filters.desde || undefined,
+          hasta: filters.hasta || undefined,
+        },
+        responseType: 'blob',
+      })
+      const url = URL.createObjectURL(res.data as Blob)
+      const a   = document.createElement('a')
+      a.href     = url
+      a.download = `estado-cuenta-${filters.masterClientId}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     },
@@ -390,10 +520,32 @@ export const adminContabApi = {
     detail: (id: number): Promise<NotaCreditoDetalle> =>
       api.get<NotaCreditoDetalle>(`/admin-contab/notas-credito/${id}`).then(r => r.data),
 
+    // SCRUM-943 — mismo criterio que invoices.fePreview().
+    fePreview: (id: number): Promise<FiscalDocumentPreviewResult> =>
+      api.get<FiscalDocumentPreviewResult>(`/admin-contab/notas-credito/${id}/fe-preview`).then(r => r.data),
+
+    // SCRUM-987 — mismo criterio que invoices.feTransmisiones().
+    feTransmisiones: (id: number): Promise<FeTransmision[]> =>
+      api.get<{ data: FeTransmision[] }>(`/admin-contab/notas-credito/${id}/fe-transmisiones`).then(r => r.data.data),
+
+    // SCRUM-1007 — mismo criterio que invoices.feReintentar().
+    feReintentar: (id: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/notas-credito/${id}/fe-reintentar`).then(r => r.data),
+    feReconciliar: (id: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/notas-credito/${id}/fe-reconciliar`).then(r => r.data),
+    feActualizarEstado: (id: number): Promise<FeAccionResultado> =>
+      api.post<FeAccionResultado>(`/admin-contab/notas-credito/${id}/fe-actualizar-estado`).then(r => r.data),
+
     // REQ-491 — precarga de una fila de la cola de Bodega, endpoint propio (no viaja embebido en
     // el historial, ver docblock de `NotaCreditoDevolucionDetail`).
     devolucionDetail: (customerReturnId: number): Promise<NotaCreditoDevolucionDetail> =>
       api.get<NotaCreditoDevolucionDetail>(`/admin-contab/notas-credito/devoluciones/${customerReturnId}`).then(r => r.data),
+
+    // SCRUM-865 punto 2 — presign del documento firmado de la devolución, bajo el permiso de
+    // Notas de Crédito (mismo mecanismo que Bodega, ver docblock de `CreditNoteService::
+    // devolucionSignedDocumentUrl()`). 404 cuando la devolución no tiene documento.
+    devolucionSignedDocumentUrl: (customerReturnId: number): Promise<{ url: string }> =>
+      api.get<{ url: string }>(`/admin-contab/notas-credito/devoluciones/${customerReturnId}/signed-document`).then(r => r.data),
 
     // Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Mark, comprobante, documento formal,
     // factura relacionada. Ver ADR-SCRUM571-574.
@@ -416,6 +568,119 @@ export const adminContabApi = {
       const a   = document.createElement('a')
       a.href     = url
       a.download = `nota-credito-${numero}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    },
+  },
+
+  // SCRUM-902 — Registrar Abono (4O). Endpoints propios de admin-contab (mismo criterio que
+  // `payments.searchClients` — este módulo no depende de `ventas_diseno.read`, así que la
+  // cascada Cliente→Sub-cliente→Proyecto→Factura tiene sus propios endpoints acá en vez de
+  // reusar `/ventas-diseno/sub-clients`).
+  abonos: {
+    // SCRUM-947 — pagina server-side (antes devolvía el array completo).
+    list: (filters: AbonoFilters): Promise<AbonoListResponse> =>
+      api.get<AbonoListResponse>('/admin-contab/abonos', { params: filters }).then(r => r.data),
+
+    detail: (id: number): Promise<Abono> =>
+      api.get<Abono>(`/admin-contab/abonos/${id}`).then(r => r.data),
+
+    // Corregido contra el backend real: viven bajo /abonos/cascada/*, y "Proyecto" es
+    // `sales_project_id` (modelo `SalesProject`, no `PipelineCard`).
+    subClientes: (masterClientId: number): Promise<AbonoSubClienteOption[]> =>
+      api.get<{ data: AbonoSubClienteOption[] }>('/admin-contab/abonos/cascada/sub-clientes', { params: { master_client_id: masterClientId } })
+        .then(r => r.data.data),
+
+    proyectos: (subClientId: number): Promise<AbonoProyectoOption[]> =>
+      api.get<{ data: AbonoProyectoOption[] }>('/admin-contab/abonos/cascada/proyectos', { params: { sub_client_id: subClientId } })
+        .then(r => r.data.data),
+
+    facturas: (salesProjectId: number): Promise<AbonoFacturaOption[]> =>
+      api.get<{ data: AbonoFacturaOption[] }>('/admin-contab/abonos/cascada/facturas', { params: { sales_project_id: salesProjectId } })
+        .then(r => r.data.data),
+
+    // SCRUM-933 — reemplaza, para el buscador cruzado Proyecto↔# Cotización de "Registrar Abono",
+    // los 2 pasos de arriba (proyectos()+facturas()) con una sola lista ya enriquecida.
+    invoicesForSubClient: (subClientId: number): Promise<AbonoInvoiceForSubClient[]> =>
+      api.get<{ data: AbonoInvoiceForSubClient[] }>('/admin-contab/abonos/cascada/facturas-por-subcliente', { params: { sub_client_id: subClientId } })
+        .then(r => r.data.data),
+
+    // Multipart siempre (mismo criterio que `payments.register`/`notasCredito.register` — un solo
+    // camino de serialización aunque no traiga comprobante).
+    register: (payload: AbonoPayload): Promise<Abono> => abonoForm(payload, form => api.post<Abono>('/admin-contab/abonos', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data)),
+
+    update: (id: number, payload: AbonoPayload): Promise<Abono> => abonoForm(payload, form => {
+      form.append('_method', 'PUT')
+      return api.post<Abono>(`/admin-contab/abonos/${id}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    }),
+
+    confirm: (id: number): Promise<Abono> =>
+      api.post<Abono>(`/admin-contab/abonos/${id}/confirm`).then(r => r.data),
+
+    // SCRUM-955 — mismo patrón blob que payments.downloadReceiptPdf() — el endpoint exige el JWT
+    // en header, no se puede abrir con un <a href> plano.
+    downloadReceiptPdf: async (id: number, numeroRecibo: string): Promise<void> => {
+      const res = await api.get(`/admin-contab/abonos/${id}/pdf`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data as Blob)
+      const a   = document.createElement('a')
+      a.href     = url
+      a.download = `recibo-${numeroRecibo}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    },
+  },
+
+  // SCRUM-903 — Saldo a Favor de Clientes (4N), 100% solo lectura.
+  saldoFavor: {
+    list: (filters: SaldoFavorFilters): Promise<SaldoFavorResult> =>
+      api.get<SaldoFavorResult>('/admin-contab/saldo-favor', { params: filters }).then(r => r.data),
+  },
+
+  // SCRUM-1168 F4 — solicitudes de anulación (y de devolución, F5): listado y decisión de Mark.
+  reversals: {
+    /** F5 — solicita devolver dinero del saldo a favor del cliente (multipart: lleva el comprobante). */
+    requestRefund: (masterClientId: number, form: FormData): Promise<ReversalRequest> =>
+      api.post<ReversalRequest>(`/admin-contab/clientes/${masterClientId}/devolucion`, form).then(r => r.data),
+
+    list: (params: { estado?: string; tipo?: string; page?: number; per_page?: number | 'all' }): Promise<ReversalRequestsResult> =>
+      api.get<ReversalRequestsResult>('/admin-contab/reversal-requests', { params }).then(r => r.data),
+
+    decide: (id: number, aprobar: boolean, motivoRechazo?: string): Promise<ReversalRequest & { ajustes_comision?: { vendedor_id: number; pedido_id: number; monto: number }[] }> =>
+      api.put(`/admin-contab/reversal-requests/${id}/decision`, { aprobar, motivo_rechazo: motivoRechazo ?? null }).then(r => r.data),
+  },
+
+  // SCRUM-1168 F3 — Compensaciones.
+  compensaciones: {
+    clientes: (filters: CompensacionesFilters): Promise<CompensacionesResult> =>
+      api.get<CompensacionesResult>('/admin-contab/compensaciones/clientes', { params: filters }).then(r => r.data),
+
+    cliente: (masterClientId: number): Promise<CompensacionClienteDetalle> =>
+      api.get<CompensacionClienteDetalle>(`/admin-contab/compensaciones/clientes/${masterClientId}`).then(r => r.data),
+
+    preview: (masterClientId: number, lines: CompensacionLinea[]): Promise<CompensacionVistaPrevia> =>
+      api.post<CompensacionVistaPrevia>('/admin-contab/compensaciones/preview', { master_client_id: masterClientId, lines }).then(r => r.data),
+
+    confirm: (masterClientId: number, lines: CompensacionLinea[]): Promise<Compensacion> =>
+      api.post<Compensacion>('/admin-contab/compensaciones', { master_client_id: masterClientId, lines }).then(r => r.data),
+
+    // SCRUM-1168 F4 — reversos: desaplicar una aplicación o un cruce completo (sin aprobación; queda en el libro con motivo y autor).
+    reverse: (id: number, motivo: string): Promise<Compensacion> =>
+      api.post<Compensacion>(`/admin-contab/compensaciones/${id}/reverse`, { motivo }).then(r => r.data),
+
+    unapply: (movementId: number, motivo: string): Promise<{ id: number }> =>
+      api.post<{ id: number }>(`/admin-contab/movimientos/${movementId}/desaplicar`, { motivo }).then(r => r.data),
+
+    // Mismo patrón blob que los recibos: el endpoint exige el JWT en header.
+    downloadPdf: async (id: number, folio: string): Promise<void> => {
+      const res = await api.get(`/admin-contab/compensaciones/${id}/pdf`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data as Blob)
+      const a   = document.createElement('a')
+      a.href     = url
+      a.download = `compensacion-${folio}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     },
@@ -546,7 +811,7 @@ export const adminContabApi = {
     markPaid: (pipelineCardId: number): Promise<{ fecha_pago: string }> =>
       api.post<{ fecha_pago: string }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/mark-paid`).then(r => r.data),
 
-    // REQ-518 — despacha un correo async al arquitecto, solo disponible en "Pendiente de factura".
+    // REQ-518 — despacha un correo async al arquitecto, solo disponible en estado "Pendiente Cuenta de cobro".
     sendReminder: (pipelineCardId: number): Promise<void> =>
       api.post(`/admin-contab/commissions/external/projects/${pipelineCardId}/remind`).then(() => undefined),
   },
@@ -599,9 +864,9 @@ export const adminContabApi = {
     closeDailyCount: (): Promise<DailyCashCount> =>
       api.post<DailyCashCount>('/admin-contab/cash-position/daily-count/close').then(r => r.data),
 
-    // REQ-528 — historial de arqueos cerrados, paginado.
-    history: (page: number): Promise<DailyCashCountHistoryResult> =>
-      api.get<DailyCashCountHistoryResult>('/admin-contab/cash-position/history', { params: { page } }).then(r => r.data),
+    // REQ-528 — historial de arqueos cerrados, paginado. SCRUM-947 — per_page real.
+    history: (page: number, perPage?: number | 'all'): Promise<DailyCashCountHistoryResult> =>
+      api.get<DailyCashCountHistoryResult>('/admin-contab/cash-position/history', { params: { page, per_page: perPage } }).then(r => r.data),
 
     // REQ-528/529 — detalle de solo lectura de un arqueo del historial (mismo shape que el activo).
     historyDetail: (id: number): Promise<DailyCashCount> =>
@@ -642,8 +907,9 @@ export const adminContabApi = {
     summary: (): Promise<PettyCashSummary> =>
       api.get<PettyCashSummary>('/admin-contab/petty-cash/summary').then(r => r.data),
 
-    pending: (): Promise<PettyCashPendingResult> =>
-      api.get<PettyCashPendingResult>('/admin-contab/petty-cash/pending').then(r => r.data),
+    // SCRUM-947 — pagina server-side, a nivel de GRUPO (por solicitante).
+    pending: (page?: number, perPage?: number | 'all'): Promise<PettyCashPendingResult> =>
+      api.get<PettyCashPendingResult>('/admin-contab/petty-cash/pending', { params: { page, per_page: perPage } }).then(r => r.data),
 
     // REQ-535 — siempre multipart, cada línea trae una foto de recibo obligatoria.
     createExpenses: (lineas: PettyCashNewExpenseLine[]): Promise<void> => {
@@ -665,8 +931,9 @@ export const adminContabApi = {
     generateReport: (payload: CreatePettyCashReportPayload): Promise<PettyCashReportListItem> =>
       api.post<PettyCashReportListItem>('/admin-contab/petty-cash/reports', payload).then(r => r.data),
 
-    reports: (): Promise<PettyCashReportListItem[]> =>
-      api.get<PettyCashReportListItem[]>('/admin-contab/petty-cash/reports').then(r => r.data),
+    // SCRUM-947 — pagina server-side (antes devolvía el array completo).
+    reports: (page?: number, perPage?: number | 'all'): Promise<PettyCashReportListResponse> =>
+      api.get<PettyCashReportListResponse>('/admin-contab/petty-cash/reports', { params: { page, per_page: perPage } }).then(r => r.data),
 
     reportDetail: (numero: string): Promise<PettyCashReportDetail> =>
       api.get<PettyCashReportDetail>(`/admin-contab/petty-cash/reports/${numero}`).then(r => r.data),
@@ -695,8 +962,9 @@ export const adminContabApi = {
     // El backend envuelve la lista en { lineas: [...] } (AdminContPettyCashService::rejected()),
     // no un array bare — sin este unwrap, RechazadosPanel llama .map() sobre un objeto y crashea
     // toda la SPA (hallazgo CRÍTICO de Pre-QA, Batch 21, 2026-08-27).
-    rejected: (): Promise<PettyCashRejectedLine[]> =>
-      api.get<{ lineas: PettyCashRejectedLine[] }>('/admin-contab/petty-cash/rejected').then(r => r.data.lineas),
+    // SCRUM-947 — pagina server-side (antes devolvía el array completo).
+    rejected: (page?: number, perPage?: number | 'all'): Promise<PettyCashRejectedResult> =>
+      api.get<PettyCashRejectedResult>('/admin-contab/petty-cash/rejected', { params: { page, per_page: perPage } }).then(r => r.data),
 
     // REQ-545 — modal unificado, funciona igual en Pendientes/Reporte/Rechazados.
     expenseDetail: (id: number): Promise<PettyCashExpenseDetail> =>
@@ -808,6 +1076,10 @@ export const adminContabApi = {
     resumenMes: (): Promise<HomeResumenMes> =>
       api.get<HomeResumenMes>('/admin-contab/home/resumen-mes').then(r => r.data),
 
+    // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+    approvalsPending: (): Promise<{ data: ApprovalPendingItem[] }> =>
+      api.get<{ data: ApprovalPendingItem[] }>('/admin-contab/home/approvals-pending').then(r => r.data),
+
     // Grupo 2 (SCRUM-509, REQ-432) — "Mi calendario". Mismo endpoint compartido con Ventas &
     // Diseño/Compras/Servicios (OutlookCalendarController, module=admin_contab) — sin `scope`/
     // `owner_id`, ver docblock de AdminContMyCalendarPanel.tsx (RN1: nadie ve el calendario de
@@ -827,6 +1099,18 @@ export const adminContabApi = {
     vencidosPorVencer: (): Promise<HomeVencidosPorVencer> =>
       api.get<HomeVencidosPorVencer>('/admin-contab/home/vencidos-por-vencer').then(r => r.data),
   },
+}
+
+// SCRUM-902 — misma serialización multipart que `payments.register`/`notasCredito.register`
+// (booleano '1'/'0', `null`/`undefined` omitidos).
+function abonoForm<T>(payload: AbonoPayload, send: (form: FormData) => Promise<T>): Promise<T> {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === undefined) continue
+    if (key === 'comprobante') { form.append('comprobante', value as File); continue }
+    form.append(key, String(value))
+  }
+  return send(form)
 }
 
 // Batch 23 Grupo 2 (SCRUM-651→660, REQ-574→583) — "Mensual por cliente" (día) y "Acumulado"

@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoBarChart, IcoDonutChart } from '@/components/icons'
 import DashboardAlertListModal from '@/components/DashboardAlertListModal'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
 
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, ArcElement, DoughnutController, Tooltip, Legend)
 
@@ -57,9 +58,17 @@ export default function CrmDashboardPage() {
   const navigate = useNavigate()
   const showToast = useToastStore(s => s.show)
 
+  // SCRUM-854 — filtro multi-selección Vendedor/Diseñador. Sin scope Mío/Equipo (REQ-609
+  // RN2/RN3, sin cambios) — esto filtra DENTRO del equipo completo que ya se muestra.
+  const [ownerIds, setOwnerIds] = useState<number[]>([])
+  const { data: teamVendors } = useQuery({
+    queryKey: ['ventas-diseno-home-vendors'],
+    queryFn:  () => ventasDisenoApi.home.vendors(),
+  })
+
   const { data: summary, isLoading, isError } = useQuery({
-    queryKey: ['crm-dashboard-summary'],
-    queryFn:  () => ventasDisenoApi.dashboard.summary(),
+    queryKey: ['crm-dashboard-summary', ownerIds],
+    queryFn:  () => ventasDisenoApi.dashboard.summary(ownerIds),
   })
 
   // SCRUM-796 (secc. 3/4) — "Ver más" de cada alerta abre el modal con la lista completa;
@@ -139,9 +148,12 @@ export default function CrmDashboardPage() {
           <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">{tCrm('dashboard.title')}</h1>
           <p className="text-xs text-slate-400 mt-0.5">{tCrm('dashboard.subtitle')}</p>
         </div>
-        <Button variant="primary" onClick={() => navigate('/ventas-diseno/pipeline?openNewProject=1')}>
-          {tVd('kanban.actions.newProject')}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <UserMultiSelect users={teamVendors ?? []} selectedIds={ownerIds} onChange={setOwnerIds} />
+          <Button variant="primary" onClick={() => navigate('/ventas-diseno/pipeline?openNewProject=1')}>
+            {tVd('kanban.actions.newProject')}
+          </Button>
+        </div>
       </div>
 
       {/* REQ-604: alertas dinámicas, se omite el aviso completo si no hay resultados (RN3).
@@ -266,7 +278,7 @@ export default function CrmDashboardPage() {
               plugins: { legend: { display: false } },
               scales: {
                 y: { beginAtZero: true, grid: { display: false }, ticks: { precision: 0, font: { size: 11 } } },
-                x: { ticks: { font: { size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
               },
               // SCRUM-796 (secc. 1.2) — cada barra navega al Pipeline filtrado por esa etapa.
               onClick: goToStage,

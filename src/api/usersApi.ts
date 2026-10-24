@@ -6,6 +6,11 @@ export interface UserListItem {
   last_name:        string
   email:            string
   phone:            string | null
+  // SCRUM-822 (REQ-548) — cargo/fecha de ingreso/jefe directo. manager null = "Ninguno — Socio
+  // Director" (RN2), el nivel más alto sin jefe asignado.
+  job_title:        string | null
+  hire_date:        string | null
+  manager:          { id: number; name: string } | null
   is_active:        boolean
   mfa_enabled:      boolean
   notes:            string | null
@@ -38,6 +43,11 @@ export interface CreateUserPayload {
   last_name:            string
   email:                string
   phone?:               string | null
+  job_title?:           string | null
+  hire_date?:           string | null
+  manager_id?:          number | null
+  // RN3 — estado elegible al crear, default true (comportamiento existente) si se omite.
+  is_active?:            boolean
   department_id?:    number | null
   security_level_id?: number
   extra_permissions?: string[]
@@ -55,6 +65,9 @@ export interface UpdateUserPayload {
   last_name?:           string
   email?:               string
   phone?:               string | null
+  job_title?:           string | null
+  hire_date?:           string | null
+  manager_id?:          number | null
   department_id?:    number | null
   security_level_id?: number
   extra_permissions?: string[]
@@ -120,6 +133,23 @@ export const usersApi = {
   reject: (id: number): Promise<void> =>
     api.delete(`/users/${id}/reject`).then(() => undefined),
 
+  // `POST /users/{id}/reset-password` — 404 inexistente, 422 si está inactivo, 403 no superadmin, 429 throttle.
+  // Cierre de H3: si el objetivo es de máximo privilegio el backend exige `operator_password` (la contraseña
+  // actual de quien opera): 422 `operator_password_required` si falta, 422 `operator_reauth_failed` si es
+  // incorrecta, 429 `too_many_attempts` (con `retry_after`) por demasiados fallos y 403
+  // `password_reset_disabled` si el interruptor global está apagado.
+  resetPassword: (id: number, operatorPassword?: string): Promise<ResetPasswordResult> =>
+    api.post(`/users/${id}/reset-password`, operatorPassword ? { operator_password: operatorPassword } : undefined)
+      .then(r => r.data as ResetPasswordResult),
+
+  // `POST /users/reset-passwords` — con `dry_run: true` solo calcula (no cambia nada) y devuelve
+  // cantidad + lista; sin dry_run exige `confirm` y aplica. 422 `confirmation_mismatch` si no coincide.
+  resetPasswords: ((payload: BulkResetPasswordPayload) =>
+    api.post('/users/reset-passwords', payload).then(r => r.data)) as {
+      (payload: BulkResetPasswordPayload & { dry_run: true }): Promise<BulkResetPasswordPreview>
+      (payload: BulkResetPasswordPayload & { dry_run: false }): Promise<BulkResetPasswordResult>
+    },
+
   updateFlags: (id: number, data: { approve_large_amounts?: boolean; manage_users?: boolean }): Promise<UserListItem> =>
     api.patch(`/admin/users/${id}/flags`, data).then(r => r.data as UserListItem),
 
@@ -147,6 +177,43 @@ export const usersApi = {
         api.post('/admin/module-visibility/bulk', data).then(r => r.data as UatVisibilityState),
     },
   },
+}
+
+// Reset de contraseñas (solo superadmin). La contraseña nueva es el correo de la persona y el
+// backend marca `must_change_password`: debe cambiarla al ingresar.
+export interface ResetPasswordResult {
+  data: { id: number; email: string; must_change_password: boolean }
+}
+
+export interface BulkResetPasswordPayload {
+  dry_run:      boolean
+  except_ids:   number[]
+  include_self: boolean
+  // Por defecto el masivo NO alcanza a las cuentas de superadmin; hay que pedirlo de forma explícita.
+  include_superadmins: boolean
+  // Solo sin dry_run: debe ser exactamente `RESETEAR <N>`, N = count del dry_run con los mismos filtros.
+  confirm?:     string
+  // Cierre de H3 — solo sin dry_run: contraseña actual del operador (re-autenticación). Nunca viaja en la simulación.
+  operator_password?: string
+}
+
+/**
+ * Cuentas de máximo privilegio (cierre de H3): rol superadmin, nivel 10 o `superadmin.all` en permisos extra.
+ * Resetear a una de ellas exige re-autenticar al operador. El backend es la autoridad; esto solo decide si
+ * se pide la contraseña de antemano.
+ */
+export function isMaxPrivilegeUser(user: Pick<UserListItem, 'roles' | 'security_level' | 'extra_permissions'>): boolean {
+  return (user.roles ?? []).includes('superadmin')
+    || user.security_level?.level === 10
+    || (user.extra_permissions ?? []).includes('superadmin.all')
+}
+
+export interface BulkResetPasswordPreview {
+  data: { count: number; users: { id: number; email: string; name: string }[] }
+}
+
+export interface BulkResetPasswordResult {
+  data: { reset_count: number }
 }
 
 export interface UatVisibilityState {

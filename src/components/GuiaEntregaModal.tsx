@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoPrinter } from '@/components/icons'
 import AppLogo from '@/components/AppLogo'
+import { formatDateTimeShort } from '@/utils/dates'
 
 interface Props {
   orderId: number
@@ -41,7 +42,13 @@ interface Props {
  */
 export default function GuiaEntregaModal({ orderId, onClose }: Props) {
   const { t } = useTranslation(['common', 'bodega'])
-  const { data: order, isLoading } = useOrderDetail(orderId)
+  // SCRUM-930 (Pre-QA, hallazgo CRÍTICO) — un 403 (rol sin `bodega.read`) se veía idéntico a
+  // "todavía cargando" para siempre, porque esta rama no existía: `isLoading` de TanStack Query
+  // pasa a `false` en error, pero `order` sigue `undefined`, así que caía al mismo estado que
+  // "cargando" en el render de abajo. El fix real del permiso (Admin&Contab ahora puede leer este
+  // endpoint, ver `OrderBoardController::resolveAccess()`) hace que esto ya no dispare en el caso
+  // que encontró Pre-QA — esta rama queda como defensa ante cualquier otro error real (404, 500).
+  const { data: order, isLoading, isError } = useOrderDetail(orderId)
   const documentUrlMutation = useOrderDocumentDownloadUrl()
 
   useEffect(() => {
@@ -83,7 +90,9 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
         </div>
 
         <div className="overflow-y-auto px-5 py-4 flex-1">
-          {isLoading || !order ? (
+          {isError ? (
+            <p className="text-sm text-red-600 dark:text-red-400 py-6 text-center">{t('bodega:pedidos.guideModal.error')}</p>
+          ) : isLoading || !order ? (
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
           ) : !guideDocument ? (
             <p className="text-sm text-slate-400 py-6 text-center">{t('bodega:pedidos.guideModal.notGenerated')}</p>
@@ -133,7 +142,7 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
                 <div className="space-y-3 sm:text-right">
                   <GuideField label={t('bodega:pedidos.guideModal.guideNumber')} value={`#${guideNumber}`} />
                   <GuideField label={t('bodega:pedidos.guideModal.orderNumber')} value={order.order_number} />
-                  <GuideField label={t('bodega:pedidos.guideModal.date')} value={new Date(guideDocument.created_at).toLocaleString()} />
+                  <GuideField label={t('bodega:pedidos.guideModal.date')} value={formatDateTimeShort(guideDocument.created_at)} />
                   <GuideField label={t('bodega:pedidos.guideModal.seller')} value={order.vendedor} />
                   <GuideField label={t('bodega:pedidos.guideModal.courier')} value={order.repartidor} />
                 </div>
@@ -152,13 +161,18 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {order.items.map(item => (
+                  {/* SCRUM-894 (rebote Daniela, 2026-09-13) — mismo criterio que
+                      `guia-entrega-pdf.blade.php`: la guía de ESTA tarjeta es de lo realmente a
+                      entregar, nunca del pedido original completo. Antes este preview mostraba
+                      TODOS los items sin filtrar y caía a `qty_requested` cuando `qty_delivered`
+                      era 0 — el mismo bug que ya se había corregido en el PDF real, pero nunca en
+                      este componente, por eso el modal y el documento descargado mostraban cosas
+                      distintas. */}
+                  {order.items.filter(item => item.qty_delivered > 0).map(item => (
                     <tr key={item.id}>
                       <td className="px-3 py-2 text-slate-600 dark:text-slate-300">{item.reference ?? '—'}</td>
                       <td className="px-3 py-2 text-slate-600 dark:text-slate-300">{item.description ?? '—'}</td>
-                      <td className="px-3 py-2 text-slate-600 dark:text-slate-300">
-                        {item.qty_delivered > 0 ? item.qty_delivered : item.qty_requested}
-                      </td>
+                      <td className="px-3 py-2 text-slate-600 dark:text-slate-300">{item.qty_delivered}</td>
                     </tr>
                   ))}
                 </tbody>

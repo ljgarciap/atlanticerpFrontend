@@ -1,0 +1,23 @@
+{
+  "title": "LUMO Logbooks",
+  "subtitle": "Sales activity recorded in LUMO — read only",
+  "loading": "Loading logbooks...",
+  "unavailable": "LUMO is not available right now. Please try again later.",
+  "empty": "No logbook entries to show",
+  "emptyFiltered": "No logbook entries match the selected filter",
+  "filters": {
+    "vendedor": "Salesperson",
+    "todos": "All",
+    "desde": "From",
+    "hasta": "To"
+  },
+  "columns": {
+    "vendedor": "Salesperson",
+    "fecha": "Date",
+    "cliente": "Client",
+    "proyecto": "Project",
+    "motivo": "Reason",
+    "tipoAtencion": "Attention type",
+    "observaciones": "Notes"
+  }
+}

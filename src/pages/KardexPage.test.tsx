@@ -25,7 +25,7 @@ function renderPage() {
 }
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
+  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
 ]
 
 const EMPTY_RESPONSE: KardexListResponse = {

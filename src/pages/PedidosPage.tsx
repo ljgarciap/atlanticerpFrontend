@@ -1,20 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useOrdersBoard, useOrdersBoardOptions, useAssistantLoad } from '@/hooks/useBodega'
+import { useOrdersBoard, useOrdersBoardOptions, useAssistantLoad, useOrderSellers } from '@/hooks/useBodega'
 import { ORDER_STAGE_COLORS, ORDER_STAGE_ORDER } from '@/types/bodega'
 import type { AssistantLoad, OrderStage } from '@/types/bodega'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoPrinter } from '@/components/icons'
 import OrderCardTile from '@/components/OrderCardTile'
+import OrderTable from '@/components/OrderTable'
+import { UserMultiSelect } from '@/components/UserMultiSelect'
 import OrderDetailModal from '@/components/OrderDetailModal'
 import GuiaEntregaModal from '@/components/GuiaEntregaModal'
 import ConsolidatedPickingModal from '@/components/ConsolidatedPickingModal'
 import PickingSheetModal from '@/components/PickingSheetModal'
 import InventoryReviewModal from '@/components/InventoryReviewModal'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 type Chip = 'all' | 'urgentes' | 'atrasados' | 'sin_stock'
+type ViewMode = 'table' | 'board'
 
 /**
  * SCRUM-329 Oleada A / Batch A3 (REQ-305/306/309/310/311/312/332/334, HU-335) — tablero "Pedidos"
@@ -27,13 +31,29 @@ export default function PedidosPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
+  // SCRUM-860 — toggle tabla/tablero, mismo patrón que `servicios/TicketsPage.tsx`.
+  const [view, setView]               = useState<ViewMode>('board')
   const [search, setSearch]           = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
   const [assistantId, setAssistantId] = useState<number | ''>('')
   const [cliente, setCliente]         = useState('')
-  const [vendedor, setVendedor]       = useState('')
+  // SCRUM-854 — multi-selección Vendedor/Diseñador por id (OR entre seleccionados), reemplaza el
+  // filtro viejo por nombre client-side (REQ-309) — el backend ahora filtra por seller_ids real.
+  const [sellerIds, setSellerIds]     = useState<number[]>([])
+  // Rebote de Pre-QA — antes usaba ventasDisenoApi.home.vendors() (gateado por
+  // ventas_diseno.read), que los roles reales de Pedidos no tienen; 403 silencioso, selector
+  // permanentemente vacío. useOrderSellers() está gateado por bodega.read, el permiso real de
+  // esta pantalla.
+  const { data: teamVendors } = useOrderSellers()
   // SCRUM-169 (Gerencia → Salud Bodega): "Despachos urgentes"/"Despachos atrasados"
   // navegan acá con ?chip=urgentes/atrasados — antes se ignoraba, el tablero
   // siempre arrancaba en 'all' sin importar la URL.
+  // SCRUM-860 (rebote de Daniela, 2026-09-09) — filtro por Estado, pedido junto con la vista de
+  // tabla (que mezcla las 7 etapas en una sola lista, a diferencia del tablero que ya las separa
+  // en columnas). Client-side sobre `cards` — mismo criterio que el resto del agrupado por etapa
+  // del tablero (ORDER_STAGE_ORDER.map + cards.filter), no hace falta un query param nuevo.
+  const [stage, setStage]             = useState<OrderStage | ''>('')
   const [chip, setChip]               = useState<Chip>(() => {
     const raw = searchParams.get('chip')
     return raw === 'urgentes' || raw === 'atrasados' || raw === 'sin_stock' ? raw : 'all'
@@ -48,22 +68,21 @@ export default function PedidosPage() {
   const { data: assistantLoad } = useAssistantLoad()
 
   const { data: board, isLoading } = useOrdersBoard({
-    search:       search.trim() || undefined,
+    search:       searchTerm || undefined,
     assistant_id: assistantId === '' ? undefined : assistantId,
     cliente:      cliente || undefined,
     chip:         chip === 'all' ? undefined : chip,
+    // SCRUM-854 — filtra en el backend (whereHas owner_id, OR entre seleccionados), reemplaza el
+    // filtro client-side por nombre que usaba REQ-309 (`Vendedor no tiene id en el board`).
+    seller_ids:   sellerIds.length > 0 ? sellerIds : undefined,
   })
 
-  // REQ-309 — Vendedor no tiene id disponible en el board (solo el nombre, ver `OrderCard.vendedor`)
-  // así que se combina (AND) client-side sobre el resultado ya filtrado por el backend, en vez de
-  // inventar un endpoint nuevo fuera de este batch.
   const cards = useMemo(() => {
-    const raw = board?.cards ?? []
-    return vendedor ? raw.filter(c => c.vendedor === vendedor) : raw
-  }, [board, vendedor])
+    const all = board?.cards ?? []
+    return stage === '' ? all : all.filter(c => c.stage === stage)
+  }, [board, stage])
 
   const clienteOptions = useMemo(() => uniqueSorted(options?.cards.map(c => c.cliente)), [options])
-  const vendedorOptions = useMemo(() => uniqueSorted(options?.cards.map(c => c.vendedor)), [options])
 
   // REQ-321 RN1 — pickers con al menos un pedido "En picking" AHORA MISMO, sacado del universo
   // completo del tablero (`options`, sin los filtros de UI aplicados) para que el consolidado no
@@ -80,7 +99,7 @@ export default function PedidosPage() {
   }, [cards])
 
   function clearFilters() {
-    setSearch(''); setAssistantId(''); setCliente(''); setVendedor(''); setChip('all')
+    setSearch(''); setAssistantId(''); setCliente(''); setSellerIds([]); setChip('all'); setStage('')
   }
 
   const [detailOrderId, setDetailOrderId] = useState<number | null>(null)
@@ -120,7 +139,22 @@ export default function PedidosPage() {
             {t('bodega:pedidos.subtitle', { count: board?.total ?? 0 })}
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* SCRUM-860 — toggle tabla/tablero, mismo patrón que servicios/TicketsPage.tsx. */}
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+            <Button
+              variant="secondary" active={view === 'table'} className="!rounded-none !border-0"
+              onClick={() => setView('table')}
+            >
+              {t('bodega:pedidos.views.table')}
+            </Button>
+            <Button
+              variant="secondary" active={view === 'board'} className="!rounded-none !border-0"
+              onClick={() => setView('board')}
+            >
+              {t('bodega:pedidos.views.board')}
+            </Button>
+          </div>
           {/* REQ-321 (SCRUM-391) — consolidado del día por picker. */}
           <Button
             variant="secondary"
@@ -162,11 +196,29 @@ export default function PedidosPage() {
           <option value="">{t('bodega:pedidos.filters.client')}</option>
           {clienteOptions.map(name => <option key={name} value={name}>{name}</option>)}
         </select>
-        <select value={vendedor} onChange={e => setVendedor(e.target.value)} className={selectClass}>
-          <option value="">{t('bodega:pedidos.filters.seller')}</option>
-          {vendedorOptions.map(name => <option key={name} value={name}>{name}</option>)}
+        {/* SCRUM-860 (rebote de Daniela) — filtro por Estado, mismo selectClass que Asistente/
+            Cliente para que los 3 se vean del mismo tamaño. */}
+        <select value={stage} onChange={e => setStage(e.target.value as OrderStage | '')} className={selectClass}>
+          <option value="">{t('bodega:pedidos.filters.stage')}</option>
+          {ORDER_STAGE_ORDER.map(s => (
+            <option key={s} value={s}>{t(`bodega:pedidos.stages.${s}`)}</option>
+          ))}
         </select>
-        <Button variant="outline" onClick={clearFilters}>{t('bodega:pedidos.filters.clear')}</Button>
+        {/* SCRUM-860 (rebote de Daniela, 2026-09-09) — "Todos los Vendedores" quedaba más grande
+            que Asistente/Cliente: UserMultiSelect no tenía forma de recibir el tamaño del botón
+            disparador (su `className` solo llega al wrapper externo, ver UserMultiSelect.tsx).
+            Se agregó `buttonClassName` puntualmente para este caso — reemplaza el estilo default
+            del botón por completo, en vez de intentar pisarlo con !important. */}
+        <UserMultiSelect
+          users={teamVendors ?? []} selectedIds={sellerIds} onChange={setSellerIds}
+          placeholder={t('bodega:pedidos.filters.seller')}
+          buttonClassName={selectClass}
+        />
+        {/* SCRUM-860 — mismo motivo: "Limpiar Filtros" (Button variant="outline", px-4 py-2 text-sm
+            por default) quedaba más grande que el resto — se achica con overrides !important. */}
+        <Button variant="outline" onClick={clearFilters} className="!px-2 !py-2 md:!py-1.5 !text-sm md:!text-[12px]">
+          {t('bodega:pedidos.filters.clear')}
+        </Button>
 
         <div className="flex gap-2 flex-wrap w-full">
           {(['all', 'urgentes', 'atrasados', 'sin_stock'] as Chip[]).map(c => (
@@ -186,9 +238,12 @@ export default function PedidosPage() {
         </div>
       </Card>
 
-      {/* SCRUM-381/382 (REQ-311/312) — tablero Kanban, 7 etapas fijas, de solo lectura. */}
+      {/* SCRUM-381/382 (REQ-311/312) — tablero Kanban, 7 etapas fijas, de solo lectura.
+          SCRUM-860 — vista Tabla alterna sobre el mismo array `cards` ya filtrado. */}
       {isLoading ? (
         <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
+      ) : view === 'table' ? (
+        <OrderTable orders={cards} onViewDetail={setDetailOrderId} />
       ) : (
         <div className="overflow-x-auto -mx-6 px-6 pb-2" data-testid="pedidos-board">
           <div

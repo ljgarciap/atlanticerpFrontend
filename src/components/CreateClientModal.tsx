@@ -4,10 +4,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { usePermission } from '@/hooks/usePermission'
-import type { ContactRole, SubClientCategory, PriceType, SubClientDetail, ClientDetail } from '@/types/ventasDiseno'
+import type { ContactRole, SubClientCategory, PriceType, SubClientDetail, ClientDetail, ReceptorTipo } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
+import TaxIdValidator from '@/components/TaxIdValidator'
+import ReceptorTipoSelect from '@/components/ReceptorTipoSelect'
 
 const CATEGORIES: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
 const PRICE_TYPES: PriceType[] = ['public', 'project', 'special', 'partner', 'premium']
@@ -23,30 +25,42 @@ function emptyContact(): ContactDraft {
   return { name: '', role: 'client', phone: '', email: '' }
 }
 
+// SCRUM-928 — DV del RUC: solo dígitos, 1 o 2 caracteres.
+const DV_PATTERN = /^\d{1,2}$/
+
 function contactsValid(contacts: ContactDraft[]): boolean {
   return contacts.length > 0 && contacts.every(c => c.name.trim() !== '' && (c.phone.trim() !== '' || c.email.trim() !== ''))
 }
 
 type Props =
-  | { mode: 'client'; initialText?: string; onClose: () => void; onCreated: (client: ClientDetail) => void }
-  | { mode: 'sub-client'; masterClientId: number; masterClientName: string; initialText?: string; onClose: () => void; onCreated: (subClient: SubClientDetail) => void }
+  | { mode: 'client'; initialText?: string; fromQuoteContext?: boolean; onClose: () => void; onCreated: (client: ClientDetail) => void }
+  | { mode: 'sub-client'; masterClientId: number; masterClientName: string; initialText?: string; fromQuoteContext?: boolean; onClose: () => void; onCreated: (subClient: SubClientDetail) => void }
 
 export default function CreateClientModal(props: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const qc = useQueryClient()
   const canSelectPartnerPrice = usePermission('ventas_diseno.select_partner_price')
+  // Decisión de Luis (2026-09-30): marcar un Consumidor Final es solo de Mark y Felix.
+  const canMarkConsumidorFinal = usePermission('ventas_diseno.edit.client_tax_data')
 
   // SCRUM-734 (RN7.1) — el texto que el usuario ya tipeó en el buscador precarga
   // el campo principal (Cliente Master en modo 'client', Razón social en modo
   // 'sub-client') — nunca arranca vacío si venía de un "+ Crear nuevo" con texto.
   const [name, setName]                     = useState(props.mode === 'client' ? props.initialText ?? '' : '')
   const [businessName, setBusinessName]     = useState(props.mode === 'sub-client' ? props.initialText ?? '' : '')
+  const [receptorTipo, setReceptorTipo]     = useState<ReceptorTipo>('01')
   const [taxId, setTaxId]                   = useState('')
+  const [taxIdDv, setTaxIdDv]               = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [category, setCategory]             = useState<SubClientCategory | ''>('')
   const [priceType, setPriceType]           = useState<PriceType | ''>('')
   const [contacts, setContacts]             = useState<ContactDraft[]>([emptyContact()])
   const [error, setError]                   = useState<string | null>(null)
+
+  // SCRUM-1003 — Consumidor Final no manda RUC ni DV.
+  const fiscalPayload = () => receptorTipo === '02'
+    ? { receptor_tipo: receptorTipo }
+    : { receptor_tipo: receptorTipo, tax_id: taxId, tax_id_dv: taxIdDv.trim() }
 
   const contactsPayload = () => contacts.map(c => ({
     name: c.name, role: c.role, phone: c.phone || null, email: c.email || null,
@@ -57,10 +71,11 @@ export default function CreateClientModal(props: Props) {
       name,
       default_price_type: priceType || null,
       business_name: businessName,
-      tax_id: taxId,
+      ...fiscalPayload(),
       delivery_address: deliveryAddress || null,
       category: category || null,
       contacts: contactsPayload(),
+      from_quote_context: props.fromQuoteContext,
     }),
     onSuccess: client => {
       qc.invalidateQueries({ queryKey: ['ventas-diseno-clients'] })
@@ -75,10 +90,11 @@ export default function CreateClientModal(props: Props) {
   const createSubClientMutation = useMutation({
     mutationFn: (masterClientId: number) => ventasDisenoApi.clients.addSubClient(masterClientId, {
       business_name: businessName,
-      tax_id: taxId,
+      ...fiscalPayload(),
       delivery_address: deliveryAddress || null,
       category: category || null,
       contacts: contactsPayload(),
+      from_quote_context: props.fromQuoteContext,
     }),
     onSuccess: subClient => {
       qc.invalidateQueries({ queryKey: ['ventas-diseno-clients'] })
@@ -102,7 +118,8 @@ export default function CreateClientModal(props: Props) {
     }
   }
 
-  const formValid = businessName.trim() !== '' && taxId.trim() !== '' && contactsValid(contacts)
+  const taxDataValid = receptorTipo === '02' || (taxId.trim() !== '' && (taxIdDv.trim() === '' || DV_PATTERN.test(taxIdDv.trim())))
+  const formValid = businessName.trim() !== '' && taxDataValid && contactsValid(contacts)
     && (props.mode === 'sub-client' || name.trim() !== '')
 
   const inputClass = 'w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-[#5BA5A0] focus:outline-none'
@@ -141,12 +158,41 @@ export default function CreateClientModal(props: Props) {
               </label>
               <input type="text" value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} className={inputClass} />
             </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
-                {t('ventasDiseno:clients.createModal.taxId')} *
-              </label>
-              <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} className={inputClass} />
-            </div>
+            {/* SCRUM-1003 — selector explícito; con Consumidor Final se ocultan RUC, DV y validación. */}
+            <ReceptorTipoSelect id="create-receptor-tipo" value={receptorTipo} onChange={setReceptorTipo} permitirConsumidorFinal={canMarkConsumidorFinal} />
+            {/* SCRUM-928 — el DV va inmediatamente después del RUC, en la misma celda. */}
+            {receptorTipo === '01' && <div className="flex gap-2">
+              <div className="flex-1 min-w-0">
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+                  {t('ventasDiseno:clients.createModal.taxId')} *
+                </label>
+                <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} className={inputClass} />
+              </div>
+              <div className="w-20 shrink-0">
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+                  {t('ventasDiseno:clients.createModal.taxIdDv')}
+                </label>
+                {/* Sin `maxLength`: el navegador cortaba el pegado (p. ej. " 81" con un espacio) a 2
+                    caracteres ANTES de que el onChange limpie los no dígitos, y quedaba "8". El
+                    `slice(0, 2)` de abajo ya limita a 2 dígitos. */}
+                <input
+                  type="text" inputMode="numeric"
+                  value={taxIdDv}
+                  onChange={e => setTaxIdDv(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                  className={inputClass}
+                />
+              </div>
+            </div>}
+            {/* SCRUM-1002 — valida contra la DGI sin bloquear el guardado; propone (nunca pisa) el DV y la razón social oficiales. */}
+            {receptorTipo === '01' && <div className="sm:col-span-2">
+              <TaxIdValidator
+                taxId={taxId} taxIdDv={taxIdDv} businessName={businessName}
+                onApply={({ dv, nombre }) => {
+                  if (dv !== null) setTaxIdDv(dv)
+                  if (nombre !== null) setBusinessName(nombre)
+                }}
+              />
+            </div>}
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                 {t('ventasDiseno:clients.createModal.category')}
@@ -224,7 +270,6 @@ export default function CreateClientModal(props: Props) {
             {t('ventasDiseno:clients.createModal.addAnotherContact')}
           </button>
           <p className="text-[11px] text-slate-400 mb-3">{t('ventasDiseno:clients.createModal.requiredNote')}</p>
-          <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-3">{t('ventasDiseno:clients.createModal.leadRuleNote')}</p>
 
           {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
         </div>
