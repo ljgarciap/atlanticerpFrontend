@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 /**
  * Pre-QA — SCRUM-944/945 (vista consolidada de superadmin `/configuracion/global`, umbrales CRM y
  * tramos de comisión de vendedores), contra https://dev.atlanticerp.ai. Gates que se prueban: acceso
- * SOLO superadmin (UI y API), Fiscal sigue exclusiva de Mark en su pantalla original, solo la tab
+ * SOLO superadmin (UI y API), Fiscal sigue exclusiva de Gerencia en su pantalla original, solo la tab
  * activa monta su panel, y qué ve el usuario cuando el backend rechaza un valor (422).
  *
  * SESIÓN: dev ya bloqueó una IP por ráfaga de logins (memoria project-dev-atlanticerp-ip-blocked-login-
@@ -120,7 +120,7 @@ test('UI — Admin&Cont no ve "Configuración global" en el Sidebar ni entra por
   await expect(page.getByRole('link', { name: 'Configuración global' })).toHaveCount(0)
 })
 
-test('UI — Fiscal sigue exclusiva de Mark: Admin&Cont (Felix) no ve el contenido en /admin-contab/fiscal', async ({ page, request }) => {
+test('UI — Fiscal sigue exclusiva de Gerencia: Admin&Cont (Contabilidad) no ve el contenido en /admin-contab/fiscal', async ({ page, request }) => {
   await openAs(page, request, 'conta', '/admin-contab/fiscal')
   // El gate real es el 403 del backend: la pantalla no debe mostrar el formulario fiscal editable.
   await expect(page.getByRole('button', { name: /guardar/i })).toHaveCount(0)

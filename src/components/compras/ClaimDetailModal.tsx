@@ -45,7 +45,7 @@ export default function ClaimDetailModal({ claimId, onClose }: Props) {
     : null
 
   // SCRUM-259 — 3 etapas fijas del mockup. El sistema hoy solo tiene 2 estados reales
-  // (en_revision, resuelto — Daniela lo reconoce explícitamente en su comentario), así que
+  // (en_revision, resuelto — Gerencia lo reconoce explícitamente en su comentario), así que
   // "Reportado" y "En revisión" comparten la fecha de creación (un reclamo nace directamente en
   // "en_revision", nunca hay un estado intermedio real entre ambos). "Resuelto" solo se muestra
   // activo si el estado actual es resuelto; de lo contrario queda atenuado como "Pendiente".

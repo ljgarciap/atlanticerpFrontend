@@ -12,7 +12,7 @@ import type { UserInfo } from '@/types/auth'
 
 // Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Cubre: 5 tarjetas (REQ-508),
 // aviso + montos ocultos cuando faltan datos fiscales (REQ-510/511), estados (REQ-512), gate de
-// rol de "Subir cuenta de cobro" (REQ-513 — Felix/Yaneth sí, Mark no).
+// rol de "Subir cuenta de cobro" (REQ-513 — Contabilidad/Yaneth sí, Gerencia no).
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -239,7 +239,7 @@ describe('ComisionesExternasPage — REQ-512 estado derivado del cobro', () => {
 })
 
 describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () => {
-  it('Felix (lider_admin_contab) ve el botón "Subir" cuenta de cobro', async () => {
+  it('Contabilidad (lider_admin_contab) ve el botón "Subir" cuenta de cobro', async () => {
     const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
     mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
     renderPage()
@@ -256,7 +256,7 @@ describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () =
     expect(await screen.findByText('adminContab:comisionesExternas.detalle.subir')).toBeInTheDocument()
   })
 
-  it('Mark (management) NO ve ningún botón de subir/reemplazar cuenta de cobro', async () => {
+  it('Gerencia (management) NO ve ningún botón de subir/reemplazar cuenta de cobro', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
     const architect = makeArchitectRow({ proyectos: [makeProject({ cuenta_cobro: null })] })
     mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
@@ -266,7 +266,7 @@ describe('ComisionesExternasPage — REQ-513 cuenta de cobro, gate de rol', () =
     expect(screen.queryByText('adminContab:comisionesExternas.detalle.subir')).not.toBeInTheDocument()
   })
 
-  it('un proyecto con cuenta de cobro ya subida muestra el nombre del archivo y "Reemplazar" para Felix', async () => {
+  it('un proyecto con cuenta de cobro ya subida muestra el nombre del archivo y "Reemplazar" para Contabilidad', async () => {
     const architect = makeArchitectRow({
       proyectos: [makeProject({ cuenta_cobro: { nombre_archivo: 'cuenta1.pdf', uploaded_at: '2026-08-25T10:00:00Z' } })],
     })

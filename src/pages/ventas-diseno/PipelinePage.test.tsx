@@ -334,7 +334,7 @@ describe('VentasDisenoPipelinePage', () => {
 })
 
 
-// SCRUM-1128 — filtro Pedidos y modo solo lectura (Félix).
+// SCRUM-1128 — filtro Pedidos y modo solo lectura (Contabilidad).
 describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
   function renderPage() {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -371,7 +371,7 @@ describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
     expect(screen.queryByText('ventasDiseno:kanban.actions.newProject')).not.toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:kanban.actions.newQuote')).not.toBeInTheDocument()
   })
-  it('sin claim modules.ventas_diseno y sin permiso de escritura (Félix): solo lectura, no se asume edición', async () => {
+  it('sin claim modules.ventas_diseno y sin permiso de escritura (Contabilidad): solo lectura, no se asume edición', async () => {
     mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} } } as never)
     renderPage()
     const tile = await screen.findByTestId('pipeline-card-1')
@@ -386,7 +386,7 @@ describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
     expect(tile).toHaveAttribute('draggable', 'true')
   })
 
-  it('Félix (pipeline.read_all): lista con scope=team, sin toggle ni llamada a vendors, en solo lectura', async () => {
+  it('Contabilidad (pipeline.read_all): lista con scope=team, sin toggle ni llamada a vendors, en solo lectura', async () => {
     mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pass_to_order'], modules: {} } } as never)
     renderPage()
     const tile = await screen.findByTestId('pipeline-card-1')
@@ -398,8 +398,8 @@ describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
     expect(screen.queryByText('ventasDiseno:kanban.actions.newProject')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1139 — Félix con `pipeline.edit`: edita el tablero (crear proyecto, arrastrar), sin ir a Cotizaciones.
-  it('Félix con pipeline.read_all + pipeline.edit: arrastra, ve Nuevo proyecto y NO ve Nueva cotización', async () => {
+  // SCRUM-1139 — Contabilidad con `pipeline.edit`: edita el tablero (crear proyecto, arrastrar), sin ir a Cotizaciones.
+  it('Contabilidad con pipeline.read_all + pipeline.edit: arrastra, ve Nuevo proyecto y NO ve Nueva cotización', async () => {
     mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} } } as never)
     renderPage()
     const tile = await screen.findByTestId('pipeline-card-1')
@@ -409,8 +409,8 @@ describe('VentasDisenoPipelinePage — SCRUM-1128', () => {
     expect(screen.queryByText('ventasDiseno:kanban.actions.newQuote')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1139 (observación de Pre-QA) — el Catálogo exige `ventas_diseno.read`: a Félix, con solo permisos angostos del Pipeline, el botón sería un enlace muerto.
-  it('Félix (solo permisos angostos del Pipeline): NO ve el botón Catálogo', async () => {
+  // SCRUM-1139 (observación de Pre-QA) — el Catálogo exige `ventas_diseno.read`: a Contabilidad, con solo permisos angostos del Pipeline, el botón sería un enlace muerto.
+  it('Contabilidad (solo permisos angostos del Pipeline): NO ve el botón Catálogo', async () => {
     mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} } } as never)
     renderPage()
     await screen.findByTestId('pipeline-card-1')

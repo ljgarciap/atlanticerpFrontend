@@ -40,7 +40,7 @@ function SolicitudBadge() {
 // REQ-273/274 — listado de Insumos. El botón "Solicitar" queda siempre habilitado por fila
 // (nunca se deshabilita ni se reemplaza por el badge, a diferencia de ToolTable — un insumo
 // puede tener varias solicitudes activas a lo largo del tiempo), visible solo para
-// Aaron/Líder de Servicios y superadmin (`canEdit`, ver InsumosPanel.tsx).
+// Lider Servicios/Líder de Servicios y superadmin (`canEdit`, ver InsumosPanel.tsx).
 export default function InsumoTable({ insumos, canEdit, onRequest }: Props) {
   const { t } = useTranslation('servicios')
 

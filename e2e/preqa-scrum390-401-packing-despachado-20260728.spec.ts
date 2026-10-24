@@ -18,7 +18,7 @@ const SOLO_ORDER_ID = 16
 const FAMILY_ROOT_ID = 17
 const FAMILY_SIBLING_ID = 18
 const PACKING_ORDER_ID = 5 // [QA-BOD] Residencial Vista Hermosa, items 10 (qty_picked=2) y 11 (qty_picked=4)
-const DESPACHADO_ORDER_ID = 8 // [QA-BOD] Restaurante Costa del Este, courier=Gary, invoice_ready=true
+const DESPACHADO_ORDER_ID = 8 // [QA-BOD] Restaurante Costa del Este, courier=Transporte, invoice_ready=true
 const INVOICE_READY_ORDER_ID = 19 // fixture dedicado, por_despachar + invoice_ready=true, no lo toca ningun otro test
 
 async function login(page, email: string) {
@@ -39,7 +39,7 @@ function cardFor(page, orderId: number) {
 }
 
 test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho', () => {
-  test('RN1 — Asistente (Osvaldo) ve el control pero recibe 403 real del backend, no un bloqueo cosmético', async ({ page }) => {
+  test('RN1 — Asistente (Asistente Bodega) ve el control pero recibe 403 real del backend, no un bloqueo cosmético', async ({ page }) => {
     await login(page, OSVALDO)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)
@@ -61,7 +61,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
     await page.screenshot({ path: path.join(__dirname, '.tmp', 'scrum396-asistente-403.png') })
   })
 
-  test('RN1 (camino feliz) — Esteban (Jefe de Bodega) sí puede asignar; select incluye a Transporte Test real', async ({ page }) => {
+  test('RN1 (camino feliz) — Lider Bodega (Jefe de Bodega) sí puede asignar; select incluye a Transporte Test real', async ({ page }) => {
     await login(page, ESTEBAN)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)

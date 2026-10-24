@@ -9,7 +9,7 @@ import { notificationsApi } from '@/api/notificationsApi'
 const LABELS: Record<string, string> = {
   'common:notifications.title':       'Notifications',
   'common:notifications.empty':       'You have no notifications.',
-  'common:notifications.markAllRead': 'Mark all as read',
+  'common:notifications.markAllRead': 'Gerencia all as read',
 }
 
 vi.mock('react-i18next', () => ({
@@ -156,7 +156,7 @@ describe('NotificationBell', () => {
     renderBell()
 
     fireEvent.click(screen.getByTitle('Notifications'))
-    fireEvent.click(await screen.findByText('Mark all as read'))
+    fireEvent.click(await screen.findByText('Gerencia all as read'))
 
     await waitFor(() => expect(mockedApi.markAllRead).toHaveBeenCalled())
   })

@@ -22,7 +22,7 @@ interface Props {
  * mockup (RN1 dice explícito "se configuran en otro lugar, fuera del alcance de este mockup") —
  * se agrega igual en este batch por decisión de Luis (regla dura del CLAUDE.md: nunca hardcodear
  * umbrales de negocio sin CRUD+vista de admin). `editable` gatea el modo edición — mismo patrón
- * que `ItbmsRateDetailModal` (Configuración Fiscal, exclusivo Mark/`admin_contab.edit`).
+ * que `ItbmsRateDetailModal` (Configuración Fiscal, exclusivo Gerencia/`admin_contab.edit`).
  */
 export default function CommissionTiersModal({ editable, onClose }: Props) {
   const { t } = useTranslation(['common', 'adminContab'])

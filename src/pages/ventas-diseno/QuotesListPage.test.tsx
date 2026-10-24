@@ -93,11 +93,11 @@ describe('VentasDisenoQuotesListPage', () => {
 
   it('SCRUM-1195 — la columna Responsable muestra al dueño de la tarjeta, no a Gerencia que generó la versión', async () => {
     mockedApi.quotes.list.mockResolvedValue(makeResult({
-      data: [makeRow({ owner: { id: 9, name: 'Gerencia Test 3' }, designer: { id: 1, name: 'Paola Vendedora' } })],
+      data: [makeRow({ owner: { id: 9, name: 'Gerencia Test 3' }, designer: { id: 1, name: 'Vendedor Disenador Vendedora' } })],
     }))
     renderPage()
 
-    expect(await screen.findByText('Paola Vendedora')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Disenador Vendedora')).toBeInTheDocument()
     expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
   })
 

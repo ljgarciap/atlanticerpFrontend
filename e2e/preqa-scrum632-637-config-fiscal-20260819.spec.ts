@@ -23,7 +23,7 @@ test('REQ-555 RN1 — no-Mark ve "acceso restringido", no la pantalla', async ({
   await page.screenshot({ path: 'test-results/scrum632-00-no-mark-restricted.png', fullPage: true })
 })
 
-test('Configuración Fiscal — Mark, modo lectura/edición y paneles', async ({ page }) => {
+test('Configuración Fiscal — Gerencia, modo lectura/edición y paneles', async ({ page }) => {
   await login(page, MARK)
   await page.goto('/admin-contab/fiscal')
   await page.waitForSelector('text=Datos fiscales de la empresa')

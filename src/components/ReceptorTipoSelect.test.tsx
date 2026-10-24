@@ -27,7 +27,7 @@ describe('ReceptorTipoSelect (SCRUM-1003)', () => {
     expect(screen.getByText(`${K}.consumidorFinalAyuda`)).toBeInTheDocument()
   })
 
-  it('sin el permiso, "Consumidor final" aparece deshabilitado con la razón (solo Mark y Felix)', () => {
+  it('sin el permiso, "Consumidor final" aparece deshabilitado con la razón (solo Gerencia y Contabilidad)', () => {
     render(<ReceptorTipoSelect id="t" value="01" onChange={vi.fn()} permitirConsumidorFinal={false} />)
     expect((screen.getByRole('option', { name: `${K}.consumidorFinal` }) as HTMLOptionElement).disabled).toBe(true)
     expect(screen.getByText(`${K}.soloMarkFelix`)).toBeInTheDocument()

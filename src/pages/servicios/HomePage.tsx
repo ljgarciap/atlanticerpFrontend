@@ -28,7 +28,7 @@ function canCreateTicket(role: string | undefined): boolean {
 }
 
 // REQ-214 RN3/RN4 (Grupo C, SCRUM-277) — MISMO criterio que TicketsPage.tsx `canEditTicketStatus()`
-// (solo Aaron/Líder de Servicios y superadmin agendan/reagendan). Duplicada acá a propósito, no
+// (solo Lider Servicios/Líder de Servicios y superadmin agendan/reagendan). Duplicada acá a propósito, no
 // exportada desde TicketsPage.tsx — mismo patrón ya usado por `canCreateTicket()` arriba. Si este
 // criterio cambia, actualizar las DOS copias (acá y en TicketsPage.tsx) — no diverjas una sin la otra.
 function canEditTicketStatus(role: string | undefined): boolean {

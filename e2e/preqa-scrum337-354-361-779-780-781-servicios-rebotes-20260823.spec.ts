@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test'
  * 781-tablero, 354) sí tenía bugs reales, corregidos en los commits de este mismo batch.
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): liderservicios@test.com (Aaron Leis, lider_servicios).
+ * (password = email): liderservicios@test.com (Lider Servicios Leis, lider_servicios).
  */
 test.describe.configure({ mode: 'serial' })
 

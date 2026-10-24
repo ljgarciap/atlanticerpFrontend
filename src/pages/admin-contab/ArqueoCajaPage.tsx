@@ -37,9 +37,9 @@ function mutationErrorMessage(err: unknown, fallback: string): string {
  * arqueo, historial de arqueos cerrados, cola de atrasados, constancia de retención).
  *
  * Permisos (§8 del ADR, ver también tabla de rutas): REQ-520/522 (encabezado+toggle) son para los
- * 4 roles del módulo; REQ-521/523 (Proyectado, Real 30/90d) excluyen a Yaneth
+ * 4 roles del módulo; REQ-521/523 (Proyectado, Real 30/90d) excluyen a Asistente Administrativa
  * (`asistente_administrativa`); REQ-524 (Arqueo del día) excluye a Gerencia (`management`). Esta
- * página nunca deja a un rol aterrizar en una combinación sin acceso — para Yaneth el toggle/chips
+ * página nunca deja a un rol aterrizar en una combinación sin acceso — para Asistente Administrativa el toggle/chips
  * ni se ofrecen (siempre Real+Hoy); para Gerencia, seleccionar Real+Hoy muestra una nota en vez de
  * intentar el fetch (que 403earía).
  */
@@ -47,9 +47,9 @@ export default function ArqueoCajaPage() {
   const { t } = useTranslation(['common', 'adminContab'])
   const { user } = useAuthStore()
 
-  // SCRUM-1139 — `lider_operaciones` (Mariam) recibe el mismo acceso que Yaneth en Admin&Cont, incluida la exclusión de REQ-521/523 (Proyectado/Vista real).
+  // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) recibe el mismo acceso que Asistente Administrativa en Admin&Cont, incluida la exclusión de REQ-521/523 (Proyectado/Vista real).
   const isYaneth        = user?.role === 'asistente_administrativa' || user?.role === 'lider_operaciones'
-  // Aclarado por Luis 2026-08-25 (Pre-QA Batch 18): REQ-521 le veda a Yaneth el PANEL de detalle
+  // Aclarado por Luis 2026-08-25 (Pre-QA Batch 18): REQ-521 le veda a Asistente Administrativa el PANEL de detalle
   // (facturas/comisiones línea por línea) y la Vista real 30/90d — no los 3 totales agregados del
   // encabezado, que REQ-520 sí le da. `canProjectedReal` sigue gateando toggle/chips + ambos
   // paneles de detalle + la Vista real; el fetch de `projected` para las tarjetas ya no depende de
@@ -57,7 +57,7 @@ export default function ArqueoCajaPage() {
   const canProjectedReal = !isYaneth
   const canDailyCount    = user?.role === 'superadmin' || user?.role === 'lider_admin_contab' || isYaneth
   // REQ-528/529 — el historial (y su "Ver"/"Descargar resumen") es para los 4 roles del módulo,
-  // a diferencia del Arqueo del día (`canDailyCount`), que excluye a Mark/Gerencia (`management`).
+  // a diferencia del Arqueo del día (`canDailyCount`), que excluye a Gerencia/Gerencia (`management`).
   const canViewHistorial = canDailyCount || user?.role === 'management'
 
   const [view, setView]             = useState<'proyectado' | 'real'>(isYaneth ? 'real' : 'proyectado')
@@ -70,7 +70,7 @@ export default function ArqueoCajaPage() {
   // Pre-QA Batch 18 (SCRUM-597, CRÍTICO) — las 3 tarjetas de encabezado "Entradas/Salidas/Saldo
   // proyectados" (REQ-520 RN2) dependen solo de la ventana elegida, no de qué pestaña (Proyectado/
   // Real) esté activa NI del rol — el backend siempre responde a los 4 roles del módulo, solo que
-  // a Yaneth le devuelve entradas/salidas vacíos (ver AdminContCashPositionController::projected()
+  // a Asistente Administrativa le devuelve entradas/salidas vacíos (ver AdminContCashPositionController::projected()
   // — su detalle sigue vedado por REQ-521, sus totales no).
   const { data: projected, isFetching: isFetchingProjected } = useCashPositionProjected(windowDays)
   const { data: real, isFetching: isFetchingReal } = useCashPositionReal(
@@ -690,8 +690,8 @@ function CerrarArqueoModal(
 }
 
 /** REQ-528 — panel de solo lectura de arqueos ya cerrados, disponible para los 4 roles del módulo
- *  (Felix/Yaneth/Mark/Gerencia) sin importar la pestaña activa (a diferencia del Arqueo del día,
- *  que Mark/Gerencia nunca ven) — por eso vive fuera del `Card` de toggle/chips, siempre visible. */
+ *  (Contabilidad/Yaneth/Mark/Gerencia) sin importar la pestaña activa (a diferencia del Arqueo del día,
+ *  que Gerencia/Gerencia nunca ven) — por eso vive fuera del `Card` de toggle/chips, siempre visible. */
 function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, unknown>) => string }) {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
@@ -778,7 +778,7 @@ function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, u
 
 /** REQ-528/529 — detalle de solo lectura de un arqueo del historial: mismos totales/movimientos/
  *  retenciones que el arqueo activo (RN1 REQ-528 — inmutable salvo la constancia, RN4 REQ-525), más
- *  "Aprobar" (gate `puede_aprobar`, exclusivo Mark) y "Descargar resumen". */
+ *  "Aprobar" (gate `puede_aprobar`, exclusivo Gerencia) y "Descargar resumen". */
 function DetalleArqueoModal({ id, t, onClose }: { id: number; t: (key: string, opts?: Record<string, unknown>) => string; onClose: () => void }) {
   const { data: detail, isFetching } = useDailyCashCountHistoryDetail(id)
   const approveMutation = useApproveDailyCashCount()

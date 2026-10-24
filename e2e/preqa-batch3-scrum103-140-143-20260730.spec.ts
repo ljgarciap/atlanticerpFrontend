@@ -13,7 +13,7 @@ import { test, expect, type Page } from '@playwright/test'
  *   PipelineCard vinculada -> pipeline_card_id debe ser null (no originada de Pipeline).
  * - id 159 = draft de designer, sin master_client/sub_client/folio -> 0 items, 0 contactos.
  * - id 156 = draft de Vendedor Disenador Test 10 (equipo), management puede verla en scope Team.
- * - id 149 = COT-2026-0082, sent, de Idmar (equipo) -> para confirmar Editar ausente en no-draft.
+ * - id 149 = COT-2026-0082, sent, de Vendedor Disenador (equipo) -> para confirmar Editar ausente en no-draft.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -269,7 +269,7 @@ test.describe('SCRUM-143 — reabrir borrador para editar', () => {
       const res = await fetch('/api/ventas-diseno/quotes/156', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       return { status: res.status, body: await res.json() }
     })
-    console.log('QUOTE 156 (Idmar draft) as management:', JSON.stringify(raw.body).slice(0, 500))
+    console.log('QUOTE 156 (Vendedor Disenador draft) as management:', JSON.stringify(raw.body).slice(0, 500))
     expect(raw.body.document_status).toBe('draft')
     console.log('can_edit for management on teammate draft:', raw.body.can_edit)
 
@@ -280,9 +280,9 @@ test.describe('SCRUM-143 — reabrir borrador para editar', () => {
       await teamBtn.click()
       await page.waitForTimeout(800)
     }
-    // Buscamos y abrimos el draft de Idmar
+    // Buscamos y abrimos el draft de Vendedor Disenador
     const search = page.locator('input[type="text"]').first()
-    await search.fill('Annie')
+    await search.fill('Vendedor Disenador')
     await page.waitForTimeout(700)
     const row = page.locator('table tbody tr').first()
     await row.locator('button[title]').click()
@@ -303,7 +303,7 @@ test.describe('SCRUM-143 — reabrir borrador para editar', () => {
     }
   })
 
-  test('12. Cotizacion YA generada (sent, id 149, de Idmar): boton Editar NO aparece en absoluto', async ({ page }) => {
+  test('12. Cotizacion YA generada (sent, id 149, de Vendedor Disenador): boton Editar NO aparece en absoluto', async ({ page }) => {
     await login(page, MGMT_EMAIL, MGMT_PASS)
     await page.goto(`${BASE}/ventas-diseno/quotes-list`)
     await page.waitForTimeout(1000)

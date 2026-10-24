@@ -391,7 +391,7 @@
       "cuentaPago": "Account number",
       "responsable": "Responsible",
       "verPdf": "View / Print PDF",
-      "marcarIncobrable": "Mark as uncollectible",
+      "marcarIncobrable": "Gerencia as uncollectible",
       "motivoLabel": "Reason",
       "motivoPlaceholder": "Explain why this is proposed as uncollectible...",
       "motivoRequerido": "A reason is required.",
@@ -601,7 +601,7 @@
       "error": "Could not load the payment detail.",
       "verComprobante": "View payment proof",
       "verRecibo": "View receipt",
-      "marcarConfirmado": "Mark as confirmed",
+      "marcarConfirmado": "Gerencia as confirmed",
       "confirmarError": "Could not confirm the payment.",
       "saldoSinAplicar": "Client credit balance (not applied to invoices)",
       "sinFacturas": "This payment was not applied to any invoice: it is the client's credit balance.",
@@ -617,17 +617,17 @@
       "anular": {
         "boton": "Void payment",
         "titulo": "Request voiding this payment",
-        "ayuda": "Mark must approve it. Once approved its applications are reversed, the money leaves the cash position on the voiding day and the payment stays as voided in the history.",
+        "ayuda": "Gerencia must approve it. Once approved its applications are reversed, the money leaves the cash position on the voiding day and the payment stays as voided in the history.",
         "motivoLabel": "Reason for voiding",
         "motivoPlaceholder": "E.g. wrong amount, duplicate payment, wrong client...",
         "enviar": "Send request",
         "cancelar": "Cancel",
-        "enviada": "Voiding request sent: pending Mark's approval.",
+        "enviada": "Voiding request sent: pending Gerencia's approval.",
         "error": "Could not send the request.",
         "anuladoTitulo": "Payment voided",
         "anuladoDetalle": "Voided on {{fecha}}. Reason: {{motivo}}",
         "pendienteTitulo": "Voiding pending approval",
-        "pendienteDetalle": "Reason: {{motivo}}. Mark must approve or reject it.",
+        "pendienteDetalle": "Reason: {{motivo}}. Gerencia must approve or reject it.",
         "rechazadaTitulo": "Voiding request rejected",
         "rechazadaDetalle": "Rejection reason: {{motivo}}"
       },
@@ -985,7 +985,7 @@
       "editar": "✎ Edit",
       "verComprobante": "View receipt",
       "verRecibo": "View receipt",
-      "marcarConfirmado": "✓ Mark as confirmed",
+      "marcarConfirmado": "✓ Gerencia as confirmed",
       "confirmarPregunta": "Confirm that the money for this advance payment is already reflected in the bank? Once confirmed, its data can't be edited."
     }
   },
@@ -1156,7 +1156,7 @@
       "cuentaPago": "Payment account",
       "comprobanteRetencion": "Withholding receipt",
       "recordar": "Remind",
-      "marcarPagado": "Mark as paid",
+      "marcarPagado": "Gerencia as paid",
       "confirmarPago": "Confirm marking this commission as paid for {{monto}}?",
       "bloqueoPorcentajePendiente": "There's a % change pending the configured approver's approval — resolve it first.",
       "bloqueoDatosFiscales": "The architect's fiscal data is missing.",
@@ -1319,7 +1319,7 @@
     },
     "restricted": {
       "restrictedRole": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Accounting, the configured approver and Management.",
-      "dailyCount": "The Daily cash count is available only to Felix and Yaneth."
+      "dailyCount": "The Daily cash count is available only to Contabilidad and Asistente Administrativa."
     }
   },
   "cajaChica": {
@@ -1491,11 +1491,11 @@
       "anio": "Year"
     },
     "felixCommission": {
-      "title": "Commission for +90-day past-due collections — Felix",
+      "title": "Commission for +90-day past-due collections — Contabilidad",
       "subtitle": "The more past-due receivables collected, the higher the commission — live, month to date",
       "cobradoMes": "+90-day receivables collected (current month)",
       "rangoActual": "Current tier",
-      "comision": "Commission for Felix (to date)",
+      "comision": "Commission for Contabilidad (to date)",
       "tramoRango": "{{desde}} – {{hasta}} → {{pct}}%",
       "tramoDesde": "Over {{desde}} → {{pct}}%",
       "tramoMenosDe": "Under {{hasta}} → {{pct}}%",
@@ -1789,16 +1789,16 @@
     "exento": "Exempt",
     "noExento": "—",
     "exencion": {
-      "titulo": "Mark client as ITBMS-exempt",
+      "titulo": "Gerencia client as ITBMS-exempt",
       "tituloQuitar": "Remove the ITBMS exemption",
       "ayuda": "From now on, new quotes and drafts for this client carry no ITBMS and are invoiced at 0%. Confirmed quotes and issued invoices do not change.",
       "ayudaQuitar": "New quotes and drafts for this client include ITBMS again. Confirmed quotes and issued invoices do not change.",
       "documento": "Document backing the exemption",
       "documentoPlaceholder": "E.g. Resolution 201-1234 or Law 8 of 2010",
       "documentoActual": "Current document",
-      "marcar": "Mark exempt",
+      "marcar": "Gerencia exempt",
       "quitar": "Remove exemption",
-      "marcarAccion": "Mark exempt",
+      "marcarAccion": "Gerencia exempt",
       "quitarAccion": "Remove exemption",
       "cancelar": "Cancel",
       "cerrar": "Close",
@@ -1893,7 +1893,7 @@
     "devolucion": {
       "boton": "Refund",
       "titulo": "Refund money from {{etiqueta}}",
-      "ayuda": "Mark must approve it. Once approved the money leaves the chosen account or cash box today and is deducted from the client's credit balance.",
+      "ayuda": "Gerencia must approve it. Once approved the money leaves the chosen account or cash box today and is deducted from the client's credit balance.",
       "monto": "Amount to refund",
       "cuenta": "Outgoing account or cash box",
       "referencia": "Outgoing reference",
@@ -1901,14 +1901,14 @@
       "motivo": "Reason for the refund",
       "enviar": "Send request",
       "cancelar": "Cancel",
-      "enviada": "Refund request sent: pending Mark's approval.",
+      "enviada": "Refund request sent: pending Gerencia's approval.",
       "error": "Could not send the request."
     }
   },
   "solicitudesReverso": {
     "titulo": "Payment voiding requests",
     "ayudaMark": "Approve or reject. Approving reverses the payment's applications, takes the money out of the cash position today and, if an order's commission was already settled, records a deduction for the seller's next settlement.",
-    "ayudaOtros": "Pending Mark's decision.",
+    "ayudaOtros": "Pending Gerencia's decision.",
     "anular": "Void payment {{recibo}}",
     "detalle": "Requested by {{quien}} on {{fecha}}",
     "motivo": "Reason",

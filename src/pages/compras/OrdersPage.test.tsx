@@ -163,7 +163,7 @@ describe('OrdersPage — columna "Proyecto asignado" (REQ-140/146)', () => {
   })
 
   it('el link de "N proyectos" abre el modal de desglose por línea, sin navegar al detalle', async () => {
-    // SCRUM-203 (hallazgo de Daniela 2026-08-04) — antes este click reusaba el mismo destino
+    // SCRUM-203 (hallazgo de Gerencia 2026-08-04) — antes este click reusaba el mismo destino
     // que el botón "Ver" y aterrizaba en el detalle general de la orden, sin foco en el
     // desglose por proyecto. Ahora abre ProjectBreakdownModal con las líneas reales.
     mockedComprasApi.orders.list.mockResolvedValue({
@@ -256,7 +256,7 @@ describe('OrdersPage — columnas faltantes de REQ-140 (SCRUM-203)', () => {
 
 // Pre-QA 2026-08-13 (Servicios, REQ-274 RN3, SCRUM-344) — gap real encontrado en vivo: el backend
 // ya guardaba origin_module='servicios' desde que existe InsumoService::requestPurchase(), pero
-// nunca se exponía en la respuesta ni se pintaba acá — Yirena no tenía forma real de distinguir
+// nunca se exponía en la respuesta ni se pintaba acá — Lider Compras no tenía forma real de distinguir
 // una solicitud de Servicios del resto (RN3 explícita del ticket, "visible en Compras con Origen:
 // Servicios"). Corregido en el mismo dispatch: PurchaseOrderController::formatSummary() ahora
 // expone `origin_module`, y esta tabla lo pinta con OriginBadge.

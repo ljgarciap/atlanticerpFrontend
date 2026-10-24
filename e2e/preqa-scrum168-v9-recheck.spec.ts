@@ -12,7 +12,7 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8
-const WHIL_PASSWORD = WHIL // default = email, confirmado en v7/v8
+const RESTRICTED_LEVEL_PASSWORD = WHIL // default = email, confirmado en v7/v8
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   // Mismo patrón que preqa-scrum-gerencia-10tickets-20260826-v8-recheck.spec.ts (defensivo contra
@@ -34,7 +34,7 @@ async function login(page: Page, email: string, password?: string): Promise<bool
 }
 
 test('SCRUM-168 RN2 — clic en "Bajo stock sin ordenar" navega a /inventario (Compras) y filtra', async ({ page }) => {
-  const ok = await login(page, WHIL, WHIL_PASSWORD)
+  const ok = await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   expect(ok).toBeTruthy()
 
   await page.goto(`${BASE}/gerencia`)
@@ -65,7 +65,7 @@ test('SCRUM-168 RN2 — clic en "Bajo stock sin ordenar" navega a /inventario (C
 })
 
 test('SCRUM-168 RN1 — "Órdenes críticas" de Gerencia coincide con /compras/ordenes?chip=critical', async ({ page }) => {
-  const ok = await login(page, WHIL, WHIL_PASSWORD)
+  const ok = await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   expect(ok).toBeTruthy()
 
   await page.goto(`${BASE}/gerencia`)

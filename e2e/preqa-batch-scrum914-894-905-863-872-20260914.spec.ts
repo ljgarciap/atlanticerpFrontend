@@ -6,7 +6,7 @@ import { writeFileSync } from 'node:fs'
  * Pre-QA — batch 2026-09-14 contra https://dev.atlanticerp.ai (SCRUM-914, 894, 905, 863, 872).
  * NUNCA localhost/en paralelo con otro Pre-QA (ver feedback_preqa_crowdsec_no_paralelo).
  * Foco: caminos de ruptura de cada criterio de aceptación, no solo el camino feliz.
- * 2 de los 5 son rebotes de Daniela (894, 905) — foco extra en reproducir EXACTAMENTE su reclamo,
+ * 2 de los 5 son rebotes de Gerencia (894, 905) — foco extra en reproducir EXACTAMENTE su reclamo,
  * no una versión simplificada.
  */
 
@@ -39,12 +39,12 @@ function getToken(page: Page): Promise<string> {
 }
 
 // ============================================================
-// SCRUM-914 + SCRUM-894 (rebote Daniela) — Guia de Entrega: stage correcto + cantidades reales
+// SCRUM-914 + SCRUM-894 (rebote Gerencia) — Guia de Entrega: stage correcto + cantidades reales
 // Un solo flujo real de entrega parcial cubre ambos: pedido PED-2026-0004 (id 4), en Packing,
 // 3 items: PREQA-VERIFY-265 (qty_picked=10=requested), PREQA-INT-B-... (qty_picked=6, requested=10,
 // shortage sin_stock ya desde picking), QA-LED-004 (qty_picked=5=requested).
 // Entregamos: item 265 y LED completos, item INT-B a 0 (motivo sin_stock) — reproduce EXACTO el
-// reclamo de Daniela: "un producto con 0 unidades por falta de stock, otro con unidades reales".
+// reclamo de Gerencia: "un producto con 0 unidades por falta de stock, otro con unidades reales".
 // ============================================================
 
 const ORDER_ID = 4
@@ -163,7 +163,7 @@ test('SCRUM-914/894 — PDF real descargado: stage=por_despachar y mismos items 
 })
 
 // ============================================================
-// SCRUM-905 (rebote Daniela) — dropdown de cliente en Registrar Cobro ya no se recorta
+// SCRUM-905 (rebote Gerencia) — dropdown de cliente en Registrar Cobro ya no se recorta
 // ============================================================
 
 test('SCRUM-905 — buscador de cliente en Registrar cobro: dropdown visible completo, sin recorte', async ({ page }) => {
@@ -217,7 +217,7 @@ test('SCRUM-905 — buscador de cliente en Registrar cobro: dropdown visible com
     console.log('SCRUM-905 — ancestros con overflow-y (el overlay raíz fullscreen es esperado, no recorta):', JSON.stringify(clientContainerOverflow))
 
     // Aserción real: el <ul> debe estar COMPLETO dentro del viewport y no recortado — visible
-    // hasta su último <li>, que es exactamente lo que Daniela reportó roto (dropdown "chico").
+    // hasta su último <li>, que es exactamente lo que Gerencia reportó roto (dropdown "chico").
     const viewport = page.viewportSize()
     expect(box, 'debe poder leerse el bounding box del dropdown').not.toBeNull()
     if (viewport && box) {
@@ -250,9 +250,9 @@ test('SCRUM-863 — Home de Compras dice Bienvenido, no Hola', async ({ page }) 
 // ============================================================
 
 test('SCRUM-872 — Configuracion Fiscal: vaciar un campo de texto y guardar no da 422', async ({ page }) => {
-  // Configuración Fiscal es exclusiva de Mark (403 en backend para cualquier otro, ver
-  // App.tsx) — Felix (conta@) puede navegar a la ruta pero no puede editar. Password real en
-  // dev.atlanticerp.ai confirmado 2026-09-10: su propio email (ver feedback_mark_dev_password_is_email_not_static).
+  // Configuración Fiscal es exclusiva de Gerencia (403 en backend para cualquier otro, ver
+  // App.tsx) — Contabilidad (conta@) puede navegar a la ruta pero no puede editar. Password real en
+  // dev.atlanticerp.ai confirmado 2026-09-10: su propio email (ver feedback_aprobador_dev_password_is_email_not_static).
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto(`${DEV}/admin-contab/fiscal`)
   await page.waitForTimeout(2000)
@@ -325,5 +325,5 @@ test('SCRUM-872 — Configuracion Fiscal: vaciar un campo de texto y guardar no 
     await page.waitForTimeout(1500)
   }
 
-  console.log('SCRUM-872 — dato de prueba pendiente sin tocar (ATLANTIC USA CORP, decision de negocio de Mark, no de Pre-QA):', true)
+  console.log('SCRUM-872 — dato de prueba pendiente sin tocar (ATLANTIC USA CORP, decision de negocio de Gerencia, no de Pre-QA):', true)
 })

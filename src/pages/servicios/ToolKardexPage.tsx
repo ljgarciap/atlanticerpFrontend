@@ -33,9 +33,9 @@ function TipoChip({ tipo }: { tipo: ToolKardexTipo }) {
 // REQ-276 — Kardex de movimientos de herramientas. Solo lectura, sin acciones de edición/borrado.
 // Vista de apoyo, se abre en una pestaña nueva desde ToolsAndSuppliesPage vía window.open(), bajo
 // FocusedViewShell (SCRUM-359 — sin el menú de navegación general, ver App.tsx). Gate de acceso a
-// nivel de ruta (App.tsx, RequireRole) — Aaron/Gerencia/superadmin únicamente.
+// nivel de ruta (App.tsx, RequireRole) — Lider Servicios/Gerencia/superadmin únicamente.
 //
-// SCRUM-779 (rebote Daniela 2026-08-20 + decisión de Luis 2026-08-23) — columnas Cantidad/Saldo
+// SCRUM-779 (rebote Gerencia 2026-08-20 + decisión de Luis 2026-08-23) — columnas Cantidad/Saldo
 // inicial/Saldo resultante agregadas: ver docblock de `ToolKardexEntry` en types/servicios.ts para
 // la definición real de "saldo" para una herramienta serializada (unidades en Buen estado por
 // nombre) y su limitación conocida.

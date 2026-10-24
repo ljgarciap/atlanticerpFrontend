@@ -78,7 +78,7 @@ describe('InvoiceDetailModal — visor de transmisiones al PAC (SCRUM-987)', () 
     expect(screen.queryByText('adminContab:facturacion.detalle.facturacionElectronica.accion.reintentar')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-1007 — sin accion_fe (no Mark, certificada, anulada o FE apagada) no hay botón', async () => {
+  it('SCRUM-1007 — sin accion_fe (no Gerencia, certificada, anulada o FE apagada) no hay botón', async () => {
     mockedApi.invoices.detail.mockResolvedValue(makeDetail({ accion_fe: null }))
     renderModal()
     await screen.findByText('adminContab:facturacion.detalle.facturacionElectronica.rechazado')
@@ -108,7 +108,7 @@ describe('InvoiceDetailModal — visor de transmisiones al PAC (SCRUM-987)', () 
     expect(screen.queryByText(VER)).not.toBeInTheDocument()
   })
 
-  it('con el interruptor apagado (no_aplica) no hay visor aunque el actor sea Mark', async () => {
+  it('con el interruptor apagado (no_aplica) no hay visor aunque el actor sea Gerencia', async () => {
     mockedApi.invoices.detail.mockResolvedValue(makeDetail({ fe_estado: 'no_aplica' }))
     renderModal()
     await screen.findByText('adminContab:facturacion.detalle.facturacionElectronica.noAplica')

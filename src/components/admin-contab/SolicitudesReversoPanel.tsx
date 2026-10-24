@@ -12,7 +12,7 @@ function formatCurrency(value: number): string {
 }
 
 /**
- * SCRUM-1168 F4 — solicitudes de anulación de cobros pendientes de decisión. Las ven quienes manejan Cobros; solo Mark (y superadmin) pueden aprobar o
+ * SCRUM-1168 F4 — solicitudes de anulación de cobros pendientes de decisión. Las ven quienes manejan Cobros; solo Gerencia (y superadmin) pueden aprobar o
  * rechazar, y el servidor lo exige igual. Aprobar ejecuta la anulación (reversa aplicaciones, saca el dinero de caja, descuenta comisión ya liquidada);
  * rechazar exige un motivo. No se muestra nada si no hay solicitudes pendientes.
  */

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * Pre-QA — SCRUM-123 (daily 2026-07-30, Bloque C): Daniela reportó el 2026-07-23 no poder
+ * Pre-QA — SCRUM-123 (daily 2026-07-30, Bloque C): Gerencia reportó el 2026-07-23 no poder
  * elegir un contacto ya existente del Subcliente sin guardar la cotización primero
  * ("Guardá la cotización antes de agregar contactos"). El fix de SCRUM-716 (2026-07-29,
  * persistir Cliente Master/Subcliente de inmediato al seleccionarlos, no solo al guardar

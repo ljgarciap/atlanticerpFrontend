@@ -93,7 +93,7 @@ export default function CobrosPage() {
         ))}
       </div>
 
-      {/* SCRUM-1168 F4 — anulaciones pendientes de la decisión de Mark. */}
+      {/* SCRUM-1168 F4 — anulaciones pendientes de la decisión de Gerencia. */}
       <SolicitudesReversoPanel />
 
       <HistorialCobrosPanel

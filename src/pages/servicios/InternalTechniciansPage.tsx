@@ -20,17 +20,17 @@ import type { UserInfo } from '@/types/auth'
 
 type ViewMode = 'team' | 'agenda'
 
-// REQ-259 RN5 — exclusivo de Aaron/Líder de Servicios.
+// REQ-259 RN5 — exclusivo de Lider Servicios/Líder de Servicios.
 function canRegisterTechnician(role: string | undefined): boolean {
   return role === 'lider_servicios' || role === 'superadmin'
 }
 
-// REQ-292 RN5 — Aaron y Gerencia capturan/editan la comisión mensual.
+// REQ-292 RN5 — Lider Servicios y Gerencia capturan/editan la comisión mensual.
 function canManageCommission(role: string | undefined): boolean {
   return role === 'lider_servicios' || role === 'management' || role === 'superadmin'
 }
 
-// Batch 10 (REQ-258 RN8) — el resultado calculado lo ve el propio técnico o Gerencia, NUNCA Aaron
+// Batch 10 (REQ-258 RN8) — el resultado calculado lo ve el propio técnico o Gerencia, NUNCA Lider Servicios
 // (a diferencia de canManageCommission arriba, que sí incluye lider_servicios). Se evalúa por
 // técnico (no solo por rol) porque "el propio técnico" depende de cuál tarjeta es.
 function canViewCommissionResultFor(user: UserInfo | null | undefined, technician: InternalTechnician): boolean {

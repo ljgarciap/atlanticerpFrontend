@@ -390,7 +390,7 @@ describe('BodegaInventarioGeneralPage', () => {
    * SCRUM-463 (rebote de Gerencia Test 2026-08-14) — reemplaza el test viejo del candado
    * decorativo: antes Aprobar/Rechazar quedaban visibles/clicables para CUALQUIER perfil de
    * Bodega (con un candado como única señal); ahora se OCULTAN por completo cuando
-   * `can_approve` es false (el usuario actual no es Mark).
+   * `can_approve` es false (el usuario actual no es Gerencia).
    */
   it('oculta Aprobar/Rechazar por completo en filas pendiente_aprobacion cuando can_approve es false', async () => {
     mockedApi.generalCounts.list.mockResolvedValue({
@@ -413,7 +413,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 2, warehouse_id: 3, bodega: 'Merma', realizado_por: 'Jorge P.',
         estado: 'rechazada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-15T10:00:00Z',
-        motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Mark', resuelto_at: '2026-06-16T10:00:00Z',
+        motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Gerencia', resuelto_at: '2026-06-16T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -429,7 +429,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 2, warehouse_id: 3, bodega: 'Merma', realizado_por: 'Jorge P.',
         estado: 'rechazada', total_productos: 1, diferencias_encontradas: 1, fecha: '2026-06-15T10:00:00Z',
-        motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Mark', resuelto_at: '2026-06-16T10:00:00Z',
+        motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Gerencia', resuelto_at: '2026-06-16T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: '2026-06-15T12:00:00Z',
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -437,7 +437,7 @@ describe('BodegaInventarioGeneralPage', () => {
     mockedApi.generalCounts.detail.mockResolvedValue({
       id: 2, warehouse_id: 3, bodega: 'Merma', realizado_por: 'Jorge P.',
       estado: 'rechazada', total_productos: 1, diferencias_encontradas: 1, fecha: '2026-06-15T10:00:00Z',
-      motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Mark', resuelto_at: '2026-06-16T10:00:00Z',
+      motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Gerencia', resuelto_at: '2026-06-16T10:00:00Z',
       aplicado_at: null, fecha_solicitud_aprobacion: '2026-06-15T12:00:00Z',
       lines: [{
         id: 9, producto: { id: 1, reference: 'REF-1', description: 'Bombillo LED' },
@@ -458,7 +458,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
-        motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-06-29T10:00:00Z',
+        motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -466,7 +466,7 @@ describe('BodegaInventarioGeneralPage', () => {
     mockedApi.generalCounts.apply.mockResolvedValue({
       id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
       estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
-      motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-06-29T10:00:00Z',
+      motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
       aplicado_at: '2026-07-25T10:00:00Z', fecha_solicitud_aprobacion: null,
     })
 
@@ -477,15 +477,15 @@ describe('BodegaInventarioGeneralPage', () => {
     expect(await waitFor(() => mockedApi.generalCounts.apply)).toHaveBeenCalledWith(3)
   })
 
-  // SCRUM-466 (rebote de Gerencia Test 2026-08-14) — "Realizar ajuste" aparecía también para Mark
+  // SCRUM-466 (rebote de Gerencia Test 2026-08-14) — "Realizar ajuste" aparecía también para Gerencia
   // (y, por extensión, cualquier otro perfil de Bodega) — debe verse SOLO para el Líder de Bodega.
-  it('rebote 2026-08-14 — "Realizar ajuste" queda oculto para Mark (role distinto de lider_bodega)', async () => {
-    mockedUseAuthStore.mockReturnValue('management' as never) // rol de Mark
+  it('rebote 2026-08-14 — "Realizar ajuste" queda oculto para Gerencia (role distinto de lider_bodega)', async () => {
+    mockedUseAuthStore.mockReturnValue('management' as never) // rol de Gerencia
     mockedApi.generalCounts.list.mockResolvedValue({
       data: [{
         id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
-        motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-06-29T10:00:00Z',
+        motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -503,7 +503,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
-        motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-06-29T10:00:00Z',
+        motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -520,7 +520,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 4, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
-        motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-06-29T10:00:00Z',
+        motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: '2026-06-30T10:00:00Z', fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -548,7 +548,7 @@ describe('BodegaInventarioGeneralPage', () => {
       data: [{
         id: 5, warehouse_id: 6, bodega: 'Bodega Central', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 10, diferencias_encontradas: 3, fecha: '2026-07-10T10:00:00Z',
-        motivo_rechazo: null, resuelto_por: 'Mark', resuelto_at: '2026-07-11T10:00:00Z', aplicado_at: null, fecha_solicitud_aprobacion: null,
+        motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-07-11T10:00:00Z', aplicado_at: null, fecha_solicitud_aprobacion: null,
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
     })

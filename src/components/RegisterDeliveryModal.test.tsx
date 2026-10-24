@@ -22,7 +22,7 @@ let mutateMock: ReturnType<typeof vi.fn>
 function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
   return {
     id: 23, order_number: '2301', order_type: 'pedido', stage: 'packing',
-    proyecto: 'Torre Azul', cliente: 'Constructora Pacífico', vendedor: 'Mark',
+    proyecto: 'Torre Azul', cliente: 'Constructora Pacífico', vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2', picker: 'Ayudante General Bodega Test', repartidor: null,
     fecha_entrega_comprometida: '2026-08-01', is_atrasado: false, is_sin_stock: false,
     eta_proveedor: null, invoice_ready: false,

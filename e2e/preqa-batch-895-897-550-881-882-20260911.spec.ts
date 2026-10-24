@@ -10,8 +10,8 @@ import { test, expect, type Page } from '@playwright/test'
  * ticket) y AdminContInvoice/AdminContPayment PREQA550-1/2 (recibos REC-002/REC-003).
  *
  * Cuentas reales (password = email, roster CoreUserSeeder):
- *  - Felix (lider_admin_contab): contabilidad@test.com
- *  - Yaneth (asistente_administrativa): asistenteadministrativa@test.com
+ *  - Contabilidad (lider_admin_contab): contabilidad@test.com
+ *  - Asistente Administrativa (asistente_administrativa): asistenteadministrativa@test.com
  *  - Vendedor Disenador Test 2 (vendedor_disenador): vendedordisenador2@test.com
  *  - almacen (Bodega): liderbodega@test.com
  */
@@ -31,7 +31,7 @@ async function login(page: Page, email: string) {
 // ---------------------------------------------------------------------------
 // SCRUM-897 — botón "Status de Pedidos" en Facturación
 // ---------------------------------------------------------------------------
-test('SCRUM-897.1 — Felix ve el botón en Facturación, a la izquierda de Estado de cuenta', async ({ page }) => {
+test('SCRUM-897.1 — Contabilidad ve el botón en Facturación, a la izquierda de Estado de cuenta', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1200)
@@ -62,7 +62,7 @@ test('SCRUM-897.2 — click navega a la MISMA pantalla que Bodega->Pedidos->Stat
   await page.waitForTimeout(1200)
   expect(page.url()).toContain('/bodega/pedidos/status')
   await page.screenshot({ path: 'e2e/.tmp/preqa-897-02-status-page-desde-facturacion.png', fullPage: true })
-  // El pedido de fixture debe aparecer en la lista para Felix (admin_contab.view da acceso total)
+  // El pedido de fixture debe aparecer en la lista para Contabilidad (admin_contab.view da acceso total)
   await expect(page.getByText('PREQA-895')).toBeVisible({ timeout: 5000 })
 })
 
@@ -112,9 +112,9 @@ test('SCRUM-895 — modal de detalle muestra los 4 casos correctos (invariante E
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-881 — Yaneth vs Felix
+// SCRUM-881 — Asistente Administrativa vs Contabilidad
 // ---------------------------------------------------------------------------
-test('SCRUM-881.1 — Cobros: tarjetas de indicadores con valores reales para Yaneth (no guiones)', async ({ page }) => {
+test('SCRUM-881.1 — Cobros: tarjetas de indicadores con valores reales para Asistente Administrativa (no guiones)', async ({ page }) => {
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/cobros')
   await page.waitForTimeout(1500)
@@ -125,7 +125,7 @@ test('SCRUM-881.1 — Cobros: tarjetas de indicadores con valores reales para Ya
   expect(bodyText).not.toMatch(/N° de cobros\s*\n\s*-/i)
 })
 
-test('SCRUM-881.2 — Comisiones Internas: Yaneth ve la tabla completa (11+ vendedores)', async ({ page }) => {
+test('SCRUM-881.2 — Comisiones Internas: Asistente Administrativa ve la tabla completa (11+ vendedores)', async ({ page }) => {
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1500)
@@ -135,7 +135,7 @@ test('SCRUM-881.2 — Comisiones Internas: Yaneth ve la tabla completa (11+ vend
   expect(count).toBeGreaterThanOrEqual(11)
 })
 
-test('SCRUM-881.3 — Reportes: tarjeta "Comisión Felix +90 días" NO aparece para Yaneth', async ({ page }) => {
+test('SCRUM-881.3 — Reportes: tarjeta "Comisión Contabilidad +90 días" NO aparece para Asistente Administrativa', async ({ page }) => {
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/reportes')
   await page.waitForTimeout(1500)
@@ -143,7 +143,7 @@ test('SCRUM-881.3 — Reportes: tarjeta "Comisión Felix +90 días" NO aparece p
   await expect(page.getByText(/comisi[oó]n.*felix/i)).toHaveCount(0)
 })
 
-test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Felix', async ({ page }) => {
+test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Contabilidad', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
   await page.goto('/admin-contab/reportes')
   await page.waitForTimeout(1500)
@@ -152,9 +152,9 @@ test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Felix', async ({ p
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-882 — vendedor_disenador (Neil) no ve Admin&Cont salvo Comisiones Internas
+// SCRUM-882 — vendedor_disenador (Vendedor Disenador) no ve Admin&Cont salvo Comisiones Internas
 // ---------------------------------------------------------------------------
-test('SCRUM-882.1 — Neil: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
+test('SCRUM-882.1 — Vendedor Disenador: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/preqa-882-01-sidebar-neil-inicial.png', fullPage: true })
@@ -175,11 +175,11 @@ test('SCRUM-882.1 — Neil: sidebar NO muestra Inicio/Facturación/Movimientos/E
 
   const bodyText = await page.locator('body').innerText()
   for (const label of ['Facturación', 'Movimientos', 'Comisiones Externas', 'Arqueo de Caja', 'Cuentas Bancarias', 'Caja chica', 'Reportes']) {
-    expect(bodyText.includes(label), `no debería verse "${label}" en el sidebar de Neil`).toBeFalsy()
+    expect(bodyText.includes(label), `no debería verse "${label}" en el sidebar de Vendedor Disenador`).toBeFalsy()
   }
 })
 
-test('SCRUM-882.2 — Neil SIGUE viendo Comisiones Internas (solo su fila)', async ({ page }) => {
+test('SCRUM-882.2 — Vendedor Disenador SIGUE viendo Comisiones Internas (solo su fila)', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com')
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1200)
@@ -203,7 +203,7 @@ const HIDDEN_ROUTES = [
 ]
 
 for (const route of HIDDEN_ROUTES) {
-  test(`SCRUM-882.3 — Neil por URL directa a ${route} queda bloqueado (no shell vacío)`, async ({ page }) => {
+  test(`SCRUM-882.3 — Vendedor Disenador por URL directa a ${route} queda bloqueado (no shell vacío)`, async ({ page }) => {
     await login(page, 'vendedordisenador2@test.com')
     await page.goto(route)
     await page.waitForTimeout(1000)
@@ -216,7 +216,7 @@ for (const route of HIDDEN_ROUTES) {
     // "sin acceso". Falla si el body está prácticamente vacío (shell roto).
     expect(bodyText.trim().length, `shell vacío en ${route}`).toBeGreaterThan(20)
     expect(page.url().includes(route) && bodyText.match(/acceso restringido|no autorizado|no tienes permiso/i) === null,
-      `Neil llegó al contenido real de ${route} sin bloqueo`
+      `Vendedor Disenador llegó al contenido real de ${route} sin bloqueo`
     ).toBeFalsy()
   })
 }

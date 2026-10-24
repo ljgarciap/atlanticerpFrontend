@@ -109,7 +109,7 @@
     "subClientTaxIdDv": "DV",
     "reactivate": "Reactivate (move to Lead)",
     "moveToNext": "Move to {{stage}}",
-    "markAsLost": "Mark as Lost",
+    "markAsLost": "Gerencia as Lost",
     "createQuote": "Create quote",
     "viewProjectQuotes": "View quotes for this project",
     "stageChangeError": "Could not move the card to a new stage.",
@@ -441,7 +441,7 @@
       "contribuyente": "Taxpayer (with tax ID)",
       "consumidorFinal": "Final consumer",
       "consumidorFinalAyuda": "Invoiced as CONSUMIDOR FINAL, with no tax ID or check digit. The internal PDF keeps the customer's name and says so; the fiscal printed version is issued by the authorized provider (PAC).",
-      "soloMarkFelix": "Only Mark and Felix can mark a customer as Final consumer."
+      "soloMarkFelix": "Only Gerencia and Contabilidad can mark a customer as Final consumer."
     }
   },
   "architects": {
@@ -720,7 +720,7 @@
       "percent": "%",
       "commission": "Commission",
       "status": "Status",
-      "markPaid": "Mark as paid",
+      "markPaid": "Gerencia as paid",
       "statusPaid": "Paid",
       "statusPending": "Pending",
       "empty": "No closed commissions yet"

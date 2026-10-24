@@ -78,7 +78,7 @@ function card(overrides: Partial<OrderCard> = {}): OrderCard {
     stage: 'asignado',
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
-    vendedor: 'Mark',
+    vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: null,
@@ -135,12 +135,12 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedUseAssistantLoad.mockReturnValue({ data: { data: ASSISTANTS } } as ReturnType<typeof useAssistantLoad>)
   mockedUseOrderSellers.mockReturnValue({
-    data: [{ id: 1, name: 'Mark' }, { id: 2, name: 'Felix' }],
+    data: [{ id: 1, name: 'Gerencia' }, { id: 2, name: 'Contabilidad' }],
   } as ReturnType<typeof useOrderSellers>)
   mockedUseOrdersBoardOptions.mockReturnValue({
     data: boardResponse([
-      card({ id: 1, cliente: 'Constructora Pacífico', vendedor: 'Mark' }),
-      card({ id: 2, cliente: 'Grupo Delta', vendedor: 'Felix' }),
+      card({ id: 1, cliente: 'Constructora Pacífico', vendedor: 'Gerencia' }),
+      card({ id: 2, cliente: 'Grupo Delta', vendedor: 'Contabilidad' }),
     ]),
   } as ReturnType<typeof useOrdersBoardOptions>)
   mockedUseTeamMembersByRole.mockReturnValue({ data: { data: [] } } as unknown as ReturnType<typeof useTeamMembersByRole>)
@@ -187,7 +187,7 @@ describe('PedidosPage', () => {
     expect(screen.getByTestId('order-card-3')).toBeInTheDocument()
   })
 
-  // SCRUM-860 (rebote de Daniela, 2026-09-09) — pedido junto con la vista de tabla, que mezcla
+  // SCRUM-860 (rebote de Gerencia, 2026-09-09) — pedido junto con la vista de tabla, que mezcla
   // las 7 etapas en una sola lista sin la separación visual en columnas que ya tiene el tablero.
   // Client-side sobre `cards` (mismo criterio que el agrupado por etapa del tablero), no manda
   // ningún filtro nuevo al backend.
@@ -249,8 +249,8 @@ describe('PedidosPage', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('bodega:pedidos.filters.seller'))
-    expect(await screen.findByText('Felix')).toBeInTheDocument()
-    fireEvent.click(screen.getByText('Felix'))
+    expect(await screen.findByText('Contabilidad')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Contabilidad'))
 
     const lastCallArgs = mockedUseOrdersBoard.mock.calls[mockedUseOrdersBoard.mock.calls.length - 1]?.[0]
     expect(lastCallArgs).toMatchObject({ seller_ids: [2] })

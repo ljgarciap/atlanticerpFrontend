@@ -27,7 +27,7 @@ vi.mock('@/api/bodegaApi', () => ({
   },
 }))
 
-// SCRUM-458 — "Mark" (`compras_settings.primary_approver_user_id`) es un concepto compartido entre
+// SCRUM-458 — "Gerencia" (`compras_settings.primary_approver_user_id`) es un concepto compartido entre
 // Compras y Bodega (mismo patrón ya probado en PurchaseOrderPaymentsPanel.test.tsx).
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: { settings: { get: vi.fn() } },
@@ -384,9 +384,9 @@ describe('BodegasPage', () => {
       { id: 5, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro de cristal' }, bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: MOTIVO_LARGO, solicitado_por: 'Jorge P.', fecha: '2026-07-24T10:00:00Z', estado: 'pendiente' as const, motivo_rechazo: null, resuelto_por: null },
       { id: 6, producto: { id: 2, reference: 'NORDIC-40', description: 'Lámpara colgante' }, bodega_origen: 'Bodega Central', bodega_destino: 'Showroom',
-        cantidad: 2, motivo: 'Exhibición', solicitado_por: 'Ana R.', fecha: '2026-07-23T09:00:00Z', estado: 'aprobada' as const, motivo_rechazo: null, resuelto_por: 'Mark B.' },
+        cantidad: 2, motivo: 'Exhibición', solicitado_por: 'Ana R.', fecha: '2026-07-23T09:00:00Z', estado: 'aprobada' as const, motivo_rechazo: null, resuelto_por: 'Gerencia B.' },
       { id: 7, producto: { id: 3, reference: 'SPOT-9', description: 'Spot magnético' }, bodega_origen: 'Merma', bodega_destino: 'Bodega Central',
-        cantidad: 1, motivo: 'Corrección', solicitado_por: 'Luis G.', fecha: '2026-07-22T08:00:00Z', estado: 'rechazada' as const, motivo_rechazo: 'No hay espacio en destino', resuelto_por: 'Mark B.' },
+        cantidad: 1, motivo: 'Corrección', solicitado_por: 'Luis G.', fecha: '2026-07-22T08:00:00Z', estado: 'rechazada' as const, motivo_rechazo: 'No hay espacio en destino', resuelto_por: 'Gerencia B.' },
     ]
     // El badge de estado traduce con el namespace aparte (`useTranslation('bodega')`): su texto en el mock no lleva el prefijo `bodega:`.
     const k = 'bodega:warehouses.relocationRequests'
@@ -432,7 +432,7 @@ describe('BodegasPage', () => {
       const dentro = within(await screen.findByTestId('relocation-detail-modal'))
       expect(dentro.getByText('warehouses.relocationRequests.status.rechazada')).toBeInTheDocument()
       expect(dentro.getByText(`${k}.detailModal.resolvedBy`)).toBeInTheDocument()
-      expect(dentro.getByText('Mark B.')).toBeInTheDocument()
+      expect(dentro.getByText('Gerencia B.')).toBeInTheDocument()
       expect(dentro.getByText(`${k}.detailModal.rejectionReason`)).toBeInTheDocument()
       expect(dentro.getByText('No hay espacio en destino')).toBeInTheDocument()
     })
@@ -448,7 +448,7 @@ describe('BodegasPage', () => {
       expect(dentro.queryByText(`${k}.detailModal.rejectionReason`)).not.toBeInTheDocument()
     })
 
-    it('abrir y cerrar el detalle no aprueba ni rechaza nada y deja Aprobar/Rechazar intactos para Mark', async () => {
+    it('abrir y cerrar el detalle no aprueba ni rechaza nada y deja Aprobar/Rechazar intactos para Gerencia', async () => {
       renderPage()
       fireEvent.click(await screen.findByText(`${k}.openButton`))
       fireEvent.click((await screen.findAllByText(`${k}.actions.viewDetail`))[0])
@@ -467,7 +467,7 @@ describe('BodegasPage', () => {
       await waitFor(() => expect(mockedBodegaApi.relocations.approve).toHaveBeenCalledWith(5))
     })
 
-    it('quien no es Mark ve el detalle aunque Aprobar/Rechazar queden ocultos', async () => {
+    it('quien no es Gerencia ve el detalle aunque Aprobar/Rechazar queden ocultos', async () => {
       mockedComprasApi.settings.get.mockResolvedValue({ primary_approver_user_id: 99 } as never)
       renderPage()
       fireEvent.click(await screen.findByText(`${k}.openButton`))
@@ -480,9 +480,9 @@ describe('BodegasPage', () => {
   })
 
   // SCRUM-458 (rebote de Gerencia Test 2026-08-13) — Aprobar/Rechazar quedaban visibles para
-  // CUALQUIER perfil de Bodega (ej. Esteban, Líder de Bodega), aunque el backend ya bloqueaba con
-  // 403. Ahora deben OCULTARSE (no solo deshabilitarse) para quien no es Mark.
-  it('rebote 2026-08-13 — Aprobar/Rechazar quedan ocultos para un perfil de Bodega que no es Mark', async () => {
+  // CUALQUIER perfil de Bodega (ej. Lider Bodega, Líder de Bodega), aunque el backend ya bloqueaba con
+  // 403. Ahora deben OCULTARSE (no solo deshabilitarse) para quien no es Gerencia.
+  it('rebote 2026-08-13 — Aprobar/Rechazar quedan ocultos para un perfil de Bodega que no es Gerencia', async () => {
     mockedBodegaApi.warehouses.list.mockResolvedValue({ data: WAREHOUSES })
     mockedBodegaApi.warehouses.show.mockResolvedValue(detailResponse())
     mockedBodegaApi.relocations.list.mockResolvedValue({
@@ -495,7 +495,7 @@ describe('BodegasPage', () => {
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
-    // Mark es el usuario 99 — el actor logueado (mockedUseAuthStore, default id 1) no lo es.
+    // Gerencia es el usuario 99 — el actor logueado (mockedUseAuthStore, default id 1) no lo es.
     mockedComprasApi.settings.get.mockResolvedValue({ primary_approver_user_id: 99 } as never)
 
     renderPage()
@@ -507,7 +507,7 @@ describe('BodegasPage', () => {
     expect(screen.queryByText('bodega:warehouses.relocationRequests.actions.reject')).not.toBeInTheDocument()
   })
 
-  it('rebote 2026-08-13 — Aprobar/Rechazar siguen visibles para el actor que SÍ es Mark', async () => {
+  it('rebote 2026-08-13 — Aprobar/Rechazar siguen visibles para el actor que SÍ es Gerencia', async () => {
     mockedBodegaApi.warehouses.list.mockResolvedValue({ data: WAREHOUSES })
     mockedBodegaApi.warehouses.show.mockResolvedValue(detailResponse())
     mockedBodegaApi.relocations.list.mockResolvedValue({
@@ -542,7 +542,7 @@ describe('BodegasPage', () => {
         bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
         fecha: '2026-07-24T10:00:00Z', estado: 'rechazada',
-        motivo_rechazo: 'No hay espacio disponible en Merma esta semana.', resuelto_por: 'Mark',
+        motivo_rechazo: 'No hay espacio disponible en Merma esta semana.', resuelto_por: 'Gerencia',
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })

@@ -6,7 +6,7 @@ import { adminContabApi } from '@/api/adminContabApi'
 import type { ArchitectCommissionProject, ArchitectCommissionRow } from '@/types/adminContab'
 
 // Batch 17 (SCRUM-591→596, REQ-514→519) — modal de detalle por proyecto. Cubre: propuesta de %
-// (REQ-516 RN3), decisión de Mark (RN4), cadena de bloqueo de "Marcar como pagado" (REQ-515 RN2),
+// (REQ-516 RN3), decisión de Gerencia (RN4), cadena de bloqueo de "Marcar como pagado" (REQ-515 RN2),
 // comprobante de retención gateado por régimen (REQ-514 RN1), recordatorio (REQ-518).
 
 vi.mock('react-i18next', () => ({
@@ -98,12 +98,12 @@ describe('ArchitectCommissionDetailModal', () => {
     ))
   })
 
-  it('REQ-516 RN4 — sin permiso de Mark, no muestra Aprobar/Rechazar aunque haya % pendiente', () => {
+  it('REQ-516 RN4 — sin permiso de Gerencia, no muestra Aprobar/Rechazar aunque haya % pendiente', () => {
     renderModal({ project: { porcentaje_pendiente: 15, porcentaje_pendiente_motivo: 'x' }, puedeDecidirPorcentaje: false })
     expect(screen.queryByText('comisionesExternas.detalleModal.aprobar')).not.toBeInTheDocument()
   })
 
-  it('REQ-516 RN4 — Mark aprueba el % pendiente', async () => {
+  it('REQ-516 RN4 — Gerencia aprueba el % pendiente', async () => {
     mockedApi.commissionsExternal.decidePercent.mockResolvedValue({ porcentaje_aprobado: 15 })
     renderModal({ project: { porcentaje_pendiente: 15, porcentaje_pendiente_motivo: 'x' }, puedeDecidirPorcentaje: true })
 
@@ -114,7 +114,7 @@ describe('ArchitectCommissionDetailModal', () => {
     ))
   })
 
-  it('REQ-516 RN4 — Mark rechaza exigiendo motivo antes de confirmar', async () => {
+  it('REQ-516 RN4 — Gerencia rechaza exigiendo motivo antes de confirmar', async () => {
     mockedApi.commissionsExternal.decidePercent.mockResolvedValue({ porcentaje_aprobado: null })
     renderModal({ project: { porcentaje_pendiente: 15, porcentaje_pendiente_motivo: 'x' }, puedeDecidirPorcentaje: true })
 

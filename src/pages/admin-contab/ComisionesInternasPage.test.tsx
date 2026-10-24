@@ -80,7 +80,7 @@ function makeOrder(overrides: Partial<CommissionOrder> = {}): CommissionOrder {
 
 function makeVendorSummary(overrides: Partial<CommissionVendorSummary> = {}): CommissionVendorSummary {
   return {
-    vendedor_id: 1, vendedor_nombre: 'Kayra Estrada', total_pedidos_mes: 6600,
+    vendedor_id: 1, vendedor_nombre: 'Vendedor Disenador', total_pedidos_mes: 6600,
     porcentaje: 1.5, porcentaje_fijo: true, pagada: 132, por_pagar: 0, pendiente_cobro: 0,
     total_nota_credito: 0, groups: [],
     ...overrides,
@@ -104,7 +104,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   } as UserInfo
 }
 
-// "Kayra Estrada" aparece tanto en el <option> del selector de vendedor como en la fila de la
+// "Vendedor Disenador" aparece tanto en el <option> del selector de vendedor como en la fila de la
 // tabla — acá se apunta siempre a la celda de la tabla (el <option> no dispara onToggle).
 async function clickVendorRow(nombre: string) {
   const matches = await screen.findAllByText(nombre)
@@ -127,7 +127,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary())
-  mockedApi.commissionsInternal.vendorOptions.mockResolvedValue([{ id: 1, nombre: 'Kayra Estrada' } as CommissionVendorOption])
+  mockedApi.commissionsInternal.vendorOptions.mockResolvedValue([{ id: 1, nombre: 'Vendedor Disenador' } as CommissionVendorOption])
   mockedApi.commissionsInternal.tiers.list.mockResolvedValue(makeTiers())
   mockedStore.mockReturnValue({ user: makeUser() } as ReturnType<typeof useAuthStore>)
 })
@@ -161,12 +161,12 @@ describe('ComisionesInternasPage — REQ-498 tabla de tramos', () => {
   })
 
   // Regresión de Pre-QA/Visual Review (2026-08-25): antes se gateaba con `admin_contab.edit`,
-  // que Felix también tiene sin ser Mark — veía "Agregar tramo" y el guardado le devolvía 403
+  // que Contabilidad también tiene sin ser Gerencia — veía "Agregar tramo" y el guardado le devolvía 403
   // (`primary_approver_only` en el backend). `puede_editar_tramos` es el cómputo server-side dependiente del
   // actor (`current_user_id === primary_approver_user_id`, mismo criterio que
   // `puede_decidir_incobrable` en Facturación) — el frontend nunca debe volver a decidir esto
   // por su cuenta vía un flag de módulo genérico.
-  it('Felix (admin_contab.edit=true pero no es Mark) NO ve "Agregar tramo"', async () => {
+  it('Contabilidad (admin_contab.edit=true pero no es Gerencia) NO ve "Agregar tramo"', async () => {
     mockedStore.mockReturnValue({
       user: makeUser({ modules: { admin_contab: { view: true, view_team: true, edit: true, approve: false } } }),
     } as ReturnType<typeof useAuthStore>)
@@ -177,7 +177,7 @@ describe('ComisionesInternasPage — REQ-498 tabla de tramos', () => {
     expect(screen.queryByText('adminContab:comisionesInternas.tramos.agregar')).not.toBeInTheDocument()
   })
 
-  it('Mark (puede_editar_tramos=true) SÍ ve "Agregar tramo"', async () => {
+  it('Gerencia (puede_editar_tramos=true) SÍ ve "Agregar tramo"', async () => {
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ puede_editar_tramos: true }))
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verTramos'))
@@ -197,7 +197,7 @@ describe('ComisionesInternasPage — scoping view vs view_team (REQ-575/577)', (
     expect(mockedApi.commissionsInternal.vendorOptions).not.toHaveBeenCalled()
   })
 
-  it('Felix/Mark/Gerencia (view_team) sí ven el botón de exportar', async () => {
+  it('Contabilidad/Mark/Gerencia (view_team) sí ven el botón de exportar', async () => {
     renderPage()
     expect(await screen.findByText('adminContab:comisionesInternas.exportar.label')).toBeInTheDocument()
   })
@@ -213,7 +213,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-503 notas de crédito', () =>
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     expect(await screen.findByText(/-.*200\.00 \(NC-0071\)/)).toBeInTheDocument()
   })
 
@@ -223,7 +223,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-503 notas de crédito', () =>
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     await screen.findByText('PED-0001')
     // La columna "sin dato" (—) aparece más de una vez en la fila (factura/fecha ya usan el
     // mismo placeholder) — solo confirmamos que la referencia de NC nunca se renderiza.
@@ -241,7 +241,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-504/505 arrastre agrupado por
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     await screen.findByText('PED-0001')
     await screen.findByText('PED-0002')
     // Solo el grupo arrastrado lleva la nota "arrastrado de un mes ya cerrado...".
@@ -261,7 +261,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-506 proyectos compartidos', (
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     expect(await screen.findByText(/Vendedor Disenador Test 2/)).toBeInTheDocument()
     expect(screen.getByText(/20,000\.00/)).toBeInTheDocument()
   })
@@ -270,7 +270,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-506 proyectos compartidos', (
 describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => {
   function makeStatement(overrides: Partial<CommissionAccountStatement> = {}): CommissionAccountStatement {
     return {
-      vendedor_id: 1, vendedor_nombre: 'Kayra Estrada', mes: '2026-08', mes_cerrado: false,
+      vendedor_id: 1, vendedor_nombre: 'Vendedor Disenador', mes: '2026-08', mes_cerrado: false,
       porcentaje: 1.5, porcentaje_fijo: false, total_pedidos_mes: 6600,
       descuento_nota_credito: 0, pagada: 132, por_pagar: 0, pendiente_cobro: 0,
       groups: [{ mes: '2026-08', porcentaje: 1.5, porcentaje_fijo: false, pedidos: [makeOrder()] }],
@@ -286,7 +286,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => 
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     mockedApi.commissionsInternal.accountStatement.mockResolvedValue(makeStatement())
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verEstadoCuenta'))
     await screen.findByText('adminContab:comisionesInternas.estadoCuenta.title')
     expect(mockedApi.commissionsInternal.accountStatement).toHaveBeenCalledWith(1, currentMonthKey())
@@ -299,7 +299,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => 
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     mockedApi.commissionsInternal.accountStatement.mockResolvedValue(makeStatement({ mes_cerrado: true }))
     renderPage()
-    await clickVendorRow('Kayra Estrada')
+    await clickVendorRow('Vendedor Disenador')
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verEstadoCuenta'))
     await screen.findByText('adminContab:comisionesInternas.estadoCuenta.title')
     const modal = within(screen.getByTestId('account-statement-modal'))

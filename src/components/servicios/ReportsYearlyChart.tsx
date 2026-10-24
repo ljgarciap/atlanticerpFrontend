@@ -62,7 +62,7 @@ export default function ReportsYearlyChart({ year }: Props) {
             {months.map(mes => {
               const item  = byMonth.get(mes)
               const label = new Date(year, mes - 1, 1).toLocaleDateString(i18n.language, { month: 'short' })
-              // SCRUM-354 (rebote Daniela 2026-08-20) — un mes sin ningún servicio registrado
+              // SCRUM-354 (rebote Gerencia 2026-08-20) — un mes sin ningún servicio registrado
               // mostraba "0 0 0 0" y un total "0" en las 4 categorías, saturando la grilla sin
               // aportar información. Ahora solo se listan los tipos con cantidad > 0 (número +
               // barra); si NINGÚN tipo tiene datos, el mes queda en blanco (solo la etiqueta del

@@ -30,13 +30,13 @@ async function login(page: Page, email: string) {
 }
 
 test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () => {
-  test('Vendedor (Neil) ve solo sus propios proyectos, sin toggle ni filtro Responsable', async ({ page }) => {
+  test('Vendedor (Vendedor Disenador) ve solo sus propios proyectos, sin toggle ni filtro Responsable', async ({ page }) => {
     await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
     // Solo sus 2 tarjetas sembradas (Torre Delta Fase 1 / Lobby Costa Bella), nunca las de
-    // Vanessa o Daniela.
+    // Vendedor Disenador o Gerencia.
     await expect(page.getByText('[DEMO] Torre Delta Fase 1')).toBeVisible()
     await expect(page.getByText('[DEMO] Lobby Costa Bella')).toBeVisible()
     await expect(page.getByText('[DEMO] Amenidades Delta')).not.toBeVisible()
@@ -48,7 +48,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
     await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/01-neil-solo-lo-suyo.png', fullPage: true })
   })
 
-  test('Gerencia (Daniela) ve el toggle Inicio/Equipo y el filtro Responsable funcional', async ({ page }) => {
+  test('Gerencia (Gerencia) ve el toggle Inicio/Equipo y el filtro Responsable funcional', async ({ page }) => {
     await login(page, 'gerencia@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
@@ -58,7 +58,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
     await teamToggle.click()
     await page.waitForTimeout(600)
 
-    // En "Equipo" ve proyectos de Neil, Vanessa y el owner demo — no solo los suyos.
+    // En "Equipo" ve proyectos de Vendedor Disenador, Vendedor Disenador y el owner demo — no solo los suyos.
     // (celdas de tabla, no las <option> del selector de Responsable, que también matchean por texto)
     await expect(page.getByRole('cell', { name: 'Vendedor Disenador Test 2' }).first()).toBeVisible()
     await expect(page.getByRole('cell', { name: 'Vendedor Disenador Test 4' })).toBeVisible()
@@ -110,7 +110,7 @@ test.describe('SCRUM-692 — click en fila navega a Pipeline con highlight', () 
 })
 
 test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas exactas', () => {
-  test('exportar con scope Mías (Neil) descarga solo sus filas, 10 columnas sin RUC/teléfono', async ({ page }) => {
+  test('exportar con scope Mías (Vendedor Disenador) descarga solo sus filas, 10 columnas sin RUC/teléfono', async ({ page }) => {
     await login(page, 'vendedordisenador2@test.com')
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
@@ -132,7 +132,7 @@ test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas e
       'Proyecto', 'Cliente', 'Etapa', 'Etiqueta', 'Responsable',
       'Valor', 'Superficie trabajada', 'Días en etapa', 'Fecha de entrega', 'Archivos',
     ])
-    // Solo las filas de Neil — nunca "Amenidades Delta" (de Daniela/Vanessa).
+    // Solo las filas de Vendedor Disenador — nunca "Amenidades Delta" (de Gerencia/Vanessa).
     expect(content).not.toContain('Amenidades Delta')
     expect(content).not.toContain('RUC')
     expect(content).not.toContain('Teléfono')

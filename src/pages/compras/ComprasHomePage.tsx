@@ -137,7 +137,7 @@ export default function ComprasHomePage() {
     <>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
-          {/* SCRUM-175 — Daniela: el saludo debe ser el título principal, sin "Inicio" aparte. */}
+          {/* SCRUM-175 — Gerencia: el saludo debe ser el título principal, sin "Inicio" aparte. */}
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             {t('compras:home.greeting', { name: firstNameOnly(user?.first_name) })}
           </h1>
@@ -157,7 +157,7 @@ export default function ComprasHomePage() {
         </div>
       </div>
 
-      {/* SCRUM-175 — Daniela (2026-08-04): en el mockup "Resumen del mes" comparte la primera
+      {/* SCRUM-175 — Gerencia (2026-08-04): en el mockup "Resumen del mes" comparte la primera
           fila con "Mi calendario", y la segunda fila es "Pendientes" + "Órdenes críticas". Antes
           "Resumen del mes" ocupaba la fila 1 completa (lg:col-span-2) sola, lo que empujaba
           "Órdenes críticas" a la fila 3 sin su compañera de fila (el auto-placement de grid no

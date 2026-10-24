@@ -97,7 +97,7 @@ function order(overrides: Partial<OrderCard> = {}): OrderCard {
     stage: 'asignado',
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
-    vendedor: 'Mark',
+    vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: null,

@@ -36,7 +36,7 @@ function SummaryField({ label, children }: { label: string; children: React.Reac
 
 /**
  * Pre-QA en vivo contra dev.atlanticerp.ai (2026-07-17), hallazgo nuevo propio del fix de SCRUM-206: el
- * 403 de "Solo Mark puede aprobar esta orden" se disparaba correctamente pero la UI no mostraba
+ * 403 de "Solo Gerencia puede aprobar esta orden" se disparaba correctamente pero la UI no mostraba
  * nada — el botón "Aprobar orden" simplemente no hacía nada visible, sin este gate previo nunca
  * fallaba para un usuario normal con compras.approve, así que este camino de error no existía.
  */

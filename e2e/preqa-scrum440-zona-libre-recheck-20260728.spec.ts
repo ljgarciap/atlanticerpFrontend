@@ -2,17 +2,17 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * SCRUM-440 (REQ-370) — Pre-QA re-check 2026-07-28, "Ciclo de vida completo de una orden Zona
- * Libre". Re-abierto por marly (2026-07-25/26): Yirena (lidercompras@test.com,
+ * Libre". Re-abierto por marly (2026-07-25/26): Lider Compras (lidercompras@test.com,
  * lider_compras) no podía entrar a /bodega/ordenes-zona-libre (la redirigía al dashboard) — sin
  * acceso, no podía ejecutar el Escenario 2 (aprobación) desde la UI.
  *
- * Backend Dev (commit cb0f413, 2026-07-28) agregó `bodega.read` a extra_permissions de Yirena en
+ * Backend Dev (commit cb0f413, 2026-07-28) agregó `bodega.read` a extra_permissions de Lider Compras en
  * SpecialPermissionSeeder.php — mismo mecanismo que sus otros 2 grants puntuales
  * (compras.settings.configure, compras.zona-libre.approve). Efecto secundario ACEPTADO por Luis:
- * Yirena ahora ve el resto del menú de Bodega en su Sidebar, no solo Zona Libre.
+ * Lider Compras ahora ve el resto del menú de Bodega en su Sidebar, no solo Zona Libre.
  *
  * Este re-check confirma en vivo:
- *  1. Yirena YA puede entrar a /bodega/ordenes-zona-libre (ya no la redirige).
+ *  1. Lider Compras YA puede entrar a /bodega/ordenes-zona-libre (ya no la redirige).
  *  2. Ve la bandeja de órdenes pendientes.
  *  3. Efecto secundario esperado: ve el resto del menú de Bodega en el Sidebar.
  *
@@ -22,11 +22,11 @@ import { test, expect, type Page } from '@playwright/test'
  * "rechazada" → link Ver motivo, "aprobada" → texto "sigue el flujo normal" — NINGUNO de los 3
  * renderiza un botón Aprobar/Rechazar, para NINGÚN usuario, independientemente del permiso que
  * tenga. El propio docblock del componente lo documenta: "bandeja de seguimiento SOLO DE LECTURA
- * ... La acción de aprobar/rechazar es de Yirena (Compras), fuera de alcance de este batch." No
+ * ... La acción de aprobar/rechazar es de Lider Compras (Compras), fuera de alcance de este batch." No
  * existe tampoco ninguna pantalla del lado de Compras (grep completo de src/ sin resultados para
  * cualquier wiring de approve/reject de zona-libre-requests). El backend expone
  * POST /compras/zona-libre/requests/{id}/approve|reject (routes/compras.php, permiso
- * compras.zona-libre.approve) y Yirena SÍ tiene el permiso — pero no hay ningún botón en toda la
+ * compras.zona-libre.approve) y Lider Compras SÍ tiene el permiso — pero no hay ningún botón en toda la
  * SPA que lo invoque. Por eso el Escenario 2 (y el "rechazar con motivo" desde la UI) siguen sin
  * poder verificarse — es exactamente el mismo hueco que marly reportó el 2026-07-25/26, el fix de
  * hoy solo resolvió la mitad (acceso), no la acción en sí.
@@ -52,8 +52,8 @@ async function login(page: Page, email: string, password: string) {
   await page.waitForTimeout(1500)
 }
 
-test.describe('SCRUM-440 — Yirena YA puede entrar a la bandeja (fix cb0f413)', () => {
-  test('Yirena entra a /bodega/ordenes-zona-libre sin ser redirigida al dashboard', async ({ page }) => {
+test.describe('SCRUM-440 — Lider Compras YA puede entrar a la bandeja (fix cb0f413)', () => {
+  test('Lider Compras entra a /bodega/ordenes-zona-libre sin ser redirigida al dashboard', async ({ page }) => {
     await login(page, YIRENA_EMAIL, YIRENA_PASS)
     await page.goto(`${BASE}/bodega/ordenes-zona-libre`)
     await page.waitForTimeout(1500)
@@ -64,12 +64,12 @@ test.describe('SCRUM-440 — Yirena YA puede entrar a la bandeja (fix cb0f413)',
     await page.screenshot({ path: 'e2e/.tmp/preqa-scrum440-yirena-bandeja.png' })
   })
 
-  test('efecto secundario aceptado — Yirena ve el resto del menú de Bodega en el Sidebar, no solo Zona Libre', async ({ page }) => {
+  test('efecto secundario aceptado — Lider Compras ve el resto del menú de Bodega en el Sidebar, no solo Zona Libre', async ({ page }) => {
     await login(page, YIRENA_EMAIL, YIRENA_PASS)
     await page.goto(`${BASE}/bodega/home`)
     await page.waitForTimeout(1500)
 
-    // bodega.read gatea TODAS las rutas de Bodega a nivel de ruta — si Yirena entra a
+    // bodega.read gatea TODAS las rutas de Bodega a nivel de ruta — si Lider Compras entra a
     // /bodega/ordenes-zona-libre, por el mismo mecanismo debe poder entrar a /bodega/home también.
     expect(page.url()).toContain('/bodega/home')
 
@@ -80,7 +80,7 @@ test.describe('SCRUM-440 — Yirena YA puede entrar a la bandeja (fix cb0f413)',
 })
 
 test.describe('SCRUM-440 — HALLAZGO: no existe botón Aprobar/Rechazar en ninguna parte de la SPA', () => {
-  test('CRÍTICO — en la bandeja, Yirena NO tiene botón Aprobar/Rechazar en ninguna fila (ningún estado)', async ({ page }) => {
+  test('CRÍTICO — en la bandeja, Lider Compras NO tiene botón Aprobar/Rechazar en ninguna fila (ningún estado)', async ({ page }) => {
     await login(page, YIRENA_EMAIL, YIRENA_PASS)
     await page.goto(`${BASE}/bodega/ordenes-zona-libre`)
     await page.waitForTimeout(1500)

@@ -22,7 +22,7 @@ import { test, expect, type Page } from '@playwright/test'
  * antes de navegar por "Técnicos".
  *
  * Cuenta real (password = email, ver memory/feedback_testing_uses_real_users_not_demo.md):
- *  - liderservicios@test.com (lider_servicios, Aaron) — acceso completo a Servicios.
+ *  - liderservicios@test.com (lider_servicios, Lider Servicios) — acceso completo a Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 

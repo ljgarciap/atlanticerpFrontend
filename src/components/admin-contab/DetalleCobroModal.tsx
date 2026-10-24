@@ -40,7 +40,7 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
   const downloadReceipt = useDownloadPaymentReceipt()
   const confirmMutation  = useConfirmPayment()
   const previewMutation  = useConfirmPaymentPreview()
-  // SCRUM-1168 F4 — pedir la anulación del cobro (la decide Mark): motivo obligatorio.
+  // SCRUM-1168 F4 — pedir la anulación del cobro (la decide Gerencia): motivo obligatorio.
   const voidMutation = useRequestPaymentVoid()
   // SCRUM-1168 F5 — después de confirmado solo se corrigen referencia y comprobante.
   const datosMutation = useUpdatePaymentDatos()
@@ -216,7 +216,7 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
                 )}
               </div>
 
-              {/* SCRUM-1168 F4 — estado de la anulación: anulado, solicitud pendiente de Mark o solicitud rechazada. */}
+              {/* SCRUM-1168 F4 — estado de la anulación: anulado, solicitud pendiente de Gerencia o solicitud rechazada. */}
               {payment.estado === 'anulado' && (
                 <div role="status" data-testid="cobro-anulado" className="mt-3 rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 px-3 py-2 text-sm text-red-900 dark:text-red-200">
                   <p className="font-semibold">{t('cobros.detalle.anular.anuladoTitulo')}</p>

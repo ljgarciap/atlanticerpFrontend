@@ -40,7 +40,7 @@ export default function CreateClientModal(props: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const qc = useQueryClient()
   const canSelectPartnerPrice = usePermission('ventas_diseno.select_partner_price')
-  // Decisión de Luis (2026-09-30): marcar un Consumidor Final es solo de Mark y Felix.
+  // Decisión de Luis (2026-09-30): marcar un Consumidor Final es solo de Gerencia y Contabilidad.
   const canMarkConsumidorFinal = usePermission('ventas_diseno.edit.client_tax_data')
 
   // SCRUM-734 (RN7.1) — el texto que el usuario ya tipeó en el buscador precarga

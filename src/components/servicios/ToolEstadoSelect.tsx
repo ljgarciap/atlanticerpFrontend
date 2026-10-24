@@ -14,7 +14,7 @@ interface Props {
   onChanged: () => void
 }
 
-// SCRUM-779 (rebote Daniela 2026-08-20) — Dañada/Perdida/Desgaste piden el detalle del incidente
+// SCRUM-779 (rebote Gerencia 2026-08-20) — Dañada/Perdida/Desgaste piden el detalle del incidente
 // antes de confirmar (mismo patrón que TicketCancelModal — motivo obligatorio, botón deshabilitado
 // hasta escribirlo); sin esto el backend igual lo aceptaba pero ninguna acción real de usuario lo
 // mandaba nunca, así que el Kardex seguía sin descripción para esos 3 tipos.

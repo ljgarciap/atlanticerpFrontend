@@ -41,7 +41,7 @@ function makeAbono(overrides: Partial<Abono> = {}): Abono {
     monto_original: 500, monto_usado: 0, monto_disponible: 500, estado_saldo: 'disponible',
     metodo_pago: 'transferencia', cuenta_bancaria_id: 1,
     referencia: 'TRF-88213', comprobante_url: null, estado: 'por_confirmar',
-    registrado_por: 'Felix', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
+    registrado_por: 'Contabilidad', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
     numero_recibo: null,
     ...overrides,
   }

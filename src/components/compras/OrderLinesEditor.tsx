@@ -53,7 +53,7 @@ export interface OrderDraft {
 export function emptyOrderDraft(): OrderDraft {
   // SCRUM-197 (REQ-134, hallazgo de Gerencia Test 2026-07-30): "Tipo de envío" no debe tener un
   // estado "Sin especificar" — siempre uno de los 3 valores reales. 'terrestre' como default más
-  // conservador (no dispara el aviso de aprobación de Mark, exclusivo de Aéreo).
+  // conservador (no dispara el aviso de aprobación de Gerencia, exclusivo de Aéreo).
   return {
     lines: [], shippingType: 'terrestre', whoPaysShipping: 'cliente', shippingCost: '',
     importCost: '', freightCost: '', handlingCost: '', otherCost: '',

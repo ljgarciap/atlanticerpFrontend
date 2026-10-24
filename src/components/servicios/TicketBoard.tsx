@@ -57,7 +57,7 @@ interface CardProps {
 function TicketCard({ ticket, canDrag, onViewDetail, onSchedule, onOpenQuote, onOpenReport }: CardProps) {
   const { t } = useTranslation('servicios')
   return (
-    // SCRUM-781 (Corrección visual #7, rebote Daniela 2026-08-20 sobre el fix anterior) — el badge
+    // SCRUM-781 (Corrección visual #7, rebote Gerencia 2026-08-20 sobre el fix anterior) — el badge
     // de tipo/subtipo y el número de ticket compartían una sola fila (`justify-between`); un badge
     // largo (ej. "Garantía · Garantía general") le dejaba tan poco ancho al número que truncaba a
     // "GAR-..." — el tooltip `title` del fix anterior lo hacía LEÍBLE al pasar el mouse, pero no

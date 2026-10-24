@@ -126,7 +126,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
     expect(screen.queryByText('compras:inventory.actions.create')).not.toBeInTheDocument()
     expect(screen.queryByText('compras:inventory.table.cost')).not.toBeInTheDocument()
-    // SCRUM-238 rebote de Daniela 2026-08-12 + decisión de Luis 2026-08-14 — revierte el hallazgo
+    // SCRUM-238 rebote de Gerencia 2026-08-12 + decisión de Luis 2026-08-14 — revierte el hallazgo
     // de Pre-QA 2026-07-19: "Por ingresar"/"En camino"/Proveedor NO son información financiera y
     // el mockup de la vista restringida los pide, así que sí deben verse en modo restringido.
     expect(screen.getByText('compras:inventory.table.porIngresar')).toBeInTheDocument()
@@ -1152,7 +1152,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('5')).toBeInTheDocument() // Stock mínimo
   })
 
-  it('SCRUM-238 (rebote Daniela 2026-08-12, decisión Luis 2026-08-14) — la tabla en modo Ventas & Diseño muestra Categoría/Rotación/Bodega(s)/Proveedor/Por ingresar/En camino pero NO costo', async () => {
+  it('SCRUM-238 (rebote Gerencia 2026-08-12, decisión Luis 2026-08-14) — la tabla en modo Ventas & Diseño muestra Categoría/Rotación/Bodega(s)/Proveedor/Por ingresar/En camino pero NO costo', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
@@ -1201,7 +1201,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getAllByText('6').length).toBeGreaterThan(0) // En camino
   })
 
-  it('SCRUM-238 — el modal de detalle en modo Ventas & Diseño también muestra "Datos generales" (gap real reportado por Daniela 2026-08-12)', async () => {
+  it('SCRUM-238 — el modal de detalle en modo Ventas & Diseño también muestra "Datos generales" (gap real reportado por Gerencia 2026-08-12)', async () => {
     const product = makeProduct({
       provider_name: 'Proveedor Uno', por_servir: 2, por_ingresar: 4, en_camino: 6, disponible: 8,
       category: 'bombillos',
@@ -1230,7 +1230,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.queryByText('compras:inventory.detail.margin')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-238 (rebote Daniela 2026-08-12, comparado contra mockup real) — en modo restringido "Información del producto" va ANTES que "Precios", con "Ver ficha técnica" agrupado dentro', async () => {
+  it('SCRUM-238 (rebote Gerencia 2026-08-12, comparado contra mockup real) — en modo restringido "Información del producto" va ANTES que "Precios", con "Ver ficha técnica" agrupado dentro', async () => {
     const product = makeProduct({ category: 'bombillos' })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,

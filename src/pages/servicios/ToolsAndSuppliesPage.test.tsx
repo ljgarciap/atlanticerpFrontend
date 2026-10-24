@@ -11,7 +11,7 @@ import type { UserInfo } from '@/types/auth'
 const LABELS: Record<string, string> = {
   'tools.table.groupHeader':    '{{count}} unidad(es) ({{summary}})',
   'tools.table.groupHeaderEmpty': '0 unidad(es)',
-  'tools.table.pendingBadge':   'Solicitado a Felix ({{cantidad}})',
+  'tools.table.pendingBadge':   'Solicitado a Contabilidad ({{cantidad}})',
   'tools.table.responsableIncidente': 'Responsable: {{nombre}}',
   'tools.purchaseModal.subtitle': '{{nombre}}',
   'insumos.requestModal.subtitle': '{{descripcion}}',
@@ -195,10 +195,10 @@ describe('ToolsAndSuppliesPage — REQ-268 listado agrupado', () => {
     renderPage()
     await screen.findByText('Casco de seguridad')
 
-    fireEvent.change(screen.getByPlaceholderText('tools.searchPlaceholder'), { target: { value: 'Miguel' } })
+    fireEvent.change(screen.getByPlaceholderText('tools.searchPlaceholder'), { target: { value: 'Garantias Servicios' } })
 
     await waitFor(() => {
-      expect(mockedApi.tools.list).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'Miguel' }))
+      expect(mockedApi.tools.list).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'Garantias Servicios' }))
     })
   })
 
@@ -244,7 +244,7 @@ describe('ToolsAndSuppliesPage — REQ-269 cambio de estado', () => {
     })
   })
 
-  // SCRUM-779 (rebote Daniela 2026-08-20) — Dañada/Perdida/Desgaste piden el detalle del
+  // SCRUM-779 (rebote Gerencia 2026-08-20) — Dañada/Perdida/Desgaste piden el detalle del
   // incidente antes de confirmar; sin él, changeEstado() nunca se llama.
   it('lider_servicios: cambiar a Dañada pide detalle obligatorio antes de confirmar', async () => {
     const tool = makeTool()
@@ -384,7 +384,7 @@ describe('ToolsAndSuppliesPage — REQ-271 alta de herramienta nueva', () => {
 
     expect(await screen.findByText('Escalera de tijera')).toBeInTheDocument()
     expect(screen.getByText('0 unidad(es)')).toBeInTheDocument()
-    expect(screen.getByText('Solicitado a Felix (3)')).toBeInTheDocument()
+    expect(screen.getByText('Solicitado a Contabilidad (3)')).toBeInTheDocument()
   })
 
   it('marcar "Recibida" en la fila pendiente confirma la recepción', async () => {
@@ -462,7 +462,7 @@ describe('ToolsAndSuppliesPage — REQ-272 solicitar reposición', () => {
     ])
     renderPage()
 
-    expect(await screen.findByText('Solicitado a Felix (2)')).toBeInTheDocument()
+    expect(await screen.findByText('Solicitado a Contabilidad (2)')).toBeInTheDocument()
     expect(screen.queryByText('tools.table.requestButton')).not.toBeInTheDocument()
     expect(screen.getByText('tools.table.receiveButton')).toBeInTheDocument()
   })

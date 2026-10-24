@@ -20,7 +20,7 @@ async function login(page: Page, email: string, password?: string): Promise<bool
   return !page.url().includes('/login')
 }
 
-test('SIDEBAR — Comisiones ▸ Internas es alcanzable desde el sidebar de Admin&Contab (Felix)', async ({ page }) => {
+test('SIDEBAR — Comisiones ▸ Internas es alcanzable desde el sidebar de Admin&Contab (Contabilidad)', async ({ page }) => {
   const ok = await login(page, FELIX)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab')
@@ -82,11 +82,11 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
   await page.getByText(/volver al mes actual/i).click()
   await page.waitForTimeout(600)
 
-  // selector de vendedor visible para Felix, con todos los nombres del mockup
+  // selector de vendedor visible para Contabilidad, con todos los nombres del mockup
   const vendorSelect = page.locator('select').filter({ hasText: /todos los vendedores/i })
   await expect(vendorSelect).toBeVisible()
 
-  // Botón exportar visible para Felix
+  // Botón exportar visible para Contabilidad
   const exportBtn = page.getByText(/exportar/i).first()
   await expect(exportBtn).toBeVisible()
 
@@ -157,7 +157,7 @@ test('FELIX — exportar PDF/Excel funciona sin error 500 (bug corregido en Seni
   }
 })
 
-test('MARK — mismo alcance que Felix (Gerencia)', async ({ page }) => {
+test('MARK — mismo alcance que Contabilidad (Gerencia)', async ({ page }) => {
   const ok = await login(page, MARK, MARK_PASS)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab/comisiones/internas')

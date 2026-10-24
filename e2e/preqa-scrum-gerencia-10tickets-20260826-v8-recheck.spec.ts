@@ -31,10 +31,10 @@ test.describe.configure({ mode: 'serial' })
 // asumir ninguno de esos comentarios como válido.
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'gerencia3@test.com' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
-const WHIL_PASSWORD = WHIL // default = email, confirmado en esta sesión (200 real)
+const RESTRICTED_LEVEL_PASSWORD = WHIL // default = email, confirmado en esta sesión (200 real)
 const TECH_SUPERADMIN = 'superadmin3@test.com' // password real = default (email)
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
@@ -72,7 +72,7 @@ async function apiCall(page: Page, method: string, url: string, body?: unknown) 
 
 // ── SCRUM-156 — Tarjeta "Variación margen" ──────────────────────────────────
 test('SCRUM-156 — PASA: margen real/cotizado son valores reales calculados (no 0/null), subtítulo "Real X% · Cotizado Y%" visible, clic navega a Facturación con desde/hasta', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
@@ -87,13 +87,13 @@ test('SCRUM-156 — PASA: margen real/cotizado son valores reales calculados (no
 
 // ── SCRUM-159 — Panel Facturación ────────────────────────────────────────────
 test('SCRUM-159 RN2 — sigue corregido: margen del año/mes real (>0), no hardcodeado', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   expect((raw.json as any).facturacion.kpis.margen_anio_pct).toBeGreaterThan(0)
 })
 
 test('SCRUM-159 RN3/Escenario 2 — CORREGIDO: clic en una barra del gráfico ahora navega a Facturación CON el mes como querystring (desde/hasta)', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1500)
   const monthLabel = page.getByText('Ago', { exact: true }).first()
@@ -128,11 +128,11 @@ test('SCRUM-161 RN2/Escenario 2 — CORREGIDO Y CONFIRMADO EN VIVO CON MUTACIÓN
   test.skip(!reglaId, 'no se pudo crear la regla de prueba')
 
   try {
-    await login(page, WHIL, WHIL_PASSWORD)
+    await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
     const home = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
     const items = ((home.json as any)?.aprobaciones ?? [])
     const types = new Set(items.map((a: any) => a.type))
-    // Confirma el fix: Whil YA NO ve purchase_order/general_count (los de Mark) — solo lo suyo.
+    // Confirma el fix: Gerencia YA NO ve purchase_order/general_count (los de Gerencia) — solo lo suyo.
     expect(types.has('purchase_order')).toBe(false)
     expect(types.has('general_count')).toBe(false)
     for (const t of types) expect(t).toBe('zona_libre')
@@ -142,7 +142,7 @@ test('SCRUM-161 RN2/Escenario 2 — CORREGIDO Y CONFIRMADO EN VIVO CON MUTACIÓN
   }
 })
 
-test('SCRUM-162 RN1/RN2/RN3 — sigue corregido: modal de detalle, botones Aprobar/Rechazar para Mark, "Ver en [módulo]" navega con ID puntual', async ({ page }) => {
+test('SCRUM-162 RN1/RN2/RN3 — sigue corregido: modal de detalle, botones Aprobar/Rechazar para Gerencia, "Ver en [módulo]" navega con ID puntual', async ({ page }) => {
   test.setTimeout(45000)
   const ok = await login(page, MARK, MARK_PASSWORD)
   expect(ok).toBe(true)
@@ -165,15 +165,15 @@ test('SCRUM-162 RN4 — CORREGIDO Y CONFIRMADO EN VIVO CON MUTACIÓN REAL (mutac
   expect((origin.json as any)?.motivo_rechazo).toContain('PREQA-V8')
 })
 
-test('SCRUM-162 — CORREGIDO: el gate "solo Mark puede aprobar" de Compras (SCRUM-206) ya NO se puede saltar vía Gerencia — un usuario sin autoridad sobre purchase_order recibe 403', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+test('SCRUM-162 — CORREGIDO: el gate "solo Gerencia puede aprobar" de Compras (SCRUM-206) ya NO se puede saltar vía Gerencia — un usuario sin autoridad sobre purchase_order recibe 403', async ({ page }) => {
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const resp = await apiCall(page, 'POST', `${BASE}/api/gerencia/aprobaciones/purchase_order/8/aprobar`, {})
   expect(resp.status).toBe(403)
 })
 
 // ── SCRUM-166 — Salud Ventas & Diseño ───────────────────────────────────────
 test('SCRUM-166 RN1 — sigue corregido: "En Final Stage" navega con ?stage=proposal, Pipeline muestra solo Propuesta', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   await page.getByText('En Final Stage', { exact: false }).first().click()
@@ -182,7 +182,7 @@ test('SCRUM-166 RN1 — sigue corregido: "En Final Stage" navega con ?stage=prop
 })
 
 test('SCRUM-166 RN2 — CORREGIDO: "Estancados" ahora navega con ?stage=stagnant y Pipeline reconoce el chip "stagnant" (antes ?order=days, interpretado como sorting, nunca como filtro)', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   await page.getByText('Estancados', { exact: false }).first().click()
@@ -191,7 +191,7 @@ test('SCRUM-166 RN2 — CORREGIDO: "Estancados" ahora navega con ?stage=stagnant
 })
 
 test('SCRUM-166 RN3/RN4 — CORREGIDO: "Monto cotizado/aprobado del mes" navegan con ?mes=YYYY-MM y las pantallas destino (QuotesListPage/PedidosPage Ventas&Diseño) lo aplican, mostrando "Filtrado por <mes>"', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   await page.getByText('Monto cotizado en el mes', { exact: false }).first().click()
@@ -202,7 +202,7 @@ test('SCRUM-166 RN3/RN4 — CORREGIDO: "Monto cotizado/aprobado del mes" navegan
 
 // ── SCRUM-167 — Salud Admin & Contab ────────────────────────────────────────
 test('SCRUM-167 — CORREGIDO: CxC Total navega con ?estado=esperando_confirmacion y CobrosPage.tsx (vía HistorialCobrosPanel initialEstado) ahora SÍ inicializa el <select> con ese valor seleccionado (antes quedaba en "" / "Todos los estados")', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/admin-contab/cobros?estado=esperando_confirmacion`)
   await page.waitForTimeout(1500)
   const estadoSelect = page.locator('select').filter({ has: page.locator('option[value="esperando_confirmacion"]') })
@@ -211,7 +211,7 @@ test('SCRUM-167 — CORREGIDO: CxC Total navega con ?estado=esperando_confirmaci
 
 // ── SCRUM-168 — Salud Compras ────────────────────────────────────────────────
 test('SCRUM-168 RN1 — MEDIO (hallazgo nuevo v8, no bloqueante por sí solo): el mismatch original (41 vs 43) YA NO ocurre, pero el conteo puede seguir divergiendo en 1 en los límites de día — GerenciaHomeService::saludModulos() REIMPLEMENTA el predicado de PurchaseOrder::isCritical() en SQL crudo (status_changed_at <= now()-3d OR estimated_arrival_date < Carbon::today()) en vez de llamar isCritical() por registro como hace PurchaseOrderController — confirmado en vivo esta sesión: en un momento dado ambos daban 43=43, minutos después 44 (tarjeta) vs 43 (filtro real). Sugerencia de fix: que saludModulos() cuente iterando $orders->filter(fn($o) => $o->isCritical()) igual que el controller, en vez de una query SQL paralela', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   const cardCount = (raw.json as any).salud_modulos.compras.ordenes_criticas
   const apiTotal = await apiCall(page, 'GET', `${BASE}/api/compras/orders?chip=critical&per_page=1`)
@@ -226,7 +226,7 @@ test('SCRUM-168 RN1 — MEDIO (hallazgo nuevo v8, no bloqueante por sí solo): e
 })
 
 test('SCRUM-168 RN2/Escenario 1 — el indicador YA EXISTE y el conteo de Gerencia SÍ coincide con /api/compras/inventory?chip=bajo_stock_sin_ordenar (misma lógica real, InventoryKpiService::isLowStockWithoutOpenOrder)', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   const cardCount = (raw.json as any).salud_modulos.compras.bajo_stock_sin_ordenar
   expect(cardCount).toBeGreaterThan(0)
@@ -235,7 +235,7 @@ test('SCRUM-168 RN2/Escenario 1 — el indicador YA EXISTE y el conteo de Gerenc
 })
 
 test('SCRUM-168 RN2/Escenario 1 — CRÍTICO NUEVO: el clic navega a /bodega/inventario?filter=bajo_stock_sin_ordenar, pero ESE backend (BodegaInventoryController, distinto de Compras/InventoryController) no tiene ningún case para este chip — cae al default SIN FILTRAR, mostrando el catálogo completo en vez de los productos bajo stock sin ordenar', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   const cardCount = (raw.json as any).salud_modulos.compras.bajo_stock_sin_ordenar // 11623 al momento de esta corrida
   await page.goto(`${BASE}/gerencia`)
@@ -253,7 +253,7 @@ test('SCRUM-168 RN2/Escenario 1 — CRÍTICO NUEVO: el clic navega a /bodega/inv
 
 // ── SCRUM-169 — Salud Bodega ──────────────────────────────────────────────
 test('SCRUM-169 CA3 — sigue correcto: "Despachado a tiempo" no navega', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   await page.getByText('Despachado a tiempo', { exact: false }).first().click()
@@ -262,7 +262,7 @@ test('SCRUM-169 CA3 — sigue correcto: "Despachado a tiempo" no navega', async 
 })
 
 test('SCRUM-169 CA1/CA4/CA5 — CORREGIDO: PedidosPage.tsx (Bodega) ahora lee ?chip= de la URL — "urgentes" y "atrasados" ya no renderizan contenido idéntico', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/bodega/pedidos?chip=urgentes`)
   await page.waitForTimeout(1500)
   const urgentesText = await page.locator('body').innerText()
@@ -274,14 +274,14 @@ test('SCRUM-169 CA1/CA4/CA5 — CORREGIDO: PedidosPage.tsx (Bodega) ahora lee ?c
 
 // ── SCRUM-170 — Salud Servicios ────────────────────────────────────────────
 test('SCRUM-170 CA2/CA5 — sigue correcto: "Resuelto en 1ra visita" ausente, quedan 2 indicadores', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   await expect(page.getByText('Resuelto en 1ra visita', { exact: false })).toHaveCount(0)
 })
 
 test('SCRUM-170 CA1/CA4 — CORREGIDO: TicketsPage.tsx ahora lee ?estado= de la URL — "Sin responder" (?estado=reported) filtra el listado en vez de mostrar los 20 tickets totales', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   const sinResponder = (raw.json as any).salud_modulos.servicios.sin_responder
   await page.goto(`${BASE}/servicios/tickets?estado=reported`)
@@ -294,7 +294,7 @@ test('SCRUM-170 CA1/CA4 — CORREGIDO: TicketsPage.tsx ahora lee ?estado= de la 
 
 // ── SCRUM-171 — Agenda de Bodega — hoy ──────────────────────────────────────
 test('SCRUM-171 RN2 — CORREGIDO: "Ver detalle" ahora navega a /bodega/rutas-dia (pantalla nueva), no a la lista genérica de Pedidos', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -305,7 +305,7 @@ test('SCRUM-171 RN2 — CORREGIDO: "Ver detalle" ahora navega a /bodega/rutas-di
 })
 
 test('SCRUM-171 RN1/RN3 — CORREGIDO Y CONFIRMADO CON DATOS REALES (4ta sesión, primera con datos sembrados hoy): seeder bodega:seed-todays-route sembró un movimiento real con fecha "hoy" — la fila muestra hora/tipo/cliente/detalle y el clic navega a /bodega/pedidos?order=<id real>', async ({ page }) => {
-  await login(page, WHIL, WHIL_PASSWORD)
+  await login(page, WHIL, RESTRICTED_LEVEL_PASSWORD)
   const raw = await apiCall(page, 'GET', `${BASE}/api/gerencia/home`)
   const bodegaAgenda = (raw.json as any).agendas.bodega
   expect(bodegaAgenda.length).toBeGreaterThan(0) // antes: 3 sesiones seguidas con []

@@ -30,7 +30,7 @@ test('Tecnico Servicios Test (tecnico_servicios) — Mi calendario muestra solo 
   expect(calendarRequests.length).toBeGreaterThan(0)
 })
 
-test('Aaron Leis (lider_servicios, gerencia sin visitas de campo) — Mi calendario vacío, nunca calendario ajeno', async ({ page }) => {
+test('Lider Servicios Leis (lider_servicios, gerencia sin visitas de campo) — Mi calendario vacío, nunca calendario ajeno', async ({ page }) => {
   const calendarRequests: string[] = []
   page.on('request', req => {
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())

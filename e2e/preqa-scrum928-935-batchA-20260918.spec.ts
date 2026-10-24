@@ -10,7 +10,7 @@ import { test, expect, Page, APIRequestContext, request as pwRequest } from '@pl
  * remoto por defecto). Se autosiembra por API (cliente maestro nuevo por corrida, cuenta bancaria
  * solo si no hay ninguna activa) — no depende de IDs fijos.
  *
- * Roster local: password = email (CoreUserSeeder). Mark (management) opera Ventas&Diseño, Felix
+ * Roster local: password = email (CoreUserSeeder). Gerencia (management) opera Ventas&Diseño, Contabilidad
  * (lider_admin_contab) opera Admin&Cont.
  */
 

@@ -8,7 +8,7 @@ import { test, expect, type Page, type Route } from '@playwright/test'
 // previa y el guardado de Facturación; el login, el JWT y los permisos son los REALES del entorno. Nunca se crea una factura
 // ni se consulta a la DGI/MSL, y no se toca ninguna fila de negocio.
 //
-// Cuentas (roster real, contraseña = su email): Felix tiene `receptor_fiscal` y `receptor_consumidor_final`; la asistente no.
+// Cuentas (roster real, contraseña = su email): Contabilidad tiene `receptor_fiscal` y `receptor_consumidor_final`; la asistente no.
 // BASE explícito: PREQA_BASE_URL (default localhost). Se niega a correr contra producción.
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'

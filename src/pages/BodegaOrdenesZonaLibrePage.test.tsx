@@ -31,7 +31,7 @@ vi.mock('@/api/bodegaApi', () => ({
   },
 }))
 
-// SCRUM-440 — Aprobar/Rechazar (Yirena, gateado por `compras.zona-libre.approve`).
+// SCRUM-440 — Aprobar/Rechazar (Lider Compras, gateado por `compras.zona-libre.approve`).
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: { zonaLibre: { approve: vi.fn(), reject: vi.fn() } },
 }))
@@ -168,7 +168,7 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     expect(await screen.findByText('bodega:zonaLibre.orders.actions.edit')).toBeInTheDocument()
   })
 
-  it('SCRUM-440 — con permiso compras.zona-libre.approve (Yirena): fila pendiente muestra Aprobar/Rechazar en vez de Recordar', async () => {
+  it('SCRUM-440 — con permiso compras.zona-libre.approve (Lider Compras): fila pendiente muestra Aprobar/Rechazar en vez de Recordar', async () => {
     mockedUsePermission.mockReturnValue(true)
     mockedApi.zonaLibre.requests.list.mockResolvedValue({ data: [makeRow({ id: 1, status: 'pendiente' })], meta: { total: 4, per_page: 20, current_page: 1, last_page: 1 } })
     renderPage()
@@ -262,7 +262,7 @@ describe('BodegaOrdenesZonaLibrePage', () => {
       ...makeRow({ id: 3, status: 'rechazada' }),
       notes: 'Entrega urgente para el cliente Hotel Riu.',
       approved_by_name: null,
-      rejected_by_name: 'Yirena',
+      rejected_by_name: 'Lider Compras',
       rejection_reason: 'Ya existe una orden similar en camino.',
       lines: [
         { id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Bombillo LED', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 },

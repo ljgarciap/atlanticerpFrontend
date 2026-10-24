@@ -705,7 +705,7 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
   })
 
   // RN9.1 — "Guardar" bloqueado mientras haya una violación vigente que el
-  // usuario actual no pueda pasar por alto (Mark/David sí pueden, con
+  // usuario actual no pueda pasar por alto (Gerencia/David sí pueden, con
   // confirmación implícita del propio botón — no hay modal de advertencia acá,
   // a diferencia de confirm(), porque acá todavía no se está generando nada).
   const blocked = preview?.violates_margin === true && !preview.can_override
@@ -814,7 +814,7 @@ function QuoteItemRow({
   })
   // SCRUM-849.6 — foto ad-hoc, solo para ítems personalizados (RN del ticket: un producto real
   // de Catálogo administra su imagen desde Compras → Inventario, no desde acá).
-  // Rebote de Daniela (2026-09-10): faltaba onError acá — un 422 (item no-custom o cotización ya
+  // Rebote de Gerencia (2026-09-10): faltaba onError acá — un 422 (item no-custom o cotización ya
   // confirmada) o el 503 del circuit breaker de S3 fallaban en silencio, sin ningún mensaje, dando
   // la impresión de "no está cargando" pese a que sí se había intentado.
   const uploadPhotoMutation = useMutation({
@@ -832,7 +832,7 @@ function QuoteItemRow({
   // general" heredando el tipo de la cotización), effectiveUnitPrice() ignora
   // unit_price por completo (usa costo/premium_divisor) — el campo manual quedaba
   // editable pero sin ningún efecto real, lo que confundió a un usuario real que
-  // pensó que había fijado un precio (Daniela, SCRUM-725, 2026-08-05).
+  // pensó que había fijado un precio (Gerencia, SCRUM-725, 2026-08-05).
   const effectivePriceType = draft.price_type_override || quotePriceType
   const priceOverrideDisabled = !canEdit || effectivePriceType === 'premium'
 
@@ -889,7 +889,7 @@ function QuoteItemRow({
                 // Input montado solo mientras se elige el archivo (en vez de un <input type="file">
                 // siempre en el DOM) — así no colisiona con queries genéricas tipo
                 // getByDisplayValue('') del resto de la fila (un file input siempre reporta value='').
-                // Rebote de Daniela (2026-09-10) — root cause real: al abrir el diálogo nativo del
+                // Rebote de Gerencia (2026-09-10) — root cause real: al abrir el diálogo nativo del
                 // SO, el navegador dispara blur sobre este input ANTES de que el usuario termine de
                 // elegir el archivo (no al cerrarlo) — con onBlur desmontando este input, React lo
                 // saca del árbol mientras el diálogo nativo sigue abierto, y el evento `change`
@@ -908,7 +908,7 @@ function QuoteItemRow({
                   className="text-[10px] w-28"
                 />
               ) : (
-                // Rebote de Daniela (2026-09-10) — "no muestra nada de ayuda visual que me
+                // Rebote de Gerencia (2026-09-10) — "no muestra nada de ayuda visual que me
                 // permita ver si la foto sí cargó o no": el texto "Cargando..." era demasiado
                 // débil. Reusa Button+Spinner (mismo patrón que el resto de la cotización, ver
                 // saveMutation arriba) en vez de un <button> de solo texto.

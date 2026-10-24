@@ -170,7 +170,7 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     expect(screen.getAllByText('Cobros').length).toBeGreaterThan(0)
   })
 
-  // SCRUM-1139 — `lider_operaciones` (Mariam) recibe el módulo por override de visibilidad y espeja a la asistente.
+  // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) recibe el módulo por override de visibilidad y espeja a la asistente.
   it.each(['lider_operaciones', 'asistente_administrativa'])('%s ve las secciones completas de Admin. & Contab.', role => {
     useAuthStore.setState({ user: baseUser({ role, modules: { admin_contab: noModule({ view: true }) } }) })
     renderSidebar()
@@ -204,7 +204,7 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     expect(screen.queryByText('Externas')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1002 — Felix/Mark editan los datos fiscales de un cliente desde Admin&Cont (no tienen la pantalla Clientes).
+  // SCRUM-1002 — Contabilidad/Mark editan los datos fiscales de un cliente desde Admin&Cont (no tienen la pantalla Clientes).
   describe('"Datos fiscales de clientes" (SCRUM-1002)', () => {
     function abrirConfiguracion(user: Partial<UserInfo>) {
       useAuthStore.setState({ user: baseUser({ modules: { admin_contab: noModule({ view: true }) }, ...user }) })
@@ -307,7 +307,7 @@ describe('Sidebar — Inicio + dropdown Inventario de Bodega (SCRUM-363)', () =>
   })
 })
 
-// SCRUM-774 — rebote de Daniela 2026-08-18: el menú de Servicios vivía en un menú superior
+// SCRUM-774 — rebote de Gerencia 2026-08-18: el menú de Servicios vivía en un menú superior
 // (ServiciosNavMenu, ya eliminado) en vez del panel lateral como el resto de los módulos, y el
 // submenú "Técnicos" mostraba la flecha de desplegable pero nunca revelaba sus opciones (bug real
 // en el componente viejo). Mismo patrón que "Inventario" de Bodega (SCRUM-363, ver describe de
@@ -341,7 +341,7 @@ describe('Sidebar — menú de Servicios en el sidebar, con "Técnicos" desplega
     expect(screen.getAllByText('Reportes').length).toBeGreaterThan(0)
   })
 
-  // SCRUM-780 (rebote de Daniela 2026-08-19) — "Cotizaciones" deja de ser ítem propio de la
+  // SCRUM-780 (rebote de Gerencia 2026-08-19) — "Cotizaciones" deja de ser ítem propio de la
   // sección, pasa a submenú de "Tickets" (mismo patrón NavDropdown que "Técnicos" de arriba).
   it('el desplegable "Tickets" arranca cerrado y un clic revela Listado de Tickets/Cotizaciones', () => {
     useAuthStore.setState({ user: serviciosUser('lider_servicios') })
@@ -387,7 +387,7 @@ describe('Sidebar — menú de Servicios en el sidebar, con "Técnicos" desplega
   })
 
   // SCRUM-780 — angosta "Ajustes" de lider_servicios/management/superadmin a solo Gerencia
-  // (management/superadmin); antes Aaron/Líder de Servicios sí lo veía.
+  // (management/superadmin); antes Lider Servicios/Líder de Servicios sí lo veía.
   it('"Ajustes" ya no aparece para lider_servicios (SCRUM-780)', () => {
     useAuthStore.setState({ user: serviciosUser('lider_servicios') })
     renderSidebar()
@@ -622,7 +622,7 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/bodega/pedidos/status')
   })
 
-  // SCRUM-1159 (rebote) — Daniela busca la consulta de pedidos bajo Bodega: el vendedor la ve también ahí (sin abrirle «Pedidos» del tablero).
+  // SCRUM-1159 (rebote) — Gerencia busca la consulta de pedidos bajo Bodega: el vendedor la ve también ahí (sin abrirle «Pedidos» del tablero).
   it('vendedor_disenador ve «Status de Pedidos» también bajo Bodega y no ve «Pedidos» del tablero (SCRUM-1159)', () => {
     useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
     render(
@@ -687,7 +687,7 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
 
 })
 
-// SCRUM-729 — regresión real reportada por Daniela: "Nueva Orden" (/compras/ordenes/nueva)
+// SCRUM-729 — regresión real reportada por Gerencia: "Nueva Orden" (/compras/ordenes/nueva)
 // es un sub-path literal de "Ver Órdenes" (/compras/ordenes), así que el viejo isActive()
 // basado en startsWith puro resaltaba ambos a la vez en /compras/ordenes/nueva. Test
 // permanente (no se borra tras el fix, mismo criterio que los smoke de Playwright
@@ -887,7 +887,7 @@ describe('Sidebar — UAT oculta un módulo de negocio pese al permiso plano por
     expect(screen.getAllByText('Servicios').length).toBeGreaterThan(0)
   })
 
-  // SCRUM-741 — hallazgo real en producción (David/Mark, Gerencia): a diferencia de
+  // SCRUM-741 — hallazgo real en producción (Gerencia/Mark, Gerencia): a diferencia de
   // ventas_diseno/bodega/servicios arriba, "Inventario" (dentro de la sección "Compras ·
   // Inventario") tiene su PROPIO OR de dos niveles (canSeeCompras || canSeeVentasDiseno,
   // SCRUM-231→244/REQ-168) que nunca leía __module__ — así que ocultar Compras vía UAT no
@@ -1033,7 +1033,7 @@ describe('Sidebar — override de visibilidad de ítems de menú por usuario (SC
   })
 })
 
-// SCRUM-1157 — Mariam (lider_operaciones): `modules.compras.view` true pero solo permisos de consulta (compras.limited.view +
+// SCRUM-1157 — Lider Operaciones (lider_operaciones): `modules.compras.view` true pero solo permisos de consulta (compras.limited.view +
 // compras.sustitutos.manage, sin compras.read/.write). El menú no debe listar pantallas cuya ruta la redirige a inicio.
 describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157)', () => {
   const visible = (text: string) => screen.queryAllByText(text).length > 0
@@ -1064,7 +1064,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
     }
   })
 
-  // Pre-QA de SCRUM-1157 (C-1): Mariam tiene el módulo Compras en solo lectura por persona (`modules.compras.view=false`) y solo permisos de
+  // Pre-QA de SCRUM-1157 (C-1): Lider Operaciones tiene el módulo Compras en solo lectura por persona (`modules.compras.view=false`) y solo permisos de
   // consulta. Su aterrizaje /compras/ordenes y sus pantallas de consulta deben estar en el menú.
   const mariam = (extra: string[] = []) => baseUser({
     role: 'lider_operaciones',
@@ -1131,9 +1131,9 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
   })
 })
 
-// SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Mark (403 para el resto del roster de Admin&Cont, Félix y
-// Mariam incluidos): el menú solo las ofrece al aprobador Mark (flag `mark_approver`) y a superadmin.
-describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)', () => {
+// SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Gerencia (403 para el resto del roster de Admin&Cont, Contabilidad y
+// Lider Operaciones incluidos): el menú solo las ofrece al aprobador Gerencia (flag `mark_approver`) y a superadmin.
+describe('Sidebar — Empresa y Fiscal solo para Gerencia y superadmin (SCRUM-1157)', () => {
   const adminUser = (role: string, mark: boolean | undefined, permissions: string[] = []) => baseUser({
     role, permissions,
     modules: { admin_contab: noModule({ view: true }) },
@@ -1142,7 +1142,7 @@ describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)'
   const abrirConfiguracion = () => { const c = screen.queryAllByText('Configuración')[0]; if (c) fireEvent.click(c) }
   const visible = (text: string) => screen.queryAllByText(text).length > 0
 
-  it.each(['lider_operaciones', 'lider_admin_contab'])('%s que no es el aprobador Mark NO ve Empresa ni Fiscal', role => {
+  it.each(['lider_operaciones', 'lider_admin_contab'])('%s que no es el aprobador Gerencia NO ve Empresa ni Fiscal', role => {
     useAuthStore.setState({ user: adminUser(role, false) })
     renderSidebar()
     abrirConfiguracion()
@@ -1150,7 +1150,7 @@ describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)'
     expect(visible('Configuración Fiscal')).toBe(false)
   })
 
-  it('el aprobador Mark (flag true) ve Empresa y Fiscal', () => {
+  it('el aprobador Gerencia (flag true) ve Empresa y Fiscal', () => {
     useAuthStore.setState({ user: adminUser('management', true) })
     renderSidebar()
     abrirConfiguracion()
@@ -1174,7 +1174,7 @@ describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)'
     expect(visible('Configuración Fiscal')).toBe(true)
   })
 
-  it('lo demás de Administración no cambia para quien no es Mark (Facturación sigue visible)', () => {
+  it('lo demás de Administración no cambia para quien no es Gerencia (Facturación sigue visible)', () => {
     useAuthStore.setState({ user: adminUser('lider_operaciones', false) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
@@ -1182,7 +1182,7 @@ describe('Sidebar — Empresa y Fiscal solo para Mark y superadmin (SCRUM-1157)'
   })
 })
 
-// SCRUM-1013 (rebote de Daniela, 2026-10-02) / SCRUM-1021 — el vendedor no tiene los módulos Compras ni
+// SCRUM-1013 (rebote de Gerencia, 2026-10-02) / SCRUM-1021 — el vendedor no tiene los módulos Compras ni
 // Bodega; solo dos permisos angostos de consulta. Su menú: Inventario + Comparación de Referencias
 // (como antes de 1013) + Órdenes → Logística y Envío, y Bodega → Bodegas. Nunca el menú completo.
 describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 rebote, SCRUM-1021)', () => {
@@ -1252,7 +1252,7 @@ describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 reb
   })
 })
 
-describe('Sidebar — Félix: Pipeline solo lectura (SCRUM-1128)', () => {
+describe('Sidebar — Contabilidad: Pipeline solo lectura (SCRUM-1128)', () => {
   it('con ventas_diseno.pipeline.read_all ve únicamente el ítem Pipeline de CRM, nada más del módulo', () => {
     useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'], modules: {} }) })
     renderSidebar()
@@ -1264,7 +1264,7 @@ describe('Sidebar — Félix: Pipeline solo lectura (SCRUM-1128)', () => {
     expect(screen.queryByText('Ventas & Diseño')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1139 — Félix edita el Pipeline con `pipeline.edit`, pero el Sidebar sigue mostrándole solo ese ítem.
+  // SCRUM-1139 — Contabilidad edita el Pipeline con `pipeline.edit`, pero el Sidebar sigue mostrándole solo ese ítem.
   it('con read_all + pipeline.edit ve únicamente el ítem Pipeline de CRM, sin ítems de otros módulos', () => {
     useAuthStore.setState({ user: baseUser({ role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit'], modules: {} }) })
     renderSidebar()

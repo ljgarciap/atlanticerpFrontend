@@ -25,7 +25,7 @@ type EstadoChip = 'all' | 'urgent'
  * (`BodegaHomeService::pendientes()` solo da datos crudos por `type`) — este mapeo tipo→prioridad
  * es una decisión de este batch, marcada para que Analista/Luis la confirmen o ajusten:
  * "picking sin iniciar" y "ajuste de inventario pendiente" se tratan como alta (bloquean el flujo
- * de despacho o una aprobación de Mark respectivamente); "guía sin subir" como media (papeleo de
+ * de despacho o una aprobación de Gerencia respectivamente); "guía sin subir" como media (papeleo de
  * cierre, no bloquea una entrega ya hecha). */
 const PENDIENTE_PRIORITY: Record<BodegaPendienteTipo, 'alta' | 'media'> = {
   picking_no_iniciado: 'alta',

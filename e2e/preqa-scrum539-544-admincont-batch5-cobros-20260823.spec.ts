@@ -8,10 +8,10 @@ import { test, expect, type Page } from '@playwright/test'
  * momento de este Pre-QA): MasterClient "PreQA Cobros SCRUM539" (id 7560) con 2 facturas abiertas
  * (F-PREQA-COBROS-1 $4,000 / F-PREQA-COBROS-2 $2,200). Cuentas bancarias reales creadas también en
  * este Pre-QA (Banco General/Corriente id 8, Banistmo/Tarjeta id 9 — dev.atlanticerp.ai solo tenía
- * fixtures de QA, ninguna cuenta real) con últimos 4 dígitos placeholder "0000" — Felix/Yaneth
+ * fixtures de QA, ninguna cuenta real) con últimos 4 dígitos placeholder "0000" — Contabilidad/Yaneth
  * deben corregirlos con los reales antes de que el auto-completado tenga sentido para el negocio.
  *
- * Cuenta real: contabilidad@test.com (Felix, lider_admin_contab, password = email).
+ * Cuenta real: contabilidad@test.com (Contabilidad, lider_admin_contab, password = email).
  */
 test.describe.configure({ mode: 'serial' })
 

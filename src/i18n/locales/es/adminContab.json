@@ -622,17 +622,17 @@
       "anular": {
         "boton": "Anular cobro",
         "titulo": "Solicitar la anulación de este cobro",
-        "ayuda": "Mark debe aprobarla. Al aprobarse se reversan sus aplicaciones, el dinero sale de caja el día de la anulación y el cobro queda como anulado en el historial.",
+        "ayuda": "Gerencia debe aprobarla. Al aprobarse se reversan sus aplicaciones, el dinero sale de caja el día de la anulación y el cobro queda como anulado en el historial.",
         "motivoLabel": "Motivo de la anulación",
         "motivoPlaceholder": "Ej. monto mal digitado, cobro duplicado, cliente equivocado...",
         "enviar": "Enviar solicitud",
         "cancelar": "Cancelar",
-        "enviada": "Solicitud de anulación enviada: queda pendiente de la aprobación de Mark.",
+        "enviada": "Solicitud de anulación enviada: queda pendiente de la aprobación de Gerencia.",
         "error": "No se pudo enviar la solicitud.",
         "anuladoTitulo": "Cobro anulado",
         "anuladoDetalle": "Anulado el {{fecha}}. Motivo: {{motivo}}",
         "pendienteTitulo": "Anulación pendiente de aprobación",
-        "pendienteDetalle": "Motivo: {{motivo}}. Mark debe aprobarla o rechazarla.",
+        "pendienteDetalle": "Motivo: {{motivo}}. Gerencia debe aprobarla o rechazarla.",
         "rechazadaTitulo": "Solicitud de anulación rechazada",
         "rechazadaDetalle": "Motivo del rechazo: {{motivo}}"
       },
@@ -1370,7 +1370,7 @@
     },
     "restricted": {
       "restrictedRole": "Tu rol solo tiene acceso al Arqueo del día. Las vistas Proyectada y Real (30/90 días) están disponibles para Contabilidad, el aprobador configurado y Gerencia.",
-      "dailyCount": "El Arqueo del día está disponible solo para Felix y Yaneth."
+      "dailyCount": "El Arqueo del día está disponible solo para Contabilidad y Asistente Administrativa."
     }
   },
   "cajaChica": {
@@ -1542,11 +1542,11 @@
       "anio": "Año"
     },
     "felixCommission": {
-      "title": "Comisión por gestión de cartera +90 días — Felix",
+      "title": "Comisión por gestión de cartera +90 días — Contabilidad",
       "subtitle": "A mayor cartera vencida cobrada, mayor comisión — en vivo, lo que va del mes",
       "cobradoMes": "Cobrado de cartera +90 días (mes actual)",
       "rangoActual": "Rango actual",
-      "comision": "Comisión para Felix (a la fecha)",
+      "comision": "Comisión para Contabilidad (a la fecha)",
       "tramoRango": "{{desde}} – {{hasta}} → {{pct}}%",
       "tramoDesde": "Más de {{desde}} → {{pct}}%",
       "tramoMenosDe": "Menos de {{hasta}} → {{pct}}%",
@@ -1944,7 +1944,7 @@
     "devolucion": {
       "boton": "Devolver",
       "titulo": "Devolver dinero desde {{etiqueta}}",
-      "ayuda": "Mark debe aprobarlo. Al aprobarse el dinero sale de la cuenta o caja elegida hoy y se descuenta del saldo a favor del cliente.",
+      "ayuda": "Gerencia debe aprobarlo. Al aprobarse el dinero sale de la cuenta o caja elegida hoy y se descuenta del saldo a favor del cliente.",
       "monto": "Monto a devolver",
       "cuenta": "Cuenta o caja de salida",
       "referencia": "Referencia de la salida",
@@ -1952,14 +1952,14 @@
       "motivo": "Motivo de la devolución",
       "enviar": "Enviar solicitud",
       "cancelar": "Cancelar",
-      "enviada": "Solicitud de devolución enviada: queda pendiente de la aprobación de Mark.",
+      "enviada": "Solicitud de devolución enviada: queda pendiente de la aprobación de Gerencia.",
       "error": "No se pudo enviar la solicitud."
     }
   },
   "solicitudesReverso": {
     "titulo": "Solicitudes de anulación de cobros",
     "ayudaMark": "Aprueba o rechaza. Al aprobar se reversan las aplicaciones del cobro, el dinero sale de caja hoy y, si un pedido ya tenía su comisión liquidada, se registra un descuento para la siguiente liquidación del vendedor.",
-    "ayudaOtros": "Pendientes de la decisión de Mark.",
+    "ayudaOtros": "Pendientes de la decisión de Gerencia.",
     "anular": "Anular el cobro {{recibo}}",
     "detalle": "Solicitada por {{quien}} el {{fecha}}",
     "motivo": "Motivo",

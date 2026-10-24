@@ -25,7 +25,7 @@ interface Props {
 
 /** REQ-539/540 (SCRUM-616/617) — detalle de un reporte, agrupado por solicitante igual que
  *  Pendientes (RN2 REQ-539). REQ-541 (Batch 21) agrega "Rechazar" por línea y "Rechazar reporte
- *  completo", ambos exclusivos de Mark (gate real en backend vía `puede_aprobar`, mismo flag que
+ *  completo", ambos exclusivos de Gerencia (gate real en backend vía `puede_aprobar`, mismo flag que
  *  ya condicionaba "Aprobar reporte"). "Descargar" ya no depende de `estado` (RN3 REQ-546 — debe
  *  funcionar tanto pendiente de aprobación como finalizado). */
 export default function DetalleReportePettyCashModal({ numero, onClose, onSelectLinea, onDisuelto }: Props) {

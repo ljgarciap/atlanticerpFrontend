@@ -75,7 +75,7 @@ test('SCRUM-302 — campos dinámicos cambian correctamente entre tickets sin qu
 
 test('SCRUM-304 — conclusión vacía bloquea el guardado', async ({ page }) => {
   await login(page, CARLOS)
-  await openTicketByNumero(page, 'RET-2026-0002') // T94, técnico=Carlos, sin informe todavía
+  await openTicketByNumero(page, 'RET-2026-0002') // T94, técnico=Tecnico Servicios, sin informe todavía
   await openInspectionReport(page)
 
   const saveBtn = page.getByRole('button', { name: 'Guardar informe' })
@@ -84,7 +84,7 @@ test('SCRUM-304 — conclusión vacía bloquea el guardado', async ({ page }) =>
   await page.getByLabel('Conclusión').fill('   ') // solo espacios
   await expect(saveBtn).toBeDisabled()
 
-  await page.getByLabel('Conclusión').fill('Conclusión real de Carlos para T94')
+  await page.getByLabel('Conclusión').fill('Conclusión real de Tecnico Servicios para T94')
   await expect(saveBtn).toBeEnabled()
   await page.screenshot({ path: 'test-results/scrum304-conclusion-required.png' })
 })
@@ -128,7 +128,7 @@ test('SCRUM-241/242 — Fotos Antes/Después separadas y firma Pendiente de firm
   await page.screenshot({ path: 'test-results/scrum241-242-readonly-gerencia.png' })
 })
 
-test('SCRUM-301 RN5 — Carlos no puede editar el informe de un ticket sin asignar (ownership UI)', async ({ page }) => {
+test('SCRUM-301 RN5 — Tecnico Servicios no puede editar el informe de un ticket sin asignar (ownership UI)', async ({ page }) => {
   await login(page, CARLOS)
   await openTicketByNumero(page, 'INS-2026-0001') // T82, sin técnico asignado
   await openInspectionReport(page)

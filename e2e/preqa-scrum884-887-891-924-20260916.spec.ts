@@ -1,11 +1,11 @@
 import { test, expect, Page } from '@playwright/test'
 
 /**
- * Pre-QA — SCRUM-884 (rebote Daniela 2026-09-16) contra el stack LOCAL (localhost:5173, proxy a
- * localhost:8090) — commit f0c4593 sin pushear todavía. Foco: Mark (Gerencia) debe poder quitarse
+ * Pre-QA — SCRUM-884 (rebote Gerencia 2026-09-16) contra el stack LOCAL (localhost:5173, proxy a
+ * localhost:8090) — commit f0c4593 sin pushear todavía. Foco: Gerencia (Gerencia) debe poder quitarse
  * a sí mismo del campo "Responsable" al crear un proyecto, igual que ya podía un vendedor/diseñador
  * creador. Camino de ruptura principal: antes del fix, `UserMultiSelect` no renderizaba el chip de
- * Mark como removible porque `teamVendors` nunca lo incluye.
+ * Gerencia como removible porque `teamVendors` nunca lo incluye.
  */
 
 test.describe.configure({ mode: 'serial' })
@@ -44,7 +44,7 @@ const MARK = 'gerencia3@test.com'
 
 let cardId: number
 
-test('SCRUM-884 — Mark (Gerencia) crea un proyecto Lead', async ({ page }) => {
+test('SCRUM-884 — Gerencia (Gerencia) crea un proyecto Lead', async ({ page }) => {
   await login(page, MARK, MARK)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1500)
@@ -57,7 +57,7 @@ test('SCRUM-884 — Mark (Gerencia) crea un proyecto Lead', async ({ page }) => 
   await nameInput.fill(uniqueName)
 
   // Sin tocar el selector de Responsable — comportamiento default: la tarjeta nace asignada a
-  // quien la crea (Mark), sin selección explícita en el modal de creación.
+  // quien la crea (Gerencia), sin selección explícita en el modal de creación.
   await page.getByRole('button', { name: /^guardar$/i }).click()
   await page.waitForTimeout(1500)
 
@@ -73,7 +73,7 @@ test('SCRUM-884 — Mark (Gerencia) crea un proyecto Lead', async ({ page }) => 
   console.log('SCRUM-884 — card creada id=', cardId)
 })
 
-test('SCRUM-884 — precondición vía API: Mark quedó como owner_id (Responsable) Y como creador', async ({ page }) => {
+test('SCRUM-884 — precondición vía API: Gerencia quedó como owner_id (Responsable) Y como creador', async ({ page }) => {
   await login(page, MARK, MARK)
   const detail = await apiGet(page, `/api/ventas-diseno/pipeline/${cardId}`)
   expect(detail.status).toBe(200)
@@ -83,7 +83,7 @@ test('SCRUM-884 — precondición vía API: Mark quedó como owner_id (Responsab
   expect(detail.body.creator?.name ?? '').toMatch(/mark/i)
 })
 
-test('SCRUM-884 — Mark puede quitarse del campo Responsable dejando otro asignado (chip removible)', async ({ page }) => {
+test('SCRUM-884 — Gerencia puede quitarse del campo Responsable dejando otro asignado (chip removible)', async ({ page }) => {
   await login(page, MARK, MARK)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1500)
@@ -108,10 +108,10 @@ test('SCRUM-884 — Mark puede quitarse del campo Responsable dejando otro asign
   await responsableSection.getByRole('button').first().click()
   await page.waitForTimeout(300);
 
-  // ANTES del fix: el chip de Mark no aparecía en absoluto (users list no lo incluía) — el
-  // camino de ruptura real es que el chip removible de Mark exista y funcione.
+  // ANTES del fix: el chip de Gerencia no aparecía en absoluto (users list no lo incluía) — el
+  // camino de ruptura real es que el chip removible de Gerencia exista y funcione.
   const markChip = page.locator('span', { hasText: /mark/i }).first()
-  await expect(markChip, 'el chip removible de Mark debe existir tras el fix').toBeVisible({ timeout: 5000 })
+  await expect(markChip, 'el chip removible de Gerencia debe existir tras el fix').toBeVisible({ timeout: 5000 })
 
   // Cerrar el dropdown clickeando su propio overlay dedicado (`.fixed.inset-0.z-10` en
   // UserMultiSelect.tsx) — ese overlay tapa al botón toggle mientras el dropdown está abierto, y
@@ -123,7 +123,7 @@ test('SCRUM-884 — Mark puede quitarse del campo Responsable dejando otro asign
   await chipCloseBtn.click()
   await page.waitForTimeout(300)
 
-  // Debe seguir habiendo al menos 1 responsable (validación min:1) — si Annie u otro vendedor
+  // Debe seguir habiendo al menos 1 responsable (validación min:1) — si Vendedor Disenador u otro vendedor
   // no quedó seleccionado, agregarla para poder guardar (el criterio dice "dejando otros
   // responsables asignados", no dejar la tarjeta sin nadie).
   // El resumen del botón toggle dice "N seleccionados" cuando hay al menos 1, o el placeholder
@@ -149,21 +149,21 @@ test('SCRUM-884 — Mark puede quitarse del campo Responsable dejando otro asign
   await page.waitForTimeout(1200)
 })
 
-test('SCRUM-884 — verificación final vía API: Mark fuera de owner/compartido_con (comisión), Creador sigue siendo Mark', async ({ page }) => {
+test('SCRUM-884 — verificación final vía API: Gerencia fuera de owner/compartido_con (comisión), Creador sigue siendo Gerencia', async ({ page }) => {
   await login(page, MARK, MARK)
   const detail = await apiGet(page, `/api/ventas-diseno/pipeline/${cardId}`)
   console.log('SCRUM-884 — detail post-fix:', JSON.stringify({ owner: detail.body.owner, assignees: detail.body.assignees, creator: detail.body.creator }))
 
-  expect(detail.body.owner?.name ?? '', 'Mark ya no debe ser el owner_id (base de la comisión)').not.toMatch(/mark/i)
-  expect((detail.body.assignees ?? []).some((a: any) => /mark/i.test(a.name)), 'Mark ya no debe estar en assignees/compartido_con').toBe(false)
-  expect(detail.body.creator?.name ?? '', 'el campo Creador debe seguir mostrando a Mark, inmutable').toMatch(/mark/i)
+  expect(detail.body.owner?.name ?? '', 'Gerencia ya no debe ser el owner_id (base de la comisión)').not.toMatch(/mark/i)
+  expect((detail.body.assignees ?? []).some((a: any) => /mark/i.test(a.name)), 'Gerencia ya no debe estar en assignees/compartido_con').toBe(false)
+  expect(detail.body.creator?.name ?? '', 'el campo Creador debe seguir mostrando a Gerencia, inmutable').toMatch(/mark/i)
   expect((detail.body.assignees ?? []).length, 'debe quedar al menos 1 responsable (validación min:1)').toBeGreaterThan(0)
 })
 
-test('SCRUM-884 — Mark puede optar por QUEDARSE como responsable si quiere (no se fuerza la remoción)', async ({ page }) => {
+test('SCRUM-884 — Gerencia puede optar por QUEDARSE como responsable si quiere (no se fuerza la remoción)', async ({ page }) => {
   // Criterio literal: "si Gerencia decide mantenerse como responsable... debe poder hacerlo" —
-  // se prueba en una tarjeta NUEVA (Mark todavía es su propio responsable por default), entrando
-  // a edición y guardando SIN tocar el chip de Mark. Distinto del test anterior (que sí lo quita).
+  // se prueba en una tarjeta NUEVA (Gerencia todavía es su propio responsable por default), entrando
+  // a edición y guardando SIN tocar el chip de Gerencia. Distinto del test anterior (que sí lo quita).
   await login(page, MARK, MARK)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1500)
@@ -190,7 +190,7 @@ test('SCRUM-884 — Mark puede optar por QUEDARSE como responsable si quiere (no
   await page.getByRole('button', { name: /editar/i }).first().click()
   await page.waitForTimeout(500)
 
-  // Confirmar que el chip de Mark está presente (viene por default, sin tocarlo) y guardar tal cual.
+  // Confirmar que el chip de Gerencia está presente (viene por default, sin tocarlo) y guardar tal cual.
   const responsableSection = page.locator('label', { hasText: /responsable/i }).first().locator('..')
   await expect(responsableSection.getByRole('button', { name: /quitar mark/i })).toBeVisible()
 
@@ -198,16 +198,16 @@ test('SCRUM-884 — Mark puede optar por QUEDARSE como responsable si quiere (no
     page.waitForResponse(r => r.request().method() === 'PUT' && r.url().includes('/pipeline/') && r.url().includes(String(newCardId))),
     page.getByRole('button', { name: /guardar/i }).click(),
   ])
-  expect(putResponse2.status(), 'el guardado debe confirmarse con 200 aun sin tocar el chip de Mark').toBe(200)
+  expect(putResponse2.status(), 'el guardado debe confirmarse con 200 aun sin tocar el chip de Gerencia').toBe(200)
   await page.waitForTimeout(1200)
 
   const detailAfter = await apiGet(page, `/api/ventas-diseno/pipeline/${newCardId}`)
-  expect((detailAfter.body.assignees ?? []).some((a: any) => /mark/i.test(a.name)), 'Mark debe seguir como responsable si nunca se lo quitó').toBe(true)
+  expect((detailAfter.body.assignees ?? []).some((a: any) => /mark/i.test(a.name)), 'Gerencia debe seguir como responsable si nunca se lo quitó').toBe(true)
 })
 
 test('SCRUM-884 — hallazgo NO bloqueante: una vez removido, Gerencia no puede re-agregarse a sí misma desde este selector (fuera de teamVendors)', async ({ page }) => {
-  // Sobre la tarjeta del test 3 (Mark ya removido, Anelhys quedó como responsable): el selector
-  // de Responsable solo ofrece teamVendors ∪ asignados ACTUALES — Mark, al no ser vendedor/
+  // Sobre la tarjeta del test 3 (Gerencia ya removido, Vendedor Disenador quedó como responsable): el selector
+  // de Responsable solo ofrece teamVendors ∪ asignados ACTUALES — Gerencia, al no ser vendedor/
   // diseñador y ya no estar entre los asignados actuales, desaparece de las opciones. No es parte
   // del criterio de aceptación de SCRUM-884 (que solo exige poder QUITARLO, no volver a
   // agregarlo después de guardado) y es consistente con el diseño original de SCRUM-849.4 (el
@@ -233,16 +233,16 @@ test('SCRUM-884 — hallazgo NO bloqueante: una vez removido, Gerencia no puede 
   await responsableSection.getByRole('button').first().click()
   await page.waitForTimeout(300)
   const markRowCount = await page.locator('li', { hasText: /^mark/i }).count()
-  console.log('INFO — filas "Mark" disponibles en el selector tras ser removido:', markRowCount)
-  expect(markRowCount, 'confirmado: Mark ya no aparece como opción seleccionable en este selector').toBe(0)
+  console.log('INFO — filas "Gerencia" disponibles en el selector tras ser removido:', markRowCount)
+  expect(markRowCount, 'confirmado: Gerencia ya no aparece como opción seleccionable en este selector').toBe(0)
 })
 
 test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VENDEDOR/DISEÑADOR del campo Responsable (comportamiento pre-existente, no debe romperse)', async ({ page }) => {
   // Nota de diseño: solo Gerencia/superadmin ve el selector editable de Responsable
   // (`canSeeTeam` en PipelineCardModal/NewProjectModal) — un vendedor nunca lo edita él mismo.
   // El contraste real del ticket es "Gerencia SÍ podía quitar a un creador vendedor (ya estaba en
-  // teamVendors) pero NO a un creador Gerencia (no estaba)" — se prueba así: Annie (vendedora)
-  // crea el proyecto, Mark (Gerencia) la remueve del campo Responsable.
+  // teamVendors) pero NO a un creador Gerencia (no estaba)" — se prueba así: Vendedor Disenador (vendedora)
+  // crea el proyecto, Gerencia (Gerencia) la remueve del campo Responsable.
   const VENDOR = 'vendedordisenador6@test.com'
   await login(page, VENDOR, VENDOR)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
@@ -265,7 +265,7 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   expect(card).toBeTruthy()
   const vendorCardId = card.id
 
-  // Ahora como Mark (Gerencia) — abrir la misma tarjeta y confirmar que el chip de Annie
+  // Ahora como Gerencia (Gerencia) — abrir la misma tarjeta y confirmar que el chip de Vendedor Disenador
   // (vendedora, creadora) es removible, igual que antes del fix (regresión, no algo nuevo).
   await login(page, MARK, MARK)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
@@ -285,8 +285,8 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   const annieChip = page.locator('span', { hasText: /annie|anelhys/i }).first()
   await expect(annieChip, 'el chip de un creador vendedor/diseñador debe seguir siendo removible (regresión)').toBeVisible({ timeout: 5000 })
 
-  // Agregar a otro vendedor (Neil, sí está en teamVendors) ANTES de quitar a Annie, para poder
-  // guardar sin violar min:1 — a diferencia de Mark (Gerencia), Neil sí es una opción válida acá.
+  // Agregar a otro vendedor (Vendedor Disenador, sí está en teamVendors) ANTES de quitar a Vendedor Disenador, para poder
+  // guardar sin violar min:1 — a diferencia de Gerencia (Gerencia), Vendedor Disenador sí es una opción válida acá.
   const neilRow = page.locator('li', { hasText: /neil/i }).first()
   await neilRow.locator('input[type="checkbox"]').check()
   await page.waitForTimeout(200)
@@ -302,5 +302,5 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   expect(putResponse3.status(), 'quitar a un creador vendedor del campo Responsable debe seguir funcionando (200)').toBe(200)
 
   const detailAfter = await apiGet(page, `/api/ventas-diseno/pipeline/${vendorCardId}`)
-  expect((detailAfter.body.assignees ?? []).some((a: any) => /anelhys|annie/i.test(a.name)), 'Annie ya no debe estar en assignees').toBe(false)
+  expect((detailAfter.body.assignees ?? []).some((a: any) => /anelhys|annie/i.test(a.name)), 'Vendedor Disenador ya no debe estar en assignees').toBe(false)
 })

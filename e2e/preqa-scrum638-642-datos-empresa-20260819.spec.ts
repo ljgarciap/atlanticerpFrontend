@@ -23,7 +23,7 @@ test('REQ-561 RN1 — no-Mark ve "acceso restringido"', async ({ page }) => {
   await page.screenshot({ path: 'test-results/scrum638-00-no-mark-restricted.png', fullPage: true })
 })
 
-test('Datos de la Empresa — Mark, paneles y campos siempre bloqueados', async ({ page }) => {
+test('Datos de la Empresa — Gerencia, paneles y campos siempre bloqueados', async ({ page }) => {
   await login(page, MARK)
   await page.goto('/admin-contab/empresa')
   await page.waitForSelector('text=Identidad de marca')

@@ -6,7 +6,7 @@ import type { ReceptorTipo } from '@/types/ventasDiseno'
  * categoría "WalkIn" ni decidirlo por documento): Contribuyente (default) o Consumidor Final. Gobierno y Extranjero quedan
  * fuera de alcance. Con Consumidor Final el formulario oculta RUC y DV.
  *
- * Decisión de Luis (2026-09-30): PASAR un cliente a Consumidor Final exige el permiso angosto de Mark y Felix
+ * Decisión de Luis (2026-09-30): PASAR un cliente a Consumidor Final exige el permiso angosto de Gerencia y Contabilidad
  * (`permitirConsumidorFinal`); sin él, la opción aparece deshabilitada con la razón. Un cliente que ya es Consumidor Final
  * conserva su opción: se compara contra el valor ORIGINAL guardado (`valorOriginal`), no contra el que se está tecleando, para que
  * quien lo pasa a Contribuyente en el modal pueda arrepentirse sin cancelar.

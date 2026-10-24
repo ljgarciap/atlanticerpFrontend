@@ -92,7 +92,7 @@ describe('VentasDisenoHomePage', () => {
     expect(await screen.findByText('ventasDiseno:home.greeting:Ana')).toBeInTheDocument()
   })
 
-  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+  it('rebote QA (Gerencia, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
     mockedStore.mockReturnValue({ user: { id: 1, role: 'designer', first_name: 'Ana Maria', last_name: 'Diaz' } } as never)
     renderPage()
     expect(await screen.findByText('ventasDiseno:home.greeting:Ana')).toBeInTheDocument()

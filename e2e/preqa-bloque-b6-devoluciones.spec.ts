@@ -374,7 +374,7 @@ test.describe('SCRUM-479/480/481 — Confirmar recepción física / Rechazar (ci
     await page.screenshot({ path: 'e2e/.tmp/b6-historial-completo-finalizado.png' })
   })
 
-  test('rechazo: doble clic (1ro revela motivo sin enviar, 2do confirma), sin aprobación de Mark, NO toca inventario ni notifica', async ({ page }) => {
+  test('rechazo: doble clic (1ro revela motivo sin enviar, 2do confirma), sin aprobación de Gerencia, NO toca inventario ni notifica', async ({ page }) => {
     const token = await login2FetchToken()
     const created = await apiPost(token, '/api/bodega/returns', {
       order_id: await getOrderId(),

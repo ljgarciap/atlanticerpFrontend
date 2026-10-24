@@ -89,7 +89,7 @@ export default function NewPurchaseOrderPage() {
   const [providerName, setProviderName] = useState(restored?.providerName ?? '')
   const [providerSearch, setProviderSearch] = useState('')
   // SCRUM-729 — el listado quedaba permanentemente desplegado apenas había resultados,
-  // sin importar si el campo tenía foco (regresión reportada por Daniela). Mismo patrón
+  // sin importar si el campo tenía foco (regresión reportada por Gerencia). Mismo patrón
   // de foco/blur que ContactoAutocomplete/AutocompleteInput: se abre al enfocar/tipear,
   // se cierra al perder el foco (con delay para que el onMouseDown de una opción alcance
   // a dispararse antes de que el blur la oculte).

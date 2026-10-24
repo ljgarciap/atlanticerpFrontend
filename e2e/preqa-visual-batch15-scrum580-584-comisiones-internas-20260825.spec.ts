@@ -141,7 +141,7 @@ test('REQ-505 — vendedor con cero pedidos EN TODA LA HISTORIA (Designer Demo, 
   await expect(expandedRow.getByText('Sin pedidos registrados todavía.', { exact: false })).toBeVisible()
 })
 
-test('PERMISOS — Milena (vendedor) solo ve su propia fila, sin selector de vendedor ni exportar', async ({ page }) => {
+test('PERMISOS — Vendedor Disenador (vendedor) solo ve su propia fila, sin selector de vendedor ni exportar', async ({ page }) => {
   const ok = await login(page, MILENA)
   expect(ok).toBeTruthy()
   await goToComisiones(page)

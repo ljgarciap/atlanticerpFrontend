@@ -77,7 +77,7 @@ describe('ServiciosHomeHeader (REQ-206 / SCRUM-269)', () => {
     expect(screen.queryByText(/^Test$/)).not.toBeInTheDocument()
   })
 
-  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+  it('rebote QA (Gerencia, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ first_name: 'Lider Jose', last_name: 'Test' }) } as never)
     mockedApi.internalTechnicians.stats.mockResolvedValue(makeTeamStats())
     mockedApi.tickets.stats.mockResolvedValue(makeTicketStats())

@@ -54,12 +54,12 @@ $fefi = User::where('email', 'vendedordisenador3@test.com')->first();
 $master = MasterClient::create(['name' => 'PreQA SCRUM854 Cliente ' . uniqid()]);
 $sub    = SubClient::create(['master_client_id' => $master->id, 'business_name' => 'PreQA SCRUM854 Sub ' . uniqid(), 'tax_id' => '155-0000-9-' . random_int(1000, 9999)]);
 
-$projectA = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto A (Neil)']);
+$projectA = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto A (Vendedor Disenador)']);
 $cardA = PipelineCard::create(['sales_project_id' => $projectA->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $neil?->id, 'amount' => 300.0, 'stage_changed_at' => Carbon::now()]);
 $orderA = Order::create(['order_number' => 'PED-2026-PREQA854A-' . random_int(100000, 999999), 'pipeline_card_id' => $cardA->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_ASIGNADO, 'customer_name' => $sub->business_name]);
 $orderA->items()->create(['qty_requested' => 3, 'reference_snapshot' => 'REF-A', 'description_snapshot' => 'Item A']);
 
-$projectB = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto B (Fefi)']);
+$projectB = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto B (Vendedor Disenador)']);
 $cardB = PipelineCard::create(['sales_project_id' => $projectB->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $fefi?->id, 'amount' => 200.0, 'stage_changed_at' => Carbon::now()]);
 $orderB = Order::create(['order_number' => 'PED-2026-PREQA854B-' . random_int(100000, 999999), 'pipeline_card_id' => $cardB->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_POR_DESPACHAR, 'customer_name' => $sub->business_name]);
 $orderB->items()->create(['qty_requested' => 2, 'reference_snapshot' => 'REF-B', 'description_snapshot' => 'Item B']);
@@ -249,7 +249,7 @@ test('SCRUM-854.3 — Lista de Proyectos: mismo checklist', async ({ page }) => 
 
   const teamBtn = page.getByRole('button', { name: /equipo/i }).first()
   const hasTeam = await teamBtn.isVisible().catch(() => false)
-  expect(hasTeam, 'Daniela (management) debería ver el toggle Equipo en Lista de Proyectos').toBe(true)
+  expect(hasTeam, 'Gerencia (management) debería ver el toggle Equipo en Lista de Proyectos').toBe(true)
   await teamBtn.click()
   await page.waitForTimeout(600)
 
@@ -299,7 +299,7 @@ test('SCRUM-854.4 — Cotizaciones: mismo checklist', async ({ page }) => {
 
   const toggle = page.locator('button[aria-haspopup="listbox"]').first()
   const visible = await toggle.isVisible().catch(() => false)
-  expect(visible, 'Daniela debería ver el filtro de vendedor en Cotizaciones').toBe(true)
+  expect(visible, 'Gerencia debería ver el filtro de vendedor en Cotizaciones').toBe(true)
   await toggle.click()
   await page.waitForTimeout(400)
   const checkboxes = page.locator('div[role="listbox"] li input[type="checkbox"]')
@@ -332,7 +332,7 @@ test('SCRUM-854.5 — Reportes VentasDiseno: recálculo real (red lleva owner_id
 
   const toggle = page.locator('button[aria-haspopup="listbox"]').first()
   const visible = await toggle.isVisible().catch(() => false)
-  expect(visible, 'Daniela debería ver el filtro de vendedor en Reportes').toBe(true)
+  expect(visible, 'Gerencia debería ver el filtro de vendedor en Reportes').toBe(true)
   await toggle.click()
   await page.waitForTimeout(400)
   const checkboxes = page.locator('div[role="listbox"] li input[type="checkbox"]')

@@ -48,12 +48,12 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   // cambio de monto pendiente de aprobación, "Enviar a pago" y "Registrar pago" quedan
   // bloqueados (el backend ya lo rechaza con 422; acá se deshabilitan antes de intentarlo).
   const hasPendingAmountChange = order.pending_amount_change !== null
-  // SCRUM-252 — "Aprobar/Rechazar cambio" solo para Mark. Si no hay primary_approver_user_id
+  // SCRUM-252 — "Aprobar/Rechazar cambio" solo para Gerencia. Si no hay primary_approver_user_id
   // configurado todavía, el backend tampoco lo exige (mismo criterio que approveAmountChange()
   // del lado del servidor) — se deja visible para no bloquear un entorno sin ese ajuste hecho.
-  // Mientras no se sepa con certeza quién es Mark (settings todavía cargando), el botón
+  // Mientras no se sepa con certeza quién es Gerencia (settings todavía cargando), el botón
   // sensible queda OCULTO por defecto en vez de mostrarse de más un instante — más seguro que
-  // arriesgar un falso "sí sos Mark" mientras la respuesta no llegó.
+  // arriesgar un falso "sí sos Gerencia" mientras la respuesta no llegó.
   const isMark = settings !== undefined
     && (settings.primary_approver_user_id == null || settings.primary_approver_user_id === currentUserId)
 
@@ -104,7 +104,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
         <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs mb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: formatMoney(order.pending_amount_change as number) })}</span>
-            {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Mark;
+            {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Gerencia;
                 Yirena (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
             {isMark && (
               <div className="flex gap-2">

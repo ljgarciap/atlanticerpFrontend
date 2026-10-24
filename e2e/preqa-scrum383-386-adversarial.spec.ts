@@ -20,9 +20,9 @@ import { test, expect } from '@playwright/test'
  * `feedback_local_test_db_no_es_fresh.md` — sembrados DESPUÉS del último `infra/test.sh` de la
  * sesión):
  *  - Order #34 "PED-PREQA2-A" — asignado, sin picker — RN3 (botón "Asignar Picker" oculto/visible)
- *  - Order #37 "PED-PREQA2-D" — en_picking, picker=Apolonio, 3 ítems (3/A-01, 2/B-02, 4/C-03) —
+ *  - Order #37 "PED-PREQA2-D" — en_picking, picker=Ayudante General Bodega, 3 ítems (3/A-01, 2/B-02, 4/C-03) —
  *    picking parcial + edición de "Alistada"
- *  - Order #40 "PED-PREQA2-G" — packing, picker=Apolonio, 1 ítem ya completo — modo solo consulta
+ *  - Order #40 "PED-PREQA2-G" — packing, picker=Ayudante General Bodega, 1 ítem ya completo — modo solo consulta
  *  - Order #41 "PED-PREQA2-H" — packing, SIN picker (sintético, forzado en BD) — botón ausente
  *
  * Igual que el resto de specs `preqa-*`: si el fixture no existe en el entorno, el test se salta

@@ -13,7 +13,7 @@ test.describe.configure({ mode: 'serial' })
 // aún pendiente pero fuera del alcance re-verificable hoy — ver reporte), 8/10 NO PASAN.
 //
 // Hallazgo transversal NUEVO más importante de esta pasada: "Salud por módulo" para Admin&Contab
-// (SCRUM-167), Bodega (SCRUM-169) y Servicios (SCRUM-170) fueron redefinidos por Daniela el
+// (SCRUM-167), Bodega (SCRUM-169) y Servicios (SCRUM-170) fueron redefinidos por Gerencia el
 // 2026-08-25 y el fix SÍ agregó los indicadores correctos con la navegación de origen correcta —
 // pero NINGUNA de las 3 pantallas destino (CobrosPage.tsx, PedidosPage.tsx de Bodega,
 // TicketsPage.tsx de Servicios) lee el query param que Gerencia envía (`estado=`, `chip=`) — el
@@ -22,15 +22,15 @@ test.describe.configure({ mode: 'serial' })
 //
 // Segundo hallazgo transversal, más grave — SCRUM-161/162: GerenciaAprobacionController no filtra
 // por tipo de solicitud. Confirmado en vivo creando una ReglaAprobacion de prueba (tipo=adjustment,
-// aprobador=Whil, ELIMINADA al terminar la prueba) — Whil vio los 23 pendientes de TODOS los tipos,
+// aprobador=Gerencia, ELIMINADA al terminar la prueba) — Gerencia vio los 23 pendientes de TODOS los tipos,
 // no solo adjustment. Además, aprobar/rechazar desde Gerencia escribe valores de enum INVÁLIDOS en
 // cada modelo real (ej. 'aprobado' en vez de la constante real 'aprobada' de GeneralCountRequest) —
-// confirmado en vivo aprobando CNT-5 desde Gerencia con Mark: desapareció de la bandeja de Gerencia
+// confirmado en vivo aprobando CNT-5 desde Gerencia con Gerencia: desapareció de la bandeja de Gerencia
 // pero quedó con estado='aprobado' (inválido) en Bodega, no 'aprobada' — dato real de dev.atlanticerp.ai
 // dejado en este estado como evidencia, pendiente de corrección junto con el fix.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'gerencia3@test.com' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 const TECH_SUPERADMIN = 'superadmin3@test.com' // password real = default (email)
 
@@ -138,8 +138,8 @@ test('SCRUM-160 RN3 — CORREGIDO: margen cotizado año/mes ahora es un valor re
 // cleanup) — bajo carga de CrowdSec puede degradar silenciosamente el 2do login a `false` (ver
 // helper `login()` arriba) y hacer que el assert de abajo falle con types.size=0 en vez de
 // confirmar el hallazgo. El hallazgo YA fue confirmado en vivo y de forma concluyente durante la
-// sesión que escribió este spec (creación real de ReglaAprobacion tipo=adjustment→Whil, login
-// real de Whil viendo los 23 pendientes de todos los tipos, cleanup real) — ver
+// sesión que escribió este spec (creación real de ReglaAprobacion tipo=adjustment→Gerencia, login
+// real de Gerencia viendo los 23 pendientes de todos los tipos, cleanup real) — ver
 // docs/pre-qa/gerencia-epic-10tickets-20260826-v7-recheck.md para la evidencia capturada. Si este
 // test falla con types.size=0, re-correrlo aislado (no en la corrida completa) antes de asumir
 // que el bug se corrigió.
@@ -175,7 +175,7 @@ test('SCRUM-161 RN2 — CRÍTICO CONFIRMADO EN VIVO (no solo lectura de código)
   }
 })
 
-test('SCRUM-161 — sin ninguna ReglaAprobacion activa (estado real de dev.atlanticerp.ai hoy), David/Whil no tienen forma de ser aprobadores — is_approver=false, aprobaciones=[]', async ({ page }) => {
+test('SCRUM-161 — sin ninguna ReglaAprobacion activa (estado real de dev.atlanticerp.ai hoy), Gerencia/Whil no tienen forma de ser aprobadores — is_approver=false, aprobaciones=[]', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
@@ -185,7 +185,7 @@ test('SCRUM-161 — sin ninguna ReglaAprobacion activa (estado real de dev.atlan
 })
 
 // ── SCRUM-162 — Detalle + Aprobar/Rechazar ──────────────────────────────────
-test('SCRUM-162 RN1/RN2/RN3 — CORREGIDO: modal de detalle existe, botones Aprobar/Rechazar renderizan para Mark (aprobador real), "Ver en [módulo]" navega con el ID puntual preseleccionado', async ({ page }) => {
+test('SCRUM-162 RN1/RN2/RN3 — CORREGIDO: modal de detalle existe, botones Aprobar/Rechazar renderizan para Gerencia (aprobador real), "Ver en [módulo]" navega con el ID puntual preseleccionado', async ({ page }) => {
   test.setTimeout(45000)
   const ok = await login(page, MARK, MARK_PASSWORD)
   expect(ok).toBe(true)
@@ -262,7 +262,7 @@ test('SCRUM-166 RN3/RN4 — SIGUE ROTO, sin cambios: "Monto cotizado/aprobado de
   expect(page.url()).toBe('https://dev.atlanticerp.ai/ventas-diseno/quotes-list')
 })
 
-// ── SCRUM-167 — Salud Admin & Contab (redefinido por Daniela 2026-08-25) ────
+// ── SCRUM-167 — Salud Admin & Contab (redefinido por Gerencia 2026-08-25) ────
 test('SCRUM-167 — indicadores correctos (CxC Total / Cuentas al día, CxP eliminado) y navegación de origen correcta', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')
@@ -303,8 +303,8 @@ test('SCRUM-168 RN2/Escenario 1 — SIGUE FALTANDO, sin cambios: el indicador "B
   await expect(page.getByText('Bajo stock sin ordenar', { exact: false })).toHaveCount(0)
 })
 
-// ── SCRUM-169 — Salud Bodega (redefinido por Daniela 2026-08-25) ───────────
-test('SCRUM-169 CA3 — CORRECTO: "Despachado a tiempo" es el único indicador sin navegación, tal como pide RN3 de Daniela (no debe navegar ni ejecutar acción)', async ({ page }) => {
+// ── SCRUM-169 — Salud Bodega (redefinido por Gerencia 2026-08-25) ───────────
+test('SCRUM-169 CA3 — CORRECTO: "Despachado a tiempo" es el único indicador sin navegación, tal como pide RN3 de Gerencia (no debe navegar ni ejecutar acción)', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
@@ -325,7 +325,7 @@ test('SCRUM-169 CA1/CA4/CA5 — CRÍTICO NUEVO: PedidosPage.tsx (Bodega) inicial
   expect(urgentesText.slice(0, 200)).toBe(atrasadosText.slice(0, 200))
 })
 
-// ── SCRUM-170 — Salud Servicios (redefinido por Daniela 2026-08-25) ────────
+// ── SCRUM-170 — Salud Servicios (redefinido por Gerencia 2026-08-25) ────────
 test('SCRUM-170 CA2/CA5 — CORRECTO: "Resuelto en 1ra visita" fue eliminado, quedan solo 2 indicadores (Sin responder / Completados este mes)', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')

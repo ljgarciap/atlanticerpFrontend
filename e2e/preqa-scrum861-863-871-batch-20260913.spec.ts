@@ -130,12 +130,12 @@ const greetingCases: { email: string; label: string; path: string; firstNameOnly
   { email: 'lidercompras@test.com', label: 'Compras (Lider Compras Test)', path: '/compras/home', firstNameOnly: 'YIRENA', fullName: 'YIRENA TENG' },
   { email: 'liderbodega@test.com', label: 'Bodega (Lider Bodega Test)', path: '/bodega/home', firstNameOnly: 'ESTEBAN', fullName: 'ESTEBAN CARDENAS' },
   // NOTA 2026-09-13: el CLAUDE.md del proyecto (batch SCRUM-800, 2026-08-28) documenta que el
-  // Líder de Servicios fue renombrado Aaron→Aldo (apellido real "Aldo" pendiente de confirmar,
+  // Líder de Servicios fue renombrado Lider Servicios→Lider Servicios (apellido real "Lider Servicios" pendiente de confirmar,
   // placeholder "Lider Servicios Test" en los 3 entornos) — la memoria de roster (project_roster_usuarios_
-  // reales_atlanticerp) seguía diciendo "Aaron Leis" para este email, desactualizada. Confirmado en vivo:
+  // reales_atlanticerp) seguía diciendo "Lider Servicios Leis" para este email, desactualizada. Confirmado en vivo:
   // BIENVENIDO, ALDO (no "Lider Servicios Test") — el saludo YA está correcto, el dato viejo era el nombre
   // esperado en este test, no un bug de SCRUM-863.
-  { email: 'liderservicios@test.com', label: 'Servicios (Aldo, líder de Servicios)', path: '/servicios/home', firstNameOnly: 'ALDO', fullName: 'ALDO ALDO' },
+  { email: 'liderservicios@test.com', label: 'Servicios (Lider Servicios, líder de Servicios)', path: '/servicios/home', firstNameOnly: 'ALDO', fullName: 'ALDO ALDO' },
   { email: 'contabilidad@test.com', label: 'Administración (Contabilidad Test)', path: '/admin-contab/home', firstNameOnly: 'FELIX', fullName: 'FELIX CAMPOS' },
 ]
 
@@ -288,7 +288,7 @@ test('SCRUM-871 — Bodega Home: una vez cargada la data, Por recibir (75) y Art
   expect(shownTotal, `"Ver los N artículos" debería mostrar el TOTAL real (grande, ej. 11670), no el tamaño del array capado (5) — texto real: "${viewAllText}"`).toBeGreaterThan(MAX_HOME_CARD_ITEMS_FOR_ASSERTION)
 })
 
-test('SCRUM-871 — Bodega vista Equipo (Esteban, view_team=true): mismo cap de 5 + "Ver más" se mantiene', async ({ page }) => {
+test('SCRUM-871 — Bodega vista Equipo (Lider Bodega, view_team=true): mismo cap de 5 + "Ver más" se mantiene', async ({ page }) => {
   test.setTimeout(30000)
   await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto(`${DEV}/bodega/home`)
@@ -302,7 +302,7 @@ test('SCRUM-871 — Bodega vista Equipo (Esteban, view_team=true): mismo cap de 
   expect(totalListItemsOnPage).toBeLessThan(200)
 })
 
-test('SCRUM-871 — Ventas & Diseño Home (Neil): Final Stage (2, <=5) NO muestra "Ver más"; Pendientes (15) sí', async ({ page }) => {
+test('SCRUM-871 — Ventas & Diseño Home (Vendedor Disenador): Final Stage (2, <=5) NO muestra "Ver más"; Pendientes (15) sí', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
@@ -311,7 +311,7 @@ test('SCRUM-871 — Ventas & Diseño Home (Neil): Final Stage (2, <=5) NO muestr
   expect(verMasCount).toBeGreaterThanOrEqual(1)
 })
 
-test('SCRUM-871 — Ventas & Diseño vista Equipo (Daniela, management): cap de 5 + "Ver más" se mantiene', async ({ page }) => {
+test('SCRUM-871 — Ventas & Diseño vista Equipo (Gerencia, management): cap de 5 + "Ver más" se mantiene', async ({ page }) => {
   await login(page, 'gerencia@test.com', 'gerencia@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(2500)
@@ -328,13 +328,13 @@ test('SCRUM-871 — Ventas & Diseño vista Equipo (Daniela, management): cap de 
   expect(totalListItemsOnPage).toBeLessThan(300)
 })
 
-test('SCRUM-871 — Administración Home (Felix): tarjeta Pendientes (3, <=5) sin "Ver más" propio, sin badge de círculo sólido', async ({ page }) => {
+test('SCRUM-871 — Administración Home (Contabilidad): tarjeta Pendientes (3, <=5) sin "Ver más" propio, sin badge de círculo sólido', async ({ page }) => {
   await login(page, 'contabilidad@test.com', 'contabilidad@test.com')
   await page.goto(`${DEV}/admin-contab/home`)
   await page.waitForTimeout(3000)
   await expect(page.locator('body')).toContainText(/Pendientes/i)
   // FALSE POSITIVE encontrado en la pasada 2026-09-13: el primer intento de este assert (sin la
-  // exclusión de abajo) falló contra Felix porque tenía 6 notificaciones sin leer — el único
+  // exclusión de abajo) falló contra Contabilidad porque tenía 6 notificaciones sin leer — el único
   // `span.rounded-full` con texto blanco resultó ser el badge GLOBAL del `NotificationBell` del
   // TopBar (`data-testid="notification-badge"`, atlanticerp-frontend/src/components/NotificationBell.tsx:64),
   // no un contador de tarjeta de Home. Ese badge es preexistente, vive en TODOS los módulos, y está

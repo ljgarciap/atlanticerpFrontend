@@ -408,7 +408,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
 
   const [lines, setLines] = useState<Array<Partial<AdjustmentRequestLineDraft>>>([])
   const [error, setError] = useState<string | null>(null)
-  // SCRUM-797 RN5→RN7 — crear ES el único momento de "enviar a aprobación de Mark" de este flujo
+  // SCRUM-797 RN5→RN7 — crear ES el único momento de "enviar a aprobación de Gerencia" de este flujo
   // (a diferencia de Inventario General, acá no hay borrador previo), así que la advertencia y la
   // confirmación de reemplazo ocurren en el mismo 409.
   const [duplicates, setDuplicates] = useState<AdjustmentDuplicateWarning[] | null>(null)

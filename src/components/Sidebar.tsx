@@ -148,7 +148,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const hasVentasDisenoAccess = usePermission('ventas_diseno.read')
   const canSeeVentasDiseno = (user?.modules?.ventas_diseno?.view === true || hasVentasDisenoAccess)
     && user?.menuVisibility?.ventas_diseno?.__module__ !== false
-  // SCRUM-1128 — Félix solo tiene lectura del Pipeline (`ventas_diseno.pipeline.read_all`): no tiene
+  // SCRUM-1128 — Contabilidad solo tiene lectura del Pipeline (`ventas_diseno.pipeline.read_all`): no tiene
   // `ventas_diseno.read` ni `modules.ventas_diseno`, así que `canSeeVentasDiseno` es false para él.
   // Ve únicamente el ítem Pipeline de CRM, nunca el resto del módulo.
   const canSeePipelineReadOnly = usePermission('ventas_diseno.pipeline.read_all') && !canSeeVentasDiseno
@@ -192,7 +192,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const hasLogisticaView   = usePermission('compras.logistica.view')
   const canSeeLogisticaOnly = !canSeeCompras && hasLogisticaView
   // SCRUM-1157 (Pre-QA) — `compras.limited.view` es el permiso de CONSULTA de Compras (Ver Órdenes, Logística, Inventario, Ingresos): sus rutas lo
-  // aceptan, pero el menú solo mostraba Compras con el módulo en ver completo. Mariam tiene el módulo en solo lectura (`can_view=1` por persona, que
+  // aceptan, pero el menú solo mostraba Compras con el módulo en ver completo. Lider Operaciones tiene el módulo en solo lectura (`can_view=1` por persona, que
   // apaga `modules.compras.view`) y solo ese permiso: abría esas pantallas por URL y su aterrizaje (/compras/ordenes) no estaba en su menú.
   const hasLimitedView = usePermission('compras.limited.view')
   const canSeeComprasLimited = !canSeeCompras && hasLimitedView
@@ -215,7 +215,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const canSeeBodegaSettings = usePermission('superadmin.all')
   // SCRUM-944/945 — vista consolidada de valores paramétricos de negocio, mismo gate estricto.
   const canSeeGlobalSettings = usePermission('superadmin.all')
-  // SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Mark en el backend (`primary_approver_only`, por identidad; superadmin
+  // SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Gerencia en el backend (`primary_approver_only`, por identidad; superadmin
   // aparte): al resto del roster de Admin&Cont le abrían la pantalla y el API respondía 403 («no carga el contenido»). Solo se oculta cuando
   // el flag viene explícitamente en `false`: una sesión abierta antes de este cambio no trae el campo y conserva el menú hasta renovarla
   // (el backend sigue cortando el acceso de todos modos).
@@ -361,10 +361,10 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   //
   // Hallazgo de Pre-QA (2026-07-31, SCRUM-674): REQ-594 RN5/RN6 exige gating por PERFIL además
   // del gate de módulo de arriba — "Dashboard CRM" solo Gerencia, "Pedidos" oculto para Líder
-  // Admin (Felix) y Asistente Administrativa (Yaneth). `user.role` en runtime es el role_key de
+  // Admin (Contabilidad) y Asistente Administrativa (Asistente Administrativa). `user.role` en runtime es el role_key de
   // negocio (auth_roles.key vía JwtClaimsBuilder, no el enum legado) — confirmado en la DB local:
-  // Mark/Daniela/David/Whileyner (los 4 "Gerencia" del REQ) tienen role_key='management'; Felix
-  // ('lider_admin_contab') y Yaneth ('asistente_administrativa') no tienen ventas_diseno.read en
+  // Gerencia/Daniela/David/Whileyner (los 4 "Gerencia" del REQ) tienen role_key='management'; Contabilidad
+  // ('lider_admin_contab') y Asistente Administrativa ('asistente_administrativa') no tienen ventas_diseno.read en
   // absoluto todavía, así que el escenario de "ve 3 de 4 pestañas" no es alcanzable hasta que se
   // les otorgue ese acceso base — decisión de negocio aparte, no de este batch. El gate de acá
   // deja el comportamiento correcto para cuando eso pase.
@@ -373,8 +373,8 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // con este mismo RequireRole) — sin esto, Luis/Andres/Luis J quedarían bloqueados de su propia
   // pantalla. Hallazgo de un segundo pase de Pre-QA (2026-07-31, revisión estática) que no pudo
   // correr en vivo por una limitación de sandbox del worktree.
-  // SCRUM-1150 (decisión de Luis, 2026-10-15): Félix replica a Mark en CRM y Ventas & Diseño, así que ve Dashboard CRM y Pedidos por
-  // el permiso `ventas_diseno.gerencia_scope` (reemplaza el «Pedidos oculto para Félix» de REQ-594 RN5/RN6 de arriba).
+  // SCRUM-1150 (decisión de Luis, 2026-10-15): Contabilidad replica a Gerencia en CRM y Ventas & Diseño, así que ve Dashboard CRM y Pedidos por
+  // el permiso `ventas_diseno.gerencia_scope` (reemplaza el «Pedidos oculto para Contabilidad» de REQ-594 RN5/RN6 de arriba).
   const isGerencia = hasGerenciaScope(user)
   // SCRUM-1119 — antes se ocultaba solo a Admin&Cont; ahora Pedidos es exclusivo de Gerencia (acá) y de Compras
   // (su propia entrada, arriba). El backend lo vuelve a exigir por rol.
@@ -389,10 +389,10 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // internos", sin desplegable de externos) — Insumos/Reportes/Cotizaciones/Ajustes quedan
   // fuera para ese rol.
   //
-  // SCRUM-780 (rebote de Daniela 2026-08-19) — reemplaza dos decisiones tomadas en SCRUM-774:
+  // SCRUM-780 (rebote de Gerencia 2026-08-19) — reemplaza dos decisiones tomadas en SCRUM-774:
   // (1) "Cotizaciones" deja de ser un ítem propio de la sección, pasa a submenú de "Tickets"
   // (mismo patrón NavDropdown que "Técnicos" un poco más abajo); (2) "Ajustes" se angosta de
-  // lider_servicios/management/superadmin a solo Gerencia (management/superadmin) — Aaron/Líder
+  // lider_servicios/management/superadmin a solo Gerencia (management/superadmin) — Lider Servicios/Líder
   // de Servicios ya no debe verlo. Ver también RequireRole en App.tsx (acceso por URL directa) y
   // el gate del backend en routes/servicios.php (GET /servicios/settings).
   const isServiciosLimited = user?.role === 'vendedor_disenador'
@@ -444,7 +444,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // (`AdminContabPage.tsx`, "Próximamente") — cada Visual Review de esos batches validó su propia
   // pantalla, ninguna validó que el punto de entrada del sidebar llevara a algo. Sin gate de rol
   // adicional por ítem porque cada pantalla ya se auto-gatea (Fiscal/Empresa muestran "Acceso
-  // restringido" si el actor no es Mark, ver `restricted.*` en `adminContab.json` — el router no
+  // restringido" si el actor no es Gerencia, ver `restricted.*` en `adminContab.json` — el router no
   // necesita duplicarlo).
   // SCRUM-882 — Vendedor/Diseñador tiene `admin_contab.view=true` (lo necesita para consultar sus
   // propias Comisiones Internas, ver ComisionesInternasPage) pero NO acceso real a ninguna otra
@@ -454,7 +454,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // (routes/admin-contab.php es la fuente real) — no hay un permiso más fino que `admin_contab.view`
   // en el JWT para distinguir "acceso completo" de "solo mis comisiones", así que se replica acá el
   // mismo allow-list explícito en vez de inventar un permiso nuevo para un solo ticket de corrección.
-  // SCRUM-1139 — `lider_operaciones` (Mariam) espeja a la asistente: mismo roster que el backend (`role:` de routes/admin-contab.php).
+  // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) espeja a la asistente: mismo roster que el backend (`role:` de routes/admin-contab.php).
   const ADMIN_CONTAB_FULL_ACCESS_ROLES = ['superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management']
   const canSeeFullAdminContab = ADMIN_CONTAB_FULL_ACCESS_ROLES.includes(user?.role ?? '')
 
@@ -520,7 +520,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // excepción: semánticamente es una pantalla de configuración (gateada a superadmin), no una
   // operación diaria de Admin&Cont, mismo criterio que agrupa Fiscal/Empresa/Seguridad juntas.
   // SCRUM-1002 — validar/editar datos fiscales de clientes: solo quien puede editarlos Y tiene acceso completo a
-  // Admin&Cont (Mark, Felix); un vendedor con `ventas_diseno.edit` ya tiene el botón en Clientes y no vería esta pantalla.
+  // Admin&Cont (Gerencia, Contabilidad); un vendedor con `ventas_diseno.edit` ya tiene el botón en Clientes y no vería esta pantalla.
   // SCRUM-1166 — la pantalla también es de quien marca clientes exentos de ITBMS (permiso angosto), aunque no edite datos fiscales.
   const canExemptItbms = usePermission('admin_contab.edit.client_itbms_exemption')
   // SCRUM-1181 — hooks siempre llamados (ver canSeeSecurity arriba), combinados después.

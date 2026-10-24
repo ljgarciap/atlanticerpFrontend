@@ -74,7 +74,7 @@ test('Adversarial — Order 127 con 3 documentos guia_entrega, el de mayor id SI
   await page.screenshot({ path: 'e2e/.tmp/scrum400-recheck-order105-adversarial.png', fullPage: true })
 
   const bodyText = await page.locator('body').innerText()
-  console.log('ORDER127_CONTAINS_RECEIVER_NAME=', bodyText.includes('Carlos Receptor Real'))
+  console.log('ORDER127_CONTAINS_RECEIVER_NAME=', bodyText.includes('Tecnico Servicios Receptor Real'))
 
   expect(errors).toEqual([])
 })
@@ -98,7 +98,7 @@ test('Descarga del PDF — Order 126 (firmada) descarga el documento correcto', 
 })
 
 test('Rol sin permiso bodega.read no puede ver el board de Pedidos', async ({ page }) => {
-  // Pre-QA 2026-07-23 (recheck) — corregido tras descubrir que "transporte" (Gary) SÍ tiene
+  // Pre-QA 2026-07-23 (recheck) — corregido tras descubrir que "transporte" (Transporte) SÍ tiene
   // bodega.view/bodega.write reales por rol (no es un caso "sin permiso" válido). Un vendedor/
   // diseñador no tiene ningún permiso de Bodega (confirmado vía JWT: modules.bodega todo false),
   // es el rol correcto para este escenario de ruptura.

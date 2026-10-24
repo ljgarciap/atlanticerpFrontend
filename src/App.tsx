@@ -124,7 +124,7 @@ function CatchAllRedirect() {
 // SCRUM-711 — Dashboard se elimina (era un stub cuyo único CTA navegaba a /crm, tambien
 // oculto). SCRUM-175 (2026-08-04) — el fallback fijo a /ventas-diseno/home causaba un loop
 // infinito de <Navigate> (pantalla en blanco) para cualquier usuario sin acceso a Ventas &
-// Diseño (ej. Yirena, lider_compras, solo ve el módulo Compras) — ver
+// Diseño (ej. Lider Compras, lider_compras, solo ve el módulo Compras) — ver
 // src/lib/homeRoute.ts para el detalle completo. El fallback ahora se resuelve por usuario
 // según sus módulos reales en vez de un módulo fijo.
 
@@ -758,7 +758,7 @@ export default function App() {
                 </RequireRole>
               </RequirePermission>
             } />
-            {/* SCRUM-1002 — validar/editar los datos fiscales de un cliente desde Admin&Cont (Mark, Felix). Entrada
+            {/* SCRUM-1002 — validar/editar los datos fiscales de un cliente desde Admin&Cont (Gerencia, Contabilidad). Entrada
                 normal del router; el gate real (permiso de edición) está en la página y en el backend. */}
             <Route path="/admin-contab/datos-fiscales-clientes" element={
               <RequirePermission permission="admin_contab.view">

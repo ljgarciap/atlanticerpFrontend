@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next'
 /**
  * REQ-274 RN3 (Servicios, SCRUM-344) — Pre-QA 2026-08-13: `origin_module` ya viajaba desde el
  * backend en `PurchaseOrderSummary`/`PurchaseOrderDetail` pero nunca se pintaba en Ver Órdenes ni
- * en el detalle — Yirena no tenía forma real de "diferenciar" una solicitud de Servicios del
+ * en el detalle — Lider Compras no tenía forma real de "diferenciar" una solicitud de Servicios del
  * resto (RN3 explícita del ticket). Solo se renderiza para `origin_module === 'servicios'` (único
  * origen automático hoy, ver `PurchaseOrder::ORIGIN_SERVICIOS`) — el resto de órdenes (creadas a
  * mano en Compras o desde Ventas & Diseño) no lleva badge, mismo criterio que "Origen: Servicios"

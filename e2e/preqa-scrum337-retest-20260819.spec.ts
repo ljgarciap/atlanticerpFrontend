@@ -8,7 +8,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * a nivel de UI real contra dev.atlanticerp.ai: no crash, no leak visual, camino feliz de quien sí tiene
  * el permiso intacto, y un smoke de edición.
  *
- * Cuentas reales (password = email): liderservicios@test.com (Aaron, lider_servicios,
+ * Cuentas reales (password = email): liderservicios@test.com (Lider Servicios, lider_servicios,
  * puede_ver_costos=true), tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios,
  * puede_ver_costos=false). Técnico externo id 2 "QA Luis Vargas" tiene rate_history real (1 fila,
  * $25.00) y tarifa_visible=true — el mismo que crasheaba en el pase anterior.
@@ -35,9 +35,9 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
   return token as string
 }
 
-// ---------- 1 y 2: Carlos (sin puede_ver_costos) — ficha no crashea, no hay leak en ficha ni listado ----------
+// ---------- 1 y 2: Tecnico Servicios (sin puede_ver_costos) — ficha no crashea, no hay leak en ficha ni listado ----------
 
-test('1. Carlos (tecnico_servicios) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
+test('1. Tecnico Servicios (tecnico_servicios) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await login(page, 'tecnicoservicios@test.com')
@@ -52,7 +52,7 @@ test('1. Carlos (tecnico_servicios) — listado de Técnicos externos NO muestra
   expect(errors, `Errores de página en el listado: ${errors.join(' | ')}`).toEqual([])
 })
 
-test('2. Carlos — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history real) NO crashea, carga datos sin costo/tarifa/historial', async ({ page }) => {
+test('2. Tecnico Servicios — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history real) NO crashea, carga datos sin costo/tarifa/historial', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
@@ -68,7 +68,7 @@ test('2. Carlos — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history r
   // No debe crashear: la app sigue teniendo contenido real, no una pantalla en blanco.
   const bodyText = await page.locator('body').innerText()
   expect(bodyText.trim().length, 'La app quedó en blanco (crash) al abrir la ficha').toBeGreaterThan(0)
-  expect(errors, `Errores de página/consola al abrir la ficha como Carlos: ${errors.join(' | ')}`).toEqual([])
+  expect(errors, `Errores de página/consola al abrir la ficha como Tecnico Servicios: ${errors.join(' | ')}`).toEqual([])
 
   // Datos sin costo que SÍ deben verse.
   await expect(page.getByText('QA Luis Vargas').first()).toBeVisible()
@@ -85,9 +85,9 @@ test('2. Carlos — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history r
   await expect(page.getByText('COSTO', { exact: true })).toHaveCount(0)
 })
 
-// ---------- 3: Aaron (con puede_ver_costos) — camino feliz intacto en listado + ficha ----------
+// ---------- 3: Lider Servicios (con puede_ver_costos) — camino feliz intacto en listado + ficha ----------
 
-test('3a. Aaron (lider_servicios) — listado SÍ muestra la tarifa real en la columna TARIFA', async ({ page }) => {
+test('3a. Lider Servicios (lider_servicios) — listado SÍ muestra la tarifa real en la columna TARIFA', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
@@ -98,7 +98,7 @@ test('3a. Aaron (lider_servicios) — listado SÍ muestra la tarifa real en la c
   await expect(row.getByText('$25.00')).toBeVisible()
 })
 
-test('3b. Aaron — ficha de "QA Luis Vargas" SÍ muestra tarifa, margen y el historial completo', async ({ page }) => {
+test('3b. Lider Servicios — ficha de "QA Luis Vargas" SÍ muestra tarifa, margen y el historial completo', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await login(page, 'liderservicios@test.com')
@@ -109,17 +109,17 @@ test('3b. Aaron — ficha de "QA Luis Vargas" SÍ muestra tarifa, margen y el hi
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/04-aaron-ficha-completa.png`, fullPage: true })
 
-  expect(errors, `Errores de página al abrir la ficha como Aaron: ${errors.join(' | ')}`).toEqual([])
+  expect(errors, `Errores de página al abrir la ficha como Lider Servicios: ${errors.join(' | ')}`).toEqual([])
   await expect(page.getByText('$25.00').first()).toBeVisible()
   // Historial de tarifa: al menos una entrada visible (25.00 — Super).
   await expect(page.getByText('25.00', { exact: false }).first()).toBeVisible()
-  // Proyectos asignados con costo/margen visibles para Aaron.
+  // Proyectos asignados con costo/margen visibles para Lider Servicios.
   await expect(page.getByText('REC-2026-0006', { exact: false })).toBeVisible()
 })
 
-// ---------- 4: smoke de edición (Aaron) — no se rompió el resto del CRUD ----------
+// ---------- 4: smoke de edición (Lider Servicios) — no se rompió el resto del CRUD ----------
 
-test('4. Ruptura directa — PATCH tarifa/estado de Aaron siguen funcionando (200), no se rompió el resto del CRUD', async ({ request }) => {
+test('4. Ruptura directa — PATCH tarifa/estado de Lider Servicios siguen funcionando (200), no se rompió el resto del CRUD', async ({ request }) => {
   const token = await apiToken(request, 'liderservicios@test.com')
 
   // Confirmar estado actual y volver a setearlo (sin cambiar datos reales) — smoke no destructivo.
@@ -136,7 +136,7 @@ test('4. Ruptura directa — PATCH tarifa/estado de Aaron siguen funcionando (20
   console.log('[SCRUM-337 retest] PATCH tarifa status:', patchTarifa.status())
   expect(patchTarifa.status()).toBe(200)
   const patchTarifaJson = await patchTarifa.json()
-  // El summary() que responde este PATCH debe seguir mostrando tarifa_dia a Aaron (canSeeCosts=true).
+  // El summary() que responde este PATCH debe seguir mostrando tarifa_dia a Lider Servicios (canSeeCosts=true).
   expect(patchTarifaJson.tarifa_dia).toBe(beforeJson.tarifa_dia)
 
   const patchEstado = await request.patch(`${BASE}/api/servicios/external-technicians/2/estado`, {

@@ -1275,7 +1275,7 @@ describe('QuotePage', () => {
       expect(screen.queryByText(FIELD('deliveryDates'))).not.toBeInTheDocument()
     })
 
-    // Escenario literal reportado por Daniela: el FE mandaba delivery_dates [''] y el backend
+    // Escenario literal reportado por Gerencia: el FE mandaba delivery_dates [''] y el backend
     // respondía 422 de formato (sin `missing`), que caía al banner crudo y no se limpiaba.
     const laravel422Format = (n = 0) => ({
       isAxiosError: true,
@@ -1481,7 +1481,7 @@ describe('QuotePage', () => {
     expect(mockedApi.quotes.confirm).not.toHaveBeenCalled()
   })
 
-  // Pre-QA SCRUM-723 (2026-08-05, hallazgo de Daniela): con la cotización generada
+  // Pre-QA SCRUM-723 (2026-08-05, hallazgo de Gerencia): con la cotización generada
   // pero SIN confirmar, "Volver a Pipeline" navegaba directo sin avisar, dejando la
   // tarjeta en Lead sin que el usuario lo esperara — el criterio de aceptación #6
   // exige la misma advertencia de "Salir sin guardar" para este botón que para
@@ -1611,7 +1611,7 @@ describe('QuotePage', () => {
     })
   })
 
-  // ── SCRUM-725 — advertencia de margen mínimo (Mark/David) al confirmar ──────
+  // ── SCRUM-725 — advertencia de margen mínimo (Gerencia/David) al confirmar ──────
 
   it('confirm() con margin_warning muestra el modal de advertencia en vez de un error genérico', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
@@ -1771,14 +1771,14 @@ describe('QuotePage', () => {
   })
 
   it('SCRUM-1195 — «Diseñador a cargo» muestra al Responsable del proyecto (designer), no a Gerencia que generó la versión (owner)', async () => {
-    mockAuthState({ id: 9, first_name: 'Mark', last_name: 'Bekhar', permissions: [] })
+    mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Gerencia', permissions: [] })
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({
       owner:    { id: 9, name: 'Gerencia Test 3', phone: '6000-0000' },
-      designer: { id: 1, name: 'Paola Vendedora', phone: '6123-4567' },
+      designer: { id: 1, name: 'Vendedor Disenador Vendedora', phone: '6123-4567' },
     }))
     renderPage()
 
-    expect(await screen.findByText('Paola Vendedora')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Disenador Vendedora')).toBeInTheDocument()
     expect(screen.getByText('6123-4567', { exact: false })).toBeInTheDocument()
     expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
   })
@@ -1805,7 +1805,7 @@ describe('QuotePage', () => {
     expect(screen.getByText('6000-0000', { exact: false })).toBeInTheDocument()
   })
 
-  // ── SCRUM-1121 (corrección de Daniela) — la sección «Asociados» se eliminó; los contactos van en «Contacto» ──
+  // ── SCRUM-1121 (corrección de Gerencia) — la sección «Asociados» se eliminó; los contactos van en «Contacto» ──
 
   it('SCRUM-1121 — la cotización ya no tiene la sección «Asociados»', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())

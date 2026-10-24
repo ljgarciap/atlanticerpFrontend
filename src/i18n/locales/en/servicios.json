@@ -315,7 +315,7 @@
         "actions": "Actions"
       },
       "bodega": "In tool storage",
-      "pendingBadge": "Requested from Felix ({{cantidad}})",
+      "pendingBadge": "Requested from Contabilidad ({{cantidad}})",
       "responsableIncidente": "Responsible: {{nombre}}",
       "receiveButton": "Received",
       "requestButton": "Request",
@@ -346,7 +346,7 @@
       "error": "Could not register the request."
     },
     "detalleModal": {
-      "title": "Mark as {{estado}}",
+      "title": "Gerencia as {{estado}}",
       "detalleLabel": "Incident detail",
       "detallePlaceholder": "Describe what happened...",
       "detalleRequired": "Detail is required.",

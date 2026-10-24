@@ -13,7 +13,7 @@ import type {
 // Batch 20 de Admin&Cont (SCRUM-612→617, REQ-535→540) — Caja Chica. Cubre: contadores de las 3
 // pestañas (REQ-536), panel Pendientes agrupado con subtotal/total general (REQ-537), "Generar
 // reporte" deshabilitado sin pendientes (REQ-538), y detalle de reporte con gate de aprobación
-// exclusivo de Mark vía `puede_aprobar` (REQ-539/540).
+// exclusivo de Gerencia vía `puede_aprobar` (REQ-539/540).
 // Batch 21 (SCRUM-618→623, REQ-541→546) agrega: panel Rechazados real (REQ-543).
 
 vi.mock('react-i18next', () => ({
@@ -56,7 +56,7 @@ function makePending(overrides: Partial<PettyCashPendingResult> = {}): PettyCash
       solicitante_id: 5, solicitante_nombre: 'Asistente Administrativa Test', subtotal: 50.5,
       lineas: [
         { id: 1, fecha: '01 jul 2026', proveedor: 'Cafetería Manolo', descripcion: 'Café', monto_bruto: 18.5, itbms: 1.3, total: 19.8, estado: 'pendiente', intentos_rechazo: 0, attachments: [{ id: 1, nombre_archivo: 'recibo.jpg', mime_type: 'image/jpeg' }] },
-        { id: 2, fecha: '01 jul 2026', proveedor: 'Farmacia Arrocha', descripcion: 'Botiquín', monto_bruto: 28.0, itbms: 2.7, total: 30.7, estado: 'pendiente', intentos_rechazo: 0, attachments: [] },
+        { id: 2, fecha: '01 jul 2026', proveedor: 'Farmacia Transporte', descripcion: 'Botiquín', monto_bruto: 28.0, itbms: 2.7, total: 30.7, estado: 'pendiente', intentos_rechazo: 0, attachments: [] },
       ],
     }],
     total_general: 50.5,

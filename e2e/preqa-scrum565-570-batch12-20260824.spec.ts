@@ -141,9 +141,9 @@ test('SCRUM-570 RN2 — detalle de F-0002 (Corrección de datos, no Devolución)
 })
 
 // NOTA: el password real de gerencia3@test.com ya no es el default (email) en
-// dev.atlanticerp.ai — no se pudo loguear como Mark en esta sesión (sin acceso para resetearlo). El
+// dev.atlanticerp.ai — no se pudo loguear como Gerencia en esta sesión (sin acceso para resetearlo). El
 // modal de detalle es el MISMO componente para cualquier rol con acceso (puede_aprobar_rechazar
-// se calcula 100% server-side, ver CreditNoteService::show()) — ya verificado con Felix arriba.
+// se calcula 100% server-side, ver CreditNoteService::show()) — ya verificado con Contabilidad arriba.
 // Documentado como gap de credenciales, no como hallazgo funcional.
 
 test('SCRUM-565 RN2/RN6 Escenario 1 — Descuento comercial sin factura de origen bloquea el registro', async ({ page }) => {

@@ -17,9 +17,9 @@ import { formatDateTimeShort } from '@/utils/dates'
 import type { FiscalSettingsPayload, ItbmsRate } from '@/types/adminContab'
 
 /**
- * REQ-555→560 (SCRUM-632→637) — Configuración Fiscal, pantalla exclusiva de Mark. El gate real
+ * REQ-555→560 (SCRUM-632→637) — Configuración Fiscal, pantalla exclusiva de Gerencia. El gate real
  * vive en el backend: `GET /admin-contab/fiscal-settings` devuelve 403 para cualquier otro
- * usuario, no solo Mark puede editar — nadie más ni siquiera ve la pantalla (RN1 REQ-555). Por
+ * usuario, no solo Gerencia puede editar — nadie más ni siquiera ve la pantalla (RN1 REQ-555). Por
  * eso este componente trata un 403 de la query como "acceso restringido", no como un error
  * genérico, y no asume que `RequirePermission` en App.tsx (gate de entrada normal, mismo criterio
  * que el resto de rutas) sea suficiente por sí solo.
@@ -54,7 +54,7 @@ function buildSchema(t: (key: string) => string) {
     // `required` ni `min:1` — ver docblock de `prepareForValidation()`), pero este schema de Zod
     // seguía exigiendo `min(1)`: el resolver de react-hook-form bloqueaba el submit ANTES de que
     // el PUT saliera siquiera, así que un usuario real seguía sin poder vaciar el campo pese al
-    // fix de backend — el bug original de Daniela/marly seguía intacto desde la UI. Alineado con
+    // fix de backend — el bug original de Gerencia/marly seguía intacto desde la UI. Alineado con
     // el backend: `string()` sin longitud mínima.
     razon_social:      z.string(),
     nombre_comercial:  z.string(),

@@ -557,11 +557,11 @@ const RELOCATION_CHIPS: RelocationEstadoFilter[] = ['todas', 'pendiente', 'aprob
  * padre) y el `useState('todas')` de acá arranca de cero en cada apertura.
  *
  * SCRUM-458 (rebote de Gerencia Test 2026-08-13, con imagen) — Aprobar/Rechazar quedaban
- * visibles y clicables para CUALQUIER perfil de Bodega (ej. Esteban, Líder de Bodega), aunque el
+ * visibles y clicables para CUALQUIER perfil de Bodega (ej. Lider Bodega, Líder de Bodega), aunque el
  * backend ya devolvía 403 real al intentarlo — la restricción quedaba solo aplicada, no
- * comunicada, violando REQ-388 PERMISOS ("Exclusivo de Mark"). Ahora se ocultan (no solo se
- * deshabilitan) cuando el actor no es Mark, reusando el mismo criterio ya probado en
- * `PurchaseOrderPaymentsPanel.tsx` (SCRUM-252): "Mark" es
+ * comunicada, violando REQ-388 PERMISOS ("Exclusivo de Gerencia"). Ahora se ocultan (no solo se
+ * deshabilitan) cuando el actor no es Gerencia, reusando el mismo criterio ya probado en
+ * `PurchaseOrderPaymentsPanel.tsx` (SCRUM-252): "Gerencia" es
  * `compras_settings.primary_approver_user_id` (compartido entre Compras y Bodega — confirmado en el
  * hallazgo de Pre-QA de este mismo ticket, 2026-07-25) comparado contra `user.id` del JWT. Con
  * `primary_approver_user_id` sin configurar todavía, el backend tampoco lo exige — se deja visible

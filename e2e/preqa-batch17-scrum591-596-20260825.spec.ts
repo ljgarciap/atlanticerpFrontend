@@ -22,7 +22,7 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const MARK  = 'gerencia3@test.com' // Mark Approver real
+const MARK  = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?'
 
 async function login(page: Page, email: string, password?: string): Promise<void> {
@@ -71,7 +71,7 @@ test('REQ-519 — modal de detalle: campos de Batch 17 presentes, comprobante de
 })
 
 // REQ-516 RN3/RN4 y REQ-513/515 se ejercitaron en vivo, paso a paso, ANTES de escribir la versión
-// final de este archivo (propuesta de 12% con motivo → Mark aprueba, sin cerrar el modal → Felix
+// final de este archivo (propuesta de 12% con motivo → Gerencia aprueba, sin cerrar el modal → Contabilidad
 // sube cuenta-cobro-preqa.pdf → Marcar como pagado) — evidencia en batch17-propuesta-pendiente.png/
 // batch17-porcentaje-aprobado.png/batch17-marcar-pagado-habilitado.png. El proyecto de fixture
 // (PED-2026-0019) ya quedó en estado final "Pagada" como resultado — este test documenta/verifica

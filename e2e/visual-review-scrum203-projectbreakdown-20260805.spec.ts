@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 /**
- * Visual Review — SCRUM-203, hallazgo de Daniela (2026-08-04) sobre la columna "Proyecto
+ * Visual Review — SCRUM-203, hallazgo de Gerencia (2026-08-04) sobre la columna "Proyecto
  * asignado" de Ver Órdenes: contra stack local (Docker backend + Vite dev server).
  *
  * Dos bugs reportados, ambos corregidos hoy:

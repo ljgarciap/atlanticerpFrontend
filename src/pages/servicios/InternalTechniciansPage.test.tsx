@@ -115,7 +115,7 @@ describe('InternalTechniciansPage — REQ-255 vista Equipo', () => {
     expect(screen.queryByText('technicians.internal.addButton')).not.toBeInTheDocument()
   })
 
-  it('Aaron (lider_servicios) sí ve el botón de nuevo técnico', async () => {
+  it('Lider Servicios (lider_servicios) sí ve el botón de nuevo técnico', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([])
     renderPage()
 
@@ -335,7 +335,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     expect(screen.queryByText('technicians.internal.card.commission')).not.toBeInTheDocument()
   })
 
-  it('técnico interno (no Aaron/Gerencia) no ve el botón aunque el técnico tenga plan activo', async () => {
+  it('técnico interno (no Lider Servicios/Gerencia) no ve el botón aunque el técnico tenga plan activo', async () => {
     useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ has_bonus_plan: true })])
     renderPage()
@@ -433,8 +433,8 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     })
   })
 
-  /** RN2 — Aaron ve el SLA pero no puede editarlo; Gerencia sí. */
-  it('Aaron ve el SLA deshabilitado, Gerencia puede editarlo', async () => {
+  /** RN2 — Lider Servicios ve el SLA pero no puede editarlo; Gerencia sí. */
+  it('Lider Servicios ve el SLA deshabilitado, Gerencia puede editarlo', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ has_bonus_plan: true })])
     mockedApi.internalTechnicians.commissionCapture.mockResolvedValue(null)
     mockedApi.internalTechnicians.slaSettings.mockResolvedValue({ claim: 2, warranty: 3, installation: 7, retrofit: 10 })
@@ -444,7 +444,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     const modal = within(await screen.findByTestId('internal-technician-commission-modal'))
     await modal.findByText('technicians.internal.commissionModal.slaSection')
 
-    // El SLA "Reclamos" (default 2 días) es uno de los 4 campos de esa sección — deshabilitado para Aaron.
+    // El SLA "Reclamos" (default 2 días) es uno de los 4 campos de esa sección — deshabilitado para Lider Servicios.
     expect(modal.getByDisplayValue('2')).toBeDisabled()
     expect(modal.queryByText('technicians.internal.commissionModal.slaSave')).not.toBeInTheDocument()
   })
@@ -453,7 +453,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
 describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
   it('"Editar" abre el mismo formulario con los datos precargados y guarda con update()', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
-    mockedApi.internalTechnicians.update.mockResolvedValue(makeTechnician({ nombre: 'Carlos V.' }))
+    mockedApi.internalTechnicians.update.mockResolvedValue(makeTechnician({ nombre: 'Tecnico Servicios V.' }))
     renderPage()
 
     fireEvent.click(await screen.findByText('technicians.internal.card.edit'))
@@ -462,11 +462,11 @@ describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
     expect(within(modal).getByDisplayValue('Tecnico Servicios Test')).toBeInTheDocument()
     expect(within(modal).getByDisplayValue('6000-0000')).toBeInTheDocument()
 
-    fireEvent.change(within(modal).getByDisplayValue('Tecnico Servicios Test'), { target: { value: 'Carlos V.' } })
+    fireEvent.change(within(modal).getByDisplayValue('Tecnico Servicios Test'), { target: { value: 'Tecnico Servicios V.' } })
     fireEvent.click(within(modal).getByText('technicians.internal.createModal.save'))
 
     await waitFor(() => expect(mockedApi.internalTechnicians.update).toHaveBeenCalledWith(
-      1, expect.objectContaining({ nombre: 'Carlos V.', telefono: '6000-0000', especialidad: 'general' }),
+      1, expect.objectContaining({ nombre: 'Tecnico Servicios V.', telefono: '6000-0000', especialidad: 'general' }),
     ))
     expect(mockedApi.internalTechnicians.create).not.toHaveBeenCalled()
   })

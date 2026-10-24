@@ -1045,7 +1045,7 @@
       "success": {
         "title": "Orden #{{number}} creada",
         "status": "Estado",
-        "pendingLabel": "Pendiente por aprobar de Yirena (Compras)",
+        "pendingLabel": "Pendiente por aprobar de Lider Compras (Compras)",
         "note": "Bodega generó esta orden, pero necesita la aprobación de Compras antes de convertirse en una orden de compra formal y seguir su flujo normal (pago, logística, ingreso).",
         "goToOrders": "Ir a Ver Órdenes",
         "another": "¿Necesitas otra orden?",

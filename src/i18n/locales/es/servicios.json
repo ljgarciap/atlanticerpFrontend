@@ -315,7 +315,7 @@
         "actions": "Acciones"
       },
       "bodega": "En bodega de herramientas",
-      "pendingBadge": "Solicitado a Felix ({{cantidad}})",
+      "pendingBadge": "Solicitado a Contabilidad ({{cantidad}})",
       "responsableIncidente": "Responsable: {{nombre}}",
       "receiveButton": "Recibida",
       "requestButton": "Solicitar",

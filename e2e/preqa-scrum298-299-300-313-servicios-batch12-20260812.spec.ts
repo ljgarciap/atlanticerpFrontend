@@ -231,8 +231,8 @@ test.describe('Batch 12 — Cotización: documento, historial, condiciones', () 
     await expect(quote.getByText(/historial de cotizaciones/i)).toHaveCount(0)
   })
 
-  test('SCRUM-300 (REQ-237) — Ajustes de Servicios: Aaron ve Condiciones pero NO puede editar, Gerencia sí y el guardado numérico sigue funcionando', async ({ page }) => {
-    await test.step('Aaron (lider_servicios) — visible, todo deshabilitado, sin botón Guardar', async () => {
+  test('SCRUM-300 (REQ-237) — Ajustes de Servicios: Lider Servicios ve Condiciones pero NO puede editar, Gerencia sí y el guardado numérico sigue funcionando', async ({ page }) => {
+    await test.step('Lider Servicios (lider_servicios) — visible, todo deshabilitado, sin botón Guardar', async () => {
       await login(page, LIDER_SERVICIOS)
       await page.goto(`${BASE}/servicios/ajustes`)
       await page.waitForTimeout(800)
@@ -285,7 +285,7 @@ test.describe('Batch 12 — Cotización: documento, historial, condiciones', () 
     await page.waitForTimeout(800)
     await page.screenshot({ path: 'test-results/b12-250-01-global-history-tecnico-ajeno.png', fullPage: true })
 
-    // Escenario 2 (RN2) — visibilidad transversal: Pedro no está asignado a ningún ticket de este
+    // Escenario 2 (RN2) — visibilidad transversal: Tecnico Servicios no está asignado a ningún ticket de este
     // fixture, pero debe ver AMBAS versiones (incluida la Rechazada, RN1) igual.
     await page.getByPlaceholder(/buscar/i).fill(fx.ticketMultiNumero)
     await page.waitForTimeout(500)

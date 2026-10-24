@@ -26,7 +26,7 @@ import GlobalSettingsPanel from '@/components/GlobalSettingsPanel'
  * Compras/Pricing/Orders/Conditions/Reports) — mismo storage, mismos hooks, cero duplicación de
  * lógica. `usePermission`/el middleware de cada endpoint ya tratan `superadmin.all` como bypass
  * universal (`EnsureIsPrimaryApprover` para Fiscal, `usePermission` en frontend para el resto), así
- * que un superadmin que no sea Mark puede igual ver y editar Fiscal desde acá sin cambios de
+ * que un superadmin que no sea Gerencia puede igual ver y editar Fiscal desde acá sin cambios de
  * backend.
  *
  * Solo se monta el panel de la tab ACTIVA (no las 12 a la vez) — cada panel dispara su propio

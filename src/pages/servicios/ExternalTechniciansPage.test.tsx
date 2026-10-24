@@ -49,7 +49,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
 
 function makeTechnician(overrides: Partial<ExternalTechnician> = {}): ExternalTechnician {
   return {
-    id: 1, nombre: 'Pedro Gómez', empresa: 'Gómez Instalaciones', especialidad: 'Cableado',
+    id: 1, nombre: 'Tecnico Servicios Gómez', empresa: 'Gómez Instalaciones', especialidad: 'Cableado',
     telefono: '6000-0000', tarifa_dia: 28, tarifa_visible: true, estado: 'active', proyectos_activos: 0,
     ...overrides,
   }
@@ -95,7 +95,7 @@ describe('ExternalTechniciansPage — REQ-263 listado', () => {
     mockedApi.externalTechnicians.list.mockResolvedValue(makeListResponse([makeTechnician()]))
     renderPage()
 
-    expect(await screen.findByText('Pedro Gómez')).toBeInTheDocument()
+    expect(await screen.findByText('Tecnico Servicios Gómez')).toBeInTheDocument()
     expect(screen.getByText('Gómez Instalaciones')).toBeInTheDocument()
     expect(screen.getByText('$28.00')).toBeInTheDocument()
   })
@@ -111,7 +111,7 @@ describe('ExternalTechniciansPage — REQ-263 listado', () => {
   it('el buscador dispara la API con el término de búsqueda', async () => {
     mockedApi.externalTechnicians.list.mockResolvedValue(makeListResponse([makeTechnician()]))
     renderPage()
-    await screen.findByText('Pedro Gómez')
+    await screen.findByText('Tecnico Servicios Gómez')
 
     fireEvent.change(screen.getByPlaceholderText('technicians.external.searchPlaceholder'), { target: { value: 'roberto' } })
 
@@ -125,7 +125,7 @@ describe('ExternalTechniciansPage — REQ-263 listado', () => {
   it('el chip "Activos" filtra por estado', async () => {
     mockedApi.externalTechnicians.list.mockResolvedValue(makeListResponse([makeTechnician()]))
     renderPage()
-    await screen.findByText('Pedro Gómez')
+    await screen.findByText('Tecnico Servicios Gómez')
 
     fireEvent.click(screen.getByText(/technicians.external.chips.active/))
 
@@ -147,7 +147,7 @@ describe('ExternalTechniciansPage — RN5 permisos de solo lectura', () => {
     expect(screen.queryByText('technicians.external.addButton')).not.toBeInTheDocument()
   })
 
-  it('Aaron (lider_servicios) sí ve el botón de agregar', async () => {
+  it('Lider Servicios (lider_servicios) sí ve el botón de agregar', async () => {
     mockedApi.externalTechnicians.list.mockResolvedValue(makeListResponse([]))
     renderPage()
 
@@ -212,7 +212,7 @@ describe('ExternalTechniciansPage — REQ-265/266/267 ficha', () => {
     fireEvent.click(await screen.findByLabelText('technicians.external.table.columns.detail'))
 
     const modal = within(await screen.findByTestId('external-technician-detail-modal'))
-    expect(await modal.findByText('Pedro Gómez')).toBeInTheDocument()
+    expect(await modal.findByText('Tecnico Servicios Gómez')).toBeInTheDocument()
   })
 
   it('REQ-265 RN2 — inactivar con proyectos activos muestra advertencia antes de aplicar', async () => {

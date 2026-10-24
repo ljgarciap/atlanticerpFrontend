@@ -65,7 +65,7 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
   // ya usa `DetalleCobroModal.tsx` (SCRUM-931) — primera vez que este componente abre uno.
   const [quoteId, setQuoteId]         = useState<number | null>(null)
   const [guiaOrderId, setGuiaOrderId] = useState<number | null>(null)
-  // SCRUM-932 (rebote Daniela 2026-09-20) — "Factura de origen" debía abrir el mismo modal de
+  // SCRUM-932 (rebote Gerencia 2026-09-20) — "Factura de origen" debía abrir el mismo modal de
   // detalle que Cobros (InvoiceDetailModal), no descargar el PDF directo (verFacturaOrigen()/
   // useDownloadInvoicePdf(), retirados). El backend ya expone ambos ids que el modal necesita:
   // `factura_origen_order_id` (order_id) y `factura_origen_id` (PK de AdminContInvoice, distinto
@@ -174,7 +174,7 @@ export default function DetalleNotaCreditoModal({ notaId, onClose }: Props) {
                     <div className="text-sm text-slate-800 dark:text-slate-100 mt-0.5">—</div>
                   )}
                 </div>
-                {/* SCRUM-932 (rebote Daniela 2026-09-20) — clic en la factura de origen abre el
+                {/* SCRUM-932 (rebote Gerencia 2026-09-20) — clic en la factura de origen abre el
                     modal de detalle (InvoiceDetailModal), mismo comportamiento que Cobros — ya
                     no descarga el PDF directo. */}
                 <div>

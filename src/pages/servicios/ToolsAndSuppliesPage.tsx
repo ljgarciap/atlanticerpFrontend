@@ -8,7 +8,7 @@ import { IcoClock } from '@/components/icons'
 
 type SubView = 'tools' | 'supplies'
 
-// REQ-276 — mismo gate que ToolKardexPage.tsx (App.tsx, RequireRole) — Aaron/Gerencia/superadmin
+// REQ-276 — mismo gate que ToolKardexPage.tsx (App.tsx, RequireRole) — Lider Servicios/Gerencia/superadmin
 // únicamente. Se oculta el botón para el resto en vez de dejarlo visible y redirigir al hacer
 // click (evita el viaje de ida y vuelta confuso de abrir una pestaña nueva solo para rebotar).
 function canViewToolKardex(role: string | undefined): boolean {

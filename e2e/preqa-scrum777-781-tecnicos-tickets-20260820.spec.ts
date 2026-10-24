@@ -17,7 +17,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * lista de "Criterios de aceptación globales" del propio ticket SCRUM-781. Ver hallazgo 0 abajo.
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): liderservicios@test.com (Aaron Leis, lider_servicios — tiene
+ * (password = email): liderservicios@test.com (Lider Servicios Leis, lider_servicios — tiene
  * can_view_cost_breakdown=true, cubre el gate de Gerencia para ver costo/margen de cotización),
  * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios).
  */
@@ -47,11 +47,11 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 // SCRUM-777 — Técnicos Internos
 // ============================================================================
 
-test('1. SCRUM-777 REQ-255 — asignar herramienta a Carlos actualiza el conteo en Técnicos Internos sin F5', async ({ page, request }) => {
+test('1. SCRUM-777 REQ-255 — asignar herramienta a Tecnico Servicios actualiza el conteo en Técnicos Internos sin F5', async ({ page, request }) => {
   const token = await apiToken(request, 'liderservicios@test.com')
   const before = await (await request.get(`${BASE}/api/servicios/internal-technicians`, { headers: { Authorization: `Bearer ${token}` } })).json()
   const carlosBefore = before.data.find((t: any) => t.nombre === 'Tecnico Servicios Test')
-  console.log('[SCRUM-777] Carlos herramientas_asignadas ANTES:', carlosBefore.herramientas_asignadas)
+  console.log('[SCRUM-777] Tecnico Servicios herramientas_asignadas ANTES:', carlosBefore.herramientas_asignadas)
 
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
@@ -61,7 +61,7 @@ test('1. SCRUM-777 REQ-255 — asignar herramienta a Carlos actualiza el conteo 
   if (await toolsTab.count() > 0) await toolsTab.first().click().catch(() => {})
   await page.waitForTimeout(500)
 
-  // Buscar un select de asignación en "En bodega de herramientas" y asignarlo a Carlos
+  // Buscar un select de asignación en "En bodega de herramientas" y asignarlo a Tecnico Servicios
   const selects = page.locator('select')
   const count = await selects.count()
   let assigned = false
@@ -114,7 +114,7 @@ test('1. SCRUM-777 REQ-255 — asignar herramienta a Carlos actualiza el conteo 
 
 test('2. SCRUM-777 REQ-256 — reagendar visita de un ticket actualiza el estado del técnico en Técnicos Internos sin F5', async ({ page, request }) => {
   const token = await apiToken(request, 'liderservicios@test.com')
-  // Ticket 28 asignado a Carlos (internal_technician_id 30... id interno 1), reagendar a "ahora + 20min" -> técnico debería pasar a "En ruta"
+  // Ticket 28 asignado a Tecnico Servicios (internal_technician_id 30... id interno 1), reagendar a "ahora + 20min" -> técnico debería pasar a "En ruta"
   const now = new Date()
   const newStart = new Date(now.getTime() + 20 * 60 * 1000).toISOString()
   const newEnd = new Date(now.getTime() + 80 * 60 * 1000).toISOString()
@@ -147,7 +147,7 @@ test('3. SCRUM-777 REQ-257 — modal "Visitas hoy" es clickeable y navega al tic
 
   const carlosCard = page.locator('text=Tecnico Servicios Test').first()
   await expect(carlosCard).toBeVisible()
-  // El card de Carlos es el 2do (Agustin, Carlos, Luis...) — subir hasta el contenedor del card y
+  // El card de Tecnico Servicios es el 2do (Tecnico Servicios, Tecnico Servicios, Luis...) — subir hasta el contenedor del card y
   // clickear su botón "Visitas hoy" (stat tile clicable, ver InternalTechnicianCard.tsx:63-69)
   const carlosCardContainer = page.locator('div', { has: page.locator('text=Tecnico Servicios Test') }).last()
   const visitsTrigger = carlosCardContainer.getByRole('button', { name: /visitas hoy/i }).first()
@@ -166,7 +166,7 @@ test('3. SCRUM-777 REQ-257 — modal "Visitas hoy" es clickeable y navega al tic
     expect(page.url()).toContain('/servicios/tickets')
     expect(await modal.count()).toBe(0)
   } else {
-    console.log('[SCRUM-777] Carlos no tenía visitas hoy visibles en el modal — revisar screenshot 05')
+    console.log('[SCRUM-777] Tecnico Servicios no tenía visitas hoy visibles en el modal — revisar screenshot 05')
     expect(await modal.count()).toBeGreaterThan(0) // al menos confirmar que el modal abrió
   }
 })

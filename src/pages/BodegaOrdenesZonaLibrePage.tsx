@@ -18,7 +18,7 @@ const CHIPS: ZonaLibreStatusFilter[] = ['todas', 'pendiente', 'aprobada', 'recha
 
 /**
  * SCRUM-442→445 (REQ-372→375) — "Órdenes de Zona Libre" (3D), bandeja de seguimiento. Misma
- * pantalla para Bodega (solo lectura) y Compras (Yirena, vía el grant `bodega.read` de
+ * pantalla para Bodega (solo lectura) y Compras (Lider Compras, vía el grant `bodega.read` de
  * `SpecialPermissionSeeder.php`, SCRUM-440) — `RowAction` decide qué mostrar según el permiso
  * `compras.zona-libre.approve`, no hay una pantalla separada del lado de Compras.
  */

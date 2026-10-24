@@ -124,7 +124,7 @@ export const comprasApi = {
     approve: (id: number): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/approve`).then(r => r.data),
 
-    // REQ-142/143 — avanza al siguiente estado; 422 si falta la aprobación de Mark.
+    // REQ-142/143 — avanza al siguiente estado; 422 si falta la aprobación de Gerencia.
     advance: (id: number): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/advance`).then(r => r.data),
 
@@ -136,7 +136,7 @@ export const comprasApi = {
 
     // SCRUM-208 (rediseño 2026-08-15) — confirma a Inventario TODAS las líneas "Por ingresar" de
     // ESTA orden puntual, sin esperar a que `status` llegue a "Recibido". Root cause real del
-    // reporte de Daniela: la capacidad manual ya existía (`inventory.confirmPending` abajo) pero
+    // reporte de Gerencia: la capacidad manual ya existía (`inventory.confirmPending` abajo) pero
     // acotada por PRODUCTO en TODAS las órdenes y solo alcanzable desde /inventario, desconectada
     // del contexto de la orden — este endpoint la acota a la orden puntual.
     confirmPendingReceipts: (id: number): Promise<PurchaseOrderDetail> =>
@@ -181,7 +181,7 @@ export const comprasApi = {
     approveAmountChange: (id: number): Promise<{ total_amount: number }> =>
       api.patch<{ total_amount: number }>(`/compras/orders/${id}/approve-amount-change`).then(r => r.data),
 
-    // SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Mark.
+    // SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Gerencia.
     rejectAmountChange: (id: number): Promise<{ total_amount: number }> =>
       api.patch<{ total_amount: number }>(`/compras/orders/${id}/reject-amount-change`).then(r => r.data),
   },
@@ -581,7 +581,7 @@ export const comprasApi = {
       api.get<{ data: OutlookCalendarEvent[]; source_unavailable: boolean }>('/compras/calendar', { params: filters }).then(r => r.data),
   },
 
-  // SCRUM-440 (REQ-370) — decisión de Yirena sobre una solicitud de Zona Libre generada por
+  // SCRUM-440 (REQ-370) — decisión de Lider Compras sobre una solicitud de Zona Libre generada por
   // Bodega. La bandeja (`/bodega/ordenes-zona-libre`) es la misma para Bodega y Compras — el
   // permiso `compras.zona-libre.approve` decide si se ven estos botones o el "Recordar" de Bodega.
   zonaLibre: {

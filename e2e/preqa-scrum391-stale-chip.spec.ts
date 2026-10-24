@@ -46,7 +46,7 @@ test('SCRUM-391 — picker deja de tener en_picking mientras se usa el modal', a
 
   const chip = page.getByRole('button', { name: 'Ayudante General Bodega Test' })
   const chipStillThere = await chip.count()
-  console.log('SCRUM-391 stale-chip: sigue apareciendo Apolonio como chip?', chipStillThere > 0)
+  console.log('SCRUM-391 stale-chip: sigue apareciendo Ayudante General Bodega como chip?', chipStillThere > 0)
 
   if (chipStillThere > 0) {
     await chip.click()

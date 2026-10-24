@@ -23,7 +23,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   }
 }
 
-// SCRUM-175 — regresión de Daniela (2026-08-04): Yirena (lider_compras) solo tiene
+// SCRUM-175 — regresión de Gerencia (2026-08-04): Lider Compras (lider_compras) solo tiene
 // role_module_visibility para 'compras', nunca para 'ventas_diseno' (comportamiento de backend
 // correcto, ver role_module_visibility seed en atlanticerp-backend). El viejo fallback fijo a
 // '/ventas-diseno/home' la mandaba a un loop infinito de <Navigate> (pantalla en blanco) porque
@@ -45,7 +45,7 @@ describe('getHomeRoute (SCRUM-175)', () => {
     expect(getHomeRoute(user)).toBe('/ventas-diseno/home')
   })
 
-  it('Yirena (lider_compras, solo compras.view=true) resuelve a /compras/inicio, no a Ventas & Diseño', () => {
+  it('Lider Compras (lider_compras, solo compras.view=true) resuelve a /compras/inicio, no a Ventas & Diseño', () => {
     const yirena = makeUser({
       modules: { ...EMPTY_MODULES, compras: { view: true, view_team: false, edit: true, approve: false } },
     })

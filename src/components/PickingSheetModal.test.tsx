@@ -32,7 +32,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     stage: 'en_picking',
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
-    vendedor: 'Mark',
+    vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
     picker: 'Ayudante General Bodega Test',
     repartidor: null,
@@ -105,7 +105,7 @@ describe('PickingSheetModal', () => {
     const right = screen.getByTestId('picking-sheet-meta-right')
     expect(right).toHaveTextContent('Ayudante General Bodega Test')
     expect(right).toHaveTextContent('Asistente Bodega Test 2')
-    expect(right).toHaveTextContent('Mark')
+    expect(right).toHaveTextContent('Gerencia')
     // El campo combinado "Cliente / Proyecto" ya no existe como tal.
     expect(screen.queryByText('bodega:pedidos.pickingSheetModal.meta.client')).not.toBeInTheDocument()
   })
@@ -137,14 +137,14 @@ describe('PickingSheetModal', () => {
   it('SCRUM-388 (corrección 2026-08-11) — columna "Encontrado en" muestra la nota armada por el backend, no un booleano crudo', () => {
     mockedUseOrderPickingSheet.mockReturnValue({
       data: sheet({ items: [
-        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: true, found_location: 'B-02', found_note: 'Nueva ubicación: B-02 — Confirmado por Esteban', qty_requested: 4, qty_picked: 0, picking_notes: null },
+        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: true, found_location: 'B-02', found_note: 'Nueva ubicación: B-02 — Confirmado por Lider Bodega', qty_requested: 4, qty_picked: 0, picking_notes: null },
       ] }),
       isLoading: false,
     } as unknown as ReturnType<typeof useOrderPickingSheet>)
 
     render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
 
-    expect(screen.getByTestId('picking-found-note-100')).toHaveTextContent('Nueva ubicación: B-02 — Confirmado por Esteban')
+    expect(screen.getByTestId('picking-found-note-100')).toHaveTextContent('Nueva ubicación: B-02 — Confirmado por Lider Bodega')
     // La ubicación original (columna "Ubicación") nunca se pisa con la nueva.
     expect(screen.getByTestId('picking-row-100')).toHaveTextContent('A-01')
   })

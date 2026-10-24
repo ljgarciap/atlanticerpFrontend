@@ -1,10 +1,10 @@
 import type { UserInfo } from '@/types/auth'
 
-// SCRUM-175 (REQ-111) — hallazgo CRÍTICO de Daniela (2026-08-04): lidercompras@test.com
-// (Yirena, role_key='lider_compras') no veía nada al entrar a AtlanticERP. Causa raíz: App.tsx tenía
+// SCRUM-175 (REQ-111) — hallazgo CRÍTICO de Gerencia (2026-08-04): lidercompras@test.com
+// (Lider Compras, role_key='lider_compras') no veía nada al entrar a AtlanticERP. Causa raíz: App.tsx tenía
 // una única `FALLBACK_ROUTE = '/ventas-diseno/home'` hardcodeada, usada tanto para el redirect
 // post-login como para el catch-all `*` y como destino de "acceso denegado" de
-// RequirePermission/RequireRole. Yirena solo tiene `role_module_visibility` para el módulo
+// RequirePermission/RequireRole. Lider Compras solo tiene `role_module_visibility` para el módulo
 // `compras` (ver 2026_07_11_100001_create_auth_role_module_visibility_table.php en
 // atlanticerp-backend — comportamiento de backend correcto y deliberado, no un bug), así que al
 // aterrizar en `/ventas-diseno/home` el RequirePermission de esa ruta (permission
@@ -52,7 +52,7 @@ export function getHomeRoute(user: UserInfo | null | undefined): string {
   // SCRUM-771 (corrección 2026-08-18) — Líder de Operaciones: `modules.compras.view=true` vía
   // VIEW_READONLY, pero SIN `compras.read` (el permiso amplio, ver User::effectivePermissionsV2()
   // en atlanticerp-backend). '/compras/inicio' exige `compras.read` — aterrizar ahí la rebotaría en
-  // loop infinito, mismo patrón de bug que el hallazgo original de Daniela documentado arriba.
+  // loop infinito, mismo patrón de bug que el hallazgo original de Gerencia documentado arriba.
   // Landing dedicado a la primera de sus 4 pantallas realmente permitidas.
   if (user.permissions?.includes('compras.limited.view') && !user.permissions?.includes('compras.read')) {
     return '/compras/ordenes'

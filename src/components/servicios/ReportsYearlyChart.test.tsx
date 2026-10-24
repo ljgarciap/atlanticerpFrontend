@@ -26,7 +26,7 @@ function renderChart(year = 2026) {
 
 beforeEach(() => { vi.clearAllMocks() })
 
-// SCRUM-354 (rebote Daniela 2026-08-20) — un mes sin ningún servicio registrado no debe mostrar
+// SCRUM-354 (rebote Gerencia 2026-08-20) — un mes sin ningún servicio registrado no debe mostrar
 // "0 0 0 0" ni un total "0"; un mes con datos parciales solo muestra los tipos con cantidad > 0.
 describe('ReportsYearlyChart — SCRUM-354, ocultar ceros', () => {
   const items: ReportsCompletadosAnioItem[] = [

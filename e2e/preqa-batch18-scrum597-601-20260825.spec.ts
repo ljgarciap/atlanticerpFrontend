@@ -45,7 +45,7 @@ async function bearerToken(page: Page): Promise<string | null> {
   })
 }
 
-test('REQ-522 — default de Felix es Proyectado + 30 días, con las 4 tarjetas pobladas', async ({ page }) => {
+test('REQ-522 — default de Contabilidad es Proyectado + 30 días, con las 4 tarjetas pobladas', async ({ page }) => {
   await login(page, FELIX)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
@@ -97,7 +97,7 @@ test('REQ-520 RN2 — las tarjetas proyectadas NO dependen de la pestaña activa
   await expect(page.getByText('Entradas proyectadas').locator('..').getByText('—')).toHaveCount(0)
 })
 
-test('REQ-524 — Yaneth aterriza directo en Arqueo del día, sin toggle/chips de Proyectado/Real', async ({ page }) => {
+test('REQ-524 — Asistente Administrativa aterriza directo en Arqueo del día, sin toggle/chips de Proyectado/Real', async ({ page }) => {
   await login(page, YANETH)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
@@ -108,9 +108,9 @@ test('REQ-524 — Yaneth aterriza directo en Arqueo del día, sin toggle/chips d
   await page.screenshot({ path: 'e2e/screenshots/batch18-yaneth-default.png', fullPage: true })
 })
 
-test('REQ-520/521/523 — Yaneth: /projected devuelve totales (sin detalle línea por línea), /real sigue 403', async ({ page, request }) => {
+test('REQ-520/521/523 — Asistente Administrativa: /projected devuelve totales (sin detalle línea por línea), /real sigue 403', async ({ page, request }) => {
   // Aclarado por Luis 2026-08-25 (commit ddd9192, tras el hallazgo de esta misma sesión de
-  // Pre-QA): REQ-520 le da a Yaneth el encabezado completo (los 3 totales agregados), REQ-521 solo
+  // Pre-QA): REQ-520 le da a Asistente Administrativa el encabezado completo (los 3 totales agregados), REQ-521 solo
   // le veda el panel de detalle línea por línea y REQ-523 le veda la Vista real 30/90d. El backend
   // ahora responde 200 en /projected para su rol, con entradas/salidas vacíos y los totales reales.
   await login(page, YANETH)
@@ -135,7 +135,7 @@ test('REQ-520/521/523 — Yaneth: /projected devuelve totales (sin detalle líne
   expect(r2.status()).toBe(403)
 })
 
-test('REQ-520 — Yaneth ve las 3 tarjetas de encabezado pobladas (no "—")', async ({ page }) => {
+test('REQ-520 — Asistente Administrativa ve las 3 tarjetas de encabezado pobladas (no "—")', async ({ page }) => {
   await login(page, YANETH)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
@@ -145,7 +145,7 @@ test('REQ-520 — Yaneth ve las 3 tarjetas de encabezado pobladas (no "—")', a
   await page.screenshot({ path: 'e2e/screenshots/batch18-yaneth-cards-populated.png', fullPage: true })
 })
 
-test('REQ-524 — Mark (Gerencia): sin acceso a Arqueo del día, ni por UI ni por API directa', async ({ page, request }) => {
+test('REQ-524 — Gerencia (Gerencia): sin acceso a Arqueo del día, ni por UI ni por API directa', async ({ page, request }) => {
   await login(page, MARK, MARK_PASSWORD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)

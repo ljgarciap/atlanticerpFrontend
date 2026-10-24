@@ -42,7 +42,7 @@ function makeTechnician(overrides: Partial<InternalTechnician> = {}): InternalTe
 function makeEntry(overrides: Partial<ToolKardexEntry> = {}): ToolKardexEntry {
   return {
     id: 1, tool_id: 1, tool_nombre: 'Escalera de tijera', tool_codigo_unico: 'HER-001',
-    tipo: 'ingreso', cantidad: 1, detalle: 'Compra OC-102', user_id: 2, user_nombre: 'Felix',
+    tipo: 'ingreso', cantidad: 1, detalle: 'Compra OC-102', user_id: 2, user_nombre: 'Contabilidad',
     saldo_inicial: 0, saldo_resultante: 1,
     created_at: '2026-08-13T10:00:00Z',
     ...overrides,
@@ -61,7 +61,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.tools.list.mockResolvedValue([makeTool({ id: 1, nombre: 'Escalera de tijera' }), makeTool({ id: 2, nombre: 'Taladro', codigo_unico: 'HER-002' })])
-  mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ id: 2, nombre: 'Felix' }), makeTechnician({ id: 3, nombre: 'Tecnico Servicios Test' })])
+  mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ id: 2, nombre: 'Contabilidad' }), makeTechnician({ id: 3, nombre: 'Tecnico Servicios Test' })])
 })
 
 describe('ToolKardexPage — REQ-276 kardex de herramientas, solo lectura (con cantidad/saldo, SCRUM-779)', () => {

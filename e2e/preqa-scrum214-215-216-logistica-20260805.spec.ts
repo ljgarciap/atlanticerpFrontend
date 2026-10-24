@@ -12,7 +12,7 @@ import { execSync } from 'node:child_process'
  * Los IDs reales se capturan del stdout de tinker (JSON en la última línea) y se usan en las
  * aserciones — el test es reproducible sin importar el estado previo de la BD local.
  *
- * Re-check Pre-QA 2026-08-05 (bounce de Daniela sobre el filtro de proyecto): se agrega
+ * Re-check Pre-QA 2026-08-05 (bounce de Gerencia sobre el filtro de proyecto): se agrega
  * `order200`/`projectSinCotizacion`, un proyecto A PROPÓSITO sin Quote/PipelineCard aprobados,
  * para dejar cobertura permanente del gate que se rompió — el "Filtro de Proyecto" reusaba
  * `approvedProjects.search()` (gateado por `documentStatus()==='approved'`, semántica de

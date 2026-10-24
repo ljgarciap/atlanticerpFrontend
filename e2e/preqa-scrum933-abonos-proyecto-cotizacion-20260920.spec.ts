@@ -16,7 +16,7 @@ import { test, expect, type Page, type Route } from '@playwright/test'
  * aparte, en vivo, corriendo `infra/test.sh --filter=test_933_invoices_for_sub_client...`
  * (1/1 verde, caso negativo incluido).
  *
- * Cuenta real (password = email, roster CoreUserSeeder): contabilidad@test.com (Felix,
+ * Cuenta real (password = email, roster CoreUserSeeder): contabilidad@test.com (Contabilidad,
  * lider_admin_contab).
  */
 test.describe.configure({ mode: 'serial' })
@@ -297,7 +297,7 @@ test('SCRUM-933.10 — edición de abono existente: Proyecto muestra el valor re
     invoice_id: 902, factura: 'F-0902', nivel_asociacion: 'proyecto', monto_original: 500,
     monto_usado: 0, monto_disponible: 500, estado_saldo: 'disponible', metodo_pago: 'transferencia',
     cuenta_bancaria_id: 1, referencia: 'REF-777', comprobante_url: null, estado: 'por_confirmar',
-    registrado_por: 'Felix', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
+    registrado_por: 'Contabilidad', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
   }
   await page.route('**/api/admin-contab/abonos**', (route: Route) => {
     const url = new URL(route.request().url())

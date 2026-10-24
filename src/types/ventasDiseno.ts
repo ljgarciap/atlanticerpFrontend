@@ -854,7 +854,7 @@ export interface QuoteDetail {
   global_discount_percent:   number
   // SCRUM-725 — margen a nivel de Totales (no por producto, ver
   // QuoteItemRef.below_min_margin) + si el usuario actual puede guardar/confirmar
-  // igual pese a la violación (Mark/David, ventas_diseno.override_min_margin).
+  // igual pese a la violación (Gerencia/David, ventas_diseno.override_min_margin).
   global_below_min_margin:   boolean
   can_override_min_margin:   boolean
   min_margin_percent:        number

@@ -36,7 +36,7 @@ function makeRow(overrides: Partial<OrderRow> = {}): OrderRow {
     sales_project: { id: 1, name: 'Residencia Albrook 14B' },
     amount: 22000, approved_at: '2026-02-10T00:00:00Z',
     quoted_margin: 40, invoiced_margin: 40, invoiced_partial: false, estado: 'igual',
-    owner: { id: 1, name: 'Carlos Ruiz' },
+    owner: { id: 1, name: 'Tecnico Servicios Ruiz' },
     ...overrides,
   }
 }

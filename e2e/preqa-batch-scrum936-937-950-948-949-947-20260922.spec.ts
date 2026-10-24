@@ -13,7 +13,7 @@ import { test, expect, type Page } from '@playwright/test'
  * SCRUM-947 (paginación: reset de página al filtrar, cambio de cantidad por página).
  *
  * Cuentas reales (password = email, roster CoreUserSeeder):
- *  - Felix (lider_admin_contab): contabilidad@test.com — SOLO admin_contab.view, sin acceso a
+ *  - Contabilidad (lider_admin_contab): contabilidad@test.com — SOLO admin_contab.view, sin acceso a
  *    Compras/Bodega (confirmado por API antes de escribir estos tests — `modules.compras.view` y
  *    `modules.bodega.view` dan `false` para esta cuenta).
  *  - almacen (Bodega): liderbodega@test.com — bodega.view=true, compras.view=false.

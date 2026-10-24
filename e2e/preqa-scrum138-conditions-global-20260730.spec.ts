@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 /**
- * Pre-QA — SCRUM-138 (daily 2026-07-30, Bloque C): Daniela pidió que el texto de
+ * Pre-QA — SCRUM-138 (daily 2026-07-30, Bloque C): Gerencia pidió que el texto de
  * Condiciones (REQ-046) se pueda cambiar una vez y aplique a toda cotización NUEVA
  * desde ese momento, en vez de editarse cotización por cotización. Reemplaza el
  * textarea editable por-cotización (gateado por `ventas_diseno.edit.conditions`) por
@@ -13,8 +13,8 @@ test.describe.configure({ mode: 'serial' })
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 const APPROVER_EMAIL = 'gerencia3@test.com'
 const MARK_PASS  = 'B1n4X_2026?'
-const DANIELA_EMAIL = 'gerencia@test.com'
-const DANIELA_PASS  = 'B1n4X_2026?'
+const GERENCIA_EMAIL = 'gerencia@test.com'
+const GERENCIA_PASS  = 'B1n4X_2026?'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)
@@ -25,7 +25,7 @@ async function login(page: Page, email: string, pass: string) {
 }
 
 test('sin el permiso edit.conditions no se ve el botón Configurar condiciones, y el texto es de solo lectura', async ({ page }) => {
-  await login(page, DANIELA_EMAIL, DANIELA_PASS)
+  await login(page, GERENCIA_EMAIL, GERENCIA_PASS)
   await page.goto(`${BASE}/ventas-diseno/quotes`)
   await page.waitForTimeout(2000)
 

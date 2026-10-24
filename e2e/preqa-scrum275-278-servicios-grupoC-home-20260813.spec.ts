@@ -13,9 +13,9 @@ import { test, expect, Page } from '@playwright/test'
  *     con cantidad_pendiente=3 (REQ-213/214)
  */
 
-const LIDER_SERVICIOS = 'liderservicios@test.com'   // Aaron — lider_servicios, puede Agendar
-const TECNICO         = 'tecnicoservicios@test.com'      // Carlos — tecnico_servicios, NO puede Agendar
-const GERENCIA         = 'gerencia@test.com'    // Management, ve la comisión de Carlos
+const LIDER_SERVICIOS = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, puede Agendar
+const TECNICO         = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico_servicios, NO puede Agendar
+const GERENCIA         = 'gerencia@test.com'    // Management, ve la comisión de Tecnico Servicios
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()

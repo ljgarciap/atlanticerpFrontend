@@ -18,7 +18,7 @@ import {
 import type { CompanyProfilePayload, CreateLocationPayload, CreateContactPayload, Location, Contact } from '@/types/adminContab'
 
 /**
- * REQ-561→565 (SCRUM-638→642) — Datos de la Empresa, misma pantalla exclusiva de Mark que
+ * REQ-561→565 (SCRUM-638→642) — Datos de la Empresa, misma pantalla exclusiva de Gerencia que
  * Configuración Fiscal (ver FiscalConfigPage.tsx, mismo patrón de gate/modo edición). El gate real
  * vive en el backend (403 en TODAS las rutas, incluido GET) — un 403 acá se trata como "acceso
  * restringido", no como error genérico.

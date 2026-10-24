@@ -7,7 +7,7 @@ import { execSync } from 'node:child_process'
  * esta misma sesión (`ensurePipelineLinkage()`, `App\Modules\VentasDiseno\Services\
  * QuoteService.php`).
  *
- * Bug original (reportado por Daniela): crear una cotización nueva sobre el mismo
+ * Bug original (reportado por Gerencia): crear una cotización nueva sobre el mismo
  * Cliente Master/Subcliente/Proyecto que otra cotización YA EXISTENTE pero SIN
  * CONFIRMAR colapsaba ambas al mismo `sales_project_id`/`PipelineCard` — la
  * segunda nunca aparecía como entrada independiente en Pipeline.
