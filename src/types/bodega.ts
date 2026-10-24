@@ -3,6 +3,10 @@
 // SCRUM-425 (REQ-355) — "Ver ficha técnica" reusa el mismo tipo que Compras (mismo dato de
 // `catalog_products`, mismo modal compartido — ver `components/TechnicalSpecModal.tsx`).
 import type { TechnicalSpec } from './compras'
+// SCRUM-832 — el detalle fiscal completo que expone `OrderInvoiceStatusResponse` desde este
+// ticket es el mismo shape que `InvoiceDetail` de Admin&Cont (`InvoiceService::detail()` es la
+// única fuente en el backend, ver docblock de `OrderInvoiceController`).
+import type { EntregaEstado, InvoiceLineItem } from './adminContab'
 
 export type WarehouseModo = 'ubicacion_exacta' | 'pendiente' | 'cliente'
 
@@ -12,6 +16,10 @@ export interface PhysicalWarehouse {
   responsable:    string | null
   capacidad_pct:  number | null
   modo_detalle:   WarehouseModo
+  /** SCRUM-990 — bodega de SOLO CONSULTA (Zona Libre / Lafayette): catálogo de una empresa externa, no es inventario de
+   * Atlantic. El backend lo manda siempre (`WarehouseController::index()` y `formatWarehouse()`); reemplaza la
+   * inferencia frágil por `modo_detalle === 'pendiente'`. */
+  solo_consulta:  boolean
 }
 
 export interface WarehouseKpis {
@@ -19,6 +27,70 @@ export interface WarehouseKpis {
   total_products:  number
   total_units:     number
   capacidad_pct:   number | null
+  /** SCRUM-990 — solo en la respuesta de una bodega de solo consulta (`buildSoloConsultaResponse`): `finished_at` ISO 8601 de
+   * la última corrida exitosa del sincronizador, o null si nunca corrió. Con `total_products`/`total_units` describe el
+   * catálogo EXTERNO de Lafayette (no es inventario de Atlantic). */
+  last_synced_at?: string | null
+}
+
+/** SCRUM-990 — UNA fila de `GET /bodega/zona-libre/productos` (`ZonaLibreCatalogoService::formatRow`, fijado por
+ * `ZonaLibreCatalogoContractTest` en el backend). `id` y `referencia_lafayette` son ambos el `lafayette_id` (string);
+ * `precio` es `precio_5` de Lafayette (sin etiqueta de tipo de precio en el payload). */
+export interface ZonaLibreCatalogoRow {
+  id:                   string
+  referencia_lafayette: string
+  referencia:           string | null
+  descripcion:          string | null
+  marca:                string | null
+  categoria:            string | null
+  url_imagen:           string | null
+  disponible:           number
+  precio:               number | null
+  synced_at:            string | null
+}
+
+/** `Pagination::meta()` + el resumen del catálogo vigente y el permiso de precio (`ZonaLibreCatalogoController::productos`). */
+export interface ZonaLibreCatalogoMeta {
+  total:                 number
+  per_page:              number
+  current_page:          number
+  last_page:             number
+  /** Categorías distintas (no vacías, ordenadas) del catálogo vigente, para el filtro. */
+  categorias:            string[]
+  /** Productos vigentes del catálogo completo, sin filtros. */
+  total_catalogo:        number
+  /** `finished_at` ISO 8601 de la última corrida exitosa/parcial del sincronizador, o null. */
+  ultima_sincronizacion: string | null
+  /** SCRUM-990 (ronda 2) — el precio de Lafayette (`precio_5`) solo lo ven Compras (`compras.read`) y superadmin. Si es false, el
+   * backend manda `precio: null` en TODAS las filas y responde 422 a `sort=precio`: la UI no muestra la columna ni el orden por precio.
+   * Va AL FINAL de `meta` (después de `ultima_sincronizacion`). */
+  puede_ver_precio:      boolean
+}
+
+export interface ZonaLibreCatalogoResponse {
+  data: ZonaLibreCatalogoRow[]
+  meta: ZonaLibreCatalogoMeta
+}
+
+/** Columnas ordenables = lista blanca del backend (`ZonaLibreCatalogoService::SORTS`); cualquier otra responde 422. */
+export type ZonaLibreCatalogoSort =
+  | 'referencia_lafayette' | 'referencia' | 'descripcion' | 'marca' | 'categoria' | 'disponible' | 'precio'
+
+/** Valores válidos de `per_page` del backend (`PER_PAGE_OPTIONS`); no existe "todas". */
+export const ZONA_LIBRE_PER_PAGE_OPTIONS = [25, 50, 100] as const
+export type ZonaLibreCatalogoPerPage = (typeof ZONA_LIBRE_PER_PAGE_OPTIONS)[number]
+
+/** Parámetros de `GET /bodega/zona-libre/productos`; todos opcionales (un valor fuera de contrato responde 422). */
+export interface ZonaLibreCatalogoParams {
+  /** Mínimo 2 caracteres: el llamador no lo manda si es más corto. */
+  search?:           string
+  categoria?:        string
+  /** Apagado por defecto: los productos con stock 0 SE VEN (decisión de Luis, 2026-09-26). Solo se manda si es true. */
+  solo_disponibles?: boolean
+  sort?:             ZonaLibreCatalogoSort
+  dir?:              'asc' | 'desc'
+  page?:             number
+  per_page?:         ZonaLibreCatalogoPerPage
 }
 
 export interface WarehouseProductRow {
@@ -321,6 +393,13 @@ export interface AssistantLoad {
   percent_of_total:  number
 }
 
+// SCRUM-854, rebote de Pre-QA — mismo shape que Vendor (ventasDiseno.ts), pero servido por
+// /bodega/orders/sellers (gateado por bodega.read, no ventas_diseno.read).
+export interface BodegaSeller {
+  id:    number
+  name:  string
+}
+
 export interface OrderItemDetail {
   id:                  number
   catalog_product_id:  number | null
@@ -365,12 +444,17 @@ export interface OrderDetail extends OrderCard {
    * `OrderBoardService::detail()`), usados en el encabezado de la Hoja de Picking. */
   cliente_master:     string | null
   subcliente:         string | null
+  /** SCRUM-1149 — Observaciones del proyecto en el Pipeline (null = vacías). Solo lectura en Bodega. */
+  observaciones:      string | null
 }
 
 export interface OrderBoardFilters {
   search?:       string
   assistant_id?: number
   seller_id?:    number
+  // SCRUM-854 — filtro multi-selección Vendedor/Diseñador (OR entre seleccionados), reemplaza
+  // el uso de `seller_id` singular en este endpoint.
+  seller_ids?:   number[]
   cliente?:      string
   chip?:         'urgentes' | 'atrasados' | 'sin_stock'
 }
@@ -605,8 +689,15 @@ export interface BodegaRotacionItem {
   total_salidas:       number
 }
 
-/** REQ-304 — panel "Artículos críticos" (no cambia con el toggle). A diferencia de
- * `mayor_rotacion`, el backend NO limita este array a un top-N — `.length` sí es el total real. */
+/** REQ-304 — panel "Artículos críticos" (no cambia con el toggle).
+ *
+ * SCRUM-871 Pre-QA (CRÍTICO, 2026-09-13) — antes `articulos_criticos` era un array plano SIN
+ * límite (11670 elementos en dev, ~13-14s de respuesta) — el backend ahora solo trae el top-N
+ * configurable (`BodegaSettingsService::articulosCriticosTopN()`, mismo patrón que
+ * `rotacion_top_n`) ya ordenado por importancia (sin_stock primero, luego por disponible
+ * ascendente). `total` es el conteo real completo — úsalo para "Ver los N artículos", nunca
+ * `items.length` (que es como mucho el top-N). El link "Ver más" sigue yendo a
+ * `/bodega/inventario?filter=criticos` (paginado real), nunca a un modal con el array completo. */
 export type BodegaCriticoEstado = 'bajo_stock' | 'sin_stock'
 
 export interface BodegaCriticoItem {
@@ -617,6 +708,11 @@ export interface BodegaCriticoItem {
   disponible:          number
   reorder_point:       number | null
   estado:              BodegaCriticoEstado
+}
+
+export interface BodegaCriticoItems {
+  items:  BodegaCriticoItem[]
+  total:  number
 }
 
 // SCRUM-500 — pantalla de administración de umbrales de Bodega (hallazgo de Senior Review en
@@ -641,8 +737,20 @@ export interface BodegaSettings {
   rotacion_ventana_dias:    number
   /** REQ-303 — tamaño del top-N de "Mayor rotación". */
   rotacion_top_n:           number
+  /** SCRUM-871 Pre-QA — tamaño del top-N de "Artículos críticos" en Home (default 5). */
+  articulos_criticos_top_n: number
   /** REQ-423 RN1 — % de concentración que dispara el aviso de "Capacidad por bodega" (default 75). */
   capacidad_concentracion_pct: number
+  // REQ-635 (SCRUM-811) — umbrales de alertas de fraude, ver
+  // docs/security/THREAT-MODEL-bodega-admincont-fraude.md (atlanticerp-backend).
+  /** Unidades de una línea de ajuste a partir de las cuales se considera "grande" (default 10). */
+  fraude_ajuste_grande_unidades: number
+  /** Ventana de madrugada [00:00, este valor) en la que un ajuste/reubicación se marca como fuera de horario (default 5). */
+  fraude_horario_fin_hora: number
+  /** Minutos de correlación entre un ajuste y una reubicación del mismo producto por el mismo actor (default 60). */
+  fraude_ventana_correlacion_minutos: number
+  /** Días hacia atrás para considerar "conocida" una IP de un usuario (default 90). */
+  fraude_ip_lookback_dias: number
 }
 
 export interface BodegaHomeSummary {
@@ -658,7 +766,7 @@ export interface BodegaHomeSummary {
   estado_pedidos:      BodegaEstadoPedidos
   por_recibir:         BodegaPorRecibirRow[]
   mayor_rotacion:      BodegaRotacionItem[]
-  articulos_criticos:  BodegaCriticoItem[]
+  articulos_criticos:  BodegaCriticoItems
 }
 
 // ── SCRUM-329 Batch B2 (REQ-344→362, SCRUM-414→432) — pantalla "Ver Inventario" de Bodega ──────
@@ -697,6 +805,8 @@ export type BodegaInventoryRotationFilter = 'alta' | 'media' | 'baja' | 'compra_
 
 export interface BodegaInventoryKpis {
   total_products:    number
+  /** SCRUM-991 — misma cifra que el KPI "Con stock" de Compras → Inventario. */
+  with_stock:        number
   low_stock:         number
   out_of_stock:      number
   in_attention:      number
@@ -939,16 +1049,31 @@ export interface OrderConsolidatedPickingResponse {
 }
 
 /**
- * SCRUM-401 (REQ-331) — ALCANCE REDUCIDO a propósito (decisión de Luis, ver docblock de
- * `OrderInvoiceController` en el backend): Bodega nunca genera la Factura real (Subtotal/ITBMS/
- * Total), solo expone si está lista y un mensaje de estado — depende de un módulo de
- * Administración & Contabilidad que todavía no existe.
+ * SCRUM-401 (REQ-331) — Bodega nunca GENERA la Factura (Subtotal/ITBMS/Total los calcula
+ * Admin&Cont), solo la LEE. SCRUM-832 amplió esta respuesta con el detalle fiscal completo
+ * (mismo shape que `InvoiceDetail`, ver `OrderInvoiceController::show()` en el backend) para que
+ * "Ver" en Por despachar muestre la factura real en vez de solo `status_message` — los campos de
+ * detalle son opcionales porque solo vienen poblados cuando `invoice_ready === true`.
  */
 export interface OrderInvoiceStatusResponse {
   order_id:       number
   order_number:   string
   invoice_ready:  boolean
+  invoice_numero?: string | null
   status_message: string
+  estado?:         EntregaEstado
+  es_anulada?:     boolean
+  cliente?:        string
+  monto?:          number
+  saldo_aplicado?: number
+  total_a_pagar?:  number
+  cuenta_pago?:    string | null
+  responsable?:    string | null
+  subtotal?:       number
+  descuentos?:     number
+  itbms?:          number
+  total?:          number
+  items?:          InvoiceLineItem[]
 }
 
 // SCRUM-329 Oleada A / Batch A2 (SCRUM-383→386, REQ-313→316) — flujo de picking. Contrato
@@ -989,7 +1114,30 @@ export interface PickingSheetItem {
   found_note:        string | null
   qty_requested:     number
   qty_picked:        number
+  /** SCRUM-1196 — lo que el sistema le reservó a este pedido (en la bodega de despacho por defecto, nunca más que su saldo). */
+  qty_reserved?:     number
   picking_notes:     string | null
+  /** SCRUM-1196 — de qué bodega(s) sale la línea y cuánto (`manual` = la escogió Bodega, p. ej. 1 pieza de Showroom Obarrio). */
+  allocations?:      PickingSheetAllocation[]
+  /** SCRUM-1196 — bodegas de venta que se pueden usar para esta línea, con su saldo; vacío en líneas personalizadas (sin producto de catálogo). */
+  warehouse_options?: PickingWarehouseOption[]
+}
+
+export interface PickingSheetAllocation {
+  warehouse_id: number
+  qty_reserved: number
+  qty_picked:   number
+  manual:       boolean
+}
+
+export interface PickingWarehouseOption {
+  warehouse_id: number
+  name:         string
+  is_default:   boolean
+  /** Saldo del sistema en esa bodega. */
+  stock:        number
+  /** Lo que se puede alistar desde allí para esta línea (en la de por defecto, lo reservado para este pedido). */
+  available:    number
 }
 
 export interface OrderPickingSheetResponse {
@@ -997,6 +1145,8 @@ export interface OrderPickingSheetResponse {
   /** RN3 (REQ-315) — `true` solo si `order.stage === 'en_picking'`; en cualquier otra etapa la
    * hoja es de solo consulta. */
   editable: boolean
+  /** SCRUM-1196 — bodegas de venta (Central y Showroom Obarrio); el selector de la hoja ofrece solo estas. */
+  sale_warehouses?: { id: number; name: string; is_default: boolean }[]
   items:    PickingSheetItem[]
 }
 
@@ -1006,6 +1156,8 @@ export interface PickingSheetItemPayload {
   /** Opcional — solo se manda cuando la fila tiene una Observación cargada (backend valida
    * `nullable|string|max:500`, ver `OrderPickingController::updatePickingSheet()`). */
   picking_notes?: string | null
+  /** SCRUM-1196 — de qué bodega(s) de venta se alista; sin esto todo sale de la bodega de despacho por defecto. */
+  allocations?: { warehouse_id: number; qty_picked: number }[]
 }
 
 export interface UpdatePickingSheetResponse {
@@ -1299,6 +1451,9 @@ export interface CustomerReturnRow {
   received_at:            string | null
   finalized_at:           string | null
   rejected_at:            string | null
+  // SCRUM-865 punto 2 — id de la nota de crédito que Administración generó para esta devolución
+  // (null hasta que exista); habilita el enlace "Ver nota de crédito" en la fila ya finalizada.
+  credit_note_id:         number | null
   products:               CustomerReturnProduct[]
 }
 
@@ -1396,9 +1551,8 @@ export interface UploadReturnSignedDocumentResponse {
   signed_document_uploaded_at:   string
 }
 
-/** `GET .../form` y `GET .../delivery-guide` — mismo shape de respuesta que
- * `OrderStatusDocument`/`documentDownloadUrl` (URL presignada de 15 min), mismo criterio de
- * "GET con efecto lateral consumido como mutation" ya usado en el resto de Bodega. */
+/** `POST .../form` y `POST .../delivery-guide` (SCRUM-1180, antes GET) — mismo shape de respuesta que
+ * `OrderStatusDocument`/`documentDownloadUrl` (URL presignada de 15 min), consumido como mutation on-demand. */
 export interface ReturnDocumentUrlResponse {
   url: string
 }
@@ -1501,4 +1655,16 @@ export interface BodegaRutaDiaItem {
 
 export interface BodegaRutasDiaResponse {
   data: BodegaRutaDiaItem[]
+}
+
+/** SCRUM-1196 — reglas de una bodega para ventas (panel de superadmin «Reglas de bodega»). */
+export interface WarehouseSaleRule {
+  id:                   number
+  name:                 string
+  /** Puede surtir pedidos de venta (Central y Showroom Obarrio). */
+  permite_venta:        boolean
+  /** La que el picking propone: siempre exactamente una, y de venta. */
+  despacho_por_defecto: boolean
+  /** Se excluye del «Disponible» que ven los vendedores (se muestra aparte). */
+  excluye_disponible:   boolean
 }

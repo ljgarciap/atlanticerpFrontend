@@ -1,17 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { useBodegaHomeTeam, useBodegaHomeSummary, useBodegaCalendar } from '@/hooks/useBodega'
+import { useBodegaHomeTeam, useBodegaHomeSummary, useBodegaCalendar, useBodegaApprovalsPending } from '@/hooks/useBodega'
 import { ORDER_STAGE_ORDER, ORDER_STAGE_COLORS } from '@/types/bodega'
-import type { OrderStage, BodegaPendienteItem, BodegaPendienteTipo } from '@/types/bodega'
+import type { OrderStage, BodegaPendienteItem, BodegaPendienteTipo, BodegaDespachoUrgente, BodegaPorRecibirRow } from '@/types/bodega'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import CountBadge from '@/components/ui/CountBadge'
 import { IcoAlertTriangle, IcoClock, IcoGlobe, IcoClose, IcoChevronRight } from '@/components/icons'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
+import ShowMoreListModal from '@/components/ShowMoreListModal'
+import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { bodegaApi } from '@/api/bodegaApi'
 import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
+import { MAX_HOME_CARD_ITEMS } from '@/lib/homeCards'
+import { firstNameOnly } from '@/lib/greeting'
 
 type Scope = 'own' | 'team'
 type EstadoChip = 'all' | 'urgent'
@@ -54,6 +59,21 @@ export default function BodegaHomePage() {
   // activar el toggle Equipo a mano cada vez que entra (antes arrancaba siempre en 'own').
   const [scope, setScope] = useState<Scope>(canViewTeam ? 'team' : 'own')
   const [memberId, setMemberId] = useState<number | ''>('')
+  // SCRUM-908 — tarjeta "Aprobaciones Pendientes", siempre personal (nunca se pide en scope 'team').
+  const { data: approvalsPending } = useBodegaApprovalsPending()
+
+  // Pre-QA 2026-09-21 (hallazgo MEDIO) — el default 'team' de SCRUM-797 sigue vigente para el caso
+  // general (Líder de Bodega ahorra un click al ver Inicio consolidado), pero si YA hay una
+  // aprobación real pendiente, aterrizar en 'team' la deja invisible (la card es siempre personal,
+  // scope==='own'). Decisión de Luis: cambiar a 'own' automáticamente en ese caso puntual — una
+  // sola vez al cargar, nunca si el usuario ya tocó el toggle a mano (no le pisamos la elección).
+  const userTouchedScope = useRef(false)
+  useEffect(() => {
+    if (!userTouchedScope.current && canViewTeam && (approvalsPending?.data.length ?? 0) > 0) {
+      setScope('own')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [approvalsPending])
   const [calendarPill, setCalendarPill] = useState<CalendarPill>('day')
   const [showCalendar, setShowCalendar] = useState(false)
   const [calendarInitialDate, setCalendarInitialDate] = useState<Date | undefined>(undefined)
@@ -69,8 +89,9 @@ export default function BodegaHomePage() {
   const calendarEvents = calendarData?.data
 
   // REQ-294 RN1 — nombre real del usuario en sesión; el backend ya lo resuelve en `saludo.nombre`
-  // (mismo `User` autenticado por JWT), con fallback al store mientras el summary carga.
-  const fullName = summary?.saludo.nombre ?? (user ? `${user.first_name} ${user.last_name}`.trim() : '')
+  // (mismo `User` autenticado por JWT), con fallback al store mientras el summary carga. SCRUM-863
+  // — solo primer nombre (backend ya devuelve `saludo.nombre` con first_name únicamente).
+  const firstName = firstNameOnly(summary?.saludo.nombre ?? user?.first_name)
 
   const miDia = summary?.mi_dia
   const pendientes = summary?.pendientes.items ?? []
@@ -78,7 +99,11 @@ export default function BodegaHomePage() {
   const despachosUrgentes = summary?.despachos_urgentes ?? []
   const porRecibir = summary?.por_recibir ?? []
   const mayorRotacion = summary?.mayor_rotacion ?? []
-  const articulosCriticos = summary?.articulos_criticos ?? []
+  // SCRUM-871 Pre-QA — articulos_criticos ahora es {items, total}: items ya viene capado al
+  // top-N configurado por el backend, total es el conteo real completo (usarlo para "Ver los N
+  // artículos", nunca items.length).
+  const articulosCriticos = summary?.articulos_criticos.items ?? []
+  const articulosCriticosTotal = summary?.articulos_criticos.total ?? 0
 
   const stageCounts = useMemo((): Partial<Record<OrderStage, number>> => {
     const fromStages = Object.fromEntries((summary?.estado_pedidos.stages ?? []).map(s => [s.stage, s.count]))
@@ -92,6 +117,7 @@ export default function BodegaHomePage() {
   }, [estadoChip, summary, despachosUrgentes])
 
   function handleScopeChange(next: Scope) {
+    userTouchedScope.current = true
     setScope(next)
     // REQ-296 RN1 — al activar Equipo, "Equipo completo" (memberId === '') queda seleccionado por defecto.
     setMemberId('')
@@ -118,11 +144,105 @@ export default function BodegaHomePage() {
   // (RN1/RN2). `null` = panel cerrado.
   const [selectedPendiente, setSelectedPendiente] = useState<BodegaPendienteItem | null>(null)
 
+  // SCRUM-871 — "Ver más" por tarjeta.
+  const [showAllPendientes, setShowAllPendientes] = useState(false)
+  const [showAllDespachos, setShowAllDespachos] = useState(false)
+  const [showAllPorRecibir, setShowAllPorRecibir] = useState(false)
+
+  const renderPendienteRow = (p: BodegaPendienteItem, i: number, onSelect: () => void) => {
+    const priority = PENDIENTE_PRIORITY[p.type]
+    return (
+      // SCRUM-369 (REQ-299, corrección 2026-08-11) — RN1: todo pendiente es
+      // seleccionable/clickeable, para poder consultar su detalle.
+      <button
+        type="button"
+        onClick={onSelect}
+        data-testid={`pendiente-item-${i}`}
+        className="w-full flex items-start gap-1.5 text-[12px] px-2 py-1.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+      >
+        <span className="shrink-0 mt-0.5" title={t(`bodega:home.pendientes.priority.${priority}`)}>
+          {priority === 'alta'
+            ? <IcoAlertTriangle size={13} className="text-red-500" />
+            : <IcoClock size={13} className="text-amber-500" />}
+        </span>
+        <span className="text-slate-600 dark:text-slate-300">{pendienteText(p)}</span>
+      </button>
+    )
+  }
+
+  const renderDespachoUrgenteRow = (d: BodegaDespachoUrgente) => (
+    <div className="flex items-center justify-between gap-2 text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900">
+      <span className="text-slate-700 dark:text-slate-200">
+        <span className="font-semibold">#{d.order_number}</span>
+        {d.cliente && <span className="text-slate-400"> · {d.cliente}</span>}
+      </span>
+      <span className="flex items-center gap-2 shrink-0">
+        <span className="text-slate-400">
+          {d.fecha_entrega_comprometida
+            ? new Date(d.fecha_entrega_comprometida).toLocaleDateString('es', { day: 'numeric', month: 'short' })
+            : '—'}
+        </span>
+        <span
+          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+          style={{ color: ORDER_STAGE_COLORS[d.stage], background: `${ORDER_STAGE_COLORS[d.stage]}18` }}
+        >
+          {t(`bodega:pedidos.stages.${d.stage}`)}
+        </span>
+      </span>
+    </div>
+  )
+
+  const renderPorRecibirCells = (row: BodegaPorRecibirRow) => (
+    <>
+      <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.factory_reference ?? '—'}</td>
+      <td className="py-1.5 pr-2 text-slate-700 dark:text-slate-200">{row.description ?? row.reference ?? '—'}</td>
+      <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.quantity}</td>
+      <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.estimated_arrival_date ?? '—'}</td>
+      <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">
+        {row.provider_name ?? '—'}
+        {row.is_zona_libre && (
+          <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+            <IcoGlobe size={10} /> {t('bodega:home.porRecibir.freeZoneBadge')}
+          </span>
+        )}
+      </td>
+      <td className="py-1.5">
+        {/* REQ-301 RN3 — "Zona Libre" es la misma orden de Compras (`PurchaseOrder.modality`),
+            no un recurso separado, así que "Ver orden" siempre va a Compras. */}
+        <button
+          className="text-primary font-semibold hover:underline"
+          onClick={() => navigate(`/compras/ordenes/${row.purchase_order_id}`)}
+        >
+          {t('bodega:home.porRecibir.viewOrder')}
+        </button>
+      </td>
+    </>
+  )
+
+  const renderPorRecibirModalRow = (row: BodegaPorRecibirRow) => (
+    <div className="flex items-center justify-between gap-3 px-3 py-2 border-b border-slate-100 dark:border-slate-800 last:border-0 text-[12px]">
+      <div>
+        <div className="font-medium text-slate-700 dark:text-slate-200">{row.description ?? row.reference ?? '—'}</div>
+        <div className="text-slate-400">{row.factory_reference ?? '—'} · {t('bodega:home.porRecibir.table.quantity')}: {row.quantity} · {row.estimated_arrival_date ?? '—'}</div>
+        <div className="text-slate-500">
+          {row.provider_name ?? '—'}
+          {row.is_zona_libre && <span className="ml-1.5 text-primary">({t('bodega:home.porRecibir.freeZoneBadge')})</span>}
+        </div>
+      </div>
+      <button
+        className="text-primary font-semibold hover:underline shrink-0"
+        onClick={() => { setShowAllPorRecibir(false); navigate(`/compras/ordenes/${row.purchase_order_id}`) }}
+      >
+        {t('bodega:home.porRecibir.viewOrder')}
+      </button>
+    </div>
+  )
+
   return (
     <>
       <div className="mb-4">
         <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-          {t('bodega:home.greeting', { name: fullName })}
+          {t('bodega:home.greeting', { name: firstName })}
         </h1>
         {!loadingSummary && summary && (
           <p className="text-[12px] text-slate-500 dark:text-slate-400">{summary.saludo.resumen}</p>
@@ -246,118 +366,93 @@ export default function BodegaHomePage() {
         <Card variant="panel" className="p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('bodega:home.pendientes.title')}</h3>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              {pendientesCount}
-            </span>
+            <CountBadge count={pendientesCount} />
           </div>
-          <ul className="flex flex-col gap-1.5">
-            {pendientes.map((p, i) => {
-              const priority = PENDIENTE_PRIORITY[p.type]
-              return (
-                <li key={i}>
-                  {/* SCRUM-369 (REQ-299, corrección 2026-08-11) — RN1: todo pendiente es
-                      seleccionable/clickeable, para poder consultar su detalle. */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPendiente(p)}
-                    data-testid={`pendiente-item-${i}`}
-                    className="w-full flex items-start gap-1.5 text-[12px] px-2 py-1.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
-                  >
-                    <span className="shrink-0 mt-0.5" title={t(`bodega:home.pendientes.priority.${priority}`)}>
-                      {priority === 'alta'
-                        ? <IcoAlertTriangle size={13} className="text-red-500" />
-                        : <IcoClock size={13} className="text-amber-500" />}
-                    </span>
-                    <span className="text-slate-600 dark:text-slate-300">{pendienteText(p)}</span>
-                  </button>
-                </li>
-              )
-            })}
-            {pendientes.length === 0 && (
-              <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.pendientes.empty')}</li>
-            )}
-          </ul>
+          {/* SCRUM-871 Pre-QA — sin este gate, un summary todavía en vuelo se ve indistinguible
+              de "no hay pendientes". */}
+          {loadingSummary ? (
+            <p className="text-[12px] text-slate-400 px-2">{t('common:labels.loading')}</p>
+          ) : (
+            <>
+              <ul className="flex flex-col gap-1.5">
+                {pendientes.slice(0, MAX_HOME_CARD_ITEMS).map((p, i) => (
+                  <li key={i}>{renderPendienteRow(p, i, () => setSelectedPendiente(p))}</li>
+                ))}
+                {pendientes.length === 0 && (
+                  <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.pendientes.empty')}</li>
+                )}
+              </ul>
+              {pendientes.length > MAX_HOME_CARD_ITEMS && (
+                <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllPendientes(true)}>
+                  {t('common:actions.viewMore')}
+                </Button>
+              )}
+            </>
+          )}
         </Card>
 
         {/* REQ-300 — Despachos urgentes. */}
         <Card variant="panel" className="p-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t('bodega:home.despachosUrgentes.title')}
-          </h3>
-          <ul className="flex flex-col gap-1.5">
-            {despachosUrgentes.map(d => (
-              <li key={d.order_id} className="flex items-center justify-between gap-2 text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900">
-                <span className="text-slate-700 dark:text-slate-200">
-                  <span className="font-semibold">#{d.order_number}</span>
-                  {d.cliente && <span className="text-slate-400"> · {d.cliente}</span>}
-                </span>
-                <span className="flex items-center gap-2 shrink-0">
-                  <span className="text-slate-400">
-                    {d.fecha_entrega_comprometida
-                      ? new Date(d.fecha_entrega_comprometida).toLocaleDateString('es', { day: 'numeric', month: 'short' })
-                      : '—'}
-                  </span>
-                  <span
-                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                    style={{ color: ORDER_STAGE_COLORS[d.stage], background: `${ORDER_STAGE_COLORS[d.stage]}18` }}
-                  >
-                    {t(`bodega:pedidos.stages.${d.stage}`)}
-                  </span>
-                </span>
-              </li>
-            ))}
-            {despachosUrgentes.length === 0 && (
-              <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.despachosUrgentes.empty')}</li>
-            )}
-          </ul>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {t('bodega:home.despachosUrgentes.title')}
+            </h3>
+            <CountBadge count={despachosUrgentes.length} tone="critical" />
+          </div>
+          {loadingSummary ? (
+            <p className="text-[12px] text-slate-400 px-2">{t('common:labels.loading')}</p>
+          ) : (
+            <>
+              <ul className="flex flex-col gap-1.5">
+                {despachosUrgentes.slice(0, MAX_HOME_CARD_ITEMS).map(d => (
+                  <li key={d.order_id}>{renderDespachoUrgenteRow(d)}</li>
+                ))}
+                {despachosUrgentes.length === 0 && (
+                  <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.despachosUrgentes.empty')}</li>
+                )}
+              </ul>
+              {despachosUrgentes.length > MAX_HOME_CARD_ITEMS && (
+                <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllDespachos(true)}>
+                  {t('common:actions.viewMore')}
+                </Button>
+              )}
+            </>
+          )}
         </Card>
 
         {/* REQ-301 — Por recibir (no cambia con el toggle). */}
         <Card variant="panel" className="p-4 lg:col-span-2 overflow-x-auto">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">{t('bodega:home.porRecibir.title')}</h3>
-          {porRecibir.length === 0 ? (
+          {/* SCRUM-871 Pre-QA — distingue "cargando" de "vacío de verdad". */}
+          {loadingSummary ? (
+            <p className="text-[12px] text-slate-400 px-2">{t('common:labels.loading')}</p>
+          ) : porRecibir.length === 0 ? (
             <p className="text-[12px] text-slate-400 px-2">{t('bodega:home.porRecibir.empty')}</p>
           ) : (
-            <table className="w-full text-[12px]">
-              <thead>
-                <tr className="text-left text-slate-400">
-                  <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.factoryRef')}</th>
-                  <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.product')}</th>
-                  <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.quantity')}</th>
-                  <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.eta')}</th>
-                  <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.providerOrigin')}</th>
-                  <th className="font-semibold pb-2"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {porRecibir.map(row => (
-                  <tr key={`${row.purchase_order_id}-${row.reference ?? row.description}`}>
-                    <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.factory_reference ?? '—'}</td>
-                    <td className="py-1.5 pr-2 text-slate-700 dark:text-slate-200">{row.description ?? row.reference ?? '—'}</td>
-                    <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.quantity}</td>
-                    <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.estimated_arrival_date ?? '—'}</td>
-                    <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">
-                      {row.provider_name ?? '—'}
-                      {row.is_zona_libre && (
-                        <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                          <IcoGlobe size={10} /> {t('bodega:home.porRecibir.freeZoneBadge')}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-1.5">
-                      {/* REQ-301 RN3 — "Zona Libre" es la misma orden de Compras (`PurchaseOrder.modality`),
-                          no un recurso separado, así que "Ver orden" siempre va a Compras. */}
-                      <button
-                        className="text-primary font-semibold hover:underline"
-                        onClick={() => navigate(`/compras/ordenes/${row.purchase_order_id}`)}
-                      >
-                        {t('bodega:home.porRecibir.viewOrder')}
-                      </button>
-                    </td>
+            <>
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="text-left text-slate-400">
+                    <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.factoryRef')}</th>
+                    <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.product')}</th>
+                    <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.quantity')}</th>
+                    <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.eta')}</th>
+                    <th className="font-semibold pb-2 pr-2">{t('bodega:home.porRecibir.table.providerOrigin')}</th>
+                    <th className="font-semibold pb-2"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {porRecibir.slice(0, MAX_HOME_CARD_ITEMS).map(row => (
+                    <tr key={`${row.purchase_order_id}-${row.reference ?? row.description}`}>{renderPorRecibirCells(row)}</tr>
+                  ))}
+                </tbody>
+              </table>
+              {porRecibir.length > MAX_HOME_CARD_ITEMS && (
+                <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllPorRecibir(true)}>
+                  {t('common:actions.viewMore')}
+                </Button>
+              )}
+            </>
           )}
         </Card>
 
@@ -415,61 +510,82 @@ export default function BodegaHomePage() {
         {/* REQ-303 — Mayor rotación (no cambia con el toggle). */}
         <Card variant="panel" className="p-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">{t('bodega:home.mayorRotacion.title')}</h3>
-          <ul className="flex flex-col gap-1.5 mb-2">
-            {mayorRotacion.map(item => (
-              <li key={item.catalog_product_id} className="flex justify-between text-[12px] px-2 py-1">
-                <span className="text-slate-700 dark:text-slate-200">
-                  {item.factory_reference && <span className="text-slate-400">{item.factory_reference} · </span>}
-                  {item.description ?? item.reference}
-                </span>
-                <span className="text-slate-500 dark:text-slate-400 shrink-0">
-                  {t('bodega:home.mayorRotacion.salidas', { count: item.total_salidas })}
-                </span>
-              </li>
-            ))}
-            {mayorRotacion.length === 0 && (
-              <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.mayorRotacion.empty')}</li>
-            )}
-          </ul>
-          {mayorRotacion.length > 0 && (
-            <button
-              className="text-[12px] text-primary font-semibold hover:underline px-2"
-              onClick={() => navigate('/bodega/inventario?filter=rotacion')}
-            >
-              {t('bodega:home.mayorRotacion.viewAll', { count: mayorRotacion.length })}
-            </button>
+          {/* SCRUM-871 Pre-QA — distingue "cargando" de "vacío de verdad". */}
+          {loadingSummary ? (
+            <p className="text-[12px] text-slate-400 px-2">{t('common:labels.loading')}</p>
+          ) : (
+            <>
+              <ul className="flex flex-col gap-1.5 mb-2">
+                {/* SCRUM-871 — máx. MAX_HOME_CARD_ITEMS visibles acá aunque `rotacionTopN` (backend,
+                    configurable) traiga más; el link de abajo ya lleva al listado completo real en
+                    Inventario, así que cumple el rol de "Ver más" sin necesitar un modal nuevo. */}
+                {mayorRotacion.slice(0, MAX_HOME_CARD_ITEMS).map(item => (
+                  <li key={item.catalog_product_id} className="flex justify-between text-[12px] px-2 py-1">
+                    <span className="text-slate-700 dark:text-slate-200">
+                      {item.factory_reference && <span className="text-slate-400">{item.factory_reference} · </span>}
+                      {item.description ?? item.reference}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                      {t('bodega:home.mayorRotacion.salidas', { count: item.total_salidas })}
+                    </span>
+                  </li>
+                ))}
+                {mayorRotacion.length === 0 && (
+                  <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.mayorRotacion.empty')}</li>
+                )}
+              </ul>
+              {mayorRotacion.length > MAX_HOME_CARD_ITEMS && (
+                <button
+                  className="text-[12px] text-primary font-semibold hover:underline px-2"
+                  onClick={() => navigate('/bodega/inventario?filter=rotacion')}
+                >
+                  {t('bodega:home.mayorRotacion.viewAll', { count: mayorRotacion.length })}
+                </button>
+              )}
+            </>
           )}
         </Card>
 
         {/* REQ-304 — Artículos críticos (no cambia con el toggle). */}
         <Card variant="panel" className="p-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">{t('bodega:home.articulosCriticos.title')}</h3>
-          <ul className="flex flex-col gap-1.5 mb-2">
-            {articulosCriticos.slice(0, 5).map(item => (
-              <li key={item.catalog_product_id} className="flex justify-between text-[12px] px-2 py-1">
-                <span className="text-slate-700 dark:text-slate-200">
-                  {item.factory_reference && <span className="text-slate-400">{item.factory_reference} · </span>}
-                  {item.description ?? item.reference}
-                </span>
-                <span className="text-red-600 dark:text-red-400 font-semibold shrink-0">
-                  {t('bodega:home.articulosCriticos.available', { count: item.disponible })}
-                </span>
-              </li>
-            ))}
-            {articulosCriticos.length === 0 && (
-              <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.articulosCriticos.empty')}</li>
-            )}
-          </ul>
-          {articulosCriticos.length > 0 && (
-            <button
-              className="text-[12px] text-primary font-semibold hover:underline px-2"
-              onClick={() => navigate('/bodega/inventario?filter=criticos')}
-            >
-              {t('bodega:home.articulosCriticos.viewAll', { count: articulosCriticos.length })}
-            </button>
+          {/* SCRUM-871 Pre-QA — con `articulos_criticos` ahora capado al top-N server-side, sin
+              este gate un summary todavía en vuelo se ve indistinguible de "no hay críticos". */}
+          {loadingSummary ? (
+            <p className="text-[12px] text-slate-400 px-2">{t('common:labels.loading')}</p>
+          ) : (
+            <>
+              <ul className="flex flex-col gap-1.5 mb-2">
+                {articulosCriticos.slice(0, MAX_HOME_CARD_ITEMS).map(item => (
+                  <li key={item.catalog_product_id} className="flex justify-between text-[12px] px-2 py-1">
+                    <span className="text-slate-700 dark:text-slate-200">
+                      {item.factory_reference && <span className="text-slate-400">{item.factory_reference} · </span>}
+                      {item.description ?? item.reference}
+                    </span>
+                    <span className="text-red-600 dark:text-red-400 font-semibold shrink-0">
+                      {t('bodega:home.articulosCriticos.available', { count: item.disponible })}
+                    </span>
+                  </li>
+                ))}
+                {articulosCriticosTotal === 0 && (
+                  <li className="text-[12px] text-slate-400 px-2">{t('bodega:home.articulosCriticos.empty')}</li>
+                )}
+              </ul>
+              {articulosCriticosTotal > MAX_HOME_CARD_ITEMS && (
+                <button
+                  className="text-[12px] text-primary font-semibold hover:underline px-2"
+                  onClick={() => navigate('/bodega/inventario?filter=criticos')}
+                >
+                  {t('bodega:home.articulosCriticos.viewAll', { count: articulosCriticosTotal })}
+                </button>
+              )}
+            </>
           )}
         </Card>
       </div>
+
+      {/* SCRUM-908 — siempre personal, no aplica al scope 'team'. */}
+      {scope === 'own' && <ApprovalsPendingCard items={approvalsPending?.data ?? []} />}
 
       {showCalendar && (
         <CalendarModal
@@ -487,6 +603,41 @@ export default function BodegaHomePage() {
           item={selectedPendiente}
           onClose={() => setSelectedPendiente(null)}
           onNavigate={target => { setSelectedPendiente(null); navigate(target) }}
+        />
+      )}
+
+      {showAllPendientes && (
+        <ShowMoreListModal
+          title={t('bodega:home.pendientes.title')}
+          items={pendientes}
+          onClose={() => setShowAllPendientes(false)}
+          renderItem={(p, i) => (
+            <div key={i}>
+              {renderPendienteRow(p, i, () => { setShowAllPendientes(false); setSelectedPendiente(p) })}
+            </div>
+          )}
+        />
+      )}
+
+      {showAllDespachos && (
+        <ShowMoreListModal
+          title={t('bodega:home.despachosUrgentes.title')}
+          items={despachosUrgentes}
+          onClose={() => setShowAllDespachos(false)}
+          renderItem={d => <div key={d.order_id}>{renderDespachoUrgenteRow(d)}</div>}
+        />
+      )}
+
+      {showAllPorRecibir && (
+        <ShowMoreListModal
+          title={t('bodega:home.porRecibir.title')}
+          items={porRecibir}
+          onClose={() => setShowAllPorRecibir(false)}
+          renderItem={row => (
+            <div key={`${row.purchase_order_id}-${row.reference ?? row.description}`}>
+              {renderPorRecibirModalRow(row)}
+            </div>
+          )}
         />
       )}
     </>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   useCustomerReturns, useReturnFormUrl, useReturnDeliveryGuideUrl, useReturnSignedDocumentUrl,
+  useReturnCreditNotePdf,
 } from '@/hooks/useBodega'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -12,6 +13,7 @@ import CustomerReturnDetailModal, { ReasonLabel } from '@/components/bodega/Cust
 import UploadReturnSignedDocumentModal from '@/components/bodega/UploadReturnSignedDocumentModal'
 import ConfirmReturnReceptionModal from '@/components/bodega/ConfirmReturnReceptionModal'
 import type { CustomerReturnRow, CustomerReturnStatus, CustomerReturnStatusFilter } from '@/types/bodega'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 const CHIPS: CustomerReturnStatusFilter[] = ['todas', 'pendiente', 'esperando_nota_credito', 'finalizado', 'rechazada']
 
@@ -111,7 +113,7 @@ export default function BodegaDevolucionesPage() {
                     <ProductsCell row={row} expanded={expandedIds.has(row.id)} onToggle={() => toggleExpanded(row.id)} />
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                    {new Date(row.created_at).toLocaleDateString()}
+                    {formatDateFromTimestamp(row.created_at)}
                   </td>
                   <td className="px-4 py-3"><EstadoBadge status={row.status} /></td>
                   <td className="px-4 py-3">
@@ -227,8 +229,9 @@ function EstadoBadge({ status }: { status: CustomerReturnStatus }) {
  * SCRUM-482 (REQ-412, rebote 2026-08-17) — "Simular finalización" eliminado por completo: el
  * propio REQ-412 ya la marcaba exclusiva del mockup ("en el sistema real, este paso lo completa
  * Administración & Contabilidad desde su propio módulo"), nunca debió construirse como
- * funcionalidad real. La columna "Nota de crédito" para `esperando_nota_credito` queda siempre
- * vacía hasta que exista esa integración real — Bodega no tiene ninguna acción disponible ahí.
+ * funcionalidad real. SCRUM-865 punto 2 — la columna "Nota de crédito" ya no queda siempre vacía:
+ * cuando la devolución tiene `credit_note_id` (Administración ya generó la nota) muestra "Ver nota
+ * de crédito"; antes de eso (incl. `esperando_nota_credito`) sigue en "—", Bodega no genera nada ahí.
  *
  * Nota de alcance (no resuelta en este ticket): el mockup de SCRUM-769 también lista columnas
  * "Rechazar" y "Ver motivo" como acciones independientes — hoy "Rechazar" solo existe DENTRO del
@@ -248,7 +251,8 @@ function RowActionCells({ row, onViewDetail, onUpload, onConfirmReception }: {
   const formUrl = useReturnFormUrl()
   const guideUrl = useReturnDeliveryGuideUrl()
   const signedDocumentUrl = useReturnSignedDocumentUrl()
-  const [error, setError] = useState<{ cell: 'form' | 'guide' | 'document'; message: string } | null>(null)
+  const creditNotePdf = useReturnCreditNotePdf()
+  const [error, setError] = useState<{ cell: 'form' | 'guide' | 'document' | 'creditNote'; message: string } | null>(null)
 
   const isResolved = row.status === 'finalizado' || row.status === 'rechazada'
   const showReception = !isResolved && row.has_signed_document && !row.received_at
@@ -279,9 +283,19 @@ function RowActionCells({ row, onViewDetail, onUpload, onConfirmReception }: {
     })
   }
 
+  // SCRUM-865 punto 2 — "Ver nota de crédito" en la fila ya finalizada. El endpoint streamea el
+  // PDF (no una URL presignada), así que se abre desde un blob URL en pestaña nueva.
+  function handleViewCreditNote() {
+    setError(null)
+    creditNotePdf.mutate(row.id, {
+      onSuccess: (blob) => window.open(URL.createObjectURL(blob), '_blank', 'noopener,noreferrer'),
+      onError:   () => setError({ cell: 'creditNote', message: t('bodega:returns.errors.openCreditNoteFailed') }),
+    })
+  }
+
   const Empty = <span className="text-slate-300 dark:text-slate-600">—</span>
 
-  function CellError({ cell }: { cell: 'form' | 'guide' | 'document' }) {
+  function CellError({ cell }: { cell: 'form' | 'guide' | 'document' | 'creditNote' }) {
     if (error?.cell !== cell) return null
     return <p className="text-red-600 text-[11px] max-w-[160px] mt-1">{error.message}</p>
   }
@@ -294,30 +308,29 @@ function RowActionCells({ row, onViewDetail, onUpload, onConfirmReception }: {
         </button>
       </td>
       <td className="px-4 py-3">
-        {!isResolved ? (
-          <button type="button" className="text-primary text-xs underline" onClick={handleViewForm} disabled={formUrl.isPending}>
-            {t('bodega:returns.actions.viewForm')}
-          </button>
-        ) : Empty}
+        {/* SCRUM-865 — el formulario/guía/documento firmado son consulta histórica, no una acción
+            operativa: deben seguir disponibles después de Finalizado/Rechazada, no solo mientras
+            la devolución está en curso. */}
+        <button type="button" className="text-primary text-xs underline" onClick={handleViewForm} disabled={formUrl.isPending}>
+          {t('bodega:returns.actions.viewForm')}
+        </button>
         <CellError cell="form" />
       </td>
       <td className="px-4 py-3">
-        {!isResolved ? (
-          <button type="button" className="text-primary text-xs underline" onClick={handleViewGuide} disabled={guideUrl.isPending}>
-            {t('bodega:returns.actions.viewDeliveryGuide')}
-          </button>
-        ) : Empty}
+        <button type="button" className="text-primary text-xs underline" onClick={handleViewGuide} disabled={guideUrl.isPending}>
+          {t('bodega:returns.actions.viewDeliveryGuide')}
+        </button>
         <CellError cell="guide" />
       </td>
       <td className="px-4 py-3">
-        {isResolved ? Empty : row.has_signed_document ? (
+        {row.has_signed_document ? (
           <button
             type="button" className="text-primary text-xs underline"
             onClick={handleViewSignedDocument} disabled={signedDocumentUrl.isPending}
           >
             {t('bodega:returns.actions.viewSignedDocument')}
           </button>
-        ) : (
+        ) : isResolved ? Empty : (
           <Button variant="outline" className="!text-xs !px-2 !py-1" onClick={onUpload}>
             {t('bodega:returns.actions.uploadSigned')}
           </Button>
@@ -331,7 +344,22 @@ function RowActionCells({ row, onViewDetail, onUpload, onConfirmReception }: {
           </Button>
         ) : Empty}
       </td>
-      <td className="px-4 py-3">{Empty}</td>
+      <td className="px-4 py-3">
+        {/* SCRUM-865 punto 2 — la columna "Nota de crédito" deja de estar siempre vacía: una vez
+            que Administración generó la nota (`credit_note_id`), Bodega puede consultarla acá sin
+            necesitar permiso de Notas de Crédito. */}
+        {row.credit_note_id !== null ? (
+          <>
+            <button
+              type="button" className="text-primary text-xs underline"
+              onClick={handleViewCreditNote} disabled={creditNotePdf.isPending}
+            >
+              {t('bodega:returns.actions.viewCreditNote')}
+            </button>
+            <CellError cell="creditNote" />
+          </>
+        ) : Empty}
+      </td>
     </>
   )
 }

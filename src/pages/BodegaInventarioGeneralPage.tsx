@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { operativeWarehouses } from '@/lib/warehouses'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
@@ -13,6 +14,7 @@ import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose, IcoCheck, IcoAlertTriangle, IcoBarChart } from '@/components/icons'
 import type { GeneralCountChip, GeneralCountDuplicateWarning, GeneralCountLine, GeneralCountRow } from '@/types/bodega'
+import { formatDateFromTimestamp, formatDateTimeShort } from '@/utils/dates'
 
 /** SCRUM-797 (rebote de Gerencia Test 2026-08-27) — 409 estructurado que devuelven
  * `POST /general-counts` y `POST /general-counts/{id}/submit`: un elemento por producto en
@@ -95,7 +97,7 @@ function NewCountPanel({ resume, onResumeConsumed }: {
 }) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = warehousesData?.data ?? []
+  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
 
   const [warehouseId, setWarehouseId] = useState<number | ''>('')
   const [countId, setCountId] = useState<number | null>(null)
@@ -295,7 +297,7 @@ function NewCountPanel({ resume, onResumeConsumed }: {
                             <div className="flex items-center gap-1 text-[11px] text-amber-700 mt-1">
                               <IcoAlertTriangle size={12} />
                               {t('bodega:generalCounts.newPanel.crossWarning', {
-                                date: line.cruce_fecha ? new Date(line.cruce_fecha).toLocaleDateString() : '—',
+                                date: line.cruce_fecha ? formatDateFromTimestamp(line.cruce_fecha) : '—',
                               })}
                             </div>
                           )}
@@ -398,7 +400,7 @@ function DuplicateProductsModal({ duplicates, onConfirm, onCancel }: {
             <li key={d.catalog_product_id} className="border-b border-slate-100 pb-2 last:border-0">
               {t('bodega:generalCounts.newPanel.duplicateModal.body', {
                 product: d.product_reference ?? d.product_name ?? '—',
-                date: new Date(d.general_count.fecha).toLocaleDateString(),
+                date: formatDateFromTimestamp(d.general_count.fecha),
                 status: t(`bodega:generalCounts.tray.status.${d.general_count.estado}`),
               })}
             </li>
@@ -435,7 +437,7 @@ function CruceConfirmModal({ lines, onConfirm, onCancel }: {
           {lines.map(l => (
             <li key={l.id}>
               <span className="font-semibold">{l.producto.reference}</span> — {l.producto.description}
-              {l.cruce_fecha && <span className="text-xs text-slate-400"> ({new Date(l.cruce_fecha).toLocaleDateString()})</span>}
+              {l.cruce_fecha && <span className="text-xs text-slate-400"> ({formatDateFromTimestamp(l.cruce_fecha)})</span>}
             </li>
           ))}
         </ul>
@@ -532,7 +534,7 @@ function CountsTrayPanel({ onContinue }: { onContinue: (row: GeneralCountRow) =>
             {rows.map(row => (
               <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 font-semibold text-slate-800">{row.bodega}</td>
-                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{new Date(row.fecha).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateFromTimestamp(row.fecha)}</td>
                 <td className="px-4 py-3 text-slate-600">{row.realizado_por ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{row.total_productos}</td>
                 <td className="px-4 py-3 text-slate-600">
@@ -815,7 +817,7 @@ function GeneralCountDetailModal({ id, onClose }: { id: number; onClose: () => v
             <div className="flex flex-wrap items-center gap-2">
               <EstadoBadge estado={data.estado} />
               <span className="text-xs text-slate-400">
-                {t('bodega:generalCounts.tray.detailModal.date')}: {new Date(data.fecha).toLocaleDateString()}
+                {t('bodega:generalCounts.tray.detailModal.date')}: {formatDateFromTimestamp(data.fecha)}
               </span>
             </div>
 
@@ -832,7 +834,7 @@ function GeneralCountDetailModal({ id, onClose }: { id: number; onClose: () => v
                 </p>
                 <p className="text-slate-700 font-medium">
                   {data.fecha_solicitud_aprobacion
-                    ? new Date(data.fecha_solicitud_aprobacion).toLocaleString()
+                    ? formatDateTimeShort(data.fecha_solicitud_aprobacion)
                     : t('bodega:generalCounts.tray.detailModal.requestedAtEmpty')}
                 </p>
               </div>

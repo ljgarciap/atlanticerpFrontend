@@ -34,7 +34,7 @@ describe('CustomerReturnDetailModal', () => {
       id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: 'Torre Marina Bahía',
       status: 'pendiente', has_signed_document: true, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: null, finalized_at: null,
-      rejected_at: null, rejection_reason: null,
+      rejected_at: null, rejection_reason: null, credit_note_id: null,
       products: [
         { id: 200, order_item_id: 950, reference: 'AMBAR-E27', description: 'Bombillo decorativo E27 Ámbar', qty_requested: 2, qty_received: null, reason: 'otra', reason_detail: 'Cliente pidió color distinto al catálogo.' },
       ],
@@ -53,7 +53,7 @@ describe('CustomerReturnDetailModal', () => {
       id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: null,
       status: 'rechazada', has_signed_document: true, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: '2026-07-10T10:00:00Z', finalized_at: null,
-      rejected_at: '2026-07-11T10:00:00Z', rejection_reason: 'Producto llegó dañado más allá de lo aceptable', products: [],
+      rejected_at: '2026-07-11T10:00:00Z', rejection_reason: 'Producto llegó dañado más allá de lo aceptable', credit_note_id: null, products: [],
       history: [
         { step: 'received', label: 'Recepción física confirmada', at: '2026-07-10T10:00:00Z', by: 'Esteban C.', destination_warehouse: 'Merma, Reclamos y Devoluciones' },
         { step: 'rejected', label: 'Rechazada', at: '2026-07-11T10:00:00Z', by: 'Esteban C.', reason: 'Producto llegó dañado más allá de lo aceptable' },
@@ -71,7 +71,7 @@ describe('CustomerReturnDetailModal', () => {
       id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: null,
       status: 'pendiente', has_signed_document: false, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: null, finalized_at: null,
-      rejected_at: null, rejection_reason: null, products: [], history: [],
+      rejected_at: null, rejection_reason: null, credit_note_id: null, products: [], history: [],
     }
     mockedApi.returns.detail.mockResolvedValue(detail)
     renderModal()

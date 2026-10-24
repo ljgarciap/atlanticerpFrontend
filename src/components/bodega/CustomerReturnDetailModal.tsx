@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import type { CustomerReturnReason } from '@/types/bodega'
+import { formatDateTimeShort } from '@/utils/dates'
 
 interface Props {
   id: number
@@ -86,7 +87,7 @@ export default function CustomerReturnDetailModal({ id, onClose }: Props) {
                 {data.history.map((entry, i) => (
                   <li key={`${entry.step}-${i}`}>
                     <span>{entry.label}</span>
-                    {entry.at && <span className="text-slate-400 text-xs"> — {new Date(entry.at).toLocaleString()}</span>}
+                    {entry.at && <span className="text-slate-400 text-xs"> — {formatDateTimeShort(entry.at)}</span>}
                     {entry.by && <span className="text-slate-400 text-xs"> ({entry.by})</span>}
                     {entry.destination_warehouse && (
                       <div className="text-xs text-slate-400 pl-3">

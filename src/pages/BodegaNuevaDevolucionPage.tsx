@@ -6,6 +6,7 @@ import { useSearchReturnOrders, useCreateCustomerReturn } from '@/hooks/useBodeg
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import type { CustomerReturnReason, ReturnSearchOrderItem, ReturnSearchOrderResult } from '@/types/bodega'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const REASONS: CustomerReturnReason[] = [
   'danado_defectuoso', 'no_corresponde', 'cliente_cambio_opinion', 'excedente', 'error_instalacion', 'otra',
@@ -30,6 +31,10 @@ export default function BodegaNuevaDevolucionPage() {
   const navigate = useNavigate()
 
   const [search, setSearch] = useState('')
+
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+
+  const searchTerm = useDebouncedSearchTerm(search)
   const [selectedOrder, setSelectedOrder] = useState<ReturnSearchOrderResult | null>(null)
   const [lines, setLines] = useState<Record<number, LineDraft>>({})
   const [contactName, setContactName] = useState('')
@@ -37,7 +42,7 @@ export default function BodegaNuevaDevolucionPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [created, setCreated] = useState<{ return_number: string } | null>(null)
 
-  const { data: searchResults, isFetching } = useSearchReturnOrders(search)
+  const { data: searchResults, isFetching } = useSearchReturnOrders(searchTerm)
   const createReturn = useCreateCustomerReturn()
 
   function selectOrder(order: ReturnSearchOrderResult) {

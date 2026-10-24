@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -9,12 +10,18 @@ import {
 } from '@/hooks/useBodega'
 import { useComprasSettings } from '@/hooks/useCompras'
 import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
-import { IcoClose } from '@/components/icons'
+import { IcoClose, IcoEye } from '@/components/icons'
+import { KpiCard, Th } from '@/components/bodega/BodegaTableParts'
+import ZonaLibreCatalogoTable from '@/components/bodega/ZonaLibreCatalogoTable'
 import { isWarehouseEmptyLocationRow } from '@/types/bodega'
+import { formatDateFromTimestamp } from '@/utils/dates'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchWarehouseProductSuggestions } from '@/utils/searchSuggestionsBodega'
 import type {
   WarehouseProductRow, WarehouseEmptyLocationRow, PhysicalWarehouse,
   RelocationEstadoFilter, RelocationRequest, WarehouseLocationRow,
@@ -29,6 +36,10 @@ export default function BodegasPage() {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
   const warehouses = warehousesData?.data ?? []
+  // SCRUM-990 — las bodegas de solo consulta (Zona Libre / Lafayette) van AL FINAL de la fila de pestañas, separadas por un
+  // divisor, para que no parezcan una bodega operativa más; las operativas conservan el orden del API.
+  const operativeWarehouses = warehouses.filter(w => !w.solo_consulta)
+  const soloConsultaWarehouses = warehouses.filter(w => w.solo_consulta)
 
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [chip, setChip] = useState<'todos' | 'espacio_libre'>('todos')
@@ -37,7 +48,17 @@ export default function BodegasPage() {
   const [categoria, setCategoria] = useState('')
   const [ubicacion, setUbicacion] = useState('')
   const [relocatingRow, setRelocatingRow] = useState<WarehouseProductRow | null>(null)
-  const [showRequestsModal, setShowRequestsModal] = useState(false)
+  // SCRUM-1154 — la notificación de «Aprobaciones pendientes» llega con `?relocation={id}`: abre la bandeja de solicitudes de
+  // reubicación (filtrada a pendientes) con esa solicitud resaltada. Solo con bodega.read (el vendedor es de consulta pura).
+  const [searchParams, setSearchParams] = useSearchParams()
+  const relocationParam = searchParams.get('relocation')
+  const highlightRelocationId = relocationParam !== null && /^\d+$/.test(relocationParam) ? Number(relocationParam) : null
+  const [showRequestsModal, setShowRequestsModal] = useState(relocationParam !== null)
+  // Senior Review: si ya se está en esta pantalla y se hace clic en la campana, la ruta cambia de parámetro pero el componente
+  // sigue montado y el estado inicial no se vuelve a evaluar — sin esto el modal no se abría la 2.ª vez.
+  useEffect(() => {
+    if (relocationParam !== null) setShowRequestsModal(true)
+  }, [relocationParam])
   const [showLocationsModal, setShowLocationsModal] = useState(false)
   // SCRUM-754 (rebote 2026-08-18) — único listado de Bodega sin paginar del batch de
   // estandarización. Una sola página/perPage para ambas tablas (chip "todos" y "espacio_libre"):
@@ -45,8 +66,16 @@ export default function BodegasPage() {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
 
-  // REQ-381 RN1 — Bodega Central es la vista por defecto al entrar a la pantalla.
-  const activeId = selectedId ?? warehouses[0]?.id ?? null
+  // REQ-381 RN1 — Bodega Central es la vista por defecto al entrar a la pantalla (SCRUM-990: la primera OPERATIVA, nunca la de
+  // solo consulta aunque el API la devolviera primero).
+  const activeId = selectedId ?? operativeWarehouses[0]?.id ?? warehouses[0]?.id ?? null
+  const activeWarehouse = warehouses.find(w => w.id === activeId)
+  const isSoloConsulta = activeWarehouse?.solo_consulta === true
+  // SCRUM-1021 — el vendedor entra con `bodega.warehouses.view` y SIN `bodega.read`: consulta pura, sin
+  // ningún botón de acción (administrar ubicaciones, solicitudes de reubicación, "Reubicar" en tablas).
+  // Quien sí tiene bodega.read ve la pantalla exactamente igual que antes.
+  const hasBodegaRead = usePermission('bodega.read')
+  const soloConsultaPorPermiso = !hasBodegaRead
 
   const { data: families } = useQuery({
     queryKey: ['ventas-diseno/catalog-product-families'],
@@ -97,207 +126,245 @@ export default function BodegasPage() {
           <p className="text-[12px] text-slate-500">{t('bodega:warehouses.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {isUbicacionExacta && (
+          {isUbicacionExacta && !isSoloConsulta && !soloConsultaPorPermiso && (
             <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowLocationsModal(true)}>
               {t('bodega:warehouses.locations.manageButton')}
             </Button>
           )}
-          <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowRequestsModal(true)}>
-            {t('bodega:warehouses.relocationRequests.openButton')}
-          </Button>
+          {/* SCRUM-990 — con una bodega de solo consulta activa no existen reubicaciones ni ubicaciones que administrar. */}
+          {!isSoloConsulta && !soloConsultaPorPermiso && (
+            <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowRequestsModal(true)}>
+              {t('bodega:warehouses.relocationRequests.openButton')}
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-5 border-b border-slate-200 pb-3">
-        {warehouses.map(w => (
+      <div className="flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible gap-2 mb-5 border-b border-slate-200 pb-3 items-center">
+        {operativeWarehouses.map(w => (
           <Button
             key={w.id}
             variant="outline"
             active={activeId === w.id}
             activeVariant="primary"
-            className="!text-xs !px-3 !py-1.5"
+            className="!text-xs !px-3 !py-1.5 shrink-0"
             onClick={() => selectWarehouse(w.id)}
           >
             {w.name}
           </Button>
         ))}
+        {soloConsultaWarehouses.length > 0 && (
+          <div className="flex shrink-0 gap-2 border-l border-slate-200 pl-2 ml-1" data-testid="solo-consulta-tabs">
+            {soloConsultaWarehouses.map(w => (
+              <Button
+                key={w.id}
+                variant="outline"
+                active={activeId === w.id}
+                activeVariant="primary"
+                className="!text-xs !px-3 !py-1.5"
+                onClick={() => selectWarehouse(w.id)}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  {w.name}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                    <IcoEye size={12} />
+                    {t('bodega:warehouses.zonaLibre.badge')}
+                  </span>
+                </span>
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {data && (
-        <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-          <KpiCard label={t('bodega:warehouses.kpis.responsable')} value={data.kpis.responsable ?? '—'} color="#5BA5A0" />
-          <KpiCard
-            label={t('bodega:warehouses.kpis.totalProducts')}
-            value={String(data.kpis.total_products)}
-            sublabel={t('bodega:warehouses.kpis.totalUnits', { count: data.kpis.total_units })}
-            color="#9fc54d"
-          />
-          <KpiCard
-            label={t('bodega:warehouses.kpis.capacityUsed')}
-            value={data.kpis.capacidad_pct !== null ? `${data.kpis.capacidad_pct}%` : t('bodega:warehouses.kpis.noData')}
-            color={data.kpis.capacidad_pct !== null ? '#5BA5A0' : '#94a3b8'}
-          />
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { setQuery(search); setPage(1) } }}
-          placeholder={t('bodega:warehouses.filters.search')}
-          className="flex-1 max-w-sm px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
-        <select
-          value={categoria}
-          onChange={e => { setCategoria(e.target.value); setPage(1) }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-        >
-          <option value="">{t('bodega:warehouses.filters.category')}</option>
-          {(families?.data ?? []).map((f: { id: number; name: string }) => (
-            <option key={f.id} value={f.id}>{f.name}</option>
-          ))}
-        </select>
-        <select
-          value={ubicacion}
-          onChange={e => { setUbicacion(e.target.value); setPage(1) }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-        >
-          <option value="">{t('bodega:warehouses.filters.location')}</option>
-          {(data?.ubicaciones ?? []).map(u => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </select>
-        <Button variant="outline" onClick={clearFilters}>{t('bodega:warehouses.filters.clear')}</Button>
-
-        <div className="flex rounded-lg border border-slate-200 overflow-hidden ml-auto">
-          <Button
-            variant={chip === 'todos' ? 'primary' : 'secondary'}
-            className="!rounded-none !border-0 !text-xs !px-3 !py-1.5"
-            onClick={() => { setChip('todos'); setPage(1) }}
-          >
-            {t('bodega:warehouses.chips.all')}
-          </Button>
-          <Button
-            variant={chip === 'espacio_libre' ? 'primary' : 'secondary'}
-            className="!rounded-none !border-0 !text-xs !px-3 !py-1.5"
-            onClick={() => { setChip('espacio_libre'); setPage(1) }}
-          >
-            {t('bodega:warehouses.chips.freeSpace')}
-          </Button>
-        </div>
-      </div>
-
-      {chip === 'espacio_libre' ? (
-        <Card variant="panel" className="overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <Th>{t('bodega:warehouses.freeSpace.location')}</Th>
-                <Th>{t('bodega:warehouses.freeSpace.status')}</Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {emptyLocationRows.length === 0 && !isFetching && (
-                <tr>
-                  <td colSpan={2} className="px-4 py-10 text-center text-slate-400 text-sm">
-                    {t('bodega:warehouses.freeSpace.empty')}
-                  </td>
-                </tr>
-              )}
-              {emptyLocationRows.map(row => (
-                <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-semibold text-slate-800">{row.ubicacion}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-emerald-50 text-emerald-700">
-                      {t('bodega:warehouses.freeSpace.available')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+      {/* SCRUM-990 — Zona Libre / Lafayette es de SOLO CONSULTA: su propia vista (aviso, 3 KPIs del catálogo externo, tabla paginada
+          en el servidor) reemplaza por completo a los KPIs, filtros, chips, tabla de 15 columnas y paginación de una bodega operativa. */}
+      {isSoloConsulta ? (
+        <ZonaLibreCatalogoTable kpis={data?.kpis} />
       ) : (
-        <Card variant="panel" className="overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <Th>{t('bodega:warehouses.table.factoryRef')}</Th>
-                <Th>{t('bodega:warehouses.table.publicRef')}</Th>
-                {showClienteColumn ? <Th>{t('bodega:warehouses.table.client')}</Th> : <Th>{t('bodega:warehouses.table.location')}</Th>}
-                <Th>{t('bodega:warehouses.table.product')}</Th>
-                <Th>{t('bodega:warehouses.table.category')}</Th>
-                {/* Mejora SCRUM-752 RN3 — unidades reales de ESTA bodega, justo después de
-                    Categoría (posición exigida por el ticket). */}
-                <Th>{t('bodega:warehouses.table.unitsInWarehouse', { warehouse: data?.warehouse.name ?? '' })}</Th>
-                <Th>{t('bodega:warehouses.table.available')}</Th>
-                <Th>{t('bodega:warehouses.table.toServe')}</Th>
-                <Th>{t('bodega:warehouses.table.totalStock')}</Th>
-                <Th>{t('bodega:warehouses.table.toReceive')}</Th>
-                <Th>{t('bodega:warehouses.table.inTransit')}</Th>
-                <Th>{t('bodega:warehouses.table.minStock')}</Th>
-                <Th>{t('bodega:warehouses.table.status')}</Th>
-                <Th>{t('bodega:warehouses.table.provider')}</Th>
-                <Th>{t('bodega:warehouses.table.action')}</Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {productRows.length === 0 && !isFetching && (
-                <tr>
-                  <td colSpan={15} className="px-4 py-10 text-center text-slate-400 text-sm">
-                    {t('bodega:warehouses.empty')}
-                  </td>
-                </tr>
-              )}
-              {productRows.map(row => (
-                <tr key={row.stock_id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-slate-600">{row.factory_reference ?? '—'}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-800">{row.reference}</td>
-                  {showClienteColumn
-                    ? <td className="px-4 py-3 text-slate-600">{row.cliente ?? '—'}</td>
-                    : <td className="px-4 py-3 text-slate-600">{row.ubicacion ?? t('bodega:warehouses.modo.pendiente')}</td>}
-                  <td className="px-4 py-3 text-slate-600">{row.description}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.categoria ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.unidades_en_bodega}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.disponible}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.por_servir}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.stock_total ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.por_ingresar > 0 ? row.por_ingresar : '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.en_camino > 0 ? row.en_camino : '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.stock_minimo ?? '—'}</td>
-                  <td className="px-4 py-3"><EstadoBadge estado={row.estado} /></td>
-                  <td className="px-4 py-3 text-slate-600">{row.proveedor ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    {/* Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — antes esta celda mostraba
-                        un "Ver detalle" deshabilitado en bodegas modo "pendiente" (Zona Libre); el
-                        rebote pide que no exista NINGUNA acción ahí, ni "Reubicar" ni "Ver
-                        detalle" — celda vacía. */}
-                    {data?.warehouse.modo_detalle !== 'pendiente' && (
-                      <Button
-                        variant="outline"
-                        className="!text-xs !px-2 !py-1"
-                        onClick={() => setRelocatingRow(row)}
-                      >
-                        {t('bodega:warehouses.table.relocate')}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
+        <>
+        {data && (
+          <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+            <KpiCard label={t('bodega:warehouses.kpis.responsable')} value={data.kpis.responsable ?? '—'} color="#5BA5A0" />
+            <KpiCard
+              label={t('bodega:warehouses.kpis.totalProducts')}
+              value={String(data.kpis.total_products)}
+              sublabel={t('bodega:warehouses.kpis.totalUnits', { count: data.kpis.total_units })}
+              color="#9fc54d"
+            />
+            <KpiCard
+              label={t('bodega:warehouses.kpis.capacityUsed')}
+              value={data.kpis.capacidad_pct !== null ? `${data.kpis.capacidad_pct}%` : t('bodega:warehouses.kpis.noData')}
+              color={data.kpis.capacidad_pct !== null ? '#5BA5A0' : '#94a3b8'}
+            />
+          </div>
+        )}
 
-      {data?.meta && (
-        <Pagination
-          meta={data.meta}
-          perPage={perPage}
-          onPageChange={setPage}
-          onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
-        />
+        {/* SCRUM-1023 (mismo fix que SCRUM-949 en Ver Inventario) — el buscador en su propia fila:
+            dentro de la fila compartida con los filtros, `flex-1` (flex-basis 0%) lo dejaba diminuto. */}
+        <div className="max-w-md mb-2" data-testid="warehouses-search-row">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={() => { setQuery(search); setPage(1) }}
+            fetchOptions={q => activeId !== null ? fetchWarehouseProductSuggestions(activeId, q) : Promise.resolve([])}
+            placeholder={t('bodega:warehouses.filters.search')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
+          <select
+            value={categoria}
+            onChange={e => { setCategoria(e.target.value); setPage(1) }}
+            className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+          >
+            <option value="">{t('bodega:warehouses.filters.category')}</option>
+            {(families?.data ?? []).map((f: { id: number; name: string }) => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <select
+            value={ubicacion}
+            onChange={e => { setUbicacion(e.target.value); setPage(1) }}
+            className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+          >
+            <option value="">{t('bodega:warehouses.filters.location')}</option>
+            {(data?.ubicaciones ?? []).map(u => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+          <Button variant="outline" onClick={clearFilters}>{t('bodega:warehouses.filters.clear')}</Button>
+
+          <div className="flex rounded-lg border border-slate-200 overflow-hidden ml-auto">
+            <Button
+              variant={chip === 'todos' ? 'primary' : 'secondary'}
+              className="!rounded-none !border-0 !text-xs !px-3 !py-1.5"
+              onClick={() => { setChip('todos'); setPage(1) }}
+            >
+              {t('bodega:warehouses.chips.all')}
+            </Button>
+            <Button
+              variant={chip === 'espacio_libre' ? 'primary' : 'secondary'}
+              className="!rounded-none !border-0 !text-xs !px-3 !py-1.5"
+              onClick={() => { setChip('espacio_libre'); setPage(1) }}
+            >
+              {t('bodega:warehouses.chips.freeSpace')}
+            </Button>
+          </div>
+        </div>
+
+        {chip === 'espacio_libre' ? (
+          <Card variant="panel" className="overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <Th>{t('bodega:warehouses.freeSpace.location')}</Th>
+                  <Th>{t('bodega:warehouses.freeSpace.status')}</Th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {emptyLocationRows.length === 0 && !isFetching && (
+                  <tr>
+                    <td colSpan={2} className="px-4 py-10 text-center text-slate-400 text-sm">
+                      {t('bodega:warehouses.freeSpace.empty')}
+                    </td>
+                  </tr>
+                )}
+                {emptyLocationRows.map(row => (
+                  <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-slate-800">{row.ubicacion}</td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-emerald-50 text-emerald-700">
+                        {t('bodega:warehouses.freeSpace.available')}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        ) : (
+          <Card variant="panel" className="overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <Th>{t('bodega:warehouses.table.factoryRef')}</Th>
+                  <Th>{t('bodega:warehouses.table.publicRef')}</Th>
+                  {showClienteColumn ? <Th>{t('bodega:warehouses.table.client')}</Th> : <Th>{t('bodega:warehouses.table.location')}</Th>}
+                  <Th>{t('bodega:warehouses.table.product')}</Th>
+                  <Th>{t('bodega:warehouses.table.category')}</Th>
+                  {/* Mejora SCRUM-752 RN3 — unidades reales de ESTA bodega, justo después de
+                      Categoría (posición exigida por el ticket). */}
+                  <Th>{t('bodega:warehouses.table.unitsInWarehouse', { warehouse: data?.warehouse.name ?? '' })}</Th>
+                  <Th>{t('bodega:warehouses.table.available')}</Th>
+                  <Th>{t('bodega:warehouses.table.toServe')}</Th>
+                  <Th>{t('bodega:warehouses.table.totalStock')}</Th>
+                  <Th>{t('bodega:warehouses.table.toReceive')}</Th>
+                  <Th>{t('bodega:warehouses.table.inTransit')}</Th>
+                  <Th>{t('bodega:warehouses.table.minStock')}</Th>
+                  <Th>{t('bodega:warehouses.table.status')}</Th>
+                  <Th>{t('bodega:warehouses.table.provider')}</Th>
+                  <Th>{t('bodega:warehouses.table.action')}</Th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {productRows.length === 0 && !isFetching && (
+                  <tr>
+                    <td colSpan={15} className="px-4 py-10 text-center text-slate-400 text-sm">
+                      {t('bodega:warehouses.empty')}
+                    </td>
+                  </tr>
+                )}
+                {productRows.map(row => (
+                  <tr key={row.stock_id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 text-slate-600">{row.factory_reference ?? '—'}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-800">{row.reference}</td>
+                    {showClienteColumn
+                      ? <td className="px-4 py-3 text-slate-600">{row.cliente ?? '—'}</td>
+                      : <td className="px-4 py-3 text-slate-600">{row.ubicacion ?? t('bodega:warehouses.modo.pendiente')}</td>}
+                    <td className="px-4 py-3 text-slate-600">{row.description}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.categoria ?? '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.unidades_en_bodega}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.disponible}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.por_servir}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.stock_total ?? '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.por_ingresar > 0 ? row.por_ingresar : '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.en_camino > 0 ? row.en_camino : '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">{row.stock_minimo ?? '—'}</td>
+                    <td className="px-4 py-3"><EstadoBadge estado={row.estado} /></td>
+                    <td className="px-4 py-3 text-slate-600">{row.proveedor ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      {/* Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — antes esta celda mostraba
+                          un "Ver detalle" deshabilitado en bodegas modo "pendiente" (Zona Libre); el
+                          rebote pide que no exista NINGUNA acción ahí, ni "Reubicar" ni "Ver
+                          detalle" — celda vacía. */}
+                      {data?.warehouse.modo_detalle !== 'pendiente' && !soloConsultaPorPermiso && (
+                        <Button
+                          variant="outline"
+                          className="!text-xs !px-2 !py-1"
+                          onClick={() => setRelocatingRow(row)}
+                        >
+                          {t('bodega:warehouses.table.relocate')}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )}
+
+        {data?.meta && (
+          <Pagination
+            meta={data.meta}
+            perPage={perPage}
+            onPageChange={setPage}
+            onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
+          />
+        )}
+        </>
       )}
 
       {relocatingRow && activeId !== null && (
@@ -308,7 +375,21 @@ export default function BodegasPage() {
           onClose={() => setRelocatingRow(null)}
         />
       )}
-      {showRequestsModal && <RelocationRequestsModal onClose={() => setShowRequestsModal(false)} />}
+      {showRequestsModal && !soloConsultaPorPermiso && (
+        <RelocationRequestsModal
+          initialChip={relocationParam !== null ? 'pendiente' : 'todas'}
+          highlightId={highlightRelocationId}
+          onClose={() => {
+            setShowRequestsModal(false)
+            if (relocationParam !== null) {
+              // Quita el parámetro para que recargar o volver no reabra la bandeja.
+              const next = new URLSearchParams(searchParams)
+              next.delete('relocation')
+              setSearchParams(next, { replace: true })
+            }
+          }}
+        />
+      )}
       {showLocationsModal && activeId !== null && data && (
         <WarehouseLocationsModal
           warehouseId={activeId}
@@ -316,24 +397,6 @@ export default function BodegasPage() {
           onClose={() => setShowLocationsModal(false)}
         />
       )}
-    </div>
-  )
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-      {children}
-    </th>
-  )
-}
-
-function KpiCard({ label, value, sublabel, color }: { label: string; value: string; sublabel?: string; color: string }) {
-  return (
-    <div className="rounded-2xl p-4" style={{ background: `${color}18` }}>
-      <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500 mb-1">{label}</div>
-      <div className="text-2xl font-bold leading-none" style={{ color }}>{value}</div>
-      {sublabel && <div className="text-[11px] text-slate-400 mt-1">{sublabel}</div>}
     </div>
   )
 }
@@ -378,7 +441,10 @@ function RelocateModal({ row, currentWarehouseId, warehouses, onClose }: {
 
   // Mejora SCRUM-752 RN1 (Gerencia Test 2026-08-13) — Zona Libre ('pendiente', sin ubicación
   // física) nunca debe aparecer como destino de reubicación.
-  const destinationOptions = warehouses.filter(w => w.id !== currentWarehouseId && w.modo_detalle !== 'pendiente')
+  // SCRUM-990 — y tampoco una bodega de solo consulta (el backend ya la rechaza con `Warehouse::operativaRule()`).
+  const destinationOptions = warehouses.filter(
+    w => w.id !== currentWarehouseId && w.modo_detalle !== 'pendiente' && !w.solo_consulta,
+  )
   const originWarehouse = warehouses.find(w => w.id === currentWarehouseId)
 
   const submit = () => {
@@ -502,20 +568,30 @@ const RELOCATION_CHIPS: RelocationEstadoFilter[] = ['todas', 'pendiente', 'aprob
  * para no bloquear un entorno sin ese ajuste hecho. Mientras `settings` está cargando, los
  * botones quedan OCULTOS por defecto (más seguro que mostrar de más un instante).
  */
-function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
+function RelocationRequestsModal({ onClose, initialChip = 'todas', highlightId = null }: { onClose: () => void; initialChip?: RelocationEstadoFilter; highlightId?: number | null }) {
   const { t } = useTranslation(['common', 'bodega'])
-  const [chip, setChip] = useState<RelocationEstadoFilter>('todas')
+  const [chip, setChip] = useState<RelocationEstadoFilter>(initialChip)
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState<number | 'all'>(20)
+  // Pre-QA SCRUM-1154: con una solicitud de la notificación se trae TODA la lista pendiente (son pocas), no solo la 1.ª página de 20:
+  // las más antiguas —las que lista primero la tarjeta de Aprobaciones— caían en la página 2 y no se resaltaban.
+  const [perPage, setPerPage] = useState<number | 'all'>(highlightId !== null ? 'all' : 20)
   const [rejectingId, setRejectingId] = useState<number | null>(null)
   // SCRUM-459 (rebote de Gerencia Test 2026-08-13) — "Ver motivo" era texto estático con solo un
   // `title` (tooltip al pasar el mouse, invisible en touch/sin hover) — ahora abre un modal real
   // con el `motivo_rechazo` real de esa fila.
   const [viewingReason, setViewingReason] = useState<string | null>(null)
+  // SCRUM-1160 — «Ver detalle»: la fila completa (ya viaja en el listado, sin fetch aparte) en una vista de solo consulta, antes de aprobar o rechazar.
+  const [viewingDetail, setViewingDetail] = useState<RelocationRequest | null>(null)
 
   const { data, isFetching } = useRelocationRequests({ estado: chip, page, per_page: perPage })
   const approve = useApproveRelocationRequest()
   const rows = data?.data ?? []
+
+  // SCRUM-1154 — lleva la solicitud de la notificación a la vista cuando está en la página cargada.
+  const highlightRef = useRef<HTMLTableRowElement | null>(null)
+  useEffect(() => {
+    highlightRef.current?.scrollIntoView?.({ block: 'center' })
+  }, [rows.length, highlightId])
 
   const { data: settings } = useComprasSettings()
   const currentUserId = useAuthStore(s => s.user?.id)
@@ -545,6 +621,14 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
+        {/* Pre-QA SCRUM-1154 — la notificación puede ser vieja: si esa solicitud ya no está pendiente (se aprobó o rechazó), se dice
+            en vez de abrir la bandeja sin resaltar nada y sin explicación. */}
+        {highlightId !== null && chip === 'pendiente' && data !== undefined && !isFetching && !rows.some(r => r.id === highlightId) && (
+          <p role="status" data-testid="relocation-not-pending" className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs">
+            {t('bodega:warehouses.relocationRequests.notPending', { id: highlightId })}
+          </p>
+        )}
+
         <div className="overflow-x-auto border border-slate-200 rounded-xl">
           <table className="w-full text-sm">
             <thead>
@@ -569,19 +653,31 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
                 </tr>
               )}
               {rows.map(r => (
-                <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                <tr
+                  key={r.id}
+                  ref={r.id === highlightId ? highlightRef : undefined}
+                  data-highlighted={r.id === highlightId ? 'true' : undefined}
+                  className={r.id === highlightId ? 'bg-amber-50 ring-2 ring-inset ring-amber-300 transition-colors' : 'hover:bg-slate-50 transition-colors'}
+                >
                   <td className="px-4 py-3 font-semibold text-slate-800">{r.producto.reference ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600">{r.bodega_origen ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600">{r.bodega_destino ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600">{r.cantidad}</td>
                   <td className="px-4 py-3 text-slate-600 max-w-[180px] truncate" title={r.motivo}>{r.motivo}</td>
                   <td className="px-4 py-3 text-slate-600">{r.solicitado_por ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{new Date(r.fecha).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateFromTimestamp(r.fecha)}</td>
                   <td className="px-4 py-3"><RelocationEstadoBadge estado={r.estado} /></td>
                   <td className="px-4 py-3">
-                    {r.estado === 'pendiente' ? (
-                      isMark ? (
-                        <div className="flex gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        className="!text-xs !px-2 !py-1"
+                        onClick={() => setViewingDetail(r)}
+                      >
+                        {t('bodega:warehouses.relocationRequests.actions.viewDetail')}
+                      </Button>
+                      {r.estado === 'pendiente' && isMark && (
+                        <>
                           <Button
                             variant="outline"
                             className="!text-xs !px-2 !py-1"
@@ -597,21 +693,18 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
                           >
                             {t('bodega:warehouses.relocationRequests.actions.reject')}
                           </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-300">—</span>
-                      )
-                    ) : r.estado === 'rechazada' && r.motivo_rechazo ? (
-                      <button
-                        type="button"
-                        className="text-xs text-primary underline decoration-dotted"
-                        onClick={() => setViewingReason(r.motivo_rechazo)}
-                      >
-                        {t('bodega:warehouses.relocationRequests.table.viewReason')}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-slate-300">—</span>
-                    )}
+                        </>
+                      )}
+                      {r.estado === 'rechazada' && r.motivo_rechazo && (
+                        <button
+                          type="button"
+                          className="text-xs text-primary underline decoration-dotted"
+                          onClick={() => setViewingReason(r.motivo_rechazo)}
+                        >
+                          {t('bodega:warehouses.relocationRequests.table.viewReason')}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -631,6 +724,7 @@ function RelocationRequestsModal({ onClose }: { onClose: () => void }) {
 
       {rejectingId !== null && <RelocationRejectModal id={rejectingId} onClose={() => setRejectingId(null)} />}
       {viewingReason !== null && <RelocationReasonModal reason={viewingReason} onClose={() => setViewingReason(null)} />}
+      {viewingDetail !== null && <RelocationDetailModal request={viewingDetail} onClose={() => setViewingDetail(null)} />}
     </div>
   )
 }
@@ -649,6 +743,45 @@ function RelocationReasonModal({ reason, onClose }: { reason: string; onClose: (
         </div>
         <p className="text-sm text-slate-700 leading-relaxed">{reason}</p>
         <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={onClose}>{t('common:actions.close')}</Button>
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+/** SCRUM-1160 — vista de solo consulta de una solicitud de reubicación (cualquier estado): producto y referencia, cantidad, bodegas, quien la pidió, fecha,
+ * motivo COMPLETO (en la tabla se corta), estado y, si ya se resolvió, quién la resolvió y el motivo del rechazo. No altera el flujo de aprobar o rechazar. */
+function RelocationDetailModal({ request: r, onClose }: { request: RelocationRequest; onClose: () => void }) {
+  const { t } = useTranslation(['common', 'bodega'])
+  const k = 'bodega:warehouses.relocationRequests'
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div>
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
+      <dd className="text-sm text-slate-800 mt-0.5 break-words whitespace-pre-wrap">{children}</dd>
+    </div>
+  )
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" data-testid="relocation-detail-modal">
+      <Card variant="modal" className="w-full max-w-lg max-h-[90vh] overflow-y-auto p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold text-slate-900">{t(`${k}.detailModal.title`)} #{r.id}</h2>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600" aria-label={t('common:actions.close')}><IcoClose /></button>
+        </div>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+          <Field label={t(`${k}.detailModal.reference`)}>{r.producto.reference ?? '—'}</Field>
+          <Field label={t(`${k}.detailModal.description`)}>{r.producto.description ?? '—'}</Field>
+          <Field label={t(`${k}.table.quantity`)}>{r.cantidad}</Field>
+          <Field label={t(`${k}.table.status`)}><RelocationEstadoBadge estado={r.estado} /></Field>
+          <Field label={t(`${k}.table.origin`)}>{r.bodega_origen ?? '—'}</Field>
+          <Field label={t(`${k}.table.destination`)}>{r.bodega_destino ?? '—'}</Field>
+          <Field label={t(`${k}.table.requestedBy`)}>{r.solicitado_por ?? '—'}</Field>
+          <Field label={t(`${k}.table.date`)}>{formatDateFromTimestamp(r.fecha)}</Field>
+          <div className="sm:col-span-2"><Field label={t(`${k}.table.reason`)}>{r.motivo.trim() !== '' ? r.motivo : '—'}</Field></div>
+          {r.estado !== 'pendiente' && <Field label={t(`${k}.detailModal.resolvedBy`)}>{r.resuelto_por ?? '—'}</Field>}
+          {r.estado === 'rechazada' && <Field label={t(`${k}.detailModal.rejectionReason`)}>{r.motivo_rechazo ?? '—'}</Field>}
+        </dl>
+        <div className="flex justify-end mt-5">
           <Button variant="outline" onClick={onClose}>{t('common:actions.close')}</Button>
         </div>
       </Card>

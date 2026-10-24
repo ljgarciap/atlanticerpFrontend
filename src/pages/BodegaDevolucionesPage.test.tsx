@@ -26,6 +26,7 @@ vi.mock('@/api/bodegaApi', () => ({
       formUrl: vi.fn(),
       deliveryGuideUrl: vi.fn(),
       signedDocumentUrl: vi.fn(),
+      creditNotePdf: vi.fn(),
       confirmReception: vi.fn(),
       reject: vi.fn(),
       uploadSignedDocument: vi.fn(),
@@ -42,7 +43,7 @@ function makeRow(overrides: Partial<CustomerReturnRow> = {}): CustomerReturnRow 
     project: 'Torre Marina Bahía',
     status: 'pendiente', has_signed_document: false, contact_name: 'Ricardo Aguilar', contact_phone: '+507 6220-1145',
     destination_warehouse: null, created_at: '2026-07-11T10:00:00Z', received_at: null, finalized_at: null,
-    rejected_at: null,
+    rejected_at: null, credit_note_id: null,
     products: [
       { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm', qty_requested: 1, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
     ],
@@ -63,7 +64,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockedApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' } as PhysicalWarehouse] })
+  mockedApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false } as PhysicalWarehouse] })
 })
 
 describe('BodegaDevolucionesPage', () => {
@@ -121,7 +122,7 @@ describe('BodegaDevolucionesPage', () => {
     expect(screen.queryByText('bodega:returns.actions.finalize')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-483 — finalizado/rechazada solo muestran "Ver detalle", sin acción contextual', async () => {
+  it('SCRUM-483 — finalizado/rechazada sin acción OPERATIVA (subir/confirmar/finalizar)', async () => {
     mockedApi.returns.list.mockResolvedValue({
       data: [
         makeRow({ id: 1, status: 'finalizado', has_signed_document: true, received_at: '2026-07-12T10:00:00Z', finalized_at: '2026-07-13T10:00:00Z' }),
@@ -134,8 +135,47 @@ describe('BodegaDevolucionesPage', () => {
     expect(screen.queryByText('bodega:returns.actions.uploadSigned')).not.toBeInTheDocument()
     expect(screen.queryByText('bodega:returns.actions.confirmReception')).not.toBeInTheDocument()
     expect(screen.queryByText('bodega:returns.actions.finalize')).not.toBeInTheDocument()
-    expect(screen.queryByText('bodega:returns.actions.viewForm')).not.toBeInTheDocument()
-    expect(screen.queryByText('bodega:returns.actions.viewDeliveryGuide')).not.toBeInTheDocument()
+  })
+
+  it('SCRUM-865 — finalizado/rechazada SIGUEN mostrando formulario/guía/documento firmado (consulta histórica, no se pierden)', async () => {
+    mockedApi.returns.list.mockResolvedValue({
+      data: [
+        makeRow({ id: 1, status: 'finalizado', has_signed_document: true, received_at: '2026-07-12T10:00:00Z', finalized_at: '2026-07-13T10:00:00Z' }),
+        makeRow({ id: 2, status: 'rechazada', has_signed_document: true, rejected_at: '2026-07-13T10:00:00Z' }),
+      ],
+      meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+    await screen.findAllByText('bodega:returns.actions.viewDetail')
+    expect(screen.getAllByText('bodega:returns.actions.viewForm')).toHaveLength(2)
+    expect(screen.getAllByText('bodega:returns.actions.viewDeliveryGuide')).toHaveLength(2)
+    expect(screen.getAllByText('bodega:returns.actions.viewSignedDocument')).toHaveLength(2)
+  })
+
+  it('SCRUM-865 punto 2 — columna "Nota de crédito": muestra "Ver nota de crédito" solo con credit_note_id', async () => {
+    mockedApi.returns.list.mockResolvedValue({
+      data: [
+        makeRow({ id: 1, status: 'finalizado', has_signed_document: true, finalized_at: '2026-07-13T10:00:00Z', credit_note_id: 55 }),
+        makeRow({ id: 2, status: 'esperando_nota_credito', has_signed_document: true, received_at: '2026-07-12T10:00:00Z', credit_note_id: null }),
+      ],
+      meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedApi.returns.creditNotePdf.mockResolvedValue(new Blob(['%PDF'], { type: 'application/pdf' }))
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
+    const originalCreateObjectURL = URL.createObjectURL
+    URL.createObjectURL = vi.fn(() => 'blob:nc')
+
+    renderPage()
+    await screen.findAllByText('bodega:returns.actions.viewDetail')
+    const links = screen.getAllByText('bodega:returns.actions.viewCreditNote')
+    expect(links).toHaveLength(1)
+
+    fireEvent.click(links[0])
+    await waitFor(() => expect(mockedApi.returns.creditNotePdf).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(openSpy).toHaveBeenCalledWith('blob:nc', '_blank', 'noopener,noreferrer'))
+
+    URL.createObjectURL = originalCreateObjectURL
+    openSpy.mockRestore()
   })
 
   it('SCRUM-474 — más de 1 producto muestra "N productos" y expande la fila al hacer clic', async () => {
@@ -204,6 +244,36 @@ describe('BodegaDevolucionesPage', () => {
     openSpy.mockRestore()
   })
 
+  // SCRUM-1180 — el backend pasó estas dos acciones a POST: lo que ve el usuario (botón, carga, error, abrir el PDF) no cambia.
+  it('SCRUM-1180 — Ver guía de entrega original abre la URL presignada en una nueva pestaña', async () => {
+    mockedApi.returns.list.mockResolvedValue({ data: [makeRow()], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 } })
+    mockedApi.returns.deliveryGuideUrl.mockResolvedValue({ url: 'https://s3.example/guia.pdf' })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    renderPage()
+
+    fireEvent.click(await screen.findByText('bodega:returns.actions.viewDeliveryGuide'))
+
+    await waitFor(() => expect(openSpy).toHaveBeenCalledWith('https://s3.example/guia.pdf', '_blank', 'noopener,noreferrer'))
+    expect(mockedApi.returns.deliveryGuideUrl).toHaveBeenCalledWith(1)
+    openSpy.mockRestore()
+  })
+
+  it('SCRUM-1180 — si falla Ver formulario o Ver guía, se muestra el mismo mensaje de error y no se abre nada', async () => {
+    mockedApi.returns.list.mockResolvedValue({ data: [makeRow()], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 } })
+    mockedApi.returns.formUrl.mockRejectedValue({ response: { status: 500 } })
+    mockedApi.returns.deliveryGuideUrl.mockRejectedValue({ response: { status: 405 } })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    renderPage()
+
+    fireEvent.click(await screen.findByText('bodega:returns.actions.viewForm'))
+    expect(await screen.findByText('bodega:returns.errors.openFormFailed')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('bodega:returns.actions.viewDeliveryGuide'))
+    expect(await screen.findByText('bodega:returns.errors.openGuideFailed')).toBeInTheDocument()
+    expect(openSpy).not.toHaveBeenCalled()
+    openSpy.mockRestore()
+  })
+
   it('SCRUM-478 (rebote 2026-08-16) — con documento firmado ya subido, "Ver documento firmado" abre la URL presignada', async () => {
     mockedApi.returns.list.mockResolvedValue({
       data: [makeRow({ has_signed_document: true })],
@@ -245,7 +315,7 @@ describe('BodegaDevolucionesPage', () => {
     expect(screen.getByText('bodega:returns.table.actionsFinalize')).toBeInTheDocument()
   })
 
-  it('SCRUM-769 — una acción que no aplica al estado de la fila muestra "—" en su columna, sin ocultarla (RN2)', async () => {
+  it('SCRUM-769/865 — una acción OPERATIVA que no aplica al estado de la fila muestra "—" en su columna, sin ocultarla (RN2); las de consulta histórica (formulario/guía/documento) se mantienen', async () => {
     mockedApi.returns.list.mockResolvedValue({
       data: [makeRow({ status: 'finalizado', has_signed_document: true, received_at: '2026-07-12T10:00:00Z', finalized_at: '2026-07-13T10:00:00Z' })],
       meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
@@ -253,9 +323,14 @@ describe('BodegaDevolucionesPage', () => {
     renderPage()
     await screen.findByText('bodega:returns.actions.viewDetail')
 
-    // finalizado: sin acción contextual salvo "Ver detalle" — el resto de columnas quedan en "—".
+    // finalizado: "Confirmar recepción" y "Finalizar" no aplican más (—); la nota de crédito
+    // sigue sin link real hasta que exista el vínculo desde Admin&Cont (— también, ver SCRUM-865
+    // punto 2, pendiente de diseño backend).
     const dashes = screen.getAllByText('—')
-    expect(dashes.length).toBeGreaterThanOrEqual(5)
+    expect(dashes.length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByText('bodega:returns.actions.viewForm')).toBeInTheDocument()
+    expect(screen.getByText('bodega:returns.actions.viewDeliveryGuide')).toBeInTheDocument()
+    expect(screen.getByText('bodega:returns.actions.viewSignedDocument')).toBeInTheDocument()
   })
 
 })

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import { useZonaLibreRequests, useZonaLibreRequestDetail, useRemindZonaLibreRequest } from '@/hooks/useBodega'
@@ -12,6 +12,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { IcoBell, IcoClose } from '@/components/icons'
 import { formatMoney, formatInt } from '@/lib/money'
 import type { ZonaLibreRequestRow, ZonaLibreStatus, ZonaLibreStatusFilter } from '@/types/bodega'
+import { formatDateFromTimestamp, formatDateShort } from '@/utils/dates'
 
 const CHIPS: ZonaLibreStatusFilter[] = ['todas', 'pendiente', 'aprobada', 'rechazada']
 
@@ -24,16 +25,48 @@ const CHIPS: ZonaLibreStatusFilter[] = ['todas', 'pendiente', 'aprobada', 'recha
 export default function BodegaOrdenesZonaLibrePage() {
   const { t } = useTranslation(['common', 'bodega'])
   const navigate = useNavigate()
-  const [chip, setChip] = useState<ZonaLibreStatusFilter>('todas')
-  const [detailRowId, setDetailRowId] = useState<number | null>(null)
+  // SCRUM-1170 — el recordatorio de una solicitud pendiente (campana y correo de Compras) llega con `?request={id}`: la bandeja resalta esa fila y abre su
+  // detalle (se pide por id, así que abre aunque la fila quede en otra página). Mismo patrón que `?relocation=` en Bodegas (SCRUM-1154).
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestParam = searchParams.get('request')
+  const requestId = requestParam !== null && /^\d+$/.test(requestParam) ? Number(requestParam) : null
+  const [highlightId, setHighlightId] = useState<number | null>(requestId)
+  const [chip, setChip] = useState<ZonaLibreStatusFilter>(requestId !== null ? 'pendiente' : 'todas')
+  const [detailRowId, setDetailRowId] = useState<number | null>(requestId)
   const [rejectingRowId, setRejectingRowId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState<number | 'all'>(20)
+  // Con una solicitud de la notificación se trae TODA la lista pendiente (son pocas): una antigua no debe quedar en la página 2 sin resaltarse.
+  const [perPage, setPerPage] = useState<number | 'all'>(requestId !== null ? 'all' : 20)
+
+  // La bandeja ya estaba abierta y llega otra notificación: se reajusta sin recargar.
+  useEffect(() => {
+    if (requestId === null) return
+    setHighlightId(requestId)
+    setDetailRowId(requestId)
+    setChip('pendiente')
+    setPerPage('all')
+    setPage(1)
+  }, [requestId])
+
+  const closeDetail = () => {
+    setDetailRowId(null)
+    if (searchParams.has('request')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('request')
+      setSearchParams(next, { replace: true })   // al cerrar el detalle la URL deja de reabrirlo, la fila sigue resaltada
+    }
+  }
+
+  const highlightRef = useRef<HTMLTableRowElement | null>(null)
 
   // REQ-373 RN1 — filtrado server-side vía `?status=`, chips mutuamente excluyentes (un solo
   // estado de `chip` a la vez, nunca combinables).
   const { data, isFetching } = useZonaLibreRequests(chip, page, perPage)
   const rows = data?.data ?? []
+
+  useEffect(() => {
+    highlightRef.current?.scrollIntoView?.({ block: 'center' })
+  }, [rows.length, highlightId])
 
   return (
     <div>
@@ -85,11 +118,16 @@ export default function BodegaOrdenesZonaLibrePage() {
               </tr>
             )}
             {rows.map(row => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+              <tr
+                key={row.id}
+                ref={row.id === highlightId ? highlightRef : undefined}
+                data-highlighted={row.id === highlightId ? 'true' : undefined}
+                className={row.id === highlightId ? 'bg-amber-50 ring-2 ring-inset ring-amber-300 transition-colors' : 'hover:bg-slate-50 transition-colors'}
+              >
                 <td className="px-4 py-3 font-semibold text-slate-800">#{row.order_number}</td>
                 <td className="px-4 py-3 text-slate-600">{row.provider_name}</td>
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                  {new Date(row.created_at).toLocaleDateString()}
+                  {formatDateFromTimestamp(row.created_at)}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{row.products_summary}</td>
                 {/* SCRUM-442 (rebote de Gerencia Test 2026-08-13) — separador de miles con el
@@ -98,7 +136,7 @@ export default function BodegaOrdenesZonaLibrePage() {
                     Nueva Orden Zona Libre (SCRUM-436). */}
                 <td className="px-4 py-3 text-slate-600">${formatMoney(row.total_amount)}</td>
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                  {row.estimated_arrival_date ? new Date(row.estimated_arrival_date).toLocaleDateString() : '—'}
+                  {row.estimated_arrival_date ? formatDateShort(row.estimated_arrival_date) : '—'}
                 </td>
                 <td className="px-4 py-3"><EstadoBadge status={row.status} /></td>
                 <td className="px-4 py-3">
@@ -123,7 +161,7 @@ export default function BodegaOrdenesZonaLibrePage() {
         />
       )}
 
-      {detailRowId !== null && <DetailModal id={detailRowId} onClose={() => setDetailRowId(null)} />}
+      {detailRowId !== null && <DetailModal id={detailRowId} onClose={closeDetail} />}
       {rejectingRowId !== null && (
         <RejectModal id={rejectingRowId} onClose={() => setRejectingRowId(null)} />
       )}
@@ -283,7 +321,7 @@ function RowAction({ row, onViewDetail, onReject }: {
  * (antes se pedía pero casi todo se descartaba sin renderizar). */
 function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   const { t } = useTranslation(['common', 'bodega'])
-  const { data, isLoading } = useZonaLibreRequestDetail(id)
+  const { data, isLoading, isError } = useZonaLibreRequestDetail(id)
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -295,14 +333,16 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600"><IcoClose /></button>
         </div>
 
-        {isLoading || !data ? (
+        {isError ? (
+          <p role="alert" data-testid="zona-libre-detail-not-found" className="text-sm text-amber-800">{t('bodega:zonaLibre.orders.detailModal.notFound')}</p>
+        ) : isLoading || !data ? (
           <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
         ) : (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <EstadoBadge status={data.status} />
               <span className="text-xs text-slate-400">
-                {t('bodega:zonaLibre.orders.detailModal.createdAt')}: {new Date(data.created_at).toLocaleDateString()}
+                {t('bodega:zonaLibre.orders.detailModal.createdAt')}: {formatDateFromTimestamp(data.created_at)}
               </span>
             </div>
 
@@ -326,7 +366,7 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
                   {t('bodega:zonaLibre.orders.detailModal.estimatedArrival')}
                 </p>
                 <p className="text-slate-700 font-medium">
-                  {data.estimated_arrival_date ? new Date(data.estimated_arrival_date).toLocaleDateString() : '—'}
+                  {data.estimated_arrival_date ? formatDateShort(data.estimated_arrival_date) : '—'}
                 </p>
               </div>
               {data.status === 'aprobada' && (

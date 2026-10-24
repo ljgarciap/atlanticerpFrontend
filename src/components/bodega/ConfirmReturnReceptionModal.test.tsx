@@ -21,8 +21,8 @@ vi.mock('@/api/bodegaApi', () => ({
 const mockedApi = vi.mocked(bodegaApi, true)
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
-  { id: 2, name: 'Merma', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
+  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false },
+  { id: 2, name: 'Merma', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false },
 ]
 
 function detailFixture(): CustomerReturnDetail {
@@ -30,7 +30,7 @@ function detailFixture(): CustomerReturnDetail {
     id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Constructora Pacífico SA',
     project: null, status: 'pendiente', has_signed_document: true, contact_name: 'Ricardo Aguilar', contact_phone: '+507 6220-1145',
     destination_warehouse: null, created_at: '2026-07-11T10:00:00Z', received_at: null, finalized_at: null,
-    rejected_at: null, rejection_reason: null, history: [],
+    rejected_at: null, rejection_reason: null, credit_note_id: null, history: [],
     products: [
       { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm', qty_requested: 3, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
     ],
@@ -53,10 +53,25 @@ beforeEach(() => {
 })
 
 describe('ConfirmReturnReceptionModal', () => {
+  // SCRUM-990 — la bodega destino de una devolución es donde se ESCRIBE stock: Zona Libre / Lafayette (solo consulta) no se ofrece
+  // ni deshabilitada, y la precarga elige la primera OPERATIVA.
+  it('el selector de bodega destino no ofrece una bodega de solo consulta', async () => {
+    const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
+    mockedApi.warehouses.list.mockResolvedValue({ data: [externa, ...WAREHOUSES] })
+    renderModal()
+    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Bodega Central' })).toBeInTheDocument())
+    expect(screen.queryByRole('option', { name: 'Catálogo Externo' })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Merma' })).toBeInTheDocument()
+  })
+
   it('precarga la cantidad real recibida con la cantidad solicitada', async () => {
     renderModal()
     await screen.findByText('Lámpara colgante Nordic 40cm')
-    expect(screen.getByRole('spinbutton')).toHaveValue(3)
+    // Flaky bajo la suite completa: el texto del producto y el value precargado del spinbutton
+    // vienen de la misma respuesta pero no necesariamente del mismo ciclo de render — esperar
+    // el value explícitamente en vez de asumirlo ya asentado apenas aparece el texto.
+    await waitFor(() => expect(screen.getByRole('spinbutton')).toHaveValue(3))
   })
 
   it('guardar confirma la recepción con las líneas y la bodega elegidas', async () => {
