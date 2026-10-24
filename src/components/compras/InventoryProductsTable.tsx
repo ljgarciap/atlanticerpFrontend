@@ -101,7 +101,12 @@ export function InventoryProductsTable({
                   </button>
                 ) : '—'}
               </td>
-              <td className="px-4 py-3 text-slate-600">{p.disponible}</td>
+              <td className="px-4 py-3 text-slate-600">
+                {p.disponible}
+                {(p.stock_showroom ?? 0) > 0 && (
+                  <div className="text-[11px] text-slate-400" data-testid={`showroom-${p.id}`}>{t('compras:inventory.table.showroom', { count: p.stock_showroom })}</div>
+                )}
+              </td>
               <td className="px-4 py-3 text-slate-600">{p.por_servir > 0 ? p.por_servir : '—'}</td>
               <td className="px-4 py-3 text-slate-600">{p.stock_quantity ?? '—'}</td>
               <td className="px-4 py-3 text-slate-600">{(p.por_ingresar ?? 0) > 0 ? p.por_ingresar : '—'}</td>
@@ -110,7 +115,7 @@ export function InventoryProductsTable({
               <td className="px-4 py-3">
                 <EstadoBadge estado={p.estado} />
               </td>
-              <td className="px-4 py-3 text-slate-600">{p.provider_name ?? '—'}</td>
+              <td className="px-4 py-3 text-slate-600">{p.providers && p.providers.length > 0 ? p.providers.map(x => x.name).join(', ') : (p.provider_name ?? '—')}</td>
               {showFinancial && (
                 <td className="px-4 py-3 text-slate-600">{p.cost != null ? `$${formatMoney(p.cost)}` : '—'}</td>
               )}

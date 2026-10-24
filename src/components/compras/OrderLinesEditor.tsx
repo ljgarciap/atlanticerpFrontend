@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { comprasApi } from '@/api/comprasApi'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { PICKER_PER_PAGE_OPTIONS, useServerProductPicker } from '@/hooks/useServerProductPicker'
+import { formatMoney } from '@/lib/money'
 import NewProductModal from '@/components/compras/NewProductModal'
 import SalesProjectPicker from '@/components/compras/SalesProjectPicker'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose } from '@/components/icons'
 import type {
   ComprasCatalogProduct, NewCatalogProductPayload,
-  ShippingType, WhoPaysShipping, Modality, PurchaseOrderLinePayload,
+  ShippingType, WhoPaysShipping, Modality, PurchaseOrderLinePayload, PurchaseOrderPayload,
 } from '@/types/compras'
 
 export interface DraftLine {
@@ -39,6 +41,11 @@ export interface OrderDraft {
   // SCRUM-197 (hallazgo QA 2026-07-16) — RN de REQ-134: envío aéreo captura costo y quién paga;
   // solo existía "quién paga", faltaba el monto del flete.
   shippingCost:              string
+  // SCRUM-1145 — costos adicionales opcionales (vacío = no aplica).
+  importCost:                string
+  freightCost:               string
+  handlingCost:              string
+  otherCost:                 string
   modality:                 Modality
   estimatedArrivalDate:      string
 }
@@ -49,6 +56,7 @@ export function emptyOrderDraft(): OrderDraft {
   // conservador (no dispara el aviso de aprobación de Mark, exclusivo de Aéreo).
   return {
     lines: [], shippingType: 'terrestre', whoPaysShipping: 'cliente', shippingCost: '',
+    importCost: '', freightCost: '', handlingCost: '', otherCost: '',
     modality: 'directo', estimatedArrivalDate: '',
   }
 }
@@ -59,6 +67,35 @@ export function draftRequiresPrimaryApproval(draft: OrderDraft): boolean {
 
 export function draftTotal(draft: OrderDraft): number {
   return draft.lines.reduce((sum, l) => sum + l.unitCost * l.quantity, 0)
+}
+
+/** SCRUM-1145 — un campo vacío/ilegible no suma. */
+function moneyOrZero(value: string): number {
+  const n = Number(value)
+  return value !== '' && Number.isFinite(n) ? n : 0
+}
+
+/** SCRUM-1145 — suma de importación + flete + manejo + otros del borrador. */
+export function draftAdditionalCostsTotal(draft: OrderDraft): number {
+  return moneyOrZero(draft.importCost) + moneyOrZero(draft.freightCost)
+    + moneyOrZero(draft.handlingCost) + moneyOrZero(draft.otherCost)
+}
+
+/** SCRUM-1145 — total a pagar: productos + envío aéreo pagado por Atlantic + adicionales. */
+export function draftPayableTotal(draft: OrderDraft): number {
+  const airShipping = draft.shippingType === 'aereo' && draft.whoPaysShipping === 'atlantic'
+    ? moneyOrZero(draft.shippingCost)
+    : 0
+  return draftTotal(draft) + airShipping + draftAdditionalCostsTotal(draft)
+}
+
+/** SCRUM-1145 — campos de costos adicionales del payload (vacío => null). */
+export function buildAdditionalCostsPayload(draft: OrderDraft): Pick<PurchaseOrderPayload, 'import_cost' | 'freight_cost' | 'handling_cost' | 'other_cost'> {
+  const num = (v: string) => (v !== '' ? Number(v) : null)
+  return {
+    import_cost: num(draft.importCost), freight_cost: num(draft.freightCost),
+    handling_cost: num(draft.handlingCost), other_cost: num(draft.otherCost),
+  }
 }
 
 export function buildLinesPayload(draft: OrderDraft): PurchaseOrderLinePayload[] {
@@ -92,11 +129,17 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
   const { t } = useTranslation(['common', 'compras'])
 
   const [productSearch, setProductSearch] = useState('')
+  // SCRUM-992 — debounce 250 ms + mínimo 2 caracteres; el input sigue respondiendo al instante.
+  const productSearchTerm = useDebouncedSearchTerm(productSearch)
   const [showNewProductModal, setShowNewProductModal] = useState(false)
 
-  const { data: productResults } = useQuery({
-    queryKey: ['compras/products/picker', providerId, productSearch],
-    queryFn:  () => comprasApi.products.search(providerId, productSearch),
+  // SCRUM-861 punto 1 — un producto ya agregado a la orden no debe poder volver a seleccionarse;
+  // se excluye de los resultados en vez de permitir una segunda línea duplicada. La
+  // cantidad se ajusta desde la línea existente (LineRow), no re-seleccionando el producto.
+  const addedProductIds = draft.lines.map(l => l.catalogProductId).filter((id): id is number => id !== null)
+  // SCRUM-1162/1163 — paginación REAL en servidor (20 por defecto, 10/20/50) con el total del proveedor; la selección vive en `draft.lines`, no en la página.
+  const productPagination = useServerProductPicker({
+    providerId, searchTerm: productSearchTerm, excludeIds: addedProductIds, queryKey: 'compras/products/picker',
   })
 
   const addExistingProduct = (p: ComprasCatalogProduct) => {
@@ -172,22 +215,39 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
             {t('compras:newOrder.products.newProduct')}
           </Button>
         </div>
-        {productResults && productResults.data.length > 0 ? (
-          <ul className="mt-2 border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
-            {productResults.data.map(p => (
-              <li key={p.id} className="flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-50">
-                <div>
-                  <span className="font-medium text-slate-800">{p.description}</span>
-                  <span className="text-slate-400 ml-2">{p.reference}</span>
-                </div>
-                <Button variant="outline" className="!text-xs !px-3 !py-1" onClick={() => addExistingProduct(p)}>
-                  {t('compras:newOrder.products.add')}
-                </Button>
-              </li>
-            ))}
-          </ul>
+        {productPagination.items.length > 0 ? (
+          <>
+            <ul className="mt-2 border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
+              {productPagination.items.map(p => (
+                <li key={p.id} className="flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-50">
+                  <div>
+                    <span className="font-medium text-slate-800">{p.description}</span>
+                    <span className="text-slate-400 ml-2">{p.reference}</span>
+                  </div>
+                  <Button variant="outline" className="!text-xs !px-3 !py-1" onClick={() => addExistingProduct(p)}>
+                    {t('compras:newOrder.products.add')}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <Pagination
+              meta={productPagination.meta}
+              perPage={productPagination.perPage}
+              onPageChange={productPagination.setPage}
+              onPerPageChange={productPagination.setPerPage}
+              perPageOptions={PICKER_PER_PAGE_OPTIONS}
+              allowAll={false}
+            />
+          </>
         ) : (
-          productResults && <p className="text-slate-400 text-xs mt-2">{t('compras:newOrder.products.empty')}</p>
+          // SCRUM-1172 — tres motivos distintos para no ver filas, cada uno con su mensaje.
+          productPagination.emptyReason && (
+            <p className="text-slate-400 text-xs mt-2" data-testid={`product-picker-empty-${productPagination.emptyReason}`}>
+              {productPagination.emptyReason === 'search' ? t('compras:newOrder.products.noResults')
+                : productPagination.emptyReason === 'allAdded' ? t('compras:newOrder.products.allAdded')
+                : t('compras:newOrder.products.empty')}
+            </p>
+          )
         )}
       </Card>
 
@@ -217,7 +277,37 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
             </tbody>
           </table>
           <div className="flex justify-end font-bold text-slate-800 text-sm">
-            {t('compras:newOrder.lines.total')}: ${total.toFixed(2)}
+            {t('compras:newOrder.lines.total')}: ${formatMoney(total)}
+          </div>
+
+          {/* SCRUM-1145 — costos adicionales opcionales, después de las líneas de la orden. */}
+          <div className="mt-5 pt-4 border-t border-slate-100">
+            <h3 className="text-xs font-semibold text-slate-600 uppercase mb-2">
+              {t('compras:newOrder.additionalCosts.title')}
+              <span className="ml-1 font-normal normal-case text-slate-400">({t('compras:newOrder.additionalCosts.optional')})</span>
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {([
+                ['importCost', 'import'], ['freightCost', 'freight'],
+                ['handlingCost', 'handling'], ['otherCost', 'other'],
+              ] as const).map(([field, key]) => (
+                <div key={field}>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">{t(`compras:newOrder.additionalCosts.${key}`)}</label>
+                  <input
+                    type="number" min={0} step="0.01"
+                    aria-label={t(`compras:newOrder.additionalCosts.${key}`)}
+                    value={draft[field]}
+                    onChange={ev => onChange({ ...draft, [field]: ev.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+              ))}
+            </div>
+            {draftPayableTotal(draft) !== total && (
+              <div className="flex justify-end font-bold text-slate-800 text-sm mt-3">
+                {t('compras:newOrder.additionalCosts.payableTotal')}: ${formatMoney(draftPayableTotal(draft))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-100">
@@ -245,7 +335,15 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
               <label className="block text-xs font-semibold text-slate-600 mb-1">{t('compras:newOrder.shipping.type')}</label>
               <select
                 value={draft.shippingType}
-                onChange={e => onChange({ ...draft, shippingType: e.target.value as ShippingType })}
+                onChange={e => {
+                  const shippingType = e.target.value as ShippingType
+                  // SCRUM-954 — Quién paga el envío/Costo del envío son exclusivos de Aéreo; al
+                  // cambiar a otro tipo se limpian del draft, no solo se ocultan en pantalla (antes
+                  // quedaban guardados y reaparecían en Ver Órdenes → Detalle de la orden).
+                  onChange(shippingType === 'aereo'
+                    ? { ...draft, shippingType }
+                    : { ...draft, shippingType, whoPaysShipping: 'cliente', shippingCost: '' })
+                }}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               >
                 <option value="aereo">{t('compras:newOrder.shipping.typeAereo')}</option>
@@ -314,6 +412,11 @@ function LineRow({ line, onUpdate, onRemove }: {
   onRemove: () => void
 }) {
   const subtotal = line.unitCost * line.quantity
+  // SCRUM-954 — el clamp a mínimo 1 no puede correr en cada tecla: un Backspace sobre el "1"
+  // pasaba por `Number('') === 0 → Math.max(1,0) === 1`, así que el campo nunca quedaba vacío y
+  // escribir "40" resultaba en "140". Se permite un estado intermedio libre mientras se edita y
+  // el clamp a mínimo 1 se aplica solo al perder el foco.
+  const [quantityDraft, setQuantityDraft] = useState(String(line.quantity))
 
   return (
     <tr>
@@ -326,8 +429,18 @@ function LineRow({ line, onUpdate, onRemove }: {
         <input
           type="number"
           min={1}
-          value={line.quantity}
-          onChange={e => onUpdate({ quantity: Math.max(1, Number(e.target.value)) })}
+          value={quantityDraft}
+          onFocus={e => e.target.select()}
+          onChange={e => {
+            const raw = e.target.value
+            setQuantityDraft(raw)
+            if (raw !== '' && !Number.isNaN(Number(raw))) onUpdate({ quantity: Number(raw) })
+          }}
+          onBlur={() => {
+            const clamped = Math.max(1, Number(quantityDraft) || 1)
+            setQuantityDraft(String(clamped))
+            onUpdate({ quantity: clamped })
+          }}
           className="w-16 px-2 py-1 border border-slate-200 rounded text-sm"
         />
       </td>
@@ -342,7 +455,7 @@ function LineRow({ line, onUpdate, onRemove }: {
           className="w-24 px-2 py-1 border border-slate-200 rounded text-sm"
         />
       </td>
-      <td className="py-2 font-semibold text-slate-800">${subtotal.toFixed(2)}</td>
+      <td className="py-2 font-semibold text-slate-800">${formatMoney(subtotal)}</td>
       <td className="py-2">
         <SalesProjectPicker
           projectId={line.salesProjectId}

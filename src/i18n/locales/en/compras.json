@@ -1,6 +1,6 @@
 {
   "home": {
-    "greeting": "Hi, {{name}}",
+    "greeting": "Welcome, {{name}}",
     "subtitle": "You have {{meetings}} meetings and {{pendientes}} pending items today",
     "actions": {
       "providers": "Providers",
@@ -68,6 +68,7 @@
   "nav": {
     "module": "Purchasing",
     "home": "Home",
+    "salesOrders": "Sales orders",
     "providers": "Providers",
     "orders": "View Orders",
     "newOrder": "New Order",
@@ -77,10 +78,12 @@
     "payments": "Purchasing Payments",
     "claims": "Warranty Claims",
     "replacements": "Reference Comparison",
+    "replenishment": "Pending replenishment",
     "reports": "Reports",
     "ordersMenu": "Orders",
     "catalogStockMenu": "Catalog & Stock",
-    "paymentsMenu": "Payments"
+    "paymentsMenu": "Payments",
+    "settings": "Purchasing Settings"
   },
   "providers": {
     "title": "Providers",
@@ -126,6 +129,8 @@
     },
     "fields": {
       "name": "Name",
+      "taxId": "Tax ID",
+      "taxIdDv": "DV",
       "category": "Category",
       "currency": "Currency",
       "isActive": "Active",
@@ -140,17 +145,31 @@
       "bankSwift": "SWIFT (if applicable)",
       "bankBeneficiary": "Beneficiary"
     },
+    "bankImage": {
+      "label": "Bank details backup",
+      "attach": "Attach bank details screenshot",
+      "change": "Change image",
+      "remove": "Remove image",
+      "uploadError": "Could not upload the image.",
+      "removeError": "Could not remove the image.",
+      "viewLarger": "View larger image",
+      "aiExtracting": "Reading bank details from the image…",
+      "aiExtracted": "Automatically extracted — verify",
+      "aiExtractionFailed": "Could not read automatically, fill in the fields manually."
+    },
     "category": {
       "locales": "Local",
       "zona_libre": "Colon Free Zone",
       "china": "China",
       "europa": "Europe",
-      "online": "Online"
+      "online": "Online",
+      "latinoamerica": "Latin America"
     },
     "validation": {
       "nameRequired": "Name is required",
       "categoryRequired": "Category is required",
       "countryRequired": "Country is required",
+      "taxIdDvFormat": "The check digit (DV) must be 1 or 2 digits",
       "contactRequired": "Enter at least one contact method (WhatsApp, phone, or email)"
     },
     "actions": {
@@ -180,7 +199,9 @@
       "searchPlaceholder": "Search catalog product…",
       "newProduct": "+ New product",
       "add": "Add",
-      "empty": "This provider has no products in the catalog yet."
+      "empty": "This provider has no products in the catalog yet.",
+      "noResults": "No product from this provider matches the search.",
+      "allAdded": "You have already added every available product from this provider."
     },
     "newProduct": {
       "title": "New product",
@@ -201,7 +222,8 @@
         "iluminacion_exterior": "Outdoor Lighting",
         "lamparas_piso_mesa": "Floor and Table Lamps",
         "iluminacion_empotrada": "Recessed Lighting",
-        "bombillos": "Bulbs"
+        "bombillos": "Bulbs",
+        "LAMPARAS": "Lamps"
       },
       "rotation": "Expected rotation",
       "rotations": {
@@ -232,6 +254,17 @@
       "remove": "Remove",
       "empty": "You haven't added any products to this order yet.",
       "total": "Order total"
+    },
+    "additionalCosts": {
+      "title": "Additional costs",
+      "optional": "optional",
+      "import": "Import cost",
+      "freight": "Freight",
+      "handling": "Handling",
+      "other": "Other",
+      "productsSubtotal": "Products",
+      "airShipping": "Air shipping",
+      "payableTotal": "Total payable to supplier"
     },
     "modality": {
       "label": "Modality",
@@ -411,6 +444,24 @@
       "updateGeneric": "Could not save the order's edits.",
       "sendEmailGeneric": "Could not send the email. Make sure the provider has an email on file.",
       "liquidateGeneric": "Could not assign the settlement agency."
+    },
+    "languages": {
+      "title": "Document versions",
+      "spanish": "Spanish",
+      "english": "English",
+      "view": "View",
+      "download": "Download",
+      "generate": "Generate English version",
+      "regenerate": "Regenerate",
+      "translating": "Translating…",
+      "notGenerated": "This order has no English version yet. It is only generated when you need it.",
+      "generatedAt": "Generated on {{date}}",
+      "stale": "The order changed after the English version was generated. Regenerate it before using it.",
+      "generateFailed": "The English version could not be generated.",
+      "useSpanishInstead": "You can use the Spanish version.",
+      "openFailed": "The document could not be opened.",
+      "emailLanguage": "Attachment language",
+      "generateFirst": "To send in English, generate the English version first."
     }
   },
   "logistics": {
@@ -595,6 +646,7 @@
   "settings": {
     "toggle": "Purchasing settings",
     "title": "Purchasing settings",
+    "forbidden": "You don't have access to this screen.",
     "subtitle": "Configurable threshold used to flag providers with a low rating.",
     "lowRatingThreshold": "Low rating threshold",
     "claimAttentionDays": "Days before flagging a claim as needing attention",
@@ -610,6 +662,12 @@
     "saveError": "Could not save the setting. Try again."
   },
   "inventory": {
+    "providersPicker": {
+      "selected": "Product providers",
+      "primary": "Primary",
+      "addAnother": "Add another provider…",
+      "remove": "Remove {{name}}"
+    },
     "title": "Inventory - {{name}}",
     "headerSubtitle": "Read-only view · Warehouse owns this data, no edits here",
     "subtitle": "{{count}} products",
@@ -623,6 +681,7 @@
     },
     "kpis": {
       "total": "Total products",
+      "withStock": "With stock",
       "lowStock": "Low stock",
       "outOfStock": "Out of stock",
       "inAttention": "Needs attention",
@@ -631,6 +690,8 @@
     "filters": {
       "searchPlaceholder": "Search product…",
       "clear": "Clear filters",
+      "familiesAll": "All families",
+      "familyLabel": "Filter by family",
       "warehousesAll": "All warehouses",
       "warehousesCount": "Warehouses ({{count}})",
       "selectAllWarehouses": "Select all",
@@ -670,7 +731,9 @@
       "reorderPoint": "Minimum stock",
       "estado": "Status",
       "actions": "Actions",
-      "empty": "No products registered"
+      "empty": "No products registered",
+      "showroom": "In Showroom Obarrio: {{count}}",
+      "showroomLabel": "In Showroom Obarrio (separate)"
     },
     "estado": {
       "disponible": "Available",
@@ -707,6 +770,9 @@
       "category": "Category",
       "barcode": "Barcode",
       "photoUrl": "Photo URL",
+      "photo": "Product image",
+      "changePhoto": "Change image",
+      "removePhotoSelection": "Remove selected image",
       "priceFull": "Sale price",
       "cost": "Cost",
       "importCost": "Import cost",
@@ -717,6 +783,7 @@
       "margin": "Margin",
       "reorderPoint": "Minimum stock",
       "provider": "Provider",
+      "providers": "Providers",
       "rotation": "Rotation",
       "name": "Product name",
       "family": "Family",
@@ -728,7 +795,7 @@
       "familyCreateError": "Could not create the family.",
       "checkingReference": "Checking availability…",
       "confirmSave": "You're about to save: total cost {{cost}}, price {{price}}, margin {{margin}}%. Confirm?",
-      "confirmSaveGeneral": "You're about to save: name \"{{name}}\", reference {{reference}}, description \"{{description}}\", brand {{brand}}, family {{family}}. Confirm?",
+      "confirmSaveGeneral": "You're about to save: name \"{{name}}\", reference {{reference}}, description \"{{description}}\", brand {{brand}}, family {{family}}, providers {{providers}}, minimum stock {{reorderPoint}}. Confirm?",
       "technicalSheetDocSection": "Technical sheet",
       "technicalSheetDoc": {
         "upload": "Upload technical sheet",
@@ -757,11 +824,16 @@
       "technicalSheetRequiredHint": "Required to create the product — upload a file or paste a link before continuing.",
       "warehouse": "Warehouse",
       "submit": "Create product",
-      "discardWarning": "Leaving will discard all the information entered."
+      "discardWarning": "Leaving will discard all the information entered.",
+      "photoSection": "Product image",
+      "photoUpload": "Upload image",
+      "photoChange": "Change image",
+      "photoHint": "Required to create the product — JPG, PNG or WEBP."
     },
     "warehouseStock": {
       "title": "Stock by warehouse",
-      "empty": "No stock registered in any warehouse"
+      "empty": "No stock registered in any warehouse",
+      "total": "Total"
     },
     "orderPrefill": {
       "pendingWarning": "This product already has {{quantity}} units on the way.",
@@ -999,6 +1071,44 @@
       }
     }
   },
+  "replenishment": {
+    "title": "Pending replenishment",
+    "subtitle": "Products missing from out-of-stock orders, grouped by supplier. Tick the ones you need and generate each supplier's purchase order.",
+    "error": "Could not load the pending list. Please try again.",
+    "empty": "No orders are waiting for stock replenishment.",
+    "customItems_one": "{{count}} custom item from an out-of-stock order is not listed here because it has no catalog product.",
+    "customItems_other": "{{count}} custom items from out-of-stock orders are not listed here because they have no catalog product.",
+    "noProvider": "No supplier",
+    "noProviderHint": "Choose a supplier on each row to be able to order it; it is saved on the product.",
+    "saved": "Saved on the product",
+    "saveError": "The product supplier could not be saved. Please try again.",
+    "saveScope": "This product can no longer be changed from here because it no longer awaits replenishment. The list was reloaded.",
+    "saveConflict": "Someone else changed this product supplier. The list was reloaded.",
+    "providersError": "The supplier list could not be loaded; without it a supplier cannot be chosen for unassigned products.",
+    "retry": "Retry",
+    "chooseProvider": "Choose supplier",
+    "productCount_one": "{{count}} product",
+    "productCount_other": "{{count}} products",
+    "selectGroup": "Select all products from {{provider}}",
+    "selectProduct": "Select {{reference}}",
+    "changeProvider": "Supplier for {{reference}}",
+    "quantityOf": "Quantity to order for {{reference}}",
+    "generate_one": "Generate purchase order ({{count}})",
+    "generate_other": "Generate purchase order ({{count}})",
+    "ordersCount_one": "{{count}} order",
+    "ordersCount_other": "{{count}} orders",
+    "inTransitHint": "Units are already on order with suppliers in open purchase orders. Check before ordering again.",
+    "columns": {
+      "product": "Product",
+      "missing": "Missing",
+      "stock": "Stock",
+      "inTransit": "On the way",
+      "since": "Waiting since",
+      "orders": "Orders",
+      "provider": "Supplier",
+      "quantity": "Quantity"
+    }
+  },
   "replacements": {
     "title": "Reference Comparison",
     "tabs": {
@@ -1018,18 +1128,22 @@
       "original": "Original product",
       "proposed": "Proposed substitute",
       "project": "Project",
+      "margin": "Margin",
       "status": "Status",
       "empty": "No replacement requests registered."
     },
     "actions": {
       "generateOrder": "Generate order",
       "viewOrder": "View generated order",
-      "generateRequest": "Generate request"
+      "generateRequest": "Generate request",
+      "approve": "Approve",
+      "reject": "Reject"
     },
     "errors": {
       "generateGeneric": "Could not generate the order.",
       "createRequestGeneric": "Could not generate the request.",
-      "searchGeneric": "Could not complete the search."
+      "searchGeneric": "Could not complete the search.",
+      "decideGeneric": "Could not process the decision."
     },
     "search": {
       "originalLabel": "Product to replace",
@@ -1068,6 +1182,7 @@
       "project": "Sales project",
       "projectPlaceholder": "Select a sales project…",
       "projectRequired": "Select a sales project.",
+      "noProjectForProduct": "No project contains this product",
       "submit": "Generate request",
       "cancel": "Cancel",
       "success": "Request generated successfully."

@@ -15,7 +15,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: {
-    providers: { list: vi.fn(), get: vi.fn(), create: vi.fn(), update: vi.fn() },
+    providers: { list: vi.fn(), get: vi.fn(), create: vi.fn(), update: vi.fn(), uploadBankImage: vi.fn(), deleteBankImage: vi.fn() },
     orders: { list: vi.fn(), get: vi.fn(), create: vi.fn(), approve: vi.fn() },
     approvedProjects: { search: vi.fn() },
     settings: { get: vi.fn(), update: vi.fn() },
@@ -85,6 +85,37 @@ describe('ProvidersPage', () => {
     ))
   })
 
+  // SCRUM-949 — buscador con autocompletado: sugiere mientras se tipea y, al elegir una
+  // sugerencia, filtra la tabla sin acciones adicionales (sin clic en "Buscar").
+  it('elegir una sugerencia del autocompletado filtra la tabla sin clic en Buscar', async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+
+    const buscador = screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder')
+    fireEvent.change(buscador, { target: { value: 'Light' } })
+
+    // El debounce interno de AutocompleteInput dispara fetchOptions con el mismo endpoint.
+    await waitFor(() => expect(mockedComprasApi.providers.list).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'Light', per_page: 8 }),
+    ))
+
+    fireEvent.mouseDown(await screen.findByText('LightCorp', { selector: 'li *, li' }))
+
+    await waitFor(() => expect(mockedComprasApi.providers.list).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: 'LightCorp', page: 1 }),
+    ))
+  })
+
+  it('sin coincidencias, el autocompletado muestra el estado de "sin resultados"', async () => {
+    renderPage()
+    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    mockedComprasApi.providers.list.mockResolvedValueOnce({ ...LIST_RESPONSE, data: [] })
+
+    fireEvent.change(screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder'), { target: { value: 'zzz' } })
+
+    expect(await screen.findByText('common:buscador.sinResultados')).toBeInTheDocument()
+  })
+
   it('el chip de calificación baja sincroniza con el filtro rating_range', async () => {
     renderPage()
     await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
@@ -108,10 +139,11 @@ describe('ProvidersPage', () => {
   // reemplaza Moneda, "Editar" pasa a "Ver detalle" y abre el modal de solo-lectura, no el drawer.
   it('muestra la columna Contacto y "Ver detalle" abre el modal de solo-lectura', async () => {
     mockedComprasApi.providers.get.mockResolvedValue({
-      id: 1, name: 'LightCorp', category: 'china', origin: 'internacional', currency: 'USD',
+      id: 1, name: 'LightCorp', tax_id: null, category: 'china', origin: 'internacional', currency: 'USD',
       is_active: true, contact_name: 'Wei Chen', rating: null, last_purchase_at: null,
       whatsapp: null, phone: null, email: null, address: null, country: null,
       bank_name: null, bank_account_number: null, bank_swift: null, bank_beneficiary: null,
+      bank_image: null,
     })
     renderPage()
     await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())

@@ -13,7 +13,11 @@ import ProjectBreakdownModal from '@/components/compras/ProjectBreakdownModal'
 import { usePermission } from '@/hooks/usePermission'
 import { orderStatusLabel } from '@/utils/orderStatusLabel'
 import { ORDER_STATUSES, type ApprovedProject } from '@/types/compras'
+import { formatDateFromTimestamp } from '@/utils/dates'
 import { IcoAlertTriangle, IcoClose } from '@/components/icons'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchOrderSuggestions } from '@/utils/searchSuggestionsCompras'
+import { formatMoney } from '@/lib/money'
 
 type Chip = 'all' | 'critical' | 'zona_libre'
 type SortField = 'created_at' | 'status' | 'total_amount' | 'estimated_arrival_date'
@@ -117,14 +121,17 @@ export default function OrdersPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:orders.filters.searchPlaceholder')}
-          className="flex-1 max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-xs">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchOrderSuggestions}
+            placeholder={t('compras:orders.filters.searchPlaceholder')}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
         <select
           value={providerId}
@@ -320,11 +327,11 @@ export default function OrdersPage() {
                 <td className="px-4 py-3 text-slate-600">
                   {o.shipping_type ? t(`compras:newOrder.shipping.type${o.shipping_type.charAt(0).toUpperCase()}${o.shipping_type.slice(1)}`) : '—'}
                 </td>
-                <td className="px-4 py-3 text-slate-600">{new Date(o.created_at).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-slate-600">{formatDateFromTimestamp(o.created_at)}</td>
                 <td className="px-4 py-3 text-slate-600">{o.estimated_arrival_date ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{o.last_payment_date ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">${o.total_amount.toFixed(2)}</td>
-                <td className="px-4 py-3 text-slate-600">{o.shipping_cost != null ? `$${o.shipping_cost.toFixed(2)}` : '—'}</td>
+                <td className="px-4 py-3 text-slate-600">${formatMoney(o.total_amount)}</td>
+                <td className="px-4 py-3 text-slate-600">{o.shipping_cost != null ? `$${formatMoney(o.shipping_cost)}` : '—'}</td>
                 <td className="px-4 py-3">
                   <ReceptionBadge status={o.reception_status} t={t} />
                 </td>

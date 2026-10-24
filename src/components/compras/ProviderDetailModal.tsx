@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { useProvider, useUpdateProvider } from '@/hooks/useCompras'
+import { isAxiosError } from 'axios'
+import { useProvider, useUpdateProvider, useUploadProviderBankImage, useDeleteProviderBankImage, useProviderBankExtraction } from '@/hooks/useCompras'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
+import ImageLightboxModal from '@/components/ImageLightboxModal'
 import { buildSchema, PROVIDER_CATEGORIES, type ProviderFormData } from './ProviderFormDrawer'
-import type { ProviderCategory } from '@/types/compras'
+import type { ProviderCategory, ProviderBankField } from '@/types/compras'
 
 /**
  * SCRUM-186 (REQ-123, 2026-08-06 — hallazgo Gerencia Test): la tabla de Proveedores diverge del
@@ -33,15 +35,84 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
   const { data: provider, isLoading } = useProvider(providerId)
   const updateProvider = useUpdateProvider()
 
+  // SCRUM-819 — respaldo visual de datos bancarios, independiente del guardado del resto del form.
+  const uploadBankImage = useUploadProviderBankImage()
+  const deleteBankImage = useDeleteProviderBankImage()
+  const [bankImageError, setBankImageError] = useState<string | null>(null)
+  const bankImageInputRef = useRef<HTMLInputElement>(null)
+
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
+
+  // ADR-SCRUM819 — extracción automática. Se habilita apenas termina un upload real.
+  const [extractionEnabled, setExtractionEnabled] = useState(false)
+  const [aiFields, setAiFields] = useState<Set<ProviderBankField>>(new Set())
+  const { data: extraction } = useProviderBankExtraction(providerId, extractionEnabled)
+
+  const handleBankImageSelected = (file: File | undefined) => {
+    if (!file) return
+    setBankImageError(null)
+    uploadBankImage.mutate({ id: providerId, file }, {
+      onSuccess: () => setExtractionEnabled(true),
+      onError: err => {
+        const data = isAxiosError<{ message?: string }>(err) ? err.response?.data : undefined
+        setBankImageError(data?.message ?? t('compras:providerForm.bankImage.uploadError'))
+      },
+    })
+  }
+
+  const handleBankImageRemove = () => {
+    setBankImageError(null)
+    deleteBankImage.mutate(providerId, {
+      onError: () => setBankImageError(t('compras:providerForm.bankImage.removeError')),
+    })
+  }
+
   const schema = useMemo(() => buildSchema(t, true), [t])
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProviderFormData>({
+  const { register, handleSubmit, reset, getValues, setValue, formState: { errors } } = useForm<ProviderFormData>({
     resolver: zodResolver(schema),
   })
 
+  // Mismo guardrail no-negociable que ProviderFormDrawer.tsx (ver ese archivo para el detalle):
+  // nunca pisa un campo ya tipeado, solo pre-llena vacíos y solo los que el modelo declaró en
+  // `fields_found`.
   useEffect(() => {
-    if (provider) {
+    if (extraction?.status !== 'completed' || !extraction.result) return
+
+    const { result } = extraction
+    const filled = new Set<ProviderBankField>()
+    for (const field of result.fields_found) {
+      const current = getValues(field)
+      const extracted = result[field]
+      if (!current && extracted) {
+        setValue(field, extracted)
+        filled.add(field)
+      }
+    }
+    if (filled.size > 0) setAiFields(prev => new Set([...prev, ...filled]))
+    setExtractionEnabled(false)
+  }, [extraction, getValues, setValue])
+
+  const clearAiField = (field: ProviderBankField) => {
+    setAiFields(prev => {
+      if (!prev.has(field)) return prev
+      const next = new Set(prev)
+      next.delete(field)
+
+      return next
+    })
+  }
+
+  // Pre-QA (SCRUM-819, 2026-08-31) — hallazgo real: sin el `!editing`, un refetch en background
+  // mientras el usuario edita (ej. la invalidación de `useUploadProviderBankImage` al adjuntar
+  // una imagen ANTES de guardar el resto del form) volvía a correr este reset() con los datos
+  // viejos del servidor, pisando en silencio cualquier cambio sin guardar (categoría, nombre,
+  // etc.) — confirmado en vivo: cambiar Categoría → adjuntar imagen → Guardar guardaba la
+  // categoría ORIGINAL, no la elegida. Solo sincronizar el form con el servidor fuera de modo
+  // edición (carga inicial, y al terminar de guardar cuando `editing` vuelve a false).
+  useEffect(() => {
+    if (provider && !editing) {
       reset({
-        name: provider.name, category: provider.category,
+        name: provider.name, tax_id: provider.tax_id, tax_id_dv: provider.tax_id_dv, category: provider.category,
         currency: provider.currency, is_active: provider.is_active, contact_name: provider.contact_name,
         whatsapp: provider.whatsapp, phone: provider.phone, email: provider.email,
         address: provider.address, country: provider.country, bank_name: provider.bank_name,
@@ -49,14 +120,14 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
         bank_beneficiary: provider.bank_beneficiary,
       })
     }
-  }, [provider, reset])
+  }, [provider, editing, reset])
 
   const startEdit  = () => setEditing(true)
   const cancelEdit = () => {
     // Descarta cualquier cambio sin guardar — vuelve a los valores reales del proveedor.
     if (provider) {
       reset({
-        name: provider.name, category: provider.category,
+        name: provider.name, tax_id: provider.tax_id, tax_id_dv: provider.tax_id_dv, category: provider.category,
         currency: provider.currency, is_active: provider.is_active, contact_name: provider.contact_name,
         whatsapp: provider.whatsapp, phone: provider.phone, email: provider.email,
         address: provider.address, country: provider.country, bank_name: provider.bank_name,
@@ -64,6 +135,7 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
         bank_beneficiary: provider.bank_beneficiary,
       })
     }
+    setAiFields(new Set())
     setEditing(false)
   }
 
@@ -75,8 +147,10 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
         ...data,
         category: data.category as ProviderCategory | null | undefined,
         email: data.email === '' ? null : data.email,
+        tax_id_dv: data.tax_id_dv === '' ? null : data.tax_id_dv,
       }
       await updateProvider.mutateAsync({ id: providerId, data: payload })
+      setAiFields(new Set())
       setEditing(false)
     } catch {
       // error mostrado inline via mutation state
@@ -90,20 +164,26 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
   const readOnlyCls = 'w-full px-3 py-2.5 rounded-lg text-sm bg-slate-50 text-slate-700 border border-transparent'
 
   // Campo de solo-lectura fuera de modo edición: texto plano, sin input — evita que un campo
-  // bloqueado se vea/actúe como uno editable deshabilitado.
+  // bloqueado se vea/actúe como uno editable deshabilitado. `aiField` (ADR-SCRUM819): badge +
+  // resaltado mientras el valor viene de la extracción automática y no fue revisado todavía.
   const Field = ({
-    label, name, type = 'text', required = false,
-  }: { label: string; name: keyof ProviderFormData; type?: string; required?: boolean }) => (
+    label, name, type = 'text', required = false, aiField,
+  }: { label: string; name: keyof ProviderFormData; type?: string; required?: boolean; aiField?: ProviderBankField }) => (
     <div>
       <label className="block text-xs font-semibold text-slate-600 mb-1">
         {label} {required && editing && '*'}
+        {aiField && aiFields.has(aiField) && (
+          <span className="ml-2 text-[10px] font-normal normal-case text-amber-600">
+            {t('compras:providerForm.bankImage.aiExtracted')}
+          </span>
+        )}
       </label>
       {editing ? (
         <>
           <input
             type={type}
-            {...register(name)}
-            className={inputCls(!!errors[name])}
+            {...register(name, aiField ? { onChange: () => clearAiField(aiField) } : {})}
+            className={inputCls(!!errors[name]) + (aiField && aiFields.has(aiField) ? ' bg-amber-50 border-amber-300' : '')}
           />
           {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]?.message as string}</p>}
         </>
@@ -151,6 +231,10 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
                 {t('compras:providerForm.sections.general')}
               </h3>
               <Field label={t('compras:providerForm.fields.name')} name="name" required />
+              <div className="grid grid-cols-[1fr_6rem] gap-3">
+                <Field label={t('compras:providerForm.fields.taxId')} name="tax_id" />
+                <Field label={t('compras:providerForm.fields.taxIdDv')} name="tax_id_dv" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
@@ -214,17 +298,81 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
               <h3 className="text-xs font-bold uppercase tracking-wide text-slate-400">
                 {t('compras:providerForm.sections.bank')}
               </h3>
-              <Field label={t('compras:providerForm.fields.bankName')} name="bank_name" />
+              <Field label={t('compras:providerForm.fields.bankName')} name="bank_name" aiField="bank_name" />
               <div className="grid grid-cols-2 gap-3">
-                <Field label={t('compras:providerForm.fields.bankAccountNumber')} name="bank_account_number" />
-                <Field label={t('compras:providerForm.fields.bankSwift')} name="bank_swift" />
+                <Field label={t('compras:providerForm.fields.bankAccountNumber')} name="bank_account_number" aiField="bank_account_number" />
+                <Field label={t('compras:providerForm.fields.bankSwift')} name="bank_swift" aiField="bank_swift" />
               </div>
-              <Field label={t('compras:providerForm.fields.bankBeneficiary')} name="bank_beneficiary" />
+              <Field label={t('compras:providerForm.fields.bankBeneficiary')} name="bank_beneficiary" aiField="bank_beneficiary" />
+
+              {/* SCRUM-819 — respaldo visual, independiente de los campos de arriba (RN9). Visible
+                  en modo vista y edición (RN6); adjuntar/cambiar/eliminar solo en modo edición.
+                  SCRUM-819(b) — click en la imagen la abre en grande. */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  {t('compras:providerForm.bankImage.label')}
+                </label>
+                {provider.bank_image ? (
+                  <div className="space-y-2">
+                    <img
+                      src={provider.bank_image.url}
+                      alt={provider.bank_image.filename ?? ''}
+                      className="max-h-40 rounded-lg border border-slate-200 cursor-zoom-in"
+                      onClick={() => setLightboxSrc(provider.bank_image!.url)}
+                    />
+                    {editing && (
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="text-xs text-primary underline"
+                          onClick={() => bankImageInputRef.current?.click()}
+                        >
+                          {t('compras:providerForm.bankImage.change')}
+                        </button>
+                        <button
+                          type="button"
+                          className="text-xs text-red-600 underline"
+                          onClick={handleBankImageRemove}
+                          disabled={deleteBankImage.isPending}
+                        >
+                          {t('compras:providerForm.bankImage.remove')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : editing ? (
+                  <button
+                    type="button"
+                    className="text-xs text-primary underline"
+                    onClick={() => bankImageInputRef.current?.click()}
+                  >
+                    {t('compras:providerForm.bankImage.attach')}
+                  </button>
+                ) : (
+                  <div className={readOnlyCls}>—</div>
+                )}
+                <input
+                  ref={bankImageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={e => { handleBankImageSelected(e.target.files?.[0]); e.target.value = '' }}
+                />
+                {bankImageError && <p className="text-xs text-red-600 mt-1">{bankImageError}</p>}
+                {extractionEnabled && (extraction?.status === 'pending' || extraction?.status === 'running' || !extraction) && (
+                  <p className="text-xs text-slate-400 mt-1">{t('compras:providerForm.bankImage.aiExtracting')}</p>
+                )}
+                {extraction?.status === 'failed' && (
+                  <p className="text-xs text-slate-400 mt-1">{t('compras:providerForm.bankImage.aiExtractionFailed')}</p>
+                )}
+              </div>
             </div>
 
             {updateProvider.isError && (
               <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs">
-                {t('compras:providerForm.errors.generic')}
+                {/* SCRUM-852 — muestra el mensaje real del backend (ej. tax_id/nombre duplicado) en vez del genérico. */}
+                {(isAxiosError<{ message?: string }>(updateProvider.error) ? updateProvider.error.response?.data?.message : undefined)
+                  ?? t('compras:providerForm.errors.generic')}
               </div>
             )}
           </form>
@@ -247,6 +395,8 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
           )}
         </div>
       </Card>
+
+      {lightboxSrc && <ImageLightboxModal src={lightboxSrc} alt="" onClose={() => setLightboxSrc(null)} />}
     </div>
   )
 }

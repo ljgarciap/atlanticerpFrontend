@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { formatMoney } from '@/lib/money'
+import AutocompleteInput from '@/components/AutocompleteInput'
+import { fetchOrderSuggestions } from '@/utils/searchSuggestionsCompras'
 
 type PaymentStatusFilter = 'all' | 'sin_enviar' | 'por_pagar' | 'parcial' | 'completo'
 const PAYMENT_STATUS_CHIPS: PaymentStatusFilter[] = ['all', 'sin_enviar', 'por_pagar', 'parcial', 'completo']
@@ -82,14 +84,17 @@ export default function PaymentsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder={t('compras:payments.filters.searchPlaceholder') ?? ''}
-          className="flex-1 max-w-xs px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
+        <div className="flex-1 max-w-xs">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            onSelect={opt => { setSearch(opt); setQuery(opt); setPage(1) }}
+            onEnterWithoutSelection={handleSearch}
+            fetchOptions={fetchOrderSuggestions}
+            placeholder={t('compras:payments.filters.searchPlaceholder') ?? ''}
+            noResultsLabel={t('common:buscador.sinResultados')}
+          />
+        </div>
         <Button variant="outline" onClick={handleSearch}>{t('common:actions.search')}</Button>
         <select
           value={providerId}
@@ -147,13 +152,10 @@ export default function PaymentsPage() {
                 <td className="px-4 py-3 text-slate-600">{o.provider_name}</td>
                 <td className="px-4 py-3 text-slate-600">{t(`compras:orders.status.${o.status}`)}</td>
                 <td className="px-4 py-3 text-slate-600">${formatMoney(o.total_amount)}</td>
-                {/* "Monto a pagar" -- mismo valor que "Monto de la orden" (total_amount): no hay
-                    ningún otro campo en el modelo que represente un "monto a pagar" distinto del
-                    total de la orden. Documentado como posible ambigüedad en el comentario de
-                    Jira para que Daniela/Luis confirmen si debían ser 2 cifras distintas. */}
-                <td className="px-4 py-3 text-slate-600">${formatMoney(o.total_amount)}</td>
+                {/* SCRUM-1145 — "Monto a pagar" = productos + envío aéreo pagado por Atlantic + costos adicionales. */}
+                <td className="px-4 py-3 text-slate-600">${formatMoney(o.payable_total)}</td>
                 <td className="px-4 py-3 text-slate-600">${formatMoney(o.paid_amount)}</td>
-                <td className="px-4 py-3 text-slate-600">${formatMoney(o.total_amount - o.paid_amount)}</td>
+                <td className="px-4 py-3 text-slate-600">${formatMoney(o.payable_total - o.paid_amount)}</td>
                 <td className="px-4 py-3 text-slate-600">{t(`compras:orders.detail.payments.statusValue.${o.payment_status}`)}</td>
                 <td className="px-4 py-3 text-slate-600">{o.created_by_name ?? '—'}</td>
                 <td className="px-4 py-3 text-right">

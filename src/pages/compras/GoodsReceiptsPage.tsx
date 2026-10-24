@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose } from '@/components/icons'
 import { usePermission } from '@/hooks/usePermission'
+import { formatDateFromTimestamp, formatDateTimeShort } from '@/utils/dates'
+import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 /**
  * REQ-159 (SCRUM-222) — "Ver registros de ingreso". Movida acá desde Ingreso de Mercancía por
@@ -17,11 +19,13 @@ export default function GoodsReceiptsPage() {
   const { t } = useTranslation(['common', 'compras'])
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
+  const searchTerm = useDebouncedSearchTerm(search)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
 
-  const { data: receipts } = useGoodsReceipts(search, page, perPage)
+  const { data: receipts } = useGoodsReceipts(searchTerm, page, perPage)
   const { data: detail } = useGoodsReceipt(selectedId)
   // SCRUM-773 (CA5) — "+ Nuevo ingreso" no tenía ningún check propio, quedaba visible/clickeable
   // para Líder de Operaciones (compras.limited.view); la ruta real (POST /compras/goods-receipts)
@@ -62,7 +66,7 @@ export default function GoodsReceiptsPage() {
           <tbody className="divide-y divide-slate-100">
             {(receipts?.data ?? []).map(r => (
               <tr key={r.id} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedId(r.id)}>
-                <td className="px-4 py-3 text-slate-600">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-slate-600">{formatDateFromTimestamp(r.created_at)}</td>
                 <td className="px-4 py-3 text-slate-600">{r.provider_name}</td>
                 <td className="px-4 py-3 text-slate-600">#{r.purchase_order_id}</td>
                 <td className="px-4 py-3 text-slate-600">{r.lines_count}</td>
@@ -103,7 +107,7 @@ export default function GoodsReceiptsPage() {
             </div>
 
             <p className="text-sm text-slate-600 mb-1">{detail.provider_name} — #{detail.purchase_order_id}</p>
-            <p className="text-xs text-slate-400 mb-4">{new Date(detail.created_at).toLocaleString()}</p>
+            <p className="text-xs text-slate-400 mb-4">{formatDateTimeShort(detail.created_at)}</p>
 
             <table className="w-full text-sm mb-4">
               <thead>

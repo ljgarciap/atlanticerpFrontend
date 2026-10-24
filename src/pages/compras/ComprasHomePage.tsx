@@ -7,11 +7,16 @@ import { useComprasHomeSummary } from '@/hooks/useCompras'
 import { useAuthStore } from '@/store/authStore'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import CountBadge from '@/components/ui/CountBadge'
 import HomeItemDetailModal from '@/components/HomeItemDetailModal'
+import ShowMoreListModal from '@/components/ShowMoreListModal'
+import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
 import { IcoAlertTriangle } from '@/components/icons'
 import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
+import { MAX_HOME_CARD_ITEMS } from '@/lib/homeCards'
+import { firstNameOnly } from '@/lib/greeting'
 import type { NewOrderPrefillState } from './NewPurchaseOrderPage'
 import type { ComprasHomePendiente, ComprasHomeOrdenCritica, ComprasHomeReorderItem } from '@/types/compras'
 
@@ -21,12 +26,21 @@ export default function ComprasHomePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { data: summary, isLoading } = useComprasHomeSummary()
+  // SCRUM-908 — tarjeta "Aprobaciones Pendientes".
+  const { data: approvalsPending } = useQuery({
+    queryKey: ['compras-home-approvals-pending'],
+    queryFn:  () => comprasApi.home.approvalsPending(),
+  })
 
   const [pendienteDetail, setPendienteDetail] = useState<ComprasHomePendiente | null>(null)
   const [ordenDetail, setOrdenDetail] = useState<ComprasHomeOrdenCritica | null>(null)
   const [showCalendar, setShowCalendar] = useState(false)
   const [calendarInitialDate, setCalendarInitialDate] = useState<Date | undefined>(undefined)
   const [calendarPill, setCalendarPill] = useState<CalendarPill>('day')
+  // SCRUM-871 — "Ver más" por tarjeta (máx. MAX_HOME_CARD_ITEMS visibles antes del modal).
+  const [showAllPendientes, setShowAllPendientes] = useState(false)
+  const [showAllOrdenes, setShowAllOrdenes] = useState(false)
+  const [showAllReorder, setShowAllReorder] = useState(false)
 
   const pendientes = summary?.pendientes ?? []
   const ordenesCriticas = summary?.ordenes_criticas ?? []
@@ -59,13 +73,73 @@ export default function ComprasHomePage() {
     navigate('/compras/ordenes/nueva', { state })
   }
 
+  // SCRUM-871 — filas reusadas entre la lista corta (máx. MAX_HOME_CARD_ITEMS) y el modal "Ver más".
+  const renderPendienteRow = (p: ComprasHomePendiente, onSelect: () => void) => (
+    <button
+      onClick={onSelect}
+      className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 flex items-start gap-1.5"
+    >
+      {p.priority === 'alta' && <IcoAlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />}
+      <span className="text-slate-600 dark:text-slate-300">
+        {t(`compras:home.pendientes.text.${p.type}`, { id: p.order_id, days: p.days })}
+      </span>
+    </button>
+  )
+
+  const renderOrdenCriticaRow = (o: ComprasHomeOrdenCritica, onSelect: () => void) => (
+    <button
+      onClick={onSelect}
+      className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900"
+    >
+      <span className="font-semibold text-slate-700 dark:text-slate-200">#{o.order_id}</span>
+      {o.motivo && <span className="text-slate-400"> · {o.motivo}</span>}
+    </button>
+  )
+
+  const renderPorReordenarCells = (item: ComprasHomeReorderItem) => (
+    <>
+      <td className="py-2">
+        <div className="font-medium text-slate-800">{item.description}</div>
+        <div className="text-xs text-slate-400">{item.reference}</div>
+      </td>
+      <td className="py-2 text-xs text-slate-500">
+        {t('compras:home.porReordenar.stock')}: {item.disponible} / {t('compras:home.porReordenar.reorderPoint')}: {item.reorder_point}
+      </td>
+      <td className="py-2 text-xs text-slate-500">{item.provider_name ?? '—'}</td>
+      <td className="py-2 text-right">
+        <Button className="!text-xs" disabled={item.provider_id === null} onClick={() => generarOrden(item)}>
+          {t('compras:home.porReordenar.generateOrder')}
+        </Button>
+      </td>
+    </>
+  )
+
+  const renderPorReordenarModalRow = (item: ComprasHomeReorderItem) => (
+    <div className="flex items-center justify-between gap-3 px-3 py-2 border-b border-slate-100 last:border-0">
+      <div>
+        <div className="font-medium text-slate-800 text-sm">{item.description}</div>
+        <div className="text-xs text-slate-400">{item.reference}</div>
+        <div className="text-xs text-slate-500 mt-0.5">
+          {t('compras:home.porReordenar.stock')}: {item.disponible} / {t('compras:home.porReordenar.reorderPoint')}: {item.reorder_point} · {item.provider_name ?? '—'}
+        </div>
+      </div>
+      <Button
+        className="!text-xs shrink-0"
+        disabled={item.provider_id === null}
+        onClick={() => { setShowAllReorder(false); generarOrden(item) }}
+      >
+        {t('compras:home.porReordenar.generateOrder')}
+      </Button>
+    </div>
+  )
+
   return (
     <>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
           {/* SCRUM-175 — Daniela: el saludo debe ser el título principal, sin "Inicio" aparte. */}
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            {t('compras:home.greeting', { name: user?.first_name ?? '' })}
+            {t('compras:home.greeting', { name: firstNameOnly(user?.first_name) })}
           </h1>
           {!isLoading && (
             <p className="text-[12px] text-slate-500 dark:text-slate-400">
@@ -172,28 +246,21 @@ export default function ComprasHomePage() {
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t('compras:home.pendientes.title')}
             </h3>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              {pendientes.length}
-            </span>
+            <CountBadge count={pendientes.length} />
           </div>
           <ul className="flex flex-col gap-1.5">
-            {pendientes.slice(0, 4).map((p, i) => (
-              <li key={i}>
-                <button
-                  onClick={() => setPendienteDetail(p)}
-                  className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 flex items-start gap-1.5"
-                >
-                  {p.priority === 'alta' && <IcoAlertTriangle size={13} className="text-red-500 shrink-0 mt-0.5" />}
-                  <span className="text-slate-600 dark:text-slate-300">
-                    {t(`compras:home.pendientes.text.${p.type}`, { id: p.order_id, days: p.days })}
-                  </span>
-                </button>
-              </li>
+            {pendientes.slice(0, MAX_HOME_CARD_ITEMS).map((p, i) => (
+              <li key={i}>{renderPendienteRow(p, () => setPendienteDetail(p))}</li>
             ))}
             {pendientes.length === 0 && (
               <li className="text-[12px] text-slate-400 px-2">{t('compras:home.pendientes.empty')}</li>
             )}
           </ul>
+          {pendientes.length > MAX_HOME_CARD_ITEMS && (
+            <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllPendientes(true)}>
+              {t('common:actions.viewMore')}
+            </Button>
+          )}
         </Card>
 
         {/* Órdenes críticas — REQ-115 */}
@@ -205,26 +272,21 @@ export default function ComprasHomePage() {
             >
               {t('compras:home.ordenesCriticas.title')}
             </h3>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600">
-              {ordenesCriticas.length}
-            </span>
+            <CountBadge count={ordenesCriticas.length} tone="critical" />
           </div>
           <ul className="flex flex-col gap-1.5">
-            {ordenesCriticas.slice(0, 4).map(o => (
-              <li key={o.order_id}>
-                <button
-                  onClick={() => setOrdenDetail(o)}
-                  className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900"
-                >
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">#{o.order_id}</span>
-                  {o.motivo && <span className="text-slate-400"> · {o.motivo}</span>}
-                </button>
-              </li>
+            {ordenesCriticas.slice(0, MAX_HOME_CARD_ITEMS).map(o => (
+              <li key={o.order_id}>{renderOrdenCriticaRow(o, () => setOrdenDetail(o))}</li>
             ))}
             {ordenesCriticas.length === 0 && (
               <li className="text-[12px] text-slate-400 px-2">{t('compras:home.ordenesCriticas.empty')}</li>
             )}
           </ul>
+          {ordenesCriticas.length > MAX_HOME_CARD_ITEMS && (
+            <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllOrdenes(true)}>
+              {t('common:actions.viewMore')}
+            </Button>
+          )}
         </Card>
 
         {/* Por reordenar — REQ-116/118 */}
@@ -235,31 +297,20 @@ export default function ComprasHomePage() {
           {porReordenar.length === 0 ? (
             <p className="text-[12px] text-slate-400">{t('compras:home.porReordenar.empty')}</p>
           ) : (
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-slate-100">
-                {porReordenar.map(item => (
-                  <tr key={item.catalog_product_id}>
-                    <td className="py-2">
-                      <div className="font-medium text-slate-800">{item.description}</div>
-                      <div className="text-xs text-slate-400">{item.reference}</div>
-                    </td>
-                    <td className="py-2 text-xs text-slate-500">
-                      {t('compras:home.porReordenar.stock')}: {item.disponible} / {t('compras:home.porReordenar.reorderPoint')}: {item.reorder_point}
-                    </td>
-                    <td className="py-2 text-xs text-slate-500">{item.provider_name ?? '—'}</td>
-                    <td className="py-2 text-right">
-                      <Button
-                        className="!text-xs"
-                        disabled={item.provider_id === null}
-                        onClick={() => generarOrden(item)}
-                      >
-                        {t('compras:home.porReordenar.generateOrder')}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <>
+              <table className="w-full text-sm">
+                <tbody className="divide-y divide-slate-100">
+                  {porReordenar.slice(0, MAX_HOME_CARD_ITEMS).map(item => (
+                    <tr key={item.catalog_product_id}>{renderPorReordenarCells(item)}</tr>
+                  ))}
+                </tbody>
+              </table>
+              {porReordenar.length > MAX_HOME_CARD_ITEMS && (
+                <Button variant="secondary" className="!text-xs mt-2 w-full" onClick={() => setShowAllReorder(true)}>
+                  {t('common:actions.viewMore')}
+                </Button>
+              )}
+            </>
           )}
         </Card>
 
@@ -281,6 +332,8 @@ export default function ComprasHomePage() {
             ))}
           </div>
         </Card>
+
+        <ApprovalsPendingCard items={approvalsPending?.data ?? []} />
       </div>
 
       {showCalendar && (
@@ -317,6 +370,41 @@ export default function ComprasHomePage() {
           ]}
           onClose={() => setOrdenDetail(null)}
           action={{ label: t('compras:home.viewOrder'), onClick: () => navigate(`/compras/ordenes/${ordenDetail.order_id}`) }}
+        />
+      )}
+
+      {showAllPendientes && (
+        <ShowMoreListModal
+          title={t('compras:home.pendientes.title')}
+          items={pendientes}
+          onClose={() => setShowAllPendientes(false)}
+          renderItem={(p, i) => (
+            <div key={i}>
+              {renderPendienteRow(p, () => { setShowAllPendientes(false); setPendienteDetail(p) })}
+            </div>
+          )}
+        />
+      )}
+
+      {showAllOrdenes && (
+        <ShowMoreListModal
+          title={t('compras:home.ordenesCriticas.title')}
+          items={ordenesCriticas}
+          onClose={() => setShowAllOrdenes(false)}
+          renderItem={o => (
+            <div key={o.order_id}>
+              {renderOrdenCriticaRow(o, () => { setShowAllOrdenes(false); setOrdenDetail(o) })}
+            </div>
+          )}
+        />
+      )}
+
+      {showAllReorder && (
+        <ShowMoreListModal
+          title={t('compras:home.porReordenar.title')}
+          items={porReordenar}
+          onClose={() => setShowAllReorder(false)}
+          renderItem={item => <div key={item.catalog_product_id}>{renderPorReordenarModalRow(item)}</div>}
         />
       )}
     </>

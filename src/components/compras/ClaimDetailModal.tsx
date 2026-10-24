@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose, IcoAlertTriangle } from '@/components/icons'
 import { formatMoney } from '@/lib/money'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 interface Props {
   claimId: number
@@ -91,7 +92,7 @@ export default function ClaimDetailModal({ claimId, onClose }: Props) {
               </div>
               <div>
                 <div className="text-[10px] uppercase text-slate-400 font-bold">{t('compras:claims.detail.reportedDate')}</div>
-                <div className="text-slate-700">{new Date(claim.created_at).toLocaleDateString()}</div>
+                <div className="text-slate-700">{formatDateFromTimestamp(claim.created_at)}</div>
               </div>
             </div>
 
@@ -181,7 +182,7 @@ export default function ClaimDetailModal({ claimId, onClose }: Props) {
                     {t(`compras:claims.detail.stages.${stage.key}`)}
                   </span>
                   <span>
-                    {stage.active && stage.date ? new Date(stage.date).toLocaleDateString() : t('compras:claims.detail.pending')}
+                    {stage.active && stage.date ? formatDateFromTimestamp(stage.date) : t('compras:claims.detail.pending')}
                   </span>
                 </li>
               ))}

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -6,6 +6,7 @@ import OrdersPage from './OrdersPage'
 import { comprasApi } from '@/api/comprasApi'
 import { useAuthStore } from '@/store/authStore'
 import type { PurchaseOrderSummary } from '@/types/compras'
+import { formatDateFromTimestamp } from '@/utils/dates'
 
 // REQ-140/146 (SCRUM-203/209): gap real detectado por el Analista al reconciliar el sprint —
 // GET /api/compras/orders no exponía ningún campo de proyecto y la tabla principal no tenía
@@ -58,7 +59,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     // tabla principal hasta este ticket (gap real vs. mockup 2A/Excel de requerimientos).
     shipping_type: null, shipping_cost: null,
     estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
-    approved_by: null, approved_by_name: null, total_amount: 100, currency: 'USD',
+    approved_by: null, approved_by_name: null, total_amount: 100, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null, additional_costs_total: 0, payable_total: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-01T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -91,6 +92,31 @@ beforeEach(() => {
     kpis: { total_providers: 0, average_rating: null, low_rating_count: 0, active_categories: 0, categories: [] },
     data: [],
     meta: { total: 0, per_page: 100, current_page: 1, last_page: 1 },
+  })
+})
+
+describe('OrdersPage — SCRUM-949 buscador con autocompletado', () => {
+  it('elegir una sugerencia (proveedor o proyecto) filtra la tabla sin clic en Buscar', async () => {
+    mockedComprasApi.orders.list.mockResolvedValue({
+      data: [makeSummary({ provider_name: 'LightCorp', sales_project_summary: 'Torre Azul' })],
+      meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+      filters: { creators: [] },
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('#1')).toBeInTheDocument())
+
+    const buscador = screen.getByPlaceholderText('compras:orders.filters.searchPlaceholder')
+    fireEvent.change(buscador, { target: { value: 'Light' } })
+
+    await waitFor(() => expect(mockedComprasApi.orders.list).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'Light', per_page: 8 }),
+    ))
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.mouseDown(within(listbox).getByText('LightCorp'))
+
+    await waitFor(() => expect(mockedComprasApi.orders.list).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: 'LightCorp', page: 1 }),
+    ))
   })
 })
 
@@ -207,7 +233,7 @@ describe('OrdersPage — columnas faltantes de REQ-140 (SCRUM-203)', () => {
     expect(screen.getByText('María G.')).toBeInTheDocument()
     expect(screen.getByText('$850.00')).toBeInTheDocument()
     expect(screen.getByText('2026-07-15')).toBeInTheDocument()
-    expect(screen.getByText(new Date('2026-07-01T00:00:00Z').toLocaleDateString())).toBeInTheDocument()
+    expect(screen.getByText(formatDateFromTimestamp('2026-07-01T00:00:00Z'))).toBeInTheDocument()
   })
 
   it('muestra "—" cuando tipo de envío, costo de envío, fecha de pago o responsable no existen', async () => {

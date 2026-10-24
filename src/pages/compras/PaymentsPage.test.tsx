@@ -38,7 +38,7 @@ function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrd
     status: 'por_aprobar', next_status: 'ordenado', is_critical: false, modality: 'directo',
     shipping_type: null, shipping_cost: null,
     estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
-    approved_by: null, approved_by_name: null, total_amount: 100, currency: 'USD',
+    approved_by: null, approved_by_name: null, total_amount: 100, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null, additional_costs_total: 0, payable_total: 100, currency: 'USD',
     sales_project_summary: null, has_multiple_projects: false, sales_project_count: 0,
     created_at: '2026-07-01T00:00:00Z', status_changed_at: '2026-07-01T00:00:00Z',
     payment_status: 'pendiente', paid_amount: 0, payment_requested_at: null, last_payment_date: null,
@@ -170,5 +170,20 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
       'compras:payments.table.responsible',
       'compras:orders.table.actions',
     ])
+  })
+
+  // SCRUM-1145 — "Monto a pagar" y saldo usan el total a pagar (productos + envío aéreo de Atlantic
+  // + costos adicionales), no solo el total de productos.
+  it('SCRUM-1145 — "Monto a pagar" y saldo incluyen envío aéreo y costos adicionales', async () => {
+    mockedComprasApi.orders.list.mockResolvedValue(makeResponse({
+      data: [makeSummary({ total_amount: 1000, payable_total: 1230, additional_costs_total: 80, paid_amount: 200 })],
+    }))
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'td' })).toBeInTheDocument())
+    const cells = screen.getAllByRole('cell').map(c => c.textContent)
+    expect(cells).toContain('$1,000.00') // Monto de la orden (solo productos)
+    expect(cells).toContain('$1,230.00') // Monto a pagar
+    expect(cells).toContain('$1,030.00') // Saldo = 1230 - 200
   })
 })
