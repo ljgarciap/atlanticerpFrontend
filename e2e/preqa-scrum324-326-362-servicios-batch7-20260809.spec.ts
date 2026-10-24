@@ -119,9 +119,9 @@ test('SCRUM-362 — selector de período: navegar hacia atrás carga datos indep
   const spinbuttons = modal.getByRole('spinbutton')
 
   // Retrocede 2 meses -> junio 2026, período sembrado antes de esta corrida vía API directa
-  // (Aaron creó satisfaccion=4.7/incidencias=0/actitud=5, Daniela lo editó después a
+  // (Lider Servicios creó satisfaccion=4.7/incidencias=0/actitud=5, Gerencia lo editó después a
   // satisfaccion=3.5/incidencias=1/actitud=2.5) — el formulario debe mostrar el valor EDITADO
-  // (post-Daniela), no el original de Aaron ni datos de otro período.
+  // (post-Daniela), no el original de Lider Servicios ni datos de otro período.
   await prevBtn.click()
   await expect(modal.getByText(/julio de 2026/i)).toBeVisible()
   await modal.getByText(/Pendiente de captura/i).waitFor({ timeout: 5000 }).catch(() => {})
@@ -179,10 +179,10 @@ test('SCRUM-362 — selector de período: trazabilidad de auditoría (captured_b
   await expect(modal.getByText(/junio de 2026/i)).toBeVisible()
   await modal.getByText(/Cargando|loading/i).waitFor({ state: 'detached', timeout: 5000 }).catch(() => {})
 
-  // Junio 2026 fue creado por Aaron y editado por Daniela vía API antes de esta corrida — el
+  // Junio 2026 fue creado por Lider Servicios y editado por Gerencia vía API antes de esta corrida — el
   // formulario no expone captured_by/updated_by como texto visible hoy (solo los porcentajes
   // convertidos), así que esta prueba UI se limita a confirmar que los VALORES del período
-  // reflejan la última edición (Daniela) sin perder el registro — la aserción de
+  // reflejan la última edición (Gerencia) sin perder el registro — la aserción de
   // captured_by/updated_by en sí se hace contra la API directamente (ver reporte de Pre-QA).
   const spinbuttons = modal.getByRole('spinbutton')
   await expect(spinbuttons.nth(0)).toHaveValue('3.5')
@@ -194,7 +194,7 @@ test('SCRUM-362 — selector de período: label en inglés coincide con el perí
 
   // Cambia a inglés vía LanguageSelector (persiste en preferencias del usuario, por eso el
   // try/finally: si una aserción de este test falla a mitad de camino, igual hay que revertir a
-  // español antes de terminar, o el resto de la suite (misma cuenta Aaron) se rompe en cascada —
+  // español antes de terminar, o el resto de la suite (misma cuenta Lider Servicios) se rompe en cascada —
   // exactamente lo que pasó en la primera corrida de este archivo.
   await page.getByRole('button', { name: 'EN', exact: true }).click()
   await page.waitForTimeout(300)
@@ -269,7 +269,7 @@ test('SCRUM-362 — selector de período: intentar romperlo (doble clic rápido,
   await page.screenshot({ path: 'test-results/scrum362-05-break-attempts.png' })
 })
 
-test('SCRUM-362 — SLA settings: Aaron ve deshabilitado, Gerencia puede editar', async ({ page }) => {
+test('SCRUM-362 — SLA settings: Lider Servicios ve deshabilitado, Gerencia puede editar', async ({ page }) => {
   await login(page, LIDER_SERVICIOS)
   await gotoTechnicians(page)
   await page.getByText('Comisión del mes').click()

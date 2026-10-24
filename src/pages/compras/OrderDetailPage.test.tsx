@@ -254,7 +254,7 @@ describe('OrderDetailPage', () => {
     expect(screen.getByText('compras:orders.actions.edit')).toBeInTheDocument()
   })
 
-  it('muestra el botón de aprobación de Mark cuando la orden lo requiere y bloquea Avanzar (REQ-143)', async () => {
+  it('muestra el botón de aprobación de Gerencia cuando la orden lo requiere y bloquea Avanzar (REQ-143)', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
       requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,
@@ -310,7 +310,7 @@ describe('OrderDetailPage', () => {
 
   it('muestra el mensaje real del backend si rechaza el avance de estado', async () => {
     // SCRUM-208 (2026-08-06): antes se mostraba siempre el genérico, aunque el backend ya
-    // mandara una razón concreta (ej. remanente pendiente, aprobación de Mark) — mismo criterio
+    // mandara una razón concreta (ej. remanente pendiente, aprobación de Gerencia) — mismo criterio
     // que ya usaba el error de "Aprobar orden".
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail())
     mockedComprasApi.orders.advance.mockRejectedValue({
@@ -463,7 +463,7 @@ describe('OrderDetailPage — avance del remanente (SCRUM-208, rediseño 2026-08
 })
 
 // SCRUM-208 (rediseño 2026-08-15, backend ya implementado) — "Ingresar a Inventario" acotado a
-// esta orden, root cause real del reporte de Daniela: la parte ya recibida no aparecía en
+// esta orden, root cause real del reporte de Gerencia: la parte ya recibida no aparecía en
 // Inventario porque nada la confirmaba sin esperar a que la orden llegara a Recibido.
 describe('OrderDetailPage — confirmar pendientes a Inventario (SCRUM-208, rediseño 2026-08-15)', () => {
   it('sin remanente pendiente, no muestra el botón de Ingresar a Inventario', async () => {
@@ -532,10 +532,10 @@ describe('OrderDetailPage', () => {
 
   /**
    * Pre-QA en vivo (2026-07-17): al probar el gate de SCRUM-206 contra dev.atlanticerp.ai con un
-   * usuario que no es Mark, el backend devolvió 403 correcto pero la UI no mostraba nada — se
+   * usuario que no es Gerencia, el backend devolvió 403 correcto pero la UI no mostraba nada — se
    * corrigió mostrando el mensaje real del backend, mismo patrón que "advance".
    */
-  it('muestra el mensaje real del backend si el 403 de aprobación indica que no soy Mark', async () => {
+  it('muestra el mensaje real del backend si el 403 de aprobación indica que no soy Gerencia', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado',
       requires_primary_approval: true, blocked_by_primary_approval: true, approved_by: null,

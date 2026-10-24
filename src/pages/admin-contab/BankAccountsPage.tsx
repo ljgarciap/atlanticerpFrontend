@@ -16,8 +16,8 @@ import type { BankAccount, BankMovement, CreateBankAccountPayload } from '@/type
 
 /**
  * Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas Bancarias.
- * A diferencia de Configuración Fiscal/Datos de la Empresa, NO es exclusiva de Mark: la ven varios
- * roles (Felix, Yaneth, Gerencia), el backend gatea cada acción por su cuenta — sin estado
+ * A diferencia de Configuración Fiscal/Datos de la Empresa, NO es exclusiva de Gerencia: la ven varios
+ * roles (Contabilidad, Asistente Administrativa, Gerencia), el backend gatea cada acción por su cuenta — sin estado
  * especial de "acceso restringido" acá, el gate de entrada es el `RequirePermission` normal.
  */
 

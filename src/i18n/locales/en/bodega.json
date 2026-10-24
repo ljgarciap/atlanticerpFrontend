@@ -1044,7 +1044,7 @@
       "success": {
         "title": "Order #{{number}} created",
         "status": "Status",
-        "pendingLabel": "Pending approval from Yirena (Purchasing)",
+        "pendingLabel": "Pending approval from Lider Compras (Purchasing)",
         "note": "Warehouse generated this order, but it needs Purchasing's approval before becoming a formal purchase order and following its normal flow (payment, logistics, receiving).",
         "goToOrders": "Go to View Orders",
         "another": "Need another order?",

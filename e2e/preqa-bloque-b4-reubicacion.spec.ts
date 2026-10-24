@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test'
 //   - Merma (id 11): sin ninguna WarehouseLocation (empty-state genuino)
 // Si estos IDs/ubicaciones no existen en el entorno donde se re-corre este test, hay que
 // re-sembrarlos (ver docs/pre-qa/bloque-b4-reubicacion-2026-07-24.md en atlanticerp-backend).
-// Backend ya verificado por curl directo (RN1/RN2/gate Mark/concurrencia/doble-resolucion) —
+// Backend ya verificado por curl directo (RN1/RN2/gate Gerencia/concurrencia/doble-resolucion) —
 // este spec cubre SOLO comportamiento de UI que curl no puede: chips, reset de filtro, reload
 // a mitad de flujo, doble clic (promovido a permanente tras encontrar y corregir un bug real de
 // doble-submit en RelocateModal — ver commit que agrega `submittingRef`).

@@ -637,7 +637,7 @@ describe('LogisticsPage — remanente pendiente (SCRUM-208, rediseño 2026-08-15
 })
 
 // SCRUM-208 (rediseño 2026-08-15, backend ya implementado) — "Ingresar a Inventario" acotado a
-// esta orden, root cause real del reporte de Daniela.
+// esta orden, root cause real del reporte de Gerencia.
 describe('LogisticsPage — confirmar pendientes a Inventario (SCRUM-208, rediseño 2026-08-15)', () => {
   it('con remanente pendiente, muestra el botón de Ingresar a Inventario junto al de avanzar remanente', async () => {
     mockAuthState(['compras.read', 'compras.edit'])
@@ -692,7 +692,7 @@ describe('LogisticsPage — confirmar pendientes a Inventario (SCRUM-208, redise
   })
 })
 
-// SCRUM-1013 (rebote de Daniela, 2026-10-02) — "solo consulta": sin compras.edit, Número de contenedor y
+// SCRUM-1013 (rebote de Gerencia, 2026-10-02) — "solo consulta": sin compras.edit, Número de contenedor y
 // Naviera se ven como texto de solo lectura (antes eran editables y solo fallaban con 403 al guardar).
 describe('LogisticsPage — solo consulta sin compras.edit (SCRUM-1013 rebote)', () => {
   function cargar() {

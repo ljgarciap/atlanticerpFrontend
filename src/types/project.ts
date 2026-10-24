@@ -201,6 +201,10 @@ export interface CrmSettings {
   freshness_recent_dias: number
   /** Días sin actividad a partir de los cuales un proyecto cuenta como "frío"/stale. */
   freshness_stale_dias: number
+  /** Días en una misma etapa a partir de los que una tarjeta del Pipeline se considera estancada (default 15). */
+  pipeline_estancado_dias: number
+  /** Días sin contacto a partir de los que un cliente se marca con contacto obsoleto (default 60). */
+  cliente_contacto_obsoleto_dias: number
   /** SCRUM-998 — máximo de productos para un PDF de Catálogo plano y síncrono; por encima se genera un ZIP de volúmenes en segundo plano. */
   catalog_pdf_max_single_products: number
   /** SCRUM-998 — máximo de productos CON foto para un PDF plano; por encima se genera el ZIP en segundo plano (cada foto remota es una descarga). */

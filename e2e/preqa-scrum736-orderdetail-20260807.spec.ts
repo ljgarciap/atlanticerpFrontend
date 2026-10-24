@@ -40,7 +40,7 @@ interface Fixture {
   orderA: number // zona_libre, en_transito_local (next_status=recibido), agencia + pago parcial asignados
   orderB: number // directo, ordenado (next_status=en_transito_local) -- sin liquidacion
   orderC: number // zona_libre, recibido -- estado FINAL, sin next_status
-  orderF: number // zona_libre, por_aprobar (requiere Mark) -- Editar orden debe aparecer
+  orderF: number // zona_libre, por_aprobar (requiere Gerencia) -- Editar orden debe aparecer
   orderE: number // directo, 1 linea con catalog_product_id NULL -- reference y factory_reference ambos null
   // Clon de Orden A dedicado a Escenario 5 -- Escenario 2 AVANZA Orden A de verdad hasta
   // "recibido" (next_status pasa a null), así que reusarla en el test de permisos de rol sería

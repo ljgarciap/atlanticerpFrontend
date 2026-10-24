@@ -9,11 +9,11 @@ import { useAuthStore } from '@/store/authStore'
 import type { UserInfo } from '@/types/auth'
 
 // Batch 22 (SCRUM-643→647, REQ-566→570) + Batch 23 completo (SCRUM-648→650, REQ-571→573) — home
-// de Reportes, 11 tarjetas: las 7 con dato/gráfico propio (Comisión Felix, Cartera por cobrar,
+// de Reportes, 11 tarjetas: las 7 con dato/gráfico propio (Comisión Contabilidad, Cartera por cobrar,
 // Cobrado de cartera +90 días, Ventas, Arqueo de Caja, Comisiones, Notas de Crédito) + 4 de
 // navegación pura a los sub-reportes (REQ-573). Cubre: render básico de las 7 con datos mockeados,
 // la regla más importante de cada batch — el selector de período recalcula Ventas+Arqueo de
-// Caja+Comisiones, nunca Comisión Felix/Cartera/Notas de Crédito — y que las 4 tarjetas de
+// Caja+Comisiones, nunca Comisión Contabilidad/Cartera/Notas de Crédito — y que las 4 tarjetas de
 // navegación estén presentes y naveguen a su ruta real.
 
 vi.mock('react-i18next', () => ({
@@ -60,7 +60,7 @@ const mockedStore = vi.mocked(useAuthStore)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Felix', last_name: 'Test', email: 'felix@atlantic.com.pa',
+    id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'felix@atlantic.com.pa',
     role: 'lider_admin_contab', permissions: [],
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
@@ -146,7 +146,7 @@ describe('ReportesPage', () => {
   it('renders the 7 cards with fetched data', async () => {
     renderPage()
 
-    await waitFor(() => expect(screen.getAllByText(/8,400\.00/).length).toBeGreaterThan(0)) // Felix + Cartera 90 comparten el monto
+    await waitFor(() => expect(screen.getAllByText(/8,400\.00/).length).toBeGreaterThan(0)) // Contabilidad + Cartera 90 comparten el monto
     expect(screen.getByText('Menos de $15K')).toBeInTheDocument()
     expect(screen.getByText(/84\.00/)).toBeInTheDocument()
     expect(screen.getByText(/3,100\.00/)).toBeInTheDocument() // Ventas hoy
@@ -161,7 +161,7 @@ describe('ReportesPage', () => {
     expect(screen.getAllByTestId('mock-chart')).toHaveLength(2)
   })
 
-  it('SCRUM-870: Felix commission tiers show the compact K format, not full USD amounts', async () => {
+  it('SCRUM-870: Contabilidad commission tiers show the compact K format, not full USD amounts', async () => {
     renderPage()
     // tiers: [0–14999.99 @1%, 15000–19999.99 @1.5%, 20000–null @2%] — ver makeFelixCommission().
     // "Menos de" usa tope exclusivo (ceil) → $15K; los cerrados/pisos truncan → $15K–$19K / $20K.
@@ -170,7 +170,7 @@ describe('ReportesPage', () => {
     expect(screen.getByText('adminContab:reportes.felixCommission.tramoDesde:desde=$20K:pct=2')).toBeInTheDocument()
   })
 
-  it('changing the period refetches Ventas, Arqueo de Caja and Comisiones, never Felix commission, Cartera or Notas de Crédito', async () => {
+  it('changing the period refetches Ventas, Arqueo de Caja and Comisiones, never Contabilidad commission, Cartera or Notas de Crédito', async () => {
     renderPage()
 
     await waitFor(() => expect(mockedApi.reports.ventas).toHaveBeenCalledTimes(1))
@@ -187,7 +187,7 @@ describe('ReportesPage', () => {
     expect(mockedApi.reports.flujoCaja).toHaveBeenCalledWith('6m')
     expect(mockedApi.reports.comisiones).toHaveBeenCalledWith('6m')
 
-    // Comisión Felix, Cartera y Notas de Crédito nunca vuelven a pedirse — su query key no depende del período.
+    // Comisión Contabilidad, Cartera y Notas de Crédito nunca vuelven a pedirse — su query key no depende del período.
     expect(mockedApi.reports.felixCommission).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.cartera).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.notasCredito).toHaveBeenCalledTimes(1)
@@ -209,8 +209,8 @@ describe('ReportesPage', () => {
 
   // SCRUM-881 (Pre-QA, 2026-09-11) -- rebote: el backend ya bloqueaba GET /reports/felix-commission
   // para asistente_administrativa (routes/admin-contab.php), pero esta tarjeta se renderizaba sin
-  // ningun gate de rol -- Yaneth veia el titulo "-- Felix" con el cuerpo vacio (fetch en 403).
-  it('hides the Felix commission card for asistente_administrativa (SCRUM-881)', async () => {
+  // ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio (fetch en 403).
+  it('hides the Contabilidad commission card for asistente_administrativa (SCRUM-881)', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ role: 'asistente_administrativa' }) } as ReturnType<typeof useAuthStore>)
     renderPage()
 
@@ -219,7 +219,7 @@ describe('ReportesPage', () => {
     expect(mockedApi.reports.felixCommission).not.toHaveBeenCalled()
   })
 
-  it('keeps showing the Felix commission card for lider_admin_contab and management', async () => {
+  it('keeps showing the Contabilidad commission card for lider_admin_contab and management', async () => {
     mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
     renderPage()
 

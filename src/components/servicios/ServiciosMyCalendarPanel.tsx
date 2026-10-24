@@ -13,7 +13,7 @@ import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
 // acá NO hay toggle Mío/Equipo ni selector de persona — RN1/PERMISOS de este ticket son estrictos
 // ("nadie puede ver el calendario personal de otro usuario desde aquí"), a diferencia de "Rutas del
 // día" (REQ-208, todo el equipo) — por eso `serviciosApi.calendar.list()` no acepta `scope`/
-// `owner_id` (ver docblock en serviciosApi.ts). RN3 (Aaron/Gerencia sin visitas propias → vacío) se
+// `owner_id` (ver docblock en serviciosApi.ts). RN3 (Lider Servicios/Gerencia sin visitas propias → vacío) se
 // cumple gratis: sin scope=team, el backend siempre devuelve el calendario Outlook propio del actor
 // logueado, nunca el de otro — si ese actor no tiene eventos reales, el estado vacío ya existente de
 // MiniCalendarCard/CalendarModal ("Sin eventos") lo cubre sin lógica extra.

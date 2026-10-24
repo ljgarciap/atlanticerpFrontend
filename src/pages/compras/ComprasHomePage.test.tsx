@@ -77,8 +77,8 @@ describe('ComprasHomePage', () => {
     expect(screen.queryByText('compras:home.title')).not.toBeInTheDocument()
   })
 
-  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, first_name: 'Lider Paola' } } as never)
+  it('rebote QA (Gerencia, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+    mockedStore.mockReturnValue({ user: { id: 1, first_name: 'Lider Vendedor Disenador' } } as never)
     renderPage()
     expect(await screen.findByText('compras:home.greeting:Lider')).toBeInTheDocument()
   })

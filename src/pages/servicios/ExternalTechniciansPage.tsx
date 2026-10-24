@@ -14,7 +14,7 @@ import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 type StatusChip = ExternalTechnicianStatus | ''
 
 // REQ-263 RN5 / REQ-264 RN4 / REQ-265 RN1 / REQ-266 RN1 — alta, tarifa y activar/inactivar son
-// exclusivos de Aaron/Líder de Servicios y Gerencia; técnico interno tiene solo consulta.
+// exclusivos de Lider Servicios/Líder de Servicios y Gerencia; técnico interno tiene solo consulta.
 function canManage(role: string | undefined): boolean {
   return role === 'lider_servicios' || role === 'superadmin' || role === 'management'
 }

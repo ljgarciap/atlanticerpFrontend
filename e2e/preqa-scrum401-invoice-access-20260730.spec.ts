@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 /**
- * Pre-QA — SCRUM-401 (daily 2026-07-30): Marly (QA) reportó el 2026-07-26 no encontrar ningún
+ * Pre-QA — SCRUM-401 (daily 2026-07-30): Gerencia (QA) reportó el 2026-07-26 no encontrar ningún
  * acceso al documento Factura desde el tablero de Bodega > Pedidos. Re-verificado en vivo contra
  * dev.atlanticerp.ai: el botón "Ver factura" SÍ existe y es visible hoy en pedidos con
  * invoice_ready=true (Despachado/Entregado) — ver hallazgo en el comentario de Jira. Este spec

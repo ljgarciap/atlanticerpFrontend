@@ -10,8 +10,7 @@
     "pedidos": "Pedidos",
     "statusPedidos": "Status de Pedidos",
     "reports": "Reportes",
-    "auditLog": "Historial",
-    "cotizaya": "CotizaYA"
+    "auditLog": "Historial"
   },
   "scope": {
     "own": "Inicio",
@@ -442,7 +441,7 @@
       "contribuyente": "Contribuyente (con RUC)",
       "consumidorFinal": "Consumidor final",
       "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin RUC ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
-      "soloMarkFelix": "Solo Mark y Felix pueden marcar un cliente como Consumidor final."
+      "soloMarkFelix": "Solo Gerencia y Contabilidad pueden marcar un cliente como Consumidor final."
     }
   },
   "architects": {
@@ -971,69 +970,6 @@
       "montoMaximo": "Monto máximo",
       "sinTope": "Sin tope (último tramo)"
     }
-  },
-  "cotizaya": {
-    "title": "CotizaYA",
-    "subtitle": "Cotizaciones de venta chica, independientes del flujo comercial",
-    "button": "CotizaYA",
-    "searchPlaceholder": "Buscar por ID, cliente, teléfono o descripción",
-    "empty": "Todavía no hay cotizaciones de CotizaYA",
-    "table": {
-      "id": "ID",
-      "customer": "Nombre de cliente",
-      "phone": "Teléfono",
-      "description": "Descripción",
-      "designer": "Diseñador",
-      "date": "Fecha",
-      "total": "Total",
-      "actions": "Acciones",
-      "viewDetail": "Ver detalle",
-      "downloadPdf": "Descargar PDF"
-    },
-    "form": {
-      "title": "Nueva CotizaYA",
-      "back": "Volver a CotizaYA",
-      "mainData": "Datos principales",
-      "customerName": "Nombre del cliente",
-      "customerPhone": "Teléfono",
-      "description": "Descripción",
-      "designer": "Diseñador a cargo",
-      "contacts": "Contactos",
-      "contactsOptional": "(opcional)",
-      "noContacts": "Sin contactos registrados",
-      "observations": "Observaciones",
-      "parts": "Partidas",
-      "noParts": "Sin partidas todavía",
-      "addPart": "+ Agregar partida",
-      "partDefaultName": "Partida {{n}}",
-      "totals": "Totales",
-      "subtotal": "Subtotal general",
-      "itbms": "ITBMS",
-      "total": "Total",
-      "conditions": "Condiciones",
-      "generate": "Generar",
-      "generating": "Generando…",
-      "notConfigured": "CotizaYA no está configurado en este entorno: falta el cliente CotizaYA.",
-      "missing": "Falta para generar: {{fields}}",
-      "genericError": "No se pudo completar la acción. Intentá de nuevo."
-    },
-    "detail": {
-      "title": "{{folio}}",
-      "back": "Volver a CotizaYA",
-      "downloadPdf": "Descargar PDF",
-      "fixed": "Cotización generada: solo se puede consultar y descargar en PDF.",
-      "customer": "Cliente",
-      "phone": "Teléfono",
-      "description": "Descripción",
-      "designer": "Diseñador",
-      "date": "Fecha",
-      "contacts": "Contactos",
-      "observations": "Observaciones",
-      "conditions": "Condiciones",
-      "parts": "Partidas",
-      "loadError": "No se pudo cargar la cotización."
-    },
-    "pdfError": "No se pudo descargar el PDF. Intentá de nuevo."
   },
   "associates": {
     "title": "Asociados",

@@ -48,7 +48,7 @@ test('vendedor_disenador NO puede entrar a /admin-contab/reportes por URL direct
   expect(bodyText).not.toContain('Comisión por gestión de cartera +90 días')
 })
 
-test('roster con acceso real (Felix) sigue entrando sin regresion', async ({ page }) => {
+test('roster con acceso real (Contabilidad) sigue entrando sin regresion', async ({ page }) => {
   const ok = await login(page, FELIX)
   expect(ok).toBeTruthy()
 
@@ -56,5 +56,5 @@ test('roster con acceso real (Felix) sigue entrando sin regresion', async ({ pag
   await page.waitForTimeout(1500)
 
   expect(page.url()).toContain('/admin-contab/reportes')
-  await expect(page.getByText('Comisión por gestión de cartera +90 días — Felix')).toBeVisible()
+  await expect(page.getByText('Comisión por gestión de cartera +90 días — Contabilidad')).toBeVisible()
 })

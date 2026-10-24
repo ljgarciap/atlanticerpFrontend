@@ -15,7 +15,7 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 const FELIX = 'contabilidad@test.com'
-const FELIX_PW = 'contabilidad@test.com'
+const CONTABILIDAD_PW = 'contabilidad@test.com'
 
 async function login(page: Page, email: string, password: string) {
   await page.context().clearCookies()
@@ -57,7 +57,7 @@ async function openNoteByNumero(page: Page, numero: string) {
 }
 
 test('Punto 1 — modal de creación muestra Proyecto/# Cotización después de Cliente Master, acotados al cliente', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')
@@ -78,7 +78,7 @@ test('Punto 1 — modal de creación muestra Proyecto/# Cotización después de 
 })
 
 test('Punto 1 — elegir Cotización autocompleta el Proyecto asociado', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')
@@ -105,7 +105,7 @@ test('Punto 1 — elegir Cotización autocompleta el Proyecto asociado', async (
 })
 
 test('Punto 1 — elegir Proyecto filtra # de Cotización, y factura pagada (Norte) sigue apareciendo', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')
@@ -132,7 +132,7 @@ test('Punto 1 — elegir Proyecto filtra # de Cotización, y factura pagada (Nor
 })
 
 test('Punto 1 — factura elegida se limpia si el filtro cambiado la deja fuera de las opciones visibles', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')
@@ -158,7 +158,7 @@ test('Punto 1 — factura elegida se limpia si el filtro cambiado la deja fuera 
 })
 
 test('Punto 1 — doble clic / cambios rápidos Proyecto→Cotización→Proyecto no dejan estado inconsistente', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')
@@ -198,7 +198,7 @@ test('Punto 1 — doble clic / cambios rápidos Proyecto→Cotización→Proyect
 })
 
 test('Punto 2 — detalle de NC-932-FAMILIA muestra Cotización y Guía ANTES de Factura de origen, ambas clickeables', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-932-FAMILIA')
 
@@ -235,7 +235,7 @@ test('Punto 2 — detalle de NC-932-FAMILIA muestra Cotización y Guía ANTES de
 })
 
 test('Punto 2 — detalle de NC-932-FAMILIA: clic en Guía abre el pedido CORRECTO (distinto al de la factura)', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-932-FAMILIA')
 
@@ -254,7 +254,7 @@ test('Punto 2 — detalle de NC-932-FAMILIA: clic en Guía abre el pedido CORREC
 })
 
 test('Punto 2 — detalle de NC-932-SUELTA (factura sin proyecto/cotización/guía) muestra "—" en vez de botón roto', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-932-SUELTA')
 
@@ -275,7 +275,7 @@ test('Punto 2 — detalle de NC-932-SUELTA (factura sin proyecto/cotización/gu�
 })
 
 test('Punto 2 — "Factura de origen" en el detalle sigue abriendo el PDF directo (no un modal) — sin cambios', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-932-NORTE')
 
@@ -290,7 +290,7 @@ test('Punto 2 — "Factura de origen" en el detalle sigue abriendo el PDF direct
 })
 
 test('Iconografía — cero emoji visible en el modal de creación y el detalle', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openCreationModal(page)
   await selectClient(page, 'PreQA932')

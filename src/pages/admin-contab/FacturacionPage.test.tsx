@@ -835,7 +835,7 @@ describe('FacturacionPage', () => {
     alertSpy.mockRestore()
   })
 
-  it('REQ-448 Escenario 2/3: Aprobar/Rechazar solo se muestran cuando el backend confirma que el usuario actual es Mark (`puede_decidir_incobrable`)', async () => {
+  it('REQ-448 Escenario 2/3: Aprobar/Rechazar solo se muestran cuando el backend confirma que el usuario actual es Gerencia (`puede_decidir_incobrable`)', async () => {
     mockedApi.invoices.detail.mockResolvedValue(makeDetail({
       estado: 'facturada', numero_factura: 'F-2201', cobrabilidad: 'pendiente_aprobacion',
       motivo_incobrable: 'Cliente sin respuesta', puede_decidir_incobrable: false,
@@ -849,7 +849,7 @@ describe('FacturacionPage', () => {
     expect(screen.queryByText('adminContab:facturacion.detalle.rechazar')).not.toBeInTheDocument()
   })
 
-  it('REQ-448 Escenario 2: Mark aprueba la propuesta desde el modal', async () => {
+  it('REQ-448 Escenario 2: Gerencia aprueba la propuesta desde el modal', async () => {
     mockedApi.invoices.detail.mockResolvedValue(makeDetail({
       estado: 'facturada', numero_factura: 'F-2201', cobrabilidad: 'pendiente_aprobacion',
       motivo_incobrable: 'Cliente sin respuesta', puede_decidir_incobrable: true,

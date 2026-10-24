@@ -78,7 +78,7 @@ describe('SolicitudAjustePage', () => {
           bodega: 'Merma', tipo: 'Restar', cantidad: 2, motivo: 'Danado',
           descripcion: null, responsable: null,
           evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
-          estado: 'Aprobada', motivo_rechazo: null, resuelto_por: 'Mark',
+          estado: 'Aprobada', motivo_rechazo: null, resuelto_por: 'Gerencia',
         },
       ],
       meta: { total: 2, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
@@ -93,9 +93,9 @@ describe('SolicitudAjustePage', () => {
   })
 
   /**
-   * SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Bodega solicita, Mark aprueba: antes
+   * SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Bodega solicita, Gerencia aprueba: antes
    * Aprobar/Rechazar quedaban visibles/clicables para CUALQUIER perfil de Bodega en una fila
-   * Pendiente (el backend ya rechazaba con 403 a quien no fuera Mark, pero sin ninguna señal en
+   * Pendiente (el backend ya rechazaba con 403 a quien no fuera Gerencia, pero sin ninguna señal en
    * el botón). Ahora se ocultan por completo cuando `can_approve` es false.
    */
   it('oculta Aprobar/Rechazar por completo en filas Pendiente cuando can_approve es false', async () => {
@@ -287,7 +287,7 @@ describe('SolicitudAjustePage', () => {
       target: { value: 'Se encontraron 3 unidades sueltas fuera de su ubicación habitual' },
     })
     fireEvent.change(screen.getByPlaceholderText('bodega:adjustments.newModal.responsiblePlaceholder'), {
-      target: { value: 'Esteban Jefe de Bodega' },
+      target: { value: 'Lider Bodega Jefe de Bodega' },
     })
     const file = new File(['foto'], 'evidencia.jpg', { type: 'image/jpeg' })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
@@ -300,7 +300,7 @@ describe('SolicitudAjustePage', () => {
       [expect.objectContaining({
         motivo: 'OTRO_ESPECIFICAR',
         descripcion: 'Se encontraron 3 unidades sueltas fuera de su ubicación habitual',
-        responsable: 'Esteban Jefe de Bodega',
+        responsable: 'Lider Bodega Jefe de Bodega',
         cantidad: 3,
       })],
       false,
@@ -429,7 +429,7 @@ describe('SolicitudAjustePage', () => {
         bodega: 'Merma', tipo: 'Restar', cantidad: 1, motivo: 'ROBO_O_PERDIDA',
         descripcion: null, responsable: null,
         evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
-        estado: 'Rechazada', motivo_rechazo: 'Ya existe un ajuste aprobado para este producto.', resuelto_por: 'Mark',
+        estado: 'Rechazada', motivo_rechazo: 'Ya existe un ajuste aprobado para este producto.', resuelto_por: 'Gerencia',
       }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: false,
     })

@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test'
  * mergeado a `dev` local en ambos repos, todavía sin push.
  *
  * Cuentas reales (password = email):
- *  - liderservicios@test.com   (lider_servicios) — Aaron, escritura completa
+ *  - liderservicios@test.com   (lider_servicios) — Lider Servicios, escritura completa
  *  - garantiasservicios@test.com  (garantias_servicios) — Garantias Servicios Test, solo lectura
  *
  * TOOL_NAME lleva un sufijo único por corrida (Date.now()) para que re-correr la suite no colisione
@@ -40,7 +40,7 @@ async function gotoTools(page: Page) {
 
 // ---------- REQ-271 — Alta de herramienta nueva, de punta a punta ----------
 
-test('1. Aaron — REQ-271 Escenario 1: solicitar 3 unidades nuevas crea fila pendiente 0 unidades', async ({ page }) => {
+test('1. Lider Servicios — REQ-271 Escenario 1: solicitar 3 unidades nuevas crea fila pendiente 0 unidades', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.screenshot({ path: `${DL_DIR}/01-panel-inicial.png`, fullPage: true })
@@ -60,10 +60,10 @@ test('1. Aaron — REQ-271 Escenario 1: solicitar 3 unidades nuevas crea fila pe
 
   // RN2 — fila "pendiente de recibir" visible en la tabla.
   await expect(page.getByText(TOOL_NAME)).toBeVisible()
-  await expect(page.getByText('Solicitado a Felix (3)')).toBeVisible()
+  await expect(page.getByText('Solicitado a Contabilidad (3)')).toBeVisible()
 })
 
-test('2. Aaron — REQ-271 Escenario 2: marcar "Recibida" crea 3 unidades reales con códigos nuevos, en bodega', async ({ page }) => {
+test('2. Lider Servicios — REQ-271 Escenario 2: marcar "Recibida" crea 3 unidades reales con códigos nuevos, en bodega', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -86,12 +86,12 @@ test('2. Aaron — REQ-271 Escenario 2: marcar "Recibida" crea 3 unidades reales
 
   // Grupo debe decir "3 unidad(es)" ya no "0 unidad(es) (pendiente de recibir)"
   await expect(page.getByText(TOOL_NAME, { exact: true })).toBeVisible()
-  await expect(page.getByText('Solicitado a Felix', { exact: false })).toHaveCount(0)
+  await expect(page.getByText('Solicitado a Contabilidad', { exact: false })).toHaveCount(0)
 })
 
 // ---------- REQ-272 — Reposición sobre unidad EXISTENTE ----------
 
-test('3. Aaron — REQ-272: "Solicitar" en una unidad existente, luego "Recibida" genera códigos NUEVOS distintos del original', async ({ page }) => {
+test('3. Lider Servicios — REQ-272: "Solicitar" en una unidad existente, luego "Recibida" genera códigos NUEVOS distintos del original', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -108,7 +108,7 @@ test('3. Aaron — REQ-272: "Solicitar" en una unidad existente, luego "Recibida
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/06-tras-solicitar-reposicion.png`, fullPage: true })
 
-  await expect(page.getByText('Solicitado a Felix (2)')).toBeVisible()
+  await expect(page.getByText('Solicitado a Contabilidad (2)')).toBeVisible()
 
   await page.getByRole('button', { name: 'Recibida' }).click()
   await page.waitForTimeout(1200)
@@ -127,7 +127,7 @@ test('3. Aaron — REQ-272: "Solicitar" en una unidad existente, luego "Recibida
 
 // ---------- REQ-269 — Cambio de estado con responsable automático ----------
 
-test('4. Aaron — REQ-269 Escenario 1: marcar unidad ASIGNADA como Dañada atribuye responsable automático', async ({ page }) => {
+test('4. Lider Servicios — REQ-269 Escenario 1: marcar unidad ASIGNADA como Dañada atribuye responsable automático', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -154,7 +154,7 @@ test('4. Aaron — REQ-269 Escenario 1: marcar unidad ASIGNADA como Dañada atri
   await expect(page.getByText(`Responsable: ${technicianOption}`)).toBeVisible()
 })
 
-test('5. Aaron — REQ-269 Escenario 2: marcar unidad EN BODEGA (sin asignar) como Perdida → "Sin asignar al momento del incidente"', async ({ page }) => {
+test('5. Lider Servicios — REQ-269 Escenario 2: marcar unidad EN BODEGA (sin asignar) como Perdida → "Sin asignar al momento del incidente"', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -171,7 +171,7 @@ test('5. Aaron — REQ-269 Escenario 2: marcar unidad EN BODEGA (sin asignar) co
   await expect(row.getByText('Responsable: Sin asignar al momento del incidente')).toBeVisible()
 })
 
-test('6. Aaron — REQ-269 Escenario 3: marcar Desgaste NO atribuye responsable', async ({ page }) => {
+test('6. Lider Servicios — REQ-269 Escenario 3: marcar Desgaste NO atribuye responsable', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -187,7 +187,7 @@ test('6. Aaron — REQ-269 Escenario 3: marcar Desgaste NO atribuye responsable'
   await expect(row.getByText('Responsable:')).toHaveCount(0)
 })
 
-test('7. Aaron — REQ-269 RN4: volver una unidad Dañada a "Buen estado" limpia el responsable', async ({ page }) => {
+test('7. Lider Servicios — REQ-269 RN4: volver una unidad Dañada a "Buen estado" limpia el responsable', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -207,7 +207,7 @@ test('7. Aaron — REQ-269 RN4: volver una unidad Dañada a "Buen estado" limpia
 
 // ---------- REQ-270 — Reasignación ----------
 
-test('8. Aaron — REQ-270: reasignar una unidad actualiza "Desde" a hoy', async ({ page }) => {
+test('8. Lider Servicios — REQ-270: reasignar una unidad actualiza "Desde" a hoy', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -236,7 +236,7 @@ test('8. Aaron — REQ-270: reasignar una unidad actualiza "Desde" a hoy', async
 
 // ---------- REQ-268 — Filtros combinados + estado vacío ----------
 
-test('9. Aaron — REQ-268 RN4: filtro sin resultados muestra "Sin herramientas para este filtro"', async ({ page }) => {
+test('9. Lider Servicios — REQ-268 RN4: filtro sin resultados muestra "Sin herramientas para este filtro"', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill('ZZZ-NO-EXISTE-NINGUNA-HERRAMIENTA-ZZZ')
@@ -246,7 +246,7 @@ test('9. Aaron — REQ-268 RN4: filtro sin resultados muestra "Sin herramientas 
   await expect(page.getByText('Sin herramientas para este filtro')).toBeVisible()
 })
 
-test('10. Aaron — REQ-268 RN3: filtros combinados (búsqueda + estado a la vez)', async ({ page }) => {
+test('10. Lider Servicios — REQ-268 RN3: filtros combinados (búsqueda + estado a la vez)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTools(page)
   await page.getByRole('textbox', { name: /buscar/i }).fill(TOOL_NAME)
@@ -262,7 +262,7 @@ test('10. Aaron — REQ-268 RN3: filtros combinados (búsqueda + estado a la vez
 
 // ---------- Modo lectura — técnico interno ----------
 
-test('11. Miguel (garantias_servicios) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
+test('11. Garantias Servicios (garantias_servicios) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
   await login(page, 'garantiasservicios@test.com')
   await gotoTools(page)
   await page.waitForTimeout(1000)

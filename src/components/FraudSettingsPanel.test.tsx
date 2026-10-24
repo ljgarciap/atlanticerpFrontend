@@ -44,6 +44,7 @@ function makeSettings(overrides: Partial<FraudSettings> = {}): FraudSettings {
     fraude_monto_ventana_dias: 90,
     fraude_aprobaciones_repetidas_n: 5,
     fraude_aprobaciones_repetidas_minutos: 10,
+    comision_pendiente_dias: 14,
     ...overrides,
   }
 }
@@ -64,13 +65,14 @@ beforeEach(() => {
 })
 
 describe('FraudSettingsPanel', () => {
-  it('carga y muestra los 4 umbrales configurados', async () => {
+  it('carga y muestra los 5 umbrales configurados', async () => {
     renderPage()
 
     expect(await screen.findByDisplayValue('3')).toBeInTheDocument()
     expect(screen.getByDisplayValue('90')).toBeInTheDocument()
     expect(screen.getByDisplayValue('5')).toBeInTheDocument()
     expect(screen.getByDisplayValue('10')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('14')).toBeInTheDocument()
   })
 
   it('gate de permiso: sin superadmin.all no se ve el formulario', async () => {
@@ -119,6 +121,7 @@ describe('FraudSettingsPanel', () => {
       fraude_monto_ventana_dias: 90,
       fraude_aprobaciones_repetidas_n: 8,
       fraude_aprobaciones_repetidas_minutos: 10,
+      comision_pendiente_dias: 14,
     }))
 
     expect(await screen.findByText('adminContab:fraudSettings.saved')).toBeInTheDocument()

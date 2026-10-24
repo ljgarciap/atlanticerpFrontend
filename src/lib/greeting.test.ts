@@ -3,12 +3,12 @@ import { firstNameOnly } from './greeting'
 
 describe('firstNameOnly', () => {
   it('devuelve el nombre tal cual cuando es una sola palabra', () => {
-    expect(firstNameOnly('Felix')).toBe('Felix')
+    expect(firstNameOnly('Contabilidad')).toBe('Contabilidad')
   })
 
   it('SCRUM-863 — recorta a la primera palabra cuando first_name trae un nombre compuesto', () => {
-    expect(firstNameOnly('Juan Manuel')).toBe('Juan')
-    expect(firstNameOnly('Kayra Milena')).toBe('Kayra')
+    expect(firstNameOnly('Ana Maria')).toBe('Ana')
+    expect(firstNameOnly('Jose Luis Perez')).toBe('Jose')
     expect(firstNameOnly('Luis J')).toBe('Luis')
   })
 

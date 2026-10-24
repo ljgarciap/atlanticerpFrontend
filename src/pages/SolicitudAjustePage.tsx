@@ -153,10 +153,10 @@ export default function SolicitudAjustePage() {
                 <td className="px-4 py-3"><EstadoBadge estado={line.estado} /></td>
                 <td className="px-4 py-3">
                   {/* SCRUM-429 (rebote de Gerencia Test 2026-08-13) — Aprobar/Rechazar quedaban
-                      visibles/clicables para CUALQUIER perfil de Bodega (Bodega solicita, Mark
-                      aprueba — el backend ya rechazaba con 403 a quien no fuera Mark, pero el
+                      visibles/clicables para CUALQUIER perfil de Bodega (Bodega solicita, Gerencia
+                      aprueba — el backend ya rechazaba con 403 a quien no fuera Gerencia, pero el
                       botón no daba ninguna señal de eso). `can_approve` (si el usuario actual ES
-                      Mark, ver AdjustmentRequestController::index()) oculta el botón por completo
+                      Gerencia, ver AdjustmentRequestController::index()) oculta el botón por completo
                       para todos los demás, en vez de dejarlo visible sin ninguna afordancia. */}
                   {line.estado === 'Pendiente' && data?.can_approve && (
                     <div className="flex gap-1.5 mb-1">
@@ -408,7 +408,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
 
   const [lines, setLines] = useState<Array<Partial<AdjustmentRequestLineDraft>>>([])
   const [error, setError] = useState<string | null>(null)
-  // SCRUM-797 RN5→RN7 — crear ES el único momento de "enviar a aprobación de Mark" de este flujo
+  // SCRUM-797 RN5→RN7 — crear ES el único momento de "enviar a aprobación de Gerencia" de este flujo
   // (a diferencia de Inventario General, acá no hay borrador previo), así que la advertencia y la
   // confirmación de reemplazo ocurren en el mismo 409.
   const [duplicates, setDuplicates] = useState<AdjustmentDuplicateWarning[] | null>(null)

@@ -12,7 +12,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * Corre contra dev.atlanticerp.ai. Serial a propósito: CrowdSec/ModSecurity dispara falsos timeouts con
  * logins concurrentes desde la misma IP.
  *
- * Fixtures: se seedean vía API real (page.request + bearer token de Yirena), no por tinker/SSH —
+ * Fixtures: se seedean vía API real (page.request + bearer token de Lider Compras), no por tinker/SSH —
  * dev.atlanticerp.ai es un entorno compartido con datos reales, no una BD local descartable.
  */
 test.describe.configure({ mode: 'serial' })
@@ -21,7 +21,7 @@ const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
 const LIDER_COMPRAS_EMAIL = 'lidercompras@test.com'
 const LIDER_COMPRAS_PASS  = 'lidercompras@test.com'
-// Nota: gerencia3@test.com (Mark, Gerencia — único aprobador real) NO se usa en esta
+// Nota: gerencia3@test.com (Gerencia, Gerencia — único aprobador real) NO se usa en esta
 // suite — su cuenta real en dev.atlanticerp.ai ya no tiene el password por defecto (mismo gap
 // documentado en el Pre-QA de SCRUM-211 del 2026-08-01), y no corresponde adivinarlo/forzarlo.
 // Ver notas en los tests de SCRUM-204/SCRUM-211 sobre cómo se cubrió el criterio sin su login.
@@ -36,7 +36,7 @@ async function login(page: Page, email: string, password: string) {
   // (visto en vivo 2026-08-07). No es un timeout de la app real, es mitigación de bot.
   await sleep(1200)
   // Bug real de esta suite (no del producto): un segundo login() en la MISMA `page` (ej. cambiar
-  // de Yirena a Mark dentro del mismo test) con un `accessToken` de la sesión anterior todavía en
+  // de Lider Compras a Gerencia dentro del mismo test) con un `accessToken` de la sesión anterior todavía en
   // localStorage hace que el guard de rutas redirija /login -> dashboard antes de que el form
   // llegue a renderizar — `input[type="email"]` nunca aparece y el test cuelga hasta el timeout.
   // Limpiar storage antes de cada login evita el falso cuelgue sin depender de un botón de logout.
@@ -215,7 +215,7 @@ test.describe('SCRUM-186/189 — Proveedores', () => {
     await page.waitForTimeout(800)
     await expect(page.getByRole('button', { name: /^editar$/i })).toBeVisible()
     // Persiste en el modal (form de solo-lectura) Y en la fila de la tabla de fondo — ambos a la
-    // vez, exactamente el criterio de Daniela ("se refleja tanto en el modal como en la tabla").
+    // vez, exactamente el criterio de Gerencia ("se refleja tanto en el modal como en la tabla").
     await expect(page.locator('#provider-detail-form').getByText('Contacto Real Guardado')).toBeVisible()
     await expect(page.getByRole('cell', { name: 'Contacto Real Guardado' })).toBeVisible()
     await page.screenshot({ path: 'test-results/scrum186-05-guardado-persiste-modal.png', fullPage: true })
@@ -295,7 +295,7 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     const orderZL = await createOrder(request, token, provZL.id, { modality: 'zona_libre' })
     expect(orderZL.status).toBe('pendiente_liquidar')
 
-    // Camino de ruptura — requiere aprobación de Mark (aéreo + Atlantic paga): SÍ debe
+    // Camino de ruptura — requiere aprobación de Gerencia (aéreo + Atlantic paga): SÍ debe
     // nacer en "Por aprobar", sin importar la modalidad.
     const provAereo = await createProvider(request, token, 'europa')
     const orderAereo = await createOrder(request, token, provAereo.id, {
@@ -325,8 +325,8 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     await page.screenshot({ path: 'test-results/scrum204-03-aereo-porAprobar.png', fullPage: true })
   })
 
-  test('orden que requiere aprobación de Mark queda bloqueada en "Por aprobar" (422 al intentar avanzar)', async ({ page, request }) => {
-    // Login de Mark con password real no disponible acá (cuenta de Gerencia real, sin password
+  test('orden que requiere aprobación de Gerencia queda bloqueada en "Por aprobar" (422 al intentar avanzar)', async ({ page, request }) => {
+    // Login de Gerencia con password real no disponible acá (cuenta de Gerencia real, sin password
     // por defecto — mismo gap ya documentado en el Pre-QA de SCRUM-211 del 2026-08-01: "no tengo
     // password válido de ninguna cuenta real de Gerencia"). El comportamiento de
     // `isBlockedByPrimaryApproval()`/`approve()` en sí es funcionalidad YA existente (no parte de
@@ -344,7 +344,7 @@ test.describe('SCRUM-204 — Ciclo de estados + etiqueta por modalidad', () => {
     const blockedAdvance = await apiPatch(request, token, `/compras/orders/${order.id}/advance`)
     expect(blockedAdvance.status()).toBe(422)
     const blockedBody = await blockedAdvance.json() as { message: string }
-    expect(blockedBody.message).toMatch(/aprobación de Mark/i)
+    expect(blockedBody.message).toMatch(/aprobación de Gerencia/i)
   })
 
   test('secuencia completa (orden sin aprobación requerida): "Pendiente/Por liquidar" ya NO se saltea entre "Por aprobar" y "Ordenado"', async ({ page, request }) => {
@@ -414,7 +414,7 @@ test.describe('SCRUM-208 — Recepción parcial', () => {
 
     // Ingreso PARCIAL: recibe solo 4 de 10, deja el remanente en "en_transito_local" (mismo estado
     // actual de la orden — escenario mínimo, sin depender del fix de "ordenado" para reproducir el
-    // hallazgo original de Daniela: banner + gate).
+    // hallazgo original de Gerencia: banner + gate).
     const partialRes = await apiPost(request, token, '/compras/goods-receipts', {
       purchase_order_id: order.id,
       lines: [{ catalog_product_id: line.catalog_product_id, quantity: 4, unit_cost: 10, warehouse_id: warehouseId }],
@@ -499,7 +499,7 @@ test.describe('SCRUM-208 — Recepción parcial', () => {
 // ─────────────────────────────────────────────────────────────────────────
 test.describe('SCRUM-211 — Confirmación del proveedor', () => {
   test('bloqueado mientras "Por aprobar": UI muestra mensaje, sin input, y API directa devuelve 422', async ({ page, request }) => {
-    // Nota: no se completa el approve() real de Mark en esta suite — su cuenta de Gerencia real
+    // Nota: no se completa el approve() real de Gerencia en esta suite — su cuenta de Gerencia real
     // en dev.atlanticerp.ai ya no tiene el password por defecto (mismo gap documentado en el Pre-QA de
     // SCRUM-211 del 2026-08-01) y no corresponde adivinarlo/forzarlo. El otro test de este bloque
     // ("habilitado...") cubre la mitad "fuera de Por aprobar" del gate con una orden que nace
@@ -535,7 +535,7 @@ test.describe('SCRUM-211 — Confirmación del proveedor', () => {
     const token = await tokenFor(page)
     const prov = await createProvider(request, token, 'europa')
     // Sin aereo/Atlantic -> nace directo en pendiente_liquidar, nunca pasa por "Por
-    // aprobar" — cubre la mitad "habilitado" del gate sin depender del login de Mark.
+    // aprobar" — cubre la mitad "habilitado" del gate sin depender del login de Gerencia.
     const order = await createOrder(request, token, prov.id, { modality: 'directo', shipping_type: 'maritimo' })
     expect(order.status).toBe('pendiente_liquidar')
 

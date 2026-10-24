@@ -23,7 +23,7 @@ interface Props {
  * mayor `id` (el más reciente): un pedido entregado tiene 2 — el generado sin firmar en Por
  * despachar y el firmado subido acá.
  *
- * "Imprimir" (rebote SCRUM-395, 2026-08-19 — Daniela: pie de página no fijo + 10 páginas en
+ * "Imprimir" (rebote SCRUM-395, 2026-08-19 — Gerencia: pie de página no fijo + 10 páginas en
  * blanco al imprimir) — corregido: ANTES este botón hacía `window.print()` sobre el HTML de este
  * modal (patrón "imprimir solo el modal" de `ConsolidatedPickingModal.tsx`/`PickingSheetModal.tsx`,
  * `body.printing-modal`+`.print-target` en `index.css`). Esa técnica oculta el resto del árbol con
@@ -161,7 +161,7 @@ export default function GuiaEntregaModal({ orderId, onClose }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {/* SCRUM-894 (rebote Daniela, 2026-09-13) — mismo criterio que
+                  {/* SCRUM-894 (rebote Gerencia, 2026-09-13) — mismo criterio que
                       `guia-entrega-pdf.blade.php`: la guía de ESTA tarjeta es de lo realmente a
                       entregar, nunca del pedido original completo. Antes este preview mostraba
                       TODOS los items sin filtrar y caía a `qty_requested` cuando `qty_delivered`

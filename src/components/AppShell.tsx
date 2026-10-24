@@ -24,7 +24,6 @@ function moduleLabel(pathname: string, t: (key: string) => string, tVd: (key: st
   if (pathname.startsWith('/ventas-diseno/')) {
     const screen = pathname.startsWith('/ventas-diseno/home')        ? tVd('nav.home')
       : pathname.startsWith('/ventas-diseno/quotes-list')            ? tVd('nav.quotesList')
-      : pathname.startsWith('/ventas-diseno/cotizaya')               ? tVd('nav.cotizaya')
       : pathname.startsWith('/ventas-diseno/pedidos')                ? tVd('nav.pedidos')
       : pathname.startsWith('/ventas-diseno/quotes')                 ? tVd('nav.quote')
       : pathname.startsWith('/ventas-diseno/reports')                ? tVd('nav.reports')

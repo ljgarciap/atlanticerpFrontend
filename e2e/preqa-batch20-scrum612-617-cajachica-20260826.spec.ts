@@ -87,7 +87,7 @@ test('REQ-535 — multi-línea de 2 solicitantes con foto real se registra y apa
   // Línea 1 → primer solicitante de la lista.
   await page.locator('input[type="date"]').nth(0).fill('2026-07-01')
   await selects.nth(0).selectOption({ index: 1 })
-  await page.locator('input[type="text"]').nth(0).fill('Farmacia Arrocha')
+  await page.locator('input[type="text"]').nth(0).fill('Farmacia Transporte')
   await page.locator('input[type="text"]').nth(1).fill('Botiquín oficina')
   await page.locator('input[type="number"]').nth(0).fill('32.00')
   await page.locator('input[type="number"]').nth(1).fill('2.24')
@@ -149,7 +149,7 @@ test('REQ-538 — generar reporte: desmarcar un solicitante completo, forma de p
   await page.screenshot({ path: 'e2e/screenshots/batch20-reporte-generado.png', fullPage: true })
 })
 
-test('REQ-539 — Felix NO ve el botón Aprobar en un reporte pendiente', async ({ page }) => {
+test('REQ-539 — Contabilidad NO ve el botón Aprobar en un reporte pendiente', async ({ page }) => {
   await login(page, FELIX)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByText(/reportes/i).first().click()
@@ -162,7 +162,7 @@ test('REQ-539 — Felix NO ve el botón Aprobar en un reporte pendiente', async 
   await page.screenshot({ path: 'e2e/screenshots/batch20-detalle-felix-sin-aprobar.png', fullPage: true })
 })
 
-test('REQ-540 — Mark aprueba con confirmación número+monto, no se puede reaprobar', async ({ page }) => {
+test('REQ-540 — Gerencia aprueba con confirmación número+monto, no se puede reaprobar', async ({ page }) => {
   await login(page, MARK, MARK_PASSWORD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByText(/reportes/i).first().click()
@@ -187,7 +187,7 @@ test('REQ-540 — Mark aprueba con confirmación número+monto, no se puede reap
   await page.screenshot({ path: 'e2e/screenshots/batch20-reporte-finalizado.png', fullPage: true })
 })
 
-test('Rol sin permiso — Mark intentando registrar gasto vía backend directo (403 real, no solo UI escondida)', async ({ page }) => {
+test('Rol sin permiso — Gerencia intentando registrar gasto vía backend directo (403 real, no solo UI escondida)', async ({ page }) => {
   await login(page, MARK, MARK_PASSWORD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.waitForTimeout(600)

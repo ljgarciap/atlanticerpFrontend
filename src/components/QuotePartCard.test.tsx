@@ -343,7 +343,7 @@ describe('QuotePartCard', () => {
     expect(await screen.findByText('Esta referencia ya existe')).toBeInTheDocument()
   })
 
-  // SCRUM-849.6 rebote (Daniela, 2026-09-10) — la foto ad-hoc de un ítem personalizado no daba
+  // SCRUM-849.6 rebote (Gerencia, 2026-09-10) — la foto ad-hoc de un ítem personalizado no daba
   // feedback visual de carga y no aparecía tras guardar. Root cause real: el <input type="file">
   // se desmontaba en onBlur (el navegador dispara blur al ABRIR el diálogo nativo, no al
   // cerrarlo), perdiendo el evento change posterior — invisible para fireEvent/setInputFiles
@@ -627,7 +627,7 @@ describe('QuotePartCard', () => {
 
   // SCRUM-725 (fix 2026-08-06) — effectiveUnitPrice() ignora unit_price por
   // completo bajo "premium" (usa costo/premium_divisor); el campo manual quedaba
-  // editable sin ningún efecto real, lo que confundió a un usuario real (Daniela)
+  // editable sin ningún efecto real, lo que confundió a un usuario real (Gerencia)
   // que pensó haber fijado un precio.
   describe('precio manual deshabilitado bajo Tarifa Premium (SCRUM-725)', () => {
     it('deshabilita el precio cuando el ítem tiene price_type_override=premium', () => {

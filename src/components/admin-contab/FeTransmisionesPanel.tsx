@@ -5,7 +5,7 @@ import { formatDateTimeShort } from '@/utils/dates'
 
 /**
  * SCRUM-987 — visor de transmisiones al PAC (payload enviado + respuesta recibida), solo para
- * Mark/superadmin (el caller lo monta únicamente si `puede_ver_fe_transmisiones`). Carga al
+ * Gerencia/superadmin (el caller lo monta únicamente si `puede_ver_fe_transmisiones`). Carga al
  * expandir, nunca al abrir el modal. Todo se muestra como texto (JSON.stringify dentro de <pre>),
  * nunca como HTML: la respuesta es texto de un tercero.
  *

@@ -132,7 +132,7 @@ test('4. Crear ticket SIN observaciones y SIN adjuntos — RN1 ambos opcionales,
   await expect(page.getByText('No se pudo crear el ticket')).toHaveCount(0)
 })
 
-test('5a. Permisos — Carlos (tecnico_servicios) NO tiene el botón "Nuevo ticket"', async ({ page }) => {
+test('5a. Permisos — Tecnico Servicios (tecnico_servicios) NO tiene el botón "Nuevo ticket"', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/05a-carlos-tabla.png`, fullPage: true })
@@ -140,7 +140,7 @@ test('5a. Permisos — Carlos (tecnico_servicios) NO tiene el botón "Nuevo tick
   await expect(page.getByRole('button', { name: /nuevo ticket/i })).toHaveCount(0)
 })
 
-test('5b. Permisos API directa — Carlos, POST /tickets/{id}/attachments → 403', async ({ page }) => {
+test('5b. Permisos API directa — Tecnico Servicios, POST /tickets/{id}/attachments → 403', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   const token = await page.evaluate(() => localStorage.getItem('accessToken') ?? '')
   expect(token).toBeTruthy()
@@ -157,7 +157,7 @@ test('5b. Permisos API directa — Carlos, POST /tickets/{id}/attachments → 40
     multipart: { file: { name: 'foto.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fake') } },
     failOnStatusCode: false,
   })
-  console.log('[Permisos] Carlos POST attachments status:', resp.status())
+  console.log('[Permisos] Tecnico Servicios POST attachments status:', resp.status())
   expect(resp.status()).toBe(403)
 })
 

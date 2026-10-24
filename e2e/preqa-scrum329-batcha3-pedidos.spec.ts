@@ -40,8 +40,8 @@ test('Pedidos — panel de carga por asistente (SCRUM-376)', async ({ page }) =>
   await page.waitForTimeout(1000)
   const panel = page.getByTestId('assistant-load-panel')
   await expect(panel).toBeVisible()
-  await expect(panel).toContainText('Mariano')
-  await expect(panel).toContainText('Osvaldo')
+  await expect(panel).toContainText('Asistente Bodega')
+  await expect(panel).toContainText('Asistente Bodega')
   await expect(panel).toContainText('50')
 })
 

@@ -3,7 +3,7 @@ import { IcoClose } from '@/components/icons'
 
 /**
  * SCRUM-819(b) — primer lightbox del proyecto (confirmado, no había ninguno). El pedido de
- * Daniela es solo "verla más grande", no pan/zoom real — un modal simple con la imagen a mayor
+ * Gerencia es solo "verla más grande", no pan/zoom real — un modal simple con la imagen a mayor
  * tamaño alcanza, sin traer una librería nueva.
  */
 interface Props {

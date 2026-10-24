@@ -33,12 +33,12 @@ async function login(page: Page) {
   await loginAs(page, SMOKE_EMAIL, SMOKE_PASSWORD)
 }
 
-test('login como Felix (lider_admin_contab, no-superadmin)', async ({ page }) => {
+test('login como Contabilidad (lider_admin_contab, no-superadmin)', async ({ page }) => {
   await login(page)
   await expect(page).not.toHaveURL(/login/)
 })
 
-test('Felix aterriza en Admin&Cont con nav completo (rol scopeado a un solo módulo)', async ({ page }) => {
+test('Contabilidad aterriza en Admin&Cont con nav completo (rol scopeado a un solo módulo)', async ({ page }) => {
   await login(page)
   await expect(page.getByRole('heading', { name: /bienvenido, felix/i })).toBeVisible({ timeout: 10000 })
   await expect(page.getByRole('button', { name: 'Facturación', exact: true })).toBeVisible()

@@ -143,9 +143,9 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     expect(await screen.findByText('$61,329.50')).toBeInTheDocument()
   })
 
-  it('"Aprobar cambio"/"Rechazar cambio" solo se muestran a Mark', async () => {
+  it('"Aprobar cambio"/"Rechazar cambio" solo se muestran a Gerencia', async () => {
     mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ primary_approver_user_id: 99 }))
-    mockedUseAuthStore.mockReturnValue(1 as never) // usuario logueado (id 1) NO es Mark (99)
+    mockedUseAuthStore.mockReturnValue(1 as never) // usuario logueado (id 1) NO es Gerencia (99)
 
     renderPanel(makeOrder({ pending_amount_change: 150, amount_change_requested_by: 1 }))
 
@@ -157,9 +157,9 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     expect(screen.queryByText('compras:orders.detail.payments.rejectAmountChange')).not.toBeInTheDocument()
   })
 
-  it('Mark sí ve "Aprobar cambio"/"Rechazar cambio" y puede rechazar', async () => {
+  it('Gerencia sí ve "Aprobar cambio"/"Rechazar cambio" y puede rechazar', async () => {
     mockedComprasApi.settings.get.mockResolvedValue(makeSettings({ primary_approver_user_id: 99 }))
-    mockedUseAuthStore.mockReturnValue(99 as never) // usuario logueado ES Mark
+    mockedUseAuthStore.mockReturnValue(99 as never) // usuario logueado ES Gerencia
     mockedComprasApi.orders.rejectAmountChange.mockResolvedValue({ total_amount: 100 })
 
     renderPanel(makeOrder({ pending_amount_change: 150, amount_change_requested_by: 1 }))

@@ -61,7 +61,7 @@ beforeEach(() => {
 })
 
 // REQ-285 RN2 — la sección es exclusiva de Gerencia y del propio técnico con plan de bonificación.
-// El gate ya se rompió una vez (Pre-QA 2026-08-12: el frontend resolvía "quién es Carlos" por
+// El gate ya se rompió una vez (Pre-QA 2026-08-12: el frontend resolvía "quién es Tecnico Servicios" por
 // `nombre === 'Tecnico Servicios Test'`, así que renombrarlo en Técnicos Internos le ocultaba su propia
 // comisión aunque el backend lo siguiera autorizando por `has_bonus_plan`) — por eso vive acá como
 // test permanente, no como verificación manual.
@@ -76,7 +76,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
 
   it('el técnico con plan de bonificación ve su propia sección aunque le hayan cambiado el nombre', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([
-      technician({ nombre: 'Carlos A. Vergara' }),
+      technician({ nombre: 'Tecnico Servicios A. Tecnico Servicios' }),
       technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
     ])
     setUser('tecnico_servicios', CARLOS_USER_ID)
@@ -94,7 +94,7 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
     expect(mockedApi.reportes.comisionCarlosVergara).not.toHaveBeenCalled()
   })
 
-  it('lider_servicios (Aaron) no ve la sección NI dispara la llamada de red', async () => {
+  it('lider_servicios (Lider Servicios) no ve la sección NI dispara la llamada de red', async () => {
     setUser('lider_servicios', 17)
     renderSection()
 

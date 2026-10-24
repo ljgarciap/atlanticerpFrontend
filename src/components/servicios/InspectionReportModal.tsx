@@ -30,7 +30,7 @@ interface Props {
   ticketProyecto:       string | null
   ticketDireccion:      string | null
   canEdit:    boolean
-  /** REQ-244 RN "Descargar plantilla en blanco" — más angosto que `canEdit`: Aaron/Líder de
+  /** REQ-244 RN "Descargar plantilla en blanco" — más angosto que `canEdit`: Lider Servicios/Líder de
    *  Servicios o técnico interno (route `role:superadmin,lider_servicios,tecnico_servicios` en
    *  `routes/servicios.php`) — a propósito NO incluye `garantias_servicios`, que sí puede editar
    *  el informe (`canEditInspectionReport`) pero no descargar la plantilla en blanco. Pre-QA

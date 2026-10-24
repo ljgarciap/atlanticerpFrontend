@@ -26,7 +26,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     stage: 'picking_pendiente',
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
-    vendedor: 'Mark',
+    vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
     picker: 'Ayudante General Bodega Test',
     repartidor: null,

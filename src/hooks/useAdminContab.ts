@@ -33,7 +33,7 @@ export function useFiscalSettings() {
   return useQuery({
     queryKey: FISCAL_SETTINGS_KEY,
     queryFn:  () => adminContabApi.fiscalSettings.get(),
-    // 403 (pantalla exclusiva de Mark) no es un error transitorio — reintentar no lo resuelve.
+    // 403 (pantalla exclusiva de Gerencia) no es un error transitorio — reintentar no lo resuelve.
     retry: false,
   })
 }
@@ -881,7 +881,7 @@ export function useNotaCreditoDevolucionSignedDocumentUrl() {
   })
 }
 
-// Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Mark, comprobante, documento formal,
+// Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Gerencia, comprobante, documento formal,
 // factura relacionada. Ver ADR-SCRUM571-574.
 
 export function useDecideNotaCredito() {
@@ -1122,7 +1122,7 @@ export function useCashPositionHeader() {
   })
 }
 
-// `enabled` — Yaneth (asistente_administrativa) no tiene acceso a REQ-521 (ver ADR, reconciliación
+// `enabled` — Asistente Administrativa (asistente_administrativa) no tiene acceso a REQ-521 (ver ADR, reconciliación
 // punto 8); ArqueoCajaPage nunca la deja seleccionar Proyectado, así que este hook nunca dispara
 // para ella, evitando un 403 innecesario.
 export function useCashPositionProjected(windowDays: CashPositionWindowDays, enabled = true) {
@@ -1411,7 +1411,7 @@ export function useRejectPettyCashReport() {
   })
 }
 
-// REQ-544 — Felix/Yaneth, no Mark. El detalle actualizado viene completo, setQueryData es seguro.
+// REQ-544 — Contabilidad/Yaneth, no Gerencia. El detalle actualizado viene completo, setQueryData es seguro.
 export function useReopenPettyCashExpense() {
   const qc = useQueryClient()
   return useMutation({
@@ -1425,7 +1425,7 @@ export function useReopenPettyCashExpense() {
   })
 }
 
-// Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. Comisión Felix y Cartera (RN4 REQ-567
+// Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. Comisión Contabilidad y Cartera (RN4 REQ-567
 // / RN3 REQ-568) nunca dependen del selector de período — sus query keys NO llevan `periodo`, así
 // que cambiar el selector jamás las re-dispara (mismo criterio que `CASH_POSITION_HEADER_KEY` vs.
 // `cashPositionProjectedKey`).
@@ -1465,7 +1465,7 @@ export function useReportsFlujoCaja(periodo: ReportsPeriodo) {
 
 // Batch 23 (SCRUM-648/649, REQ-571/572). Comisiones SÍ depende del período (query key con
 // `periodo`, mismo criterio que Ventas/Arqueo de Caja); Notas de Crédito nunca depende de él
-// (mismo criterio que Felix/Cartera arriba).
+// (mismo criterio que Contabilidad/Cartera arriba).
 const reportsComisionesKey = (periodo: ReportsPeriodo) => ['admin-contab', 'reports', 'comisiones', periodo]
 const REPORTS_NOTAS_CREDITO_KEY = ['admin-contab', 'reports', 'notas-credito']
 
@@ -1550,7 +1550,7 @@ export function useDownloadVentasMedioPagoExcel() {
 }
 
 // Batch Home (SCRUM-503→512, REQ-426→435) — "Inicio". Grupo 1: "Resumen del mes" (REQ-427→431).
-// Sin parámetros — siempre mes en curso a la fecha, mismo criterio que Comisión Felix/Cartera.
+// Sin parámetros — siempre mes en curso a la fecha, mismo criterio que Comisión Contabilidad/Cartera.
 const HOME_RESUMEN_MES_KEY = ['admin-contab', 'home', 'resumen-mes']
 
 export function useHomeResumenMes() {

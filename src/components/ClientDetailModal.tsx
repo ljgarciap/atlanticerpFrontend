@@ -32,7 +32,7 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const [contactError, setContactError] = useState<string | null>(null)
   const [showIcgHistory, setShowIcgHistory] = useState(false)
   const [showEditTaxData, setShowEditTaxData] = useState(false)
-  // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Mark/Felix).
+  // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Gerencia/Felix).
   // SCRUM-1182 — los hooks se llaman SIEMPRE, todos, y se combinan después (`a || b` no ejecuta el segundo hook y cambia el número de hooks entre renders).
   const hasVentasDisenoEdit = usePermission('ventas_diseno.edit')
   const hasEditClientTaxData = usePermission('ventas_diseno.edit.client_tax_data')
@@ -62,7 +62,7 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
       setDraft({ name: '', role: 'client', phone: '', email: '' })
       qc.invalidateQueries({ queryKey: ['ventas-diseno-client'] })
     },
-    // SCRUM-96 (hallazgo Marly): sin esto, un 422 del backend (ej. email con
+    // SCRUM-96 (hallazgo Gerencia): sin esto, un 422 del backend (ej. email con
     // formato inválido) se perdía en silencio -- el formulario no mostraba
     // nada y el contacto nunca quedaba creado.
     onError: (err: unknown) => setContactError(contactErrorMessage(err)),

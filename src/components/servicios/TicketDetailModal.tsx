@@ -21,8 +21,8 @@ import ServiciosSearchPickerModal from './ServiciosSearchPickerModal'
 import { useToastStore } from '@/store/toastStore'
 import { formatDateTimeShort, formatDateFromTimestamp, formatTimeShort } from '@/utils/dates'
 
-// REQ-238 RN5 — Aaron/Líder de Servicios (superadmin incluido) o el técnico interno ASIGNADO a
-// este ticket puntual — distinto de `canEdit` (edición global del ticket, solo Aaron/superadmin),
+// REQ-238 RN5 — Lider Servicios/Líder de Servicios (superadmin incluido) o el técnico interno ASIGNADO a
+// este ticket puntual — distinto de `canEdit` (edición global del ticket, solo Lider Servicios/superadmin),
 // por eso vive acá y no en TicketsPage. Gerencia y el resto quedan solo con lectura, igual que
 // confirma la Matriz de Permisos por Rol del Excel para "Generar/editar Informe de Inspección".
 export function canEditInspectionReport(role: string | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
@@ -128,7 +128,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
   const [productPickerOpen, setProductPickerOpen] = useState(false)
   const [attachmentError, setAttachmentError] = useState<string | null>(null)
 
-  // SCRUM-781 (rebote Daniela 2026-08-20) — productos/adjuntos en modo edición eran la ÚNICA
+  // SCRUM-781 (rebote Gerencia 2026-08-20) — productos/adjuntos en modo edición eran la ÚNICA
   // parte del formulario que aplicaba de inmediato (ver commit histórico que documentaba esto como
   // decisión deliberada) — "Cancelar" descartaba los 4 campos batcheados pero un producto ya
   // borrado/agregado quedaba persistido igual. Ahora TODO en modo edición es un borrador local:
@@ -183,7 +183,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
     }
   }
 
-  // SCRUM-781 (rebote Daniela 2026-08-20) — un único "Guardar" aplica el diff completo (los 4
+  // SCRUM-781 (rebote Gerencia 2026-08-20) — un único "Guardar" aplica el diff completo (los 4
   // campos batcheados + productos agregados/editados/quitados + adjuntos nuevos) en secuencia;
   // "Cancelar" nunca llega a llamar ninguno de estos endpoints. Los adjuntos ya existentes siguen
   // sin poder eliminarse (RN3, sin cambios).

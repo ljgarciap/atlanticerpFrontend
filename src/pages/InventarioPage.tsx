@@ -660,7 +660,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
 
         {/* SCRUM-237/238 — sección "Datos generales": 9 campos de solo lectura, sin botón de editar
             propio (se alimentan de otras pantallas/procesos, no se editan acá). Visible en AMBOS
-            modos desde 2026-08-14 (decisión de Luis, rebote de Daniela sobre el mockup de
+            modos desde 2026-08-14 (decisión de Luis, rebote de Gerencia sobre el mockup de
             SCRUM-238) — Proveedor/Por ingresar/En camino no son información financiera; costo/
             margen/precio de compra siguen exclusivos de la sección Precios más abajo. */}
         <h3 className="text-xs font-bold uppercase text-slate-400 mb-2">{t('compras:inventory.detail.generalDataSection')}</h3>

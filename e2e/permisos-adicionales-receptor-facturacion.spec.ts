@@ -96,7 +96,7 @@ test('un superadmin ve los permisos de facturación en "Permisos adicionales", l
 })
 
 test('guardar sin tocar conserva los permisos que el usuario ya tenía, incluidos los que no figuran en el catálogo', async ({ page }) => {
-  const previos = ['lumo.view', 'ventas_diseno.edit.client_tax_data', P_FISCAL]
+  const previos = ['ventas_diseno.edit.client_tax_data', P_FISCAL]
   const puts = await stubUsuarios(page, previos)
   await login(page, SUPERADMIN, SUPERADMIN_PASSWORD)
   await abrirEdicion(page)

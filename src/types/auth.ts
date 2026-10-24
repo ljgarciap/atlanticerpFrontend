@@ -14,7 +14,7 @@ export interface UserFlags {
   approve_large_amounts: boolean
   manage_users:          boolean
   /**
-   * SCRUM-1157 — identidad (no permiso): es el aprobador Mark. «Datos de la Empresa» y «Configuración Fiscal» responden 403 a cualquier otra
+   * SCRUM-1157 — identidad (no permiso): es el aprobador Gerencia. «Datos de la Empresa» y «Configuración Fiscal» responden 403 a cualquier otra
    * persona (superadmin aparte); el menú las oculta cuando viene en `false`. Opcional: una sesión abierta antes de este cambio no lo trae.
    */
   mark_approver?:        boolean

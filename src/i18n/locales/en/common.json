@@ -43,9 +43,6 @@
     "actividad": "Activity",
     "logs": "Logs",
     "settings": "Settings",
-    "lumo": "LUMO",
-    "soporte": "Support",
-    "manuales": "User manuals",
     "configuracionGlobal": "Global settings"
   },
   "globalSettings": {
@@ -201,7 +198,7 @@
   "notifications": {
     "title": "Notifications",
     "empty": "You have no notifications.",
-    "markAllRead": "Mark all as read",
+    "markAllRead": "Gerencia all as read",
     "viewLink": "View"
   },
   "comingSoon": "{{module}} module coming soon.",

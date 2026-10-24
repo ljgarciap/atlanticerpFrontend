@@ -28,8 +28,8 @@ function periodLabel(period: { year: number; month: number }, locale: string): s
 }
 
 // Batch 10 (REQ-258 RN9) — tarjeta+detalle de comisión, SOLO LECTURA. Distinto de
-// InternalTechnicianCommissionModal (captura de Aaron/Gerencia) — RN8: este modal lo abre el
-// propio técnico o Gerencia, nunca Aaron. El backend re-valida esta misma restricción
+// InternalTechnicianCommissionModal (captura de Lider Servicios/Gerencia) — RN8: este modal lo abre el
+// propio técnico o Gerencia, nunca Lider Servicios. El backend re-valida esta misma restricción
 // (InternalTechnicianController::commission()) — el gate del lado del botón (ver
 // InternalTechnicianCard) es solo para no ofrecer una acción que el backend va a rechazar.
 export default function InternalTechnicianCommissionResultModal({ technician, onClose }: Props) {

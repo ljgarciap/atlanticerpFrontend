@@ -275,7 +275,7 @@ export interface AdjustmentRequestLine {
 export interface AdjustmentRequestListResponse {
   data: AdjustmentRequestLine[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
-  // SCRUM-429 — si el usuario actual es "Mark" (primary_approver_user_id) para Aprobar/Rechazar.
+  // SCRUM-429 — si el usuario actual es "Gerencia" (primary_approver_user_id) para Aprobar/Rechazar.
   // El frontend no puede derivarlo solo (es una persona configurable, no un rol en el JWT).
   can_approve: boolean
 }
@@ -1208,7 +1208,7 @@ export interface ResolveInventoryReviewResponse {
 // ── Batch B3 (SCRUM-433→445, REQ-363→375) — "Zona Libre de Colón" ────────────────────────────
 //
 // Bodega genera órdenes de compra directas al proveedor fijo "Zona Libre de Colón"; Compras
-// (Yirena) las aprueba o rechaza por fuera de este alcance
+// (Lider Compras) las aprueba o rechaza por fuera de este alcance
 // (`POST /compras/zona-libre/requests/{id}/approve|reject`, ver
 // `atlanticerp-backend/docs/adr/ADR-SCRUM433-445-zona-libre-colon.md`). Contrato verificado contra el
 // backend ya implementado y pusheado a `dev` (commits e2e1b83/ea82918/1f72ce4, 1251 tests verdes)
@@ -1299,9 +1299,9 @@ export interface ZonaLibreProductWarehouseBreakdownResponse {
 }
 
 // ── Bloque B5 (SCRUM-460→466, REQ-390→396) — "Inventario general" (conteos físicos completos por
-// bodega, con doble aprobación: Mark aprueba el conteo y luego Bodega confirma "Realizar ajuste"
+// bodega, con doble aprobación: Gerencia aprueba el conteo y luego Bodega confirma "Realizar ajuste"
 // antes de que se aplique al inventario real — excepción intencional al patrón de Ajustes/
-// Reubicación, donde la aprobación de Mark ya aplica el cambio sola, ver REQ-396 RN1). Contrato
+// Reubicación, donde la aprobación de Gerencia ya aplica el cambio sola, ver REQ-396 RN1). Contrato
 // verificado contra `GeneralCountController` real, ya pusheado a `dev` (atlanticerp-backend commits
 // ae1d6c0/ff3b345/a8d1b5d, 21/21 tests) — no especulativo.
 
@@ -1310,7 +1310,7 @@ export interface ZonaLibreProductWarehouseBreakdownResponse {
 export type GeneralCountEstado = 'pendiente_evaluacion' | 'evaluado' | 'pendiente_aprobacion' | 'aprobada' | 'rechazada' | 'reemplazada'
 
 /** Chips de la bandeja (RN4 de REQ-395): solo 4, "Pendientes" filtra específicamente
- * `pendiente_aprobacion` (conteo ya evaluado y enviado a Mark) — `pendiente_evaluacion`/`evaluado`
+ * `pendiente_aprobacion` (conteo ya evaluado y enviado a Gerencia) — `pendiente_evaluacion`/`evaluado`
  * son estados transitorios del panel "Nuevo conteo general" mientras Bodega todavía lo está
  * armando, no filas relevantes de la bandeja/historial. */
 export type GeneralCountChip = 'todas' | 'pendiente_aprobacion' | 'aprobada' | 'rechazada'
@@ -1327,14 +1327,14 @@ export interface GeneralCountRow {
    * vez del número real que pide el mockup (ver `docs/pre-qa/bloque-b5-inventario-general-2026-07-25.md`). */
   diferencias_encontradas: number
   fecha:            string
-  /** SCRUM-797 (RN8, "Ver detalle") — momento en que `submit()` pidió la aprobación de Mark,
+  /** SCRUM-797 (RN8, "Ver detalle") — momento en que `submit()` pidió la aprobación de Gerencia,
    * distinto de `fecha` (creación del borrador). `null` mientras el conteo sigue en borrador. */
   fecha_solicitud_aprobacion: string | null
   motivo_rechazo:   string | null
   resuelto_por:     string | null
   resuelto_at:      string | null
   /** `POST .../apply` (REQ-396) — `null` hasta que Bodega confirma "Realizar ajuste" tras la
-   * aprobación de Mark. Fuente de verdad de si el botón debe verse deshabilitado como
+   * aprobación de Gerencia. Fuente de verdad de si el botón debe verse deshabilitado como
    * "Ajuste aplicado". */
   aplicado_at:      string | null
 }
@@ -1342,7 +1342,7 @@ export interface GeneralCountRow {
 export interface GeneralCountListResponse {
   data: GeneralCountRow[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
-  // SCRUM-463 — si el usuario actual es "Mark" (primary_approver_user_id) para Aprobar/Rechazar.
+  // SCRUM-463 — si el usuario actual es "Gerencia" (primary_approver_user_id) para Aprobar/Rechazar.
   // El frontend no puede derivarlo solo (es una persona configurable, no un rol en el JWT).
   can_approve: boolean
 }
@@ -1540,7 +1540,7 @@ export interface ConfirmReturnReceptionPayload {
 }
 
 /** `POST /bodega/returns/{id}/reject` (REQ-411 RN2) — el rechazo NO requiere el permiso de
- * aprobación de Mark, es exclusivo de Bodega (`bodega.write`), a diferencia de
+ * aprobación de Gerencia, es exclusivo de Bodega (`bodega.write`), a diferencia de
  * `relocations.reject`/`generalCounts.reject`. */
 export interface RejectCustomerReturnPayload {
   rejection_reason: string

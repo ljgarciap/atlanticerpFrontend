@@ -10,11 +10,11 @@ import { test, expect, Page, Locator } from '@playwright/test'
  *   - INS-2026-0005 — Instalación subcontratada, informe No aplica (gate abierto), sin técnico interno,
  *     quote_status corregido a PENDING (no NOT_APPLICABLE) tras revisar el primer screenshot.
  *   - GAR-2026-0005 — Garantía, informe pendiente (gate debe bloquear).
- *   - Técnico externo activo #1 "Luis Vargas" ($25/día), inactivo #2 "Pedro Inactivo".
+ *   - Técnico externo activo #1 "Luis Vargas" ($25/día), inactivo #2 "Tecnico Servicios Inactivo".
  */
 
-const LIDER_SERVICIOS  = 'liderservicios@test.com'   // Aaron — lider_servicios, tiene view_cost_breakdown
-const TECNICO_ASIGNADO = 'tecnicoservicios@test.com'      // Carlos — tecnico_servicios, asignado a RET-2026-0004
+const LIDER_SERVICIOS  = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, tiene view_cost_breakdown
+const TECNICO_ASIGNADO = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico_servicios, asignado a RET-2026-0004
 const TECNICO_AJENO    = 'tecnicoservicios2@test.com'       // Tecnico Servicios Test 2 — tecnico_servicios, NO asignado a ningún ticket de este batch
 const GERENCIA_SIN_PERM = 'gerencia@test.com'    // Management, NO tiene servicios.quotes.view_cost_breakdown
 
@@ -135,7 +135,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
       await page.waitForTimeout(600)
       await page.screenshot({ path: 'test-results/b11-295-05-item-agregado.png', fullPage: true })
 
-      // Escenario 1 del ticket (REQ-232): 25 * 1.30 * 3 = 97.50, visible porque Aaron tiene view_cost_breakdown
+      // Escenario 1 del ticket (REQ-232): 25 * 1.30 * 3 = 97.50, visible porque Lider Servicios tiene view_cost_breakdown
       // (aparece 2 veces: precio de línea y subtotal de la cotización — ambos correctos)
       await expect(quote.getByText(/97\.5/).first()).toBeVisible()
       expect(await quote.getByText(/97\.5/).count()).toBeGreaterThanOrEqual(1)
@@ -194,7 +194,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
     await page.screenshot({ path: 'test-results/b11-296-01-totales-con-itbms.png', fullPage: true })
   })
 
-  test('SCRUM-297 (REQ-234) — ciclo de vida: guardar no promueve estado, enviar sí, decidir exclusivo de Aaron', async ({ page }) => {
+  test('SCRUM-297 (REQ-234) — ciclo de vida: guardar no promueve estado, enviar sí, decidir exclusivo de Lider Servicios', async ({ page }) => {
     await login(page, LIDER_SERVICIOS)
     const detail = await openTicketByNumero(page, 'RET-2026-0004')
     const quote = await openQuoteModal(detail, page)
@@ -329,8 +329,8 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
   })
 
   test('Pre-QA adversarial — Escenario 3/4 REQ-234: técnico interno no puede decidir + rechazo habilita regenerar', async ({ page }) => {
-    // Ticket dedicado GAR-2026-0006, técnico asignado = Carlos.
-    await test.step('Setup — Aaron genera, agrega ítem y envía la cotización', async () => {
+    // Ticket dedicado GAR-2026-0006, técnico asignado = Tecnico Servicios.
+    await test.step('Setup — Lider Servicios genera, agrega ítem y envía la cotización', async () => {
       await login(page, LIDER_SERVICIOS)
       const detail = await openTicketByNumero(page, 'GAR-2026-0006')
       const quote = await openQuoteModal(detail, page)
@@ -361,7 +361,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
       await expect(quote.getByRole('button', { name: /^aprobar$/i })).toHaveCount(0)
       await expect(quote.getByRole('button', { name: /^rechazar$/i })).toHaveCount(0)
 
-      // Defensa en profundidad — intento directo por API con el token de Carlos.
+      // Defensa en profundidad — intento directo por API con el token de Tecnico Servicios.
       const token = await page.evaluate(() => localStorage.getItem('accessToken'))
       const res = await page.request.patch('http://localhost:8094/api/servicios/tickets/19/quote/decidir', {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -371,7 +371,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
       expect([401, 403]).toContain(res.status())
     })
 
-    await test.step('Escenario 4 — Aaron rechaza y "Generar nueva cotización" aparece', async () => {
+    await test.step('Escenario 4 — Lider Servicios rechaza y "Generar nueva cotización" aparece', async () => {
       await login(page, LIDER_SERVICIOS)
       const detail = await openTicketByNumero(page, 'GAR-2026-0006')
       const quote = await openQuoteModal(detail, page)

@@ -10,7 +10,7 @@ import InsumoRequestModal from './InsumoRequestModal'
 import type { Insumo } from '@/types/servicios'
 import { IcoPlus } from '@/components/icons'
 
-// REQ-273/274/275 — exclusivo de Aaron/Líder de Servicios y superadmin, mismo criterio que
+// REQ-273/274/275 — exclusivo de Lider Servicios/Líder de Servicios y superadmin, mismo criterio que
 // canManageTools en ToolsPanel.tsx (no se reexporta desde ahí a propósito: son 2 sub-vistas que
 // Backend Dev puede evolucionar por separado, ver docblock de InsumosPanel/ToolsPanel).
 function canManageInsumos(role: string | undefined): boolean {

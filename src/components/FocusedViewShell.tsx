@@ -6,7 +6,7 @@ import ImpersonationBanner from './ImpersonationBanner'
 // RN1/RN2 piden que NO lleven el menú de navegación general de las 5 pestañas, a diferencia de
 // toda otra ruta de la app, que hasta ahora vivía sin excepción dentro de AppShell (ver docblock
 // viejo en App.tsx). Reemplaza ese criterio para estas 2 rutas puntuales — decisión del Arquitecto
-// 2026-08-20 tras el rebote de QA (Marly) sobre el Kardex mostrando el sidebar/topbar completo.
+// 2026-08-20 tras el rebote de QA (Gerencia) sobre el Kardex mostrando el sidebar/topbar completo.
 // Sin Sidebar ni TopBar acá — cada página bajo este shell es responsable de su propio control de
 // cerrar/volver (ToolKardexPage — window.close(), se abre en pestaña nueva; InspectionReportMobilePage
 // — navigate(-1), ya lo tenía desde su creación), para no duplicar el control en 2 lugares.

@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test'
 
-// Pre-QA — SCRUM-818 (rebote 2026-09-03, hallazgos de Daniela sobre Comparación de Referencias).
+// Pre-QA — SCRUM-818 (rebote 2026-09-03, hallazgos de Gerencia sobre Comparación de Referencias).
 // Corrido en LOCAL contra http://localhost:8090 (nginx + build fresco), con las cuentas REALES
-// de Mark (Gerencia) y Yirena (Líder de Compras) — no cuentas *.test — para reproducir la cuenta
+// de Gerencia (Gerencia) y Lider Compras (Líder de Compras) — no cuentas *.test — para reproducir la cuenta
 // real reportada en el rebote. Datos sembrados vía tinker antes de esta corrida: RoleModuleVisibility
 // real para management/lider_compras (v2, sin tocar extra_permissions v1), 1 producto original
 // (PQ818-ORIG, id 719) + 1 sustituto, 1 proyecto en etapa Cotización con folio PQ818-COT-1 (con
@@ -26,7 +26,7 @@ async function login(page: Page, email: string, password: string): Promise<void>
   expect(page.url()).not.toContain('/login')
 }
 
-test('Hallazgo 1 — Mark (Gerencia, acceso solo vía rol) VE la solicitud Pendiente Gerencia y puede aprobarla', async ({ page }) => {
+test('Hallazgo 1 — Gerencia (Gerencia, acceso solo vía rol) VE la solicitud Pendiente Gerencia y puede aprobarla', async ({ page }) => {
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto(`${BASE}/compras/sustitutos`)
   await page.waitForTimeout(600)
@@ -38,7 +38,7 @@ test('Hallazgo 1 — Mark (Gerencia, acceso solo vía rol) VE la solicitud Pendi
   await expect(page.getByRole('button', { name: /aprobar/i }).first()).toBeVisible()
 })
 
-test('Hallazgo 2 — Mark encuentra el proyecto al buscar sustituto (picker "Proyecto de venta" filtrado por producto)', async ({ page }) => {
+test('Hallazgo 2 — Gerencia encuentra el proyecto al buscar sustituto (picker "Proyecto de venta" filtrado por producto)', async ({ page }) => {
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto(`${BASE}/compras/sustitutos`)
   await page.waitForTimeout(600)
@@ -61,7 +61,7 @@ test('Hallazgo 2 — Mark encuentra el proyecto al buscar sustituto (picker "Pro
   await page.getByRole('button', { name: 'Selecciona un proyecto de venta…' }).click()
   await page.waitForTimeout(500)
 
-  // Antes del fix (v1 sin gerencia.view): searchApprovedProjects devolvía 0 proyectos para Mark
+  // Antes del fix (v1 sin gerencia.view): searchApprovedProjects devolvía 0 proyectos para Gerencia
   // pese a que el proyecto SÍ contiene el producto — el picker mostraba el mensaje de "no existe
   // ningún proyecto" en vez de la fila real.
   await expect(page.getByText('No existe ningún proyecto que contenga este producto')).not.toBeVisible()
@@ -75,12 +75,12 @@ test('Hallazgo 2 — Mark encuentra el proyecto al buscar sustituto (picker "Pro
   await expect(modal.getByRole('button', { name: 'Generar solicitud' })).toBeEnabled()
 })
 
-test('Hallazgo 3 — Yirena (Compras, acceso solo vía rol) VE la lista y el botón "Generar orden" en la Rechazada', async ({ page }) => {
+test('Hallazgo 3 — Lider Compras (Compras, acceso solo vía rol) VE la lista y el botón "Generar orden" en la Rechazada', async ({ page }) => {
   await login(page, 'lidercompras@test.com', 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/sustitutos`)
   await page.waitForTimeout(600)
 
-  // Antes del fix: lista vacía para Yirena (mismo síntoma que Mark). Yirena tiene acceso completo
+  // Antes del fix: lista vacía para Lider Compras (mismo síntoma que Gerencia). Lider Compras tiene acceso completo
   // (lider_compras), por lo que ve ambas Rechazadas sembradas (id 28 y 29) — solo importa que
   // vea al menos un botón "Generar orden" (can_generate_order=true para su rol).
   await expect(page.getByText('PreQA818 Lampara Original').first()).toBeVisible()

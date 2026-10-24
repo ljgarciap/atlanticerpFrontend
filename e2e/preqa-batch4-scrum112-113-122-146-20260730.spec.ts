@@ -324,7 +324,7 @@ test.describe('SCRUM-122 — Arquitecto: buscar y crear (mini-form Teléfono/Cor
 
 // ============================= SCRUM-146 =============================
 test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, complementa tinker)', () => {
-  test('1. Reportes > Configuración muestra los 9 vendedores con Meta real + Annie sin Meta', async ({ page }) => {
+  test('1. Reportes > Configuración muestra los 9 vendedores con Meta real + Vendedor Disenador sin Meta', async ({ page }) => {
     await login(page, MGMT_EMAIL, MGMT_PASS)
     await gotoReports(page)
     await page.getByRole('main').getByRole('button', { name: 'Configuración' }).click()
@@ -346,7 +346,7 @@ test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, compl
     for (const name of roster) {
       await expect(page.getByText(name)).toBeVisible()
     }
-    // Annie sin meta -> no debe romper el render (fila vacía, sin error de consola)
+    // Vendedor Disenador sin meta -> no debe romper el render (fila vacía, sin error de consola)
     const consoleErrors: string[] = []
     page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()) })
     await page.reload()

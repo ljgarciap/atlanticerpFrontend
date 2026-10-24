@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Corre contra dev.atlanticerp.ai (ya deployado, CI/CD verde).
  *
  * Cuentas reales (password = email):
- *  - liderservicios@test.com (lider_servicios) — Aaron, único que edita/agenda.
+ *  - liderservicios@test.com (lider_servicios) — Lider Servicios, único que edita/agenda.
  *  - tecnicoservicios@test.com   (tecnico_servicios) — solo lectura, sin Editar/Agendar.
  *  - vendedordisenador@test.com   (vendedor_disenador) — solo lectura, sin Editar/Agendar.
  */
@@ -33,7 +33,7 @@ async function getToken(page: Page): Promise<string> {
   return page.evaluate(() => localStorage.getItem('accessToken') ?? '')
 }
 
-test('1. REQ-222 — 4 tarjetas de estadísticas con valores reales (Aaron)', async ({ page }) => {
+test('1. REQ-222 — 4 tarjetas de estadísticas con valores reales (Lider Servicios)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/01-stat-cards.png`, fullPage: true })
@@ -124,7 +124,7 @@ test('2b. RE-CHECK 2026-08-03(2) — "Horario de trabajo/visita" y teléfono de 
   expect(contactoText).not.toBe('—')
 })
 
-test('3. REQ-225 — editar Subtipo persiste tras reabrir el modal (Aaron)', async ({ page }) => {
+test('3. REQ-225 — editar Subtipo persiste tras reabrir el modal (Lider Servicios)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
@@ -188,7 +188,7 @@ test('4. CASO CRÍTICO RN5 — ticket no-Garantía con técnico del pool general
     const row = rows.nth(i)
     const tipoCell = (await row.locator('td').nth(2).innerText()).trim()
     const tecnicoCell = (await row.locator('td').nth(4).innerText()).trim()
-    if (tipoCell !== 'Garantía' && tecnicoCell !== 'Sin asignar' && tecnicoCell !== '' && !tecnicoCell.includes('Miguel')) {
+    if (tipoCell !== 'Garantía' && tecnicoCell !== 'Sin asignar' && tecnicoCell !== '' && !tecnicoCell.includes('Garantias Servicios')) {
       targetRow = row
       numero = await row.locator('td').first().innerText()
       console.log('[RN5] candidato encontrado:', numero, '| tipo:', tipoCell, '| técnico:', tecnicoCell)
@@ -217,7 +217,7 @@ test('4. CASO CRÍTICO RN5 — ticket no-Garantía con técnico del pool general
   await page.screenshot({ path: `${DL_DIR}/04d-tras-guardar.png`, fullPage: true })
 
   // Aviso visible (toast) — aserción real, no solo log, ya que el candidato ahora está
-  // garantizado a ser del pool general (nunca Miguel), así que el backend SIEMPRE debe desasignar.
+  // garantizado a ser del pool general (nunca Garantias Servicios), así que el backend SIEMPRE debe desasignar.
   const warning = page.getByText(/no atiende este nuevo tipo de servicio/i)
   await expect(warning).toBeVisible({ timeout: 5000 })
 
@@ -348,12 +348,12 @@ test('7. REQ-226 RN2 — filtro de especialidad: Agendar en ticket de Garantía 
 
   expect(realOptions.length).toBeGreaterThan(0)
   for (const opt of realOptions) {
-    expect(opt).toContain('Miguel')
+    expect(opt).toContain('Garantias Servicios')
   }
-  expect(realOptions.some(o => o.includes('Carlos'))).toBeFalsy()
+  expect(realOptions.some(o => o.includes('Tecnico Servicios'))).toBeFalsy()
 })
 
-test('8a. Permisos negativos UI — Carlos (técnico interno) sin botón Editar ni Agendar', async ({ page }) => {
+test('8a. Permisos negativos UI — Tecnico Servicios (técnico interno) sin botón Editar ni Agendar', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/08a-carlos-tabla.png`, fullPage: true })
@@ -372,7 +372,7 @@ test('8a. Permisos negativos UI — Carlos (técnico interno) sin botón Editar 
   await expect(page.getByRole('button', { name: /^(Agendar|Reagendar)$/ })).toHaveCount(0)
 })
 
-test('8b. Permisos negativos UI — Milena (vendedor/diseñador) sin botón Editar ni Agendar', async ({ page }) => {
+test('8b. Permisos negativos UI — Vendedor Disenador (vendedor/diseñador) sin botón Editar ni Agendar', async ({ page }) => {
   await login(page, 'vendedordisenador@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/08c-milena-tabla.png`, fullPage: true })
@@ -387,7 +387,7 @@ test('8b. Permisos negativos UI — Milena (vendedor/diseñador) sin botón Edit
   await expect(page.getByRole('button', { name: 'Editar' })).toHaveCount(0)
 })
 
-test('9. Permisos negativos API directa — Carlos, PATCH /tickets/{id} y /agendar → 403', async ({ page, request }) => {
+test('9. Permisos negativos API directa — Tecnico Servicios, PATCH /tickets/{id} y /agendar → 403', async ({ page, request }) => {
   await login(page, 'tecnicoservicios@test.com')
   const token = await getToken(page)
   expect(token).toBeTruthy()
@@ -411,7 +411,7 @@ test('9. Permisos negativos API directa — Carlos, PATCH /tickets/{id} y /agend
     data: { tipo: 'installation', subtipo: 'installation', tipo_instalacion: 'internal', requerimientos_especiales: null },
     failOnStatusCode: false,
   })
-  console.log('[Permisos API] PATCH /tickets/{id} status (Carlos):', patchResp.status())
+  console.log('[Permisos API] PATCH /tickets/{id} status (Tecnico Servicios):', patchResp.status())
   expect(patchResp.status()).toBe(403)
 
   const scheduleResp = await page.request.patch(`${BASE}/api/servicios/tickets/${ticketId}/agendar`, {
@@ -419,11 +419,11 @@ test('9. Permisos negativos API directa — Carlos, PATCH /tickets/{id} y /agend
     data: { internal_technician_id: 30, scheduled_at: new Date().toISOString() },
     failOnStatusCode: false,
   })
-  console.log('[Permisos API] PATCH /tickets/{id}/agendar status (Carlos):', scheduleResp.status())
+  console.log('[Permisos API] PATCH /tickets/{id}/agendar status (Tecnico Servicios):', scheduleResp.status())
   expect(scheduleResp.status()).toBe(403)
 })
 
-test('10. Sanity — tabla/tablero sin regresión (Aaron)', async ({ page }) => {
+test('10. Sanity — tabla/tablero sin regresión (Lider Servicios)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
   await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 })

@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // copy/labels y wiring — el spec v2 (16 tests) quedó con selectores del texto viejo, por eso este
 // spec nuevo verifica contra el estado real post-deploy en vez de reciclar aserciones stale.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -144,7 +144,7 @@ test('SCRUM-157 — CONFIRMADO: "CxC al día" ahora navega (antes no hacía nada
   expect(page.url()).toContain('/admin-contab')
 })
 
-test('SCRUM-161/162 — Whil (no es Mark Approver) ve "Solo para aprobadores", no el placeholder viejo', async ({ page }) => {
+test('SCRUM-161/162 — Gerencia (no es Gerencia Approver) ve "Solo para aprobadores", no el placeholder viejo', async ({ page }) => {
   await login(page, WHIL)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
@@ -158,7 +158,7 @@ test('SCRUM-161/162 — Whil (no es Mark Approver) ve "Solo para aprobadores", n
   expect(raw.aprobaciones).toEqual([])
 })
 
-test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Mark Approver global, no "cada tipo con su propio rol autorizado" (Mark/David/Whil)', async ({ page }) => {
+test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Gerencia Approver global, no "cada tipo con su propio rol autorizado" (Gerencia/David/Whil)', async ({ page }) => {
   // No es un bug de comportamiento — es una verificación de que el modelo implementado
   // (ComprasSettings.primary_approver_user_id, un único aprobador) sigue sin ser el que describe el
   // ticket (RN1: "cada tipo de solicitud tiene un rol autorizado"; RN2: "el listado se filtra
@@ -173,6 +173,6 @@ test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Mark Approver 
     return res.json()
   })
   // Confirmamos el hecho estructural: is_approver es un booleano único, no una lista de tipos
-  // autorizados por usuario — el modelo de datos no soporta "David ve sus propios tipos".
+  // autorizados por usuario — el modelo de datos no soporta "Gerencia ve sus propios tipos".
   expect(typeof raw.is_approver).toBe('boolean')
 })

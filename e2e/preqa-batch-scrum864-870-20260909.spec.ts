@@ -3,7 +3,7 @@ import { test, expect, Page } from '@playwright/test'
 /**
  * Gate fusionado Visual Review + Pre-QA — batch de correcciones SCRUM-864→870 (Admin&Cont).
  * Corrido en LOCAL contra http://localhost:5173 (Vite dev server, proxy /api -> :8090),
- * NUNCA dev.atlanticerp.ai. Login con usuario real Felix (`contabilidad@test.com`, password =
+ * NUNCA dev.atlanticerp.ai. Login con usuario real Contabilidad (`contabilidad@test.com`, password =
  * email en local). Cubre solo las verificaciones que NECESITAN un browser y datos mínimos;
  * el grueso de los ACs data-dependientes se validó a nivel código + feature/unit tests
  * (ver docs/pre-qa/scrum864-870-batch-20260909.md).
@@ -88,9 +88,9 @@ test('SCRUM-866.1 — Comisiones Externas no muestra "Pendiente de factura" en n
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-870 punto 2 — tarjeta de comisión de Felix: rangos en formato K
+// SCRUM-870 punto 2 — tarjeta de comisión de Contabilidad: rangos en formato K
 // ---------------------------------------------------------------------------
-test('SCRUM-870.2 — tarjeta Felix: rangos "$15K" / "$15K – $19K" / "$20K", nunca USD con decimales', async ({ page }) => {
+test('SCRUM-870.2 — tarjeta Contabilidad: rangos "$15K" / "$15K – $19K" / "$20K", nunca USD con decimales', async ({ page }) => {
   await login(page, FELIX)
   await page.goto(`${BASE}/admin-contab/reportes`)
   await page.waitForTimeout(2000)

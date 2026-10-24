@@ -39,8 +39,8 @@ async function goToBandeja(page: Page) {
   await page.waitForTimeout(800)
 }
 
-test.describe('SCRUM-440 — Yirena ve y usa Aprobar/Rechazar', () => {
-  test('Yirena ve botones Aprobar/Rechazar en una fila pendiente real', async ({ page }) => {
+test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
+  test('Lider Compras ve botones Aprobar/Rechazar en una fila pendiente real', async ({ page }) => {
     await login(page, YIRENA_EMAIL, YIRENA_PASS)
     await goToBandeja(page)
 
@@ -174,7 +174,7 @@ test.describe('SCRUM-440 — Bodega solo consulta, no aprueba/rechaza (RN3 / per
     await page.screenshot({ path: 'e2e/.tmp/preqa-440-bodega-sin-botones.png' })
   })
 
-  test('Escenario 1 — Bodega ve el motivo real de una orden rechazada por Yirena', async ({ page }) => {
+  test('Escenario 1 — Bodega ve el motivo real de una orden rechazada por Lider Compras', async ({ page }) => {
     await login(page, ALMACEN_EMAIL, ALMACEN_PASS)
     await page.goto(`${BASE}/bodega/ordenes-zona-libre`)
     await page.waitForTimeout(1200)

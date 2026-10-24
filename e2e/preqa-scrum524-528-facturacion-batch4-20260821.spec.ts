@@ -18,15 +18,15 @@ import { test, expect, Page } from '@playwright/test'
 //   D (invoice 21, F-0004, monto $500, saldo a
 //      favor $150 aplicado, total_a_pagar $350) -> REQ-449 RN2 (ambos totales) + bloque de pago
 //   E (invoice 22, F-0005, $620)              -> REQ-448 workflow completo (verificado por API):
-//                                                 Felix propone, RN5 (doble propuesta bloqueada),
-//                                                 Mark rechaza -> vuelve a normal
+//                                                 Contabilidad propone, RN5 (doble propuesta bloqueada),
+//                                                 Gerencia rechaza -> vuelve a normal
 //   F (invoice 23, F-0006, $275, anulada_at
 //      seteado manualmente)                   -> REQ-449 RN3 (marca de agua ANULADA)
 //   G (invoice 24, F-0007, $900, created_at
 //      backdateado 75 dias, incobrable
 //      PENDIENTE)                             -> REQ-450 RN1/RN2 (antiguedad real, pendiente
 //                                                 sigue contando) + REQ-451 RN2 (boton visible
-//                                                 pese a pendiente) -- Mark rechaza via UI en
+//                                                 pese a pendiente) -- Gerencia rechaza via UI en
 //                                                 este spec (queda como pendiente->normal)
 //   H (invoice 25, F-0008, $450, created_at
 //      backdateado 75 dias, incobrable
@@ -34,11 +34,11 @@ import { test, expect, Page } from '@playwright/test'
 //                                                 REQ-451 RN1 (boton oculto, incobrable aprobada)
 //
 // Verificacion backend/API ya confirmada antes de este spec (ver documento de Pre-QA): RN4 de
-// REQ-448 (Felix 403 real intentando decidir por API directa), RN5 (422 en segundo intento),
+// REQ-448 (Contabilidad 403 real intentando decidir por API directa), RN5 (422 en segundo intento),
 // aging RN1/RN2 con matematica real de antiguedad (75 dias backdateados -> 45 dias vencido con
 // dias_credito_factura=30 -> bucket 31-60, confirmado antes y despues de aprobar/rechazar). Este
 // spec cubre lo que solo se puede verificar en el navegador real: gates visuales de Mark-only,
-// banda de PDF/watermark, navegacion de "Registrar cobro", y el flujo completo Felix->Mark en vivo.
+// banda de PDF/watermark, navegacion de "Registrar cobro", y el flujo completo Felix->Gerencia en vivo.
 
 test.describe.configure({ mode: 'serial' })
 
@@ -210,9 +210,9 @@ test('REQ-449 RN3 -- factura anulada muestra marca de agua ANULADA (seteada manu
   execSync(`pdftoppm -png -r 100 -f 1 -l 1 "${pdfPath}" test-results/scrum524-528-req449-pdf-anulada-watermark`)
 })
 
-test('REQ-448 RN4 -- Felix NO ve los botones Aprobar/Rechazar sobre una propuesta pendiente (Mark-only)', async ({ page }) => {
+test('REQ-448 RN4 -- Contabilidad NO ve los botones Aprobar/Rechazar sobre una propuesta pendiente (Mark-only)', async ({ page }) => {
   await login(page, FELIX)
-  // Idempotencia entre corridas -- el test siguiente (Mark rechaza) deja a G de vuelta en estado
+  // Idempotencia entre corridas -- el test siguiente (Gerencia rechaza) deja a G de vuelta en estado
   // normal. Si este spec ya corrio una vez contra este mismo ambiente, G ya no esta pendiente --
   // se vuelve a proponer por API (ignorando 422 si por algun motivo ya estuviera pendiente) antes
   // de abrir el modal, para que este test sea repetible sin resembrar todo el fixture.
@@ -236,7 +236,7 @@ test('REQ-448 RN4 -- Felix NO ve los botones Aprobar/Rechazar sobre una propuest
   await page.screenshot({ path: 'test-results/scrum524-528-req448-felix-sin-botones.png', fullPage: true })
 })
 
-test('REQ-448 RN4 -- Mark SI ve y puede usar Aprobar/Rechazar; al rechazar vuelve exactamente a normal', async ({ page }) => {
+test('REQ-448 RN4 -- Gerencia SI ve y puede usar Aprobar/Rechazar; al rechazar vuelve exactamente a normal', async ({ page }) => {
   await login(page, MARK)
   await openDetailFor(page, 'PREQA4 Subcliente G')
   const modal = detailModal(page)

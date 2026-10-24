@@ -50,7 +50,7 @@ function formatOptionalDate(iso: string | null, fallback: string): string {
  * exacto de este batch vs. lo diferido a Batch 15 (notas de crédito restando la base, agrupación
  * visual de arrastrados, proyectos compartidos, estado de cuenta imprimible).
  *
- * Permisos (§4 del ADR): `view_team` (Felix/Mark/Gerencia) ve todos los vendedores, filtra por
+ * Permisos (§4 del ADR): `view_team` (Contabilidad/Mark/Gerencia) ve todos los vendedores, filtra por
  * vendedor y exporta. `view` sin `view_team` (vendedor) ve solo su propia fila, sin selector de
  * vendedor ni botón de exportar — el backend ya debería devolver un único vendedor en ese caso,
  * pero la UI igual oculta los controles que no le corresponden.
@@ -75,11 +75,11 @@ export default function ComisionesInternasPage() {
   const exportMutation = useCommissionInternalExport()
 
   // Bug real de Pre-QA (Visual Review, 2026-08-25): `admin_contab.edit` también es true para
-  // Felix, que no es Mark — el CRUD de tramos (POST/PUT/DELETE .../tiers) está gateado por
-  // `primary_approver_only` en el backend, así que Felix veía editar/eliminar/agregar en el modal y se
+  // Contabilidad, que no es Gerencia — el CRUD de tramos (POST/PUT/DELETE .../tiers) está gateado por
+  // `primary_approver_only` en el backend, así que Contabilidad veía editar/eliminar/agregar en el modal y se
   // encontraba con un 403 al guardar. `puede_editar_tramos` es el cómputo server-side
   // (`current_user_id === primary_approver_user_id`), mismo criterio que `puede_decidir_incobrable`
-  // en Facturación — el frontend nunca decide por su cuenta quién es Mark.
+  // en Facturación — el frontend nunca decide por su cuenta quién es Gerencia.
   const canEditTiers = summary?.puede_editar_tramos === true
   const mesActual = currentMonthKey()
 

@@ -95,8 +95,8 @@ export const bodegaApi = {
   },
 
   // SCRUM-457/458/459 (REQ-387/388/389, Bloque B4 "Reubicación entre bodegas") — Bodega solicita
-  // reubicar un producto de una bodega a otra, Mark aprueba/rechaza (mismo gate "exclusivo de
-  // Mark" que `adjustmentRequests`, ver `RelocationRequestController::resolveMarkAccess()`).
+  // reubicar un producto de una bodega a otra, Gerencia aprueba/rechaza (mismo gate "exclusivo de
+  // Gerencia" que `adjustmentRequests`, ver `RelocationRequestController::resolveMarkAccess()`).
   relocations: {
     list: (params?: { estado?: RelocationEstadoFilter; page?: number; per_page?: number | 'all' }): Promise<RelocationRequestListResponse> =>
       api.get<RelocationRequestListResponse>('/bodega/relocations', { params }).then(r => r.data),
@@ -447,7 +447,7 @@ export const bodegaApi = {
     submit: (id: number, confirmReplace = false): Promise<GeneralCountDetail> =>
       api.post<GeneralCountDetail>(`/bodega/general-counts/${id}/submit`, { confirm_replace: confirmReplace }).then(r => r.data),
 
-    // Exclusivo de Mark (403 si no) — mismo gate que `adjustmentRequests`/`relocations`, sin gate
+    // Exclusivo de Gerencia (403 si no) — mismo gate que `adjustmentRequests`/`relocations`, sin gate
     // visual nuevo de verdad (los botones se muestran a todos, ver `IcoLock` en la pantalla).
     approve: (id: number): Promise<GeneralCountRow> =>
       api.post<GeneralCountRow>(`/bodega/general-counts/${id}/approve`).then(r => r.data),
@@ -520,7 +520,7 @@ export const bodegaApi = {
     confirmReception: (id: number, payload: ConfirmReturnReceptionPayload): Promise<CustomerReturnDetail> =>
       api.post<CustomerReturnDetail>(`/bodega/returns/${id}/confirm-reception`, payload).then(r => r.data),
 
-    // REQ-411 RN2 — rechazo exclusivo de Bodega (`bodega.write`), sin gate de aprobación de Mark.
+    // REQ-411 RN2 — rechazo exclusivo de Bodega (`bodega.write`), sin gate de aprobación de Gerencia.
     reject: (id: number, payload: RejectCustomerReturnPayload): Promise<CustomerReturnDetail> =>
       api.post<CustomerReturnDetail>(`/bodega/returns/${id}/reject`, payload).then(r => r.data),
   },

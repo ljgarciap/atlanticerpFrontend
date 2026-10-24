@@ -44,7 +44,7 @@ function makeAbono(overrides: Partial<Abono> = {}): Abono {
     monto_original: 250, monto_usado: 0, monto_disponible: 250, estado_saldo: 'disponible',
     metodo_pago: 'yappy', cuenta_bancaria_id: 1,
     referencia: 'YP-4471', comprobante_url: null, estado: 'por_confirmar',
-    registrado_por: 'Felix', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
+    registrado_por: 'Contabilidad', confirmado_por: null, fecha_confirmacion: null, abono_origen_id: null,
     numero_recibo: null,
     ...overrides,
   }

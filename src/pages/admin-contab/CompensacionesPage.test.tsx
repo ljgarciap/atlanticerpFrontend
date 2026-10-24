@@ -167,7 +167,7 @@ describe('CompensacionClienteModal — cruce de un cliente', () => {
       facturas: [{ id: 3, numero: 'F-0003', pendiente_antes: 25, aplicado: 25, pendiente_despues: 0 }], fuentes: [],
     })
     mockedApi.compensaciones.confirm.mockResolvedValue({
-      id: 99, folio: 'CMP-001', estado: 'confirmado', master_client_id: 7, cliente: 'Vitrio', monto_total: 25, confirmed_at: '2026-10-19T00:00:00Z', registrado_por: 'Felix', lineas: [],
+      id: 99, folio: 'CMP-001', estado: 'confirmado', master_client_id: 7, cliente: 'Vitrio', monto_total: 25, confirmed_at: '2026-10-19T00:00:00Z', registrado_por: 'Contabilidad', lineas: [],
     })
     await abrirCliente()
     fireEvent.change(screen.getByLabelText('compensaciones.modal.montoAAplicar:numero=F-0003'), { target: { value: '25' } })

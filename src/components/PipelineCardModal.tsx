@@ -50,7 +50,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   const canSeeTeam = hasGerenciaScope(user)
   const readsPipelineOnly = (user?.permissions?.includes('ventas_diseno.pipeline.read_all') ?? false)
     && !(user?.permissions?.includes('ventas_diseno.read') ?? false)
-  // SCRUM-1139 — Félix además edita el Pipeline (`ventas_diseno.pipeline.edit`): sigue SIN `ventas_diseno.read`
+  // SCRUM-1139 — Contabilidad además edita el Pipeline (`ventas_diseno.pipeline.edit`): sigue SIN `ventas_diseno.read`
   // (no abre cotizaciones ni clientes), pero recupera los controles de escritura del propio tablero.
   const hasPipelineEdit = user?.permissions?.includes('ventas_diseno.pipeline.edit') ?? false
   const readsPipelineReadOnly = readsPipelineOnly && !hasPipelineEdit
@@ -66,7 +66,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     enabled:  canSeeTeam,
   })
 
-  // SCRUM-884 (rebote 2026-09-16) — cuando quien crea el proyecto es Gerencia (Mark/David/Will),
+  // SCRUM-884 (rebote 2026-09-16) — cuando quien crea el proyecto es Gerencia (Gerencia/David/Will),
   // queda en `assigneeIds` (owner_id) pero `teamVendors` nunca lo incluye (es la lista de
   // vendedores/diseñadores, no de Gerencia). `UserMultiSelect` solo renderiza como "chip"
   // removible a quien esté en la lista `users` que recibe — sin este id ahí, no había forma de
@@ -95,7 +95,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   const { data: productDeliveryRows } = useQuery({
     queryKey: ['ventas-diseno-pipeline-card-product-delivery-assignments', cardId],
     queryFn:  () => ventasDisenoApi.pipeline.productDeliveryAssignments.list(cardId),
-    // SCRUM-1128 — el endpoint exige `ventas_diseno.read`; Félix (solo `pipeline.read_all`, sin `.read`)
+    // SCRUM-1128 — el endpoint exige `ventas_diseno.read`; Contabilidad (solo `pipeline.read_all`, sin `.read`)
     // recibiría 403. Se excluye solo ese caso: superadmin llega con `superadmin.all`, no con `.read`.
     enabled:  card?.delivery_type === 'partial' && !readsPipelineReadOnly,
   })
@@ -293,7 +293,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   })
 
   // SCRUM-1128 — "Pasar a Pedido": el estado Aprobado de Pipeline ya no genera el pedido de Bodega;
-  // lo genera esta acción explícita, solo para quien tiene el permiso (Gerencia y Félix). El backend
+  // lo genera esta acción explícita, solo para quien tiene el permiso (Gerencia y Contabilidad). El backend
   // vuelve a validar permiso e idempotencia — esto solo decide qué se muestra.
   const canPassToOrder = user?.permissions?.includes('ventas_diseno.pass_to_order') ?? false
   const [showPassToOrderDialog, setShowPassToOrderDialog] = useState(false)
@@ -879,7 +879,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   {/* SCRUM-909 — solo con Entrega Parcial seleccionada; ver criterio 1. No
                       gateado por isEditing: es una acción propia (abre su propio modal),
                       no un campo de este formulario. SCRUM-1128 — oculto para el acceso de solo
-                      lectura del Pipeline (Félix): el modal pide asignaciones que exigen
+                      lectura del Pipeline (Contabilidad): el modal pide asignaciones que exigen
                       ventas_diseno.read y mostraba 2×403 con un texto engañoso. */}
                   {deliveryType === 'partial' && !readsPipelineReadOnly && (
                     <Button
@@ -1192,7 +1192,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
               </Button>
             )}
             {/* SCRUM-1128 — `can_edit` es false en Perdido para todos los roles, así que no sirve
-                de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Félix). */}
+                de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Contabilidad). */}
             {card?.stage === 'lost' && !readsPipelineReadOnly && (
               <Button
                 variant="accent"
@@ -1206,7 +1206,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             {/* REQ-597 RN3 / REQ-603 RN2 (Epic CRM Batch B) — Aprobado es terminal, sin ningún
                 botón de movimiento (ni "Mover a siguiente" — ya cubierto por STAGE_FLOW.approved
                 === null — ni "Marcar como Perdido", que sí se colaba para un usuario con permiso
-                de editar Aprobado, ej. Mark). */}
+                de editar Aprobado, ej. Gerencia). */}
             {card && canEdit && card.stage !== 'lost' && card.stage !== 'approved' && (
               <>
                 {/* RN5 (SCRUM-677/680): nunca un botón genérico de movimiento hacia Cotización —

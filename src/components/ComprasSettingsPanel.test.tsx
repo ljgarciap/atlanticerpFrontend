@@ -23,7 +23,7 @@ const mockedApi = vi.mocked(comprasApi, true)
 
 function makeSettings(overrides: Partial<ComprasSettings> = {}): ComprasSettings {
   return {
-    low_rating_threshold: 40, primary_approver_user_id: null, claim_attention_days: 7,
+    low_rating_threshold: 40, primary_approver_user_id: null, claim_attention_days: 7, critical_days_por_aprobar: 3,
     replacement_margin_threshold: 15,
     similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
     similarity_other_category_penalty: 30, similarity_min_threshold: 25,
@@ -71,7 +71,7 @@ describe('ComprasSettingsPanel', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
-      low_rating_threshold: 75, claim_attention_days: 7, replacement_margin_threshold: 15,
+      low_rating_threshold: 75, claim_attention_days: 7, critical_days_por_aprobar: 3, replacement_margin_threshold: 15,
       similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
       similarity_other_category_penalty: 30, similarity_min_threshold: 25,
     }))
@@ -87,7 +87,7 @@ describe('ComprasSettingsPanel', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
-      low_rating_threshold: 40, claim_attention_days: 14, replacement_margin_threshold: 15,
+      low_rating_threshold: 40, claim_attention_days: 14, critical_days_por_aprobar: 3, replacement_margin_threshold: 15,
       similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
       similarity_other_category_penalty: 30, similarity_min_threshold: 25,
     }))
@@ -103,7 +103,7 @@ describe('ComprasSettingsPanel', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
-      low_rating_threshold: 40, claim_attention_days: 7, replacement_margin_threshold: 20,
+      low_rating_threshold: 40, claim_attention_days: 7, critical_days_por_aprobar: 3, replacement_margin_threshold: 20,
       similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
       similarity_other_category_penalty: 30, similarity_min_threshold: 25,
     }))
@@ -120,7 +120,7 @@ describe('ComprasSettingsPanel', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith({
-      low_rating_threshold: 40, claim_attention_days: 7, replacement_margin_threshold: 15,
+      low_rating_threshold: 40, claim_attention_days: 7, critical_days_por_aprobar: 3, replacement_margin_threshold: 15,
       similarity_weight_text: 60, similarity_weight_price: 30, similarity_weight_margin: 20,
       similarity_other_category_penalty: 30, similarity_min_threshold: 30,
     }))

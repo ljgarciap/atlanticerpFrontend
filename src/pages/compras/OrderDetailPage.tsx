@@ -36,7 +36,7 @@ function SummaryField({ label, children }: { label: string; children: React.Reac
 
 /**
  * Pre-QA en vivo contra dev.atlanticerp.ai (2026-07-17), hallazgo nuevo propio del fix de SCRUM-206: el
- * 403 de "Solo Mark puede aprobar esta orden" se disparaba correctamente pero la UI no mostraba
+ * 403 de "Solo Gerencia puede aprobar esta orden" se disparaba correctamente pero la UI no mostraba
  * nada — el botón "Aprobar orden" simplemente no hacía nada visible, sin este gate previo nunca
  * fallaba para un usuario normal con compras.approve, así que este camino de error no existía.
  */
@@ -294,7 +294,7 @@ export default function OrderDetailPage() {
         {/* SCRUM-208 (rediseño 2026-08-15, docs/architecture/scrum208-recepcion-parcial-rediseno.md)
             — el aviso deja de ser puramente informativo: 2 botones independientes.
             "Ingresar a Inventario" (`confirm-pending-receipts`, root cause real del reporte de
-            Daniela — la parte ya recibida no aparecía en Inventario porque nada la confirmaba
+            Gerencia — la parte ya recibida no aparecía en Inventario porque nada la confirmaba
             hasta que la orden ENTERA llegaba a Recibido) y "Completar etapa del remanente"
             (`advance-remainder`, avanza lo que sigue pendiente por sus propias etapas, sin
             depender del status de la orden completa). Ambos ya implementados en el backend. */}

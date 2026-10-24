@@ -6,7 +6,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
 // mark-uncollectible; el visor desaparecía al aprobar una NC).
 //
 // Diseño (sin consumir el sandbox de MSL ni depender de datos previos):
-//  - API real: el 403 para cualquier actor que no sea Mark/superadmin vive en el middleware
+//  - API real: el 403 para cualquier actor que no sea Gerencia/superadmin vive en el middleware
 //    `primary_approver_only`, que corre ANTES del controlador — no depende de que el documento exista.
 //  - UI: se parcha la respuesta REAL del detalle de una factura (page.route) para forzar un estado
 //    fiscal `rechazado`, y se responde el historial con un registro sintético con payload XSS.
@@ -56,7 +56,7 @@ async function uiLogin(page: Page, email: string) {
   await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 15000 })
 }
 
-/** Primera factura `facturada` visible para Mark; null si el entorno no tiene ninguna. */
+/** Primera factura `facturada` visible para Gerencia; null si el entorno no tiene ninguna. */
 async function primeraFacturada(request: APIRequestContext, token: string) {
   const res = await request.get('/api/admin-contab/invoices', {
     headers: { Authorization: `Bearer ${token}` },
@@ -83,23 +83,23 @@ async function abrirFactura(page: Page, folio: string) {
   await page.getByText(folio, { exact: false }).first().click()
 }
 
-test('API: un actor que no es Mark recibe 403 en ambos endpoints de transmisiones; Mark no', async ({ request }) => {
+test('API: un actor que no es Gerencia recibe 403 en ambos endpoints de transmisiones; Gerencia no', async ({ request }) => {
   const felix = await apiToken(request, FELIX)
   const mark = await apiToken(request, MARK)
 
   // ID arbitrario a propósito: `primary_approver_only` responde antes de resolver el documento.
   for (const path of ['/api/admin-contab/invoices/1/fe-transmisiones', '/api/admin-contab/notas-credito/1/fe-transmisiones']) {
     const denegado = await request.get(path, { headers: { Authorization: `Bearer ${felix}` } })
-    expect(denegado.status(), `${path} con Felix`).toBe(403)
+    expect(denegado.status(), `${path} con Contabilidad`).toBe(403)
     await espaciar()
 
     const permitido = await request.get(path, { headers: { Authorization: `Bearer ${mark}` } })
-    expect([200, 404], `${path} con Mark`).toContain(permitido.status())
+    expect([200, 404], `${path} con Gerencia`).toContain(permitido.status())
     await espaciar()
   }
 })
 
-test('API: el detalle de una factura solo trae el flag y fe_detalle para Mark', async ({ request }) => {
+test('API: el detalle de una factura solo trae el flag y fe_detalle para Gerencia', async ({ request }) => {
   const mark = await apiToken(request, MARK)
   const fila = await primeraFacturada(request, mark)
   test.skip(fila === null, 'el entorno no tiene ninguna factura facturada para inspeccionar')
@@ -114,11 +114,11 @@ test('API: el detalle de una factura solo trae el flag y fe_detalle para Mark', 
 
   expect(conMark.puede_ver_fe_transmisiones).toBe(true)
   expect(conFelix.puede_ver_fe_transmisiones ?? false).toBe(false)
-  // Deny-by-default: el motivo del rechazo del PAC nunca llega a quien no es Mark.
+  // Deny-by-default: el motivo del rechazo del PAC nunca llega a quien no es Gerencia.
   expect(conFelix.fe_detalle ?? null).toBeNull()
 })
 
-test('UI: Mark ve el visor en una factura rechazada y el payload se muestra escapado (XSS)', async ({ page, request }) => {
+test('UI: Gerencia ve el visor en una factura rechazada y el payload se muestra escapado (XSS)', async ({ page, request }) => {
   const mark = await apiToken(request, MARK)
   const fila = await primeraFacturada(request, mark)
   test.skip(fila === null, 'el entorno no tiene ninguna factura facturada para abrir')
@@ -154,7 +154,7 @@ test('UI: Mark ve el visor en una factura rechazada y el payload se muestra esca
   await expect(page.locator('body')).toContainText('<img src=x')
 })
 
-test('UI: un usuario que no es Mark no ve el visor ni dispara la petición de transmisiones', async ({ page, request }) => {
+test('UI: un usuario que no es Gerencia no ve el visor ni dispara la petición de transmisiones', async ({ page, request }) => {
   const mark = await apiToken(request, MARK)
   const fila = await primeraFacturada(request, mark)
   test.skip(fila === null, 'el entorno no tiene ninguna factura facturada para abrir')

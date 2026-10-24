@@ -8,7 +8,7 @@ import type { PurchaseOrderListResponse, PurchaseOrderSummary } from '@/types/co
 
 // SCRUM-250 (corrección de Gerencia Test, 2026-08-09) — la pantalla de "Pagos a Proveedores"
 // nunca tuvo test dedicado (solo el panel de detalle de orden, PurchaseOrderPaymentsPanel.test.tsx,
-// estaba cubierto). Cubre los 4 gaps reales que Daniela reportó: 5 KPIs dinámicos, búsqueda +
+// estaba cubierto). Cubre los 4 gaps reales que Gerencia reportó: 5 KPIs dinámicos, búsqueda +
 // filtro de proveedor + "Limpiar filtros", los 5 chips con la nomenclatura correcta
 // (Sin enviar/Por pagar, no "Pago pendiente"), y las 9 columnas de la tabla en el orden definido.
 
@@ -34,7 +34,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrderSummary {
   return {
-    id: 12, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Yirena',
+    id: 12, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Lider Compras',
     status: 'por_aprobar', next_status: 'ordenado', is_critical: false, modality: 'directo',
     shipping_type: null, shipping_cost: null,
     estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
@@ -101,7 +101,7 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
 
     expect(screen.getByPlaceholderText('compras:payments.filters.searchPlaceholder')).toBeInTheDocument()
 
-    // 5 chips exactos — nunca "Pago pendiente" (nomenclatura vieja que Daniela pidió corregir).
+    // 5 chips exactos — nunca "Pago pendiente" (nomenclatura vieja que Gerencia pidió corregir).
     expect(screen.getByText('compras:payments.filters.all')).toBeInTheDocument()
     expect(screen.getByText('compras:payments.chips.sin_enviar')).toBeInTheDocument()
     expect(screen.getByText('compras:payments.chips.por_pagar')).toBeInTheDocument()

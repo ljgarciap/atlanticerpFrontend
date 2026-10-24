@@ -257,7 +257,7 @@ describe('TicketsPage — REQ-217 filtros', () => {
 })
 
 describe('TicketsPage — REQ-218 gate de cambio de estado', () => {
-  it('Aaron (lider_servicios) puede cambiar el estado; éxito refresca la lista', async () => {
+  it('Lider Servicios (lider_servicios) puede cambiar el estado; éxito refresca la lista', async () => {
     mockedApi.tickets.list.mockResolvedValue([makeTicket()])
     mockedApi.tickets.changeStatus.mockResolvedValue(makeTicket({ estado: 'scheduled' }))
     renderPage()

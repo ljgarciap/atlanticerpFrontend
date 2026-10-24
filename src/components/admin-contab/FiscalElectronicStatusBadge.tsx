@@ -20,7 +20,7 @@ export default function FiscalElectronicStatusBadge(
     estado: FiscalElectronicStatus | null
     cufe: string | null
     qrContent: string | null
-    /** Motivo textual del rechazo (solo Mark/superadmin lo reciben del backend). */
+    /** Motivo textual del rechazo (solo Gerencia/superadmin lo reciben del backend). */
     detalle?: string | null
     onLoadPreview?: () => Promise<FiscalDocumentPreviewResult>
     t: (key: string) => string

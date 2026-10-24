@@ -45,7 +45,7 @@ import type {
   FiscalDocumentPreviewResult, FeTransmision, FeAccionResultado,
 } from '@/types/adminContab'
 
-// Batch Configuración Fiscal (SCRUM-632→637). Pantalla exclusiva de Mark — el backend devuelve
+// Batch Configuración Fiscal (SCRUM-632→637). Pantalla exclusiva de Gerencia — el backend devuelve
 // 403 en TODAS estas rutas (incluido el GET) para cualquier otro usuario, no solo en mutaciones.
 export const adminContabApi = {
   fiscalSettings: {
@@ -82,7 +82,7 @@ export const adminContabApi = {
       api.delete(`/admin-contab/itbms-rates/${id}`).then(() => undefined),
   },
 
-  // Batch Datos de la Empresa (SCRUM-638→642). Misma pantalla exclusiva de Mark.
+  // Batch Datos de la Empresa (SCRUM-638→642). Misma pantalla exclusiva de Gerencia.
   companyProfile: {
     get: (): Promise<CompanyProfile> =>
       api.get<CompanyProfile>('/admin-contab/company-profile').then(r => r.data),
@@ -121,7 +121,7 @@ export const adminContabApi = {
       api.put<Contact>(`/admin-contab/contacts/${id}`, { activo }).then(r => r.data),
   },
 
-  // Batch 1 del cuerpo principal (SCRUM-607→611). NO exclusiva de Mark — varios roles, el backend
+  // Batch 1 del cuerpo principal (SCRUM-607→611). NO exclusiva de Gerencia — varios roles, el backend
   // gatea quién puede ver/editar cada acción (403 normal, no "acceso restringido" de pantalla).
   // SCRUM-1166 — exención de ITBMS de un cliente fiscal (sub-cliente): la marca solo quien tiene el permiso angosto; marcar exige el documento.
   clientesFiscal: {
@@ -215,11 +215,11 @@ export const adminContabApi = {
     fePreview: (orderId: number, invoiceId?: number): Promise<FiscalDocumentPreviewResult> =>
       api.get<FiscalDocumentPreviewResult>(`/admin-contab/invoices/${orderId}/fe-preview`, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
 
-    // SCRUM-987 — historial de transmisiones al PAC (solo Mark/superadmin; 403 para el resto).
+    // SCRUM-987 — historial de transmisiones al PAC (solo Gerencia/superadmin; 403 para el resto).
     feTransmisiones: (orderId: number, invoiceId?: number): Promise<FeTransmision[]> =>
       api.get<{ data: FeTransmision[] }>(`/admin-contab/invoices/${orderId}/fe-transmisiones`, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data.data),
 
-    // SCRUM-1007 — acciones fiscales manuales (solo Mark/superadmin; 409 con `codigo` si la precondición falla).
+    // SCRUM-1007 — acciones fiscales manuales (solo Gerencia/superadmin; 409 con `codigo` si la precondición falla).
     feReintentar: (orderId: number, invoiceId?: number): Promise<FeAccionResultado> =>
       api.post<FeAccionResultado>(`/admin-contab/invoices/${orderId}/fe-reintentar`, undefined, { params: invoiceId ? { invoice_id: invoiceId } : undefined }).then(r => r.data),
     /** SCRUM-1019 — reconciliar con MSL; 200 incluso en `ventana_vencida`/`ya_certificado_9022`. */
@@ -301,7 +301,7 @@ export const adminContabApi = {
     updateDatos: (id: number, form: FormData): Promise<{ id: number; referencia: string | null }> =>
       api.post<{ id: number; referencia: string | null }>(`/admin-contab/payments/${id}/datos`, form).then(r => r.data),
 
-    // SCRUM-1168 F4 — solicitar la anulación de un cobro (la decide Mark).
+    // SCRUM-1168 F4 — solicitar la anulación de un cobro (la decide Gerencia).
     requestVoid: (id: number, motivo: string): Promise<ReversalRequest> =>
       api.post<ReversalRequest>(`/admin-contab/payments/${id}/anular`, { motivo }).then(r => r.data),
 
@@ -456,7 +456,7 @@ export const adminContabApi = {
     resumenMes: (): Promise<NotaCreditoResumenMes> =>
       api.get<NotaCreditoResumenMes>('/admin-contab/notas-credito/summary').then(r => r.data),
 
-    // Endpoint distinto de `itbmsRates.list()` (ese es exclusivo de Mark) — ver docblock de
+    // Endpoint distinto de `itbmsRates.list()` (ese es exclusivo de Gerencia) — ver docblock de
     // `NotaCreditoItbmsRateOption` en types/adminContab.ts.
     itbmsRates: (): Promise<NotaCreditoItbmsRateOption[]> =>
       api.get<NotaCreditoItbmsRateOption[]>('/admin-contab/notas-credito/itbms-rates').then(r => r.data),
@@ -547,7 +547,7 @@ export const adminContabApi = {
     devolucionSignedDocumentUrl: (customerReturnId: number): Promise<{ url: string }> =>
       api.get<{ url: string }>(`/admin-contab/notas-credito/devoluciones/${customerReturnId}/signed-document`).then(r => r.data),
 
-    // Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Mark, comprobante, documento formal,
+    // Batch 13 (SCRUM-571→574, REQ-494→497) — aprobación de Gerencia, comprobante, documento formal,
     // factura relacionada. Ver ADR-SCRUM571-574.
 
     // REQ-494 — mismo patrón que `invoices.decideUncollectible()`, bajo `primary_approver_only` del lado del
@@ -640,7 +640,7 @@ export const adminContabApi = {
       api.get<SaldoFavorResult>('/admin-contab/saldo-favor', { params: filters }).then(r => r.data),
   },
 
-  // SCRUM-1168 F4 — solicitudes de anulación (y de devolución, F5): listado y decisión de Mark.
+  // SCRUM-1168 F4 — solicitudes de anulación (y de devolución, F5): listado y decisión de Gerencia.
   reversals: {
     /** F5 — solicita devolver dinero del saldo a favor del cliente (multipart: lleva el comprobante). */
     requestRefund: (masterClientId: number, form: FormData): Promise<ReversalRequest> =>
@@ -798,11 +798,11 @@ export const adminContabApi = {
     updateCuentaPago: (pipelineCardId: number, data: UpdateCuentaPagoPayload): Promise<{ bank_account_id: number | null }> =>
       api.put<{ bank_account_id: number | null }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/cuenta-pago`, data).then(r => r.data),
 
-    // REQ-516 RN3 — Felix/Yaneth/Mark/Gerencia proponen, queda pendiente de Mark.
+    // REQ-516 RN3 — Contabilidad/Yaneth/Mark/Gerencia proponen, queda pendiente de Gerencia.
     proposePercent: (pipelineCardId: number, data: ProposePercentPayload): Promise<{ porcentaje_pendiente: number }> =>
       api.post<{ porcentaje_pendiente: number }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/propose`, data).then(r => r.data),
 
-    // REQ-516 RN4 — exclusivo de Mark, 403 para cualquier otro rol (mismo gate `primary_approver_only`).
+    // REQ-516 RN4 — exclusivo de Gerencia, 403 para cualquier otro rol (mismo gate `primary_approver_only`).
     decidePercent: (pipelineCardId: number, data: DecidePercentPayload): Promise<{ porcentaje_aprobado: number | null }> =>
       api.post<{ porcentaje_aprobado: number | null }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/decide`, data).then(r => r.data),
 
@@ -818,7 +818,7 @@ export const adminContabApi = {
 
   // Batch 18 (SCRUM-597→601, REQ-520→524) — Arqueo / Flujo de Caja, parte 1. Ver
   // ADR-SCRUM597-601-batch18-arqueo-caja.md para el contrato completo. `projected`/`real` 403 para
-  // asistente_administrativa (Yaneth) — REQ-521/523 no la incluyen; `daily-count` 403 para
+  // asistente_administrativa (Asistente Administrativa) — REQ-521/523 no la incluyen; `daily-count` 403 para
   // management/superadmin-no-Mark si el backend decide gatear distinto — el frontend nunca asume,
   // solo maneja el 403 con el estado vacío/oculto correspondiente (ver ArqueoCajaPage).
   cashPosition: {
@@ -872,12 +872,12 @@ export const adminContabApi = {
     historyDetail: (id: number): Promise<DailyCashCount> =>
       api.get<DailyCashCount>(`/admin-contab/cash-position/history/${id}`).then(r => r.data),
 
-    // REQ-528 RN2/RN4 — exclusivo Mark (`primary_approver_only` en el backend). 409 si el arqueo ya no está
+    // REQ-528 RN2/RN4 — exclusivo Gerencia (`primary_approver_only` en el backend). 409 si el arqueo ya no está
     // `pendiente_aprobacion` (aprobado por otra sesión mientras el modal estaba abierto).
     approve: (id: number): Promise<DailyCashCount> =>
       api.post<DailyCashCount>(`/admin-contab/cash-position/history/${id}/approve`).then(r => r.data),
 
-    // REQ-529 Escenario 1 — resumen del arqueo activo, mismo gate que `daily-count` (Felix+Yaneth,
+    // REQ-529 Escenario 1 — resumen del arqueo activo, mismo gate que `daily-count` (Contabilidad+Asistente Administrativa,
     // ver ADR §9).
     exportDailyCount: async (numero: number | null): Promise<void> => {
       const res = await api.get('/admin-contab/cash-position/daily-count/export', { responseType: 'blob' })
@@ -889,7 +889,7 @@ export const adminContabApi = {
       URL.revokeObjectURL(url)
     },
 
-    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Felix/Yaneth/Mark/
+    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Contabilidad/Yaneth/Mark/
     // Gerencia, ver ADR §9).
     exportHistory: async (id: number, numero: number | null): Promise<void> => {
       const res = await api.get(`/admin-contab/cash-position/history/${id}/export`, { responseType: 'blob' })
@@ -983,22 +983,22 @@ export const adminContabApi = {
       }).then(r => r.data)
     },
 
-    // REQ-541 — exclusivo Mark (gate real en el backend, `primary_approver_only`). Respuesta angosta a
+    // REQ-541 — exclusivo Gerencia (gate real en el backend, `primary_approver_only`). Respuesta angosta a
     // propósito, ver docblock de RejectPettyCashExpenseResponse.
     rejectExpense: (id: number, motivo: string): Promise<RejectPettyCashExpenseResponse> =>
       api.put<RejectPettyCashExpenseResponse>(`/admin-contab/petty-cash/expenses/${id}/reject`, { motivo }).then(r => r.data),
 
-    // REQ-541 — exclusivo Mark, rechaza TODAS las líneas del reporte con un solo motivo.
+    // REQ-541 — exclusivo Gerencia, rechaza TODAS las líneas del reporte con un solo motivo.
     rejectReport: (numero: string, motivo: string): Promise<RejectPettyCashReportResponse> =>
       api.put<RejectPettyCashReportResponse>(`/admin-contab/petty-cash/reports/${numero}/reject`, { motivo }).then(r => r.data),
 
-    // REQ-544 — Felix/Yaneth, NUNCA Mark (al revés que rechazar — el backend nunca deja pasar a
-    // Mark acá, no es el mismo gate que approve/reject).
+    // REQ-544 — Contabilidad/Yaneth, NUNCA Gerencia (al revés que rechazar — el backend nunca deja pasar a
+    // Gerencia acá, no es el mismo gate que approve/reject).
     reopenExpense: (id: number, motivo: string): Promise<PettyCashExpenseDetail> =>
       api.put<PettyCashExpenseDetail>(`/admin-contab/petty-cash/expenses/${id}/reopen`, { motivo }).then(r => r.data),
   },
 
-  // Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. Comisión Felix y Cartera (RN4/RN3)
+  // Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. Comisión Contabilidad y Cartera (RN4/RN3)
   // nunca reciben `periodo` — siempre mes/estado en curso, mismo criterio que `cash-position`
   // (header vs. projected).
   reports: {

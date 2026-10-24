@@ -59,8 +59,8 @@ export default function ReportsCommissionSection({ globalPeriod }: Props) {
   const isManagement = user?.role === 'management' || user?.role === 'superadmin'
   // El técnico con plan de bonificación se resuelve por `has_bonus_plan`, el MISMO flag que usa el
   // backend (`ReportsController::comisionCarlosVergara()`), nunca por su nombre: el nombre es
-  // editable en Técnicos Internos, y con el match por string un simple renombre ("Carlos A.
-  // Vergara") le ocultaba a Carlos su propia sección aunque el backend siguiera autorizándolo
+  // editable en Técnicos Internos, y con el match por string un simple renombre ("Tecnico Servicios A.
+  // Tecnico Servicios") le ocultaba a Tecnico Servicios su propia sección aunque el backend siguiera autorizándolo
   // (hallazgo de Pre-QA 2026-08-12, reproducido en vivo).
   const carlosVergara = technicians?.find(tech => tech.has_bonus_plan)
   const isCarlosVergara = !!user && !!carlosVergara && carlosVergara.user_id === user.id

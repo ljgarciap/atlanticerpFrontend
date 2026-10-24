@@ -14,7 +14,7 @@ import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 
 const BODEGA = 'bodega'
 
-// REQ-269/270/271/272 — exclusivo de Aaron/Líder de Servicios y superadmin (mismo patrón que
+// REQ-269/270/271/272 — exclusivo de Lider Servicios/Líder de Servicios y superadmin (mismo patrón que
 // canEditTicketStatus en TicketsPage.tsx). Técnico interno y otros roles del módulo ven la
 // pantalla completa en modo lectura.
 function canManageTools(role: string | undefined): boolean {

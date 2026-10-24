@@ -11,13 +11,13 @@ import { test, expect, Page, Locator } from '@playwright/test'
  *          submit concurrente por API, terminó COMPLETADO — no usar para "sin hoja")
  *   T102 = REC-2026-0005 (claim, técnico=Agustín — YA completado por una corrida anterior de este
  *          mismo archivo, no reusar)
- *   T103 = REC-2026-0006 (claim, SIN técnico asignado, SIN hoja — usar para RN4 con Aaron)
- *   T104 = REC-2026-0007 (claim, técnico=Agustín Rodríguez, SIN hoja — solo lectura, RN6 caso Pedro
- *          NO asignado; nunca se completa porque Pedro siempre es rechazado, seguro de reusar)
+ *   T103 = REC-2026-0006 (claim, SIN técnico asignado, SIN hoja — usar para RN4 con Lider Servicios)
+ *   T104 = REC-2026-0007 (claim, técnico=Agustín Rodríguez, SIN hoja — solo lectura, RN6 caso Tecnico Servicios
+ *          NO asignado; nunca se completa porque Tecnico Servicios siempre es rechazado, seguro de reusar)
  *   El caso "RN6 técnico SÍ asignado" se autosiembra un ticket nuevo en cada corrida (ver el test) —
  *   ese sí completa la hoja como efecto secundario permanente, no puede reusar un ID fijo.
  *   T88  = INS-2026-0002 (installation/inspection, técnico=Agustín, informe NO completado — botón blanco)
- *   T89  = INS-2026-0003 (installation/inspection, técnico=Carlos, informe COMPLETADO — botón lleno)
+ *   T89  = INS-2026-0003 (installation/inspection, técnico=Tecnico Servicios, informe COMPLETADO — botón lleno)
  */
 const AARON    = 'liderservicios@test.com'
 const PEDRO    = 'tecnicoservicios2@test.com'
@@ -63,7 +63,7 @@ test('SCRUM-348 RN1/RN2 — precarga de secciones 1-2 en Hoja de Reclamo (ticket
   await expect(modal.getByText('LED-2026', { exact: false })).toBeVisible()
   await expect(modal.getByText(/Cant\. reclamo.*10/)).toBeVisible()
 
-  // RN5 — ya completada, campos de captura bloqueados sin excepción de rol (Aaron = superadmin)
+  // RN5 — ya completada, campos de captura bloqueados sin excepción de rol (Lider Servicios = superadmin)
   await expect(modal.getByText('Esta Hoja de Reclamo ya fue completada y no puede editarse.')).toBeVisible()
   await expect(modal.getByLabel('Diagnóstico')).toBeDisabled()
   await expect(modal.getByRole('button', { name: 'Guardar Hoja de Reclamo' })).toHaveCount(0)
@@ -82,7 +82,7 @@ test('SCRUM-348 RN4 — diagnóstico y firma ambos obligatorios, botón Guardar 
   await expect(saveBtn).toBeDisabled()
 
   // Solo firma
-  await firmaInput.fill('Aaron Ceballos')
+  await firmaInput.fill('Lider Servicios Ceballos')
   await expect(saveBtn).toBeDisabled()
 
   // Firma con solo espacios en blanco — canSave usa .trim(), debe seguir deshabilitado
@@ -95,13 +95,13 @@ test('SCRUM-348 RN4 — diagnóstico y firma ambos obligatorios, botón Guardar 
   await expect(saveBtn).toBeDisabled()
 
   // Ambos llenos — recién ahí se habilita
-  await firmaInput.fill('Aaron Ceballos')
+  await firmaInput.fill('Lider Servicios Ceballos')
   await expect(saveBtn).toBeEnabled()
   await page.screenshot({ path: 'test-results/scrum348-rn4-boton-habilitado.png' })
 })
 
 test('SCRUM-348 RN6 — técnico NO asignado ve el form bloqueado (no solo el botón escondido)', async ({ page }) => {
-  await login(page, PEDRO) // Pedro NO está asignado a T104 (asignado a Agustín)
+  await login(page, PEDRO) // Tecnico Servicios NO está asignado a T104 (asignado a Agustín)
   await openTicketByNumero(page, 'REC-2026-0007')
   await page.getByRole('button', { name: 'Generar Hoja de Reclamo' }).last().click()
   const modal = activeModal(page)
@@ -155,9 +155,9 @@ test('SCRUM-348 RN6 — técnico SÍ asignado puede editar y completar', async (
 })
 
 test('SCRUM-349 RN3 — hoja completada: cualquier rol con acceso puede Ver/Imprimir aunque no pueda editar', async ({ page }) => {
-  // Daniela (management) no puede editar Hoja de Reclamo (route role gate la bloquea), pero
+  // Gerencia (management) no puede editar Hoja de Reclamo (route role gate la bloquea), pero
   // servicios.read sí le da acceso de lectura/impresión — confirmar que el botón Ver/Imprimir
-  // aparece y funciona una vez la hoja (T96, Carlos) ya está completada.
+  // aparece y funciona una vez la hoja (T96, Tecnico Servicios) ya está completada.
   await login(page, DANIELA)
   await openTicketByNumero(page, 'REC-2026-0002') // T96, completada
   await page.getByRole('button', { name: /Completada/ }).last().click()

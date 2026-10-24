@@ -34,8 +34,8 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
     await page.getByRole('button', { name: 'Equipo', exact: true }).click()
     await page.waitForTimeout(2200)
 
-    // Scoped a botones (no al body completo) para no confundir con "Bienvenido, Esteban
-    // Cardenas" del saludo, que sí es legítimo y no es parte del selector de chips.
+    // Scoped a botones (no al body completo) para no confundir con "Bienvenido, Lider Bodega
+    // Lider Bodega" del saludo, que sí es legítimo y no es parte del selector de chips.
     await expect(page.getByRole('button', { name: 'Asistente Bodega Test 2', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Asistente Bodega Test', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Lider Bodega Test', exact: true })).toHaveCount(0)

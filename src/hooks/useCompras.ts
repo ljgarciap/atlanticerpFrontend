@@ -457,7 +457,7 @@ export function useApproveAmountChange(orderId: number) {
   })
 }
 
-// SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Mark.
+// SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Gerencia.
 export function useRejectAmountChange(orderId: number) {
   const qc = useQueryClient()
   return useMutation({

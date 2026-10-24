@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios'
 import type { FeAccionBoton, FeAccionResultado } from '@/types/adminContab'
 
 /**
- * SCRUM-1007 — acción fiscal manual sobre un documento electrónico (solo Mark/superadmin; el caller lo monta
+ * SCRUM-1007 — acción fiscal manual sobre un documento electrónico (solo Gerencia/superadmin; el caller lo monta
  * únicamente si el backend devolvió `accion_fe`). Pide confirmación explícita porque vuelve a hablar con la
  * DGI a través de MSL, muestra "Enviando…" mientras dura la llamada (puede tardar ~15 s por el timeout de MSL)
  * y luego el resultado real: un rechazo nuevo NO es un error, es el resultado.

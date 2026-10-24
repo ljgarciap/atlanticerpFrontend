@@ -24,7 +24,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     stage: 'despachado',
     proyecto: 'Torre Azul',
     cliente: 'Constructora Pacífico',
-    vendedor: 'Mark',
+    vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
     picker: null,
     repartidor: 'Juan Pérez',
@@ -152,7 +152,7 @@ describe('GuiaEntregaModal', () => {
   })
 
   /**
-   * Rebote SCRUM-894 (Daniela, 2026-09-13) — el preview mostraba TODOS los items sin filtrar y
+   * Rebote SCRUM-894 (Gerencia, 2026-09-13) — el preview mostraba TODOS los items sin filtrar y
    * caía a `qty_requested` cuando `qty_delivered` era 0, mismo bug ya corregido en
    * `guia-entrega-pdf.blade.php` pero nunca en este componente (por eso modal y PDF descargado
    * mostraban cosas distintas). Caso real: 1 producto con 10 unidades realmente entregadas en
@@ -184,7 +184,7 @@ describe('GuiaEntregaModal', () => {
   })
 
   /**
-   * Rebote SCRUM-395 (2026-08-19, Daniela) — "Imprimir" hacía `window.print()` sobre el HTML del
+   * Rebote SCRUM-395 (2026-08-19, Gerencia) — "Imprimir" hacía `window.print()` sobre el HTML del
    * modal: el tablero de Pedidos oculto con `visibility:hidden` seguía paginándose de fondo
    * (10 páginas, 8 en blanco) y el navegador nunca repite un footer entre páginas impresas. El
    * documento real (dompdf, con pie de página fijo y paginación correctos) ya existe en

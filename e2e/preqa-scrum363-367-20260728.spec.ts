@@ -160,7 +160,7 @@ test.describe('SCRUM-367 — Mi día / Pedidos hoy', () => {
     await page.goto(`${BASE}/bodega/home`)
     await page.waitForTimeout(1500)
 
-    // Esteban es Jefe de Bodega — alterna a "Equipo" (view_team) para el chequeo principal.
+    // Lider Bodega es Jefe de Bodega — alterna a "Equipo" (view_team) para el chequeo principal.
     const equipoBtn = page.getByRole('button', { name: 'Equipo', exact: true })
     await equipoBtn.waitFor({ timeout: 10000 })
     await equipoBtn.click()
@@ -226,9 +226,9 @@ test.describe('SCRUM-367 — Mi día / Pedidos hoy', () => {
     await page.goto(`${BASE}/bodega/home`)
     await page.waitForTimeout(1500)
 
-    // Alcance "Inicio" (propio de Esteban como Jefe) es el candidato más probable a dar 0 si él
+    // Alcance "Inicio" (propio de Lider Bodega como Jefe) es el candidato más probable a dar 0 si él
     // mismo no tiene pedidos asignados directamente (el fix es sobre el conteo, no una garantía
-    // de que Esteban tenga pedidos propios) — igual no debe romper la pantalla.
+    // de que Lider Bodega tenga pedidos propios) — igual no debe romper la pantalla.
     const body = await page.textContent('body')
     expect(errors).toEqual([])
     expect(body).toMatch(/Pedidos hoy/)

@@ -11,7 +11,7 @@ import EditSubClientTaxDataModal from '@/components/EditSubClientTaxDataModal'
 import ExencionItbmsModal from '@/components/admin-contab/ExencionItbmsModal'
 
 /**
- * SCRUM-1002 — punto de entrada de Admin&Cont (Mark, Felix) para validar y editar la razón social, el RUC y el DV de un
+ * SCRUM-1002 — punto de entrada de Admin&Cont (Gerencia, Contabilidad) para validar y editar la razón social, el RUC y el DV de un
  * SubCliente sin pasar por Ventas & Diseño (sus homes y su sidebar no incluyen la pantalla Clientes). Reusa el mismo
  * modal que el detalle del cliente. La lista marca los clientes ya "bloqueados" (con facturas o notas de crédito
  * certificadas/pendientes): el backend rechazaría su edición con 409, así que el botón se deshabilita con la razón.
@@ -22,7 +22,7 @@ export default function ClientesFiscalPage() {
   const hasEditClientTaxData = usePermission('ventas_diseno.edit.client_tax_data')
   const hasVentasDisenoEdit  = usePermission('ventas_diseno.edit')
   const canEdit = hasEditClientTaxData || hasVentasDisenoEdit
-  // SCRUM-1166 — marcar clientes exentos de ITBMS es un permiso angosto propio (Mark, Felix y Yaneth): quien solo tiene este entra a ver el listado.
+  // SCRUM-1166 — marcar clientes exentos de ITBMS es un permiso angosto propio (Gerencia, Contabilidad y Asistente Administrativa): quien solo tiene este entra a ver el listado.
   const canExempt = usePermission('admin_contab.edit.client_itbms_exemption')
 
   const [busqueda, setBusqueda] = useState('')

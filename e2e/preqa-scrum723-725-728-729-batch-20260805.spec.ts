@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * Pre-QA — SCRUM-723 (warn "Volver a Pipeline" sin guardar), SCRUM-725 (margen mínimo
- * por producto/global + override Mark/David + precio manual de catálogo), SCRUM-728
+ * por producto/global + override Gerencia/David + precio manual de catálogo), SCRUM-728
  * (submenú Catálogo en CRM), SCRUM-729 (sidebar Compras un solo activo + provider
  * picker con foco/blur).
  *
@@ -304,7 +304,7 @@ function itemRowByReference(page: Page, reference: string) {
   return page.locator('tr').filter({ has: page.locator(`input[value="${reference}"]`) })
 }
 
-test.describe('SCRUM-725 — margen mínimo (30%) por producto/global + excepción Mark/David', () => {
+test.describe('SCRUM-725 — margen mínimo (30%) por producto/global + excepción Gerencia/David', () => {
   let vendorQuoteUrl = ''
 
   test('1. Sin permiso — agregar producto de margen bajo (20%) BLOQUEA (422), revelando el 30% (decisión de Luis 2026-08-05)', async ({ page }) => {
@@ -433,12 +433,12 @@ echo "PRICE_FULL:" . $p->price_full . "\\n";
 
   let markQuoteUrl = ''
 
-  test('6. Mark (con permiso) — agregar producto de margen bajo NO bloquea, queda resaltado en rojo con mensaje (con el 30% visible)', async ({ page }) => {
+  test('6. Gerencia (con permiso) — agregar producto de margen bajo NO bloquea, queda resaltado en rojo con mensaje (con el 30% visible)', async ({ page }) => {
     await login(page, MARK)
     await openBlankQuote(page)
     markQuoteUrl = page.url()
-    await fillQuoteHeader(page, `${PROJECT} Margen Mark`)
-    await addPart(page, '[PREQA] Mark Margen')
+    await fillQuoteHeader(page, `${PROJECT} Margen Gerencia`)
+    await addPart(page, '[PREQA] Gerencia Margen')
     await page.waitForTimeout(400)
 
     await addCatalogItemByReference(page, REF_LOW)
@@ -464,7 +464,7 @@ echo "PRICE_FULL:" . $p->price_full . "\\n";
     await page.waitForTimeout(700)
   })
 
-  test('7. Mark — "Guardar" (confirm) con margen violado muestra modal de advertencia; "Cancelar" NO guarda', async ({ page }) => {
+  test('7. Gerencia — "Guardar" (confirm) con margen violado muestra modal de advertencia; "Cancelar" NO guarda', async ({ page }) => {
     await login(page, MARK)
     await page.goto(markQuoteUrl)
     await page.waitForTimeout(600)
@@ -496,7 +496,7 @@ echo "PRICE_FULL:" . $p->price_full . "\\n";
     await expect(page.getByText('Guardada')).toHaveCount(0)
   })
 
-  test('8. Mark — "Continuar" en el modal de advertencia SÍ guarda (confirmed_at queda seteado)', async ({ page }) => {
+  test('8. Gerencia — "Continuar" en el modal de advertencia SÍ guarda (confirmed_at queda seteado)', async ({ page }) => {
     await login(page, MARK)
     await page.goto(markQuoteUrl)
     await page.waitForTimeout(600)

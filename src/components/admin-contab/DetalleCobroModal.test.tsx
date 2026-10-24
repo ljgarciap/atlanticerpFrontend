@@ -208,8 +208,8 @@ describe('DetalleCobroModal — REQ-473/475 (Batch 7)', () => {
     expect(screen.queryByTestId('cobro-saldo-sin-aplicar')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1168 F4 — anular un cobro: se solicita con motivo y lo decide Mark.
-  it('SCRUM-1168 — «Anular cobro» pide el motivo y envía la solicitud; queda pendiente de Mark', async () => {
+  // SCRUM-1168 F4 — anular un cobro: se solicita con motivo y lo decide Gerencia.
+  it('SCRUM-1168 — «Anular cobro» pide el motivo y envía la solicitud; queda pendiente de Gerencia', async () => {
     mockedApi.payments.detail.mockResolvedValue(makeDetail({ estado: 'confirmado' }))
     mockedApi.payments.requestVoid.mockResolvedValue({ id: 3, estado: 'solicitada' } as never)
     renderModal()
@@ -271,7 +271,7 @@ describe('DetalleCobroModal — REQ-473/475 (Batch 7)', () => {
   it('REQ-475 Escenario 2 — muestra el registro de confirmación (CONF-XXX) cuando existe', async () => {
     mockedApi.payments.detail.mockResolvedValue(makeDetail({
       estado: 'confirmado',
-      confirmacion: { numero_confirmacion: 'CONF-001', confirmado_por: 'Yaneth Solano', confirmado_at: '2026-07-05T00:00:00Z' },
+      confirmacion: { numero_confirmacion: 'CONF-001', confirmado_por: 'Asistente Administrativa Solano', confirmado_at: '2026-07-05T00:00:00Z' },
     }))
     renderModal()
 

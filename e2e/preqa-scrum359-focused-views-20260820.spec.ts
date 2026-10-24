@@ -3,10 +3,10 @@ import { test, expect, type Page } from '@playwright/test'
 /**
  * Pre-QA — SCRUM-359 (REQ-289): vistas SECUNDARIAS de apoyo (Movimiento de Herramientas / Kardex,
  * Informe móvil) NO deben mostrar el menú de navegación general de las 5 pestañas. Rebote de QA
- * (Marly, 2026-08-20) sobre el Kardex mostrando el sidebar/topbar completo. Fix: FocusedViewShell
+ * (Gerencia, 2026-08-20) sobre el Kardex mostrando el sidebar/topbar completo. Fix: FocusedViewShell
  * (sin Sidebar/TopBar) para estas 2 rutas, commit ffa921e, desplegado a dev.atlanticerp.ai.
  *
- * Cuenta real (password = email): liderservicios@test.com (Aaron Leis, lider_servicios).
+ * Cuenta real (password = email): liderservicios@test.com (Lider Servicios Leis, lider_servicios).
  */
 test.describe.configure({ mode: 'serial' })
 

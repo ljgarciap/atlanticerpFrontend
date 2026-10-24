@@ -59,18 +59,18 @@ function mk($numero, $tech, $estado, $start, $end) {
   ]);
 }
 
-// Carlos: 2 visitas hoy -- una más temprana (ya pasada) y una EN CURSO ahora (Ocupado/on_site).
+// Tecnico Servicios: 2 visitas hoy -- una más temprana (ya pasada) y una EN CURSO ahora (Ocupado/on_site).
 $early = $now->copy()->subHours(3);
 $tCarlosEarly = mk("E2E-{$stamp}-1", $carlos, 'resolved', $early->copy(), $early->copy()->addHour());
 $tCarlosOnSite = mk("E2E-{$stamp}-2", $carlos, 'scheduled', $now->copy()->subMinutes(15), $now->copy()->addMinutes(45));
 
-// Pedro: próxima visita en 30 min -- En ruta.
+// Tecnico Servicios: próxima visita en 30 min -- En ruta.
 $tPedro = mk("E2E-{$stamp}-3", $pedro, 'scheduled', $now->copy()->addMinutes(30), $now->copy()->addMinutes(90));
 
 // Agustín: única visita de hoy ya terminada, sin más agendadas -- Fuera.
 $tAgustin = mk("E2E-{$stamp}-4", $agustin, 'resolved', $now->copy()->subHours(2), $now->copy()->subHour());
 
-// Miguel: visita CANCELADA hoy -- no debe contar ni afectar su estado (sigue Disponible, 0 visitas).
+// Garantias Servicios: visita CANCELADA hoy -- no debe contar ni afectar su estado (sigue Disponible, 0 visitas).
 $tMiguelCancelled = mk("E2E-{$stamp}-5", $miguel, 'cancelled', $now->copy()->subMinutes(5), $now->copy()->addMinutes(55));
 
 echo "FIXTURE_JSON:" . json_encode([

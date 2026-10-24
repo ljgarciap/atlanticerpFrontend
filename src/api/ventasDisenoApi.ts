@@ -17,7 +17,7 @@ import type {
   OrderListResult, OrderDetail, OrderStatus, OrdersSettingsValue, QuoteVersionsResult, QuoteItemPricePreview,
   LegacyHistoryEntidad, LegacyHistoryResult, LegacyDocumentResult,
   PipelineCardProductDeliveryRow, PipelineCardProductDeliveryAssignmentPayload,
-  CotizaYaContext, CotizaYaListResult, CotizaYaFields, Associate, AssociateInput, AssociateType,
+  Associate, AssociateInput, AssociateType,
 } from '@/types/ventasDiseno'
 import type { CatalogProductCategory } from '@/types/compras'
 import type { OutlookCalendarEvent } from '@/types/calendar'
@@ -74,10 +74,9 @@ function blobToText(blob: Blob): Promise<string> {
 }
 
 /**
- * Partidas e ítems de una cotización. El MISMO motor sirve a Cotizaciones (`quotes`) y a CotizaYA (`cotizaya`):
- * el backend expone rutas gemelas, así `QuotePartCard` se reutiliza sin copiarse (SCRUM-1120).
+ * Partidas e ítems de una cotización (`/ventas-diseno/quotes/{id}/parts/...`).
  */
-export function buildQuotePartsApi(base: 'quotes' | 'cotizaya') {
+export function buildQuotePartsApi(base: 'quotes') {
   return {
     create: (quoteId: number, name: string): Promise<QuotePartRef> =>
       api.post<QuotePartRef>(`/ventas-diseno/${base}/${quoteId}/parts`, { name }).then(r => r.data),
@@ -392,7 +391,7 @@ export const ventasDisenoApi = {
     // asignado (422 si no); marca la cotización como registrada oficialmente
     // (confirmed_at), lo que la hace visible en Pipeline/Cotizaciones/Reportes/Dashboard.
     // SCRUM-725 — `overrideMarginWarning` es la confirmación explícita del modal de
-    // advertencia de margen (Mark/David); sin violaciones de margen no hace nada.
+    // advertencia de margen (Gerencia/David); sin violaciones de margen no hace nada.
     confirm: (id: number, overrideMarginWarning?: boolean): Promise<QuoteDetail> =>
       api.post<QuoteDetail>(`/ventas-diseno/quotes/${id}/confirm`, overrideMarginWarning ? { override_margin_warning: true } : undefined).then(r => r.data),
 
@@ -424,41 +423,6 @@ export const ventasDisenoApi = {
     parts: buildQuotePartsApi('quotes'),
 
     // SCRUM-1121 — asociados (base única): con proyecto son los del proyecto, sin proyecto los del borrador.
-  },
-
-  // SCRUM-1120 — CotizaYA: cotizaciones de venta chica, independientes del flujo comercial. Partidas e ítems
-  // reutilizan el mismo motor que Cotizaciones por las rutas gemelas `/cotizaya/{id}/parts/...`.
-  cotizaya: {
-    context: (): Promise<CotizaYaContext> =>
-      api.get<CotizaYaContext>('/ventas-diseno/cotizaya/context').then(r => r.data),
-
-    list: (filters: { search?: string; page?: number; per_page?: number | 'all' } = {}): Promise<CotizaYaListResult> =>
-      api.get<CotizaYaListResult>('/ventas-diseno/cotizaya', { params: filters }).then(r => r.data),
-
-    // Crea el borrador (con el cliente fijo del backend) para poder agregar partidas.
-    create: (data: CotizaYaFields = {}): Promise<QuoteDetail> =>
-      api.post<QuoteDetail>('/ventas-diseno/cotizaya', data).then(r => r.data),
-
-    get: (id: number): Promise<QuoteDetail> =>
-      api.get<QuoteDetail>(`/ventas-diseno/cotizaya/${id}`).then(r => r.data),
-
-    update: (id: number, data: CotizaYaFields): Promise<QuoteDetail> =>
-      api.put<QuoteDetail>(`/ventas-diseno/cotizaya/${id}`, data).then(r => r.data),
-
-    // Generar: valida, asigna el folio CotizaYA-AAAA-NNNN y deja la cotización fija. Nunca toca Pipeline.
-    generate: (id: number): Promise<QuoteDetail> =>
-      api.post<QuoteDetail>(`/ventas-diseno/cotizaya/${id}/generate`).then(r => r.data),
-
-    // PDF con el formato de Cotizaciones (versión interna: incluye Observaciones y Condiciones).
-    pdf: (id: number): Promise<Blob> =>
-      api.get(`/ventas-diseno/cotizaya/${id}/pdf`, { params: { external: 0 }, responseType: 'blob' }).then(r => r.data as Blob),
-
-    contacts: {
-      create: (quoteId: number, subClientContactId: number): Promise<QuoteContactRef> =>
-        api.post<QuoteContactRef>(`/ventas-diseno/cotizaya/${quoteId}/contacts`, { sub_client_contact_id: subClientContactId }).then(r => r.data),
-    },
-
-    parts: buildQuotePartsApi('cotizaya'),
   },
 
   // Grupo 4 — pantalla Reportes (REQ-071 a 079).

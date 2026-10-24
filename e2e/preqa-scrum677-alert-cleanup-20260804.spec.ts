@@ -48,7 +48,7 @@ const errBanner = (page: Page) =>
   page.locator('div.border-red-200, div.dark\\:border-red-900\\/50').filter({ hasText: /./ })
 
 test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER vía que resuelva el dato', () => {
-  test('Diseño → Crear cotización: falta superficie, se resuelve vía Editar/Guardar (escenario EXACTO de Daniela)', async ({ page }) => {
+  test('Diseño → Crear cotización: falta superficie, se resuelve vía Editar/Guardar (escenario EXACTO de Gerencia)', async ({ page }) => {
     test.setTimeout(60000)
     await login(page, 'vendedordisenador2@test.com')
     await openCard(page, 'PreQA Lead 677')

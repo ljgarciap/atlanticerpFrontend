@@ -117,7 +117,7 @@ export default function OrderCardTile({ order, onOpenDetail, onOpenGuide, onOpen
   // de Bodega — Asistentes no deberían poder asignar", sin pedir explícitamente ocultar el
   // control para el resto (a diferencia de "Asignar Picker", que si lo pide vía el Pre-QA MEDIO
   // 2026-07-26). El bloqueo real es el 403 del backend (`DeliveryService::assignCourier()`,
-  // confirmado en Pre-QA 2026-07-22 contra Mariano/Asistente), mostrado inline igual que el resto
+  // confirmado en Pre-QA 2026-07-22 contra Asistente Bodega/Asistente), mostrado inline igual que el resto
   // de este batch — mismo criterio "nunca un disabled/oculto precalculado" que `handleDispatch`.
   // Fix de regresión cruzada (2026-07-28): usaba `useBodegaHomeTeam` (solo Asistentes desde
   // SCRUM-366), select siempre vacío para Repartidor — ahora `useTeamMembersByRole('courier', ...)`.

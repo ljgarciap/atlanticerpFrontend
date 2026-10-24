@@ -56,24 +56,24 @@ function renderHeader() {
 
 describe('InicioHeader', () => {
   it('muestra el saludo con solo el primer nombre y el resumen del día (RN1/RN3/RN4)', async () => {
-    mockedAuth.mockReturnValue({ user: { first_name: 'Felix', last_name: 'López' } } as ReturnType<typeof useAuthStore>)
+    mockedAuth.mockReturnValue({ user: { first_name: 'Contabilidad', last_name: 'López' } } as ReturnType<typeof useAuthStore>)
     mockedApi.home.calendar.list.mockResolvedValue({ data: [{ id: '1' }], source_unavailable: false } as never)
     mockedApi.home.pendientes.mockResolvedValue({ count: 8, items: [] })
 
     renderHeader()
 
-    expect(await screen.findByText('Bienvenido, Felix')).toBeInTheDocument()
+    expect(await screen.findByText('Bienvenido, Contabilidad')).toBeInTheDocument()
     expect(await screen.findByText(/1 reunión y 8 pendientes hoy/)).toBeInTheDocument()
   })
 
-  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
-    mockedAuth.mockReturnValue({ user: { first_name: 'Juan Manuel', last_name: 'Brustein' } } as ReturnType<typeof useAuthStore>)
+  it('rebote QA (Gerencia, 2026-09-14) — recorta a la primera palabra cuando first_name trae un nombre compuesto', async () => {
+    mockedAuth.mockReturnValue({ user: { first_name: 'Ana Maria', last_name: 'Perez' } } as ReturnType<typeof useAuthStore>)
     mockedApi.home.calendar.list.mockResolvedValue({ data: [], source_unavailable: false } as never)
     mockedApi.home.pendientes.mockResolvedValue({ count: 0, items: [] })
 
     renderHeader()
 
-    expect(await screen.findByText('Bienvenido, Juan')).toBeInTheDocument()
+    expect(await screen.findByText('Bienvenido, Ana')).toBeInTheDocument()
   })
 
   it('muestra saludo genérico cuando no hay usuario resuelto (RN5)', async () => {

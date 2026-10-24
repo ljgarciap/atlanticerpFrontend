@@ -34,7 +34,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
 const mockedComprasApi = vi.mocked(comprasApi, true)
 const mockedVentasDisenoApi = vi.mocked(ventasDisenoApi, true)
 
-// Lote 4 (SCRUM-246) — `name` y `description` deliberadamente distintos: el rebote de Daniela
+// Lote 4 (SCRUM-246) — `name` y `description` deliberadamente distintos: el rebote de Gerencia
 // (2026-08-16) era justo que la pantalla mostraba `description` en vez de `name` en estos 2
 // lugares — un test que los deja iguales no puede detectar esa regresión si vuelve a aparecer.
 const ORIGINAL = { id: 1, reference: 'REF-ORIG', factory_reference: null, name: 'Bombillo decorativo E27 Ámbar', description: 'Descripción larga del original, no debe mostrarse', brand: null, photo_url: null, price_full: 20, cost: 12, stock_quantity: 3, reorder_point: null }

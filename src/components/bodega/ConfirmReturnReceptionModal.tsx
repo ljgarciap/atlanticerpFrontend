@@ -20,7 +20,7 @@ interface Props {
  * "Rechazar devolución" pide doble clic: el primero solo revela el campo de motivo (sin enviar
  * nada), el segundo (con motivo ya escrito) confirma el rechazo — mismo espíritu que el patrón de
  * "primer clic arma la confirmación" de `NewProjectModal.tsx`, pero con un campo de texto en vez de
- * un banner. El rechazo es exclusivo de Bodega (`bodega.write`), sin el gate de aprobación de Mark
+ * un banner. El rechazo es exclusivo de Bodega (`bodega.write`), sin el gate de aprobación de Gerencia
  * que sí tienen Reubicación/Conteos generales.
  */
 export default function ConfirmReturnReceptionModal({ id, onClose }: Props) {

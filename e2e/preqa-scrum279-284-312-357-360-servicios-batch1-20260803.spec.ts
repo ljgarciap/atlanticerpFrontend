@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test'
  * este trabajo todavía no se pusheó.
  *
  * Cuentas reales (password = email):
- *  - liderservicios@test.com    (lider_servicios) — Aaron, único que cambia estado.
+ *  - liderservicios@test.com    (lider_servicios) — Lider Servicios, único que cambia estado.
  *  - tecnicoservicios@test.com      (tecnico_servicios) — solo lectura del estado.
  *  - garantiasservicios@test.com   (garantias_servicios) — solo lectura del estado.
  *  - gerencia@test.com     (management) — solo lectura del estado.
@@ -32,7 +32,7 @@ async function gotoTickets(page: Page) {
   await page.waitForTimeout(1500)
 }
 
-test('1. Aaron — REQ-218: cambiar estado vía SELECT en tabla llega al backend real (regresión del mismatch /status vs /estado)', async ({ page }) => {
+test('1. Lider Servicios — REQ-218: cambiar estado vía SELECT en tabla llega al backend real (regresión del mismatch /status vs /estado)', async ({ page }) => {
   // Hallazgo CRÍTICO original de Pre-QA (2026-08-03): el frontend llamaba /status, el backend
   // solo registra /estado (routes/servicios.php) — 404 en todo intento de cambiar estado, tanto
   // desde el select de la tabla como desde el arrastre del tablero. Fix: serviciosApi.ts ahora
@@ -71,7 +71,7 @@ test('1. Aaron — REQ-218: cambiar estado vía SELECT en tabla llega al backend
   await expect(errorMsg).not.toBeVisible()
 })
 
-test('2. Aaron — REQ-221: Tablero renderiza las 6 columnas (Reportado→Cancelado)', async ({ page }) => {
+test('2. Lider Servicios — REQ-221: Tablero renderiza las 6 columnas (Reportado→Cancelado)', async ({ page }) => {
   const responses: number[] = []
   page.on('response', (res) => {
     if (res.url().includes('/servicios/tickets/') && (res.url().includes('/status') || res.url().includes('/estado'))) {
@@ -94,38 +94,38 @@ test('2. Aaron — REQ-221: Tablero renderiza las 6 columnas (Reportado→Cancel
   expect(columnHeaders).toBe(6)
 })
 
-test('3. Carlos (tecnico_servicios) — select de estado DESHABILITADO pero visible, no oculto', async ({ page }) => {
+test('3. Tecnico Servicios (tecnico_servicios) — select de estado DESHABILITADO pero visible, no oculto', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/04-tabla-carlos.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-281] Carlos — selects visibles:', count)
+  console.log('[SCRUM-281] Tecnico Servicios — selects visibles:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 })
 
-test('4. Daniela (management) — select de estado DESHABILITADO pero visible', async ({ page }) => {
+test('4. Gerencia (management) — select de estado DESHABILITADO pero visible', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/05-tabla-daniela.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-281] Daniela — selects visibles:', count)
+  console.log('[SCRUM-281] Gerencia — selects visibles:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 })
 
-test('5. Neil (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
+test('5. Vendedor Disenador (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/06-tabla-neil.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-281] Neil — selects visibles:', count)
+  console.log('[SCRUM-281] Vendedor Disenador — selects visibles:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 
@@ -133,7 +133,7 @@ test('5. Neil (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, s
   const nav = page.locator('nav[aria-label]').first()
   await expect(nav).toBeVisible()
   const navText = await nav.textContent()
-  console.log('[SCRUM-358] Menú de Neil:', navText)
+  console.log('[SCRUM-358] Menú de Vendedor Disenador:', navText)
   await expect(nav.getByText(/insumos/i)).toHaveCount(0)
   await expect(nav.getByText(/reportes/i)).toHaveCount(0)
 
@@ -144,13 +144,13 @@ test('5. Neil (vendedor_disenador) — solo lectura + menú reducido a 3 tabs, s
   await page.screenshot({ path: `${DL_DIR}/07-neil-dropdown-tecnicos.png`, fullPage: true })
 })
 
-test('6. Aaron — comparación: menú completo con 5 pestañas + 2 opciones de Técnicos', async ({ page }) => {
+test('6. Lider Servicios — comparación: menú completo con 5 pestañas + 2 opciones de Técnicos', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const nav = page.locator('nav[aria-label]').first()
   const navText = await nav.textContent()
-  console.log('[SCRUM-358] Menú de Aaron:', navText)
+  console.log('[SCRUM-358] Menú de Lider Servicios:', navText)
   await expect(nav.getByText(/insumos/i)).toBeVisible()
   await expect(nav.getByText(/reportes/i)).toBeVisible()
 
@@ -160,24 +160,24 @@ test('6. Aaron — comparación: menú completo con 5 pestañas + 2 opciones de 
   await page.screenshot({ path: `${DL_DIR}/08-aaron-dropdown-tecnicos.png`, fullPage: true })
 })
 
-test('7. Felix (Administración) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
+test('7. Contabilidad (Administración) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
   await page.screenshot({ path: `${DL_DIR}/09-felix-post-login.png`, fullPage: true })
 
   // Sidebar no debe mostrar el módulo Servicios en absoluto.
   const sidebarServicios = page.locator('a,button').filter({ hasText: /servicios/i })
   const sidebarCount = await sidebarServicios.count()
-  console.log('[SCRUM-358] Felix — enlaces "Servicios" en sidebar:', sidebarCount)
+  console.log('[SCRUM-358] Contabilidad — enlaces "Servicios" en sidebar:', sidebarCount)
 
   // Navegación directa por URL — confirmar que no se puede usar el módulo igual.
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/10-felix-direct-url-servicios.png`, fullPage: true })
   const bodyText = await page.textContent('body')
-  console.log('[SCRUM-358] Felix — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
+  console.log('[SCRUM-358] Contabilidad — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
 })
 
-test('8. Yirena (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
+test('8. Lider Compras (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
   await login(page, 'lidercompras@test.com')
   await page.screenshot({ path: `${DL_DIR}/11-yirena-post-login.png`, fullPage: true })
 
@@ -185,7 +185,7 @@ test('8. Yirena (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', as
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/12-yirena-direct-url-servicios.png`, fullPage: true })
   const bodyText = await page.textContent('body')
-  console.log('[SCRUM-358] Yirena — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
+  console.log('[SCRUM-358] Lider Compras — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
 })
 
 test('9. REQ-217 — filtros: sin fila de chips (RN5)', async ({ page }) => {
@@ -411,7 +411,7 @@ test('14. REQ-218 Escenario 4 — cotización Rechazada sin reemplazo bloquea (r
   console.log('TICKET_ID_FOR_TINKER=' + ticket.id)
 })
 
-test('15. Carlos (tecnico_servicios) — API directa: 403 al intentar cambiar estado aunque tenga servicios.edit', async ({ request }) => {
+test('15. Tecnico Servicios (tecnico_servicios) — API directa: 403 al intentar cambiar estado aunque tenga servicios.edit', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
     data: { email: 'tecnicoservicios@test.com', password: 'tecnicoservicios@test.com' },
   })
@@ -425,11 +425,11 @@ test('15. Carlos (tecnico_servicios) — API directa: 403 al intentar cambiar es
   const r = await request.patch(`${BASE}/api/servicios/tickets/${anyTicket.id}/estado`, {
     headers, data: { estado: 'scheduled' },
   })
-  console.log('[REQ-218 RN7 backend] Carlos (tecnico_servicios) intenta cambiar estado vía API directa -> HTTP', r.status())
+  console.log('[REQ-218 RN7 backend] Tecnico Servicios (tecnico_servicios) intenta cambiar estado vía API directa -> HTTP', r.status())
   expect(r.status()).toBe(403)
 })
 
-test('16. Daniela (management) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
+test('16. Gerencia (management) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
     data: { email: 'gerencia@test.com', password: 'gerencia@test.com' },
   })
@@ -443,7 +443,7 @@ test('16. Daniela (management) — API directa: 403 al intentar cambiar estado',
   const r = await request.patch(`${BASE}/api/servicios/tickets/${anyTicket.id}/estado`, {
     headers, data: { estado: 'scheduled' },
   })
-  console.log('[REQ-218 RN7 backend] Daniela (management) intenta cambiar estado vía API directa -> HTTP', r.status())
+  console.log('[REQ-218 RN7 backend] Gerencia (management) intenta cambiar estado vía API directa -> HTTP', r.status())
   expect(r.status()).toBe(403)
 })
 

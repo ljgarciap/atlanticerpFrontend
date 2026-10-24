@@ -30,6 +30,8 @@ export default function ComprasSettingsPanel() {
   // backend (`compras_settings`) pero no tenía ninguna pantalla para verlo/ajustarlo, mismo gap
   // que `low_rating_threshold` tenía antes de este panel.
   const [attentionDays, setAttentionDays] = useState('')
+  // Fase 1 (aislamiento del núcleo) — días «Por aprobar» a partir de los que una orden es crítica; antes fijo en código.
+  const [criticalDays, setCriticalDays] = useState('')
   // SCRUM-247 (REQ-184) — umbral de margen del sustituto, mismo patrón que los 2 de arriba.
   const [marginThreshold, setMarginThreshold] = useState('')
   // Lote 4 (SCRUM-246) — pesos de la fórmula de "% de similitud" y umbral mínimo de candidato.
@@ -46,6 +48,7 @@ export default function ComprasSettingsPanel() {
     if (!settings) return
     setThreshold(String(settings.low_rating_threshold))
     setAttentionDays(String(settings.claim_attention_days))
+    setCriticalDays(String(settings.critical_days_por_aprobar))
     setMarginThreshold(String(settings.replacement_margin_threshold))
     setWeightText(String(settings.similarity_weight_text))
     setWeightPrice(String(settings.similarity_weight_price))
@@ -57,6 +60,7 @@ export default function ComprasSettingsPanel() {
   const dirty = settings != null && (
     threshold !== String(settings.low_rating_threshold)
     || attentionDays !== String(settings.claim_attention_days)
+    || criticalDays !== String(settings.critical_days_por_aprobar)
     || marginThreshold !== String(settings.replacement_margin_threshold)
     || weightText !== String(settings.similarity_weight_text)
     || weightPrice !== String(settings.similarity_weight_price)
@@ -72,6 +76,8 @@ export default function ComprasSettingsPanel() {
 
   const parsedDays = Number(attentionDays)
   const daysInvalid = attentionDays.trim() === '' || !Number.isInteger(parsedDays) || parsedDays < 1 || parsedDays > 365
+  const parsedCritical = Number(criticalDays)
+  const criticalInvalid = criticalDays.trim() === '' || !Number.isInteger(parsedCritical) || parsedCritical < 1 || parsedCritical > 365
 
   const parsedMargin = Number(marginThreshold)
   const marginInvalid = marginThreshold.trim() === '' || Number.isNaN(parsedMargin) || parsedMargin < 0 || parsedMargin > 100
@@ -94,13 +100,13 @@ export default function ComprasSettingsPanel() {
   const weightsSumOffBy100 = !similarityInvalid && Math.round(weightsSum) !== 100
 
   const handleSave = () => {
-    if (invalid || daysInvalid || marginInvalid || similarityInvalid) {
+    if (invalid || daysInvalid || criticalInvalid || marginInvalid || similarityInvalid) {
       setError(t('compras:settings.invalid'))
       return
     }
     setError(null)
     mutation.mutate({
-      low_rating_threshold: parsed, claim_attention_days: parsedDays,
+      low_rating_threshold: parsed, claim_attention_days: parsedDays, critical_days_por_aprobar: parsedCritical,
       replacement_margin_threshold: parsedMargin,
       similarity_weight_text: parsedWeightText, similarity_weight_price: parsedWeightPrice,
       similarity_weight_margin: parsedWeightMargin,
@@ -142,6 +148,20 @@ export default function ComprasSettingsPanel() {
           max={365}
           value={attentionDays}
           onChange={e => { setAttentionDays(e.target.value); setError(null) }}
+          className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </div>
+
+      <div className="max-w-xs mb-3">
+        <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+          {t('compras:settings.criticalDaysPorAprobar')}
+        </label>
+        <input
+          type="number"
+          min={1}
+          max={365}
+          value={criticalDays}
+          onChange={e => { setCriticalDays(e.target.value); setError(null) }}
           className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
         />
       </div>

@@ -24,24 +24,24 @@ export default function VentasDisenoPipelinePage() {
   const navigate  = useNavigate()
   const { user }  = useAuthStore()
   const canSeeTeam = hasGerenciaScope(user)
-  // SCRUM-1128 — Félix (`ventas_diseno.pipeline.read_all`) ve el Pipeline de TODO el equipo en solo
+  // SCRUM-1128 — Contabilidad (`ventas_diseno.pipeline.read_all`) ve el Pipeline de TODO el equipo en solo
   // lectura, pero no es Gerencia: sin esto el listado salía con scope='own' y le llegaba vacío (el
   // backend solo da alcance de equipo con scope='team'). `canSeeTeam` se mantiene para lo que exige
-  // `ventas_diseno.read` (selector de dueños, /home/vendors): Félix no lo tiene y recibiría 403.
+  // `ventas_diseno.read` (selector de dueños, /home/vendors): Contabilidad no lo tiene y recibiría 403.
   const readsAllPipeline = user?.permissions?.includes('ventas_diseno.pipeline.read_all') ?? false
   const canViewTeamScope = canSeeTeam || readsAllPipeline
-  // SCRUM-1128 — Félix entra al Pipeline en solo lectura (más la acción "Pasar a Pedido" dentro del
+  // SCRUM-1128 — Contabilidad entra al Pipeline en solo lectura (más la acción "Pasar a Pedido" dentro del
   // detalle de un proyecto aprobado). Sin permiso de edición del módulo se ocultan las acciones de
   // escritura del tablero; el backend las rechaza igual (403). Sin permiso real de escritura => solo lectura.
-  // Sin el claim de módulo (Félix no tiene `modules.ventas_diseno`) NO se asume edición: se exige permiso real de escritura.
-  // SCRUM-1139 — `ventas_diseno.pipeline.edit` (Félix) habilita la edición del tablero SOLO en el Pipeline: es el
+  // Sin el claim de módulo (Contabilidad no tiene `modules.ventas_diseno`) NO se asume edición: se exige permiso real de escritura.
+  // SCRUM-1139 — `ventas_diseno.pipeline.edit` (Contabilidad) habilita la edición del tablero SOLO en el Pipeline: es el
   // permiso angosto gemelo de `pipeline.read_all`, no abre ninguna otra pantalla del módulo.
   const canEditModule = user?.modules?.ventas_diseno?.edit === true || (user?.permissions?.includes('ventas_diseno.write') ?? false)
   const hasPipelineEdit = user?.permissions?.includes('ventas_diseno.pipeline.edit') ?? false
   const canEditPipeline = canEditModule || hasPipelineEdit
   // Con solo `pipeline.edit` (sin edición del módulo) no se ofrece "Nueva cotización": llevaría a Cotizaciones, que esa persona no abre.
   const canCreateQuoteFromPipeline = canEditModule
-  // El Catálogo exige `ventas_diseno.read`: quien solo tiene los permisos angostos del Pipeline (`read_all`/`pipeline.edit`, Félix) no lo abre
+  // El Catálogo exige `ventas_diseno.read`: quien solo tiene los permisos angostos del Pipeline (`read_all`/`pipeline.edit`, Contabilidad) no lo abre
   // (la ruta lo redirige), así que el botón sería un enlace muerto. Se oculta solo para ese perfil; el resto lo ve igual que antes.
   const perms = user?.permissions ?? []
   const pipelineOnlyAccess = (readsAllPipeline || hasPipelineEdit) && !perms.includes('ventas_diseno.read') && !perms.includes('superadmin.all')
@@ -206,7 +206,7 @@ export default function VentasDisenoPipelinePage() {
           className="border border-slate-200 rounded-lg px-3 py-2 md:py-1.5 text-base md:text-[13px] w-full sm:min-w-[220px] sm:flex-1 focus:outline-none focus:border-[#5BA5A0]"
         />
 
-        {/* Alcance — solo Gerencia puede ver "Equipo" (REQ-002); Félix queda fijo en Equipo, sin toggle */}
+        {/* Alcance — solo Gerencia puede ver "Equipo" (REQ-002); Contabilidad queda fijo en Equipo, sin toggle */}
         {canSeeTeam && (
           <div className="flex rounded-lg border border-slate-200 overflow-hidden">
             <Button

@@ -31,7 +31,7 @@ async function login(page: Page, email: string, password: string): Promise<void>
 
 // ---------- SCRUM-884 — campo Creador ----------
 
-test('SCRUM-884 — Neil crea un Lead solo; Creador y Responsable coinciden (caso simple)', async ({ page }) => {
+test('SCRUM-884 — Vendedor Disenador crea un Lead solo; Creador y Responsable coinciden (caso simple)', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
   await page.goto(`${DEV}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
@@ -39,7 +39,7 @@ test('SCRUM-884 — Neil crea un Lead solo; Creador y Responsable coinciden (cas
   await page.waitForTimeout(500)
   // El input de Nombre tiene autoFocus — más confiable que "primer input[type=text] de la
   // página" (el resto de la app sigue montado detrás del modal).
-  await page.locator(':focus').fill('PreQA SCRUM-884 Neil Solo')
+  await page.locator(':focus').fill('PreQA SCRUM-884 Vendedor Disenador Solo')
   await page.getByRole('button', { name: /^Guardar$/i }).click()
   await page.waitForTimeout(2000)
 
@@ -58,7 +58,7 @@ test('SCRUM-884 — Camino de ruptura: proyecto ya existente (pre-backfill) mues
   const firstCard = page.locator('[draggable="true"]').first()
   await firstCard.click({ timeout: 15000 })
   await page.waitForTimeout(1000)
-  // La cuenta de Daniela tiene la UI en inglés (confirmado en vivo, ver spec SCRUM-910) —
+  // La cuenta de Gerencia tiene la UI en inglés (confirmado en vivo, ver spec SCRUM-910) —
   // matchear ambos labels en vez de asumir español.
   const body = page.locator('body')
   await expect(body).toContainText(/Creador|Creator/)
@@ -158,7 +158,7 @@ async function openClienteMasterPicker(page: Page): Promise<boolean> {
 test('SCRUM-917 — buscar un Cliente Master real fuera del top 200 alfabético SÍ aparece', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
   const opened = await openClienteMasterPicker(page)
-  test.skip(!opened, 'Neil no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
+  test.skip(!opened, 'Vendedor Disenador no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
 
   const searchInput = page.locator('input:focus')
   await searchInput.fill('GRUPO MJE')
@@ -173,7 +173,7 @@ test('SCRUM-917 — buscar un Cliente Master real fuera del top 200 alfabético 
 test('SCRUM-917 — Camino de ruptura: buscar un nombre que NO existe sigue mostrando "Sin resultados" (negativo intacto)', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
   const opened = await openClienteMasterPicker(page)
-  test.skip(!opened, 'Neil no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
+  test.skip(!opened, 'Vendedor Disenador no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
 
   const searchInput = page.locator('input:focus')
   await searchInput.fill('ZZZZZZ Cliente Que Definitivamente No Existe 999')

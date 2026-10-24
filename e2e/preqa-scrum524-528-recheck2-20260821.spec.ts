@@ -4,7 +4,7 @@ import { test, expect, Page } from '@playwright/test'
 // proyectaba incobrable_pendiente/anulada_at). Fixtures nuevos sembrados por tinker/API en esta
 // misma sesión de re-check (el ambiente local había sido revertido a 0 filas al cerrar la corrida
 // anterior, ver docs/pre-qa/scrum524-528-facturacion-batch4-20260821.md sección 0):
-//   P (order 372, F-0001) -> incobrable PENDIENTE (Felix propuso via API)
+//   P (order 372, F-0001) -> incobrable PENDIENTE (Contabilidad propuso via API)
 //   N (order 373, F-0002) -> facturada normal, sin flags (control)
 //   A (order 374, F-0003) -> anulada_at seteado manualmente (sin flujo real todavía)
 // bank_account_id 18 "Banco PreQA Recheck ****9911" creada porque el ambiente volvía a estar en 0
@@ -125,5 +125,5 @@ test('bloque de pago (Cuenta número/Responsable) sigue en el PDF real -- confir
   expect(text).toContain('Cuenta número')
   expect(text).toContain('Banco PreQA Recheck ****9911')
   expect(text).toContain('Responsable')
-  expect(text).toContain('Felix')
+  expect(text).toContain('Contabilidad')
 })

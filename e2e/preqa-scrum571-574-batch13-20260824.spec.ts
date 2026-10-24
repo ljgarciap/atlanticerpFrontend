@@ -10,20 +10,20 @@ import { test, expect, type Page } from '@playwright/test'
  * — + POST/PUT reales contra `/api/admin-contab/notas-credito` para register()/decide()). Prefijo
  * [PREQA-B13] en todo lo sembrado. Ver reporte de Pre-QA (docs/pre-qa/) para el detalle completo.
  *
- * ⚠️ Password real de Mark en este entorno local: default (su propio email), NO la que constaba
+ * ⚠️ Password real de Gerencia en este entorno local: default (su propio email), NO la que constaba
  * en el prompt de despacho (`B1n4X_2026?`, confirmada inválida vía Hash::check() contra la BD real
  * — hallazgo de documentación, reportado aparte, no bloqueante de este batch).
  *
  *   NC-0007 (id 26) — Anulación completa $200 (bajo el umbral $5,000), CON comprobante —
  *                     pendiente_aprobacion (REQ-494 RN1, foco explícito del Arquitecto). Se deja
  *                     pendiente a propósito (no se decide) para verificar el estado en UI.
- *   NC-0008 (id 27) — Devolución mercancía $8,000, SIN comprobante — aprobada por Mark sin exigir
+ *   NC-0008 (id 27) — Devolución mercancía $8,000, SIN comprobante — aprobada por Gerencia sin exigir
  *                     comprobante (RN2, foco explícito).
  *   NC-0009 (id 28) — Anulación completa $400, comprobante imagen JPG — pendiente (para Ver comprobante).
- *   NC-0010 (id 29) — Anulación completa $500 — rechazada por Mark con motivo.
- *   NC-0011 (id 30) — Anulación completa $300 — aprobada por Mark.
+ *   NC-0010 (id 29) — Anulación completa $500 — rechazada por Gerencia con motivo.
+ *   NC-0011 (id 30) — Anulación completa $300 — aprobada por Gerencia.
  *   NC-0012 (id 31) — Anulación completa $250, pendiente_aprobacion — chequeo de visibilidad de
- *                     los botones Aprobar/Rechazar contra un actor no-Mark (Felix).
+ *                     los botones Aprobar/Rechazar contra un actor no-Mark (Contabilidad).
  *   NC-0013 (id 32) — Anulación completa $200, pendiente, SIN comprobante (creada directo en BD,
  *                     fuera del flujo de registro que ya lo exige) — verificado el bloqueo RN2 al
  *                     aprobar vía API real (422), no se repite acá en UI (ya cubierto por backend).
@@ -32,7 +32,7 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 const FELIX = 'contabilidad@test.com'
-const FELIX_PW = 'contabilidad@test.com'
+const CONTABILIDAD_PW = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
 const MARK_PW = 'gerencia3@test.com' // default (email-como-password) — NO la del prompt de despacho, ver docblock arriba
 
@@ -67,7 +67,7 @@ async function openNoteByNumero(page: Page, numero: string) {
 }
 
 test('REQ-494 RN1 — NC-0007 (Anulación completa $200, bajo umbral) muestra "Pendiente" en UI', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0007')
   await expect(page.getByText(/NC-0007/i).first()).toBeVisible({ timeout: 8000 })
@@ -75,21 +75,21 @@ test('REQ-494 RN1 — NC-0007 (Anulación completa $200, bajo umbral) muestra "P
   await page.screenshot({ path: 'e2e/.tmp/preqa-b13-nc0007-pendiente-monto-bajo.png' })
 })
 
-test('REQ-494 RN1 — hallazgo documentado: Felix (NO Mark) SÍ ve Aprobar/Rechazar en NC-0012 pendiente (backend bloquea, UI no oculta)', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+test('REQ-494 RN1 — hallazgo documentado: Contabilidad (NO Gerencia) SÍ ve Aprobar/Rechazar en NC-0012 pendiente (backend bloquea, UI no oculta)', async ({ page }) => {
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0012')
   await expect(page.getByText(/NC-0012/i).first()).toBeVisible({ timeout: 8000 })
   const aprobarBtn = page.getByRole('button', { name: /^Aprobar$/i })
   const visible = await aprobarBtn.isVisible().catch(() => false)
-  console.log('REQ-494 RN1 — botón "Aprobar" visible para Felix (NO Mark):', visible)
+  console.log('REQ-494 RN1 — botón "Aprobar" visible para Contabilidad (NO Gerencia):', visible)
   await page.screenshot({ path: 'e2e/.tmp/preqa-b13-felix-nc0012-botones.png' })
   // Hallazgo documentado en el reporte (no falla el test): `puede_aprobar_rechazar` es solo por
   // estado, no por actor — a diferencia de `puede_decidir_incobrable` en Facturación (mismo batch/
-  // epic, mismo patrón "exclusivo de Mark"), que SÍ resuelve identidad server-side.
+  // epic, mismo patrón "exclusivo de Gerencia"), que SÍ resuelve identidad server-side.
 })
 
-test('REQ-494 — Mark ve y usa Aprobar/Rechazar en NC-0012', async ({ page }) => {
+test('REQ-494 — Gerencia ve y usa Aprobar/Rechazar en NC-0012', async ({ page }) => {
   await login(page, MARK, MARK_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0012')
@@ -99,7 +99,7 @@ test('REQ-494 — Mark ve y usa Aprobar/Rechazar en NC-0012', async ({ page }) =
 })
 
 test('REQ-495 — Ver comprobante de NC-0009 (imagen JPG) muestra un <img> real, no fallback genérico', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0009')
   await page.getByRole('button', { name: /Ver comprobante/i }).click()
@@ -113,7 +113,7 @@ test('REQ-495 — Ver comprobante de NC-0009 (imagen JPG) muestra un <img> real,
 })
 
 test('REQ-495 RN2 — Ver comprobante de NC-0008 (sin comprobante) muestra mensaje explícito, no <img> roto', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0008')
   await page.getByRole('button', { name: /Ver comprobante/i }).click()
@@ -124,7 +124,7 @@ test('REQ-495 RN2 — Ver comprobante de NC-0008 (sin comprobante) muestra mensa
 })
 
 test('REQ-496 RN3 — Documento formal de NC-0010 (rechazada) muestra estado "Rechazada", nunca aplicada', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0010')
   await page.getByRole('button', { name: /Ver documento/i }).click()
@@ -144,7 +144,7 @@ test('REQ-496 RN3 — Documento formal de NC-0010 (rechazada) muestra estado "Re
 })
 
 test('REQ-497 — "Ver factura relacionada" en NC-0010 abre/descarga la factura CORRECTA (order_id, no el PK de la nota)', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0010')
   await page.getByRole('button', { name: /Ver documento/i }).click()
@@ -158,8 +158,8 @@ test('REQ-497 — "Ver factura relacionada" en NC-0010 abre/descarga la factura 
   expect(download.suggestedFilename()).toContain('PREQA-B13]-F-23924')
 })
 
-test('RN2 REQ-494 — Devolución de mercancía (NC-0008) fue aprobada por Mark sin exigir comprobante', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+test('RN2 REQ-494 — Devolución de mercancía (NC-0008) fue aprobada por Gerencia sin exigir comprobante', async ({ page }) => {
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0008')
   const modal = page.locator('div.fixed').last()
@@ -168,7 +168,7 @@ test('RN2 REQ-494 — Devolución de mercancía (NC-0008) fue aprobada por Mark 
 })
 
 test('REQ-494 RN3 — NC-0011 (aprobada) muestra quién aprobó y cuándo', async ({ page }) => {
-  await login(page, FELIX, FELIX_PW)
+  await login(page, FELIX, CONTABILIDAD_PW)
   await gotoNotasCredito(page)
   await openNoteByNumero(page, 'NC-0011')
   await expect(page.getByText(/Gerencia Test 3/i).first()).toBeVisible({ timeout: 8000 })

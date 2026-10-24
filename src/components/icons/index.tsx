@@ -460,7 +460,7 @@ export function IcoBan({ size = 16, ...props }: IconProps) {
 }
 
 // Bloque B5 (SCRUM-465, REQ-395 Escenario 3) — candado en los botones Aprobar/Rechazar de
-// "Conteos generales" (Inventario general) para señalar visualmente que son exclusivos de Mark.
+// "Conteos generales" (Inventario general) para señalar visualmente que son exclusivos de Gerencia.
 // El mockup usa el glyph 🔒 — regla SCRUM-56 (nunca emoji real en la UI): ícono Feather propio
 // "lock", mismo criterio que el resto del set (`stroke=currentColor`, sin relleno).
 export function IcoLock({ size = 12, ...props }: IconProps) {

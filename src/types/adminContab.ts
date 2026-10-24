@@ -1,5 +1,5 @@
 // Batch Configuración Fiscal (SCRUM-632→637, REQ-555→560) — módulo Admin&Cont, pantalla exclusiva
-// de Mark. Contrato acordado con Backend Dev (implementado en paralelo sobre App\Modules\AdminCont).
+// de Gerencia. Contrato acordado con Backend Dev (implementado en paralelo sobre App\Modules\AdminCont).
 
 export type RegimenTributario = 'general' | 'pequeno_contribuyente'
 export type PacAmbiente = 'apagado' | 'production' | 'testing'
@@ -61,6 +61,8 @@ export interface FraudSettings {
   fraude_aprobaciones_repetidas_n: number
   /** Ventana en minutos para contar aprobaciones repetidas (default 10). */
   fraude_aprobaciones_repetidas_minutos: number
+  /** Días de antigüedad (estrictamente mayores) a partir de los que una comisión pendiente genera alerta en Inicio (default 10). */
+  comision_pendiente_dias: number
 }
 
 export interface FiscalSettings {
@@ -116,7 +118,7 @@ export interface CreateItbmsRatePayload {
 }
 
 // Batch Datos de la Empresa (SCRUM-638→642, REQ-561→565) — mismo módulo Admin&Cont, misma
-// pantalla exclusiva de Mark (gate real en el backend, 403 en TODAS las rutas incluido GET).
+// pantalla exclusiva de Gerencia (gate real en el backend, 403 en TODAS las rutas incluido GET).
 
 export interface RedSocial {
   plataforma: string
@@ -180,7 +182,7 @@ export interface CreateContactPayload {
 }
 
 // Batch 1 del cuerpo principal de la épica (SCRUM-607→611, REQ-530→534) — Cuentas Bancarias.
-// A diferencia de Fiscal/Empresa, NO es exclusiva de Mark: la ven varios roles (Felix, Yaneth,
+// A diferencia de Fiscal/Empresa, NO es exclusiva de Gerencia: la ven varios roles (Contabilidad, Asistente Administrativa,
 // Gerencia) según gate del backend — sin estado especial de "acceso restringido" en el frontend.
 
 export type TipoCuenta = 'corriente' | 'ahorro' | 'tarjeta_credito'
@@ -271,8 +273,8 @@ export type CarteraTab = 'cobrable' | 'incobrable'
 export type FacturacionView = 'agrupado' | 'plana'
 
 /** Estado de la propuesta de incobrable de una factura — REQ-448. `normal` = sin ninguna
- *  propuesta activa; `pendiente_aprobacion` = Felix/Mark/Gerencia la propuso, esperando la
- *  decisión de Mark; `incobrable` = Mark ya la aprobó (equivalente a `es_incobrable=true`). */
+ *  propuesta activa; `pendiente_aprobacion` = Contabilidad/Mark/Gerencia la propuso, esperando la
+ *  decisión de Gerencia; `incobrable` = Gerencia ya la aprobó (equivalente a `es_incobrable=true`). */
 export type CobrabilidadEstado = 'normal' | 'pendiente_aprobacion' | 'incobrable'
 
 export interface InvoiceSummary {
@@ -338,10 +340,10 @@ export interface InvoiceEntry {
   tipo_factura: InvoiceTipo | null
   /** SCRUM-876 — avance de las entregas parciales del pedido (1 elemento si es entrega única). */
   entregas_del_pedido?: EntregaDelPedido[]
-  /** true SOLO cuando Mark ya aprobó la propuesta (REQ-448 RN4) — mientras está pendiente de su
+  /** true SOLO cuando Gerencia ya aprobó la propuesta (REQ-448 RN4) — mientras está pendiente de su
    *  decisión, esto sigue en false y `incobrable_pendiente` es el que vale true. */
   es_incobrable: boolean
-  /** Batch 4 (REQ-448) — propuesta de incobrable enviada, esperando aprobar/rechazar de Mark. */
+  /** Batch 4 (REQ-448) — propuesta de incobrable enviada, esperando aprobar/rechazar de Gerencia. */
   incobrable_pendiente: boolean
   /** SCRUM-1147 — `cobrada` (el cobro cubre el monto), `por_cobrar` (con saldo pendiente, incluye
    *  cobros parciales) o null (pendiente de facturar, anulada o incobrable). */
@@ -508,7 +510,7 @@ export interface CreateInvoiceResult {
 }
 
 // Batch 4 del cuerpo principal (SCRUM-524→528, REQ-447→451) — modal de detalle/trazabilidad,
-// cobrabilidad con aprobación de Mark, impresión fiscal, antigüedad de cartera, "Registrar cobro".
+// cobrabilidad con aprobación de Gerencia, impresión fiscal, antigüedad de cartera, "Registrar cobro".
 
 /**
  * `GET /admin-contab/invoices/{order_id}/detail` (opcional `?invoice_id=`, ver ADR §4.6) — payload
@@ -550,8 +552,8 @@ export interface InvoiceDetail {
   cobrabilidad: CobrabilidadEstado
   motivo_incobrable: string | null
   /** Calculado server-side (`current_user_id === primary_approver_user_id`) — el frontend nunca
-   *  decide por su cuenta quién es Mark, mismo criterio de fail-closed que el resto de gates
-   *  exclusivos de Mark en este módulo. Undefined/false = no mostrar Aprobar/Rechazar. */
+   *  decide por su cuenta quién es Gerencia, mismo criterio de fail-closed que el resto de gates
+   *  exclusivos de Gerencia en este módulo. Undefined/false = no mostrar Aprobar/Rechazar. */
   puede_decidir_incobrable?: boolean
   /** SCRUM-864 — false si la factura ya está pagada (saldo_aplicado >= monto) o anulada; el
    *  frontend nunca recalcula "pagada" comparando montos, usa este flag server-side. */
@@ -568,11 +570,11 @@ export interface InvoiceDetail {
   items?: InvoiceLineItem[]
   /** SCRUM-943 — `null` en facturas previas a esta feature. */
   fe_estado: FiscalElectronicStatus | null
-  /** Motivo textual del rechazo del PAC — solo lo envía el backend a Mark/superadmin (`null` para el resto). */
+  /** Motivo textual del rechazo del PAC — solo lo envía el backend a Gerencia/superadmin (`null` para el resto). */
   fe_detalle?: string | null
-  /** SCRUM-987 — solo Mark/superadmin: habilita el visor de transmisiones al PAC (payload + respuesta). */
+  /** SCRUM-987 — solo Gerencia/superadmin: habilita el visor de transmisiones al PAC (payload + respuesta). */
   puede_ver_fe_transmisiones?: boolean
-  /** SCRUM-1007 — acción fiscal manual disponible ahora (solo Mark/superadmin): reintentar la certificación o actualizar el estado. */
+  /** SCRUM-1007 — acción fiscal manual disponible ahora (solo Gerencia/superadmin): reintentar la certificación o actualizar el estado. */
   accion_fe?: FeAccionFiscal | null
   /** SCRUM-1019 — el backend ofrece "Reconciliar con MSL" para este documento. */
   puede_reconciliar_fe?: boolean
@@ -975,7 +977,7 @@ export interface CreatePaymentV2Payload {
   comprobante: File | null
 }
 
-/** SCRUM-1168 F4 — solicitud de anular un cobro (o de devolver dinero, F5): la piden Felix o Yaneth y la decide Mark. */
+/** SCRUM-1168 F4 — solicitud de anular un cobro (o de devolver dinero, F5): la piden Contabilidad o Asistente Administrativa y la decide Gerencia. */
 export interface ReversalRequest {
   id: number
   tipo: 'anulacion' | 'devolucion'
@@ -1184,7 +1186,7 @@ export interface NotaCreditoResumenMes {
   devoluciones_por_generar: number
   nota_promedio: number
   /** REQ-482 RN2/RN3 — umbral configurable ($5,000 por defecto, Configuración Fiscal) a partir del
-   *  cual una nota queda pendiente de aprobación de Mark. Viaja acá para que el formulario nunca lo
+   *  cual una nota queda pendiente de aprobación de Gerencia. Viaja acá para que el formulario nunca lo
    *  hardcodee. */
   primary_approval_threshold: number
 }
@@ -1263,9 +1265,9 @@ export interface NotaCredito {
 
 /** `GET /admin-contab/notas-credito/itbms-rates` — REQ-480, catálogo de tasas configuradas en
  *  Configuración Fiscal (`ItbmsRate`, mismo shape), pero por un endpoint DISTINTO al de
- *  `/admin-contab/itbms-rates`: ese es exclusivo de Mark (403 en el GET para cualquier otro rol),
- *  y Felix/Yaneth/Gerencia sí necesitan ver las 3 tasas acá para elegir el "tratamiento correcto"
- *  — contrato a confirmar con Backend Dev, no reusar el endpoint de Mark tal cual. */
+ *  `/admin-contab/itbms-rates`: ese es exclusivo de Gerencia (403 en el GET para cualquier otro rol),
+ *  y Contabilidad/Yaneth/Gerencia sí necesitan ver las 3 tasas acá para elegir el "tratamiento correcto"
+ *  — contrato a confirmar con Backend Dev, no reusar el endpoint de Gerencia tal cual. */
 export type NotaCreditoItbmsRateOption = Pick<ItbmsRate, 'id' | 'nombre' | 'descripcion' | 'porcentaje' | 'es_base'>
 
 /** Un producto dentro de una devolución ya confirmada por Bodega — REQ-481. */
@@ -1368,7 +1370,7 @@ export interface PreviewCorreccionResponse {
   factura_preview: PreviewCorreccionFactura
   monto: number
   /** `monto > primaryApprovalThreshold()` — RN1 REQ-490. Determina el mensaje de confirmación
-   *  ("se generó la factura nueva" vs "queda pendiente de aprobación de Mark, la original sigue
+   *  ("se generó la factura nueva" vs "queda pendiente de aprobación de Gerencia, la original sigue
    *  activa"). */
   requiere_aprobacion: boolean
 }
@@ -1543,11 +1545,11 @@ export interface NotaCreditoDetalle {
   cuenta_bancaria_salida: string | null
   /** SCRUM-943 — `null` en notas previas a esta feature. */
   fe_estado: FiscalElectronicStatus | null
-  /** Motivo textual del rechazo del PAC — solo lo envía el backend a Mark/superadmin (`null` para el resto). */
+  /** Motivo textual del rechazo del PAC — solo lo envía el backend a Gerencia/superadmin (`null` para el resto). */
   fe_detalle?: string | null
-  /** SCRUM-987 — solo Mark/superadmin: habilita el visor de transmisiones al PAC (payload + respuesta). */
+  /** SCRUM-987 — solo Gerencia/superadmin: habilita el visor de transmisiones al PAC (payload + respuesta). */
   puede_ver_fe_transmisiones?: boolean
-  /** SCRUM-1007 — acción fiscal manual disponible ahora (solo Mark/superadmin): reintentar la certificación o actualizar el estado. */
+  /** SCRUM-1007 — acción fiscal manual disponible ahora (solo Gerencia/superadmin): reintentar la certificación o actualizar el estado. */
   accion_fe?: FeAccionFiscal | null
   /** SCRUM-1019 — el backend ofrece "Reconciliar con MSL" para este documento. */
   puede_reconciliar_fe?: boolean
@@ -1556,7 +1558,7 @@ export interface NotaCreditoDetalle {
   pac_provider_usado: PacProvider | null
 }
 
-/** `PUT /admin-contab/notas-credito/{id}/decision` — REQ-494, exclusivo Mark (`primary_approver_only`).
+/** `PUT /admin-contab/notas-credito/{id}/decision` — REQ-494, exclusivo Gerencia (`primary_approver_only`).
  *  `motivo_rechazo` obligatorio cuando `approve = false` (RN4), ignorado si `approve = true`. */
 export interface NotaCreditoDecisionPayload {
   approve: boolean
@@ -1667,7 +1669,7 @@ export interface CommissionInternalSummary {
   vendedores: CommissionVendorSummary[]
   /** Calculado server-side (`current_user_id === primary_approver_user_id`) — mismo criterio que
    *  `puede_decidir_incobrable` en Facturación, el frontend nunca decide por su cuenta quién es
-   *  Mark. Gatea los botones editar/eliminar/agregar tramo del modal "Tabla de comisión
+   *  Gerencia. Gatea los botones editar/eliminar/agregar tramo del modal "Tabla de comisión
    *  escalonada" — el CRUD real (`POST/PUT/DELETE .../tiers`) está gateado por `primary_approver_only` en el
    *  backend sin importar lo que muestre la UI. */
   puede_editar_tramos: boolean
@@ -1744,7 +1746,7 @@ export interface ArchitectCommissionProject {
   monto_proyecto: number
   total_facturado: number | null
   total_cobrado: number
-  /** Batch 17 (REQ-516) — % vigente de este proyecto puntual: el aprobado por Mark si existe,
+  /** Batch 17 (REQ-516) — % vigente de este proyecto puntual: el aprobado por Gerencia si existe,
    *  si no el default global (`AdminContFiscalSettings.comision_externa_default_percent`). */
   porcentaje: number
   comision: number
@@ -1761,8 +1763,8 @@ export interface ArchitectCommissionProject {
    *  mostrar la zona de carga según `regimen_fiscal` de la fila padre. */
   comprobante_retencion: { nombre_archivo: string; uploaded_at: string } | null
   fecha_pago: string | null // 'YYYY-MM-DD'
-  /** Batch 17 (REQ-516) — % propuesto por Felix/Yaneth/Mark/Gerencia, pendiente de la decisión de
-   *  Mark. `null` si no hay ninguna propuesta activa. */
+  /** Batch 17 (REQ-516) — % propuesto por Contabilidad/Yaneth/Mark/Gerencia, pendiente de la decisión de
+   *  Gerencia. `null` si no hay ninguna propuesta activa. */
   porcentaje_pendiente: number | null
   porcentaje_pendiente_motivo: string | null
   /** Batch 17 (REQ-517) — cuenta de pago resuelta (explícita del proyecto o el default "Banco
@@ -1798,7 +1800,7 @@ export interface CommissionExternalSummary {
   arquitectos: ArchitectCommissionRow[]
   /** Batch 17 (REQ-516 RN4) — calculado server-side (`current_user_id === primary_approver_user_id`),
    *  mismo criterio que `puede_editar_tramos`/`puede_decidir_incobrable` en el resto del módulo:
-   *  el frontend nunca decide por su cuenta quién es Mark. Gatea Aprobar/Rechazar en el modal de
+   *  el frontend nunca decide por su cuenta quién es Gerencia. Gatea Aprobar/Rechazar en el modal de
    *  detalle — el endpoint real (`percent/decide`) está gateado por `primary_approver_only` de todos modos. */
   puede_decidir_porcentaje: boolean
   // SCRUM-947 — paginación estándar A NIVEL DE ARQUITECTO (nunca parte los proyectos de un mismo
@@ -1828,7 +1830,7 @@ export interface ArchitectFiscalProfilePayload {
 }
 
 // Batch 17 (SCRUM-591→596, REQ-514→519) — comprobante de retención, "Marcar como pagado", % de
-// comisión por proyecto (propuesta + aprobación de Mark), cuenta de pago editable, recordatorio
+// comisión por proyecto (propuesta + aprobación de Gerencia), cuenta de pago editable, recordatorio
 // por correo, y el modal de detalle por proyecto que consolida todo lo de arriba.
 
 export interface BankAccountOption {
@@ -2017,7 +2019,7 @@ export interface DailyCashCount {
   aprobado_at: string | null
   /** Calculado server-side (`current_user_id === primary_approver_user_id`), mismo criterio que
    *  `puede_decidir_incobrable`/`puede_editar_tramos` en el resto del módulo — el frontend nunca
-   *  decide por su cuenta quién es Mark. NO estaba en el contrato original del ADR (§ Contrato
+   *  decide por su cuenta quién es Gerencia. NO estaba en el contrato original del ADR (§ Contrato
    *  JSON exacto); se agrega acá por consistencia con el patrón ya establecido en todo el resto de
    *  AdminCont — verificar con Backend Dev que el endpoint lo agregue. Ausente/`false` = no
    *  mostrar "Aprobar". */
@@ -2101,7 +2103,7 @@ export interface PettyCashExpenseLine {
 
 // Batch 21 (SCRUM-618→623) — REQ-545, modal unificado de detalle de línea. `ubicacion` decide qué
 // acciones tienen sentido; los flags `puede_*` son calculados server-side (mismo criterio que
-// `puede_aprobar` de PettyCashReportDetail) — el frontend nunca decide por su cuenta quién es Mark
+// `puede_aprobar` de PettyCashReportDetail) — el frontend nunca decide por su cuenta quién es Gerencia
 // ni en qué estado está la línea.
 export type PettyCashUbicacionLinea = 'pendientes' | 'reporte' | 'rechazados'
 
@@ -2230,7 +2232,7 @@ export interface PettyCashReportDetail {
   grupos: PettyCashGrupo[]
   total_general: number
   /** Calculado server-side (actor === primary_approver_user_id), mismo criterio que
-   *  `DailyCashCount.puede_aprobar` — el frontend nunca decide por su cuenta quién es Mark.
+   *  `DailyCashCount.puede_aprobar` — el frontend nunca decide por su cuenta quién es Gerencia.
    *  Ausente/`false` = no mostrar "Aprobar reporte". */
   puede_aprobar?: boolean
 }
@@ -2249,7 +2251,7 @@ export interface CreatePettyCashReportPayload {
 }
 
 // Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. `ReportsPeriodo` es el selector de
-// encabezado (RN1 REQ-566); solo Ventas y Arqueo de Caja lo consumen — Comisión Felix y Cartera
+// encabezado (RN1 REQ-566); solo Ventas y Arqueo de Caja lo consumen — Comisión Contabilidad y Cartera
 // nunca reciben período (RN4 REQ-567/RN3 REQ-568).
 export type ReportsPeriodo = 'hoy' | '3m' | '6m' | 'anio'
 
@@ -2312,8 +2314,8 @@ export interface CreateCarteraCommissionTierPayload {
 }
 
 // Batch 23 (SCRUM-648/649, REQ-571/572) — 2 tarjetas más en la misma grilla de Reportes.
-// Comisiones SÍ depende del selector de período (a diferencia de Felix/Cartera del Batch 22);
-// Notas de Crédito nunca depende de él (mismo criterio que Felix/Cartera).
+// Comisiones SÍ depende del selector de período (a diferencia de Contabilidad/Cartera del Batch 22);
+// Notas de Crédito nunca depende de él (mismo criterio que Contabilidad/Cartera).
 export type ReportsComisiones =
   | { periodo: 'hoy'; tipo: 'hoy'; hoy: { internas: number; externas: number } }
   | { periodo: string; tipo: 'meses'; meses: { mes: string; anio: number; internas: number; externas: number }[] }

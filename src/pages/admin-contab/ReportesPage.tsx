@@ -32,7 +32,7 @@ function formatCurrencyRounded(value: number): string {
   return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
 }
 
-// SCRUM-870 punto 2 — formato abreviado para los rangos de la tarjeta de comisión de Felix (ej.
+// SCRUM-870 punto 2 — formato abreviado para los rangos de la tarjeta de comisión de Contabilidad (ej.
 // "$15K"), no para los montos exactos de la tarjeta (esos se quedan con `formatCurrency`).
 // - `bound: 'inclusive'` (default): trunca — el tope de un rango cerrado como 19999.99 se lee
 //   "$19K" (lo que cabe hasta ahí), y un piso como 15000 se lee "$15K".
@@ -80,7 +80,7 @@ const barValueLabelPlugin: Plugin<'bar'> = {
  * gráfico propio en el dashboard, y nunca dependen del selector de período (RN2).
  *
  * El selector de período (RN1/RN3 REQ-566) recalcula Ventas, Arqueo de Caja y Comisiones —
- * Comisión Felix, Cartera (2 tarjetas) y Notas de Crédito nunca dependen de él (RN4 REQ-567, RN3
+ * Comisión Contabilidad, Cartera (2 tarjetas) y Notas de Crédito nunca dependen de él (RN4 REQ-567, RN3
  * REQ-568, RN2 REQ-572), por eso esos hooks no reciben `periodo` y su query key es fija (ver
  * useAdminContab.ts).
  */
@@ -90,7 +90,7 @@ export default function ReportesPage() {
   const [periodo, setPeriodo] = useState<ReportsPeriodo>('hoy')
   // SCRUM-881 (Pre-QA, 2026-09-11) -- el backend ya bloqueaba GET /reports/felix-commission
   // para asistente_administrativa (routes/admin-contab.php linea 396), pero esta tarjeta se
-  // renderizaba sin ningun gate de rol -- Yaneth veia el titulo "-- Felix" con el cuerpo vacio
+  // renderizaba sin ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio
   // (fetch bloqueado en 403). Mismo allow-list que el backend.
   const { user } = useAuthStore()
   const canSeeFelixCommission = ['superadmin', 'lider_admin_contab', 'management'].includes(user?.role ?? '')
@@ -452,7 +452,7 @@ function ArqueoCajaCard({ t, periodo, onNavigate }: { t: Translate; periodo: Rep
 }
 
 /** REQ-571 — Internas vs. Externas por mes (barras pareadas) o 2 KPIs en "Hoy". SÍ depende del
- *  selector de período (a diferencia de Felix/Cartera/Notas de Crédito). Montos siempre iguales a
+ *  selector de período (a diferencia de Contabilidad/Cartera/Notas de Crédito). Montos siempre iguales a
  *  los que ya muestran Comisiones Internas/Externas (REQ-499/508) — nunca recalculados acá. */
 function ComisionesCard({ t, periodo, navigate }: { t: Translate; periodo: ReportsPeriodo; navigate: (path: string) => void }) {
   const { data, isLoading } = useReportsComisiones(periodo)

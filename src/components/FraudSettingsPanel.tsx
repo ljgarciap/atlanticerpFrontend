@@ -29,6 +29,7 @@ const FIELD_RANGES = {
   fraude_monto_ventana_dias:              { min: 1, max: 365 },
   fraude_aprobaciones_repetidas_n:        { min: 1, max: 1000 },
   fraude_aprobaciones_repetidas_minutos:  { min: 1, max: 1440 },
+  comision_pendiente_dias:                { min: 1, max: 365 },
 } as const satisfies Record<keyof FraudSettings, { min: number; max: number }>
 
 function buildSchema(t: TFunction) {
@@ -43,6 +44,7 @@ function buildSchema(t: TFunction) {
     fraude_monto_ventana_dias:             intField(FIELD_RANGES.fraude_monto_ventana_dias.min, FIELD_RANGES.fraude_monto_ventana_dias.max),
     fraude_aprobaciones_repetidas_n:       intField(FIELD_RANGES.fraude_aprobaciones_repetidas_n.min, FIELD_RANGES.fraude_aprobaciones_repetidas_n.max),
     fraude_aprobaciones_repetidas_minutos: intField(FIELD_RANGES.fraude_aprobaciones_repetidas_minutos.min, FIELD_RANGES.fraude_aprobaciones_repetidas_minutos.max),
+    comision_pendiente_dias:               intField(FIELD_RANGES.comision_pendiente_dias.min, FIELD_RANGES.comision_pendiente_dias.max),
   })
 }
 type FormData = z.infer<ReturnType<typeof buildSchema>>
@@ -58,6 +60,7 @@ const FIELDS: { key: keyof FraudSettings; i18nKey: string }[] = [
   { key: 'fraude_monto_ventana_dias',             i18nKey: 'fraudeMontoVentanaDias' },
   { key: 'fraude_aprobaciones_repetidas_n',       i18nKey: 'fraudeAprobacionesRepetidasN' },
   { key: 'fraude_aprobaciones_repetidas_minutos', i18nKey: 'fraudeAprobacionesRepetidasMinutos' },
+  { key: 'comision_pendiente_dias',               i18nKey: 'comisionPendienteDias' },
 ]
 
 export default function FraudSettingsPanel() {

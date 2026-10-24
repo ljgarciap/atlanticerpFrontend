@@ -80,7 +80,7 @@ describe('CreateClientModal', () => {
       fireEvent.change(screen.getByPlaceholderText('common:labels.phone'), { target: { value: '6000-0000' } })
     }
 
-    it('sin el permiso angosto (no es Mark ni Felix) no puede elegir Consumidor final', () => {
+    it('sin el permiso angosto (no es Gerencia ni Contabilidad) no puede elegir Consumidor final', () => {
       mockCanMarkConsumidorFinal = false
       renderClientModal()
       expect((screen.getByRole('option', { name: 'clients.receptorTipo.consumidorFinal' }) as HTMLOptionElement).disabled).toBe(true)

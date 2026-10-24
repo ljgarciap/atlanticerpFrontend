@@ -116,7 +116,7 @@ export default function CrmProjectsListPage() {
 
       {/* RN4 (REQ-611): el selector de Responsable solo tiene efecto real para
           Líder/Gerencia — can_view_team viene del propio backend (ProjectsListController),
-          no de un heurístico de rol en el frontend. SCRUM-690 (pedido de Daniela 2026-08-03):
+          no de un heurístico de rol en el frontend. SCRUM-690 (pedido de Gerencia 2026-08-03):
           alcance Inicio/Equipo (+ Responsable cuando aplica) arriba de los filtros, en su
           propia fila, en vez de mezclado con ellos. */}
       {canViewTeam && (

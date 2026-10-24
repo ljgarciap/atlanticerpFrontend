@@ -103,8 +103,8 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
     order ? orderId : null,
   )
 
-  // SCRUM-393 — columna "Disponible" (stock total en bodega, `por_servir`), pedida por Daniela
-  // Amaya en el mockup original. Reusa el mismo `warehouseBreakdown` que ya trae el botón "Ver
+  // SCRUM-393 — columna "Disponible" (stock total en bodega, `por_servir`), pedida por Gerencia
+  // Test en el mockup original. Reusa el mismo `warehouseBreakdown` que ya trae el botón "Ver
   // bodegas" (una sola llamada a nivel de pedido, ver arriba) — no hace falta un fetch nuevo.
   function getAvailable(item: OrderItemDetail): number | null {
     if (item.catalog_product_id === null) return null

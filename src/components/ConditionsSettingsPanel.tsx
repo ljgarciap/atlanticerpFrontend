@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
 /**
- * SCRUM-138 — Daniela pidió poder cambiar el texto de Condiciones (REQ-046) una vez y
+ * SCRUM-138 — Gerencia pidió poder cambiar el texto de Condiciones (REQ-046) una vez y
  * que aplique a toda cotización NUEVA desde ese momento, en vez de editarlo cotización
  * por cotización. Mismo patrón que PricingSettingsPanel (permiso individual, sin
  * atarlo a ningún security_level). Las cotizaciones ya generadas conservan su propio

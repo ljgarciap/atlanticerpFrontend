@@ -39,7 +39,7 @@ export function buildSchema(t: TFunction, isEdit: boolean) {
   // no solo el campo en cuestión). Efecto observado en vivo contra dev.atlanticerp.ai: al enviar el
   // formulario de creación sin categoría NI país NI contacto, solo aparecían los mensajes de
   // categoría/país — el de "al menos un medio de contacto" quedaba en silencio (el guardado
-  // seguía bloqueado igual, por categoría/país, pero el mensaje del AC de Daniela no se mostraba
+  // seguía bloqueado igual, por categoría/país, pero el mensaje del AC de Gerencia no se mostraba
   // en esa combinación). Fix: `z.string().nullable()` nunca produce `invalid_type` (null es un
   // tipo válido), así que la obligatoriedad de categoría pasa a validarse con `.refine()` en vez
   // de por tipo — esto ya no aborta el resto de la cadena.

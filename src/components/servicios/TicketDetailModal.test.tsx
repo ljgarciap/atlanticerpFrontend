@@ -218,7 +218,7 @@ describe('TicketDetailModal — edición (REQ-225)', () => {
     await waitFor(() => expect(showSpy).toHaveBeenCalledWith('tickets.detail.technicianUnassignedWarning', 'error'))
   })
 
-  // SCRUM-781 (rebote Daniela 2026-08-20) — productos/adjuntos en modo edición son un borrador
+  // SCRUM-781 (rebote Gerencia 2026-08-20) — productos/adjuntos en modo edición son un borrador
   // local: ningún endpoint se llama hasta "Guardar cambios", y "Cancelar" nunca los llama.
   it('agrega un producto vía el buscador — queda en el borrador, no llama a addProduct() hasta Guardar', async () => {
     mockedApi.tickets.get.mockResolvedValue(makeDetail())
@@ -345,7 +345,7 @@ describe('TicketDetailModal — edición (REQ-225)', () => {
     await waitFor(() => expect(mockedApi.tickets.uploadAttachment).toHaveBeenCalledWith(1, file))
   })
 
-  // Regresión directa del rebote de Daniela (2026-08-20): quitar un producto y presionar
+  // Regresión directa del rebote de Gerencia (2026-08-20): quitar un producto y presionar
   // "Cancelar" (no "Guardar") NO debe eliminarlo — el bug real era que la eliminación se
   // aplicaba de inmediato pese a que el resto del formulario sí se descartaba con Cancelar.
   it('Cancelar tras agregar/quitar productos y subir un adjunto descarta todo — ningún endpoint de productos/adjuntos se llama', async () => {

@@ -49,7 +49,7 @@ export default function PedidosPage() {
   // SCRUM-169 (Gerencia → Salud Bodega): "Despachos urgentes"/"Despachos atrasados"
   // navegan acá con ?chip=urgentes/atrasados — antes se ignoraba, el tablero
   // siempre arrancaba en 'all' sin importar la URL.
-  // SCRUM-860 (rebote de Daniela, 2026-09-09) — filtro por Estado, pedido junto con la vista de
+  // SCRUM-860 (rebote de Gerencia, 2026-09-09) — filtro por Estado, pedido junto con la vista de
   // tabla (que mezcla las 7 etapas en una sola lista, a diferencia del tablero que ya las separa
   // en columnas). Client-side sobre `cards` — mismo criterio que el resto del agrupado por etapa
   // del tablero (ORDER_STAGE_ORDER.map + cards.filter), no hace falta un query param nuevo.
@@ -196,7 +196,7 @@ export default function PedidosPage() {
           <option value="">{t('bodega:pedidos.filters.client')}</option>
           {clienteOptions.map(name => <option key={name} value={name}>{name}</option>)}
         </select>
-        {/* SCRUM-860 (rebote de Daniela) — filtro por Estado, mismo selectClass que Asistente/
+        {/* SCRUM-860 (rebote de Gerencia) — filtro por Estado, mismo selectClass que Asistente/
             Cliente para que los 3 se vean del mismo tamaño. */}
         <select value={stage} onChange={e => setStage(e.target.value as OrderStage | '')} className={selectClass}>
           <option value="">{t('bodega:pedidos.filters.stage')}</option>
@@ -204,7 +204,7 @@ export default function PedidosPage() {
             <option key={s} value={s}>{t(`bodega:pedidos.stages.${s}`)}</option>
           ))}
         </select>
-        {/* SCRUM-860 (rebote de Daniela, 2026-09-09) — "Todos los Vendedores" quedaba más grande
+        {/* SCRUM-860 (rebote de Gerencia, 2026-09-09) — "Todos los Vendedores" quedaba más grande
             que Asistente/Cliente: UserMultiSelect no tenía forma de recibir el tamaño del botón
             disparador (su `className` solo llega al wrapper externo, ver UserMultiSelect.tsx).
             Se agregó `buttonClassName` puntualmente para este caso — reemplaza el estilo default

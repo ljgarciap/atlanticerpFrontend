@@ -26,7 +26,7 @@ async function login(page: Page, base: string, email: string, password: string):
 
 // ---------- SCRUM-910 ----------
 
-test('SCRUM-910 — Fefi (current_amount=0, pendiente_cobro>0) NO muestra $0 en Comisión generada', async ({ page }) => {
+test('SCRUM-910 — Vendedor Disenador (current_amount=0, pendiente_cobro>0) NO muestra $0 en Comisión generada', async ({ page }) => {
   await login(page, DEV, 'vendedordisenador3@test.com', 'vendedordisenador3@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
@@ -35,13 +35,13 @@ test('SCRUM-910 — Fefi (current_amount=0, pendiente_cobro>0) NO muestra $0 en 
   await expect(body).toContainText('$1,350')
 })
 
-test('SCRUM-910 — Gerencia (Daniela) viendo a Fefi en modo Equipo ve el mismo monto ($1,350)', async ({ page }) => {
+test('SCRUM-910 — Gerencia (Gerencia) viendo a Vendedor Disenador en modo Equipo ve el mismo monto ($1,350)', async ({ page }) => {
   // NOTA 2026-09-13: password real ya NO es B1n4X_2026? (memoria stale de 2026-08-24) — confirmado
   // 401 con esa clave y 200 con el default (email) vía curl directo antes de correr este spec.
   await login(page, DEV, 'gerencia@test.com', 'gerencia@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(2000)
-  // Daniela tiene el idioma de UI en inglés (confirmado en vivo) — matchear ambos labels.
+  // Gerencia tiene el idioma de UI en inglés (confirmado en vivo) — matchear ambos labels.
   await page.getByText(/^(Equipo|Team)$/, { exact: false }).first().click()
   await page.waitForTimeout(1000)
   // Acotar al <select> real del selector de vendedor (no el de idioma ES/EN) — es el único que
@@ -49,14 +49,14 @@ test('SCRUM-910 — Gerencia (Daniela) viendo a Fefi en modo Equipo ve el mismo 
   const select = page.locator('select').filter({ has: page.locator('option', { hasText: /whole team|todo el equipo/i }) })
   const options = await select.locator('option').allTextContents()
   const idx = options.findIndex(o => /bonvini|fefi/i.test(o))
-  expect(idx, `no se encontró a Fefi/Maria Bonvini entre las opciones: ${options.join(', ')}`).toBeGreaterThanOrEqual(0)
+  expect(idx, `no se encontró a Vendedor Disenador/Maria Vendedor Disenador entre las opciones: ${options.join(', ')}`).toBeGreaterThanOrEqual(0)
   await select.selectOption({ index: idx })
   await page.waitForTimeout(2500)
   const body = page.locator('body')
   await expect(body).toContainText('$1,350')
 })
 
-test('SCRUM-910 — Neil (vendedor con proyecto compartido con Fefi) ve su propia mitad, no duplicada', async ({ page }) => {
+test('SCRUM-910 — Vendedor Disenador (vendedor con proyecto compartido con Vendedor Disenador) ve su propia mitad, no duplicada', async ({ page }) => {
   await login(page, DEV, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
@@ -64,7 +64,7 @@ test('SCRUM-910 — Neil (vendedor con proyecto compartido con Fefi) ve su propi
   await expect(body).toContainText('$1,180')
 })
 
-test('SCRUM-910 — Comisión generada en Home coincide con Comisiones Internas (Paola, con NC aplicada)', async ({ page }) => {
+test('SCRUM-910 — Comisión generada en Home coincide con Comisiones Internas (Vendedor Disenador, con NC aplicada)', async ({ page }) => {
   await login(page, DEV, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
@@ -89,7 +89,7 @@ test('SCRUM-883 — timestamp real (visor de Logs, superadmin.all) se muestra en
 
 // ---------- SCRUM-901 ----------
 
-test('SCRUM-901 — Paola: pipeline propio carga sin error tras el cleanup', async ({ page }) => {
+test('SCRUM-901 — Vendedor Disenador: pipeline propio carga sin error tras el cleanup', async ({ page }) => {
   await login(page, TEST, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
   await page.goto(`${TEST}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
@@ -106,7 +106,7 @@ test('SCRUM-901 — Bodega: Kanban de pedidos renderiza con picker/courier NULL 
   await expect(page.locator('body')).not.toContainText(/error 500|internal server error|undefined/i)
 })
 
-test('SCRUM-901 — otro usuario real (Osvaldo, asistente de bodega) sigue logueando con normalidad', async ({ page }) => {
+test('SCRUM-901 — otro usuario real (Asistente Bodega, asistente de bodega) sigue logueando con normalidad', async ({ page }) => {
   await login(page, TEST, 'asistentebodega@test.com', 'asistentebodega@test.com')
   await page.goto(`${TEST}/bodega/home`)
   await page.waitForTimeout(2000)

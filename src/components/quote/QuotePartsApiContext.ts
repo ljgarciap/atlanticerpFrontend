@@ -2,9 +2,8 @@ import { createContext, useContext } from 'react'
 import { ventasDisenoApi, type QuotePartsApi } from '@/api/ventasDisenoApi'
 
 /**
- * SCRUM-1120 — `QuotePartCard` (partidas, ítems, precios, márgenes) sirve tanto a Cotizaciones como a CotizaYA.
- * Por defecto habla con `/ventas-diseno/quotes/...`; CotizaYA lo envuelve con un provider que apunta a
- * `/ventas-diseno/cotizaya/...`. Así la lógica de Partidas se reutiliza sin una sola línea copiada.
+ * `QuotePartCard` (partidas, ítems, precios, márgenes) habla por defecto con `/ventas-diseno/quotes/...`; un provider
+ * puede apuntarlo a otra API de partidas sin copiar la lógica.
  */
 export const QuotePartsApiContext = createContext<QuotePartsApi | null>(null)
 

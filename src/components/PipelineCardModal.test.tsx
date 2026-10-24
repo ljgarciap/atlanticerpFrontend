@@ -421,7 +421,7 @@ describe('PipelineCardModal', () => {
   })
 
   // REQ-597 RN3 / REQ-603 RN2 (Epic CRM Batch B) — Aprobado es terminal, sin ningún botón de
-  // movimiento. can_edit:true simula un usuario con ventas_diseno.edit.approved (ej. Mark en
+  // movimiento. can_edit:true simula un usuario con ventas_diseno.edit.approved (ej. Gerencia en
   // producción) — antes de este fix, "Marcar como Perdido" seguía visible y funcional para él.
   it('NO muestra "Marcar como Perdido" (ni ningún botón de movimiento) para una tarjeta Aprobada, aunque can_edit sea true', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'approved', can_edit: true }))
@@ -879,10 +879,10 @@ describe('PipelineCardModal', () => {
     ))
   })
 
-  // SCRUM-884 (rebote 2026-09-16) — cuando Mark (Gerencia) crea el proyecto, queda como
+  // SCRUM-884 (rebote 2026-09-16) — cuando Gerencia (Gerencia) crea el proyecto, queda como
   // Responsable (owner_id) pero `teamVendors` (lista de vendedores/diseñadores) nunca lo incluye
   // — antes del fix, `UserMultiSelect` solo renderiza como chip removible a quien esté en la
-  // lista `users` que recibe, así que Mark no aparecía ahí y no había forma de quitarlo, aunque
+  // lista `users` que recibe, así que Gerencia no aparecía ahí y no había forma de quitarlo, aunque
   // sí se podía con cualquier creador vendedor/diseñador (esos sí están en `teamVendors`).
   it('Gerencia puede quitarse a sí misma del campo Responsable cuando ella creó el proyecto (SCRUM-884)', async () => {
     mockedStore.mockReturnValue({ user: { id: 9, role: 'management' } } as never)
@@ -890,15 +890,15 @@ describe('PipelineCardModal', () => {
       { id: 1, name: 'Ana Diaz' }, { id: 2, name: 'Beto Solis' },
     ] as never)
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({
-      owner: { id: 9, name: 'Mark' },
-      assignees: [{ id: 9, name: 'Mark' }],
+      owner: { id: 9, name: 'Gerencia' },
+      assignees: [{ id: 9, name: 'Gerencia' }],
     }))
     mockedApi.pipeline.update.mockResolvedValue(makeDetail())
     renderModal()
     await openEditMode()
 
-    // Mark aparece como chip removible pese a no estar en teamVendors.
-    const markChip = screen.getByText('Mark').closest('span') as HTMLElement
+    // Gerencia aparece como chip removible pese a no estar en teamVendors.
+    const markChip = screen.getByText('Gerencia').closest('span') as HTMLElement
     fireEvent.click(within(markChip).getByRole('button'))
 
     fireEvent.click(screen.getByRole('button', { name: /userFilter\.count|userFilter\.all/ }))
@@ -1191,7 +1191,7 @@ describe('PipelineCardModal — SCRUM-1115 crear cotización con historial', () 
   })
 
 
-  // SCRUM-1121 (corrección de Daniela) — la sección «Asociados» se eliminó: los contactos de la cotización llegan al campo «Contacto».
+  // SCRUM-1121 (corrección de Gerencia) — la sección «Asociados» se eliminó: los contactos de la cotización llegan al campo «Contacto».
   it('SCRUM-1121 — el detalle del proyecto no muestra la sección «Asociados» y conserva «Contacto»', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({
       contacts: [{ id: 5, name: 'Ana Cliente', role: 'client', phone: '6111-1111', email: 'ana@cliente.test' }],
@@ -1309,7 +1309,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('ventasDiseno:modal.passToOrder.error')
     expect(screen.queryByTestId('abono-ask-dialog')).not.toBeInTheDocument()
   })
-  it('no muestra el botón si el backend dice can_pass_to_order=false aunque haya permiso (Félix sin permiso efectivo)', async () => {
+  it('no muestra el botón si el backend dice can_pass_to_order=false aunque haya permiso (Contabilidad sin permiso efectivo)', async () => {
     asUser(['ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved({ can_pass_to_order: false }))
     renderModal()
@@ -1317,7 +1317,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(screen.queryByText('ventasDiseno:modal.passToOrder.button')).not.toBeInTheDocument()
   })
 
-  it('Félix (read_all + pass_to_order, can_edit=false): ve el botón y ningún control de edición', async () => {
+  it('Contabilidad (read_all + pass_to_order, can_edit=false): ve el botón y ningún control de edición', async () => {
     asUser(['ventas_diseno.pipeline.read_all', 'ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved())
     renderModal()
@@ -1357,8 +1357,8 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
   })
 })
 
-// SCRUM-1128 (Pre-QA) — Félix: solo lectura del Pipeline, aunque el payload diga can_edit=true.
-describe('PipelineCardModal — solo lectura de Félix (SCRUM-1128)', () => {
+// SCRUM-1128 (Pre-QA) — Contabilidad: solo lectura del Pipeline, aunque el payload diga can_edit=true.
+describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () => {
   const asFelix = () =>
     mockedStore.mockReturnValue({
       user: { id: 9, role: 'contabilidad', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pass_to_order'] },
@@ -1443,8 +1443,8 @@ describe('PipelineCardModal — solo lectura de Félix (SCRUM-1128)', () => {
   })
 })
 
-// SCRUM-1139 — Félix con `pipeline.edit`: edita el Pipeline, pero sigue sin ventas_diseno.read (no abre cotizaciones).
-describe('PipelineCardModal — Félix con edición del Pipeline (SCRUM-1139)', () => {
+// SCRUM-1139 — Contabilidad con `pipeline.edit`: edita el Pipeline, pero sigue sin ventas_diseno.read (no abre cotizaciones).
+describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-1139)', () => {
   const asFelixEditor = () =>
     mockedStore.mockReturnValue({
       user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit', 'ventas_diseno.pass_to_order'] },

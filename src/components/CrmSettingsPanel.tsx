@@ -26,6 +26,9 @@ export default function CrmSettingsPanel() {
   const [proximaDias, setProximaDias] = useState('')
   const [recentDias, setRecentDias]   = useState('')
   const [staleDias, setStaleDias]     = useState('')
+  // Fase 1 (aislamiento del núcleo): umbrales que estaban fijos en código.
+  const [estancadoDias, setEstancadoDias] = useState('')
+  const [contactoObsoletoDias, setContactoObsoletoDias] = useState('')
   const [pdfMax, setPdfMax]           = useState('')
   const [pdfPhotos, setPdfPhotos]     = useState('')
   const [pdfVolume, setPdfVolume]     = useState('')
@@ -36,6 +39,8 @@ export default function CrmSettingsPanel() {
     setProximaDias(String(settings.entrega_proxima_dias))
     setRecentDias(String(settings.freshness_recent_dias))
     setStaleDias(String(settings.freshness_stale_dias))
+    setEstancadoDias(String(settings.pipeline_estancado_dias))
+    setContactoObsoletoDias(String(settings.cliente_contacto_obsoleto_dias))
     setPdfMax(String(settings.catalog_pdf_max_single_products))
     setPdfPhotos(String(settings.catalog_pdf_max_single_photos))
     setPdfVolume(String(settings.catalog_pdf_volume_size))
@@ -68,6 +73,8 @@ export default function CrmSettingsPanel() {
     proximaDias !== String(settings.entrega_proxima_dias)
     || recentDias !== String(settings.freshness_recent_dias)
     || staleDias !== String(settings.freshness_stale_dias)
+    || estancadoDias !== String(settings.pipeline_estancado_dias)
+    || contactoObsoletoDias !== String(settings.cliente_contacto_obsoleto_dias)
     || pdfMax !== String(settings.catalog_pdf_max_single_products)
     || pdfPhotos !== String(settings.catalog_pdf_max_single_photos)
     || pdfVolume !== String(settings.catalog_pdf_volume_size)
@@ -112,6 +119,28 @@ export default function CrmSettingsPanel() {
           />
           {fieldError('freshness_stale_dias') && <p role="alert" className="mt-1 text-xs text-red-500">{fieldError('freshness_stale_dias')}</p>}
         </div>
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+            {t('crm:settings.fields.pipelineEstancadoDias')}
+          </label>
+          <input
+            type="number" min={1} step={1} value={estancadoDias} onChange={e => edit(setEstancadoDias, e.target.value)}
+            aria-invalid={fieldError('pipeline_estancado_dias') ? true : undefined}
+            className={`w-full rounded-md border px-3 py-1.5 text-sm ${fieldError('pipeline_estancado_dias') ? 'border-red-400' : 'border-slate-300'}`}
+          />
+          {fieldError('pipeline_estancado_dias') && <p role="alert" className="mt-1 text-xs text-red-500">{fieldError('pipeline_estancado_dias')}</p>}
+        </div>
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
+            {t('crm:settings.fields.clienteContactoObsoletoDias')}
+          </label>
+          <input
+            type="number" min={1} step={1} value={contactoObsoletoDias} onChange={e => edit(setContactoObsoletoDias, e.target.value)}
+            aria-invalid={fieldError('cliente_contacto_obsoleto_dias') ? true : undefined}
+            className={`w-full rounded-md border px-3 py-1.5 text-sm ${fieldError('cliente_contacto_obsoleto_dias') ? 'border-red-400' : 'border-slate-300'}`}
+          />
+          {fieldError('cliente_contacto_obsoleto_dias') && <p role="alert" className="mt-1 text-xs text-red-500">{fieldError('cliente_contacto_obsoleto_dias')}</p>}
+        </div>
       </div>
       {/* SCRUM-998 — PDF de Catálogo: hasta el máximo sale plano en el momento; por encima, un ZIP de volúmenes en segundo plano. */}
       <h4 className="text-[13px] font-bold text-slate-900 dark:text-slate-100 mb-1">{t('crm:settings.catalogPdf.title')}</h4>
@@ -147,6 +176,8 @@ export default function CrmSettingsPanel() {
             entrega_proxima_dias: Number(proximaDias),
             freshness_recent_dias: Number(recentDias),
             freshness_stale_dias: Number(staleDias),
+            pipeline_estancado_dias: Number(estancadoDias),
+            cliente_contacto_obsoleto_dias: Number(contactoObsoletoDias),
             catalog_pdf_max_single_products: Number(pdfMax),
             catalog_pdf_max_single_photos: Number(pdfPhotos),
             catalog_pdf_volume_size: Number(pdfVolume),

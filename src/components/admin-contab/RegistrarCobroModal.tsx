@@ -244,7 +244,7 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
           <Button variant="icon" onClick={onClose}><IcoClose /></Button>
         </div>
 
-        {/* Cliente — rebote Daniela (SCRUM-905, 2026-09-13): un ancestro con overflow-y-auto
+        {/* Cliente — rebote Gerencia (SCRUM-905, 2026-09-13): un ancestro con overflow-y-auto
             clippea cualquier hijo absolutamente posicionado que caiga fuera de su propio alto,
             sin importar z-index — por eso el desplegable de resultados "no se veía" al tipear
             (SÍ se renderizaba, solo quedaba recortado por el scroll del cuerpo del modal). El

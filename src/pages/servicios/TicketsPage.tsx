@@ -19,7 +19,7 @@ import type { Ticket } from '@/types/servicios'
 
 type ViewMode = 'table' | 'board'
 
-// REQ-216→221 (Batch 1) — solo Aaron/Líder de Servicios puede cambiar estado (select inline o
+// REQ-216→221 (Batch 1) — solo Lider Servicios/Líder de Servicios puede cambiar estado (select inline o
 // drag-and-drop, REQ-218/221). superadmin incluido como bypass (mismo criterio que el resto de
 // la app, ver Sidebar.tsx `isGerencia`). Vendedor/Diseñador (y cualquier otro rol con acceso de
 // solo lectura al módulo) ve el panel completo pero sin poder ejecutar el cambio.
@@ -27,7 +27,7 @@ function canEditTicketStatus(role: string | undefined): boolean {
   return role === 'lider_servicios' || role === 'superadmin'
 }
 
-// REQ-245 RN4 — Aaron/Líder de Servicios, superadmin, Gerencia (`management`) y Vendedor/Diseñador
+// REQ-245 RN4 — Lider Servicios/Líder de Servicios, superadmin, Gerencia (`management`) y Vendedor/Diseñador
 // pueden reportar un ticket nuevo — técnico interno/garantías NO tienen este botón disponible
 // (mismo criterio que el backend, `role:` en routes/servicios.php, más angosto que servicios.write).
 function canCreateTicket(role: string | undefined): boolean {

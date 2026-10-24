@@ -41,7 +41,7 @@ interface Props {
    * "Devolución de mercancía" nunca seleccionable a mano — RN1 REQ-481).
    */
   devolucionPrecargada?: NotaCreditoDevolucionPrecargada | null
-  /** REQ-482 RN2/RN3 — umbral configurable de aprobación de Mark (`NotaCreditoResumenMes.mark_
+  /** REQ-482 RN2/RN3 — umbral configurable de aprobación de Gerencia (`NotaCreditoResumenMes.mark_
    *  approval_threshold`, Configuración Fiscal). `undefined` mientras el resumen del mes no cargó
    *  todavía — el banner y el gate de comprobante obligatorio quedan inactivos hasta entonces
    *  (nunca asumen un umbral por defecto en el frontend). */

@@ -8,10 +8,10 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * mergeado a `dev` local en ambos repos, todavía sin push.
  *
  * Cuentas reales (password = email):
- *  - liderservicios@test.com  (lider_servicios) — Aaron, escritura completa de Insumos
+ *  - liderservicios@test.com  (lider_servicios) — Lider Servicios, escritura completa de Insumos
  *  - tecnicoservicios@test.com    (tecnico_servicios) — Tecnico Servicios Test, solo lectura del módulo
  *  - gerencia@test.com   (management) — Gerencia, ve el Kardex de herramientas
- *  - lidercompras@test.com (lider_compras) — Yirena, avanza la orden real en Compras
+ *  - lidercompras@test.com (lider_compras) — Lider Compras, avanza la orden real en Compras
  *
  * Hallazgo real de este pase (corregido en el mismo dispatch, ver OriginBadge.tsx +
  * PurchaseOrderController.php): REQ-274 RN3 pedía que la orden generada quedara "visible en
@@ -54,7 +54,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 
 // ---------- REQ-273 — Listado + gate de escritura ----------
 
-test('1. Aaron — REQ-273: panel Insumos vacío al arrancar, botón "+ Agregar insumo" visible', async ({ page }) => {
+test('1. Lider Servicios — REQ-273: panel Insumos vacío al arrancar, botón "+ Agregar insumo" visible', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/01-panel-vacio.png`, fullPage: true })
@@ -62,18 +62,18 @@ test('1. Aaron — REQ-273: panel Insumos vacío al arrancar, botón "+ Agregar 
   await expect(page.getByRole('button', { name: /Agregar insumo/i })).toBeVisible()
 })
 
-test('2. Carlos (tecnico_servicios) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
+test('2. Tecnico Servicios (tecnico_servicios) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/02-carlos-solo-lectura.png`, fullPage: true })
 
   await expect(page.getByRole('button', { name: /Agregar insumo/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Solicitar', exact: true })).toHaveCount(0)
-  // "Movimiento de herramientas" tampoco — REQ-276, exclusivo Aaron/Gerencia/superadmin.
+  // "Movimiento de herramientas" tampoco — REQ-276, exclusivo Lider Servicios/Gerencia/superadmin.
   await expect(page.getByRole('button', { name: /Movimiento de herramientas/i })).toHaveCount(0)
 })
 
-test('3. Ruptura — Carlos vía API directa: POST /servicios/insumos debe dar 403', async ({ request }) => {
+test('3. Ruptura — Tecnico Servicios vía API directa: POST /servicios/insumos debe dar 403', async ({ request }) => {
   const token = await apiToken(request, 'tecnicoservicios@test.com')
   const res = await request.post(`${API_BASE}/api/servicios/insumos`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -85,7 +85,7 @@ test('3. Ruptura — Carlos vía API directa: POST /servicios/insumos debe dar 4
 
 // ---------- REQ-275 — Alta de insumo nuevo (buscador del catálogo real) ----------
 
-test('4. Aaron — REQ-275 Escenario 2: buscar un insumo que NO existe no muestra ninguna opción, sin forma de crearlo libre', async ({ page }) => {
+test('4. Lider Servicios — REQ-275 Escenario 2: buscar un insumo que NO existe no muestra ninguna opción, sin forma de crearlo libre', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
 
@@ -101,7 +101,7 @@ test('4. Aaron — REQ-275 Escenario 2: buscar un insumo que NO existe no muestr
   await expect(page.locator('[data-testid="insumo-create-modal"]')).toHaveCount(0)
 })
 
-test('5. Aaron — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3, cantidad inicial=5) crea la fila en 0 disponible / Bajo mínimo', async ({ page }) => {
+test('5. Lider Servicios — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3, cantidad inicial=5) crea la fila en 0 disponible / Bajo mínimo', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
 
@@ -132,7 +132,7 @@ test('5. Aaron — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3
   await expect(row.getByText('Solicitud pendiente', { exact: false })).toBeVisible()
 })
 
-test('6. Aaron — REQ-275 RN1: ese mismo producto YA NO aparece en el buscador (excluido)', async ({ page }) => {
+test('6. Lider Servicios — REQ-275 RN1: ese mismo producto YA NO aparece en el buscador (excluido)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
 
@@ -152,7 +152,7 @@ test('6. Aaron — REQ-275 RN1: ese mismo producto YA NO aparece en el buscador 
 
 // ---------- REQ-274/277 — ciclo completo real hasta "Recibido", vía Compras ----------
 
-test('7. Yirena (Compras) — la orden generada por Aaron aparece con "Origen: Servicios" (hallazgo corregido)', async ({ page }) => {
+test('7. Lider Compras (Compras) — la orden generada por Lider Servicios aparece con "Origen: Servicios" (hallazgo corregido)', async ({ page }) => {
   await login(page, 'lidercompras@test.com')
   await page.goto(`${BASE}/compras/ordenes`)
   await page.waitForTimeout(1200)
@@ -163,7 +163,7 @@ test('7. Yirena (Compras) — la orden generada por Aaron aparece con "Origen: S
   await expect(row.getByText('Origen: Servicios')).toBeVisible()
 })
 
-test('8. Yirena — avanza la orden hasta Recibido (Pendiente → Ordenado → En tránsito local → Ingreso de Mercancía → Recibido)', async ({ page, request }) => {
+test('8. Lider Compras — avanza la orden hasta Recibido (Pendiente → Ordenado → En tránsito local → Ingreso de Mercancía → Recibido)', async ({ page, request }) => {
   await login(page, 'lidercompras@test.com')
 
   const token = await apiToken(request, 'lidercompras@test.com')
@@ -236,7 +236,7 @@ test('8. Yirena — avanza la orden hasta Recibido (Pendiente → Ordenado → E
   expect(finalOrder.status).toBe('recibido')
 })
 
-test('9. Aaron — REQ-277 RN3/RN4: tras "Recibido" el insumo pasa a "OK" (disponible=5 > mínimo=3), botón vuelve a "Solicitar"', async ({ page }) => {
+test('9. Lider Servicios — REQ-277 RN3/RN4: tras "Recibido" el insumo pasa a "OK" (disponible=5 > mínimo=3), botón vuelve a "Solicitar"', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
   await page.waitForTimeout(1000)
@@ -273,12 +273,12 @@ test('10. REQ-291 RN5 — Bodega ve exactamente el mismo disponible en "Reserva 
   expect(reservaRow).toBeTruthy()
   const qty = reservaRow.quantity ?? reservaRow.qty ?? reservaRow.stock
   console.log('[REQ-291] cantidad en Reserva Servicios vista desde Bodega:', qty)
-  expect(Number(qty)).toBe(5) // mismo número que REQ-273 le muestra a Aaron en el test anterior
+  expect(Number(qty)).toBe(5) // mismo número que REQ-273 le muestra a Lider Servicios en el test anterior
 })
 
 // ---------- REQ-276 — Kardex de herramientas: gate + filtros combinados ----------
 
-test('11. Carlos (tecnico_servicios) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
+test('11. Tecnico Servicios (tecnico_servicios) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1500)
@@ -287,7 +287,7 @@ test('11. Carlos (tecnico_servicios) — URL directa a /servicios/tools/kardex l
   expect(page.url()).not.toContain('/servicios/tools/kardex')
 })
 
-test('12. Ruptura — Carlos vía API directa: GET /servicios/tools/movements debe dar 403', async ({ request }) => {
+test('12. Ruptura — Tecnico Servicios vía API directa: GET /servicios/tools/movements debe dar 403', async ({ request }) => {
   const token = await apiToken(request, 'tecnicoservicios@test.com')
   const res = await request.get(`${API_BASE}/api/servicios/tools/movements`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -296,7 +296,7 @@ test('12. Ruptura — Carlos vía API directa: GET /servicios/tools/movements de
   expect(res.status()).toBe(403)
 })
 
-test('13. Daniela (management) — accede al Kardex de herramientas, ve filtros combinables', async ({ page }) => {
+test('13. Gerencia (management) — accede al Kardex de herramientas, ve filtros combinables', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1200)
@@ -307,7 +307,7 @@ test('13. Daniela (management) — accede al Kardex de herramientas, ve filtros 
   await expect(page.getByLabel(/responsable/i).first()).toBeVisible()
 })
 
-test('14. Aaron — botón "Movimiento de herramientas" visible y abre el Kardex en pestaña nueva', async ({ page, context }) => {
+test('14. Lider Servicios — botón "Movimiento de herramientas" visible y abre el Kardex en pestaña nueva', async ({ page, context }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
   await page.getByRole('button', { name: 'Herramientas', exact: true }).click()

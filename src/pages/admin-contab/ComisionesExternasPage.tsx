@@ -39,8 +39,8 @@ const ESTADO_COBRO_CLIENTE_PILL_CLASSES: Record<ArchitectCommissionEstadoCobroCl
  * comprobante de retención, recordatorio al arquitecto).
  *
  * Sin distinción `view`/`view_team` (a diferencia de Comisiones Internas) — la audiencia de esta
- * pantalla es Felix/Yaneth/Mark/Gerencia únicamente, todos ven la tabla completa (ver §5 del ADR).
- * "Subir cuenta de cobro" se oculta para Mark/Gerencia (`role: management`) — el backend ya
+ * pantalla es Contabilidad/Yaneth/Mark/Gerencia únicamente, todos ven la tabla completa (ver §5 del ADR).
+ * "Subir cuenta de cobro" se oculta para Gerencia/Gerencia (`role: management`) — el backend ya
  * responde 403 para ese rol (REQ-513, sin el carve-out que sí tiene REQ-510), la UI solo evita
  * mostrar un botón que siempre fallaría.
  */
@@ -51,7 +51,7 @@ export default function ComisionesExternasPage() {
   // REQ-515/516 — mismo roster amplio del backend (`role:superadmin,lider_admin_contab,
   // asistente_administrativa,management`), que en la práctica es toda la audiencia de esta
   // pantalla (ver docblock de clase) — Marcar como pagado/Proponer %/Recordar están disponibles
-  // para cualquiera con acceso acá, solo Decidir % (Aprobar/Rechazar) es exclusivo de Mark.
+  // para cualquiera con acceso acá, solo Decidir % (Aprobar/Rechazar) es exclusivo de Gerencia.
   const canManage = canUploadCuentaCobro || user?.role === 'management'
 
   const [search, setSearch]           = useState('')

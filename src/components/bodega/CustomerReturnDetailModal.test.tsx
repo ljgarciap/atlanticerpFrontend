@@ -55,8 +55,8 @@ describe('CustomerReturnDetailModal', () => {
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: '2026-07-10T10:00:00Z', finalized_at: null,
       rejected_at: '2026-07-11T10:00:00Z', rejection_reason: 'Producto llegó dañado más allá de lo aceptable', credit_note_id: null, products: [],
       history: [
-        { step: 'received', label: 'Recepción física confirmada', at: '2026-07-10T10:00:00Z', by: 'Esteban C.', destination_warehouse: 'Merma, Reclamos y Devoluciones' },
-        { step: 'rejected', label: 'Rechazada', at: '2026-07-11T10:00:00Z', by: 'Esteban C.', reason: 'Producto llegó dañado más allá de lo aceptable' },
+        { step: 'received', label: 'Recepción física confirmada', at: '2026-07-10T10:00:00Z', by: 'Lider Bodega C.', destination_warehouse: 'Merma, Reclamos y Devoluciones' },
+        { step: 'rejected', label: 'Rechazada', at: '2026-07-11T10:00:00Z', by: 'Lider Bodega C.', reason: 'Producto llegó dañado más allá de lo aceptable' },
       ],
     }
     mockedApi.returns.detail.mockResolvedValue(detail)

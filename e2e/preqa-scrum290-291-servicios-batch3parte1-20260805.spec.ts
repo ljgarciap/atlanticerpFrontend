@@ -23,7 +23,7 @@ async function openFirstTicketDetail(page: Page) {
 }
 
 test('SCRUM-290/291 — Cancelar ticket y Ver/Imprimir PDF', async ({ page }) => {
-  await test.step('0) Login como lider_servicios (Aaron) y abrir el primer ticket', async () => {
+  await test.step('0) Login como lider_servicios (Lider Servicios) y abrir el primer ticket', async () => {
     await login(page, LIDER_SERVICIOS)
     await openFirstTicketDetail(page)
     await page.screenshot({ path: 'test-results/scrum290-291-00-detalle.png' })

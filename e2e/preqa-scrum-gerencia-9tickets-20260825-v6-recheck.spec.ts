@@ -15,8 +15,8 @@ test.describe.configure({ mode: 'serial' })
 // destino recibe el filtro Y la pantalla destino lo aplica) vs. cuáles solo agregaron un
 // querystring que la pantalla destino no sabe interpretar.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Mark Approver
-const MARK = 'gerencia3@test.com' // Mark Approver real
+const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
@@ -123,7 +123,7 @@ test('SCRUM-161 RN1/RN2 — SIN CAMBIOS, gap de diseño sigue vigente: aprobador
   expect(raw.aprobaciones).toEqual([])
 })
 
-test('SCRUM-162 RN2 — SIN CAMBIOS: sigue sin existir botón Aprobar/Rechazar ni modal de detalle (Mark real, password confirmada)', async ({ page }) => {
+test('SCRUM-162 RN2 — SIN CAMBIOS: sigue sin existir botón Aprobar/Rechazar ni modal de detalle (Gerencia real, password confirmada)', async ({ page }) => {
   test.setTimeout(45000)
   const ok = await login(page, MARK, MARK_PASSWORD)
   expect(ok).toBe(true) // password real confirmada en v6 — ya no debería fallar como en v5

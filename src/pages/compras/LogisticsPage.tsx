@@ -239,7 +239,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
   // SCRUM-208 (2026-08-06/12, rebotes de Gerencia Test) — mismo gate puntual que OrderDetailPage:
   // `pending_remainder_status` solo bloquea de verdad el paso final a "Recibido". Antes de este
   // fix, este botón quedaba clickeable en ese caso puntual y el 422 resultante no se mostraba en
-  // ningún lado (esta pantalla nunca renderizaba `advance.isError`) — el video de Daniela
+  // ningún lado (esta pantalla nunca renderizaba `advance.isError`) — el video de Gerencia
   // ("el botón está clickeable pero no genera ninguna acción") es exactamente este bug.
   const blockedFromReceivingByRemainder = order.next_status === 'recibido' && order.pending_remainder_status !== null
   // REQ-154 (SCRUM-217) RN7 — solo Compras ve/usa el botón de avance de etapa; cualquier otro rol

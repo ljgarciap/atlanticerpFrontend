@@ -7,7 +7,7 @@ import type { PurchaseOrderSummary, ProviderOrigin } from '@/types/compras'
  * Visual Reviewer 2026-08-05: este componente no existía — la pantalla solo mostraba la etiqueta
  * de "Estado" (una de las 4 del encabezado), sin ningún historial de fechas por etapa.
  *
- * RN1 (comentario de Daniela, SCRUM-217, 2026-08-05 17:23) — 2 secuencias posibles según
+ * RN1 (comentario de Gerencia, SCRUM-217, 2026-08-05 17:23) — 2 secuencias posibles según
  * `Provider::origin` (mismo criterio que `PurchaseOrder::statusSequence()` en backend):
  *  - Proveedor normal/internacional: Salió de origen → En tránsito → En aduana → En tránsito
  *    local → Recibido (5 pasos).
@@ -16,7 +16,7 @@ import type { PurchaseOrderSummary, ProviderOrigin } from '@/types/compras'
  * El primer paso de ambas secuencias es el MISMO status (`ordenado`) pero con una etiqueta
  * distinta según el origen — confirmado contra el mockup 2B__Compras_Logistica.html (su JS de
  * demo solo ejercita el caso normal, "Salió de origen") y, de forma explícita, contra el propio
- * texto de la RN1 de Daniela para el caso local.
+ * texto de la RN1 de Gerencia para el caso local.
  */
 
 type StageKey = 'ordenado' | 'en_transito' | 'en_aduana' | 'en_transito_local' | 'recibido'

@@ -255,7 +255,7 @@ describe('CrmDashboardPage', () => {
       alerts: { overdue_proposals: { count: 1, items: [{ card_id: 1, project_name: 'Proyecto A', days: 16 }] }, cold_clients: null },
     }))
     mockedApi.dashboard.remind.mockResolvedValue({
-      notified: [{ owner_id: 1, owner_name: 'Carlos Ruiz', projects_count: 1 }],
+      notified: [{ owner_id: 1, owner_name: 'Tecnico Servicios Ruiz', projects_count: 1 }],
     })
     renderPage()
 
@@ -263,7 +263,7 @@ describe('CrmDashboardPage', () => {
 
     await waitFor(() => expect(mockedApi.dashboard.remind).toHaveBeenCalled())
     await waitFor(() => expect(showSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Carlos Ruiz (1)'),
+      expect.stringContaining('Tecnico Servicios Ruiz (1)'),
     ))
   })
 

@@ -18,7 +18,7 @@ const PAYMENT_STATUS_CHIPS: PaymentStatusFilter[] = ['all', 'sin_enviar', 'por_p
  * comportamiento ya validado por QA, sin cambios en este batch.
  *
  * Los "5 indicadores (KPIs)" que el ticket original pedía quedaron deliberadamente afuera en la
- * primera pasada (sin RN documentadas) — Daniela los definió con precisión en su comentario del
+ * primera pasada (sin RN documentadas) — Gerencia los definió con precisión en su comentario del
  * 2026-08-09, ya implementados acá (`payment_kpis` del backend, calculado sobre el universo
  * completo, no la página visible).
  */

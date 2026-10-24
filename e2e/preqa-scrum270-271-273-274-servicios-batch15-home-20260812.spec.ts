@@ -16,7 +16,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Indicadores del mes.
  *
  * Cuentas reales (password = email):
- *  - liderservicios@test.com   (lider_servicios) — Aaron, ve TODO incl. "+ Nuevo ticket"
+ *  - liderservicios@test.com   (lider_servicios) — Lider Servicios, ve TODO incl. "+ Nuevo ticket"
  *  - tecnicoservicios@test.com     (tecnico_servicios) — NO debe ver "+ Nuevo ticket"
  *  - garantiasservicios@test.com  (garantias_servicios) — NO debe ver "+ Nuevo ticket"
  *
@@ -57,14 +57,14 @@ async function login(page: Page, email: string) {
 async function gotoHome(page: Page) {
   // Ruta real (App.tsx): /servicios/inicio — NO /servicios/home. Un typo acá cae en el catch-all
   // `*` → <Navigate to={getHomeRoute(user)}>, que por coincidencia aterriza en la pantalla correcta
-  // para usuarios cuyo ÚNICO/primer módulo es servicios (Aaron/Carlos/Miguel), enmascarando el
-  // error hasta que se prueba con un usuario multi-módulo (Daniela, ventas_diseno con prioridad
+  // para usuarios cuyo ÚNICO/primer módulo es servicios (Lider Servicios/Carlos/Miguel), enmascarando el
+  // error hasta que se prueba con un usuario multi-módulo (Gerencia, ventas_diseno con prioridad
   // más alta en MODULE_HOME_ROUTES) — descubierto exactamente así durante esta pasada.
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1500)
 }
 
-test('1. Aaron (lider_servicios) — Encabezado: título, botones Agenda y + Nuevo ticket', async ({ page }) => {
+test('1. Lider Servicios (lider_servicios) — Encabezado: título, botones Agenda y + Nuevo ticket', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/01-home-aaron.png`, fullPage: true })
@@ -74,7 +74,7 @@ test('1. Aaron (lider_servicios) — Encabezado: título, botones Agenda y + Nue
   await expect(page.getByRole('button', { name: 'Nuevo ticket' })).toBeVisible()
 })
 
-test('2. Aaron — REQ-207 RN2: botón Agenda navega a Técnicos Internos → Agenda equipo sin filtro', async ({ page }) => {
+test('2. Lider Servicios — REQ-207 RN2: botón Agenda navega a Técnicos Internos → Agenda equipo sin filtro', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.getByRole('button', { name: 'Agenda', exact: true }).click()
@@ -89,7 +89,7 @@ test('2. Aaron — REQ-207 RN2: botón Agenda navega a Técnicos Internos → Ag
   }
 })
 
-test('3. Aaron — REQ-207 RN1: + Nuevo ticket abre EXACTAMENTE el mismo formulario del módulo Tickets', async ({ page }) => {
+test('3. Lider Servicios — REQ-207 RN1: + Nuevo ticket abre EXACTAMENTE el mismo formulario del módulo Tickets', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.getByRole('button', { name: 'Nuevo ticket' }).click()
@@ -104,7 +104,7 @@ test('3. Aaron — REQ-207 RN1: + Nuevo ticket abre EXACTAMENTE el mismo formula
   await page.keyboard.press('Escape').catch(() => {})
 })
 
-test('4. Aaron — REQ-208: Rutas del día muestra máx. 5 de 6 visitas + "Ver agenda completa"', async ({ page }) => {
+test('4. Lider Servicios — REQ-208: Rutas del día muestra máx. 5 de 6 visitas + "Ver agenda completa"', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/04-rutas-dia.png`, fullPage: true })
@@ -130,7 +130,7 @@ test('4. Aaron — REQ-208: Rutas del día muestra máx. 5 de 6 visitas + "Ver a
   expect(page.url()).toContain('/servicios/tecnicos?view=agenda')
 })
 
-test('5. Aaron — REQ-210: Pendientes muestra badge=1 y SOLO el ticket >3 días (no el de 1 día)', async ({ page }) => {
+test('5. Lider Servicios — REQ-210: Pendientes muestra badge=1 y SOLO el ticket >3 días (no el de 1 día)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/05-pendientes.png`, fullPage: true })
@@ -145,7 +145,7 @@ test('5. Aaron — REQ-210: Pendientes muestra badge=1 y SOLO el ticket >3 días
   await expect(badge).toHaveText('1')
 })
 
-test('6. Aaron — REQ-210 RN5: "Ver ticket" navega al ticket CORRECTO (deep-link ?ticket=)', async ({ page }) => {
+test('6. Lider Servicios — REQ-210 RN5: "Ver ticket" navega al ticket CORRECTO (deep-link ?ticket=)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
 
@@ -164,7 +164,7 @@ test('6. Aaron — REQ-210 RN5: "Ver ticket" navega al ticket CORRECTO (deep-lin
   expect(await page.getByText('Cliente Sin Agendar QA').count()).toBeGreaterThanOrEqual(1)
 })
 
-test('7. Aaron — REQ-211: Indicadores del mes con datos reales sembrados', async ({ page }) => {
+test('7. Lider Servicios — REQ-211: Indicadores del mes con datos reales sembrados', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/07-indicadores.png`, fullPage: true })
@@ -178,7 +178,7 @@ test('7. Aaron — REQ-211: Indicadores del mes con datos reales sembrados', asy
   await expect(page.getByText('Ingresos por instalaciones')).toBeVisible()
 })
 
-test('8. Carlos (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo ticket", panels SÍ visibles (RN1)', async ({ page }) => {
+test('8. Tecnico Servicios (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo ticket", panels SÍ visibles (RN1)', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/08-home-carlos.png`, fullPage: true })
@@ -186,13 +186,13 @@ test('8. Carlos (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo t
   await expect(page.getByRole('button', { name: 'Nuevo ticket' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Agenda', exact: true })).toBeVisible()
 
-  // RN1 de los 3 paneles — visibles para TODOS los roles del módulo, no solo Aaron/gerencia
+  // RN1 de los 3 paneles — visibles para TODOS los roles del módulo, no solo Lider Servicios/gerencia
   await expect(page.getByRole('heading', { name: 'Rutas del día' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Pendientes' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Indicadores del mes' })).toBeVisible()
 })
 
-test('9. Miguel (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticket"', async ({ page }) => {
+test('9. Garantias Servicios (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticket"', async ({ page }) => {
   await login(page, 'garantiasservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/09-home-miguel.png`, fullPage: true })
@@ -200,7 +200,7 @@ test('9. Miguel (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticke
   await expect(page.getByRole('button', { name: 'Nuevo ticket' })).toHaveCount(0)
 })
 
-test('10. Daniela (management) — SÍ debe ver "+ Nuevo ticket" (rol autorizado)', async ({ page }) => {
+test('10. Gerencia (management) — SÍ debe ver "+ Nuevo ticket" (rol autorizado)', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/10-home-daniela.png`, fullPage: true })
@@ -249,12 +249,12 @@ async function apiLogin(request: import('@playwright/test').APIRequestContext, e
 }
 
 test('13. Gate de rol — pencil de "Ajustar meta" visible SOLO para superadmin/management', async ({ page }) => {
-  // Daniela (management) — SÍ debe ver el ícono.
+  // Gerencia (management) — SÍ debe ver el ícono.
   await login(page, 'gerencia@test.com')
   await gotoHome(page)
   await expect(page.getByTitle(/ajustar meta|meta de instalaciones/i)).toBeVisible()
 
-  // Aaron (lider_servicios) — NO debe verlo (mismo gate que el backend, role:superadmin,management).
+  // Lider Servicios (lider_servicios) — NO debe verlo (mismo gate que el backend, role:superadmin,management).
   await login(page, 'liderservicios@test.com')
   await gotoHome(page)
   await expect(page.getByTitle(/ajustar meta|meta de instalaciones/i)).toHaveCount(0)

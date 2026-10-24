@@ -52,7 +52,7 @@ interface Props {
 
 /**
  * SCRUM-1168 F3 — cruce de UN cliente: qué dinero tiene a favor, qué facturas debe, y a cuáles aplicarlo (total o parcial). El sistema solo sugiere;
- * Felix decide el monto por factura, ve cómo quedaría todo (vista previa) y recién al confirmar se compromete. Nada cambia antes de confirmar.
+ * Contabilidad decide el monto por factura, ve cómo quedaría todo (vista previa) y recién al confirmar se compromete. Nada cambia antes de confirmar.
  */
 export default function CompensacionClienteModal({ masterClientId, onClose }: Props) {
   const { t } = useTranslation('adminContab')
@@ -66,7 +66,7 @@ export default function CompensacionClienteModal({ masterClientId, onClose }: Pr
   const [reversoMotivo, setReversoMotivo] = useState('')
   const [reversoResultado, setReversoResultado] = useState<string | null>(null)
 
-  // F5 — devolver dinero al cliente desde una fuente de su saldo a favor (lo aprueba Mark).
+  // F5 — devolver dinero al cliente desde una fuente de su saldo a favor (lo aprueba Gerencia).
   const refundMutation = useRequestRefund()
   const { data: cuentas = [] } = useBankAccounts()
   const [devolver, setDevolver] = useState<CompensacionFuente | null>(null)

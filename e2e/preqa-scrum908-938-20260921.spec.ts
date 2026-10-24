@@ -43,9 +43,9 @@ test('regresión — un usuario SIN ningún permiso relevante de Compras sigue b
 })
 
 // ============================================================
-// SCRUM-908 — Compras (Mark): purchase_order respeta requires_primary_approval
+// SCRUM-908 — Compras (Gerencia): purchase_order respeta requires_primary_approval
 // ============================================================
-test('Mark ve la OC que requiere su aprobación, no la que no la requiere', async ({ page }) => {
+test('Gerencia ve la OC que requiere su aprobación, no la que no la requiere', async ({ page }) => {
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto('/compras/inicio')
   const card = page.locator('text=Aprobaciones Pendientes').first().locator('xpath=ancestor::*[contains(@class,"p-4")]').last()
@@ -56,16 +56,16 @@ test('Mark ve la OC que requiere su aprobación, no la que no la requiere', asyn
 })
 
 // ============================================================
-// SCRUM-908 — Bodega: negativo (no-Mark no ve relocation) y positivo (Mark ve + max5 + Ver más)
+// SCRUM-908 — Bodega: negativo (no-Mark no ve relocation) y positivo (Gerencia ve + max5 + Ver más)
 // ============================================================
-test('almacen (lider_bodega, no es Mark) NO ve las reubicaciones pendientes', async ({ page }) => {
+test('almacen (lider_bodega, no es Gerencia) NO ve las reubicaciones pendientes', async ({ page }) => {
   await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
   await page.goto('/bodega/home')
   await page.waitForTimeout(1000)
   await expect(page.getByText('Aprobaciones Pendientes')).toHaveCount(0)
 })
 
-test('FIX VERIFICADO — Bodega Home de Mark aterriza directo en "Inicio" (no "Equipo") porque tiene aprobaciones reales pendientes', async ({ page }) => {
+test('FIX VERIFICADO — Bodega Home de Gerencia aterriza directo en "Inicio" (no "Equipo") porque tiene aprobaciones reales pendientes', async ({ page }) => {
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto('/bodega/home')
   await page.waitForTimeout(1200)
@@ -75,7 +75,7 @@ test('FIX VERIFICADO — Bodega Home de Mark aterriza directo en "Inicio" (no "E
   await expect(inicioBtn).toHaveClass(/primary|active/)
 })
 
-test('Mark ve las 6 reubicaciones: máx 5 + "Ver más" + modal con las 6', async ({ page }) => {
+test('Gerencia ve las 6 reubicaciones: máx 5 + "Ver más" + modal con las 6', async ({ page }) => {
   await login(page, 'gerencia3@test.com', 'gerencia3@test.com')
   await page.goto('/bodega/home')
   await page.waitForTimeout(1200)

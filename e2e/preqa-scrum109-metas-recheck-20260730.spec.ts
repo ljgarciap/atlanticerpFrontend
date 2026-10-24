@@ -1,11 +1,11 @@
 import { test, expect, type Page } from '@playwright/test'
 
 /**
- * Pre-QA — SCRUM-109 (daily 2026-07-30, Bloque B): Daniela reportó el 2026-07-27 que el panel
+ * Pre-QA — SCRUM-109 (daily 2026-07-30, Bloque B): Gerencia reportó el 2026-07-27 que el panel
  * Metas seguía mostrando "Sin Meta configurada todavía" para todos los usuarios. Hipótesis:
  * ya resuelto por el fix de SCRUM-146 (2026-07-29/30, VentasDisenoSalesGoalsSeeder + goalsIndex()
  * corregido para usar HomeService::vendors()) — ese trabajo ya se cherry-pickeó a test.atlanticerp.ai.
- * Corre contra test.atlanticerp.ai (mismo entorno donde Daniela probó) con Vendedor Disenador Test 5, una de
+ * Corre contra test.atlanticerp.ai (mismo entorno donde Gerencia probó) con Vendedor Disenador Test 5, una de
  * las 9 vendedoras reales con Meta sembrada.
  */
 test.describe.configure({ mode: 'serial' })
@@ -22,7 +22,7 @@ async function login(page: Page, email: string, pass: string) {
   await page.waitForTimeout(2000)
 }
 
-test('Paola (vendedora real con Meta sembrada) ve su Meta configurada en Reportes', async ({ page }) => {
+test('Vendedor Disenador (vendedora real con Meta sembrada) ve su Meta configurada en Reportes', async ({ page }) => {
   await login(page, PAOLA_EMAIL, PAOLA_PASS)
   await page.goto(`${BASE}/ventas-diseno/reports`)
   await page.waitForTimeout(1500)

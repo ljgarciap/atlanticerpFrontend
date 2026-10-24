@@ -11,9 +11,9 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * 0574d5c (SCRUM-780) — atlanticerp-frontend 7171c72 (SCRUM-779), 6dd47f3 (SCRUM-780).
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
- * (password = email): liderservicios@test.com (Aaron, lider_servicios),
+ * (password = email): liderservicios@test.com (Lider Servicios, lider_servicios),
  * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios), lidercompras@test.com
- * (Yirena, lider_compras), gerencia5@test.com (Whileyner, management — mbekhar/daniela/
+ * (Lider Compras, lider_compras), gerencia5@test.com (Gerencia, management — mbekhar/daniela/
  * luis.garcia NO loguean con password=email en este entorno, ver hallazgo de proceso en el reporte).
  *
  * HALLAZGO CRÍTICO real de este pase (SCRUM-337, ver tests 8/9 abajo): el fix de backend
@@ -24,7 +24,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * (`ExternalTechnicianController::summary()`, usado por GET /servicios/external-technicians)
  * nunca fue tocado por el fix — sigue exponiendo `tarifa_dia` a cualquier rol basado solo en
  * `tarifa_visible`, ignorando `puede_ver_costos` — la columna TARIFA de la tabla "Técnicos
- * externos" le muestra $25.00 a Carlos.
+ * externos" le muestra $25.00 a Tecnico Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -50,7 +50,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 
 // ---------- SCRUM-347 (REQ-277) — Sincronización con Bodega, gate CRÍTICO de la empresa entera ----------
 
-test('1. Yirena (lider_compras) — Ingresos > + Nuevo ingreso carga la lista de órdenes elegibles sin 500', async ({ page }) => {
+test('1. Lider Compras (lider_compras) — Ingresos > + Nuevo ingreso carga la lista de órdenes elegibles sin 500', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await login(page, 'lidercompras@test.com')
@@ -74,7 +74,7 @@ test('2. Ruptura directa — GET /compras/goods-receipts/eligible-orders respond
 
 // ---------- SCRUM-344 (REQ-274) — ciclo completo Servicios -> Compras -> Recibido, bloqueado en cascada por 347 ----------
 
-test('3. Aaron — Insumos: producto "PreQA204 producto" en estado "Solicitud pendiente" antes del ciclo', async ({ page }) => {
+test('3. Lider Servicios — Insumos: producto "PreQA204 producto" en estado "Solicitud pendiente" antes del ciclo', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
@@ -87,7 +87,7 @@ test('3. Aaron — Insumos: producto "PreQA204 producto" en estado "Solicitud pe
   await expect(row.getByText('Solicitud pendiente', { exact: false })).toBeVisible()
 })
 
-test('4. Yirena — avanza la orden real de Servicios (id 97, en_transito_local) hasta Recibido vía Ingreso de Mercancía real', async ({ page, request }) => {
+test('4. Lider Compras — avanza la orden real de Servicios (id 97, en_transito_local) hasta Recibido vía Ingreso de Mercancía real', async ({ page, request }) => {
   const token = await apiToken(request, 'lidercompras@test.com')
 
   const orderRes = await request.get(`${BASE}/api/compras/orders/97`, { headers: { Authorization: `Bearer ${token}` } })
@@ -130,7 +130,7 @@ test('4. Yirena — avanza la orden real de Servicios (id 97, en_transito_local)
   expect(finalOrder.status).toBe('recibido')
 })
 
-test('5. Aaron — tras "Recibido" el disponible del insumo sube y el botón vuelve a "Solicitar" (cascada real cerrada)', async ({ page }) => {
+test('5. Lider Servicios — tras "Recibido" el disponible del insumo sube y el botón vuelve a "Solicitar" (cascada real cerrada)', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
@@ -146,7 +146,7 @@ test('5. Aaron — tras "Recibido" el disponible del insumo sube y el botón vue
 
 // ---------- SCRUM-361/779 (REQ-291/275) — nombre de insumo vacío ----------
 
-test('6. Aaron — tabla de Insumos muestra el nombre real del producto, no vacío', async ({ page }) => {
+test('6. Lider Servicios — tabla de Insumos muestra el nombre real del producto, no vacío', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/insumos-herramientas`)
   await page.waitForTimeout(1000)
@@ -158,7 +158,7 @@ test('6. Aaron — tabla de Insumos muestra el nombre real del producto, no vac�
   await expect(row.getByText('PreQA204 producto', { exact: false })).toBeVisible()
 })
 
-test('7. Aaron — Informe de Inspección (ticket GAR-2026-0001, id 5): datalist "Material" trae nombres reales de insumos, no vacíos', async ({ page }) => {
+test('7. Lider Servicios — Informe de Inspección (ticket GAR-2026-0001, id 5): datalist "Material" trae nombres reales de insumos, no vacíos', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/tickets?ticket=5`)
   await page.waitForTimeout(1500)
@@ -179,7 +179,7 @@ test('7. Aaron — Informe de Inspección (ticket GAR-2026-0001, id 5): datalist
 
 // ---------- SCRUM-337 (REQ-267) — proyectos/tickets asignados de técnico externo (gate de costos) ----------
 
-test('8. Aaron (puede_ver_costos) — ficha de técnico externo id 2: ve tarifa, margen e historial completo, sin crash', async ({ page }) => {
+test('8. Lider Servicios (puede_ver_costos) — ficha de técnico externo id 2: ve tarifa, margen e historial completo, sin crash', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await login(page, 'liderservicios@test.com')
@@ -190,11 +190,11 @@ test('8. Aaron (puede_ver_costos) — ficha de técnico externo id 2: ve tarifa,
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/08-scrum337-aaron-ficha.png`, fullPage: true })
 
-  expect(errors, `Errores de página al abrir la ficha como Aaron: ${errors.join(' | ')}`).toEqual([])
+  expect(errors, `Errores de página al abrir la ficha como Lider Servicios: ${errors.join(' | ')}`).toEqual([])
   await expect(page.getByText('$25.00').first()).toBeVisible()
 })
 
-test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
+test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico_servicios, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
@@ -207,7 +207,7 @@ test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos):
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/09-scrum337-carlos-listado-leak-tarifa.png`, fullPage: true })
   const listLeak = await page.locator('tbody tr', { hasText: 'QA Luis Vargas' }).getByText('$25.00').count()
-  console.log('[SCRUM-337 CRÍTICO 1/2] "$25.00" visible para Carlos en la tabla de listado:', listLeak > 0)
+  console.log('[SCRUM-337 CRÍTICO 1/2] "$25.00" visible para Tecnico Servicios en la tabla de listado:', listLeak > 0)
 
   // 9b. Abrir la ficha detalle crashea la app entera (pantalla en blanco) — regresión introducida
   // por el propio fix del backend (8e162f8), que dejó de mandar la key `rate_history` para este
@@ -217,7 +217,7 @@ test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos):
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/10-scrum337-carlos-ficha-crash.png`, fullPage: true })
 
-  console.log('[SCRUM-337 CRÍTICO 2/2] errores de página al abrir la ficha como Carlos:', JSON.stringify(errors))
+  console.log('[SCRUM-337 CRÍTICO 2/2] errores de página al abrir la ficha como Tecnico Servicios:', JSON.stringify(errors))
   const bodyText = await page.locator('body').innerText()
   console.log('[SCRUM-337] body text tras el intento de apertura (esperado: vacío = crash):', JSON.stringify(bodyText.slice(0, 200)))
 
@@ -227,7 +227,7 @@ test('9. HALLAZGO CRÍTICO — Carlos (tecnico_servicios, sin puede_ver_costos):
 
 // ---------- SCRUM-780 — Reorganización de menú y permisos "Ajustes" ----------
 
-test('10. Aaron — desplegable "Tickets" revela "Listado de Tickets" + "Cotizaciones" al hacer clic', async ({ page }) => {
+test('10. Lider Servicios — desplegable "Tickets" revela "Listado de Tickets" + "Cotizaciones" al hacer clic', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1200)
@@ -258,7 +258,7 @@ test('10. Aaron — desplegable "Tickets" revela "Listado de Tickets" + "Cotizac
   await expect(page.getByText('Cotizaciones').first()).toBeVisible()
 })
 
-test('11. Aaron (lider_servicios) — "Ajustes" NO aparece en el sidebar Y navegar por URL directa a /servicios/ajustes lo redirige', async ({ page }) => {
+test('11. Lider Servicios (lider_servicios) — "Ajustes" NO aparece en el sidebar Y navegar por URL directa a /servicios/ajustes lo redirige', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1000)
@@ -277,18 +277,18 @@ test('11. Aaron (lider_servicios) — "Ajustes" NO aparece en el sidebar Y naveg
   await page.goto(`${BASE}/servicios/ajustes`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/13-scrum780-aaron-ajustes-bloqueado.png`, fullPage: true })
-  console.log('[SCRUM-780] Aaron navega a /servicios/ajustes, URL final:', page.url())
+  console.log('[SCRUM-780] Lider Servicios navega a /servicios/ajustes, URL final:', page.url())
   expect(page.url()).not.toContain('/servicios/ajustes')
 })
 
-test('12. Ruptura directa — GET /servicios/settings con token de Aaron (lider_servicios) da 403', async ({ request }) => {
+test('12. Ruptura directa — GET /servicios/settings con token de Lider Servicios (lider_servicios) da 403', async ({ request }) => {
   const token = await apiToken(request, 'liderservicios@test.com')
   const res = await request.get(`${BASE}/api/servicios/settings`, { headers: { Authorization: `Bearer ${token}` } })
   console.log('[SCRUM-780] GET /servicios/settings como lider_servicios → status:', res.status())
   expect(res.status()).toBe(403)
 })
 
-test('13. Whileyner (management) — ve "Ajustes" en el sidebar y accede normalmente a /servicios/ajustes', async ({ page }) => {
+test('13. Gerencia (management) — ve "Ajustes" en el sidebar y accede normalmente a /servicios/ajustes', async ({ page }) => {
   await login(page, 'gerencia5@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(1000)

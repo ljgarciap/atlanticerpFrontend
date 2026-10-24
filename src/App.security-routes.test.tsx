@@ -8,9 +8,6 @@ import type { UserInfo } from '@/types/auth'
 // aunque el usuario tenga security.users/levels por permiso individual.
 vi.mock('@/pages/security/UsersPage', () => ({ default: () => <div>USERS_PAGE</div> }))
 vi.mock('@/pages/security/SecurityLevelsPage', () => ({ default: () => <div>LEVELS_PAGE</div> }))
-vi.mock('@/pages/ventas-diseno/CotizaYaPage', () => ({ default: () => <div>COTIZAYA_LIST</div> }))
-vi.mock('@/pages/ventas-diseno/CotizaYaFormPage', () => ({ default: () => <div>COTIZAYA_FORM</div> }))
-vi.mock('@/pages/ventas-diseno/CotizaYaDetailPage', () => ({ default: () => <div>COTIZAYA_DETAIL</div> }))
 vi.mock('@/pages/ventas-diseno/PedidosPage', () => ({ default: () => <div>PEDIDOS_PAGE</div> }))
 vi.mock('@/pages/admin-contab/CompanyProfilePage', () => ({ default: () => <div>EMPRESA_PAGE</div> }))
 vi.mock('@/pages/admin-contab/FiscalConfigPage', () => ({ default: () => <div>FISCAL_PAGE</div> }))
@@ -96,37 +93,4 @@ describe('Ruta /ventas-diseno/pedidos restringida a Compras y Gerencia (SCRUM-11
       expect(screen.queryByText('PEDIDOS_PAGE')).not.toBeInTheDocument()
       expect(window.location.pathname).not.toBe(path)
     })
-})
-
-// SCRUM-1120 — CotizaYA: mismos permisos que Cotizaciones (leer para ver y abrir el detalle, escribir para crear).
-describe('Rutas de CotizaYA (SCRUM-1120)', () => {
-  it.each([
-    ['/ventas-diseno/cotizaya', 'COTIZAYA_LIST', 'ventas_diseno.read'],
-    ['/ventas-diseno/cotizaya/12', 'COTIZAYA_DETAIL', 'ventas_diseno.read'],
-    ['/ventas-diseno/cotizaya/nueva', 'COTIZAYA_FORM', 'ventas_diseno.write'],
-  ])('%s es accesible con %s', (path, marker, permission) => {
-    window.history.pushState({}, '', path)
-    useAuthStore.setState({ user: user('vendedor_disenador', [permission]) })
-    render(<App />)
-    expect(screen.getByText(marker)).toBeInTheDocument()
-  })
-
-  it.each([
-    ['/ventas-diseno/cotizaya', 'COTIZAYA_LIST'],
-    ['/ventas-diseno/cotizaya/12', 'COTIZAYA_DETAIL'],
-    ['/ventas-diseno/cotizaya/nueva', 'COTIZAYA_FORM'],
-  ])('%s redirige a quien no tiene permisos de Ventas y Diseño', (path, marker) => {
-    window.history.pushState({}, '', path)
-    useAuthStore.setState({ user: user('lider_compras', []) })
-    render(<App />)
-    expect(screen.queryByText(marker)).not.toBeInTheDocument()
-    expect(window.location.pathname).not.toBe(path)
-  })
-
-  it('crear exige escribir: con solo lectura redirige', () => {
-    window.history.pushState({}, '', '/ventas-diseno/cotizaya/nueva')
-    useAuthStore.setState({ user: user('vendedor_disenador', ['ventas_diseno.read']) })
-    render(<App />)
-    expect(screen.queryByText('COTIZAYA_FORM')).not.toBeInTheDocument()
-  })
 })

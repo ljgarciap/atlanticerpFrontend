@@ -199,8 +199,8 @@ test.beforeAll(async ({ request }) => {
   ])
   seed.reportC = await groupReport(request, felix.token, idsC)
 
-  // Reporte D — 1 línea, aprobado por Mark de entrada (SCRUM-622.3 solo-lectura, SCRUM-623.3
-  // descargar+"aprobado por Mark").
+  // Reporte D — 1 línea, aprobado por Gerencia de entrada (SCRUM-622.3 solo-lectura, SCRUM-623.3
+  // descargar+"aprobado por Gerencia").
   const idsD = await createExpenses(request, felix.token, [
     { proveedor: `ProveedorD1-${RUN_ID}`, solicitanteId: felix.userId },
   ])
@@ -229,14 +229,14 @@ test.beforeAll(async ({ request }) => {
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-618 (REQ-541) — rechazar línea individual / reporte completo, exclusivo Mark
+// SCRUM-618 (REQ-541) — rechazar línea individual / reporte completo, exclusivo Gerencia
 // ---------------------------------------------------------------------------
 
-test('SCRUM-618.1 — Mark rechaza 1 sola línea de Reporte A (3 líneas): motivo obligatorio, línea sale, resto queda pendiente', async ({ page }) => {
+test('SCRUM-618.1 — Gerencia rechaza 1 sola línea de Reporte A (3 líneas): motivo obligatorio, línea sale, resto queda pendiente', async ({ page }) => {
   await login(page, MARK)
   await openReport(page, seed.reportA)
 
-  // Debe haber 3 filas de línea con botón "Rechazar" (RN2, exclusivo Mark).
+  // Debe haber 3 filas de línea con botón "Rechazar" (RN2, exclusivo Gerencia).
   const rechazarButtons = page.getByRole('button', { name: /^rechazar$/i })
   await expect(rechazarButtons).toHaveCount(3)
 
@@ -256,7 +256,7 @@ test('SCRUM-618.1 — Mark rechaza 1 sola línea de Reporte A (3 líneas): motiv
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-618-1.png', fullPage: true })
 })
 
-test('SCRUM-618.2 — Mark rechaza el Reporte A completo (2 líneas restantes) con un solo motivo: reporte deja de existir como pendiente', async ({ page }) => {
+test('SCRUM-618.2 — Gerencia rechaza el Reporte A completo (2 líneas restantes) con un solo motivo: reporte deja de existir como pendiente', async ({ page }) => {
   await login(page, MARK)
   await openReport(page, seed.reportA)
 
@@ -304,7 +304,7 @@ test('SCRUM-618.4 — Reporte B (1 sola línea): rechazo completo disuelve el re
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-618-4-reporte-unilinea-disuelto.png', fullPage: true })
 })
 
-test('SCRUM-618.5 — Felix (no Mark) no ve Rechazar/Rechazar reporte en un reporte pendiente', async ({ page }) => {
+test('SCRUM-618.5 — Contabilidad (no Gerencia) no ve Rechazar/Rechazar reporte en un reporte pendiente', async ({ page }) => {
   await login(page, FELIX)
   await openReport(page, seed.reportC)
 
@@ -313,7 +313,7 @@ test('SCRUM-618.5 — Felix (no Mark) no ve Rechazar/Rechazar reporte en un repo
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-618-5-felix-sin-rechazar.png', fullPage: true })
 })
 
-test('SCRUM-618.6 — backend real: Felix intentando rechazar por API directa recibe 403 (no solo botón escondido)', async ({ page, request }) => {
+test('SCRUM-618.6 — backend real: Contabilidad intentando rechazar por API directa recibe 403 (no solo botón escondido)', async ({ page, request }) => {
   await login(page, FELIX)
   const bearer = await page.evaluate(() => localStorage.getItem('accessToken'))
   expect(bearer).toBeTruthy()
@@ -349,9 +349,9 @@ test('SCRUM-619.1 — líneas con 1 rechazo vuelven a Pendientes con estado 1/2 
 // ---------------------------------------------------------------------------
 
 test('SCRUM-619.2 — 2do rechazo de la misma línea (Reporte generado sobre la marcha) pasa PERMANENTEMENTE a Rechazados, no vuelve a Pendientes', async ({ page, request }) => {
-  // Setup — Felix genera un reporte nuevo con la línea seed.provA1, que ya viene de un primer
+  // Setup — Contabilidad genera un reporte nuevo con la línea seed.provA1, que ya viene de un primer
   // rechazo (SCRUM-618.1). Vía API directa (mismo resultado que hacerlo por UI, ya cubierto en
-  // REQ-538/Batch 20) para mantener este test enfocado en la regla de 2 intentos. Login de Felix
+  // REQ-538/Batch 20) para mantener este test enfocado en la regla de 2 intentos. Login de Contabilidad
   // también por API directa (no por `page`) — 2 logins de navegador distintos en la misma page
   // dentro de un mismo test cuelgan la navegación a /login (ver nota en login(), no reproducible
   // fuera de esta combinación puntual; separar el login de setup de la navegación real evita el
@@ -411,7 +411,7 @@ async function assertRechazadosPanel(page: Page): Promise<void> {
   await expect(page.getByText(new RegExp(seed.provB1, 'i'))).not.toBeVisible()
 }
 
-test('SCRUM-620.1 — panel Rechazados visible y correcto para Mark (solo 2/2, no 1/2)', async ({ page }) => {
+test('SCRUM-620.1 — panel Rechazados visible y correcto para Gerencia (solo 2/2, no 1/2)', async ({ page }) => {
   await login(page, MARK)
   await assertRechazadosPanel(page)
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-620-1-rechazados-mark.png', fullPage: true })
@@ -419,26 +419,26 @@ test('SCRUM-620.1 — panel Rechazados visible y correcto para Mark (solo 2/2, n
 
 // 3 tests separados (no un loop con 3 logins en la misma page) — 2 logins de navegador
 // consecutivos en la misma page cuelgan la navegación a /login (mismo hallazgo que en SCRUM-619.2).
-test('SCRUM-620.2a — panel Rechazados visible para Felix', async ({ page }) => {
+test('SCRUM-620.2a — panel Rechazados visible para Contabilidad', async ({ page }) => {
   await login(page, FELIX)
   await assertRechazadosPanel(page)
 })
 
-test('SCRUM-620.2b — panel Rechazados visible para Yaneth', async ({ page }) => {
+test('SCRUM-620.2b — panel Rechazados visible para Asistente Administrativa', async ({ page }) => {
   await login(page, YANETH)
   await assertRechazadosPanel(page)
 })
 
-test('SCRUM-620.2c — panel Rechazados visible para Gerencia (Daniela)', async ({ page }) => {
+test('SCRUM-620.2c — panel Rechazados visible para Gerencia (Gerencia)', async ({ page }) => {
   await login(page, DANIELA)
   await assertRechazadosPanel(page)
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-621 (REQ-544) — reabrir línea rechazada permanentemente: exclusivo Felix/Yaneth, NUNCA Mark
+// SCRUM-621 (REQ-544) — reabrir línea rechazada permanentemente: exclusivo Contabilidad/Yaneth, NUNCA Gerencia
 // ---------------------------------------------------------------------------
 
-test('SCRUM-621.1 — Mark NO puede reabrir (sin botón; 403 real si se fuerza por API)', async ({ page, request }) => {
+test('SCRUM-621.1 — Gerencia NO puede reabrir (sin botón; 403 real si se fuerza por API)', async ({ page, request }) => {
   await login(page, MARK)
   const bearer = await page.evaluate(() => localStorage.getItem('accessToken'))
   const rejectedRes = await request.get(`${BASE}/api/admin-contab/petty-cash/rejected`, {
@@ -460,12 +460,12 @@ test('SCRUM-621.1 — Mark NO puede reabrir (sin botón; 403 real si se fuerza p
 
   const res = await request.put(`${BASE}/api/admin-contab/petty-cash/expenses/${lineaId}/reopen`, {
     headers: { Authorization: `Bearer ${bearer}` },
-    data: { motivo: 'intento forzado de Mark' },
+    data: { motivo: 'intento forzado de Gerencia' },
   })
   expect(res.status()).toBe(403)
 })
 
-test('SCRUM-621.2 — Felix reabre la línea permanentemente rechazada: motivo obligatorio, vuelve a Pendientes con intentos=0 y conserva historial completo', async ({ page }) => {
+test('SCRUM-621.2 — Contabilidad reabre la línea permanentemente rechazada: motivo obligatorio, vuelve a Pendientes con intentos=0 y conserva historial completo', async ({ page }) => {
   await login(page, FELIX)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByText(/^rechazados$/i).first().click()
@@ -627,7 +627,7 @@ test('SCRUM-623.3 — Descargar en un reporte FINALIZADO funciona e incluye qui�
 // Extra (Senior Review) — Configuración Fiscal: máximo de intentos de rechazo, editable
 // ---------------------------------------------------------------------------
 
-test('Extra — Configuración Fiscal (Mark): campo "máximo de intentos de rechazo" existe, editable, guardar no rompe la pantalla', async ({ page }) => {
+test('Extra — Configuración Fiscal (Gerencia): campo "máximo de intentos de rechazo" existe, editable, guardar no rompe la pantalla', async ({ page }) => {
   await login(page, MARK)
   await page.goto(`${BASE}/admin-contab/fiscal`)
   await page.waitForTimeout(1000)

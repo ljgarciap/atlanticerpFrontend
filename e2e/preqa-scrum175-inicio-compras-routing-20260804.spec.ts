@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Este es un smoke test PERMANENTE (no descartable) — CLAUDE.md del proyecto pide promover a
  * e2e/ cualquier gate de routing/estado/permiso que ya se rompió una vez. El bug original
- * (CRÍTICO, reportado por Daniela 2026-08-04): lidercompras@test.com (Yirena,
+ * (CRÍTICO, reportado por Gerencia 2026-08-04): lidercompras@test.com (Lider Compras,
  * lider_compras) quedaba en loop infinito de <Navigate> / pantalla en blanco al hacer login,
  * porque App.tsx tenía un FALLBACK_ROUTE fijo a '/ventas-diseno/home' (módulo al que ella no
  * tiene acceso). Fix: src/lib/homeRoute.ts resuelve el primer módulo real del usuario
@@ -41,7 +41,7 @@ async function logout(page: Page) {
   await page.goto('/login')
 }
 
-test('CRÍTICO original — Yirena (lider_compras) aterriza directo en /compras/inicio, sin loop ni pantalla en blanco', async ({ page }) => {
+test('CRÍTICO original — Lider Compras (lider_compras) aterriza directo en /compras/inicio, sin loop ni pantalla en blanco', async ({ page }) => {
   await login(page, 'lidercompras@test.com')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
   // Contenido real visible, no solo la URL correcta — el bug original era loop -> blanco aunque
@@ -66,7 +66,7 @@ test('CRÍTICO original — Yirena (lider_compras) aterriza directo en /compras/
   await page.screenshot({ path: 'test-results/scrum175-compras-home-yirena.png', fullPage: true })
 })
 
-test('logout/login repetido — no es un fluke de caché, Yirena sigue aterrizando en /compras/inicio', async ({ page }) => {
+test('logout/login repetido — no es un fluke de caché, Lider Compras sigue aterrizando en /compras/inicio', async ({ page }) => {
   await login(page, 'lidercompras@test.com')
   await expect(page).toHaveURL(/\/compras\/inicio/, { timeout: 15000 })
 
@@ -78,12 +78,12 @@ test('logout/login repetido — no es un fluke de caché, Yirena sigue aterrizan
   await expect(page.getByRole('heading', { name: 'Resumen del mes' })).toBeVisible()
 })
 
-test('regresión — Daniela (Gerencia Total, acceso a todo) sigue aterrizando en Ventas & Diseño primero', async ({ page }) => {
+test('regresión — Gerencia (Gerencia Total, acceso a todo) sigue aterrizando en Ventas & Diseño primero', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await expect(page).toHaveURL(/\/ventas-diseno\/home/, { timeout: 15000 })
 })
 
-test('regresión — Esteban (lider_bodega, sin compras/ventas_diseno) aterriza en /bodega/home', async ({ page }) => {
+test('regresión — Lider Bodega (lider_bodega, sin compras/ventas_diseno) aterriza en /bodega/home', async ({ page }) => {
   await login(page, 'liderbodega@test.com')
   await expect(page).toHaveURL(/\/bodega\/home/, { timeout: 15000 })
 })

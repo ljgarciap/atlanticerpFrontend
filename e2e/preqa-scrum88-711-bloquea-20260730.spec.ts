@@ -71,7 +71,7 @@ test.describe('SCRUM-711 — sidebar colapsado por defecto (migración one-time)
     // 1. Login real una vez — deja la sesión persistida (zustand) + fuerza colapsado (setAuth()).
     await login(page, MGMT_EMAIL, MGMT_PASS)
 
-    // 2. Simular el caso real reportado por Daniela: un navegador con sesión de ANTES del fix
+    // 2. Simular el caso real reportado por Gerencia: un navegador con sesión de ANTES del fix
     // de SCRUM-713 — 'sidebar-collapsed' expandido y SIN el marcador de migración nuevo.
     await page.evaluate(() => {
       localStorage.setItem('sidebar-collapsed', 'false')

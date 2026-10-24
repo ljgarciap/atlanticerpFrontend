@@ -39,7 +39,7 @@ const mockedStore = vi.mocked(useAuthStore)
 
 function makeSummary(overrides: Partial<BodegaHomeSummary> = {}): BodegaHomeSummary {
   return {
-    saludo:              { nombre: 'Mariano', fecha: '2026-07-23', resumen: '' },
+    saludo:              { nombre: 'Asistente Bodega', fecha: '2026-07-23', resumen: '' },
     mi_dia:              { asignados_hoy: 0, despachados_hoy: 0, percent_despachado_hoy: null, percent_a_tiempo: null },
     mi_calendario:       { events_today_count: 0 },
     pendientes:          { count: 0, items: [] },
@@ -77,18 +77,19 @@ beforeEach(() => {
 describe('BodegaHomePage', () => {
   it('saluda con solo el primer nombre del usuario en sesión (REQ-294/SCRUM-863)', async () => {
     renderPage()
-    expect(await screen.findByText('bodega:home.greeting:Mariano')).toBeInTheDocument()
+    // El first_name genérico del seeder es compuesto («Asistente Bodega»): el saludo recorta a la primera palabra.
+    expect(await screen.findByText('bodega:home.greeting:Asistente')).toBeInTheDocument()
   })
 
-  it('rebote QA (Marly, 2026-09-14) — recorta a la primera palabra cuando saludo.nombre trae un nombre compuesto', async () => {
-    mockedApi.home.summary.mockResolvedValue(makeSummary({ saludo: { nombre: 'Mariano Jose', fecha: '2026-07-23', resumen: '' } }))
+  it('rebote QA (Gerencia, 2026-09-14) — recorta a la primera palabra cuando saludo.nombre trae un nombre compuesto', async () => {
+    mockedApi.home.summary.mockResolvedValue(makeSummary({ saludo: { nombre: 'Ana Maria', fecha: '2026-07-23', resumen: '' } }))
     renderPage()
-    expect(await screen.findByText('bodega:home.greeting:Mariano')).toBeInTheDocument()
+    expect(await screen.findByText('bodega:home.greeting:Ana')).toBeInTheDocument()
   })
 
   it('muestra el resumen de una línea que viene del backend', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
-      saludo: { nombre: 'Mariano', fecha: '2026-07-23', resumen: 'Tienes 3 pedidos asignados y 2 pendientes hoy.' },
+      saludo: { nombre: 'Asistente Bodega', fecha: '2026-07-23', resumen: 'Tienes 3 pedidos asignados y 2 pendientes hoy.' },
     }))
     renderPage()
     expect(await screen.findByText('Tienes 3 pedidos asignados y 2 pendientes hoy.')).toBeInTheDocument()
@@ -132,7 +133,7 @@ describe('BodegaHomePage', () => {
 
   it('Pre-QA SCRUM-908 (2026-09-21) — un Líder de Bodega CON aprobaciones pendientes reales aterriza en "Inicio", no "Equipo"', async () => {
     mockedStore.mockReturnValue({
-      user: { id: 2, first_name: 'Esteban', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
+      user: { id: 2, first_name: 'Lider Bodega', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
     } as never)
     mockedApi.home.approvalsPending.mockResolvedValue({
       data: [{ tipo: 'relocation', label: 'Solicitud de reubicación de inventario', created_at: '2026-09-20T10:00:00Z', detail_route: '/bodega/inventario' }],
@@ -146,7 +147,7 @@ describe('BodegaHomePage', () => {
 
   it('Pre-QA SCRUM-908 (2026-09-21) — si el Líder de Bodega ya cambió el toggle a mano, no se lo pisamos al refetchear aprobaciones', async () => {
     mockedStore.mockReturnValue({
-      user: { id: 2, first_name: 'Esteban', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
+      user: { id: 2, first_name: 'Lider Bodega', last_name: 'Jefe', modules: { bodega: { view: true, view_team: true, edit: false, approve: false } } },
     } as never)
 
     renderPage()

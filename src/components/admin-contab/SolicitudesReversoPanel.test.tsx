@@ -6,7 +6,7 @@ import { adminContabApi } from '@/api/adminContabApi'
 import { useAuthStore } from '@/store/authStore'
 import type { ReversalRequest, ReversalRequestsResult } from '@/types/adminContab'
 
-// SCRUM-1168 F4 — solicitudes de anulación de cobros: las ven todos los de Cobros, solo Mark decide.
+// SCRUM-1168 F4 — solicitudes de anulación de cobros: las ven todos los de Cobros, solo Gerencia decide.
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -61,7 +61,7 @@ describe('SolicitudesReversoPanel', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('Felix ve las solicitudes pero no puede aprobar ni rechazar', async () => {
+  it('Contabilidad ve las solicitudes pero no puede aprobar ni rechazar', async () => {
     comoUsuario('lider_admin_contab', false)
     renderPanel()
 
@@ -71,7 +71,7 @@ describe('SolicitudesReversoPanel', () => {
     expect(screen.queryByText('solicitudesReverso.rechazar')).not.toBeInTheDocument()
   })
 
-  it('Mark aprueba en dos pasos y se le avisa del descuento de comisión que quedó registrado', async () => {
+  it('Gerencia aprueba en dos pasos y se le avisa del descuento de comisión que quedó registrado', async () => {
     comoUsuario('management', true)
     mockedApi.reversals.decide.mockResolvedValue({ ...solicitud({ estado: 'ejecutada' }), ajustes_comision: [{ vendedor_id: 3, pedido_id: 9, monto: 225 }] })
     renderPanel()
@@ -84,7 +84,7 @@ describe('SolicitudesReversoPanel', () => {
     expect(await screen.findByTestId('solicitud-resultado')).toHaveTextContent('solicitudesReverso.descuentoComision')
   })
 
-  it('Mark rechaza solo con motivo', async () => {
+  it('Gerencia rechaza solo con motivo', async () => {
     comoUsuario('management', true)
     mockedApi.reversals.decide.mockResolvedValue(solicitud({ estado: 'rechazada' }))
     renderPanel()
@@ -100,7 +100,7 @@ describe('SolicitudesReversoPanel', () => {
     await waitFor(() => expect(mockedApi.reversals.decide).toHaveBeenCalledWith(5, false, 'El cobro está bien'))
   })
 
-  it('una devolución muestra referencia y comprobante, y Mark la aprueba con su propio mensaje', async () => {
+  it('una devolución muestra referencia y comprobante, y Gerencia la aprueba con su propio mensaje', async () => {
     comoUsuario('management', true)
     mockedApi.reversals.list.mockResolvedValue(lista([solicitud({ id: 8, tipo: 'devolucion', payment_id: null, source_type: 'cobro', source_id: 11, referencia: 'TRF-77', tiene_comprobante: true, comprobante_url: 'https://s3/x.pdf', numero_recibo: null })]))
     mockedApi.reversals.decide.mockResolvedValue(solicitud({ id: 8, tipo: 'devolucion', estado: 'ejecutada' }))

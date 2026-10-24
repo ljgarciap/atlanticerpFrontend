@@ -203,11 +203,11 @@ export const serviciosApi = {
     get: (id: number): Promise<ExternalTechnicianDetail> =>
       api.get<ExternalTechnicianDetail>(`/servicios/external-technicians/${id}`).then(r => r.data),
 
-    // REQ-264 — alta (RN4: solo Aaron/Líder de Servicios y Gerencia, ver la ruta).
+    // REQ-264 — alta (RN4: solo Lider Servicios/Líder de Servicios y Gerencia, ver la ruta).
     create: (data: CreateExternalTechnicianPayload): Promise<ExternalTechnician> =>
       api.post<ExternalTechnician>('/servicios/external-technicians', data).then(r => r.data),
 
-    // REQ-266 — edita tarifa y/o el interruptor mostrar/ocultar (RN1: solo Aaron/Gerencia).
+    // REQ-266 — edita tarifa y/o el interruptor mostrar/ocultar (RN1: solo Lider Servicios/Gerencia).
     updateTarifa: (id: number, data: UpdateExternalTechnicianRatePayload): Promise<ExternalTechnician> =>
       api.patch<ExternalTechnician>(`/servicios/external-technicians/${id}/tarifa`, data).then(r => r.data),
 
@@ -230,7 +230,7 @@ export const serviciosApi = {
       api.get<{ data: InternalTechnicianVisit[] }>(`/servicios/internal-technicians/${id}/visitas-hoy`)
         .then(r => r.data.data),
 
-    // REQ-259 — alta (RN5: solo Aaron/Líder de Servicios, ver la ruta).
+    // REQ-259 — alta (RN5: solo Lider Servicios/Líder de Servicios, ver la ruta).
     create: (data: CreateInternalTechnicianPayload): Promise<InternalTechnician> =>
       api.post<InternalTechnician>('/servicios/internal-technicians', data).then(r => r.data),
 
@@ -417,7 +417,7 @@ export const serviciosApi = {
     send: (ticketId: number): Promise<ServiceQuoteDetail> =>
       api.patch<ServiceQuoteDetail>(`/servicios/tickets/${ticketId}/quote/enviar`).then(r => r.data),
 
-    // REQ-234 — Aprobar/Rechazar, exclusivo de Aaron/lider_servicios (ver la ruta).
+    // REQ-234 — Aprobar/Rechazar, exclusivo de Lider Servicios/lider_servicios (ver la ruta).
     decide: (ticketId: number, estado: Extract<ServiceQuoteStatus, 'approved' | 'rejected'>): Promise<ServiceQuoteDetail> =>
       api.patch<ServiceQuoteDetail>(`/servicios/tickets/${ticketId}/quote/decidir`, { estado }).then(r => r.data),
 

@@ -169,7 +169,7 @@ test('REQ-528 — historial muestra el arqueo cerrado pendiente de aprobación, 
   await page.screenshot({ path: 'e2e/screenshots/batch19-historial-pendiente.png', fullPage: true })
 })
 
-test('REQ-528 RN2 — Yaneth (asistente) NO puede aprobar ni por UI ni por API directa (403)', async ({ page, request }) => {
+test('REQ-528 RN2 — Asistente Administrativa (asistente) NO puede aprobar ni por UI ni por API directa (403)', async ({ page, request }) => {
   await login(page, YANETH)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1500)
@@ -193,7 +193,7 @@ test('REQ-528 RN2 — Yaneth (asistente) NO puede aprobar ni por UI ni por API d
   expect(approveRes.status()).toBe(403)
 })
 
-test('REQ-528 RN2 — Daniela (management, no es Mark) tampoco puede aprobar vía API (403)', async ({ page, request }) => {
+test('REQ-528 RN2 — Gerencia (management, no es Gerencia) tampoco puede aprobar vía API (403)', async ({ page, request }) => {
   await login(page, DANIELA)
   const token = await bearerToken(page)
   const hist = await request.get(`${BASE}/api/admin-contab/cash-position/history?page=1`, { headers: { Authorization: `Bearer ${token}` } })
@@ -207,12 +207,12 @@ test('REQ-528 RN2 — Daniela (management, no es Mark) tampoco puede aprobar ví
   expect(approveRes.status()).toBe(403)
 })
 
-test('REQ-528 escenario 2 — Mark ve y aprueba, queda "Aprobado por Gerencia — Mark"', async ({ page }) => {
+test('REQ-528 escenario 2 — Gerencia ve y aprueba, queda "Aprobado por Gerencia — Gerencia"', async ({ page }) => {
   await login(page, MARK)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1500)
 
-  // Mark/Gerencia no debería ver "Arqueo del día" (REQ-524 excluye a management)
+  // Gerencia/Gerencia no debería ver "Arqueo del día" (REQ-524 excluye a management)
   await expect(page.getByText('Ajustes / Retención')).toHaveCount(0)
 
   await expect(page.getByText('Historial de arqueos cerrados')).toBeVisible()
@@ -260,10 +260,10 @@ test('REQ-529 — Descargar resumen desde el historial (ya aprobado) genera PDF 
 })
 
 test('Chequeo cruzado de permisos — un rol sin acceso a Admin&Cont recibe 403, no 200/500', async ({ request }) => {
-  // Reuse Felix login just to get a valid backend, but hit endpoints as an unauthenticated actor is
+  // Reuse Contabilidad login just to get a valid backend, but hit endpoints as an unauthenticated actor is
   // already covered elsewhere — here we specifically re-verify approve requires primary_approver_only even with
-  // a well-formed but wrong-role token is already covered above (Yaneth/Daniela). Skipped duplicate.
-  test.skip(true, 'cubierto arriba con Yaneth/Daniela')
+  // a well-formed but wrong-role token is already covered above (Asistente Administrativa/Daniela). Skipped duplicate.
+  test.skip(true, 'cubierto arriba con Asistente Administrativa/Daniela')
 })
 
 test('Chequeo de iconografía — sin emojis en la UI nueva de Arqueo de Caja', async ({ page }) => {

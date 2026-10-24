@@ -10,7 +10,7 @@ interface Props {
   onViewCommission?: (technician: InternalTechnician) => void
   canManageCommission?: boolean
   // Batch 10 (REQ-258 RN8/RN9) — distinto de canManageCommission: RN8 es "el propio técnico o
-  // Gerencia ve el resultado calculado", nunca Aaron (que sí puede CAPTURAR sin ver el total).
+  // Gerencia ve el resultado calculado", nunca Lider Servicios (que sí puede CAPTURAR sin ver el total).
   onViewCommissionResult?: (technician: InternalTechnician) => void
   canViewCommissionResult?: boolean
   // SCRUM-1015 — editar/eliminar; solo se pasan cuando el usuario puede gestionar técnicos.
@@ -83,7 +83,7 @@ export default function InternalTechnicianCard({
         </div>
       </div>
 
-      {/* REQ-292 — solo el/los técnico(s) con plan de bonificación activo, y solo Aaron/Gerencia
+      {/* REQ-292 — solo el/los técnico(s) con plan de bonificación activo, y solo Lider Servicios/Gerencia
           pueden abrir la captura mensual (RN5/RN8). */}
       {t.has_bonus_plan && canManageCommission && onViewCommission && (
         <Button variant="outline" className="!text-xs !py-1.5" onClick={() => onViewCommission(t)}>
@@ -92,9 +92,9 @@ export default function InternalTechnicianCard({
       )}
 
       {/* Batch 10 (REQ-258 RN8/RN9) — mini-indicador del resultado calculado, exclusivo del
-          propio técnico o Gerencia (nunca Aaron, ver docblock de canViewCommissionResult en
+          propio técnico o Gerencia (nunca Lider Servicios, ver docblock de canViewCommissionResult en
           InternalTechniciansPage). Botón separado del de arriba a propósito: son 2 audiencias
-          distintas que pueden no solaparse (Aaron gestiona sin ver; Carlos ve sin gestionar). */}
+          distintas que pueden no solaparse (Lider Servicios gestiona sin ver; Tecnico Servicios ve sin gestionar). */}
       {t.has_bonus_plan && canViewCommissionResult && onViewCommissionResult && (
         <Button variant="outline" className="!text-xs !py-1.5" onClick={() => onViewCommissionResult(t)}>
           {i18n.t('servicios:technicians.internal.card.commissionResult')}

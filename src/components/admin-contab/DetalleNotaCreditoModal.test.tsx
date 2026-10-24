@@ -35,7 +35,7 @@ vi.mock('@/components/QuoteViewerModal', () => ({
 vi.mock('@/components/GuiaEntregaModal', () => ({
   default: ({ orderId }: { orderId: number }) => <div data-testid="guia-modal">guia:{orderId}</div>,
 }))
-// SCRUM-932 (rebote Daniela 2026-09-20) — "Factura de origen" ahora abre este modal en vez de
+// SCRUM-932 (rebote Gerencia 2026-09-20) — "Factura de origen" ahora abre este modal en vez de
 // descargar el PDF directo (ver InvoiceDetailModal, mismo patrón que DetalleCobroModal).
 vi.mock('./InvoiceDetailModal', () => ({
   default: ({ orderId, invoiceId }: { orderId: number; invoiceId: number | null }) => (
@@ -206,7 +206,7 @@ describe('DetalleNotaCreditoModal — REQ-493', () => {
     expect(screen.queryByText('adminContab:facturacion.detalle.facturacionElectronica.transmisiones.ver')).not.toBeInTheDocument()
   })
 
-  it('SCRUM-987 — con el interruptor apagado (no_aplica) tampoco hay visor aunque el actor sea Mark', async () => {
+  it('SCRUM-987 — con el interruptor apagado (no_aplica) tampoco hay visor aunque el actor sea Gerencia', async () => {
     mockedApi.notasCredito.detail.mockResolvedValue(makeDetalle({
       estado: 'aplicada', fe_estado: 'no_aplica', puede_ver_fe_transmisiones: true,
     }))
@@ -283,7 +283,7 @@ describe('DetalleNotaCreditoModal — REQ-493', () => {
     expect(screen.getByRole('button', { name: /notasCredito.detalle.verDocumento/ })).toBeEnabled()
   })
 
-  it('SCRUM-932 (rebote Daniela 2026-09-20) — clic en la factura de origen abre InvoiceDetailModal con order_id/invoice_id (nunca descarga el PDF directo)', async () => {
+  it('SCRUM-932 (rebote Gerencia 2026-09-20) — clic en la factura de origen abre InvoiceDetailModal con order_id/invoice_id (nunca descarga el PDF directo)', async () => {
     // factura_origen_id (10) y factura_origen_order_id (55) deliberadamente distintos acá — este
     // test debe fallar si el componente vuelve a usar el campo equivocado.
     mockedApi.notasCredito.detail.mockResolvedValue(makeDetalle({ factura_origen_id: 10, factura_origen_numero: 'F-0001', factura_origen_order_id: 55 }))

@@ -126,7 +126,7 @@ export interface PurchaseOrderSummary {
   // REQ-274 RN3 (Servicios) — 'servicios' cuando la orden nació de una solicitud de Insumos de
   // Servicios (InsumoService::requestPurchase()); null para el resto (creadas a mano en Compras o
   // desde Ventas & Diseño). Pre-QA 2026-08-13: el backend ya guardaba este dato, faltaba
-  // exponerlo — sin esto Yirena no tiene forma de diferenciar el origen (RN3 explícita).
+  // exponerlo — sin esto Lider Compras no tiene forma de diferenciar el origen (RN3 explícita).
   origin_module:               'servicios' | null
   status:                    string
   next_status:               string | null
@@ -160,7 +160,7 @@ export interface PurchaseOrderSummary {
   requires_primary_approval:      boolean
   blocked_by_primary_approval:    boolean
   approved_by:                number | null
-  // SCRUM-206 — nombre real de quien aprobó, para no mostrar un texto fijo tipo "Aprobada por Mark".
+  // SCRUM-206 — nombre real de quien aprobó, para no mostrar un texto fijo tipo "Aprobada por Gerencia".
   approved_by_name:            string | null
   total_amount:                number
   currency:                    string
@@ -541,11 +541,13 @@ export interface ApprovedProject {
 
 export interface ComprasSettings {
   low_rating_threshold: number
-  // SCRUM-206 — quién es "Mark" para el gate de aprobación (REQ-143), configurable.
+  // SCRUM-206 — quién es "Gerencia" para el gate de aprobación (REQ-143), configurable.
   primary_approver_user_id: number | null
   // SCRUM-257 (REQ-194) — días "En revisión" antes de marcar un reclamo con la bandera de atención.
   claim_attention_days: number
-  // SCRUM-247 (REQ-184) — margen del sustituto propuesto por debajo del cual la solicitud escala a Mark.
+  /** REQ-139 RN2 — días «Por aprobar» a partir de los cuales una orden es crítica (default 3). */
+  critical_days_por_aprobar: number
+  // SCRUM-247 (REQ-184) — margen del sustituto propuesto por debajo del cual la solicitud escala a Gerencia.
   replacement_margin_threshold: number
   // Lote 4 (SCRUM-246) — pesos de la fórmula de "% de similitud" de "Buscar en catálogo"
   // (deben sumar 100) y umbral mínimo para mostrar un candidato. Existían en el backend desde
