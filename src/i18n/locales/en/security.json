@@ -6,7 +6,8 @@
     "departments": "Departments",
     "alerts": "Security Alerts",
     "notificationRules": "Notification Rules",
-    "roles": "Roles"
+    "roles": "Roles",
+    "impersonations": "Support sessions"
   },
   "alerts": {
     "title": "Security Alerts",
@@ -120,6 +121,11 @@
       "password": "Password",
       "passwordHint": "If left blank, the default password will be the user's email address.",
       "phone": "Phone",
+      "jobTitle": "Job title",
+      "hireDate": "Hire date",
+      "manager": "Direct manager",
+      "noManager": "None — Managing Partner",
+      "activeOnCreate": "Active user",
       "department": "Department",
       "securityLevel": "Security level",
       "notes": "Notes",
@@ -142,6 +148,7 @@
       },
       "extraPermissions": "Extra permissions",
       "extraPermissionsHint": "Individual grants on top of the security level's permissions",
+      "extraPermissionsError": "The permission catalog could not be loaded",
       "permLabels": {
         "crm.read":       "CRM — View",
         "crm.write":      "CRM — Create",
@@ -153,7 +160,9 @@
         "security.users":  "Security — Users",
         "security.levels": "Security — Levels",
         "settings.global": "Global settings",
-        "superadmin.all":  "Superadmin — All"
+        "superadmin.all":  "Superadmin — All",
+        "admin_contab.edit.receptor_fiscal": "Invoicing — Correct the customer's tax ID and legal name",
+        "admin_contab.edit.receptor_consumidor_final": "Invoicing — Invoice to a final consumer"
       }
     },
     "actions": {
@@ -164,8 +173,70 @@
       "view": "View",
       "resetMfa": "Reset MFA",
       "visibility": "Navigation permissions",
-      "bulkVisibility": "Module visibility (UAT)"
+      "bulkVisibility": "Module visibility (UAT)",
+      "resetPassword": "Reset password",
+      "bulkResetPassword": "Reset passwords…",
+      "impersonate": "View as"
     },
+      "resetPassword": {
+        "title": "Reset password",
+        "message": "The password of {{name}} ({{email}}) will become their email address and they must change it when signing in.",
+        "warning": "Their open sessions will be closed. This action is recorded in the audit log.",
+        "confirm": "Reset",
+        "success": "Password reset: {{name}} must change it when signing in",
+        "inactiveTooltip": "The password of an inactive user cannot be reset",
+        "selfWarning": "This is your own account: your current session will be invalidated and you must change the password when you sign in again.",
+        "passwordLabel": "Your password",
+        "passwordHelp": "This is a highest-privilege account: confirm with your current password to continue.",
+        "errors": {
+          "inactive": "The password of an inactive user cannot be reset",
+          "forbidden": "Only a superadmin can reset passwords",
+          "notFound": "The user no longer exists",
+          "throttled": "Too many attempts. Wait a moment and try again.",
+          "passwordRequired": "Confirm with your current password to reset this account.",
+          "reauthFailed": "Incorrect password.",
+          "throttledWait": "Too many attempts. Please try again in {{time}}.",
+          "disabled": "Password reset is disabled in this environment. A superadmin can enable it in Global settings.",
+          "generic": "The password could not be reset. Please try again."
+        }
+      },
+      "bulkResetPassword": {
+        "title": "Reset passwords",
+        "subtitle": "Resets the password of all active users: it will become their email address and they must change it when signing in. First it calculates who would be affected, without changing anything.",
+        "includeSelf": "Include my own account",
+        "includeSuperadmins": "Include superadmin accounts",
+        "includeSuperadminsWarning": "They are skipped by default. Including them leaves every superadmin with a password equal to their email until they change it.",
+        "calculate": "Calculate affected users",
+        "affected_one": "Affected user: {{count}}",
+        "affected_other": "Affected users: {{count}}",
+        "excludedCount_one": "({{count}} excluded)",
+        "excludedCount_other": "({{count}} excluded)",
+        "emptyPreview": "There are no users to reset with this selection.",
+        "filterPlaceholder": "Filter by email or name",
+        "excludeHelper": "Check the people you want to exclude from the reset.",
+        "excludeUser": "Exclude {{email}}",
+        "continue": "Continue",
+        "back": "Back",
+        "recalculate": "Recalculate",
+        "confirmWarning": "These users' open sessions will be closed and the action is recorded in the audit log.",
+        "passwordLabel": "Your password",
+        "passwordHelp": "Confirm with your current password to apply the bulk reset.",
+        "disabledNotice": "Password reset is disabled in this environment. A superadmin can enable it in Global settings.",
+        "confirmInstruction": "To confirm, type exactly {{phrase}}",
+        "apply": "Reset passwords",
+        "resultCount_one": "{{count}} password was reset",
+        "resultCount_other": "{{count}} passwords were reset",
+        "resultNote": "Each person must change their password when signing in.",
+        "errors": {
+          "mismatch": "The number of users changed while you were confirming. Recalculate and confirm again.",
+          "forbidden": "Only a superadmin can reset passwords",
+          "throttled": "Too many attempts. Wait a moment and try again.",
+          "reauthFailed": "Incorrect password.",
+          "throttledWait": "Too many attempts. Please try again in {{time}}.",
+          "disabled": "Password reset is disabled in this environment. A superadmin can enable it in Global settings.",
+          "generic": "The operation could not be completed. Please try again."
+        }
+      },
     "visibility": {
       "title": "Navigation permissions",
       "subtitle": "Exceptions for this person, on top of their role's visibility. A module or item left unchecked here inherits whatever the role already has."
@@ -326,5 +397,72 @@
       "in_app": "In-app (bell)",
       "email": "Email"
     }
+  },
+  "impersonate": {
+    "title": "View as {{name}}",
+    "message": "You will see the application exactly as {{name}} ({{email}}) sees it, with their role, permissions and menu.",
+    "readOnlyNote": "It is read only: you will not be able to save changes. The session is short, is not renewed and is recorded under your name, with the reason.",
+    "reasonLabel": "Reason",
+    "reasonHelp": "State why you are entering, for example the support ticket key.",
+    "passwordLabel": "Your password",
+    "passwordHelp": "Confirm with your current password to start the session.",
+    "confirm": "View as this person",
+    "tooltips": {
+      "inactive": "You cannot view as an inactive person",
+      "self": "You cannot view as yourself",
+      "superadmin": "You cannot view as another superadmin",
+      "guest": "You cannot view as a guest"
+    },
+    "errors": {
+      "reasonRequired": "Enter the reason.",
+      "passwordRequired": "Enter your password.",
+      "reauthFailed": "Wrong password.",
+      "throttled": "Too many attempts. Wait a few minutes and try again.",
+      "throttledWait": "Too many attempts. Try again in {{time}}.",
+      "forbidden": "You are not allowed to view as another person, or you cannot view as this person.",
+      "invalid": "You cannot view as this person (inactive, blocked or not eligible).",
+      "notFound": "This person no longer exists.",
+      "generic": "The View as session could not be started. Please try again."
+    }
+  },
+  "impersonations": {
+    "title": "Support sessions",
+    "subtitle": "Record of View as user sessions: who viewed whom, why and for how long.",
+    "empty": "There are no sessions for this filter.",
+    "loadError": "The sessions could not be loaded.",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "ended": "Ended",
+      "expired": "Expired"
+    },
+    "columns": {
+      "actor": "Superadmin",
+      "target": "Viewed person",
+      "reason": "Reason",
+      "startedAt": "Started",
+      "endedAt": "Ended",
+      "status": "Status",
+      "endedReason": "Cause",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "ended": "Ended",
+      "expired": "Expired"
+    },
+    "endedReason": {
+      "manual": "The superadmin exited",
+      "expired": "Expired",
+      "revoked": "Ended by a superadmin",
+      "target_blocked": "The person was blocked or deactivated",
+      "unknown": "Other cause"
+    },
+    "terminate": "End",
+    "terminateTitle": "End session",
+    "terminateMessage": "The session of {{actor}} viewing as {{target}} will be closed immediately.",
+    "terminateConfirm": "End session",
+    "terminateError": "The session could not be ended.",
+    "terminated": "Session ended."
   }
 }

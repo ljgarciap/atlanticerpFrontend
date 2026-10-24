@@ -31,6 +31,11 @@ export default function UserVisibilityModal({ user, onClose }: Props) {
   })
 
   useEffect(() => {
+    // Sin este guard, el effect corre una vez con `data === undefined` (fase de carga) y deja
+    // TODOS los módulos en VIEW_NONE; al pasar `isLoading` a false hay un render intermedio con
+    // los checkboxes deshabilitados antes de que el 2º pase (ya con datos) los habilite — flash
+    // visible al abrir el modal, y la causa raíz del test flaky en CI de este componente.
+    if (!data) return
     const initialRows: Record<string, ModuleVisibilityRow> = {}
     for (const module of MODULES) {
       const existing = data?.modules.find(r => r.module === module)

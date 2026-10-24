@@ -9,6 +9,10 @@ import UserFormDrawer from '@/components/security/UserFormDrawer'
 import ApproveUserModal from '@/components/security/ApproveUserModal'
 import UserVisibilityModal from '@/components/security/UserVisibilityModal'
 import BulkModuleVisibilityModal from '@/components/security/BulkModuleVisibilityModal'
+import ResetPasswordModal from '@/components/security/ResetPasswordModal'
+import ImpersonateUserModal from '@/components/security/ImpersonateUserModal'
+import BulkResetPasswordModal from '@/components/security/BulkResetPasswordModal'
+import { useToastStore } from '@/store/toastStore'
 import type { UserListItem } from '@/api/usersApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -21,6 +25,12 @@ export default function UsersPage() {
   const { user: authUser } = useAuthStore()
   const actorPermissions   = authUser?.permissions ?? []
   const actorHasSuperadmin = actorPermissions.includes('superadmin.all')
+  // El backend gatea el reset con `role:superadmin`, que compara el claim `role` del JWT (rol base),
+  // NO el permiso `superadmin.all` (que también lo da un nivel 10 o un rol adicional). Se alinea el
+  // criterio de la UI para no mostrar botones que terminarían en 403.
+  const canResetPasswords  = authUser?.role === 'superadmin'
+  // SCRUM-1158 — «Ver como usuario»: mismo criterio que el reset (rol base superadmin) y nunca encadenado (quien ya observa a alguien tiene el rol de esa persona).
+  const canImpersonate      = authUser?.role === 'superadmin' && !authUser.impersonation
   const canManage           = actorHasSuperadmin || actorPermissions.includes('security.users')
   const actorLevel          = authUser?.security_level ?? 0
 
@@ -37,6 +47,9 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<UserListItem | null>(null)
   const [visibilityUser, setVisibilityUser] = useState<UserListItem | null>(null)
   const [bulkVisibilityOpen, setBulkVisibilityOpen] = useState(false)
+  const [resetPasswordUser,   setResetPasswordUser]   = useState<UserListItem | null>(null)
+  const [bulkResetOpen,       setBulkResetOpen]       = useState(false)
+  const [impersonateUser,    setImpersonateUser]    = useState<UserListItem | null>(null)
 
   const { data, isFetching } = useUsers({ search: query, page, per_page: perPage, is_active: true, role_id: roleFilter || undefined })
   const toggleStatus         = useToggleUserStatus()
@@ -158,6 +171,11 @@ export default function UsersPage() {
                     {t('security:users.actions.bulkVisibility')}
                   </Button>
                 )}
+                {canResetPasswords && (
+                  <Button variant="secondary" onClick={() => setBulkResetOpen(true)}>
+                    {t('security:users.actions.bulkResetPassword')}
+                  </Button>
+                )}
                 {canManage && (
                   <Button onClick={openCreate}>
                     {t('security:users.actions.create')}
@@ -199,7 +217,12 @@ export default function UsersPage() {
               onEdit={openEdit}
               onToggleStatus={handleToggle}
               onResetMfa={handleResetMfa}
+              canResetPassword={canResetPasswords}
+              onResetPassword={setResetPasswordUser}
               onVisibility={setVisibilityUser}
+              canImpersonate={canImpersonate}
+              actorId={authUser?.id}
+              onImpersonate={setImpersonateUser}
             />
 
             {meta && (
@@ -290,7 +313,12 @@ export default function UsersPage() {
               onEdit={openEdit}
               onToggleStatus={handleToggle}
               onResetMfa={handleResetMfa}
+              canResetPassword={canResetPasswords}
+              onResetPassword={setResetPasswordUser}
               onVisibility={setVisibilityUser}
+              canImpersonate={canImpersonate}
+              actorId={authUser?.id}
+              onImpersonate={setImpersonateUser}
             />
 
             {inactiveMeta && inactiveLastPage > 1 && (
@@ -443,6 +471,28 @@ export default function UsersPage() {
 
       {bulkVisibilityOpen && (
         <BulkModuleVisibilityModal onClose={() => setBulkVisibilityOpen(false)} />
+      )}
+
+      {canResetPasswords && resetPasswordUser && (
+        <ResetPasswordModal
+          user={resetPasswordUser}
+          onClose={() => setResetPasswordUser(null)}
+          onDone={u => {
+            setResetPasswordUser(null)
+            useToastStore.getState().show(
+              t('security:users.resetPassword.success', { name: `${u.first_name} ${u.last_name}`.trim() }),
+              'success',
+            )
+          }}
+        />
+      )}
+
+      {canImpersonate && impersonateUser && (
+        <ImpersonateUserModal user={impersonateUser} onClose={() => setImpersonateUser(null)} />
+      )}
+
+      {canResetPasswords && bulkResetOpen && (
+        <BulkResetPasswordModal onClose={() => setBulkResetOpen(false)} />
       )}
 
       {confirmDialog && (

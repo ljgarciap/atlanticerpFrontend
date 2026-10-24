@@ -29,6 +29,7 @@ export default function SecurityLayout({ children }: Props) {
       { id: 'alerts',      label: t('security:nav.alerts'),      href: '/security/alerts' },
       { id: 'notification-rules', label: t('security:nav.notificationRules'), href: '/security/notification-rules' },
       { id: 'roles', label: t('security:nav.roles'), href: '/security/roles' },
+      { id: 'impersonations', label: t('security:nav.impersonations'), href: '/security/impersonations' },
     ] : []),
   ]
 

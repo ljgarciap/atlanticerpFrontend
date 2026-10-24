@@ -9,21 +9,12 @@ import { departmentsApi } from '@/api/departmentsApi'
 import { levelsApi } from '@/api/levelsApi'
 import { rolesApi } from '@/api/rolesApi'
 import { usersApi } from '@/api/usersApi'
-import { useCreateUser, useUpdateUser } from '@/hooks/useUsers'
+import { useCreateUser, useUpdateUser, useUsers } from '@/hooks/useUsers'
 import { useAuthStore } from '@/store/authStore'
 import type { UserListItem } from '@/api/usersApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose, IcoCheck } from '@/components/icons'
-
-const PERMISSION_CATALOG = [
-  'crm.read', 'crm.write', 'crm.edit', 'crm.delete',
-  'reports.read', 'reports.export',
-  'ai.use',
-  'security.users', 'security.levels',
-  'settings.global',
-  'superadmin.all',
-] as const
 
 function buildSchema(t: TFunction) {
   return z.object({
@@ -31,6 +22,13 @@ function buildSchema(t: TFunction) {
     last_name:          z.string().min(1, t('auth:validation.required')).max(120, t('auth:validation.maxLength', { count: 120 })),
     email:              z.string().email(t('auth:validation.invalidEmail')),
     phone:              z.string().max(30).nullable().optional(),
+    // SCRUM-822 (REQ-548) — cargo/fecha de ingreso/jefe directo. manager_id null = "Ninguno —
+    // Socio Director" (RN2). is_active solo se usa al crear (RN3) — al editar el estado se
+    // maneja con el toggle existente (toggleStatus), no por este form.
+    job_title:          z.string().max(120).nullable().optional(),
+    hire_date:          z.string().nullable().optional(),
+    manager_id:         z.number().nullable().optional(),
+    is_active:          z.boolean().optional(),
     department_id:      z.number().nullable().optional(),
     security_level_id:  z.number().int().positive(),
     notes:              z.string().nullable().optional(),
@@ -51,6 +49,15 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
   const { t }         = useTranslation(['common', 'security'])
   const currentUser   = useAuthStore(s => s.user)
   const isSuperadmin  = currentUser?.permissions.includes('superadmin.all') ?? false
+
+  // SCRUM-1140 — los permisos adicionales salen del catálogo real (`GET /api/permission-catalog`, el mismo contra el que el backend
+  // valida `extra_permissions.*`), no de una lista fija: antes solo se podían asignar 11 permisos y los angostos por persona
+  // (p. ej. `admin_contab.edit.receptor_fiscal`) solo existían vía seeder.
+  const { data: catalogData, isLoading: catalogLoading, isError: catalogError } = useQuery({
+    queryKey: ['permission-catalog'],
+    queryFn:  levelsApi.catalog,
+    enabled:  isSuperadmin,
+  })
   const actorLevel    = currentUser?.security_level ?? 0
   const isEdit        = user !== null
   const createUser    = useCreateUser()
@@ -61,6 +68,10 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
   const { data: departments = [] }  = useQuery({ queryKey: ['departments', 'all'],        queryFn: departmentsApi.listAll })
   const { data: levels = [] }       = useQuery({ queryKey: ['security-levels', 'all'],    queryFn: levelsApi.listAll })
   const { data: roles = [] }        = useQuery({ queryKey: ['roles'],                     queryFn: rolesApi.list })
+  // SCRUM-822 — picker de jefe directo: candidatos activos, excluyendo al propio usuario en
+  // edición (un usuario no puede ser su propio jefe, RN2/validación de backend).
+  const { data: managerCandidates } = useUsers({ per_page: 100, is_active: true })
+  const managerOptions              = (managerCandidates?.data ?? []).filter(u => u.id !== user?.id)
   const schema                      = useMemo(() => buildSchema(t), [t])
   const activeRoles                 = roles.filter(r => r.is_active)
   // Blocker de Senior Review 2026-07-13 — defensa en profundidad, el gate real vive en
@@ -71,7 +82,8 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      phone: null, department_id: null, security_level_id: undefined, notes: null,
+      phone: null, job_title: null, hire_date: null, manager_id: null, is_active: true,
+      department_id: null, security_level_id: undefined, notes: null,
       role_id: undefined, additional_role_ids: [], extra_permissions: [],
     },
   })
@@ -100,6 +112,9 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
         last_name:           user.last_name,
         email:               user.email,
         phone:               user.phone,
+        job_title:           user.job_title,
+        hire_date:           user.hire_date,
+        manager_id:          user.manager?.id ?? null,
         department_id:       user.department?.id ?? null,
         security_level_id:   user.security_level?.id,
         notes:               user.notes,
@@ -109,7 +124,8 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
       })
     } else {
       reset({
-        phone: null, department_id: null, security_level_id: level1Id, notes: null,
+        phone: null, job_title: null, hire_date: null, manager_id: null, is_active: true,
+        department_id: null, security_level_id: level1Id, notes: null,
         role_id: undefined, additional_role_ids: [], extra_permissions: [],
       })
     }
@@ -124,10 +140,13 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
   const onSubmit = async (data: FormData) => {
     try {
       if (isEdit && user) {
+        // is_active no es parte de UpdateUserPayload — RN3 solo aplica al crear, el estado de
+        // un usuario ya existente se maneja con el toggle dedicado (useToggleUserStatus).
+        const { is_active: _isActive, ...editable } = data
         await updateUser.mutateAsync({
           id: user.id,
           data: {
-            ...data,
+            ...editable,
             additional_role_ids: isSuperadmin ? (data.additional_role_ids ?? []) : undefined,
             extra_permissions:   isSuperadmin ? (data.extra_permissions ?? []) : undefined,
           },
@@ -138,6 +157,10 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
           last_name:            data.last_name,
           email:                data.email,
           phone:                data.phone ?? null,
+          job_title:            data.job_title ?? null,
+          hire_date:            data.hire_date ?? null,
+          manager_id:           data.manager_id ?? null,
+          is_active:            data.is_active ?? true,
           department_id:        data.department_id ?? null,
           security_level_id:    data.security_level_id,
           notes:                data.notes ?? null,
@@ -213,6 +236,55 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
             </label>
             <input {...register('phone')} inputMode="tel" className={inputCls(!!errors.phone)} placeholder="+xxx xxxx-xxxx" />
           </div>
+
+          {/* Cargo / Fecha de ingreso — SCRUM-822 (REQ-548) */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">
+                {t('security:users.form.jobTitle')}
+              </label>
+              <input {...register('job_title')} className={inputCls(!!errors.job_title)} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">
+                {t('security:users.form.hireDate')}
+              </label>
+              <input type="date" {...register('hire_date')} className={inputCls(!!errors.hire_date)} />
+            </div>
+          </div>
+
+          {/* Jefe directo — null = "Ninguno — Socio Director" (RN2) */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              {t('security:users.form.manager')}
+            </label>
+            <Controller
+              name="manager_id"
+              control={control}
+              render={({ field }) => (
+                <select
+                  className={inputCls(!!errors.manager_id)}
+                  value={field.value ?? ''}
+                  onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}>
+                  <option value="">{t('security:users.form.noManager')}</option>
+                  {managerOptions.map(m => (
+                    <option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>
+                  ))}
+                </select>
+              )}
+            />
+            {errors.manager_id && (
+              <p className="text-red-500 text-xs mt-1">{errors.manager_id.message}</p>
+            )}
+          </div>
+
+          {/* Estado al crear — RN3, no aplica al editar (usa el toggle dedicado) */}
+          {!isEdit && (
+            <label className="flex items-center gap-2 text-sm text-slate-700 select-none">
+              <input type="checkbox" {...register('is_active')} className="rounded border-slate-300" />
+              {t('security:users.form.activeOnCreate')}
+            </label>
+          )}
 
           {/* Resumen de solo lectura: rol base + excepciones (SCRUM-145) */}
           {isEdit && user && (
@@ -417,29 +489,38 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
                 {t('security:users.form.extraPermissions')}
               </label>
               <p className="text-slate-400 text-xs mb-2">{t('security:users.form.extraPermissionsHint')}</p>
+              {catalogLoading && <p className="text-slate-400 text-xs">{t('common:labels.loading')}</p>}
+              {catalogError && <p className="text-red-600 text-xs">{t('security:users.form.extraPermissionsError')}</p>}
               <Controller
                 name="extra_permissions"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex flex-wrap gap-2">
-                    {PERMISSION_CATALOG.map(perm => {
-                      const active = (field.value ?? []).includes(perm)
-                      return (
-                        <Button
-                          key={perm}
-                          type="button"
-                          variant="outline"
-                          active={active}
-                          activeVariant="accent"
-                          onClick={() => {
-                            const curr = field.value ?? []
-                            field.onChange(active ? curr.filter(p => p !== perm) : [...curr, perm])
-                          }}
-                          className="!text-xs">
-                          {t(`security:users.form.permLabels.${perm}`, { defaultValue: perm })}
-                        </Button>
-                      )
-                    })}
+                  <div className="space-y-2" data-testid="extra-permissions">
+                    {catalogData && Object.entries(catalogData.catalog).map(([module, perms]) => (
+                      <div key={module}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{module}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {perms.map(perm => {
+                            const active = (field.value ?? []).includes(perm.key)
+                            return (
+                              <Button
+                                key={perm.key}
+                                type="button"
+                                variant="outline"
+                                active={active}
+                                activeVariant="accent"
+                                onClick={() => {
+                                  const curr = field.value ?? []
+                                  field.onChange(active ? curr.filter(p => p !== perm.key) : [...curr, perm.key])
+                                }}
+                                className="!text-xs">
+                                {t(`security:users.form.permLabels.${perm.key}`, { defaultValue: perm.label })}
+                              </Button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               />
