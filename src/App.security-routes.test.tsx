@@ -2,6 +2,7 @@ import { render, screen, cleanup } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import App from './App'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { UserInfo } from '@/types/auth'
 
 // SCRUM-1012 — /security/users y /security/levels solo para Gerencia (management) + superadmin,
@@ -17,8 +18,10 @@ vi.mock('@/components/AppShell', async () => {
 })
 vi.mock('@/pages/security/SecurityLayout', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }))
 
+// Fase 1b: permisos del rol REAL del seed (los permisos de rol completo llegan por nivel de seguridad) + los individuales que pase cada caso.
 function user(role: string, permissions: string[]): UserInfo {
-  return { id: 1, first_name: 'T', last_name: 'U', email: 't@t.com', role, permissions, modules: {} } as unknown as UserInfo
+  const all = [...new Set([...permissionsForOrEmpty(role), ...permissions])]
+  return { id: 1, first_name: 'T', last_name: 'U', email: 't@t.com', role, permissions: all, modules: {} } as unknown as UserInfo
 }
 
 beforeEach(() => { vi.stubGlobal('scrollTo', () => {}) })
@@ -85,7 +88,15 @@ describe('Ruta /ventas-diseno/pedidos restringida a Compras y Gerencia (SCRUM-11
       expect(screen.getByText('PEDIDOS_PAGE')).toBeInTheDocument()
     })
 
-  it.each(['vendedor_disenador', 'lider_operaciones', 'lider_bodega', 'lider_servicios', 'lider_admin_contab', 'asistente_compras', 'asistente_administrativa'])(
+  // SCRUM-1150: el Contabilidad del seed (lider_admin_contab) tiene `ventas_diseno.gerencia_scope` POR PERSONA, no por rol — entra a Pedidos.
+  it('es accesible para el Contabilidad del seed por su alcance de Gerencia por persona', () => {
+    window.history.pushState({}, '', path)
+    useAuthStore.setState({ user: user('lider_admin_contab', ['ventas_diseno.read']) })
+    render(<App />)
+    expect(screen.getByText('PEDIDOS_PAGE')).toBeInTheDocument()
+  })
+
+  it.each(['vendedor_disenador', 'lider_operaciones', 'lider_bodega', 'lider_servicios', 'asistente_compras', 'asistente_administrativa'])(
     'redirige a %s aunque tenga ventas_diseno.read', role => {
       window.history.pushState({}, '', path)
       useAuthStore.setState({ user: user(role, ['ventas_diseno.read']) })

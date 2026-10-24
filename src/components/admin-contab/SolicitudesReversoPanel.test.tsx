@@ -39,7 +39,7 @@ function lista(rows: ReversalRequest[]): ReversalRequestsResult {
 }
 
 function comoUsuario(role: string, markApprover?: boolean) {
-  mockedStore.mockImplementation(((sel: (s: unknown) => unknown) => sel({ user: { role, flags: { mark_approver: markApprover } } })) as never)
+  mockedStore.mockImplementation(((sel: (s: unknown) => unknown) => sel({ user: { role, permissions: role === 'superadmin' ? ['superadmin.all'] : [], flags: { mark_approver: markApprover } } })) as never)
 }
 
 function renderPanel() {

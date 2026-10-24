@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import ToolsAndSuppliesPage from './ToolsAndSuppliesPage'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { Tool, ToolPurchaseRequest, InternalTechnician, Insumo } from '@/types/servicios'
 import type { UserInfo } from '@/types/auth'
 
@@ -50,9 +51,10 @@ vi.mock('@/api/serviciosApi', () => ({
 const mockedApi = vi.mocked(serviciosApi, true)
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
+  const role = overrides.role ?? 'lider_servicios'
   return {
     id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
-    role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
+    role, permissions: ['servicios.read', ...permissionsForOrEmpty(role)], modules: {},
     ...overrides,
   }
 }

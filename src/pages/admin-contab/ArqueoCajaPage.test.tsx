@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import ArqueoCajaPage from './ArqueoCajaPage'
 import { adminContabApi } from '@/api/adminContabApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type {
   CashPositionHeader, CashPositionProjected, CashPositionReal, DailyCashCount,
 } from '@/types/adminContab'
@@ -55,6 +56,10 @@ vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
 
 const mockedApi   = vi.mocked(adminContabApi, true)
 const mockedStore = vi.mocked(useAuthStore)
+// `usePermission` lee con selector: el mock debe aplicarlo (devolver `{ user }` a secas lo rompe).
+function mockAuth(user: unknown) {
+  mockedStore.mockImplementation(((sel?: (s: unknown) => unknown) => (sel ? sel({ user }) : { user })) as never)
+}
 
 function makeHeader(overrides: Partial<CashPositionHeader> = {}): CashPositionHeader {
   return { saldo_disponible_hoy: 28740, saldo_bancos: 28400, saldo_caja_menuda: 340, ...overrides }
@@ -104,9 +109,11 @@ function makeHistory(overrides: Partial<import('@/types/adminContab').DailyCashC
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
     id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'contabilidad@test.com',
-    role: 'lider_admin_contab', permissions: [],
+    role: 'lider_admin_contab',
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
+    // Fase 1b: permisos del rol REAL del seed + los de cada caso (el JWT real los une igual).
+    permissions: [...new Set([...permissionsForOrEmpty(overrides.role ?? 'lider_admin_contab'), ...(overrides.permissions ?? [])])],
   } as UserInfo
 }
 
@@ -128,7 +135,7 @@ beforeEach(() => {
   mockedApi.cashPosition.real.mockResolvedValue(makeReal())
   mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount())
   mockedApi.cashPosition.history.mockResolvedValue(makeHistory())
-  mockedStore.mockReturnValue({ user: makeUser() } as ReturnType<typeof useAuthStore>)
+  mockAuth(makeUser())
 })
 
 describe('ArqueoCajaPage — REQ-520 encabezado y tarjetas', () => {
@@ -146,7 +153,7 @@ describe('ArqueoCajaPage — REQ-520 encabezado y tarjetas', () => {
   })
 
   it('oculta el menú de exportar cuando la vista activa es Real + Hoy (RN3 REQ-520)', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'superadmin' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     expect(screen.getByText('adminContab:arqueoCaja.exportButton')).toBeInTheDocument()
@@ -179,7 +186,7 @@ describe('ArqueoCajaPage — REQ-522/523 toggle, chips y vista real', () => {
 
 describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
   it('arma la tabla con los cobros y notas de crédito de hoy, con totales', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'superadmin' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
@@ -195,7 +202,7 @@ describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
       comisiones: [{ movement_type: 'commission', movement_id: 91, concepto: 'Comisión arquitecto Arquitecto 12', monto: 18.10, observacion: null }],
       total_comisiones: 18.10,
     }))
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'superadmin' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
@@ -212,7 +219,7 @@ describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
       comisiones: [{ movement_type: 'commission', movement_id: 91, concepto: 'Comisión arquitecto Arquitecto 12 — PED-2026-0070', monto: 18.10, observacion: null }],
       total_comisiones: 18.10, total_neto: 6081.90,
     }))
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'superadmin' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
@@ -223,7 +230,7 @@ describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
   })
 
   it('editar la observación de una fila dispara el PUT al perder el foco', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'superadmin' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'superadmin' }))
     mockedApi.cashPosition.updateEntryObservation.mockResolvedValue(undefined)
     renderPage()
     await screen.findByText(/28,740\.00/)
@@ -241,7 +248,7 @@ describe('ArqueoCajaPage — REQ-524 arqueo del día', () => {
 
 describe('ArqueoCajaPage — restricción de rol Asistente Administrativa (§8 del ADR, ajustado 2026-08-25 Pre-QA Batch 18)', () => {
   it('Asistente Administrativa aterriza directo en Arqueo del día, sin toggle ni chips, y nunca pide Real (histórico)', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'asistente_administrativa' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'asistente_administrativa' }))
     renderPage()
     await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.title')
     expect(screen.queryByText('adminContab:arqueoCaja.toggle.proyectado')).not.toBeInTheDocument()
@@ -251,7 +258,7 @@ describe('ArqueoCajaPage — restricción de rol Asistente Administrativa (§8 d
   })
 
   it('Asistente Administrativa SÍ ve los 3 totales proyectados del encabezado — REQ-520 se los da, solo el panel de detalle es de REQ-521', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'asistente_administrativa' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'asistente_administrativa' }))
     renderPage()
     await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.title')
     expect(mockedApi.cashPosition.projected).toHaveBeenCalled()
@@ -261,7 +268,7 @@ describe('ArqueoCajaPage — restricción de rol Asistente Administrativa (§8 d
 // SCRUM-1139 — `lider_operaciones` (Lider Operaciones) espeja a la asistente: mismo arqueo del día y misma exclusión de REQ-521/523.
 describe('ArqueoCajaPage — lider_operaciones espeja a Asistente Administrativa (SCRUM-1139)', () => {
   it('aterriza directo en Arqueo del día, sin toggle ni chips, y nunca pide Real (histórico)', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_operaciones' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_operaciones' }))
     renderPage()
     await screen.findByText('adminContab:arqueoCaja.arqueoDelDia.title')
     expect(screen.queryByText('adminContab:arqueoCaja.toggle.proyectado')).not.toBeInTheDocument()
@@ -273,7 +280,7 @@ describe('ArqueoCajaPage — lider_operaciones espeja a Asistente Administrativa
 
 describe('ArqueoCajaPage — restricción de rol Gerencia (management, sin REQ-524)', () => {
   it('Gerencia en Real + Hoy ve la nota restringida en vez de pedir el arqueo del día', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     fireEvent.click(screen.getByText('adminContab:arqueoCaja.toggle.real'))
@@ -283,7 +290,7 @@ describe('ArqueoCajaPage — restricción de rol Gerencia (management, sin REQ-5
   })
 
   it('REQ-528: Gerencia SÍ ve el panel de Historial, aunque no vea el Arqueo del día', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-03', realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
     }))
@@ -301,7 +308,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   }
 
   it('REQ-527: muestra el aviso de atrasado cuando el arqueo activo no es literalmente hoy', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
       fecha: '2026-08-24', es_atrasado: true, fecha_real_hoy: '2026-08-26',
     }))
@@ -312,7 +319,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-525: la sección Ajustes/Retención solo aparece cuando hay al menos una retención, y muestra "Pendiente" sin constancia', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
       retenciones: [{ payment_id: 88, cliente: 'Constructora del Istmo', referencia: 'F-4392', motivo: 'Retención 2% ISR', monto: 3450, constancia: null }],
     }))
@@ -325,7 +332,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-525: sin retenciones del día, la sección no se renderiza', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
     goToDailyCount()
@@ -334,7 +341,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-526: confirmar el cierre en el modal llama a closeDailyCount', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.closeDailyCount.mockResolvedValue(makeDailyCount({ estado: 'pendiente_aprobacion', numero: 3 }))
     renderPage()
     await screen.findByText(/28,740\.00/)
@@ -346,7 +353,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-526 (QA SCRUM-603, 2026-08-29 RN1): el modal de confirmación muestra numero_preview', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({ numero_preview: 5 }))
     renderPage()
     await screen.findByText(/28,740\.00/)
@@ -357,7 +364,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-526: un arqueo ya cerrado no ofrece el botón de cerrar ni de editar observaciones', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({ estado: 'pendiente_aprobacion' }))
     renderPage()
     await screen.findByText(/28,740\.00/)
@@ -369,7 +376,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-528: "Ver" abre el detalle del historial y "Aprobar" solo se muestra cuando puede_aprobar es true', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'pendiente_aprobacion', aprobado_por: null, aprobado_at: null, realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
       pendientes_aprobacion: 1,
@@ -388,7 +395,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('REQ-528: sin puede_aprobar, el detalle del historial no ofrece el botón "Aprobar"', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'pendiente_aprobacion', aprobado_por: null, aprobado_at: null, realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
     }))
@@ -402,7 +409,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('QA SCRUM-603 (2026-08-29 RN4): el historial muestra la hora de cierre junto a quién lo cerró', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-03', realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
     }))
@@ -413,7 +420,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   })
 
   it('QA SCRUM-601 (2026-08-29): la observación general se resincroniza al avanzar al arqueo siguiente, sin arrastrar la del anterior', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
       id: 7, fecha: '2026-08-25', observacion_general: 'Observación del arqueo del 25',
     }))
@@ -439,7 +446,7 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
   // SCRUM-947 — paginación estándar (antes: botones "Anterior"/"Siguiente" propios, per_page fijo
   // en 20 sin selector).
   it('SCRUM-947: el historial usa el componente de paginación estándar, con selector de por página', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-03', realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
       meta: { total: 45, per_page: 20, current_page: 1, last_page: 3 },
@@ -460,7 +467,7 @@ describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / t
   }
 
   it('muestra ambos indicadores bajo la tabla y los totales, con sus etiquetas y valores', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
       total_facturado_dia: 12500.5, total_pasado_a_pedido_dia: 48200,
     }))
@@ -480,7 +487,7 @@ describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / t
   })
 
   it('un día sin movimientos muestra 0.00 en ambos (arranca en cero), no oculta el bloque', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({ total_facturado_dia: 0, total_pasado_a_pedido_dia: 0 }))
     renderPage()
     await screen.findByText(/28,740\.00/)
@@ -491,7 +498,7 @@ describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / t
   })
 
   it('no inventa $0.00: si el backend no envía los indicadores, el bloque no se renderiza', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     renderPage() // makeDailyCount() base no trae total_facturado_dia ni total_pasado_a_pedido_dia
     await screen.findByText(/28,740\.00/)
     goToDailyCount()
@@ -500,7 +507,7 @@ describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / t
   })
 
   it('los indicadores son informativos: no cambian el total neto mostrado', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'lider_admin_contab' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
       total_facturado_dia: 999999, total_pasado_a_pedido_dia: 888888,
     }))
@@ -512,7 +519,7 @@ describe('ArqueoCajaPage — SCRUM-934 indicadores del día (total facturado / t
   })
 
   it('el detalle de un arqueo cerrado del historial muestra los valores congelados al cerrar', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
       data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-03', realizado_por: 'Asistente Administrativa Ríos', cerrado_at: '2026-07-02T14:05:00-05:00' }],
     }))

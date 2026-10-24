@@ -130,7 +130,7 @@ describe('VentasDisenoHomePage', () => {
   })
 
   it('muestra el selector Equipo/vendedor para Gerencia', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     const vendors: Vendor[] = [{ id: 2, name: 'Designer Demo' }]
     mockedApi.home.vendors.mockResolvedValue(vendors)
 

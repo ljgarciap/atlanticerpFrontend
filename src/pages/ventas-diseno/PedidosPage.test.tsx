@@ -86,7 +86,7 @@ describe('VentasDisenoPedidosPage', () => {
 
   // SCRUM-1119 — Compras ve Pedidos sin ventas_diseno.read: Catálogo y Cotizaciones llevarían a una redirección.
   it('sin ventas_diseno.read (Compras) no muestra los botones Catálogo ni Ver cotizaciones', async () => {
-    mockAuthState({ id: 2, role: 'lider_compras', permissions: [] })
+    mockAuthState({ id: 2, role: 'lider_compras', permissions: ['ventas_diseno.orders.access'] })
     renderPage()
     await screen.findByText('ventasDiseno:orders.title')
     expect(screen.queryByText('ventasDiseno:orders.actions.catalog')).not.toBeInTheDocument()
@@ -95,13 +95,13 @@ describe('VentasDisenoPedidosPage', () => {
 
   // SCRUM-1184 — «Pendientes de reposición» (Compras) enlaza a un pedido con ?search=<N° de pedido>.
   it('SCRUM-1184: abre con el N° de pedido de la URL ya buscado', async () => {
-    mockAuthState({ id: 2, role: 'lider_compras', permissions: [] })
+    mockAuthState({ id: 2, role: 'lider_compras', permissions: ['ventas_diseno.orders.access'] })
     renderPage('/ventas-diseno/pedidos?search=PED-2026-0042')
     await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(expect.objectContaining({ search: 'PED-2026-0042' })))
   })
 
   it('con ventas_diseno.read (Gerencia) muestra los botones Catálogo y Ver cotizaciones', async () => {
-    mockAuthState({ id: 9, role: 'management', permissions: ['ventas_diseno.read'] })
+    mockAuthState({ id: 9, role: 'management', permissions: ['ventas_diseno.read', 'platform.management', 'ventas_diseno.orders.access'] })
     renderPage()
     expect(await screen.findByText('ventasDiseno:orders.actions.catalog')).toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:orders.actions.viewQuotes')).toBeInTheDocument()
@@ -211,7 +211,7 @@ describe('VentasDisenoPedidosPage', () => {
     })
 
     it('gerencia puede filtrar pedidos por vendedores seleccionados', async () => {
-      mockAuthState({ id: 9, role: 'management', permissions: [] })
+      mockAuthState({ id: 9, role: 'management', permissions: ['platform.management', 'ventas_diseno.orders.access'] })
       mockedApi.home.vendors.mockResolvedValue([
         { id: 5, name: 'Vendedor Disenador Test 2' }, { id: 6, name: 'Vendedor Disenador Test 3' },
       ])
@@ -227,7 +227,7 @@ describe('VentasDisenoPedidosPage', () => {
     })
 
     it('Borrar filtros también limpia la selección de vendedores', async () => {
-      mockAuthState({ id: 9, role: 'management', permissions: [] })
+      mockAuthState({ id: 9, role: 'management', permissions: ['platform.management', 'ventas_diseno.orders.access'] })
       mockedApi.home.vendors.mockResolvedValue([{ id: 5, name: 'Vendedor Disenador Test 2' }])
       renderPage()
       await screen.findByText('ventasDiseno:orders.table.empty')

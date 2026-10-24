@@ -175,13 +175,13 @@ describe('VentasDisenoPipelinePage', () => {
   })
 
   it('muestra el toggle de alcance "Equipo" para Gerencia', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     renderPage()
     expect(await screen.findByText('ventasDiseno:scope.team')).toBeInTheDocument()
   })
 
   it('pasa scope=team al API cuando Gerencia lo selecciona', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     renderPage()
 
     const teamButton = await screen.findByText('ventasDiseno:scope.team')
@@ -196,7 +196,7 @@ describe('VentasDisenoPipelinePage', () => {
 
   // REQ-074 (Reportes — Mejores clientes)
   it('llegar con ?stage=approved&order=value&scope=team pide la etapa Aprobado con ese alcance', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     renderPage(['/ventas-diseno/pipeline?stage=approved&order=value&scope=team'])
 
     await waitFor(() => expect(mockedApi.pipeline.list).toHaveBeenCalledWith(
@@ -205,7 +205,7 @@ describe('VentasDisenoPipelinePage', () => {
   })
 
   it('llegar con ?stage=approved&scope=own respeta el alcance propio', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     renderPage(['/ventas-diseno/pipeline?stage=approved&order=value&scope=own'])
 
     await waitFor(() => expect(mockedApi.pipeline.list).toHaveBeenCalledWith(
@@ -216,7 +216,7 @@ describe('VentasDisenoPipelinePage', () => {
   // SCRUM-796 (secc. 1.1/1.2) — deep-link genérico a cualquiera de los otros 5 stages,
   // filtro NUEVO e independiente de `chip` (que sigue intacto para 'approved').
   it('llegar con ?stage=lead pide el filtro `stage` (no `chip`) y muestra solo la columna Lead', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     renderPage(['/ventas-diseno/pipeline?stage=lead'])
 
     await waitFor(() => expect(mockedApi.pipeline.list).toHaveBeenCalledWith(
@@ -275,7 +275,7 @@ describe('VentasDisenoPipelinePage', () => {
 
   // REQ-022: navegación cruzada desde Clientes (?card={id}) fuerza alcance Equipo para Gerencia.
   it('fuerza alcance Equipo cuando llega vía ?card= y el usuario es Gerencia', async () => {
-    mockedStore.mockReturnValue({ user: { id: 1, role: 'management' } } as never)
+    mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
     mockedApi.pipeline.get.mockResolvedValue({
       ...makeCard({ id: 5 }),
       creator: null,

@@ -6,6 +6,7 @@ import VentasDisenoCatalogPage from './CatalogPage'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsFor } from '@/test/identities'
 import type { CatalogItem, CatalogListResult, CatalogPdfExportStatus } from '@/types/ventasDiseno'
 
 const mockNavigate = vi.fn()
@@ -357,6 +358,8 @@ describe('VentasDisenoCatalogPage', () => {
   })
 
   it('REQ-620 — botones de Inventario navegan a las rutas reales', async () => {
+    // Fase 1b: el atajo de Bodega es para quien tiene el alcance de Gerencia (permiso), no «cualquiera menos el vendedor».
+    useAuthStore.setState({ user: { id: 1, first_name: 'G', last_name: 'T', email: 'g@t.com', role: 'management', permissions: permissionsFor('management'), modules: {} } })
     renderPage()
     await screen.findByText('IL-DEC-1410A · 770 Lights')
 

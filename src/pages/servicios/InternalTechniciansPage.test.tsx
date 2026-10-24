@@ -11,6 +11,7 @@ vi.mock('react-router-dom', async () => {
 import InternalTechniciansPage from './InternalTechniciansPage'
 import { serviciosApi } from '@/api/serviciosApi'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { InternalTechnician, InternalTechnicianAgendaEntry } from '@/types/servicios'
 import type { UserInfo } from '@/types/auth'
 
@@ -52,8 +53,10 @@ const mockedApi = vi.mocked(serviciosApi, true)
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
     id: 1, first_name: 'Lider Servicios', last_name: 'Test', email: 'liderservicios@test.com',
-    role: 'lider_servicios', permissions: ['servicios.read'], modules: {},
+    role: 'lider_servicios', modules: {},
     ...overrides,
+    // Fase 1b: permisos del rol REAL del seed + los de cada caso (el JWT real los une igual).
+    permissions: [...new Set([...permissionsForOrEmpty(overrides.role ?? 'lider_servicios'), ...(overrides.permissions ?? ['servicios.read'])])],
   }
 }
 

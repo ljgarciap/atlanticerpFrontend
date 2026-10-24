@@ -6,6 +6,7 @@ import ReportesPage from './ReportesPage'
 import { adminContabApi } from '@/api/adminContabApi'
 import type { ReportsFelixCommission, ReportsCartera, ReportsVentas, ReportsFlujoCaja, ReportsComisiones, ReportsNotasCredito } from '@/types/adminContab'
 import { useAuthStore } from '@/store/authStore'
+import { permissionsForOrEmpty } from '@/test/identities'
 import type { UserInfo } from '@/types/auth'
 
 // Batch 22 (SCRUM-643→647, REQ-566→570) + Batch 23 completo (SCRUM-648→650, REQ-571→573) — home
@@ -57,13 +58,19 @@ vi.mock('@/store/authStore', () => ({ useAuthStore: vi.fn() }))
 
 const mockedApi   = vi.mocked(adminContabApi, true)
 const mockedStore = vi.mocked(useAuthStore)
+// `usePermission` lee con selector: el mock debe aplicarlo (devolver `{ user }` a secas lo rompe).
+function mockAuth(user: unknown) {
+  mockedStore.mockImplementation(((sel?: (s: unknown) => unknown) => (sel ? sel({ user }) : { user })) as never)
+}
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
     id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'felix@atlantic.com.pa',
-    role: 'lider_admin_contab', permissions: [],
+    role: 'lider_admin_contab',
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
+    // Fase 1b: permisos del rol REAL del seed + los de cada caso (el JWT real los une igual).
+    permissions: [...new Set([...permissionsForOrEmpty(overrides.role ?? 'lider_admin_contab'), ...(overrides.permissions ?? [])])],
   } as UserInfo
 }
 
@@ -139,7 +146,7 @@ beforeEach(() => {
   mockedApi.reports.flujoCaja.mockResolvedValue(makeFlujoCajaHoy())
   mockedApi.reports.comisiones.mockResolvedValue(makeComisionesHoy())
   mockedApi.reports.notasCredito.mockResolvedValue(makeNotasCredito())
-  mockedStore.mockReturnValue({ user: makeUser() } as ReturnType<typeof useAuthStore>)
+  mockAuth(makeUser())
 })
 
 describe('ReportesPage', () => {
@@ -211,7 +218,7 @@ describe('ReportesPage', () => {
   // para asistente_administrativa (routes/admin-contab.php), pero esta tarjeta se renderizaba sin
   // ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio (fetch en 403).
   it('hides the Contabilidad commission card for asistente_administrativa (SCRUM-881)', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'asistente_administrativa' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'asistente_administrativa' }))
     renderPage()
 
     await waitFor(() => expect(screen.getAllByText(/22,100\.00/).length).toBeGreaterThan(0)) // Cartera por cobrar SI se ve
@@ -220,7 +227,7 @@ describe('ReportesPage', () => {
   })
 
   it('keeps showing the Contabilidad commission card for lider_admin_contab and management', async () => {
-    mockedStore.mockReturnValue({ user: makeUser({ role: 'management' }) } as ReturnType<typeof useAuthStore>)
+    mockAuth(makeUser({ role: 'management' }))
     renderPage()
 
     await waitFor(() => expect(screen.getByText('adminContab:reportes.felixCommission.title')).toBeInTheDocument())
