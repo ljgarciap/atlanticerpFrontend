@@ -54,24 +54,24 @@ describe('BankAccountDetailModal — numero_cuenta_completo (SCRUM-857)', () => 
   })
 
   it('con número ya cargado, lo muestra tal cual (nunca enmascarado acá)', () => {
-    renderModal(makeAccount({ numero_cuenta_completo: '03-01-01-074455-4' }))
+    renderModal(makeAccount({ numero_cuenta_completo: '00-00-00-000000-1' }))
 
-    expect(screen.getByText('03-01-01-074455-4')).toBeInTheDocument()
+    expect(screen.getByText('00-00-00-000000-1')).toBeInTheDocument()
   })
 
   it('click en Editar abre un input precargado con el valor actual; Guardar llama a update con el valor nuevo', async () => {
-    mockedApi.bankAccounts.update.mockResolvedValue(makeAccount({ numero_cuenta_completo: '03-01-01-074455-4' }))
+    mockedApi.bankAccounts.update.mockResolvedValue(makeAccount({ numero_cuenta_completo: '00-00-00-000000-1' }))
     renderModal(makeAccount())
 
     fireEvent.click(screen.getByText('adminContab:cuentasBancarias.numeroCuentaCompleto.editButton'))
     const input = screen.getByRole('textbox')
     expect(input).toHaveValue('')
 
-    fireEvent.change(input, { target: { value: '03-01-01-074455-4' } })
+    fireEvent.change(input, { target: { value: '00-00-00-000000-1' } })
     fireEvent.click(screen.getByText('adminContab:cuentasBancarias.numeroCuentaCompleto.saveButton'))
 
     await waitFor(() => expect(mockedApi.bankAccounts.update).toHaveBeenCalledWith(
-      1, { numero_cuenta_completo: '03-01-01-074455-4' },
+      1, { numero_cuenta_completo: '00-00-00-000000-1' },
     ))
     // Vuelve a modo lectura tras guardar con éxito.
     await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument())
@@ -79,7 +79,7 @@ describe('BankAccountDetailModal — numero_cuenta_completo (SCRUM-857)', () => 
 
   it('un valor de solo espacios se guarda como null, no como string vacío', async () => {
     mockedApi.bankAccounts.update.mockResolvedValue(makeAccount())
-    renderModal(makeAccount({ numero_cuenta_completo: '03-01-01-074455-4' }))
+    renderModal(makeAccount({ numero_cuenta_completo: '00-00-00-000000-1' }))
 
     fireEvent.click(screen.getByText('adminContab:cuentasBancarias.numeroCuentaCompleto.editButton'))
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } })

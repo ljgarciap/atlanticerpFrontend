@@ -205,9 +205,9 @@ test.describe('SCRUM-140 — casos negativos del documento (0 items, sin contact
       }
       return {
         checkPayableTo: colorOf('Cheque a nombre de'),
-        companyName: colorOf('ATLANTIC USA CORP'),
+        companyName: colorOf('EMPRESA DEMO S.A.'),
         achLabel: colorOf('Pagos por ACH'),
-        footer: colorOf('Calle 57 Este'),
+        footer: colorOf('Calle Ejemplo 123'),
         docBg: (() => {
           const doc = document.querySelector('.quote-doc')
           return doc ? getComputedStyle(doc).backgroundColor : null

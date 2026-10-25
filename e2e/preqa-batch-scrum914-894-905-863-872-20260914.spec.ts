@@ -325,5 +325,5 @@ test('SCRUM-872 — Configuracion Fiscal: vaciar un campo de texto y guardar no 
     await page.waitForTimeout(1500)
   }
 
-  console.log('SCRUM-872 — dato de prueba pendiente sin tocar (ATLANTIC USA CORP, decision de negocio de Gerencia, no de Pre-QA):', true)
+  console.log('SCRUM-872 — dato de prueba pendiente sin tocar (EMPRESA DEMO S.A., decision de negocio de Gerencia, no de Pre-QA):', true)
 })

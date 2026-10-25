@@ -30,13 +30,13 @@ async function login(page: Page, email: string): Promise<void> {
 }
 
 // SCRUM-857 — Estado de Cuenta: "Pago a" y "Responsable" ya no salen en blanco (rebote Gerencia)
-test('SCRUM-857 — Estado de Cuenta: "Pago a: ATLANTIC USA CORP" y "Responsable: Contabilidad Test"', async ({ page }) => {
+test('SCRUM-857 — Estado de Cuenta: "Pago a: EMPRESA DEMO S.A." y "Responsable: Contabilidad Test"', async ({ page }) => {
   await login(page, FELIX)
   await page.goto(`${BASE}/admin-contab/facturacion/estado-cuenta?master_client_id=7040`)
   await page.waitForTimeout(4000)
   const body = page.locator('body')
   await expect(body).toContainText('Pago a:')
-  await expect(body).toContainText('ATLANTIC USA CORP')
+  await expect(body).toContainText('EMPRESA DEMO S.A.')
   await expect(body).toContainText('Responsable:')
   await expect(body).toContainText('Contabilidad Test')
   await expect(body).toContainText('Cuenta número:')
