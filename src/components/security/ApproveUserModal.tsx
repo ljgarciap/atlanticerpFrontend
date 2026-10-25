@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { usersApi, type UserListItem } from '@/api/usersApi'
+import { type UserListItem } from '@/api/usersApi'
+import { rolesApi } from '@/api/rolesApi'
+import { useAuthStore } from '@/store/authStore'
 import { levelsApi } from '@/api/levelsApi'
 import { useApproveUser } from '@/hooks/useUsers'
 import { Button } from '@/components/ui/Button'
@@ -19,15 +21,14 @@ const selectCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm f
 export default function ApproveUserModal({ user, onClose, onApproved }: Props) {
   const { t } = useTranslation(['common', 'security'])
 
-  const [role,            setRole]            = useState('')
+  const [roleId,          setRoleId]          = useState<number>(0)
   const [securityLevelId, setSecurityLevelId] = useState<number>(0)
   const [apiError,        setApiError]        = useState('')
 
-  const { data: catalogData } = useQuery({
-    queryKey: ['users/catalog'],
-    queryFn:  usersApi.catalog,
-    staleTime: Infinity,
-  })
+  // Fase 2: los roles salen de la tabla `roles` (el rol de sistema `guest` viene inactivo y por eso no aparece).
+  const currentUser  = useAuthStore(s => s.user)
+  const isSuperadmin = currentUser?.permissions.includes('superadmin.all') ?? false
+  const { data: roles = [] } = useQuery({ queryKey: ['roles'], queryFn: rolesApi.list })
 
   const { data: levels } = useQuery({
     queryKey: ['security-levels/all'],
@@ -37,16 +38,16 @@ export default function ApproveUserModal({ user, onClose, onApproved }: Props) {
 
   const approve = useApproveUser()
 
-  const availableRoles = (catalogData?.roles ?? []).filter(r => r !== 'guest')
+  const availableRoles = roles.filter(r => r.is_active && (isSuperadmin || !r.is_superadmin))
   const activeLevels   = (levels ?? []).filter(l => l.is_active)
 
-  const canSubmit = role !== '' && securityLevelId > 0 && !approve.isPending
+  const canSubmit = roleId > 0 && securityLevelId > 0 && !approve.isPending
 
   const handleSubmit = () => {
     if (!canSubmit) return
     setApiError('')
     approve.mutate(
-      { id: user.id, role, securityLevelId },
+      { id: user.id, roleId, securityLevelId },
       {
         onSuccess: () => { onApproved() },
         onError:   (err) => {
@@ -93,14 +94,14 @@ export default function ApproveUserModal({ user, onClose, onApproved }: Props) {
               {t('security:users.pending.role')} *
             </label>
             <select
-              value={role}
-              onChange={e => setRole(e.target.value)}
+              value={roleId || ''}
+              onChange={e => setRoleId(Number(e.target.value))}
               className={selectCls}
             >
               <option value="">{t('security:users.pending.selectRole')}</option>
               {availableRoles.map(r => (
-                <option key={r} value={r}>
-                  {t(`common:roles.${r}`, { defaultValue: r })}
+                <option key={r.id} value={r.id}>
+                  {r.name}
                 </option>
               ))}
             </select>

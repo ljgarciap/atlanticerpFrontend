@@ -22,6 +22,14 @@ vi.mock('@/api/notificationRulesApi', () => ({
   },
 }))
 
+vi.mock('@/api/rolesApi', () => ({
+  rolesApi: { list: vi.fn().mockResolvedValue([
+    { id: 1, key: 'management', name: 'Gerencia', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
+    { id: 2, key: 'vendedor_disenador', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
+    { id: 99, key: 'guest', name: 'Invitado', is_superadmin: false, is_system: true, is_active: false, default_security_level_id: null },
+  ]) },
+}))
+
 vi.mock('@/api/usersApi', () => ({
   usersApi: {
     list: vi.fn(),
@@ -89,6 +97,27 @@ describe('NotificationRulesPage', () => {
       expect(options).toContain('etapa')
       expect(options).toContain('valor')
     })
+  })
+
+  it('Fase 2 — con destinatario «rol» ofrece los roles reales de la tabla (sin el enum legado ni guest)', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByText('security:notificationRules.actions.create'))
+
+    const tipo = screen.getAllByRole('combobox').find(s => Array.from(s.querySelectorAll('option')).some(o => o.value === 'role')) as HTMLSelectElement
+    fireEvent.change(tipo, { target: { value: 'role' } })
+
+    expect(await screen.findByRole('button', { name: 'Vendedor/Diseñador' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Gerencia' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Invitado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /designer|supervisor|electrician/i })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Vendedor/Diseñador' }))
+    fireEvent.change(screen.getByPlaceholderText('security:notificationRules.form.namePlaceholder'), { target: { value: 'Regla por rol' } })
+    fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'Project' } })
+    fireEvent.click(screen.getByText('common:actions.save'))
+    // El valor guardado es la CLAVE del rol (lo que resuelve el backend con roles.key).
+    await waitFor(() => expect(mockedRules.create).toHaveBeenCalled())
+    expect(mockedRules.create.mock.calls[0][0].recipient_value).toEqual(['vendedor_disenador'])
   })
 
   it('crea una regla al guardar el formulario', async () => {

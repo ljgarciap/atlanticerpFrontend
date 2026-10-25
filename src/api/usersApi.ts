@@ -52,10 +52,7 @@ export interface CreateUserPayload {
   security_level_id?: number
   extra_permissions?: string[]
   notes?:               string | null
-  // ADR-006, Fase D — `roles` (legado) dejó de ser obligatorio, `role_id` es el modelo real
-  // desde la Fase C. Se mantiene el tipo por compatibilidad con `usersApi.approve()`, que sigue
-  // usando el vocabulario viejo (registro público, fuera de alcance de esta fase).
-  roles?:                string[]
+  // Fase 2 (Fase E del ADR-006): `role_id` es el único mecanismo; el enum legado `roles` ya no se envía.
   role_id?:              number | null
   additional_role_ids?:  number[]
 }
@@ -120,14 +117,11 @@ export const usersApi = {
   toggleStatus: (id: number, is_active: boolean): Promise<UserListItem> =>
     api.patch(`/users/${id}/status`, { is_active }).then(r => r.data as UserListItem),
 
-  catalog: (): Promise<{ roles: string[] }> =>
-    api.get('/users/catalog').then(r => r.data as { roles: string[] }),
-
   listPending: (): Promise<PendingUsersResponse> =>
     api.get('/users/pending').then(r => r.data as PendingUsersResponse),
 
-  approve: (id: number, role: string, securityLevelId: number): Promise<UserListItem> =>
-    api.post(`/users/${id}/approve`, { role, security_level_id: securityLevelId })
+  approve: (id: number, roleId: number, securityLevelId: number): Promise<UserListItem> =>
+    api.post(`/users/${id}/approve`, { role_id: roleId, security_level_id: securityLevelId })
       .then(r => r.data as UserListItem),
 
   reject: (id: number): Promise<void> =>

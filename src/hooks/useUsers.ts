@@ -64,8 +64,8 @@ export function usePendingUsers() {
 export function useApproveUser() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, role, securityLevelId }: { id: number; role: string; securityLevelId: number }) =>
-      usersApi.approve(id, role, securityLevelId),
+    mutationFn: ({ id, roleId, securityLevelId }: { id: number; roleId: number; securityLevelId: number }) =>
+      usersApi.approve(id, roleId, securityLevelId),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['users/pending'] })
       void qc.invalidateQueries({ queryKey: ['users'] })
