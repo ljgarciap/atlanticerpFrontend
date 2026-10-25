@@ -74,10 +74,6 @@ export interface UpdateUserPayload {
   additional_role_ids?:  number[]
 }
 
-export interface PendingUsersResponse {
-  data: UserListItem[]
-}
-
 // SCRUM-724 — override de visibilidad de módulos/ítems de menú por usuario puntual,
 // por encima del visibility-por-rol ya existente (RoleVisibilityModal/rolesApi).
 // Mismo shape de fila que RoleVisibilityRow (rolesApi.ts) para can_view — se
@@ -116,16 +112,6 @@ export const usersApi = {
 
   toggleStatus: (id: number, is_active: boolean): Promise<UserListItem> =>
     api.patch(`/users/${id}/status`, { is_active }).then(r => r.data as UserListItem),
-
-  listPending: (): Promise<PendingUsersResponse> =>
-    api.get('/users/pending').then(r => r.data as PendingUsersResponse),
-
-  approve: (id: number, roleId: number, securityLevelId: number): Promise<UserListItem> =>
-    api.post(`/users/${id}/approve`, { role_id: roleId, security_level_id: securityLevelId })
-      .then(r => r.data as UserListItem),
-
-  reject: (id: number): Promise<void> =>
-    api.delete(`/users/${id}/reject`).then(() => undefined),
 
   // `POST /users/{id}/reset-password` — 404 inexistente, 422 si está inactivo, 403 no superadmin, 429 throttle.
   // Cierre de H3: si el objetivo es de máximo privilegio el backend exige `operator_password` (la contraseña

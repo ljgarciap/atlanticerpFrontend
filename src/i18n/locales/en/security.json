@@ -266,33 +266,6 @@
       "activateSuccess": "User activated",
       "deactivateConfirm": "Deactivate this user? They will not be able to log in until reactivated.",
       "resetMfaConfirm": "Reset two-step verification for {{name}}? They will have no MFA until they re-enable it from their profile."
-    },
-    "pending": {
-      "tabLabel": "Pending",
-      "title": "Pending access requests",
-      "empty": "No pending requests",
-      "columns": {
-        "name": "Name",
-        "email": "Email",
-        "department": "Area",
-        "requested": "Requested",
-        "actions": "Actions"
-      },
-      "approve": "Approve",
-      "reject": "Reject",
-      "rejectConfirm": "Reject this request? The user will be permanently deleted.",
-      "approveTitle": "Approve request",
-      "approveSubtitle": "Assign a role and security level to activate the account.",
-      "role": "Role",
-      "selectRole": "Select a role...",
-      "securityLevel": "Security level",
-      "selectLevel": "Select a level...",
-      "confirmApprove": "Approve & activate",
-      "approving": "Approving...",
-      "messages": {
-        "approved": "Account approved successfully",
-        "rejected": "Request rejected"
-      }
     }
   },
   "roles": {
@@ -410,8 +383,7 @@
     "tooltips": {
       "inactive": "You cannot view as an inactive person",
       "self": "You cannot view as yourself",
-      "superadmin": "You cannot view as another superadmin",
-      "guest": "You cannot view as a guest"
+      "superadmin": "You cannot view as another superadmin"
     },
     "errors": {
       "reasonRequired": "Enter the reason.",

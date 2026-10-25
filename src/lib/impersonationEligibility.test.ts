@@ -28,9 +28,6 @@ describe('impersonationBlock', () => {
   it('inactivo no', () => {
     expect(impersonationBlock(makeUser({ is_active: false }), 1)).toBe('inactive')
   })
-  it('invitado no', () => {
-    expect(impersonationBlock(makeUser({ roles: ['guest'] }), 1)).toBe('guest')
-  })
   it('sin id de actor solo aplica el resto de reglas', () => {
     expect(impersonationBlock(makeUser({ id: 1 }), undefined)).toBeNull()
   })

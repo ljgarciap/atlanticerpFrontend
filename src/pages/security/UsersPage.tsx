@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
-import { useUsers, useToggleUserStatus, usePendingUsers, useRejectUser, useResetUserMfa } from '@/hooks/useUsers'
+import { useUsers, useToggleUserStatus, useResetUserMfa } from '@/hooks/useUsers'
 import { rolesApi } from '@/api/rolesApi'
 import UserTable from '@/components/security/UserTable'
 import UserFormDrawer from '@/components/security/UserFormDrawer'
-import ApproveUserModal from '@/components/security/ApproveUserModal'
 import UserVisibilityModal from '@/components/security/UserVisibilityModal'
 import BulkModuleVisibilityModal from '@/components/security/BulkModuleVisibilityModal'
 import ResetPasswordModal from '@/components/security/ResetPasswordModal'
@@ -18,7 +17,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoChevronLeft, IcoChevronRight } from '@/components/icons'
 
-type Tab = 'active' | 'inactive' | 'pending'
+type Tab = 'active' | 'inactive'
 
 export default function UsersPage() {
   const { t }     = useTranslation(['common', 'security'])
@@ -74,14 +73,6 @@ export default function UsersPage() {
   const inactiveMeta     = inactiveData?.meta
   const inactiveLastPage = inactiveMeta?.last_page ?? 1
 
-  // ── Pending tab state ──────────────────────────────────────────────────────
-  const { data: pendingData } = usePendingUsers()
-  const pendingUsers          = pendingData?.data ?? []
-  const pendingCount          = pendingUsers.length
-
-  const rejectUser = useRejectUser()
-  const [approvingUser,  setApprovingUser]  = useState<UserListItem | null>(null)
-  const [pendingSuccess, setPendingSuccess] = useState('')
   const [confirmDialog,  setConfirmDialog]  = useState<{ msg: string; onConfirm: () => void } | null>(null)
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -99,20 +90,6 @@ export default function UsersPage() {
   const openCreate  = () => { setEditingUser(null); setDrawerOpen(true) }
   const openEdit    = (u: UserListItem) => { setEditingUser(u); setDrawerOpen(true) }
   const closeDrawer = () => setDrawerOpen(false)
-
-  const handleReject = (user: UserListItem) => {
-    setConfirmDialog({
-      msg: t('security:users.pending.rejectConfirm'),
-      onConfirm: () => rejectUser.mutate(user.id, {
-        onSuccess: () => setPendingSuccess(t('security:users.pending.messages.rejected')),
-      }),
-    })
-  }
-
-  const handleApproved = () => {
-    setApprovingUser(null)
-    setPendingSuccess(t('security:users.pending.messages.approved'))
-  }
 
   const handleResetMfa = (user: UserListItem) => {
     setConfirmDialog({
@@ -142,22 +119,6 @@ export default function UsersPage() {
           >
             {t('security:users.tabs.inactive')}
           </Button>
-          {canManage && (
-            <Button
-              variant="outline"
-              active={activeTab === 'pending'}
-              className="!px-3.5 !py-2 !text-sm !font-medium"
-              onClick={() => { setActiveTab('pending'); setPendingSuccess('') }}
-            >
-              {t('security:users.pending.tabLabel')}
-              {pendingCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white"
-                  style={{ background: '#9fc54d' }}>
-                  {pendingCount}
-                </span>
-              )}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -369,82 +330,6 @@ export default function UsersPage() {
             )}
           </>
         )}
-
-        {/* ── Pending tab ── */}
-        {activeTab === 'pending' && (
-          <>
-            <div className="flex items-center justify-between mb-5">
-              <h1 className="text-lg font-bold text-slate-900">{t('security:users.pending.title')}</h1>
-            </div>
-
-            {pendingSuccess && (
-              <div className="mb-4 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-sm">
-                {pendingSuccess}
-              </div>
-            )}
-
-            {pendingUsers.length === 0 ? (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-6 py-12 text-center">
-                <p className="text-slate-400 text-sm">{t('security:users.pending.empty')}</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        {t('security:users.pending.columns.name')}
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        {t('security:users.pending.columns.email')}
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">
-                        {t('security:users.pending.columns.department')}
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        {t('security:users.pending.columns.actions')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {pendingUsers.map(u => (
-                      <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <span className="font-semibold text-slate-800">
-                            {u.first_name} {u.last_name}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600 max-w-[160px] truncate">{u.email}</td>
-                        <td className="px-4 py-3 text-slate-500 hidden md:table-cell">
-                          {u.department?.name ?? '—'}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="accent"
-                              className="!px-3 !py-1.5 !text-xs"
-                              onClick={() => { setPendingSuccess(''); setApprovingUser(u) }}
-                            >
-                              {t('security:users.pending.approve')}
-                            </Button>
-                            <Button
-                              variant="danger"
-                              className="!px-3 !py-1.5 !text-xs"
-                              disabled={rejectUser.isPending}
-                              onClick={() => handleReject(u)}
-                            >
-                              {t('security:users.pending.reject')}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       {/* ── Drawers / Modals ── */}
@@ -453,14 +338,6 @@ export default function UsersPage() {
           user={editingUser}
           onClose={closeDrawer}
           onSaved={closeDrawer}
-        />
-      )}
-
-      {approvingUser && (
-        <ApproveUserModal
-          user={approvingUser}
-          onClose={() => setApprovingUser(null)}
-          onApproved={handleApproved}
         />
       )}
 
