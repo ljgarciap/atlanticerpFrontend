@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com   (lider_servicios) — Lider Servicios, escritura completa
- *  - garantiasservicios@test.com  (garantias_servicios) — Garantias Servicios Test, solo lectura
+ *  - garantiasservicios@test.com  (tecnico_garantias) — Garantias Servicios Test, solo lectura
  *
  * TOOL_NAME lleva un sufijo único por corrida (Date.now()) para que re-correr la suite no colisione
  * con datos reales dejados por una corrida anterior (no hay borrado de fixtures entre corridas).
@@ -262,7 +262,7 @@ test('10. Lider Servicios — REQ-268 RN3: filtros combinados (búsqueda + estad
 
 // ---------- Modo lectura — técnico interno ----------
 
-test('11. Garantias Servicios (garantias_servicios) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
+test('11. Garantias Servicios (tecnico_garantias) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
   await login(page, 'garantiasservicios@test.com')
   await gotoTools(page)
   await page.waitForTimeout(1000)
@@ -280,7 +280,7 @@ test('11. Garantias Servicios (garantias_servicios) — modo lectura: sin select
   await expect(page.getByText(TOOL_NAME)).toBeVisible()
 })
 
-test('12. Ruptura — rol de escritura vía API directa: PATCH estado con garantias_servicios debe dar 403', async ({ request }) => {
+test('12. Ruptura — rol de escritura vía API directa: PATCH estado con tecnico_garantias debe dar 403', async ({ request }) => {
   const loginRes = await request.post(`${API_BASE}/api/auth/login`, {
     data: { email: 'garantiasservicios@test.com', password: 'garantiasservicios@test.com' },
   })
@@ -297,6 +297,6 @@ test('12. Ruptura — rol de escritura vía API directa: PATCH estado con garant
     headers: { Authorization: `Bearer ${token}` },
     data: { estado: 'good' },
   })
-  console.log('[Ruptura] PATCH estado como garantias_servicios → status:', patchRes.status())
+  console.log('[Ruptura] PATCH estado como tecnico_garantias → status:', patchRes.status())
   expect(patchRes.status()).toBe(403)
 })

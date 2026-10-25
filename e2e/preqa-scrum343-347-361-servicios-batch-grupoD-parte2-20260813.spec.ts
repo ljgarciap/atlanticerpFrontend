@@ -9,7 +9,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com  (lider_servicios) — Lider Servicios, escritura completa de Insumos
- *  - tecnicoservicios@test.com    (tecnico_servicios) — Tecnico Servicios Test, solo lectura del módulo
+ *  - tecnicoservicios@test.com    (tecnico) — Tecnico Servicios Test, solo lectura del módulo
  *  - gerencia@test.com   (management) — Gerencia, ve el Kardex de herramientas
  *  - lidercompras@test.com (lider_compras) — Lider Compras, avanza la orden real en Compras
  *
@@ -62,7 +62,7 @@ test('1. Lider Servicios — REQ-273: panel Insumos vacío al arrancar, botón "
   await expect(page.getByRole('button', { name: /Agregar insumo/i })).toBeVisible()
 })
 
-test('2. Tecnico Servicios (tecnico_servicios) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
+test('2. Tecnico Servicios (tecnico) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/02-carlos-solo-lectura.png`, fullPage: true })
@@ -79,7 +79,7 @@ test('3. Ruptura — Tecnico Servicios vía API directa: POST /servicios/insumos
     headers: { Authorization: `Bearer ${token}` },
     data: { catalog_product_id: 1, minimo: 1, cantidad_inicial: 1 },
   })
-  console.log('[Ruptura] POST /servicios/insumos como tecnico_servicios → status:', res.status())
+  console.log('[Ruptura] POST /servicios/insumos como tecnico → status:', res.status())
   expect(res.status()).toBe(403)
 })
 
@@ -278,7 +278,7 @@ test('10. REQ-291 RN5 — Bodega ve exactamente el mismo disponible en "Reserva 
 
 // ---------- REQ-276 — Kardex de herramientas: gate + filtros combinados ----------
 
-test('11. Tecnico Servicios (tecnico_servicios) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
+test('11. Tecnico Servicios (tecnico) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1500)
@@ -292,7 +292,7 @@ test('12. Ruptura — Tecnico Servicios vía API directa: GET /servicios/tools/m
   const res = await request.get(`${API_BASE}/api/servicios/tools/movements`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  console.log('[Ruptura] GET /servicios/tools/movements como tecnico_servicios → status:', res.status())
+  console.log('[Ruptura] GET /servicios/tools/movements como tecnico → status:', res.status())
   expect(res.status()).toBe(403)
 })
 

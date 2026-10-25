@@ -192,12 +192,12 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     expect(screen.getAllByText('Movimientos').length).toBeGreaterThan(0)
   })
 
-  // SCRUM-882 — vendedor_disenador tiene admin_contab.view=true (lo necesita para sus propias
+  // SCRUM-882 — vendedor tiene admin_contab.view=true (lo necesita para sus propias
   // Comisiones Internas) pero el backend le devuelve datos vacíos en el resto de las pantallas del
   // módulo; el síntoma reportado era que el sidebar igual las mostraba (pantallas vacías en vez de
   // ítems ocultos). Ver ADMIN_CONTAB_FULL_ACCESS_ROLES en Sidebar.tsx.
-  it('vendedor_disenador solo ve "Comisiones → Internas" dentro de Admin. & Contab., el resto queda oculto', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { admin_contab: noModule({ view: true }) } }) })
+  it('vendedor solo ve "Comisiones → Internas" dentro de Admin. & Contab., el resto queda oculto', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { admin_contab: noModule({ view: true }) } }) })
     renderSidebar()
 
     fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
@@ -236,7 +236,7 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
 
     it('no aparece para un vendedor/diseñador con ventas_diseno.edit: él ya tiene el botón en Clientes y la ruta le está vedada', () => {
       // SCRUM-1012: ni siquiera existe el grupo Configuración para él (sin Empresa/Fiscal/Seguridad/Global).
-      useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { admin_contab: noModule({ view: true }) }, permissions: ['ventas_diseno.edit'] }) })
+      useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { admin_contab: noModule({ view: true }) }, permissions: ['ventas_diseno.edit'] }) })
       renderSidebar()
       expect(screen.queryByText('Configuración')).not.toBeInTheDocument()
       expect(screen.queryByText('Datos fiscales de clientes')).not.toBeInTheDocument()
@@ -391,8 +391,8 @@ describe('Sidebar — menú de Servicios en el sidebar, con "Técnicos" desplega
     expect(screen.getAllByText('Listado de Tickets').length).toBeGreaterThan(0)
   })
 
-  it('"Ajustes" no aparece para un rol sin ese permiso (ej. tecnico_servicios)', () => {
-    useAuthStore.setState({ user: serviciosUser('tecnico_servicios') })
+  it('"Ajustes" no aparece para un rol sin ese permiso (ej. tecnico)', () => {
+    useAuthStore.setState({ user: serviciosUser('tecnico') })
     renderSidebar()
     fireEvent.click(screen.getAllByText('Servicios')[0])
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument()
@@ -414,8 +414,8 @@ describe('Sidebar — menú de Servicios en el sidebar, con "Técnicos" desplega
     expect(screen.getAllByText('Ajustes').length).toBeGreaterThan(0)
   })
 
-  it('vendedor_disenador ve Inicio/Tickets/Técnicos (solo "internos", sin desplegable de externos) y nada más', () => {
-    useAuthStore.setState({ user: serviciosUser('vendedor_disenador') })
+  it('vendedor ve Inicio/Tickets/Técnicos (solo "internos", sin desplegable de externos) y nada más', () => {
+    useAuthStore.setState({ user: serviciosUser('vendedor') })
     renderSidebar()
     fireEvent.click(screen.getAllByText('Servicios')[0])
 
@@ -546,7 +546,7 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   // solo un acceso adicional a la misma ruta/pantalla que ya usan los botones "Catálogo"
   // en Clientes/Pedidos/Pipeline.
   it('SCRUM-728: muestra "Catálogo" dentro de CRM para cualquier perfil con acceso a Ventas & Diseño', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('CRM')[0])
     expect(screen.getAllByText('Catálogo').length).toBeGreaterThan(0)
@@ -585,8 +585,8 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   // Hallazgo de Pre-QA (2026-07-31) — REQ-594 RN5/RN6: "Dashboard CRM" y "Pedidos" no son
   // visibles para todo perfil con acceso a Ventas & Diseño/CRM, a diferencia de Pipeline/Lista
   // de Proyectos/Clientes. role_key confirmado contra la DB local (ver comentario en Sidebar.tsx).
-  it('NO muestra "Dashboard CRM" para un perfil que no sea Gerencia (ej. vendedor_disenador)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+  it('NO muestra "Dashboard CRM" para un perfil que no sea Gerencia (ej. vendedor)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('CRM')[0])
     expect(screen.queryByText('Dashboard CRM')).not.toBeInTheDocument()
@@ -612,16 +612,16 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   })
 
   // SCRUM-1119 — Pedidos muestra márgenes, montos y estado de compra: solo Compras y Gerencia.
-  it('NO muestra "Pedidos" para un vendedor_disenador (SCRUM-1119)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+  it('NO muestra "Pedidos" para un vendedor (SCRUM-1119)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { ventas_diseno: noModule({ view: true }) } }) })
     renderSidebar()
     fireEvent.click(screen.getAllByText('Ventas & Diseño')[0])
     expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
   })
 
   // SCRUM-1159 — quien no ve «Pedidos» (márgenes y montos) sí tiene «Status de Pedidos»: consulta de solo lectura de sus propios pedidos.
-  it('vendedor_disenador ve «Status de Pedidos» y al hacer clic navega a /bodega/pedidos/status (SCRUM-1159)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+  it('vendedor ve «Status de Pedidos» y al hacer clic navega a /bodega/pedidos/status (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { ventas_diseno: noModule({ view: true }) } }) })
     render(
       <MemoryRouter initialEntries={['/']}>
         <Sidebar isOpen={false} onClose={vi.fn()} collapsed={false} onToggleCollapse={vi.fn()} />
@@ -635,8 +635,8 @@ describe('Sidebar — módulo CRM (Epic CRM Batch A, SCRUM-673→676)', () => {
   })
 
   // SCRUM-1159 (rebote) — Gerencia busca la consulta de pedidos bajo Bodega: el vendedor la ve también ahí (sin abrirle «Pedidos» del tablero).
-  it('vendedor_disenador ve «Status de Pedidos» también bajo Bodega y no ve «Pedidos» del tablero (SCRUM-1159)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador', modules: { ventas_diseno: noModule({ view: true }) } }) })
+  it('vendedor ve «Status de Pedidos» también bajo Bodega y no ve «Pedidos» del tablero (SCRUM-1159)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor', modules: { ventas_diseno: noModule({ view: true }) } }) })
     render(
       <MemoryRouter initialEntries={['/']}>
         <Sidebar isOpen={false} onClose={vi.fn()} collapsed={false} onToggleCollapse={vi.fn()} />
@@ -784,7 +784,7 @@ describe('Sidebar — Configuración exclusiva de Gerencia (SCRUM-1012)', () => 
     expect(screen.getAllByText('Seguridad').length).toBeGreaterThan(0)
   })
 
-  it.each(['vendedor_disenador', 'lider_compras', 'lider_bodega', 'lider_servicios', 'tecnico_servicios'])(
+  it.each(['vendedor', 'lider_compras', 'lider_bodega', 'lider_servicios', 'tecnico'])(
     '%s NO ve el grupo Configuración ni Seguridad aunque tenga security.users/levels por permiso individual',
     (role) => {
       useAuthStore.setState({ user: baseUser({ role, permissions: ['security.users', 'security.levels'] }) })
@@ -795,7 +795,7 @@ describe('Sidebar — Configuración exclusiva de Gerencia (SCRUM-1012)', () => 
   )
 
   // Pre-QA 1012: Vendedor/Diseñador tienen admin_contab.view por Comisiones, y eso les mostraba Empresa/Fiscal.
-  it.each(['vendedor_disenador'])('%s con admin_contab.view (Comisiones) NO ve Empresa, Fiscal ni un grupo Configuración vacío', (role) => {
+  it.each(['vendedor'])('%s con admin_contab.view (Comisiones) NO ve Empresa, Fiscal ni un grupo Configuración vacío', (role) => {
     useAuthStore.setState({ user: baseUser({
       role,
       modules: { admin_contab: noModule({ view: true }) },
@@ -1199,7 +1199,7 @@ describe('Sidebar — Empresa y Fiscal solo para Gerencia y superadmin (SCRUM-11
 // (como antes de 1013) + Órdenes → Logística y Envío, y Bodega → Bodegas. Nunca el menú completo.
 describe('Sidebar — vendedor con permisos angostos de consulta (SCRUM-1013 rebote, SCRUM-1021)', () => {
   const vendedor = (permissions: string[]) => exactUser({
-    role: 'vendedor_disenador', permissions: ['ventas_diseno.read', 'ventas_diseno.edit', ...permissions],
+    role: 'vendedor', permissions: ['ventas_diseno.read', 'ventas_diseno.edit', ...permissions],
     modules: { ventas_diseno: noModule({ view: true }) },
   })
   // El Sidebar renderiza el menú dos veces (drawer móvil + escritorio): se consulta por "alguna ocurrencia".

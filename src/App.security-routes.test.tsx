@@ -41,7 +41,7 @@ describe('Rutas de Seguridad restringidas a Gerencia (SCRUM-1012)', () => {
 
   it.each([['/security/users', 'USERS_PAGE'], ['/security/levels', 'LEVELS_PAGE']])(
     '%s redirige a roles no Gerencia con el permiso individual', (path, marker) => {
-      for (const role of ['vendedor_disenador', 'lider_compras', 'lider_bodega', 'lider_servicios', 'tecnico_servicios', 'lider_admin_contab']) {
+      for (const role of ['vendedor', 'lider_compras', 'lider_bodega', 'lider_servicios', 'tecnico', 'lider_admin_contab']) {
         window.history.pushState({}, '', path)
         useAuthStore.setState({ user: user(role, ['security.users', 'security.levels']) })
         render(<App />)
@@ -68,7 +68,7 @@ describe('Rutas Empresa/Fiscal restringidas al roster completo de Admin&Cont (SC
   it.each([['/admin-contab/empresa', 'EMPRESA_PAGE'], ['/admin-contab/fiscal', 'FISCAL_PAGE']])(
     '%s redirige a Vendedor/Diseñador aunque tenga admin_contab.view', (path, marker) => {
       window.history.pushState({}, '', path)
-      useAuthStore.setState({ user: user('vendedor_disenador', ['admin_contab.view']) })
+      useAuthStore.setState({ user: user('vendedor', ['admin_contab.view']) })
       render(<App />)
       expect(screen.queryByText(marker)).not.toBeInTheDocument()
       expect(window.location.pathname).not.toBe(path)
@@ -96,7 +96,7 @@ describe('Ruta /ventas-diseno/pedidos restringida a Compras y Gerencia (SCRUM-11
     expect(screen.getByText('PEDIDOS_PAGE')).toBeInTheDocument()
   })
 
-  it.each(['vendedor_disenador', 'lider_operaciones', 'lider_bodega', 'lider_servicios', 'asistente_compras', 'asistente_administrativa'])(
+  it.each(['vendedor', 'lider_operaciones', 'lider_bodega', 'lider_servicios', 'asistente_compras', 'asistente_administrativa'])(
     'redirige a %s aunque tenga ventas_diseno.read', role => {
       window.history.pushState({}, '', path)
       useAuthStore.setState({ user: user(role, ['ventas_diseno.read']) })

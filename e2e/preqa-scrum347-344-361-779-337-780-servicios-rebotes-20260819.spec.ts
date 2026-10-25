@@ -12,7 +12,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
  * (password = email): liderservicios@test.com (Lider Servicios, lider_servicios),
- * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios), lidercompras@test.com
+ * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico), lidercompras@test.com
  * (Lider Compras, lider_compras), gerencia5@test.com (Gerencia, management — mbekhar/daniela/
  * luis.garcia NO loguean con password=email en este entorno, ver hallazgo de proceso en el reporte).
  *
@@ -20,7 +20,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * (8e162f8) dejó de mandar la key `rate_history` para actores sin `puede_ver_costos`, pero
  * ExternalTechnicianDetailModal.tsx (línea ~173) sigue leyendo `technician.rate_history.length`
  * sin optional chaining — la ficha de técnico externo CRASHEA (pantalla en blanco) para
- * tecnico_servicios/cualquier rol sin costos. Además, el endpoint de LISTADO
+ * tecnico/cualquier rol sin costos. Además, el endpoint de LISTADO
  * (`ExternalTechnicianController::summary()`, usado por GET /servicios/external-technicians)
  * nunca fue tocado por el fix — sigue exponiendo `tarifa_dia` a cualquier rol basado solo en
  * `tarifa_visible`, ignorando `puede_ver_costos` — la columna TARIFA de la tabla "Técnicos
@@ -194,7 +194,7 @@ test('8. Lider Servicios (puede_ver_costos) — ficha de técnico externo id 2: 
   await expect(page.getByText('$25.00').first()).toBeVisible()
 })
 
-test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico_servicios, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
+test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })

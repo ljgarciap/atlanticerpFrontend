@@ -1,5 +1,5 @@
 {
- "_generado": "2026-10-24 con effectivePermissionsV2() real sobre los usuarios del seed (backend fase1b/frontend-bloque-d). Regenerar si cambian roles/niveles.",
+ "_generado": "2026-10-25 con effectivePermissions() real sobre los usuarios del seed, ya con el catálogo de roles genérico de la Fase 3. Regenerar si cambian roles/niveles.",
  "identities": [
   {
    "email": "superadmin@test.com",
@@ -428,7 +428,7 @@
   },
   {
    "email": "ayudantegeneralbodega@test.com",
-   "role": "ayudante_general_bodega",
+   "role": "auxiliar_bodega",
    "permissions": [
     "bodega.edit",
     "bodega.read",
@@ -482,7 +482,7 @@
   },
   {
    "email": "tecnicoservicios@test.com",
-   "role": "tecnico_servicios",
+   "role": "tecnico",
    "permissions": [
     "ai.use",
     "crm.delete",
@@ -504,7 +504,7 @@
   },
   {
    "email": "tecnicoservicios2@test.com",
-   "role": "tecnico_servicios",
+   "role": "tecnico",
    "permissions": [
     "ai.use",
     "crm.delete",
@@ -526,7 +526,7 @@
   },
   {
    "email": "tecnicoservicios3@test.com",
-   "role": "tecnico_servicios",
+   "role": "tecnico",
    "permissions": [
     "ai.use",
     "crm.delete",
@@ -548,7 +548,7 @@
   },
   {
    "email": "garantiasservicios@test.com",
-   "role": "garantias_servicios",
+   "role": "tecnico_garantias",
    "permissions": [
     "ai.use",
     "crm.delete",
@@ -569,7 +569,7 @@
   },
   {
    "email": "vendedordisenador@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -593,7 +593,7 @@
   },
   {
    "email": "vendedordisenador2@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -617,7 +617,7 @@
   },
   {
    "email": "vendedordisenador3@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -641,7 +641,7 @@
   },
   {
    "email": "vendedordisenador4@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -665,7 +665,7 @@
   },
   {
    "email": "vendedordisenador5@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -689,7 +689,7 @@
   },
   {
    "email": "vendedordisenador6@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -713,7 +713,7 @@
   },
   {
    "email": "vendedordisenador7@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -737,7 +737,7 @@
   },
   {
    "email": "vendedordisenador8@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -761,7 +761,7 @@
   },
   {
    "email": "vendedordisenador9@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -785,7 +785,7 @@
   },
   {
    "email": "vendedordisenador10@test.com",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
     "admin_contab.view",
@@ -827,7 +827,7 @@
   },
   {
    "email": "pickerbodega@test.com",
-   "role": "ayudante_general_bodega",
+   "role": "auxiliar_bodega",
    "permissions": [
     "bodega.edit",
     "bodega.read",
@@ -954,7 +954,7 @@
   },
   {
    "email": "designer@atlantic.test",
-   "role": "vendedor_disenador",
+   "role": "vendedor",
    "permissions": [
     "admin_contab.view",
     "ai.use",
@@ -1001,7 +1001,7 @@
   },
   {
    "email": "multi@atlantic.test",
-   "role": "",
+   "role": "management",
    "permissions": [
     "admin_contab.edit",
     "admin_contab.read",

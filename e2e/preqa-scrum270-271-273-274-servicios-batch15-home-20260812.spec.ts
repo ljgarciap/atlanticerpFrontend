@@ -17,8 +17,8 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com   (lider_servicios) — Lider Servicios, ve TODO incl. "+ Nuevo ticket"
- *  - tecnicoservicios@test.com     (tecnico_servicios) — NO debe ver "+ Nuevo ticket"
- *  - garantiasservicios@test.com  (garantias_servicios) — NO debe ver "+ Nuevo ticket"
+ *  - tecnicoservicios@test.com     (tecnico) — NO debe ver "+ Nuevo ticket"
+ *  - garantiasservicios@test.com  (tecnico_garantias) — NO debe ver "+ Nuevo ticket"
  *
  * ⚠️ Tests 1-12 (arriba) dependen de las fixtures de rutas/pendientes/indicadores sembradas para el
  * worktree `batch15review` original (backend :8095), que ya no existe — al re-correr esta suite
@@ -178,7 +178,7 @@ test('7. Lider Servicios — REQ-211: Indicadores del mes con datos reales sembr
   await expect(page.getByText('Ingresos por instalaciones')).toBeVisible()
 })
 
-test('8. Tecnico Servicios (tecnico_servicios) — gate REQ-245 RN4: NO debe ver "+ Nuevo ticket", panels SÍ visibles (RN1)', async ({ page }) => {
+test('8. Tecnico Servicios (tecnico) — gate REQ-245 RN4: NO debe ver "+ Nuevo ticket", panels SÍ visibles (RN1)', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/08-home-carlos.png`, fullPage: true })
@@ -192,7 +192,7 @@ test('8. Tecnico Servicios (tecnico_servicios) — gate REQ-245 RN4: NO debe ver
   await expect(page.getByRole('heading', { name: 'Indicadores del mes' })).toBeVisible()
 })
 
-test('9. Garantias Servicios (garantias_servicios) — mismo gate: NO debe ver "+ Nuevo ticket"', async ({ page }) => {
+test('9. Garantias Servicios (tecnico_garantias) — mismo gate: NO debe ver "+ Nuevo ticket"', async ({ page }) => {
   await login(page, 'garantiasservicios@test.com')
   await gotoHome(page)
   await page.screenshot({ path: `${DL_DIR}/09-home-miguel.png`, fullPage: true })

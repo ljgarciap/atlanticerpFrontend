@@ -79,7 +79,7 @@ export default function RoleFormModal({ role, levels, onClose }: Props) {
         <form id="role-form" onSubmit={handleSubmit(d => mutation.mutate(d))} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">{t('security:roles.form.key')}</label>
-            <input {...register('key')} disabled={isEdit} className={inputCls(!!errors.key)} placeholder="vendedor_disenador" />
+            <input {...register('key')} disabled={isEdit} className={inputCls(!!errors.key)} placeholder="vendedor" />
             {errors.key && <p className="text-red-500 text-xs mt-1">{errors.key.message}</p>}
             {isEdit && <p className="text-slate-400 text-xs mt-1">{t('security:roles.form.keyImmutable')}</p>}
           </div>

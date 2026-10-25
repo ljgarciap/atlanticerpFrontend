@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import type { UserInfo } from '@/types/auth'
 
 const user = (overrides: Partial<UserInfo> = {}): UserInfo => ({
-  id: 1, first_name: 'Vendedor Disenador', last_name: 'Q', email: 'n@q.c', role: 'vendedor_disenador',
+  id: 1, first_name: 'Vendedor Disenador', last_name: 'Q', email: 'n@q.c', role: 'vendedor',
   permissions: ['ventas_diseno.read'], modules: { ventas_diseno: { view: true, view_team: false, edit: false, approve: false } }, ...overrides,
 })
 

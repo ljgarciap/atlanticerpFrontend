@@ -23,8 +23,8 @@ const LEGACY: Record<keyof typeof GUARD, (i: SeedIdentity) => boolean> = {
 }
 
 /** Persona con el alcance de Gerencia por persona (SCRUM-1150): un vendedor real + el permiso individual. */
-const vendedor = IDENTITIES.find(i => i.role === 'vendedor_disenador')!
-const WITH_SCOPE: SeedIdentity = { email: 'alcance@test.com', role: 'vendedor_disenador', permissions: [...vendedor.permissions, GERENCIA_SCOPE_PERMISSION] }
+const vendedor = IDENTITIES.find(i => i.role === 'vendedor')!
+const WITH_SCOPE: SeedIdentity = { email: 'alcance@test.com', role: 'vendedor', permissions: [...vendedor.permissions, GERENCIA_SCOPE_PERMISSION] }
 const ALL: SeedIdentity[] = [...IDENTITIES, WITH_SCOPE]
 
 /**
@@ -38,6 +38,8 @@ const EXPECTED_DIVERGENCES = new Set([
   'PEDIDOS@gerencia5@test.com', 'TOOL_KARDEX@gerencia5@test.com',
   // Usuarios demo con `records.manage` o `superadmin.all` concedidos sin tener el rol correspondiente.
   'ADMIN_CONTAB@readonly@atlantic.test', 'SUPERADMIN@management@atlantic.test', 'SUPERADMIN@gerencia@atlantic.test',
+  // multi@atlantic.test: rol `management` pero nivel 8 (sin `platform.management`): un demo con rol y permisos que no concuerdan.
+  'ADMIN_CONTAB@multi@atlantic.test', 'GERENCIA@multi@atlantic.test', 'GERENCIA_O_ALCANCE@multi@atlantic.test', 'PEDIDOS@multi@atlantic.test', 'TOOL_KARDEX@multi@atlantic.test',
 ])
 
 describe('GUARD por permiso ≡ regla legada por rol (Fase 1b)', () => {
@@ -77,11 +79,11 @@ describe('GUARD por permiso ≡ regla legada por rol (Fase 1b)', () => {
   })
 })
 
-describe('Sidebar: «Servicios limitado» por permiso ≡ por rol vendedor_disenador', () => {
+describe('Sidebar: «Servicios limitado» por permiso ≡ por rol vendedor', () => {
   it('para toda identidad con acceso a Servicios', () => {
     const conServicios = ALL.filter(i => i.permissions.some(p => p.startsWith('servicios.')))
     const dif = conServicios
-      .filter(i => (i.role === 'vendedor_disenador') !== !hasAnyPermission(i.permissions, ['servicios.external_technicians.view']))
+      .filter(i => (i.role === 'vendedor') !== !hasAnyPermission(i.permissions, ['servicios.external_technicians.view']))
       .map(i => i.email)
     // gerencia5 (nivel restringido) y multi@ (sin rol): su permiso real no incluye el directorio de externos.
     expect(dif.sort()).toEqual(['gerencia5@test.com', 'multi@atlantic.test'])
@@ -95,10 +97,10 @@ describe('Sidebar: «Servicios limitado» por permiso ≡ por rol vendedor_disen
 const R = (...roles: string[]) => (i: SeedIdentity) => roles.includes(i.role)
 const CAPABILITIES: Record<string, { permission: string; legacy: (i: SeedIdentity) => boolean }> = {
   'servicios.tickets.manage (agendar/estado, herramientas, insumos, alta de técnico interno)': { permission: 'servicios.tickets.manage', legacy: R('lider_servicios', 'superadmin') },
-  'servicios.tickets.create': { permission: 'servicios.tickets.create', legacy: R('lider_servicios', 'superadmin', 'management', 'vendedor_disenador') },
+  'servicios.tickets.create': { permission: 'servicios.tickets.create', legacy: R('lider_servicios', 'superadmin', 'management', 'vendedor') },
   'servicios.field_ops.admin (técnicos externos, captura de comisión)': { permission: 'servicios.field_ops.admin', legacy: R('lider_servicios', 'management', 'superadmin') },
   'servicios.settings.configure (ajustes, meta del mes, SLA)': { permission: 'servicios.settings.configure', legacy: R('management', 'superadmin') },
-  'servicios.claim_sheets.manage (plantilla en blanco)': { permission: 'servicios.claim_sheets.manage', legacy: R('superadmin', 'lider_servicios', 'tecnico_servicios') },
+  'servicios.claim_sheets.manage (plantilla en blanco)': { permission: 'servicios.claim_sheets.manage', legacy: R('superadmin', 'lider_servicios', 'tecnico') },
   'admin_contab.operations.manage (arqueo del día, subir cuenta de cobro)': { permission: 'admin_contab.operations.manage', legacy: R('superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones') },
   'admin_contab.records.manage (historial de arqueo, gestionar comisiones externas)': { permission: 'admin_contab.records.manage', legacy: R('superadmin', 'lider_admin_contab', 'asistente_administrativa', 'lider_operaciones', 'management') },
   'admin_contab.oversight.manage (tarjeta de comisión de Reportes)': { permission: 'admin_contab.oversight.manage', legacy: R('superadmin', 'lider_admin_contab', 'management') },
@@ -127,6 +129,9 @@ const EXPECTED_CAPABILITY_DIVERGENCES = new Set<string>([
   'servicios.tickets.manage@management@atlantic.test',
   'servicios.tools.kardex.view@gerencia5@test.com',
   'ventas_diseno.orders.access@gerencia5@test.com',
+  'admin_contab.oversight.manage@multi@atlantic.test', 'admin_contab.records.manage@multi@atlantic.test', 'servicios.field_ops.admin@multi@atlantic.test',
+  'servicios.settings.configure@multi@atlantic.test', 'servicios.tickets.create@multi@atlantic.test', 'servicios.tools.kardex.view@multi@atlantic.test',
+  'ventas_diseno.orders.access@multi@atlantic.test',
 ])
 
 describe('Capacidades por permiso ≡ roster legado por rol (helpers sueltos de la 1b)', () => {

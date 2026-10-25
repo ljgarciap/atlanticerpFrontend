@@ -81,14 +81,14 @@ async function openDetailFor(page: Page, subclienteText: string, tab: 'cobrable'
   await page.waitForTimeout(500)
 }
 
-test('RBAC negativo -- vendedor_disenador no accede a /admin-contab/invoices*', async ({ page }) => {
+test('RBAC negativo -- vendedor no accede a /admin-contab/invoices*', async ({ page }) => {
   await login(page, NEIL)
   const apiResponse = page.waitForResponse(r => r.url().includes('/api/admin-contab/invoices'), { timeout: 8000 }).catch(() => null)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   const resp = await apiResponse
   if (resp) {
-    expect(resp.status(), 'GET /admin-contab/invoices debe responder 403 para vendedor_disenador').toBe(403)
+    expect(resp.status(), 'GET /admin-contab/invoices debe responder 403 para vendedor').toBe(403)
   }
   await page.screenshot({ path: 'test-results/scrum524-528-rbac-negativo.png' })
 })

@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Cuentas reales (password = email, roster CoreUserSeeder):
  *  - Contabilidad (lider_admin_contab): contabilidad@test.com
  *  - Asistente Administrativa (asistente_administrativa): asistenteadministrativa@test.com
- *  - Vendedor Disenador Test 2 (vendedor_disenador): vendedordisenador2@test.com
+ *  - Vendedor Disenador Test 2 (vendedor): vendedordisenador2@test.com
  *  - almacen (Bodega): liderbodega@test.com
  */
 test.describe.configure({ mode: 'serial' })
@@ -152,7 +152,7 @@ test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Contabilidad', asy
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-882 — vendedor_disenador (Vendedor Disenador) no ve Admin&Cont salvo Comisiones Internas
+// SCRUM-882 — vendedor (Vendedor Disenador) no ve Admin&Cont salvo Comisiones Internas
 // ---------------------------------------------------------------------------
 test('SCRUM-882.1 — Vendedor Disenador: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
   await login(page, 'vendedordisenador2@test.com')

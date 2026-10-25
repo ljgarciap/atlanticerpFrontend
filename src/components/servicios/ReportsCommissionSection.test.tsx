@@ -80,14 +80,14 @@ describe('ReportsCommissionSection — gate de visibilidad (REQ-285 RN2)', () =>
       technician({ nombre: 'Tecnico Servicios A. Tecnico Servicios' }),
       technician({ id: 2, user_id: 19, nombre: 'Tecnico Servicios Test 2', has_bonus_plan: false }),
     ])
-    setUser('tecnico_servicios', TECNICO_USER_ID)
+    setUser('tecnico', TECNICO_USER_ID)
     renderSection()
 
     await waitFor(() => expect(screen.getByText('reports.commission.title')).toBeInTheDocument())
   })
 
   it('otro técnico interno no ve la sección NI dispara la llamada de red', async () => {
-    setUser('tecnico_servicios', 19)
+    setUser('tecnico', 19)
     renderSection()
 
     await waitFor(() => expect(mockedApi.internalTechnicians.list).toHaveBeenCalled())

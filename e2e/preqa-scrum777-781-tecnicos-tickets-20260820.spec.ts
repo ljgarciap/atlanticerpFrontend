@@ -19,7 +19,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
  * (password = email): liderservicios@test.com (Lider Servicios Leis, lider_servicios — tiene
  * can_view_cost_breakdown=true, cubre el gate de Gerencia para ver costo/margen de cotización),
- * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios).
+ * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico).
  */
 test.describe.configure({ mode: 'serial' })
 

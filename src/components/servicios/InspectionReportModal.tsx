@@ -31,12 +31,12 @@ interface Props {
   ticketDireccion:      string | null
   canEdit:    boolean
   /** REQ-244 RN "Descargar plantilla en blanco" — más angosto que `canEdit`: Lider Servicios/Líder de
-   *  Servicios o técnico interno (route `role:superadmin,lider_servicios,tecnico_servicios` en
-   *  `routes/servicios.php`) — a propósito NO incluye `garantias_servicios`, que sí puede editar
+   *  Servicios o técnico interno (route `role:superadmin,lider_servicios,tecnico` en
+   *  `routes/servicios.php`) — a propósito NO incluye `tecnico_garantias`, que sí puede editar
    *  el informe (`canEditInspectionReport`) pero no descargar la plantilla en blanco. Pre-QA
    *  2026-08-11 (Batch 9): antes de este fix, el botón se mostraba a CUALQUIER rol con acceso de
    *  lectura al ticket sin importar si el informe existía o no — un rol fuera de este roster
-   *  (management, vendedor_disenador, garantias_servicios) veía "Ver plantilla en blanco",
+   *  (management, vendedor, tecnico_garantias) veía "Ver plantilla en blanco",
    *  hacía clic, y el backend lo rechazaba con 403 → toast de error genérico, sin explicar que
    *  era un tema de permiso. El botón "Ver / Imprimir" (informe YA completado) sigue disponible
    *  para todos los roles con acceso de lectura — RN3 de REQ-244 es de solo lectura para ese caso. */
@@ -320,7 +320,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
           <div className="flex items-center gap-2">
             {/* Pre-QA 2026-08-11 (Batch 9) — antes se mostraba a cualquier rol con lectura del
                 ticket, incluso cuando el backend (route role:superadmin,lider_servicios,
-                tecnico_servicios) iba a rechazar la plantilla en blanco con 403. "Ver / Imprimir"
+                tecnico) iba a rechazar la plantilla en blanco con 403. "Ver / Imprimir"
                 (informe ya completado) sigue disponible para todos — RN3 es de solo lectura. */}
             {!loadingExisting && (existing ? true : canDownloadBlank) && (
               <Button variant="secondary" onClick={() => void downloadPdf()} loading={downloadingPdf}>

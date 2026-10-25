@@ -101,7 +101,7 @@ describe('OrderStatusPage', () => {
 
   // SCRUM-1159 (Pre-QA B-1) — el vendedor no puede abrir el tablero de Pedidos: el botón rebotaba en silencio a su inicio.
   it('sin bodega.read (vendedor) NO muestra el botón de volver a Pedidos', () => {
-    useAuthStore.setState({ user: { id: 2, first_name: 'V', last_name: 'D', email: 'v@d.e', role: 'vendedor_disenador', permissions: ['ventas_diseno.read'] } })
+    useAuthStore.setState({ user: { id: 2, first_name: 'V', last_name: 'D', email: 'v@d.e', role: 'vendedor', permissions: ['ventas_diseno.read'] } })
     mockedUseOrderStatusList.mockReturnValue({ data: listResponse([]), isLoading: false } as ReturnType<typeof useOrderStatusList>)
     renderPage()
 

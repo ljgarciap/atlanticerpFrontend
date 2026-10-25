@@ -110,7 +110,7 @@ describe('ServiciosSettingsPanel', () => {
   })
 
   it('rol sin permiso de edición ve los campos deshabilitados y sin botón "Guardar"', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.settings.list.mockResolvedValue(makeSettings())
     renderPage()
 

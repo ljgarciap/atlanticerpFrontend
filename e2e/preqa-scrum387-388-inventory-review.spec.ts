@@ -115,7 +115,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
     await expect(page.getByTestId('picking-sheet-modal')).toBeVisible()
   })
 
-  test('rol Picker (ayudante_general_bodega) — el botón "Revisar Inventario" no aparece nunca, y el endpoint responde 403 directo', async ({ page }) => {
+  test('rol Picker (auxiliar_bodega) — el botón "Revisar Inventario" no aparece nunca, y el endpoint responde 403 directo', async ({ page }) => {
     await login(page, 'ayudantegeneralbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)

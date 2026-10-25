@@ -8,8 +8,8 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com      (lider_servicios) — puede cambiar estado.
- *  - tecnicoservicios@test.com        (tecnico_servicios) — NO puede cambiar estado.
- *  - vendedordisenador@test.com        (vendedor_disenador) — solo lectura en Servicios.
+ *  - tecnicoservicios@test.com        (tecnico) — NO puede cambiar estado.
+ *  - vendedordisenador@test.com        (vendedor) — solo lectura en Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -203,7 +203,7 @@ test('7. Tecnico Servicios (técnico interno) — API directa: 403 al intentar c
   const r = await request.patch(`${BASE}/api/servicios/tickets/${anyTicket.id}/estado`, {
     headers, data: { estado: 'scheduled' },
   })
-  console.log('[SCRUM-721] Tecnico Servicios (tecnico_servicios) intenta cambiar estado vía API directa -> HTTP', r.status())
+  console.log('[SCRUM-721] Tecnico Servicios (tecnico) intenta cambiar estado vía API directa -> HTTP', r.status())
   expect(r.status()).toBe(403)
 })
 
@@ -219,7 +219,7 @@ test('8. Tecnico Servicios (técnico interno) — UI: select de estado deshabili
   await expect(selects.first()).toBeDisabled()
 })
 
-test('9. Vendedor Disenador (vendedor_disenador) — puede VER tabla + filtro técnico (4 opciones), NO puede editar', async ({ page }) => {
+test('9. Vendedor Disenador (vendedor) — puede VER tabla + filtro técnico (4 opciones), NO puede editar', async ({ page }) => {
   await login(page, 'vendedordisenador@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/10-milena-tabla.png`, fullPage: true })

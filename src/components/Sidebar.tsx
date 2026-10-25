@@ -387,7 +387,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // SCRUM-774 — el menú de Servicios se muda del menú superior (ServiciosNavMenu, eliminado)
   // al panel lateral, mismo patrón que "Inventario" de Bodega (NavDropdown anidado dentro de la
   // sección). Mismo gate de rol que tenía ServiciosNavMenu (REQ-287/288, ahora eliminado):
-  // vendedor_disenador ve solo Inicio/Tickets/Técnicos (con una única opción, "Técnicos
+  // vendedor ve solo Inicio/Tickets/Técnicos (con una única opción, "Técnicos
   // internos", sin desplegable de externos) — Insumos/Reportes/Cotizaciones/Ajustes quedan
   // fuera para ese rol.
   //

@@ -6,8 +6,8 @@ import { execSync } from 'node:child_process'
  * stock (seleccionados / catálogo completo). Corre contra dev.atlanticerp.ai (ya pusheado+desplegado).
  *
  * Cuentas reales (password = email, ver project_roster_usuarios_reales_atlanticerp.md):
- *  - vendedordisenador2@test.com (vendedor_disenador) — tiene ventas_diseno.read.
- *  - tecnicoservicios@test.com (tecnico_servicios) — NO tiene ventas_diseno.read, confirmado
+ *  - vendedordisenador2@test.com (vendedor) — tiene ventas_diseno.read.
+ *  - tecnicoservicios@test.com (tecnico) — NO tiene ventas_diseno.read, confirmado
  *    por curl directo (403) antes de este spec.
  */
 test.describe.configure({ mode: 'serial' })
@@ -126,7 +126,7 @@ test('5. Doble clic rápido en "Enviar catálogo completo" — solo 1 descarga',
 })
 
 test('6. Rol sin ventas_diseno.read — endpoint responde 401/403, no solo botón oculto', async ({ page, request }) => {
-  // Confirmado antes por curl directo: carlos (tecnico_servicios) → 403 en POST send-pdf.
+  // Confirmado antes por curl directo: carlos (tecnico) → 403 en POST send-pdf.
   // Acá confirmamos también el comportamiento en navegador: login exitoso, pero sin acceso a
   // la pantalla/al endpoint.
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
@@ -139,7 +139,7 @@ test('6. Rol sin ventas_diseno.read — endpoint responde 401/403, no solo botó
     headers: { Authorization: `Bearer ${token}` },
     data: { mode: 'completo' },
   })
-  console.log('[SCRUM-702] POST send-pdf como tecnico_servicios (sin ventas_diseno.read) → status', pdfRes.status())
+  console.log('[SCRUM-702] POST send-pdf como tecnico (sin ventas_diseno.read) → status', pdfRes.status())
   expect([401, 403]).toContain(pdfRes.status())
 
   // Y en navegador: la pantalla de Catálogo no debería ni cargar datos para este rol.

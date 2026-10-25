@@ -110,7 +110,7 @@ describe('InternalTechniciansPage — REQ-255 vista Equipo', () => {
   })
 
   it('técnico interno no ve el botón de nuevo técnico', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.internalTechnicians.list.mockResolvedValue([])
     renderPage()
 
@@ -339,7 +339,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
   })
 
   it('técnico interno (no Lider Servicios/Gerencia) no ve el botón aunque el técnico tenga plan activo', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ has_bonus_plan: true })])
     renderPage()
 
@@ -513,7 +513,7 @@ describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
   })
 
   it('un rol sin permiso de gestión (técnico) no ve Editar ni Eliminar', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     renderPage()
 

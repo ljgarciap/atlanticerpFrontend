@@ -10,8 +10,7 @@ import type { UserInfo } from '@/types/auth'
 
 const LABELS: Record<string, string> = {
   'roles.superadmin': 'Super Admin',
-  'roles.designer':   'Diseñador',
-  'roles.vendedor_disenador': 'Vendedor/Diseñador',
+  'roles.vendedor': 'Vendedor',
   'roles.lider_compras': 'Líder de Compras',
 }
 
@@ -80,11 +79,11 @@ describe('TopBar — título del módulo (SCRUM-58)', () => {
 })
 
 describe('TopBar — badge de rol legible (SCRUM-58)', () => {
-  it('muestra el nombre legible para un rol del catálogo nuevo (vendedor_disenador)', () => {
-    useAuthStore.setState({ user: baseUser({ role: 'vendedor_disenador' }) })
+  it('muestra el nombre legible para un rol del catálogo nuevo (vendedor)', () => {
+    useAuthStore.setState({ user: baseUser({ role: 'vendedor' }) })
     renderTopBar('Ventas & Diseño')
-    expect(screen.getByText('Vendedor/Diseñador')).toBeInTheDocument()
-    expect(screen.queryByText('vendedor_disenador')).not.toBeInTheDocument()
+    expect(screen.getByText('Vendedor')).toBeInTheDocument()
+    expect(screen.queryByText('vendedor')).not.toBeInTheDocument()
     expect(screen.queryByText('VENDEDOR_DISENADOR')).not.toBeInTheDocument()
   })
 
