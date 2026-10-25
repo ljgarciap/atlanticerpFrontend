@@ -6,8 +6,8 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com (lider_servicios) — Lider Servicios, único que edita/agenda.
- *  - tecnicoservicios@test.com   (tecnico_servicios) — solo lectura, sin Editar/Agendar.
- *  - vendedordisenador@test.com   (vendedor_disenador) — solo lectura, sin Editar/Agendar.
+ *  - tecnicoservicios@test.com   (tecnico) — solo lectura, sin Editar/Agendar.
+ *  - vendedordisenador@test.com   (vendedor) — solo lectura, sin Editar/Agendar.
  */
 test.describe.configure({ mode: 'serial' })
 

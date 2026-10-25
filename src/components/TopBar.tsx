@@ -121,7 +121,7 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
           {/* Role badge — oculto en xs para no desbordar */}
           <span className="hidden sm:inline-block px-2 py-0.5 rounded text-xs font-bold uppercase"
             style={{ background: '#d1ede9', color: '#1f6b66' }}>
-            {user?.role ? t(`common:roles.${user.role}`, { defaultValue: user.role }) : ''}
+            {user?.role ? (user.role_name ?? t(`common:roles.${user.role}`, { defaultValue: user.role })) : ''}
           </span>
           {/* LanguageSelector — oculto en xs */}
           <span className="hidden sm:flex"><LanguageSelector /></span>

@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // preqa-scrum684-689-dashboard-crm-batchc.spec.ts (gate de rol que ya se rompio una vez, ver
 // feedback_e2e_permanent_tests_must_self_seed.md).
 //
-// Hallazgo real: el comentario original de App.tsx asumia que vendedor_disenador no tiene
+// Hallazgo real: el comentario original de App.tsx asumia que vendedor no tiene
 // `admin_contab.view` y por eso no hacia falta un gate de rol adicional en la ruta
 // /admin-contab/reportes -- falso: ese rol SI tiene `admin_contab.view=true` en su JWT (lo
 // necesita para Comisiones Internas, ver Batch 14/15), asi que llegaba a la pantalla completa por
@@ -29,7 +29,7 @@ async function login(page: Page, email: string): Promise<boolean> {
   return !page.url().includes('/login')
 }
 
-test('vendedor_disenador NO puede entrar a /admin-contab/reportes por URL directa pese a tener admin_contab.view', async ({ page }) => {
+test('vendedor NO puede entrar a /admin-contab/reportes por URL directa pese a tener admin_contab.view', async ({ page }) => {
   const reportsCalls: string[] = []
   page.on('request', req => { if (req.url().includes('/api/admin-contab/reports/')) reportsCalls.push(req.url()) })
 

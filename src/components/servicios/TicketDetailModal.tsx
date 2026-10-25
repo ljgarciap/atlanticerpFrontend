@@ -33,13 +33,13 @@ export function canEditInspectionReport(permissions: readonly string[] | undefin
 
 // REQ-244 RN "Descargar plantilla en blanco" — mismo permiso que la ruta
 // (`servicios.claim_sheets.manage`: lider y técnico) de `/inspection-report/pdf/blank` en
-// routes/servicios.php. Más angosto que `canEditInspectionReport`: sin `garantias_servicios` a
+// routes/servicios.php. Más angosto que `canEditInspectionReport`: sin `tecnico_garantias` a
 // propósito (Pre-QA 2026-08-11, Batch 9 — confirmado con el backend que ese rol recibe 403 ahí).
 function canDownloadBlankInspectionReport(permissions: readonly string[] | undefined): boolean {
   return hasAnyPermission(permissions, ['servicios.claim_sheets.manage'])
 }
 
-// REQ-278 — mismo criterio que `ClaimSheetService::assertCanEdit()`, sin rama `garantias_servicios`
+// REQ-278 — mismo criterio que `ClaimSheetService::assertCanEdit()`, sin rama `tecnico_garantias`
 // a propósito (Reclamos no es un tipo de ticket que atienda el especialista de garantías).
 function canEditClaimSheet(permissions: readonly string[] | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
   if (hasAnyPermission(permissions, ['servicios.tickets.manage'])) return true

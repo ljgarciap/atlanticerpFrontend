@@ -7,8 +7,8 @@ import { test, expect, type Page } from '@playwright/test'
  * (localhost:5173 -> proxy /api -> localhost:8090), cambios sin commitear en dev.
  *
  * Cuenta real (password = email, ver project_roster_usuarios_reales_atlanticerp.md):
- *  - vendedordisenador2@test.com (vendedor_disenador) — tiene ventas_diseno.read.
- *  - tecnicoservicios@test.com (tecnico_servicios) — NO tiene ventas_diseno.read, usado para
+ *  - vendedordisenador2@test.com (vendedor) — tiene ventas_diseno.read.
+ *  - tecnicoservicios@test.com (tecnico) — NO tiene ventas_diseno.read, usado para
  *    el check negativo del punto 5.
  */
 test.describe.configure({ mode: 'serial' })

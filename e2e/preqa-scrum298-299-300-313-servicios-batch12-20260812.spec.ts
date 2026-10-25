@@ -37,7 +37,7 @@ import { execSync } from 'node:child_process'
  *  - liderservicios@test.com (lider_servicios) — genera/envía/decide cotizaciones, Ajustes
  *    de Servicios visible pero NO editable.
  *  - gerencia@test.com  (management) — Ajustes de Servicios editable (REQ-237 RN1).
- *  - tecnicoservicios2@test.com    (tecnico_servicios) — NO asignado a los tickets de este
+ *  - tecnicoservicios2@test.com    (tecnico) — NO asignado a los tickets de este
  *    fixture, usado para confirmar visibilidad transversal del historial global (REQ-250 RN2).
  */
 test.describe.configure({ mode: 'serial' })

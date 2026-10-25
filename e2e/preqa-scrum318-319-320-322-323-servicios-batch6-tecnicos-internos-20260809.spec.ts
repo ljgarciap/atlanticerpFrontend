@@ -23,8 +23,8 @@ import { execSync } from 'node:child_process'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com (lider_servicios) — alta completa, vista Equipo/Agenda.
- *  - tecnicoservicios@test.com   (tecnico_servicios) — solo consulta, sin alta.
- *  - vendedordisenador@test.com   (vendedor_disenador) — solo vista de Agenda equipo (RN5).
+ *  - tecnicoservicios@test.com   (tecnico) — solo consulta, sin alta.
+ *  - vendedordisenador@test.com   (vendedor) — solo vista de Agenda equipo (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -184,7 +184,7 @@ test('REQ-255 RN5 — clic en nombre/avatar abre el detalle con teléfono/correo
   await expect(detail.getByText('garantiasservicios@test.com')).toBeVisible()
 })
 
-test('REQ-259 RN5 — técnico interno (tecnico_servicios) NO ve el botón de alta', async ({ page }) => {
+test('REQ-259 RN5 — técnico interno (tecnico) NO ve el botón de alta', async ({ page }) => {
   await login(page, 'tecnicoservicios@test.com')
   await gotoInternalTechnicians(page)
 

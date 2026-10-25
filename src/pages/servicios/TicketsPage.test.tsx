@@ -298,7 +298,7 @@ describe('TicketsPage — REQ-218 gate de cambio de estado', () => {
   })
 
   it('un rol sin permiso (Vendedor/Diseñador) ve el select deshabilitado', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'vendedor_disenador' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'vendedor' }) })
     mockedApi.tickets.list.mockResolvedValue([makeTicket()])
     renderPage()
     await screen.findByText('INS-2026-0001')
@@ -366,8 +366,8 @@ describe('TicketsPage — REQ-245 botón Nuevo ticket', () => {
     expect(await screen.findByText('tickets.create.title')).toBeInTheDocument()
   })
 
-  it('vendedor_disenador (solo lectura general) también ve el botón — única excepción de REQ-245 RN4', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'vendedor_disenador' }) })
+  it('vendedor (solo lectura general) también ve el botón — única excepción de REQ-245 RN4', async () => {
+    useAuthStore.setState({ user: makeUser({ role: 'vendedor' }) })
     mockedApi.tickets.list.mockResolvedValue([])
     renderPage()
     await screen.findByText('tickets.table.empty')
@@ -376,7 +376,7 @@ describe('TicketsPage — REQ-245 botón Nuevo ticket', () => {
   })
 
   it('técnico interno no ve el botón — no tiene el botón de Nuevo ticket disponible', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tickets.list.mockResolvedValue([])
     renderPage()
     await screen.findByText('tickets.table.empty')

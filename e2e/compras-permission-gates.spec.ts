@@ -30,7 +30,7 @@ async function login(page: Page, email: string, password: string) {
   await page.waitForURL(/\/(dashboard|compras|ventas|seguridad)/, { timeout: 10000 })
 }
 
-test('un rol sin acceso a Compras (vendedor_disenador) no ve el módulo en el sidebar ni puede leer datos reales en /compras/proveedores', async ({ page }) => {
+test('un rol sin acceso a Compras (vendedor) no ve el módulo en el sidebar ni puede leer datos reales en /compras/proveedores', async ({ page }) => {
   await login(page, 'designer@atlantic.test', 'Password123!')
   await expect(page.getByRole('link', { name: /compras/i })).toHaveCount(0)
 

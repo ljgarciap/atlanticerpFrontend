@@ -6,7 +6,7 @@ test.describe.configure({ mode: 'serial' })
 
 // Re-check COMPLETO de Pre-QA sobre SCRUM-854 (filtro multi-selección Vendedor/Diseñador) tras el
 // rebote CRÍTICO: en Pedidos (Bodega), el selector usaba ventasDisenoApi.home.vendors() (gateado
-// por ventas_diseno.read) -> 403 para lider_bodega/asistente_bodega/ayudante_general_bodega/
+// por ventas_diseno.read) -> 403 para lider_bodega/asistente_bodega/auxiliar_bodega/
 // transporte. Fix: nuevo endpoint GET /api/bodega/orders/sellers gateado por bodega.read (backend
 // 262224e, frontend 28c7a59). Este spec corre las 6 ubicaciones completas, no solo Pedidos, para
 // agarrar cualquier regresión que el fix haya podido introducir en otro lado.

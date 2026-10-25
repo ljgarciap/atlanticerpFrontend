@@ -371,7 +371,7 @@ describe('VentasDisenoCatalogPage', () => {
   })
 
   it('SCRUM-785 — Vendedor/Diseñador no ve el atajo "Inventario de Bodega", pero sí "Inventario de Compras"', async () => {
-    useAuthStore.setState({ user: { id: 1, first_name: 'V', last_name: 'D', email: 'v@t.com', role: 'vendedor_disenador', permissions: [], modules: {} } })
+    useAuthStore.setState({ user: { id: 1, first_name: 'V', last_name: 'D', email: 'v@t.com', role: 'vendedor', permissions: [], modules: {} } })
     renderPage()
     await screen.findByText('IL-DEC-1410A · 770 Lights')
 

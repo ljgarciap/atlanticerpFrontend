@@ -45,6 +45,8 @@ export interface UserInfo {
   language?:     string
   security_level?: number | null
   role:          Role
+  // Fase 3: nombre visible del rol (`roles.name`, editable por CRUD sin deploy); `role` es solo la clave.
+  role_name?:    string | null
   role_id?:      number | null
   permissions:   string[]
   // ADR-006, Decisión 11 — contrato nuevo que consume Sidebar.tsx (modulesPayload() del backend,

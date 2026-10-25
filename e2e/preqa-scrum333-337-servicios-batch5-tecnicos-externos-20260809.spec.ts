@@ -18,7 +18,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com (lider_servicios) — alta completa.
- *  - tecnicoservicios@test.com   (tecnico_servicios) — solo consulta (RN5).
+ *  - tecnicoservicios@test.com   (tecnico) — solo consulta (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 

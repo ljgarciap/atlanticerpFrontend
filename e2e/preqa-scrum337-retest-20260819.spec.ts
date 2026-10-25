@@ -9,7 +9,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * el permiso intacto, y un smoke de edición.
  *
  * Cuentas reales (password = email): liderservicios@test.com (Lider Servicios, lider_servicios,
- * puede_ver_costos=true), tecnicoservicios@test.com (Tecnico Servicios Test, tecnico_servicios,
+ * puede_ver_costos=true), tecnicoservicios@test.com (Tecnico Servicios Test, tecnico,
  * puede_ver_costos=false). Técnico externo id 2 "QA Luis Vargas" tiene rate_history real (1 fila,
  * $25.00) y tarifa_visible=true — el mismo que crasheaba en el pase anterior.
  */
@@ -37,7 +37,7 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
 
 // ---------- 1 y 2: Tecnico Servicios (sin puede_ver_costos) — ficha no crashea, no hay leak en ficha ni listado ----------
 
-test('1. Tecnico Servicios (tecnico_servicios) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
+test('1. Tecnico Servicios (tecnico) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await login(page, 'tecnicoservicios@test.com')

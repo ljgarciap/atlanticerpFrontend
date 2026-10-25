@@ -10,7 +10,7 @@ async function login(page, email: string) {
   await page.waitForTimeout(1500)
 }
 
-// SCRUM-391 — actor SIN modules.bodega.view_team (Picker real: ayudante_general_bodega,
+// SCRUM-391 — actor SIN modules.bodega.view_team (Picker real: auxiliar_bodega,
 // ayudantegeneralbodega@test.com, confirmado por Pre-QA vía tinker que view_team=false,
 // a diferencia de asistentebodega@test.com/asistente_bodega que SÍ tiene view_team=true —
 // el brief original sugería logistica como el actor sin el permiso, dato desactualizado).

@@ -25,7 +25,7 @@ vi.mock('@/api/notificationRulesApi', () => ({
 vi.mock('@/api/rolesApi', () => ({
   rolesApi: { list: vi.fn().mockResolvedValue([
     { id: 1, key: 'management', name: 'Gerencia', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
-    { id: 2, key: 'vendedor_disenador', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
+    { id: 2, key: 'vendedor', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
   ]) },
 }))
 
@@ -115,7 +115,7 @@ describe('NotificationRulesPage', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
     // El valor guardado es la CLAVE del rol (lo que resuelve el backend con roles.key).
     await waitFor(() => expect(mockedRules.create).toHaveBeenCalled())
-    expect(mockedRules.create.mock.calls[0][0].recipient_value).toEqual(['vendedor_disenador'])
+    expect(mockedRules.create.mock.calls[0][0].recipient_value).toEqual(['vendedor'])
   })
 
   it('crea una regla al guardar el formulario', async () => {

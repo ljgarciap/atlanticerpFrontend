@@ -14,8 +14,8 @@ import { test, expect, Page, Locator } from '@playwright/test'
  */
 
 const LIDER_SERVICIOS  = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, tiene view_cost_breakdown
-const TECNICO_ASIGNADO = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico_servicios, asignado a RET-2026-0004
-const TECNICO_AJENO    = 'tecnicoservicios2@test.com'       // Tecnico Servicios Test 2 — tecnico_servicios, NO asignado a ningún ticket de este batch
+const TECNICO_ASIGNADO = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico, asignado a RET-2026-0004
+const TECNICO_AJENO    = 'tecnicoservicios2@test.com'       // Tecnico Servicios Test 2 — tecnico, NO asignado a ningún ticket de este batch
 const GERENCIA_SIN_PERM = 'gerencia@test.com'    // Management, NO tiene servicios.quotes.view_cost_breakdown
 
 async function login(page: Page, email: string) {

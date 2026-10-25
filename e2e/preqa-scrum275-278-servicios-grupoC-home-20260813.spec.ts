@@ -14,7 +14,7 @@ import { test, expect, Page } from '@playwright/test'
  */
 
 const LIDER_SERVICIOS = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, puede Agendar
-const TECNICO         = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico_servicios, NO puede Agendar
+const TECNICO         = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico, NO puede Agendar
 const GERENCIA         = 'gerencia@test.com'    // Management, ve la comisión de Tecnico Servicios
 
 async function login(page: Page, email: string) {

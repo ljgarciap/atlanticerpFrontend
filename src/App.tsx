@@ -552,7 +552,7 @@ export default function App() {
                 comentario en el historial de git). */}
             <Route path="/admin-contab"  element={<Navigate to="/admin-contab/inicio" replace />} />
             {/* SCRUM-882 — mismo hallazgo/fix ya aplicado a /admin-contab/reportes (SCRUM-643→647):
-                vendedor_disenador tiene `admin_contab.view=true` (lo necesita para Comisiones
+                vendedor tiene `admin_contab.view=true` (lo necesita para Comisiones
                 Internas) y llegaba acá por URL directa a un shell vacío. `RequirePermission` anidado
                 dentro de `RequirePermission`, mismo roster que routes/admin-contab.php. */}
             <Route path="/admin-contab/inicio" element={
@@ -585,7 +585,7 @@ export default function App() {
             {/* Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas
                 Bancarias. A diferencia de Fiscal/Empresa, NO es exclusiva de Gerencia — el backend
                 gatea cada acción por rol (Contabilidad/Yaneth/Gerencia), sin 403 en el GET general. */}
-            {/* SCRUM-882 — mismo fix que /admin-contab/inicio arriba: vendedor_disenador no debe
+            {/* SCRUM-882 — mismo fix que /admin-contab/inicio arriba: vendedor no debe
                 llegar acá por URL directa (Tesorería no forma parte de lo que ve este rol). */}
             <Route path="/admin-contab/cuentas-bancarias" element={
               <RequirePermission permission="admin_contab.view">
@@ -662,7 +662,7 @@ export default function App() {
                 Contabilidad/Yaneth/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
                 ADR-SCRUM585-590-batch16-comisiones-externas.md.
                 SCRUM-882 — RequirePermission agregado, mismo fix que /admin-contab/inicio (a diferencia
-                de Comisiones Internas, acá no hay versión acotada para vendedor_disenador). */}
+                de Comisiones Internas, acá no hay versión acotada para vendedor). */}
             <Route path="/admin-contab/comisiones/externas" element={
               <RequirePermission permission="admin_contab.view">
                 <RequirePermission permission={GUARD.ADMIN_CONTAB}>
@@ -695,7 +695,7 @@ export default function App() {
             } />
             {/* Batch 22 (SCRUM-643→647, REQ-566→570) — home de Reportes. CORREGIDO 2026-08-27
                 (hallazgo de Pre-QA/Visual Review fusionado): el comentario original asumía que
-                vendedor_disenador no tiene `admin_contab.view` y por eso quedaba afuera sin gate
+                vendedor no tiene `admin_contab.view` y por eso quedaba afuera sin gate
                 adicional — falso, ese rol SÍ tiene `admin_contab.view=true` (lo necesita para
                 Comisiones Internas, Batch 14/15) y llegaba a esta pantalla por URL directa viendo
                 el shell completo (títulos/selector) con las 4 queries siempre en 403 sin nunca

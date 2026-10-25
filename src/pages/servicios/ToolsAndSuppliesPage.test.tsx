@@ -158,7 +158,7 @@ describe('ToolsAndSuppliesPage — REQ-268 listado agrupado', () => {
   })
 
   it('RN2 — modo lectura muestra el texto de asignación ya resuelto por el backend', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([makeTool({ assigned_to: 'En bodega de herramientas' })])
     renderPage()
 
@@ -293,7 +293,7 @@ describe('ToolsAndSuppliesPage — REQ-269 cambio de estado', () => {
   })
 
   it('técnico interno ve el estado de solo lectura, sin select', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([makeTool()])
     renderPage()
     await screen.findByText('Casco de seguridad')
@@ -337,7 +337,7 @@ describe('ToolsAndSuppliesPage — REQ-270 reasignación', () => {
   })
 
   it('técnico interno no ve el select de reasignación', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([makeTool()])
     renderPage()
     await screen.findByText('Casco de seguridad')
@@ -355,7 +355,7 @@ describe('ToolsAndSuppliesPage — REQ-271 alta de herramienta nueva', () => {
   })
 
   it('técnico interno no ve el botón "+ Agregar herramienta"', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([])
     renderPage()
     await waitFor(() => expect(mockedApi.tools.list).toHaveBeenCalled())
@@ -450,7 +450,7 @@ describe('ToolsAndSuppliesPage — REQ-272 solicitar reposición', () => {
   })
 
   it('técnico interno no ve el botón "Solicitar"', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([makeTool()])
     renderPage()
     await screen.findByText('Casco de seguridad')
@@ -508,7 +508,7 @@ describe('ToolsAndSuppliesPage — REQ-273 listado de Insumos', () => {
   })
 
   it('técnico interno no ve "+ Agregar insumo" ni "Solicitar"', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([])
     mockedApi.insumos.list.mockResolvedValue([makeInsumo()])
     renderPage()
@@ -614,7 +614,7 @@ describe('ToolsAndSuppliesPage — REQ-276 botón "Movimiento de herramientas"',
   })
 
   it('un rol sin acceso (técnico interno) no ve el botón', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.tools.list.mockResolvedValue([])
     renderPage()
     await waitFor(() => expect(mockedApi.tools.list).toHaveBeenCalled())

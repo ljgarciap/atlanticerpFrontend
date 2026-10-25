@@ -60,7 +60,7 @@ test('SCRUM-362 — has_bonus_plan gate: botón Comisión solo visible en Tecnic
   expect(commissionButtons).toBe(1)
 })
 
-test('SCRUM-362 — tecnico_servicios no ve el botón de Comisión aunque exista plan activo', async ({ page }) => {
+test('SCRUM-362 — tecnico no ve el botón de Comisión aunque exista plan activo', async ({ page }) => {
   await login(page, TECNICO_SERVICIOS)
   await gotoTechnicians(page)
   await expect(page.getByText('Comisión del mes')).not.toBeVisible()

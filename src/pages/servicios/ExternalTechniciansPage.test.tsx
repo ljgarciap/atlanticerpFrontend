@@ -142,7 +142,7 @@ describe('ExternalTechniciansPage — REQ-263 listado', () => {
 
 describe('ExternalTechniciansPage — RN5 permisos de solo lectura', () => {
   it('técnico interno no ve el botón de agregar', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.externalTechnicians.list.mockResolvedValue(makeListResponse([]))
     renderPage()
 

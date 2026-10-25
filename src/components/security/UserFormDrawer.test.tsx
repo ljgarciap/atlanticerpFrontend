@@ -32,7 +32,7 @@ const mockedLevelsApi = vi.mocked(levelsApi, true)
 const mockedDepartmentsApi = vi.mocked(departmentsApi, true)
 
 const ROLES = [
-  { id: 1, key: 'vendedor_disenador', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: 3 },
+  { id: 1, key: 'vendedor', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: 3 },
   { id: 2, key: 'lider_servicios', name: 'Líder de Servicios', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: 4 },
   { id: 3, key: 'superadmin', name: 'Superadmin', is_superadmin: true, is_system: true, is_active: true, default_security_level_id: null },
 ]

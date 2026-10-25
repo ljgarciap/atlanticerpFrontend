@@ -228,7 +228,7 @@ describe('ServiciosHomePage', () => {
   // Senior Review 2026-08-11 (Batch 15) — el botón se renderizaba sin gate de rol, a diferencia
   // del mismo botón en TicketsPage.tsx (REQ-245 RN4: técnico interno/garantías no pueden crear).
   it('REQ-245 RN4 — un técnico interno NO ve el botón "+ Nuevo ticket"', async () => {
-    useAuthStore.setState({ user: makeUser({ role: 'tecnico_servicios' }) })
+    useAuthStore.setState({ user: makeUser({ role: 'tecnico' }) })
     mockedApi.home.summary.mockResolvedValue(makeSummary())
     renderPage()
 

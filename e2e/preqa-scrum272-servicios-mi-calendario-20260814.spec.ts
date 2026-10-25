@@ -10,7 +10,7 @@ async function login(page, email: string, password: string) {
   await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 15000 })
 }
 
-test('Tecnico Servicios Test (tecnico_servicios) — Mi calendario muestra solo lo propio, red sin scope/owner_id', async ({ page }) => {
+test('Tecnico Servicios Test (tecnico) — Mi calendario muestra solo lo propio, red sin scope/owner_id', async ({ page }) => {
   const calendarRequests: string[] = []
   page.on('request', req => {
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())

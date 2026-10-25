@@ -17,7 +17,7 @@ import { execSync } from 'node:child_process'
  * nunca IDs hardcodeados, capturados del stdout de tinker.
  */
 const LIDER_COMPRAS = 'lidercompras@test.com'
-const SIN_COMPRAS = 'vendedordisenador2@test.com' // vendedor_disenador — sin compras.view/edit
+const SIN_COMPRAS = 'vendedordisenador2@test.com' // vendedor — sin compras.view/edit
 const STAMP = Date.now()
 
 interface Fixture {
@@ -147,7 +147,7 @@ test('SCRUM-217 — timeline de 3 pasos para proveedor local, primer paso rotula
 
 test('SCRUM-217 RN7 — usuario sin compras.edit ve el timeline pero nunca el botón de avance (gate de DOM)', async ({ page }) => {
   await login(page, SIN_COMPRAS)
-  // neil.quiel (vendedor_disenador) no tiene role_module_visibility para compras -- confirmar
+  // neil.quiel (vendedor) no tiene role_module_visibility para compras -- confirmar
   // primero que efectivamente no puede navegar al módulo por su cuenta (bandera ya conocida de la
   // auditoría anterior), y forzar la navegación directa a la URL de todas formas para ejercitar el
   // gate del botón específicamente, no la visibilidad del menú.

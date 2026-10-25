@@ -14,7 +14,7 @@ import { test, expect, type Page, request as playwrightRequest } from '@playwrig
  * designer@atlantic.test — nunca depende de un ID hardcodeado.
  *
  * Cuentas:
- *  - designer@atlantic.test / Password123! (vendedor_disenador, demo .test)
+ *  - designer@atlantic.test / Password123! (vendedor, demo .test)
  *  - management@atlantic.test / Password123! (Gerencia, demo .test)
  *  - liderbodega@test.com / liderbodega@test.com (Líder de Bodega, roster real)
  */
@@ -201,7 +201,7 @@ test('SCRUM-854.a — management ve el filtro Vendedor/Diseñador en Pedidos de 
   await expect(page.getByRole('button', { name: /vendedor|todos los vendedores/i })).toBeVisible({ timeout: 8000 })
 })
 
-test('SCRUM-854.b — designer (vendedor_disenador) NO ve el filtro, sigue viendo solo lo suyo', async ({ page }) => {
+test('SCRUM-854.b — designer (vendedor) NO ve el filtro, sigue viendo solo lo suyo', async ({ page }) => {
   await loginDemo(page, 'designer@atlantic.test')
   await page.goto('/ventas-diseno/pedidos')
   await page.waitForTimeout(1500)
