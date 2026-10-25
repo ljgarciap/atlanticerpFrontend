@@ -10,10 +10,10 @@ import {
   type Channel,
 } from '@/api/notificationRulesApi'
 import { usersApi } from '@/api/usersApi'
+import { rolesApi } from '@/api/rolesApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 
-const ROLES = ['superadmin', 'management', 'designer', 'supervisor', 'electrician']
 const OPERATORS_NEEDING_VALUE: Operator[] = ['changed_to', 'equals', 'gt', 'lt', 'gte', 'lte']
 
 const EMPTY_FORM: NotificationRulePayload = {
@@ -57,6 +57,7 @@ function RuleForm({ rule, models, onClose }: FormProps) {
     } : EMPTY_FORM,
   )
 
+  const { data: roles = [] } = useQuery({ queryKey: ['roles'], queryFn: rolesApi.list, enabled: form.recipient_type === 'role' })
   const { data: usersResp } = useQuery({
     queryKey: ['users', 'for-rule-picker'],
     queryFn:  () => usersApi.list({ per_page: 100, is_active: true }),
@@ -194,14 +195,14 @@ function RuleForm({ rule, models, onClose }: FormProps) {
               {t('security:notificationRules.form.recipientValue')}
             </label>
             <div className="flex flex-wrap gap-2">
-              {ROLES.map(r => (
+              {roles.filter(r => r.is_active).map(role => role.key).map(r => (
                 <button type="button" key={r} onClick={() => toggleRecipientValue(r)}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
                     Array.isArray(form.recipient_value) && (form.recipient_value as string[]).includes(r)
                       ? 'bg-teal-600 text-white border-teal-600'
                       : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300'
                   }`}>
-                  {t(`common:roles.${r}`, { defaultValue: r })}
+                  {roles.find(x => x.key === r)?.name ?? r}
                 </button>
               ))}
             </div>
