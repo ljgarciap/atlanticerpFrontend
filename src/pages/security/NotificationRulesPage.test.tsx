@@ -26,7 +26,6 @@ vi.mock('@/api/rolesApi', () => ({
   rolesApi: { list: vi.fn().mockResolvedValue([
     { id: 1, key: 'management', name: 'Gerencia', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
     { id: 2, key: 'vendedor_disenador', name: 'Vendedor/Diseñador', is_superadmin: false, is_system: true, is_active: true, default_security_level_id: null },
-    { id: 99, key: 'guest', name: 'Invitado', is_superadmin: false, is_system: true, is_active: false, default_security_level_id: null },
   ]) },
 }))
 
@@ -99,7 +98,7 @@ describe('NotificationRulesPage', () => {
     })
   })
 
-  it('Fase 2 — con destinatario «rol» ofrece los roles reales de la tabla (sin el enum legado ni guest)', async () => {
+  it('Fase 2 — con destinatario «rol» ofrece los roles reales de la tabla (sin el enum legado)', async () => {
     renderPage()
     fireEvent.click(await screen.findByText('security:notificationRules.actions.create'))
 
@@ -108,7 +107,6 @@ describe('NotificationRulesPage', () => {
 
     expect(await screen.findByRole('button', { name: 'Vendedor/Diseñador' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Gerencia' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Invitado' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /designer|supervisor|electrician/i })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Vendedor/Diseñador' }))

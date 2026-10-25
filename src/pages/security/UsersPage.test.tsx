@@ -23,13 +23,10 @@ const hoisted = vi.hoisted(() => ({
 vi.mock('@/hooks/useUsers', () => ({
   useUsers:            () => ({ data: { data: hoisted.users, meta: { total: hoisted.users.length, per_page: 20, current_page: 1, last_page: 1 } }, isFetching: false }),
   useToggleUserStatus: () => ({ mutate: vi.fn() }),
-  usePendingUsers:     () => ({ data: { data: [] } }),
-  useRejectUser:       () => ({ mutate: vi.fn(), isPending: false }),
   useResetUserMfa:     () => ({ mutate: vi.fn() }),
 }))
 vi.mock('@/api/rolesApi', () => ({ rolesApi: { list: vi.fn().mockResolvedValue([]) } }))
 vi.mock('@/components/security/UserFormDrawer', () => ({ default: () => null }))
-vi.mock('@/components/security/ApproveUserModal', () => ({ default: () => null }))
 vi.mock('@/components/security/UserVisibilityModal', () => ({ default: () => null }))
 vi.mock('@/components/security/BulkModuleVisibilityModal', () => ({ default: () => null }))
 vi.mock('@/components/security/ResetPasswordModal', () => ({

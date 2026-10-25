@@ -266,33 +266,6 @@
       "activateSuccess": "Usuario activado",
       "deactivateConfirm": "¿Desactivar este usuario? No podrá iniciar sesión hasta ser reactivado.",
       "resetMfaConfirm": "¿Resetear la verificación en dos pasos de {{name}}? Quedará sin MFA hasta que vuelva a activarlo desde su perfil."
-    },
-    "pending": {
-      "tabLabel": "Pendientes",
-      "title": "Solicitudes de acceso pendientes",
-      "empty": "No hay solicitudes pendientes",
-      "columns": {
-        "name": "Nombre",
-        "email": "Email",
-        "department": "Área",
-        "requested": "Solicitud",
-        "actions": "Acciones"
-      },
-      "approve": "Aprobar",
-      "reject": "Rechazar",
-      "rejectConfirm": "¿Rechazar esta solicitud? El usuario será eliminado permanentemente.",
-      "approveTitle": "Aprobar solicitud",
-      "approveSubtitle": "Asigna un rol y nivel de seguridad para activar la cuenta.",
-      "role": "Rol",
-      "selectRole": "Selecciona un rol...",
-      "securityLevel": "Nivel de seguridad",
-      "selectLevel": "Selecciona un nivel...",
-      "confirmApprove": "Aprobar y activar",
-      "approving": "Aprobando...",
-      "messages": {
-        "approved": "Cuenta aprobada correctamente",
-        "rejected": "Solicitud rechazada"
-      }
     }
   },
   "roles": {
@@ -410,8 +383,7 @@
     "tooltips": {
       "inactive": "No se puede ver como una persona inactiva",
       "self": "No puedes ver como tú mismo",
-      "superadmin": "No se puede ver como otro superadmin",
-      "guest": "No se puede ver como un invitado"
+      "superadmin": "No se puede ver como otro superadmin"
     },
     "errors": {
       "reasonRequired": "Escribe el motivo.",

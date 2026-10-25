@@ -53,30 +53,3 @@ export function useResetUserPassword() {
   })
 }
 
-export function usePendingUsers() {
-  return useQuery({
-    queryKey: ['users/pending'],
-    queryFn:  usersApi.listPending,
-    staleTime: 10_000,
-  })
-}
-
-export function useApproveUser() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, roleId, securityLevelId }: { id: number; roleId: number; securityLevelId: number }) =>
-      usersApi.approve(id, roleId, securityLevelId),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['users/pending'] })
-      void qc.invalidateQueries({ queryKey: ['users'] })
-    },
-  })
-}
-
-export function useRejectUser() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => usersApi.reject(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['users/pending'] }),
-  })
-}
