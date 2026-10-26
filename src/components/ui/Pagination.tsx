@@ -16,7 +16,7 @@ interface Props {
   onPerPageChange: (perPage: number | 'all') => void
   /** SCRUM-990 — opciones de tamaño de página propias (por defecto 10/20/50/100). */
   perPageOptions?: readonly number[]
-  /** SCRUM-990 — `false` oculta la opción "Todos": un listado de ~25.800 filas (catálogo de Lafayette) nunca se carga entero. */
+  /** SCRUM-990 — `false` oculta la opción "Todos": un listado muy grande nunca se carga entero. */
   allowAll?:       boolean
 }
 

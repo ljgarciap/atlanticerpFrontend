@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import es from './locales/es/compras.json'
 import en from './locales/en/compras.json'
 
-// SCRUM-992 (Pre-QA H12) — el catálogo de Lafayette (~26K productos) usa la categoría `LAMPARAS`, que no
+// SCRUM-992 (Pre-QA H12) — el catálogo importado usa la categoría `LAMPARAS`, que no
 // tenía traducción: la UI mostraba la clave cruda `newOrder.newProduct.categories.LAMPARAS`.
 describe('traducciones de categorías de producto', () => {
   const esCats = es.newOrder.newProduct.categories as Record<string, string>
   const enCats = en.newOrder.newProduct.categories as Record<string, string>
 
-  it('LAMPARAS (categoría de Lafayette) tiene etiqueta legible en es y en', () => {
+  it('LAMPARAS (categoría importada) tiene etiqueta legible en es y en', () => {
     expect(esCats.LAMPARAS).toBe('Lámparas')
     expect(enCats.LAMPARAS).toBe('Lamps')
   })

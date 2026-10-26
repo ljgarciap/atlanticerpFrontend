@@ -20,10 +20,6 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/hooks/usePermission', () => ({ usePermission: () => false }))
 
-// Fase 5a — el historial de ICG solo existe con el módulo `legacy_icg` encendido (bandera del backend).
-const moduleFlags = vi.hoisted(() => ({ legacyIcg: true }))
-vi.mock('@/lib/modules', () => ({ useModuleEnabled: () => moduleFlags.legacyIcg }))
-
 vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
     clients: {
@@ -32,7 +28,6 @@ vi.mock('@/api/ventasDisenoApi', () => ({
     },
     subClients: {
       contacts: { create: vi.fn(), update: vi.fn(), remove: vi.fn() },
-      history: vi.fn(),
     },
   },
 }))
@@ -69,7 +64,6 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.clients.get.mockResolvedValue(makeDetail())
   mockedApi.clients.projects.mockResolvedValue([])
-  mockedApi.subClients.history.mockResolvedValue({ data: [], total: 0, per_page: 20, current_page: 1, last_page: 1 })
 })
 
 describe('ClientDetailModal', () => {
@@ -151,27 +145,5 @@ describe('ClientDetailModal', () => {
     fireEvent.click(screen.getByText('common:actions.add'))
 
     expect(await screen.findByText('El correo electrónico debe ser una dirección de correo válida.')).toBeInTheDocument()
-  })
-
-  it('Fase 5a: sin el módulo legacy_icg no hay botón de Historial ICG', async () => {
-    moduleFlags.legacyIcg = false
-    try {
-      renderModal()
-      await screen.findByText('Delta Residencial')
-
-      expect(screen.queryByText('ventasDiseno:clients.detail.icgHistory')).not.toBeInTheDocument()
-    } finally {
-      moduleFlags.legacyIcg = true
-    }
-  })
-
-  it('SCRUM-762: abre el modal de Historial ICG del subcliente correcto', async () => {
-    renderModal()
-    await screen.findByText('Delta Residencial')
-
-    fireEvent.click(screen.getByText('ventasDiseno:clients.detail.icgHistory'))
-
-    expect(await screen.findByText('ventasDiseno:clients.icgHistoryModal.title:Delta Residencial')).toBeInTheDocument()
-    await waitFor(() => expect(mockedApi.subClients.history).toHaveBeenCalledWith(10, 'cotizaciones', 1, 20))
   })
 })

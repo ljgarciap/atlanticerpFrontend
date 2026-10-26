@@ -119,7 +119,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     expect(screen.getByText('bodega:inventory.kpis.total').parentElement).toHaveTextContent('40')
   })
 
-  // SCRUM-990 — "Ver Inventario" es solo inventario de Atlantic: Zona Libre / Lafayette no aparece ni como filtro.
+  // SCRUM-990 — "Ver Inventario" es solo inventario de Atlantic: Zona Libre no aparece ni como filtro.
   it('el filtro por bodega no ofrece una bodega de solo consulta', async () => {
     const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
     mockedApi.warehouses.list.mockResolvedValue({ data: [...WAREHOUSES, externa] })

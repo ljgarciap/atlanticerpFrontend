@@ -1,5 +1,5 @@
 /** Piezas de presentación compartidas por las pantallas de Bodega (extraídas de `BodegasPage.tsx` en SCRUM-990 para que
- * `ZonaLibreCatalogoTable` las reuse sin duplicarlas). Mismo markup y comportamiento que tenían inline. */
+ * otra tabla las reuse sin duplicarlas). Mismo markup y comportamiento que tenían inline. */
 
 export function Th({ children }: { children: React.ReactNode }) {
   return (

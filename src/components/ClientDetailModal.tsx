@@ -10,8 +10,6 @@ import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import CreateClientModal from '@/components/CreateClientModal'
 import ClientProjectsModal from '@/components/ClientProjectsModal'
-import SubClientIcgHistoryModal from '@/components/SubClientIcgHistoryModal'
-import { useModuleEnabled } from '@/lib/modules'
 import EditSubClientTaxDataModal from '@/components/EditSubClientTaxDataModal'
 import { usePermission } from '@/hooks/usePermission'
 
@@ -31,8 +29,6 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const [editingContactId, setEditingContactId] = useState<number | null>(null)
   const [draft, setDraft] = useState({ name: '', role: 'client' as ContactRole, phone: '', email: '' })
   const [contactError, setContactError] = useState<string | null>(null)
-  const [showIcgHistory, setShowIcgHistory] = useState(false)
-  const legacyIcgEnabled = useModuleEnabled('legacy_icg') // Fase 5a
   const [showEditTaxData, setShowEditTaxData] = useState(false)
   // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Gerencia/Felix).
   // SCRUM-1182 — los hooks se llaman SIEMPRE, todos, y se combinan después (`a || b` no ejecuta el segundo hook y cambia el número de hooks entre renders).
@@ -130,11 +126,6 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
           >
             {t('ventasDiseno:clients.detail.newQuote')}
           </Button>
-          {legacyIcgEnabled && (
-            <Button variant="secondary" onClick={() => setShowIcgHistory(true)}>
-              {t('ventasDiseno:clients.detail.icgHistory')}
-            </Button>
-          )}
           {canEditTaxData && (
             <Button variant="secondary" onClick={() => setShowEditTaxData(true)}>
               {t('ventasDiseno:clients.editTaxData.editar')}
@@ -144,14 +135,6 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
       </div>
 
       {showEditTaxData && <EditSubClientTaxDataModal subClient={subClient} onClose={() => setShowEditTaxData(false)} />}
-
-      {showIcgHistory && (
-        <SubClientIcgHistoryModal
-          subClientId={subClient.id}
-          subClientName={subClient.business_name}
-          onClose={() => setShowIcgHistory(false)}
-        />
-      )}
 
       <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">
         {t('ventasDiseno:clients.detail.contacts')}

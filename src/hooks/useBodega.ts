@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { bodegaApi, type BodegaInventoryListParams } from '@/api/bodegaApi'
 import type {
   AdjustmentRequestLineDraft, BodegaConfirmArrivalPayload, BodegaSettings, OrderBoardFilters,
@@ -8,7 +8,7 @@ import type {
   PickingSheetItemPayload, InventoryReviewDecisionPayload,
   BodegaReportPeriodKey,
   RegisterDeliveryPayload, RegisterSignedGuidePayload,
-  BodegaTeamMemberRole, ZonaLibreCatalogoParams,
+  BodegaTeamMemberRole,
 } from '@/types/bodega'
 
 // SCRUM-451→456 (REQ-381→386) — pantalla "Bodegas".
@@ -17,17 +17,6 @@ export function useWarehousesList() {
     queryKey:  ['bodega/warehouses'],
     queryFn:   () => bodegaApi.warehouses.list(),
     staleTime: 60_000,
-  })
-}
-
-/** SCRUM-990 — catálogo de Lafayette de solo consulta (Bodega > Zona Libre). `keepPreviousData`: al cambiar de página, filtro u
- * orden se mantiene la tabla anterior (con opacidad) en vez de saltar a un esqueleto. Paginado del lado del servidor. */
-export function useZonaLibreCatalogo(params: ZonaLibreCatalogoParams, enabled = true) {
-  return useQuery({
-    queryKey:        ['bodega/zona-libre/productos', params],
-    queryFn:         () => bodegaApi.zonaLibre.productos(params),
-    placeholderData: keepPreviousData,
-    enabled,
   })
 }
 

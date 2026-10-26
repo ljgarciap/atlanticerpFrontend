@@ -27,13 +27,6 @@
     "sessionInactivityHoursSuffix": "horas",
     "sessionInactivityHoursSave": "Guardar",
     "sessionInactivityHoursError": "Ingresa un valor entre 1 y 720 horas.",
-    "lafayetteGuarda": "Umbral de la guarda de sincronización de Lafayette",
-    "lafayetteGuardaHelp": "Fracción mínima del catálogo ya conocido (la última sincronización exitosa) que debe traer una sincronización de Lafayette para aceptarla y ocultar los productos que ya no vienen: 0,9 equivale al 90 %. Si trae menos, la sincronización queda como parcial y no oculta ningún producto. Valor entre 0,5 y 1,0.",
-    "lafayetteGuardaPercent": "= {{percent}} %",
-    "lafayetteGuardaSave": "Guardar",
-    "lafayetteGuardaError": "Ingresa un valor entre 0,5 y 1,0.",
-    "lafayetteGuardaForbidden": "Solo un superadmin puede cambiar este umbral.",
-    "lafayetteGuardaGeneric": "No se pudo guardar el umbral. Intenta de nuevo.",
     "demoModeEnabled": "Habilitar Modo Demo",
     "demoModeSubtitle": "Permite que cualquier usuario active su propio Modo Demo (filtra Catálogo, Inventario y el selector de producto a solo artículos con foto, nombre y precio)."
   },
@@ -61,11 +54,11 @@
     }
   },
   "documents": {
-    "title":    "Límite de documentos",
+    "title": "Límite de documentos",
     "subtitle": "Tamaño máximo por archivo para la carga de documentos — solo superadmin",
-    "label":    "Máximo por archivo (MB)",
-    "save":     "Guardar",
-    "saved":    "Límite actualizado correctamente.",
-    "error":    "Ingresa un valor entre 1 y 500 MB."
+    "label": "Máximo por archivo (MB)",
+    "save": "Guardar",
+    "saved": "Límite actualizado correctamente.",
+    "error": "Ingresa un valor entre 1 y 500 MB."
   }
 }

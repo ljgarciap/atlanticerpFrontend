@@ -16,8 +16,7 @@ export interface PhysicalWarehouse {
   responsable:    string | null
   capacidad_pct:  number | null
   modo_detalle:   WarehouseModo
-  /** SCRUM-990 — bodega de SOLO CONSULTA (Zona Libre / Lafayette): catálogo de una empresa externa, no es inventario de
-   * Atlantic. El backend lo manda siempre (`WarehouseController::index()` y `formatWarehouse()`); reemplaza la
+  /** SCRUM-990 — bodega de SOLO CONSULTA (Zona Libre): no es inventario de Atlantic (el concepto se retira en la 5b-2). El backend lo manda siempre (`WarehouseController::index()` y `formatWarehouse()`); reemplaza la
    * inferencia frágil por `modo_detalle === 'pendiente'`. */
   solo_consulta:  boolean
 }
@@ -27,70 +26,6 @@ export interface WarehouseKpis {
   total_products:  number
   total_units:     number
   capacidad_pct:   number | null
-  /** SCRUM-990 — solo en la respuesta de una bodega de solo consulta (`buildSoloConsultaResponse`): `finished_at` ISO 8601 de
-   * la última corrida exitosa del sincronizador, o null si nunca corrió. Con `total_products`/`total_units` describe el
-   * catálogo EXTERNO de Lafayette (no es inventario de Atlantic). */
-  last_synced_at?: string | null
-}
-
-/** SCRUM-990 — UNA fila de `GET /bodega/zona-libre/productos` (`ZonaLibreCatalogoService::formatRow`, fijado por
- * `ZonaLibreCatalogoContractTest` en el backend). `id` y `referencia_lafayette` son ambos el `lafayette_id` (string);
- * `precio` es `precio_5` de Lafayette (sin etiqueta de tipo de precio en el payload). */
-export interface ZonaLibreCatalogoRow {
-  id:                   string
-  referencia_lafayette: string
-  referencia:           string | null
-  descripcion:          string | null
-  marca:                string | null
-  categoria:            string | null
-  url_imagen:           string | null
-  disponible:           number
-  precio:               number | null
-  synced_at:            string | null
-}
-
-/** `Pagination::meta()` + el resumen del catálogo vigente y el permiso de precio (`ZonaLibreCatalogoController::productos`). */
-export interface ZonaLibreCatalogoMeta {
-  total:                 number
-  per_page:              number
-  current_page:          number
-  last_page:             number
-  /** Categorías distintas (no vacías, ordenadas) del catálogo vigente, para el filtro. */
-  categorias:            string[]
-  /** Productos vigentes del catálogo completo, sin filtros. */
-  total_catalogo:        number
-  /** `finished_at` ISO 8601 de la última corrida exitosa/parcial del sincronizador, o null. */
-  ultima_sincronizacion: string | null
-  /** SCRUM-990 (ronda 2) — el precio de Lafayette (`precio_5`) solo lo ven Compras (`compras.read`) y superadmin. Si es false, el
-   * backend manda `precio: null` en TODAS las filas y responde 422 a `sort=precio`: la UI no muestra la columna ni el orden por precio.
-   * Va AL FINAL de `meta` (después de `ultima_sincronizacion`). */
-  puede_ver_precio:      boolean
-}
-
-export interface ZonaLibreCatalogoResponse {
-  data: ZonaLibreCatalogoRow[]
-  meta: ZonaLibreCatalogoMeta
-}
-
-/** Columnas ordenables = lista blanca del backend (`ZonaLibreCatalogoService::SORTS`); cualquier otra responde 422. */
-export type ZonaLibreCatalogoSort =
-  | 'referencia_lafayette' | 'referencia' | 'descripcion' | 'marca' | 'categoria' | 'disponible' | 'precio'
-
-/** Valores válidos de `per_page` del backend (`PER_PAGE_OPTIONS`); no existe "todas". */
-export const ZONA_LIBRE_PER_PAGE_OPTIONS = [25, 50, 100] as const
-export type ZonaLibreCatalogoPerPage = (typeof ZONA_LIBRE_PER_PAGE_OPTIONS)[number]
-
-/** Parámetros de `GET /bodega/zona-libre/productos`; todos opcionales (un valor fuera de contrato responde 422). */
-export interface ZonaLibreCatalogoParams {
-  /** Mínimo 2 caracteres: el llamador no lo manda si es más corto. */
-  search?:           string
-  categoria?:        string
-  /** Apagado por defecto: los productos con stock 0 SE VEN (decisión de Luis, 2026-09-26). Solo se manda si es true. */
-  solo_disponibles?: boolean
-  sort?:             ZonaLibreCatalogoSort
-  dir?:              'asc' | 'desc'
-  page?:             number
-  per_page?:         ZonaLibreCatalogoPerPage
 }
 
 export interface WarehouseProductRow {

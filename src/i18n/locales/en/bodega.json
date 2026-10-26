@@ -143,37 +143,6 @@
     },
     "zonaLibre": {
       "badge": "View only",
-      "noticeTitle": "View only",
-      "noticeBody": "Lafayette Lighting data; not part of Atlantic inventory.",
-      "kpis": {
-        "products": "Lafayette products",
-        "available": "Available (Lafayette)",
-        "lastSync": "Last sync"
-      },
-      "filters": {
-        "search": "Search by reference, description or brand...",
-        "searchLabel": "Search the Lafayette catalog",
-        "withStock": "Only with availability"
-      },
-      "table": {
-        "image": "Image",
-        "lafayetteId": "Lafayette ref.",
-        "reference": "Reference",
-        "description": "Description",
-        "brand": "Brand",
-        "category": "Category",
-        "available": "Available (Lafayette)",
-        "price": "Lafayette price",
-        "caption": "Lafayette product catalog (view only)"
-      },
-      "resultsCount_one": "{{count}} product",
-      "resultsCount_other": "{{count}} products",
-      "empty": "No Lafayette products match your search.",
-      "notSynced": "The Lafayette catalog has not been synced yet.",
-      "notSyncedHint": "Products will appear after the first automatic sync.",
-      "error": "Could not load the Lafayette catalog.",
-      "retry": "Retry",
-      "help": "Need a product in AtlanticERP? Create it manually as a AtlanticERP product from Purchasing; it is not copied from this list.",
       "sinCatalogo": "This warehouse is read-only and has no external catalog connected."
     }
   },
