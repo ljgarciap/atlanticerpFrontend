@@ -15,7 +15,6 @@ import type {
   ProjectListResult, CatalogListResult, CatalogItem, CatalogTechnicalSheetUploadResult,
   CatalogPdfExportStatus, CatalogSendPdfResult,
   OrderListResult, OrderDetail, OrderStatus, OrdersSettingsValue, QuoteVersionsResult, QuoteItemPricePreview,
-  LegacyHistoryEntidad, LegacyHistoryResult, LegacyDocumentResult,
   PipelineCardProductDeliveryRow, PipelineCardProductDeliveryAssignmentPayload,
   Associate, AssociateInput, AssociateType,
 } from '@/types/ventasDiseno'
@@ -262,17 +261,6 @@ export const ventasDisenoApi = {
         api.delete(`/ventas-diseno/sub-clients/${subClientId}/contacts/${contactId}`).then(() => undefined),
     },
 
-    // SCRUM-762 — pestaña "Historial ICG", solo lectura. Nunca incluye 'pagos' — ver
-    // App\Modules\Legacy\Http\Controllers\SubClientHistoryController en atlanticerp-backend.
-    history: (subClientId: number, entidad: LegacyHistoryEntidad, page = 1, perPage: number | 'all' = 20): Promise<LegacyHistoryResult> =>
-      api.get<LegacyHistoryResult>(`/ventas-diseno/sub-clients/${subClientId}/legacy-history`, {
-        params: { entidad, page, per_page: perPage },
-      }).then(r => r.data),
-
-    // Vista "gemela" tipo documento (cabecera + líneas) de un registro puntual del Historial ICG —
-    // a pedido de Luis 2026-09-02. Ver App\Modules\Legacy\Http\Controllers\SubClientHistoryController::show().
-    historyShow: (subClientId: number, entidad: LegacyHistoryEntidad, id: number): Promise<LegacyDocumentResult> =>
-      api.get<LegacyDocumentResult>(`/ventas-diseno/sub-clients/${subClientId}/legacy-history/${entidad}/${id}`).then(r => r.data),
   },
 
   // Grupo 2 — pantalla Clientes (REQ-063 a REQ-070). Distinto de masterClients/

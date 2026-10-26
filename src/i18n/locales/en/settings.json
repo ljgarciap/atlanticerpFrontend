@@ -27,13 +27,6 @@
     "sessionInactivityHoursSuffix": "hours",
     "sessionInactivityHoursSave": "Save",
     "sessionInactivityHoursError": "Enter a value between 1 and 720 hours.",
-    "lafayetteGuarda": "Lafayette sync guard threshold",
-    "lafayetteGuardaHelp": "Minimum fraction of the already known catalog (the last successful sync) that a Lafayette sync must bring to be accepted and to hide the products that no longer come: 0.9 means 90%. If it brings less, the sync is left as partial and no product is hidden. Value between 0.5 and 1.0.",
-    "lafayetteGuardaPercent": "= {{percent}}%",
-    "lafayetteGuardaSave": "Save",
-    "lafayetteGuardaError": "Enter a value between 0.5 and 1.0.",
-    "lafayetteGuardaForbidden": "Only a superadmin can change this threshold.",
-    "lafayetteGuardaGeneric": "Could not save the threshold. Try again.",
     "demoModeEnabled": "Enable Demo Mode",
     "demoModeSubtitle": "Lets any user turn on their own Demo Mode (filters Catalog, Inventory and the product picker to only items with a photo, name and price)."
   },
@@ -61,11 +54,11 @@
     }
   },
   "documents": {
-    "title":    "Document upload limit",
+    "title": "Document upload limit",
     "subtitle": "Maximum file size for document uploads — superadmin only",
-    "label":    "Maximum per file (MB)",
-    "save":     "Save",
-    "saved":    "Limit updated successfully.",
-    "error":    "Please enter a value between 1 and 500 MB."
+    "label": "Maximum per file (MB)",
+    "save": "Save",
+    "saved": "Limit updated successfully.",
+    "error": "Please enter a value between 1 and 500 MB."
   }
 }

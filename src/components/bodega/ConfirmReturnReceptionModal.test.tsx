@@ -53,7 +53,7 @@ beforeEach(() => {
 })
 
 describe('ConfirmReturnReceptionModal', () => {
-  // SCRUM-990 — la bodega destino de una devolución es donde se ESCRIBE stock: Zona Libre / Lafayette (solo consulta) no se ofrece
+  // SCRUM-990 — la bodega destino de una devolución es donde se ESCRIBE stock: Zona Libre (solo consulta) no se ofrece
   // ni deshabilitada, y la precarga elige la primera OPERATIVA.
   it('el selector de bodega destino no ofrece una bodega de solo consulta', async () => {
     const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }

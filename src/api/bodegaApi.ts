@@ -16,7 +16,6 @@ import type {
   InventoryReviewDecisionPayload, ResolveInventoryReviewResponse,
   ZonaLibreProvider, ZonaLibreRequestListResponse, ZonaLibreRequestDetail, ZonaLibreRequestPayload,
   ZonaLibreStatusFilter, ZonaLibreProductWarehouseBreakdownResponse,
-  ZonaLibreCatalogoParams, ZonaLibreCatalogoResponse,
   GeneralCountChip, GeneralCountCreatePayload, GeneralCountCreateResponse, GeneralCountDetail,
   GeneralCountEvaluatePayload, GeneralCountListResponse, GeneralCountRow,
   CustomerReturnStatusFilter, CustomerReturnListResponse, CustomerReturnDetail,
@@ -395,11 +394,6 @@ export const bodegaApi = {
     provider: (): Promise<ZonaLibreProvider> =>
       api.get<ZonaLibreProvider>('/bodega/zona-libre/provider').then(r => r.data),
 
-    // SCRUM-990 — catálogo de Lafayette de SOLO CONSULTA (tabla propia `lafayette_productos`). Un único GET: no existe
-    // ninguna ruta de escritura sobre esto en el backend (lo afirma un test de rutas). El contrato exacto lo fija
-    // `ZonaLibreCatalogoContractTest` (atlanticerp-backend) y los tipos de `ZonaLibreCatalogo*` en `types/bodega.ts`.
-    productos: (params?: ZonaLibreCatalogoParams): Promise<ZonaLibreCatalogoResponse> =>
-      api.get<ZonaLibreCatalogoResponse>('/bodega/zona-libre/productos', { params }).then(r => r.data),
 
     requests: {
       list: (params?: { status?: ZonaLibreStatusFilter; page?: number; per_page?: number | 'all' }): Promise<ZonaLibreRequestListResponse> =>

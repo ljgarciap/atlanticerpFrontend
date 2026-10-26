@@ -7,7 +7,6 @@ import { bodegaApi } from '@/api/bodegaApi'
 import { comprasApi } from '@/api/comprasApi'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
-import { makeZonaLibreResponse, zonaLibreContractViolations } from '@/test/zonaLibreContract'
 import type { PhysicalWarehouse, RelocationRequestListResponse, WarehouseDetailResponse } from '@/types/bodega'
 
 vi.mock('react-i18next', () => ({
@@ -22,8 +21,6 @@ vi.mock('@/api/bodegaApi', () => ({
       locations: { list: vi.fn(), create: vi.fn(), update: vi.fn() },
     },
     relocations: { list: vi.fn(), create: vi.fn(), approve: vi.fn(), reject: vi.fn() },
-    // SCRUM-990 — catálogo de Lafayette de solo consulta (Zona Libre).
-    zonaLibre: { productos: vi.fn() },
   },
 }))
 
@@ -71,9 +68,9 @@ function renderPage(initialUrl = '/bodega/bodegas') {
 
 // SCRUM-1021 — BodegasPage lee `useAuthStore(s => s.user?.id)` y `usePermission(...)`: el mock evalúa el
 // selector contra un usuario real (id 1) en vez de devolver siempre un valor fijo.
-function mockUser(permissions: string[] = ['bodega.read', 'bodega.write'], flags: { lafayette?: boolean } = { lafayette: true }) {
+function mockUser(permissions: string[] = ['bodega.read', 'bodega.write']) {
   mockedUseAuthStore.mockImplementation(((selector?: (s: { user: unknown }) => unknown) => {
-    const state = { user: { id: 1, permissions, flags } }
+    const state = { user: { id: 1, permissions } }
     return selector ? selector(state) : state
   }) as never)
 }
@@ -611,11 +608,11 @@ describe('BodegasPage', () => {
 })
 
 
-// SCRUM-990 — Zona Libre / Lafayette: bodega de SOLO CONSULTA. Spec visual: atlanticerp-backend/docs/specs/scrum990-zona-libre-ux.md.
+// SCRUM-990 — bodega de SOLO CONSULTA (Fase 5b: sin catálogo externo; el concepto se retira en la 5b-2). Spec visual: atlanticerp-backend/docs/specs/scrum990-zona-libre-ux.md.
 describe('BodegasPage — Zona Libre de solo consulta (SCRUM-990)', () => {
   const SOLO_CONSULTA_DETAIL: WarehouseDetailResponse = {
     warehouse: WAREHOUSES[1],
-    kpis: { responsable: null, total_products: 25816, total_units: 1767865, capacidad_pct: null, last_synced_at: '2026-09-30T17:05:00Z' },
+    kpis: { responsable: null, total_products: 0, total_units: 0, capacidad_pct: null },
     ubicaciones: [],
     data: [],
     meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
@@ -626,12 +623,6 @@ describe('BodegasPage — Zona Libre de solo consulta (SCRUM-990)', () => {
     mockedBodegaApi.warehouses.show.mockImplementation(async id => (
       list.find(w => w.id === id)?.solo_consulta ? { ...SOLO_CONSULTA_DETAIL, warehouse: list.find(w => w.id === id) as PhysicalWarehouse } : detailResponse()
     ))
-    // Misma validación que el controlador real: un parámetro inválido es un rechazo (422), no se ignora.
-    mockedBodegaApi.zonaLibre.productos.mockImplementation(async params => {
-      const violations = zonaLibreContractViolations(params as Record<string, unknown> | undefined)
-      if (violations.length > 0) throw new Error(`422 ${violations.join('; ')}`)
-      return makeZonaLibreResponse()
-    })
   }
 
   it('la pestaña de solo consulta va AL FINAL, separada por un divisor y con la insignia; las operativas no llevan insignia', async () => {
@@ -655,64 +646,22 @@ describe('BodegasPage — Zona Libre de solo consulta (SCRUM-990)', () => {
     renderPage()
     await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
     expect(mockedBodegaApi.warehouses.show).not.toHaveBeenCalledWith(2, expect.anything())
-    expect(mockedBodegaApi.zonaLibre.productos).not.toHaveBeenCalled()
   })
 
-  it('Fase 5a: con el módulo lafayette apagado, Zona Libre no pide ni muestra el catálogo externo', async () => {
-    arrange()
-    mockUser(['bodega.read', 'bodega.write'], {})
-    renderPage()
-    fireEvent.click(await screen.findByText('Bodega Zona Libre'))
-
-    expect(await screen.findByText('bodega:warehouses.zonaLibre.sinCatalogo')).toBeInTheDocument()
-    expect(screen.queryByTestId('zona-libre-catalogo')).not.toBeInTheDocument()
-    expect(mockedBodegaApi.zonaLibre.productos).not.toHaveBeenCalled()
-  })
-
-  it('al abrir Zona Libre muestra SOLO su vista de consulta: aviso, 8 columnas y ningún elemento de una bodega operativa', async () => {
-    arrange()
-    renderPage()
-    await screen.findByText('REF-0000001').catch(() => undefined)
-    fireEvent.click(await screen.findByText('Bodega Zona Libre'))
-
-    await screen.findByTestId('zona-libre-catalogo')
-    await waitFor(() => expect(screen.getAllByText('REF-0000001').length).toBeGreaterThan(0))
-    expect(screen.getByRole('note')).toBeInTheDocument()
-    expect(within(screen.getByRole('table')).getAllByRole('columnheader')).toHaveLength(8)
-
-    // Nada de la tabla/controles de 15 columnas de una bodega operativa.
-    for (const key of [
-      'bodega:warehouses.table.toServe', 'bodega:warehouses.table.relocate', 'bodega:warehouses.table.action',
-      'bodega:warehouses.chips.all', 'bodega:warehouses.chips.freeSpace',
-      'bodega:warehouses.kpis.responsable', 'bodega:warehouses.kpis.capacityUsed',
-      'bodega:warehouses.locations.manageButton', 'bodega:warehouses.relocationRequests.openButton',
-    ]) expect(screen.queryByText(key), key).not.toBeInTheDocument()
-    expect(within(screen.getByRole('table')).queryAllByRole('button').filter(b => b.closest('tbody'))).toHaveLength(0)
-  })
-
-  it('el catálogo de Lafayette solo se pide cuando se abre la pestaña de solo consulta, y la vista de Central no lo pide nunca', async () => {
-    arrange()
-    renderPage()
-    await screen.findByText('Bodega Central')
-    await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalled())
-    expect(mockedBodegaApi.zonaLibre.productos).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByText('Bodega Zona Libre'))
-    await waitFor(() => expect(mockedBodegaApi.zonaLibre.productos).toHaveBeenCalledTimes(1))
-    expect(mockedBodegaApi.zonaLibre.productos).toHaveBeenCalledWith({ sort: 'referencia', dir: 'asc', page: 1, per_page: 25 })
-  })
-
-  it('volver a una bodega operativa restablece su vista y los botones de cabecera', async () => {
+  it('Fase 5b: abrir la bodega de solo consulta muestra el aviso sin catálogo y ninguna vista de bodega operativa', async () => {
     arrange()
     renderPage()
     await screen.findByText('bodega:warehouses.relocationRequests.openButton')
     fireEvent.click(await screen.findByText('Bodega Zona Libre'))
-    await screen.findByTestId('zona-libre-catalogo')
+
+    expect(await screen.findByText('bodega:warehouses.zonaLibre.sinCatalogo')).toBeInTheDocument()
     expect(screen.queryByText('bodega:warehouses.relocationRequests.openButton')).not.toBeInTheDocument()
+    expect(screen.queryByText('bodega:warehouses.chips.all')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Bodega Central'))
     expect(await screen.findByText('bodega:warehouses.relocationRequests.openButton')).toBeInTheDocument()
     expect(await screen.findByText('CRISTAL-IMPERIAL')).toBeInTheDocument()
-    expect(screen.queryByTestId('zona-libre-catalogo')).not.toBeInTheDocument()
+    expect(screen.queryByText('bodega:warehouses.zonaLibre.sinCatalogo')).not.toBeInTheDocument()
   })
 
   // SCRUM-1021 — el vendedor entra con bodega.warehouses.view y SIN bodega.read: consulta pura.

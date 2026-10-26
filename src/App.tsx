@@ -82,10 +82,6 @@ import VentasMedioPagoPage from '@/pages/admin-contab/VentasMedioPagoPage'
 import FraudSettingsPage from '@/pages/admin-contab/FraudSettingsPage'
 import ClientesFiscalPage from '@/pages/admin-contab/ClientesFiscalPage'
 import GerenciaPage      from '@/pages/GerenciaPage'
-import LegacyMigrationDashboardPage from '@/pages/LegacyMigrationDashboardPage'
-import LegacyPagosPage from '@/pages/LegacyPagosPage'
-import VistaIcgPage from '@/pages/VistaIcgPage'
-import { isModuleEnabled, type OptionalModule } from '@/lib/modules'
 import OperacionesPage   from '@/pages/OperacionesPage'
 import VentasDisenoHomePage     from '@/pages/ventas-diseno/HomePage'
 import VentasDisenoPipelinePage from '@/pages/ventas-diseno/PipelinePage'
@@ -134,14 +130,6 @@ function RequirePermission({ children, permission }: { children: React.ReactNode
   const user = useAuthStore(s => s.user)
   if (!user) return <Navigate to="/login" replace />
   if (!hasAnyPermission(user.permissions, permission)) return <Navigate to={getHomeRoute(user)} replace />
-  return <>{children}</>
-}
-
-// Fase 5a — pantallas de módulos fuera del núcleo: sin la bandera del backend no existen (ni siquiera por URL directa).
-function RequireModule({ children, module }: { children: React.ReactNode; module: OptionalModule }) {
-  const user = useAuthStore(s => s.user)
-  if (!user) return <Navigate to="/login" replace />
-  if (!isModuleEnabled(user.flags, module)) return <Navigate to={getHomeRoute(user)} replace />
   return <>{children}</>
 }
 
@@ -777,39 +765,6 @@ export default function App() {
               </RequirePermission>
             } />
             <Route path="/operaciones"   element={<OperacionesPage />} />
-
-            {/* SCRUM-816 — dashboard de migración ICG. Gate role:superadmin exclusivo (ajuste
-                2026-09-04 a pedido de Luis — antes incluía management/Gerencia, mismo criterio
-                que Pagos ICG/Vista ICG abajo). No hay módulo propio en el JWT para esta épica,
-                ver docblock de LegacyMigrationDashboardController. */}
-            <Route path="/migracion/dashboard" element={
-              <RequirePermission permission={GUARD.SUPERADMIN}>
-                <RequireModule module="legacy_icg">
-                  <LegacyMigrationDashboardPage />
-                </RequireModule>
-              </RequirePermission>
-            } />
-
-            {/* SCRUM-827 — legacy.pagos, gate role:superadmin exclusivo (audiencia solo equipo
-                técnico, más restrictivo que el dashboard de arriba). */}
-            <Route path="/migracion/pagos" element={
-              <RequirePermission permission={GUARD.SUPERADMIN}>
-                <RequireModule module="legacy_icg">
-                  <LegacyPagosPage />
-                </RequireModule>
-              </RequirePermission>
-            } />
-
-            {/* "Vista ICG" (SCRUM-749, 2026-09-03) — pantalla propia bajo Migración con una
-                pestaña por entidad, sin partir de un Subcliente puntual. Gate role:superadmin
-                exclusivo, mismo criterio que Pagos ICG arriba. */}
-            <Route path="/migracion/vista" element={
-              <RequirePermission permission={GUARD.SUPERADMIN}>
-                <RequireModule module="legacy_icg">
-                  <VistaIcgPage />
-                </RequireModule>
-              </RequirePermission>
-            } />
 
             {/* Auditoría de uso de IA (pedido de Luis 2026-07-20) */}
             <Route path="/auditoria/uso-ia" element={

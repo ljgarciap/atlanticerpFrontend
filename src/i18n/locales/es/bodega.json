@@ -143,38 +143,6 @@
     },
     "zonaLibre": {
       "badge": "Solo consulta",
-      "noticeTitle": "Solo consulta",
-      "noticeBody": "Datos de Lafayette Lighting, no forman parte del inventario de Atlantic.",
-      "kpis": {
-        "products": "Productos de Lafayette",
-        "available": "Disponible (Lafayette)",
-        "lastSync": "Última sincronización"
-      },
-      "filters": {
-        "search": "Buscar por referencia, descripción o marca...",
-        "searchLabel": "Buscar en el catálogo de Lafayette",
-        "withStock": "Solo con disponibilidad"
-      },
-      "table": {
-        "image": "Imagen",
-        "lafayetteId": "Ref. Lafayette",
-        "reference": "Referencia",
-        "description": "Descripción",
-        "brand": "Marca",
-        "category": "Categoría",
-        "available": "Disponible (Lafayette)",
-        "price": "Precio Lafayette",
-        "caption": "Catálogo de productos de Lafayette (solo consulta)"
-      },
-      "resultsCount_one": "{{count}} producto",
-      "resultsCount_many": "{{count}} de productos",
-      "resultsCount_other": "{{count}} productos",
-      "empty": "No hay productos de Lafayette que coincidan con la búsqueda.",
-      "notSynced": "El catálogo de Lafayette aún no se ha sincronizado.",
-      "notSyncedHint": "Los productos aparecerán después de la primera sincronización automática.",
-      "error": "No se pudo cargar el catálogo de Lafayette.",
-      "retry": "Reintentar",
-      "help": "¿Necesita usar un producto en AtlanticERP? Créelo manualmente como producto de AtlanticERP desde Compras; no se copia desde esta lista.",
       "sinCatalogo": "Esta bodega es de solo consulta y no tiene un catálogo externo conectado."
     }
   },
