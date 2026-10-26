@@ -54,8 +54,8 @@ async function selectWarehouse(name: string, value: string) {
 }
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
-  { id: 2, name: 'Merma', responsable: null, capacidad_pct: 12, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
+  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
+  { id: 2, name: 'Merma', responsable: null, capacidad_pct: 12, modo_detalle: 'ubicacion_exacta' },
 ]
 
 const EMPTY_TRAY: GeneralCountListResponse = { data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true }
@@ -99,16 +99,6 @@ beforeEach(() => {
 })
 
 describe('BodegaInventarioGeneralPage', () => {
-  // SCRUM-990 — un conteo general solo se abre sobre bodegas operativas (el backend lo exige con Warehouse::operativaRule()).
-  it('el selector de bodega del conteo no ofrece una bodega de solo consulta', async () => {
-    const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
-    mockedApi.warehouses.list.mockResolvedValue({ data: [...WAREHOUSES, externa] })
-    renderPage()
-    await screen.findByText('bodega:generalCounts.tray.empty')
-    await waitFor(() => expect(screen.getAllByText('Bodega Central').length).toBeGreaterThan(0))
-    expect(screen.queryByText('Catálogo Externo')).not.toBeInTheDocument()
-  })
-
   it('muestra el mensaje de vacío cuando no hay conteos en la bandeja', async () => {
     renderPage()
     expect(await screen.findByText('bodega:generalCounts.tray.empty')).toBeInTheDocument()

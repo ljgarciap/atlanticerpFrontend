@@ -57,8 +57,8 @@ vi.mock('@/api/ventasDisenoApi', () => ({
 const mockedApi = vi.mocked(bodegaApi, true)
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Atlantic', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
-  { id: 2, name: 'Mermas', responsable: null, capacidad_pct: 10, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
+  { id: 1, name: 'Atlantic', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
+  { id: 2, name: 'Mermas', responsable: null, capacidad_pct: 10, modo_detalle: 'ubicacion_exacta' },
 ]
 
 function makeRow(overrides: Partial<BodegaInventoryRow> = {}): BodegaInventoryRow {
@@ -117,16 +117,6 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     const card = (await screen.findByText('bodega:inventory.kpis.withStock')).parentElement
     expect(card).toHaveTextContent('7')
     expect(screen.getByText('bodega:inventory.kpis.total').parentElement).toHaveTextContent('40')
-  })
-
-  // SCRUM-990 — "Ver Inventario" es solo inventario de Atlantic: Zona Libre no aparece ni como filtro.
-  it('el filtro por bodega no ofrece una bodega de solo consulta', async () => {
-    const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
-    mockedApi.warehouses.list.mockResolvedValue({ data: [...WAREHOUSES, externa] })
-    renderPage()
-    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
-    await waitFor(() => expect(screen.getByRole('option', { name: 'Mermas' })).toBeInTheDocument())
-    expect(screen.queryByRole('option', { name: 'Catálogo Externo' })).not.toBeInTheDocument()
   })
 
   it('renderiza encabezado, KPIs y la fila del producto', async () => {

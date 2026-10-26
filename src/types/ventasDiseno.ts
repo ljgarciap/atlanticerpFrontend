@@ -728,7 +728,6 @@ export interface QuoteDetail {
   id:                        number
   // SCRUM-1121 — asociados del proyecto (o del borrador si la cotización aún no tiene proyecto).
   associates?:               Associate[]
-  origin?:                   'comercial' | 'icg_legacy'
   status:                    QuoteStatus
   // Cotización-D (REQ-048/051): folio/generated_at quedan null mientras la
   // cotización siga siendo un borrador sin generar — ese es el gate que habilita

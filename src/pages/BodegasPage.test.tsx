@@ -76,9 +76,9 @@ function mockUser(permissions: string[] = ['bodega.read', 'bodega.write']) {
 }
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta', solo_consulta: false },
-  { id: 2, name: 'Bodega Zona Libre', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: true },
-  { id: 3, name: 'Showroom Cliente', responsable: null, capacidad_pct: null, modo_detalle: 'cliente', solo_consulta: false },
+  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
+  { id: 2, name: 'Bodega Pendiente', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
+  { id: 3, name: 'Showroom Cliente', responsable: null, capacidad_pct: null, modo_detalle: 'cliente' },
 ]
 
 function detailResponse(overrides: Partial<WarehouseDetailResponse> = {}): WarehouseDetailResponse {
@@ -122,7 +122,7 @@ describe('BodegasPage', () => {
     renderPage()
 
     expect(await screen.findByText('Bodega Central')).toBeInTheDocument()
-    expect(screen.getByText('Bodega Zona Libre')).toBeInTheDocument()
+    expect(screen.getByText('Bodega Pendiente')).toBeInTheDocument()
     expect(screen.getByText('Showroom Cliente')).toBeInTheDocument()
     await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
   })
@@ -134,7 +134,7 @@ describe('BodegasPage', () => {
   // SCRUM-990 — Zona Libre ya no usa esta tabla (es de solo consulta, ver el describe de abajo); la regla de SCRUM-752 sigue
   // vigente para cualquier bodega OPERATIVA en modo 'pendiente'.
   it('no muestra ninguna acción (ni Reubicar ni Ver detalle) en una bodega operativa modo pendiente', async () => {
-    const pendienteOperativa: PhysicalWarehouse = { ...WAREHOUSES[1], solo_consulta: false }
+    const pendienteOperativa: PhysicalWarehouse = WAREHOUSES[1]
     mockedBodegaApi.warehouses.list.mockResolvedValue({ data: [WAREHOUSES[0], pendienteOperativa] })
     mockedBodegaApi.warehouses.show.mockResolvedValue(detailResponse({
       warehouse: pendienteOperativa,
@@ -253,22 +253,7 @@ describe('BodegasPage', () => {
     // Mejora SCRUM-752 RN1 — Bodega Zona Libre ('pendiente') tampoco, en ningún caso.
     const destinationSelect = screen.getByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
     expect(within(destinationSelect).queryByText('Bodega Central')).not.toBeInTheDocument()
-    expect(within(destinationSelect).queryByText('Bodega Zona Libre')).not.toBeInTheDocument()
-    expect(within(destinationSelect).getByText('Showroom Cliente')).toBeInTheDocument()
-  })
-
-  // SCRUM-990 — el destino se filtra por `solo_consulta` (no solo por el modo 'pendiente'): una bodega de solo consulta jamás recibe
-  // reubicaciones aunque su modo sea otro. El backend lo rechaza igual con Warehouse::operativaRule().
-  it('el selector de destino de Reubicar excluye una bodega de solo consulta aunque su modo no sea pendiente', async () => {
-    const externa: PhysicalWarehouse = { id: 4, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
-    mockedBodegaApi.warehouses.list.mockResolvedValue({ data: [...WAREHOUSES, externa] })
-    mockedBodegaApi.warehouses.show.mockResolvedValue(detailResponse())
-
-    renderPage()
-    fireEvent.click(await screen.findByText('bodega:warehouses.table.relocate'))
-
-    const destinationSelect = await screen.findByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
-    expect(within(destinationSelect).queryByText('Catálogo Externo')).not.toBeInTheDocument()
+    expect(within(destinationSelect).queryByText('Bodega Pendiente')).not.toBeInTheDocument()
     expect(within(destinationSelect).getByText('Showroom Cliente')).toBeInTheDocument()
   })
 
@@ -608,62 +593,7 @@ describe('BodegasPage', () => {
 })
 
 
-// SCRUM-990 — bodega de SOLO CONSULTA (Fase 5b: sin catálogo externo; el concepto se retira en la 5b-2). Spec visual: atlanticerp-backend/docs/specs/scrum990-zona-libre-ux.md.
-describe('BodegasPage — Zona Libre de solo consulta (SCRUM-990)', () => {
-  const SOLO_CONSULTA_DETAIL: WarehouseDetailResponse = {
-    warehouse: WAREHOUSES[1],
-    kpis: { responsable: null, total_products: 0, total_units: 0, capacidad_pct: null },
-    ubicaciones: [],
-    data: [],
-    meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 },
-  }
-
-  function arrange(list: PhysicalWarehouse[] = WAREHOUSES) {
-    mockedBodegaApi.warehouses.list.mockResolvedValue({ data: list })
-    mockedBodegaApi.warehouses.show.mockImplementation(async id => (
-      list.find(w => w.id === id)?.solo_consulta ? { ...SOLO_CONSULTA_DETAIL, warehouse: list.find(w => w.id === id) as PhysicalWarehouse } : detailResponse()
-    ))
-  }
-
-  it('la pestaña de solo consulta va AL FINAL, separada por un divisor y con la insignia; las operativas no llevan insignia', async () => {
-    // El API la devuelve en medio (por id): aun así se pinta al final.
-    arrange(WAREHOUSES)
-    renderPage()
-    await screen.findByText('Bodega Central')
-
-    const tabs = Array.from(document.querySelectorAll('.border-b > button, .border-b > div > button')).map(b => b.textContent ?? '')
-    expect(tabs.map(t => t.replace('bodega:warehouses.zonaLibre.badge', '').trim())).toEqual(['Bodega Central', 'Showroom Cliente', 'Bodega Zona Libre'])
-    const group = screen.getByTestId('solo-consulta-tabs')
-    expect(group.className).toContain('border-l')
-    expect(within(group).getByText('Bodega Zona Libre')).toBeInTheDocument()
-    expect(within(group).getByText('bodega:warehouses.zonaLibre.badge')).toBeInTheDocument()
-    // Sin insignia en las operativas: exactamente UNA en toda la fila de pestañas.
-    expect(screen.getAllByText('bodega:warehouses.zonaLibre.badge')).toHaveLength(1)
-  })
-
-  it('la pestaña por defecto es la primera OPERATIVA aunque el API devuelva primero la de solo consulta', async () => {
-    arrange([WAREHOUSES[1], WAREHOUSES[0], WAREHOUSES[2]])
-    renderPage()
-    await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
-    expect(mockedBodegaApi.warehouses.show).not.toHaveBeenCalledWith(2, expect.anything())
-  })
-
-  it('Fase 5b: abrir la bodega de solo consulta muestra el aviso sin catálogo y ninguna vista de bodega operativa', async () => {
-    arrange()
-    renderPage()
-    await screen.findByText('bodega:warehouses.relocationRequests.openButton')
-    fireEvent.click(await screen.findByText('Bodega Zona Libre'))
-
-    expect(await screen.findByText('bodega:warehouses.zonaLibre.sinCatalogo')).toBeInTheDocument()
-    expect(screen.queryByText('bodega:warehouses.relocationRequests.openButton')).not.toBeInTheDocument()
-    expect(screen.queryByText('bodega:warehouses.chips.all')).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByText('Bodega Central'))
-    expect(await screen.findByText('bodega:warehouses.relocationRequests.openButton')).toBeInTheDocument()
-    expect(await screen.findByText('CRISTAL-IMPERIAL')).toBeInTheDocument()
-    expect(screen.queryByText('bodega:warehouses.zonaLibre.sinCatalogo')).not.toBeInTheDocument()
-  })
-
+describe('BodegasPage — solo consulta por permiso y navegación', () => {
   // SCRUM-1021 — el vendedor entra con bodega.warehouses.view y SIN bodega.read: consulta pura.
   describe('solo consulta por permiso (vendedor, SCRUM-1021)', () => {
     beforeEach(() => {

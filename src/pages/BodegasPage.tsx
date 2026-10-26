@@ -15,7 +15,7 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
-import { IcoClose, IcoEye } from '@/components/icons'
+import { IcoClose } from '@/components/icons'
 import { KpiCard, Th } from '@/components/bodega/BodegaTableParts'
 import { isWarehouseEmptyLocationRow } from '@/types/bodega'
 import { formatDateFromTimestamp } from '@/utils/dates'
@@ -35,10 +35,6 @@ export default function BodegasPage() {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
   const warehouses = warehousesData?.data ?? []
-  // SCRUM-990 — las bodegas de solo consulta (Zona Libre) van AL FINAL de la fila de pestañas, separadas por un
-  // divisor, para que no parezcan una bodega operativa más; las operativas conservan el orden del API.
-  const operativeWarehouses = warehouses.filter(w => !w.solo_consulta)
-  const soloConsultaWarehouses = warehouses.filter(w => w.solo_consulta)
 
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [chip, setChip] = useState<'todos' | 'espacio_libre'>('todos')
@@ -65,11 +61,8 @@ export default function BodegasPage() {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
 
-  // REQ-381 RN1 — Bodega Central es la vista por defecto al entrar a la pantalla (SCRUM-990: la primera OPERATIVA, nunca la de
-  // solo consulta aunque el API la devolviera primero).
-  const activeId = selectedId ?? operativeWarehouses[0]?.id ?? warehouses[0]?.id ?? null
-  const activeWarehouse = warehouses.find(w => w.id === activeId)
-  const isSoloConsulta = activeWarehouse?.solo_consulta === true
+  // REQ-381 RN1 — Bodega Central es la vista por defecto al entrar a la pantalla.
+  const activeId = selectedId ?? warehouses[0]?.id ?? null
   // SCRUM-1021 — el vendedor entra con `bodega.warehouses.view` y SIN `bodega.read`: consulta pura, sin
   // ningún botón de acción (administrar ubicaciones, solicitudes de reubicación, "Reubicar" en tablas).
   // Quien sí tiene bodega.read ve la pantalla exactamente igual que antes.
@@ -125,13 +118,12 @@ export default function BodegasPage() {
           <p className="text-[12px] text-slate-500">{t('bodega:warehouses.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {isUbicacionExacta && !isSoloConsulta && !soloConsultaPorPermiso && (
+          {isUbicacionExacta && !soloConsultaPorPermiso && (
             <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowLocationsModal(true)}>
               {t('bodega:warehouses.locations.manageButton')}
             </Button>
           )}
-          {/* SCRUM-990 — con una bodega de solo consulta activa no existen reubicaciones ni ubicaciones que administrar. */}
-          {!isSoloConsulta && !soloConsultaPorPermiso && (
+          {!soloConsultaPorPermiso && (
             <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowRequestsModal(true)}>
               {t('bodega:warehouses.relocationRequests.openButton')}
             </Button>
@@ -140,7 +132,7 @@ export default function BodegasPage() {
       </div>
 
       <div className="flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible gap-2 mb-5 border-b border-slate-200 pb-3 items-center">
-        {operativeWarehouses.map(w => (
+        {warehouses.map(w => (
           <Button
             key={w.id}
             variant="outline"
@@ -152,36 +144,8 @@ export default function BodegasPage() {
             {w.name}
           </Button>
         ))}
-        {soloConsultaWarehouses.length > 0 && (
-          <div className="flex shrink-0 gap-2 border-l border-slate-200 pl-2 ml-1" data-testid="solo-consulta-tabs">
-            {soloConsultaWarehouses.map(w => (
-              <Button
-                key={w.id}
-                variant="outline"
-                active={activeId === w.id}
-                activeVariant="primary"
-                className="!text-xs !px-3 !py-1.5"
-                onClick={() => selectWarehouse(w.id)}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  {w.name}
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
-                    <IcoEye size={12} />
-                    {t('bodega:warehouses.zonaLibre.badge')}
-                  </span>
-                </span>
-              </Button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* SCRUM-990 — Zona Libre es de SOLO CONSULTA (Fase 5b: sin catálogo externo): muestra un aviso y reemplaza
-          por completo a los KPIs, filtros, chips, tabla de 15 columnas y paginación de una bodega operativa. */}
-      {isSoloConsulta ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">{t('bodega:warehouses.zonaLibre.sinCatalogo')}</p>
-      ) : (
-        <>
         {data && (
           <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
             <KpiCard label={t('bodega:warehouses.kpis.responsable')} value={data.kpis.responsable ?? '—'} color="#5BA5A0" />
@@ -363,8 +327,6 @@ export default function BodegasPage() {
             onPerPageChange={pp => { setPerPage(pp); setPage(1) }}
           />
         )}
-        </>
-      )}
 
       {relocatingRow && activeId !== null && (
         <RelocateModal
@@ -438,11 +400,10 @@ function RelocateModal({ row, currentWarehouseId, warehouses, onClose }: {
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Mejora SCRUM-752 RN1 (Gerencia Test 2026-08-13) — Zona Libre ('pendiente', sin ubicación
+  // Mejora SCRUM-752 RN1 (Gerencia Test 2026-08-13) — una bodega 'pendiente' (sin ubicación
   // física) nunca debe aparecer como destino de reubicación.
-  // SCRUM-990 — y tampoco una bodega de solo consulta (el backend ya la rechaza con `Warehouse::operativaRule()`).
   const destinationOptions = warehouses.filter(
-    w => w.id !== currentWarehouseId && w.modo_detalle !== 'pendiente' && !w.solo_consulta,
+    w => w.id !== currentWarehouseId && w.modo_detalle !== 'pendiente',
   )
   const originWarehouse = warehouses.find(w => w.id === currentWarehouseId)
 

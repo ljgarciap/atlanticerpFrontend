@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { operativeWarehouses } from '@/lib/warehouses'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { isAxiosError } from 'axios'
@@ -377,7 +376,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
 }) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
+  const warehouses = warehousesData?.data ?? []
   const create = useCreateAdjustmentRequest()
 
   // SCRUM-428 (REQ-358) — cuando se entra con un producto ya fijo (fila de Ver Inventario), el
