@@ -9,12 +9,13 @@ import type { PaymentMethod, PaymentClientOption } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoSearch, IcoPaperclip } from '@/components/icons'
+import { getRegion } from '@/lib/region'
 
 const COMPROBANTE_MAX_BYTES = 10 * 1024 * 1024
 const COMPROBANTE_ACCEPTED  = ['image/jpeg', 'image/png', 'application/pdf']
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 interface Props {

@@ -7,9 +7,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoPlus, IcoPencil, IcoBan } from '@/components/icons'
 import type { CommissionTier, CreateCommissionTierPayload } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency, maximumFractionDigits: 0 }).format(value)
 }
 
 interface Props {

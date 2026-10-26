@@ -1,4 +1,5 @@
 import type { InvoiceLineItem } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 /**
  * Extraído de `FacturacionPage.tsx` (Batch 12, SCRUM-565→570) — `FiscalItemsTable`/
@@ -10,7 +11,7 @@ import type { InvoiceLineItem } from '@/types/adminContab'
  */
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 export function FiscalItemsTable({ items, t }: { items?: InvoiceLineItem[]; t: (key: string) => string }) {

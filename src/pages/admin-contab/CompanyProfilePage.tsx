@@ -38,7 +38,10 @@ function buildSchema(t: (key: string) => string) {
   return z.object({
     descripcion_corta: z.string(),
     sitio_web: z.union([z.literal(''), z.string().url(t('adminContab:empresa.validation.invalidUrl'))]),
+    pais: z.string().min(1, required),
+    moneda: z.string().regex(/^[A-Z]{3}$/, t('adminContab:empresa.validation.currency')),
     zona_horaria: z.string().min(1, required),
+    locale: z.string().regex(/^[a-z]{2}(-[A-Z]{2})?$/, t('adminContab:empresa.validation.locale')),
     redes_sociales: z.array(z.object({
       plataforma: z.string().min(1, required),
       url: z.string().min(1, required),
@@ -92,7 +95,7 @@ export default function CompanyProfilePage() {
   const logoInputRef = useRef<HTMLInputElement>(null)
 
   const schema = buildSchema(t)
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
   const redesFields = useFieldArray({ control, name: 'redes_sociales' })
@@ -428,28 +431,61 @@ export default function CompanyProfilePage() {
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('adminContab:empresa.regional.title')}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextField label={t('adminContab:empresa.regional.fields.moneda')}>
-              <input value={profile.moneda} disabled className={inputClass(false)} />
+            <TextField label={t('adminContab:empresa.regional.fields.pais')} className="sm:col-span-2">
+              <Controller
+                control={control}
+                name="pais"
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    disabled={!editMode}
+                    className={inputClass(false)}
+                    onChange={e => {
+                      field.onChange(e)
+                      // Elegir un país propone su moneda, zona y locale por omisión (se pueden afinar a mano).
+                      const country = profile.paises.find(c => c.code === e.target.value)
+                      if (country) {
+                        setValue('moneda', country.currency, { shouldDirty: true })
+                        setValue('zona_horaria', country.timezone, { shouldDirty: true })
+                        setValue('locale', country.locale, { shouldDirty: true })
+                      }
+                    }}
+                  >
+                    {profile.paises.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                  </select>
+                )}
+              />
+            </TextField>
+            <TextField label={t('adminContab:empresa.regional.fields.moneda')} error={errors.moneda?.message}>
+              <input {...register('moneda')} disabled={!editMode} maxLength={3} className={inputClass(!!errors.moneda)} />
+            </TextField>
+            <TextField label={t('adminContab:empresa.regional.fields.locale')} error={errors.locale?.message}>
+              <input {...register('locale')} disabled={!editMode} className={inputClass(!!errors.locale)} />
             </TextField>
             <TextField label={t('adminContab:empresa.regional.fields.anioFiscal')}>
               <input value={profile.anio_fiscal} disabled className={inputClass(false)} />
             </TextField>
-            <TextField label={t('adminContab:empresa.regional.fields.zonaHoraria')} className="sm:col-span-2">
-              <Controller
-                control={control}
-                name="zona_horaria"
-                render={({ field }) => (
-                  <select {...field} disabled={!editMode} className={inputClass(false)}>
-                    <option value="America/Panama">{t('adminContab:empresa.regional.zonaHorariaOptions.americaPanama')}</option>
-                  </select>
-                )}
-              />
+            <TextField label={t('adminContab:empresa.regional.fields.zonaHoraria')} error={errors.zona_horaria?.message}>
+              <input {...register('zona_horaria')} disabled={!editMode} list="zonas-horarias" className={inputClass(!!errors.zona_horaria)} />
+              <datalist id="zonas-horarias">
+                {timezoneOptions().map(z => <option key={z} value={z} />)}
+              </datalist>
             </TextField>
           </div>
         </Card>
       </div>
     </div>
   )
+}
+
+/** Zonas IANA que conoce el navegador (para el autocompletado); si no expone la lista, solo las de los países del catálogo. */
+function timezoneOptions(): string[] {
+  const intl = Intl as typeof Intl & { supportedValuesOf?: (key: 'timeZone') => string[] }
+  try {
+    return intl.supportedValuesOf?.('timeZone') ?? []
+  } catch {
+    return []
+  }
 }
 
 function inputClass(hasError: boolean): string {

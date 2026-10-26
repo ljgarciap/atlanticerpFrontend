@@ -53,6 +53,8 @@ export interface UserInfo {
   // siempre las 7 llaves del catálogo, en false por defecto).
   modules?:      Record<string, ModulePermissions>
   flags?:        UserFlags
+  /** Fase 6a — contexto regional de la empresa (viene del tenant). Ausente en sesiones anteriores: rige el de Panamá (`lib/region`). */
+  region?:       { country: string; currency: string; timezone: string; locale: string }
   // SCRUM-724 — override puntual por usuario de qué ítems de menú ve (por encima de
   // modules arriba, que sigue siendo el gate de MÓDULO por rol). module -> key ->
   // visible; una clave ausente significa visible=true (default) — solo un `false`

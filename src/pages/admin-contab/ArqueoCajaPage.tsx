@@ -20,9 +20,10 @@ import type {
   DailyCashCountRetencion, DailyCashCountHistoryRow,
 } from '@/types/adminContab'
 import { formatDateShort, formatTimeShort } from '@/utils/dates'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function mutationErrorMessage(err: unknown, fallback: string): string {

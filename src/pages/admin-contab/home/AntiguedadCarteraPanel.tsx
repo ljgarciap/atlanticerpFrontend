@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/Card'
 import { useInvoiceAging } from '@/hooks/useAdminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 /**

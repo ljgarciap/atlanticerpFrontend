@@ -11,9 +11,10 @@ import CommissionTiersModal from '@/components/admin-contab/CommissionTiersModal
 import CommissionAccountStatementModal from '@/components/admin-contab/CommissionAccountStatementModal'
 import type { CommissionExportFormat, CommissionOrder, CommissionVendorSummary } from '@/types/adminContab'
 import { formatDateShort } from '@/utils/dates'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function currentMonthKey(): string {
@@ -29,7 +30,7 @@ function shiftMonth(mes: string, delta: number): string {
 
 function monthLabel(mes: string): string {
   const [y, m] = mes.split('-').map(Number)
-  return new Date(y, m - 1, 1).toLocaleDateString('es-PA', { month: 'long', year: 'numeric' })
+  return new Date(y, m - 1, 1).toLocaleDateString(getRegion().locale, { month: 'long', year: 'numeric' })
 }
 
 const ESTADO_PILL_CLASSES: Record<CommissionOrder['estado'], string> = {

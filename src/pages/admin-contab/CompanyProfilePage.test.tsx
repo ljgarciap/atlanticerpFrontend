@@ -38,7 +38,13 @@ function makeProfile(overrides: Partial<CompanyProfile> = {}): CompanyProfile {
     descripcion_corta: 'Diseño e iluminación',
     sitio_web: 'https://atlantic.com.pa',
     redes_sociales: [],
+    pais: 'PA',
     moneda: 'USD',
+    locale: 'es-PA',
+    paises: [
+      { code: 'PA', name: 'Panamá', currency: 'USD', timezone: 'America/Panama', locale: 'es-PA' },
+      { code: 'CO', name: 'Colombia', currency: 'COP', timezone: 'America/Bogota', locale: 'es-CO' },
+    ],
     anio_fiscal: 'Enero-Diciembre',
     zona_horaria: 'America/Panama',
     ...overrides,
@@ -94,7 +100,7 @@ describe('CompanyProfilePage', () => {
     expect(await screen.findByText('adminContab:empresa.saveChanges')).toBeInTheDocument()
   })
 
-  it('razón social, nombre comercial, moneda y año fiscal nunca se habilitan, ni en modo edición', async () => {
+  it('razón social, nombre comercial y año fiscal nunca se habilitan, ni en modo edición', async () => {
     renderPage()
     await screen.findByDisplayValue('https://atlantic.com.pa')
 
@@ -102,7 +108,6 @@ describe('CompanyProfilePage', () => {
 
     expect(screen.getByDisplayValue('Atlantic S.A.')).toBeDisabled()
     expect(screen.getByDisplayValue('Atlantic')).toBeDisabled()
-    expect(screen.getByDisplayValue('USD')).toBeDisabled()
     expect(screen.getByDisplayValue('Enero-Diciembre')).toBeDisabled()
   })
 
@@ -217,13 +222,46 @@ describe('CompanyProfilePage', () => {
     }))
   })
 
-  it('zona horaria exige una selección para guardar', async () => {
+  it('Fase 6a: la zona horaria, la moneda y el país son editables en modo edición', async () => {
+    renderPage()
+    await screen.findByDisplayValue('https://atlantic.com.pa')
+    expect(screen.getByLabelText('adminContab:empresa.regional.fields.zonaHoraria')).toBeDisabled()
+
+    fireEvent.click(screen.getByText('common:actions.edit'))
+
+    const zona = screen.getByLabelText('adminContab:empresa.regional.fields.zonaHoraria') as HTMLInputElement
+    expect(zona.value).toBe('America/Panama')
+    expect(zona).not.toBeDisabled()
+    expect(screen.getByLabelText('adminContab:empresa.regional.fields.moneda')).not.toBeDisabled()
+  })
+
+  it('Fase 6a: elegir un país propone su moneda, zona y locale y los envía al guardar', async () => {
+    mockedApi.companyProfile.update.mockResolvedValue(makeProfile({ pais: 'CO', moneda: 'COP', zona_horaria: 'America/Bogota', locale: 'es-CO' }))
     renderPage()
     await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
 
-    const zonaHorariaSelect = screen.getByLabelText('adminContab:empresa.regional.fields.zonaHoraria') as HTMLSelectElement
-    expect(zonaHorariaSelect.value).toBe('America/Panama')
-    expect(zonaHorariaSelect).not.toBeDisabled()
+    fireEvent.change(screen.getByLabelText('adminContab:empresa.regional.fields.pais'), { target: { value: 'CO' } })
+    expect((screen.getByLabelText('adminContab:empresa.regional.fields.moneda') as HTMLInputElement).value).toBe('COP')
+    expect((screen.getByLabelText('adminContab:empresa.regional.fields.zonaHoraria') as HTMLInputElement).value).toBe('America/Bogota')
+
+    fireEvent.click(screen.getByText('adminContab:empresa.saveChanges'))
+    fireEvent.click(await screen.findByText('common:actions.confirm'))
+    await waitFor(() => expect(mockedApi.companyProfile.update).toHaveBeenCalledWith(
+      expect.objectContaining({ pais: 'CO', moneda: 'COP', zona_horaria: 'America/Bogota', locale: 'es-CO' }),
+    ))
+  })
+
+  it('Fase 6a: una moneda con formato inválido no se guarda', async () => {
+    renderPage()
+    await screen.findByDisplayValue('https://atlantic.com.pa')
+    fireEvent.click(screen.getByText('common:actions.edit'))
+
+    fireEvent.change(screen.getByLabelText('adminContab:empresa.regional.fields.moneda'), { target: { value: 'dolar' } })
+    fireEvent.click(screen.getByText('adminContab:empresa.saveChanges'))
+    fireEvent.click(await screen.findByText('common:actions.confirm'))
+
+    expect(await screen.findByText('adminContab:empresa.validation.currency')).toBeInTheDocument()
+    expect(mockedApi.companyProfile.update).not.toHaveBeenCalled()
   })
 })

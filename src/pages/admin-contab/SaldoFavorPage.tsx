@@ -7,9 +7,10 @@ import { Pagination } from '@/components/ui/Pagination'
 import { IcoSearch, IcoTrendingUp } from '@/components/icons'
 import { formatDateShort } from '@/utils/dates'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 // Igual criterio que `Abono.nivel_asociacion` (calculado del más específico al más general) —

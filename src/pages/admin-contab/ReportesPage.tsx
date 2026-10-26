@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/Card'
 import { IcoBarChart, IcoTrendingUp, IcoChevronRight, IcoCheck, IcoFileText, IcoList, IcoBook, IcoDollarSign } from '@/components/icons'
 import type { ReportsPeriodo } from '@/types/adminContab'
 import { usePermission } from '@/hooks/usePermission'
+import { getRegion } from '@/lib/region'
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend)
 
@@ -22,14 +23,14 @@ const AGING_COLORS = ['#5BA5A0', '#D9A441', '#D2685A', '#9a3f30']
 const NOTAS_COLORS = ['#5BA5A0', '#5BA5A0', '#C15A4A', '#C9A66B']
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 // SCRUM-870 — valores en $ encima de cada barra, sin decimales (más legible a este tamaño de
 // fuente/barra que el formato completo de `formatCurrency`). Solo para las etiquetas de las 4
 // gráficas de barra, nunca para los KPIs/tooltips que ya usan `formatCurrency`.
 function formatCurrencyRounded(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency, maximumFractionDigits: 0 }).format(value)
 }
 
 // SCRUM-870 punto 2 — formato abreviado para los rangos de la tarjeta de comisión de Contabilidad (ej.

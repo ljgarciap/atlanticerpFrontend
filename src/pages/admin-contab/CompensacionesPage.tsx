@@ -9,9 +9,10 @@ import { IcoSearch, IcoTrendingUp } from '@/components/icons'
 import CompensacionClienteModal from '@/components/admin-contab/CompensacionClienteModal'
 import { formatDateShort } from '@/utils/dates'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 const selectClass = 'rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary'

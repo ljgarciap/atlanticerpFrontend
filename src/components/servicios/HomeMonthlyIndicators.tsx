@@ -8,6 +8,7 @@ import { IcoPencil } from '@/components/icons'
 import { useAuthStore } from '@/store/authStore'
 import InstallationGoalModal from './InstallationGoalModal'
 import type { HomeIndicadoresMes } from '@/types/servicios'
+import { getRegion } from '@/lib/region'
 
 interface Props {
   data: HomeIndicadoresMes | undefined
@@ -32,7 +33,7 @@ function formatDays(value: number | null, unit: string): string {
 function formatMoney(value: number | null): string {
   return value === null
     ? '—'
-    : new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+    : new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 // REQ-211 — panel "Indicadores del mes" de Inicio. RN1: visible para todo el equipo, sin gate

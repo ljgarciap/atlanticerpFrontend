@@ -8,6 +8,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { IcoSearch, IcoClose } from '@/components/icons'
 import { formatDateShort } from '@/utils/dates'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { getRegion } from '@/lib/region'
 
 const selectClass = 'rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary'
 
@@ -18,7 +19,7 @@ const ESTADO_PILL_CLASSES: Record<PaymentEstado, string> = {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 // SCRUM-787 — `formatDate()` local eliminado, reemplazado por `formatDateShort()` compartido

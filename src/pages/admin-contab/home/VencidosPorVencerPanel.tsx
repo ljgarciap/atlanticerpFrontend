@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/Card'
 import { useHomeVencidosPorVencer } from '@/hooks/useAdminContab'
 import type { HomeVencidoRow, HomePorVencerRow } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 /**

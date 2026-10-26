@@ -6,6 +6,7 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import type { TaxIdValidationResult } from '@/types/ventasDiseno'
 import { Button } from '@/components/ui/Button'
 import { IcoCheck, IcoAlertTriangle } from '@/components/icons'
+import { getRegion } from '@/lib/region'
 
 /**
  * SCRUM-1002 — "Validar RUC" contra la DGI (vía MSL), compartido entre el alta de cliente/subcliente y la edición de
@@ -26,7 +27,7 @@ interface Props {
 }
 
 function horaPanama(fecha: Date): string {
-  return fecha.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: '2-digit', minute: '2-digit', hour12: false })
+  return fecha.toLocaleTimeString(getRegion().locale, { timeZone: getRegion().timezone, hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 const normalizar = (v: string) => v.trim().toUpperCase().replace(/\s+/g, ' ')

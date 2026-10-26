@@ -7,9 +7,10 @@ import ShowMoreListModal from '@/components/ShowMoreListModal'
 import { useHomePendientes } from '@/hooks/useAdminContab'
 import { MAX_HOME_CARD_ITEMS } from '@/lib/homeCards'
 import type { HomePendientesAlert } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 const DOT_COLOR: Record<HomePendientesAlert['severidad'], string> = {
