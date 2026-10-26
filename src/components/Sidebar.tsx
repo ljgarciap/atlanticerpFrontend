@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
+import { useModuleEnabled } from '@/lib/modules'
 import { useUnsavedQuoteGuard } from '@/store/unsavedQuoteGuard'
 import { usePermission } from '@/hooks/usePermission'
 import AppLogo from '@/components/AppLogo'
@@ -222,6 +223,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // el flag viene explícitamente en `false`: una sesión abierta antes de este cambio no trae el campo y conserva el menú hasta renovarla
   // (el backend sigue cortando el acceso de todos modos).
   const isSuperadmin = usePermission('superadmin.all')
+  const legacyIcgEnabled = useModuleEnabled('legacy_icg') // Fase 5a — la sección Migración ICG solo existe con el módulo encendido
   const canSeeMarkOnlyConfig = isSuperadmin || user?.flags?.mark_approver !== false
 
   // SCRUM-711, 3ra vuelta — causa raíz real del bug reportado por Gerencia Test 3 (video
@@ -678,7 +680,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
     // scoping por cliente, a diferencia de Cotizaciones/Pedidos/Albaranes/Facturas, donde el
     // modal "Historial ICG" scoped y la pestaña global de Vista ICG SÍ son vistas distintas). La
     // ruta /migracion/pagos sigue viva (acceso directo), solo se retiró el ítem del Sidebar.
-    ...(isSuperadmin
+    ...(isSuperadmin && legacyIcgEnabled
       ? [{
           section: t('nav.migracion'),
           items: [

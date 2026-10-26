@@ -71,9 +71,9 @@ function renderPage(initialUrl = '/bodega/bodegas') {
 
 // SCRUM-1021 — BodegasPage lee `useAuthStore(s => s.user?.id)` y `usePermission(...)`: el mock evalúa el
 // selector contra un usuario real (id 1) en vez de devolver siempre un valor fijo.
-function mockUser(permissions: string[] = ['bodega.read', 'bodega.write']) {
+function mockUser(permissions: string[] = ['bodega.read', 'bodega.write'], flags: { lafayette?: boolean } = { lafayette: true }) {
   mockedUseAuthStore.mockImplementation(((selector?: (s: { user: unknown }) => unknown) => {
-    const state = { user: { id: 1, permissions } }
+    const state = { user: { id: 1, permissions, flags } }
     return selector ? selector(state) : state
   }) as never)
 }
@@ -655,6 +655,17 @@ describe('BodegasPage — Zona Libre de solo consulta (SCRUM-990)', () => {
     renderPage()
     await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
     expect(mockedBodegaApi.warehouses.show).not.toHaveBeenCalledWith(2, expect.anything())
+    expect(mockedBodegaApi.zonaLibre.productos).not.toHaveBeenCalled()
+  })
+
+  it('Fase 5a: con el módulo lafayette apagado, Zona Libre no pide ni muestra el catálogo externo', async () => {
+    arrange()
+    mockUser(['bodega.read', 'bodega.write'], {})
+    renderPage()
+    fireEvent.click(await screen.findByText('Bodega Zona Libre'))
+
+    expect(await screen.findByText('bodega:warehouses.zonaLibre.sinCatalogo')).toBeInTheDocument()
+    expect(screen.queryByTestId('zona-libre-catalogo')).not.toBeInTheDocument()
     expect(mockedBodegaApi.zonaLibre.productos).not.toHaveBeenCalled()
   })
 

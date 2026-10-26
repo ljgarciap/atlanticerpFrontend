@@ -7,6 +7,7 @@ import { settingsApi } from '@/api/settingsApi'
 import { adminApi } from '@/api/adminApi'
 import { authApi } from '@/api/authApi'
 import { useAuthStore } from '@/store/authStore'
+import { useModuleEnabled } from '@/lib/modules'
 import { applyTheme } from '@/hooks/useTheme'
 import { parseApiValidationError } from '@/lib/apiValidationError'
 import { invalidateDemoModeAffectedQueries } from '@/hooks/useDemoMode'
@@ -23,6 +24,7 @@ const TIMEOUTS  = [15, 30, 60, 120, 240, 480, 600, 1440, 2880]
 export default function SettingsPage() {
   const { t }        = useTranslation(['settings', 'common'])
   const { user, updateUser } = useAuthStore()
+  const lafayetteEnabled = useModuleEnabled('lafayette') // Fase 5a
   const qc           = useQueryClient()
   // Espeja el catálogo de permisos del backend en vez de chequear el rol —
   // superadmin.all da acceso a todo, igual que en las rutas del backend.
@@ -232,7 +234,7 @@ export default function SettingsPage() {
                 {/* SCRUM-990 — umbral de la guarda del sincronizador de Lafayette (regla dura: todo umbral de negocio en una tabla paramétrica
                     con vista de administración). Solo SUPERADMIN: el backend lo exige (403 con settings.global sin superadmin.all), así que
                     ni se muestra a quien solo tiene settings.global. */}
-                {isSuperadmin && (
+                {isSuperadmin && lafayetteEnabled && (
                   <div>
                     <SettingRow label={t('settings:global.lafayetteGuarda')}>
                       <LafayetteGuardaRatioInput

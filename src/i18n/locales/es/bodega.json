@@ -174,7 +174,8 @@
       "notSyncedHint": "Los productos aparecerán después de la primera sincronización automática.",
       "error": "No se pudo cargar el catálogo de Lafayette.",
       "retry": "Reintentar",
-      "help": "¿Necesita usar un producto en AtlanticERP? Créelo manualmente como producto de AtlanticERP desde Compras; no se copia desde esta lista."
+      "help": "¿Necesita usar un producto en AtlanticERP? Créelo manualmente como producto de AtlanticERP desde Compras; no se copia desde esta lista.",
+      "sinCatalogo": "Esta bodega es de solo consulta y no tiene un catálogo externo conectado."
     }
   },
   "kardex": {

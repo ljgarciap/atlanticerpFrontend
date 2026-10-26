@@ -85,6 +85,7 @@ import GerenciaPage      from '@/pages/GerenciaPage'
 import LegacyMigrationDashboardPage from '@/pages/LegacyMigrationDashboardPage'
 import LegacyPagosPage from '@/pages/LegacyPagosPage'
 import VistaIcgPage from '@/pages/VistaIcgPage'
+import { isModuleEnabled, type OptionalModule } from '@/lib/modules'
 import OperacionesPage   from '@/pages/OperacionesPage'
 import VentasDisenoHomePage     from '@/pages/ventas-diseno/HomePage'
 import VentasDisenoPipelinePage from '@/pages/ventas-diseno/PipelinePage'
@@ -133,6 +134,14 @@ function RequirePermission({ children, permission }: { children: React.ReactNode
   const user = useAuthStore(s => s.user)
   if (!user) return <Navigate to="/login" replace />
   if (!hasAnyPermission(user.permissions, permission)) return <Navigate to={getHomeRoute(user)} replace />
+  return <>{children}</>
+}
+
+// Fase 5a — pantallas de módulos fuera del núcleo: sin la bandera del backend no existen (ni siquiera por URL directa).
+function RequireModule({ children, module }: { children: React.ReactNode; module: OptionalModule }) {
+  const user = useAuthStore(s => s.user)
+  if (!user) return <Navigate to="/login" replace />
+  if (!isModuleEnabled(user.flags, module)) return <Navigate to={getHomeRoute(user)} replace />
   return <>{children}</>
 }
 
@@ -775,7 +784,9 @@ export default function App() {
                 ver docblock de LegacyMigrationDashboardController. */}
             <Route path="/migracion/dashboard" element={
               <RequirePermission permission={GUARD.SUPERADMIN}>
-                <LegacyMigrationDashboardPage />
+                <RequireModule module="legacy_icg">
+                  <LegacyMigrationDashboardPage />
+                </RequireModule>
               </RequirePermission>
             } />
 
@@ -783,7 +794,9 @@ export default function App() {
                 técnico, más restrictivo que el dashboard de arriba). */}
             <Route path="/migracion/pagos" element={
               <RequirePermission permission={GUARD.SUPERADMIN}>
-                <LegacyPagosPage />
+                <RequireModule module="legacy_icg">
+                  <LegacyPagosPage />
+                </RequireModule>
               </RequirePermission>
             } />
 
@@ -792,7 +805,9 @@ export default function App() {
                 exclusivo, mismo criterio que Pagos ICG arriba. */}
             <Route path="/migracion/vista" element={
               <RequirePermission permission={GUARD.SUPERADMIN}>
-                <VistaIcgPage />
+                <RequireModule module="legacy_icg">
+                  <VistaIcgPage />
+                </RequireModule>
               </RequirePermission>
             } />
 
