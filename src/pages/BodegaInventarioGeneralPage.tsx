@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { operativeWarehouses } from '@/lib/warehouses'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
@@ -97,7 +96,7 @@ function NewCountPanel({ resume, onResumeConsumed }: {
 }) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
+  const warehouses = warehousesData?.data ?? []
 
   const [warehouseId, setWarehouseId] = useState<number | ''>('')
   const [countId, setCountId] = useState<number | null>(null)

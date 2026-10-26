@@ -21,8 +21,8 @@ vi.mock('@/api/bodegaApi', () => ({
 const mockedApi = vi.mocked(bodegaApi, true)
 
 const WAREHOUSES: PhysicalWarehouse[] = [
-  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false },
-  { id: 2, name: 'Merma', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false },
+  { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
+  { id: 2, name: 'Merma', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
 ]
 
 function detailFixture(): CustomerReturnDetail {
@@ -53,18 +53,6 @@ beforeEach(() => {
 })
 
 describe('ConfirmReturnReceptionModal', () => {
-  // SCRUM-990 — la bodega destino de una devolución es donde se ESCRIBE stock: Zona Libre (solo consulta) no se ofrece
-  // ni deshabilitada, y la precarga elige la primera OPERATIVA.
-  it('el selector de bodega destino no ofrece una bodega de solo consulta', async () => {
-    const externa: PhysicalWarehouse = { id: 99, name: 'Catálogo Externo', responsable: null, capacidad_pct: null, modo_detalle: 'ubicacion_exacta', solo_consulta: true }
-    mockedApi.warehouses.list.mockResolvedValue({ data: [externa, ...WAREHOUSES] })
-    renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
-    await waitFor(() => expect(screen.getByRole('option', { name: 'Bodega Central' })).toBeInTheDocument())
-    expect(screen.queryByRole('option', { name: 'Catálogo Externo' })).not.toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Merma' })).toBeInTheDocument()
-  })
-
   it('precarga la cantidad real recibida con la cantidad solicitada', async () => {
     renderModal()
     await screen.findByText('Lámpara colgante Nordic 40cm')

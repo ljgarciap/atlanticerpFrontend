@@ -16,9 +16,6 @@ export interface PhysicalWarehouse {
   responsable:    string | null
   capacidad_pct:  number | null
   modo_detalle:   WarehouseModo
-  /** SCRUM-990 — bodega de SOLO CONSULTA (Zona Libre): no es inventario de Atlantic (el concepto se retira en la 5b-2). El backend lo manda siempre (`WarehouseController::index()` y `formatWarehouse()`); reemplaza la
-   * inferencia frágil por `modo_detalle === 'pendiente'`. */
-  solo_consulta:  boolean
 }
 
 export interface WarehouseKpis {

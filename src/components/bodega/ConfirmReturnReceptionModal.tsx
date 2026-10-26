@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { operativeWarehouses } from '@/lib/warehouses'
 import { isAxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
 import {
@@ -44,7 +43,7 @@ export default function ConfirmReturnReceptionModal({ id, onClose }: Props) {
   }, [data])
 
   useEffect(() => {
-    const warehouses = operativeWarehouses(warehousesData?.data ?? [])
+    const warehouses = warehousesData?.data ?? []
     if (warehouseId === '' && warehouses.length > 0) setWarehouseId(warehouses[0].id)
   }, [warehousesData, warehouseId])
 
@@ -105,7 +104,7 @@ export default function ConfirmReturnReceptionModal({ id, onClose }: Props) {
     })
   }
 
-  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
+  const warehouses = warehousesData?.data ?? []
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

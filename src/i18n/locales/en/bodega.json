@@ -140,10 +140,6 @@
         "required": "Write a location code.",
         "generic": "Could not save the location. Please try again."
       }
-    },
-    "zonaLibre": {
-      "badge": "View only",
-      "sinCatalogo": "This warehouse is read-only and has no external catalog connected."
     }
   },
   "kardex": {

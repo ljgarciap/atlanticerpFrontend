@@ -140,10 +140,6 @@
         "required": "Escribe un código de ubicación.",
         "generic": "No se pudo guardar la ubicación. Intenta de nuevo."
       }
-    },
-    "zonaLibre": {
-      "badge": "Solo consulta",
-      "sinCatalogo": "Esta bodega es de solo consulta y no tiene un catálogo externo conectado."
     }
   },
   "kardex": {

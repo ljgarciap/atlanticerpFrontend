@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { operativeWarehouses } from '@/lib/warehouses'
 import { isAxiosError } from 'axios'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -158,7 +157,7 @@ function ProductsTab() {
 
   const { data: families } = useBodegaInventoryFamiliesList()
   const { data: warehousesData } = useWarehousesList()
-  const warehouses = operativeWarehouses(warehousesData?.data ?? [])
+  const warehouses = warehousesData?.data ?? []
 
   const listParams: BodegaInventoryListParams = {
     search: query || undefined,

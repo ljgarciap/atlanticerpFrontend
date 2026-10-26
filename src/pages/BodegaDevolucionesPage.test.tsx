@@ -64,7 +64,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockedApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente', solo_consulta: false } as PhysicalWarehouse] })
+  mockedApi.warehouses.list.mockResolvedValue({ data: [{ id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' } as PhysicalWarehouse] })
 })
 
 describe('BodegaDevolucionesPage', () => {
