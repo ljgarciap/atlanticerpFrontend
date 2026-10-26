@@ -194,7 +194,8 @@ jobs:
       group: frontend-deploy-dev
       cancel-in-progress: false
     runs-on: ubuntu-22.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    # Fase 5a — desactivado hasta tener infraestructura real (sin EC2/dominio ni secretos, el job solo falla). Reactivar: quitar `false && `.
+    if: false && github.event_name == 'push' && github.ref == 'refs/heads/dev'
     environment:
       name: dev
       url: https://dev.atlanticerp.ai
@@ -262,7 +263,8 @@ jobs:
       group: frontend-deploy-test
       cancel-in-progress: false
     runs-on: ubuntu-22.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/test'
+    # Fase 5a — desactivado hasta tener infraestructura real (sin EC2/dominio ni secretos, el job solo falla). Reactivar: quitar `false && `.
+    if: false && github.event_name == 'push' && github.ref == 'refs/heads/test'
     environment:
       name: test
       url: https://test.atlanticerp.ai
@@ -326,7 +328,8 @@ jobs:
       group: frontend-deploy-prod
       cancel-in-progress: false
     runs-on: ubuntu-22.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # Fase 5a — desactivado hasta tener infraestructura real (sin EC2/dominio ni secretos, el job solo falla). Reactivar: quitar `false && `.
+    if: false && github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
       name: prod
       url: https://atlanticerp.ai

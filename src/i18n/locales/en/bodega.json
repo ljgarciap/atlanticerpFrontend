@@ -173,7 +173,8 @@
       "notSyncedHint": "Products will appear after the first automatic sync.",
       "error": "Could not load the Lafayette catalog.",
       "retry": "Retry",
-      "help": "Need a product in AtlanticERP? Create it manually as a AtlanticERP product from Purchasing; it is not copied from this list."
+      "help": "Need a product in AtlanticERP? Create it manually as a AtlanticERP product from Purchasing; it is not copied from this list.",
+      "sinCatalogo": "This warehouse is read-only and has no external catalog connected."
     }
   },
   "kardex": {

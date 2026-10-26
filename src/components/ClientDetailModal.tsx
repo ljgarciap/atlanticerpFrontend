@@ -11,6 +11,7 @@ import { IcoClose } from '@/components/icons'
 import CreateClientModal from '@/components/CreateClientModal'
 import ClientProjectsModal from '@/components/ClientProjectsModal'
 import SubClientIcgHistoryModal from '@/components/SubClientIcgHistoryModal'
+import { useModuleEnabled } from '@/lib/modules'
 import EditSubClientTaxDataModal from '@/components/EditSubClientTaxDataModal'
 import { usePermission } from '@/hooks/usePermission'
 
@@ -31,6 +32,7 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const [draft, setDraft] = useState({ name: '', role: 'client' as ContactRole, phone: '', email: '' })
   const [contactError, setContactError] = useState<string | null>(null)
   const [showIcgHistory, setShowIcgHistory] = useState(false)
+  const legacyIcgEnabled = useModuleEnabled('legacy_icg') // Fase 5a
   const [showEditTaxData, setShowEditTaxData] = useState(false)
   // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Gerencia/Felix).
   // SCRUM-1182 — los hooks se llaman SIEMPRE, todos, y se combinan después (`a || b` no ejecuta el segundo hook y cambia el número de hooks entre renders).
@@ -128,9 +130,11 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
           >
             {t('ventasDiseno:clients.detail.newQuote')}
           </Button>
-          <Button variant="secondary" onClick={() => setShowIcgHistory(true)}>
-            {t('ventasDiseno:clients.detail.icgHistory')}
-          </Button>
+          {legacyIcgEnabled && (
+            <Button variant="secondary" onClick={() => setShowIcgHistory(true)}>
+              {t('ventasDiseno:clients.detail.icgHistory')}
+            </Button>
+          )}
           {canEditTaxData && (
             <Button variant="secondary" onClick={() => setShowEditTaxData(true)}>
               {t('ventasDiseno:clients.editTaxData.editar')}

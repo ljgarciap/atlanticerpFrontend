@@ -543,6 +543,8 @@ export interface ComprasSettings {
   low_rating_threshold: number
   // SCRUM-206 — quién es "Gerencia" para el gate de aprobación (REQ-143), configurable.
   primary_approver_user_id: number | null
+  /** Fase 5a — proveedor fijo de las solicitudes de Zona Libre; null = el flujo no tiene proveedor configurado. */
+  zona_libre_provider_id: number | null
   // SCRUM-257 (REQ-194) — días "En revisión" antes de marcar un reclamo con la bandera de atención.
   claim_attention_days: number
   /** REQ-139 RN2 — días «Por aprobar» a partir de los cuales una orden es crítica (default 3). */

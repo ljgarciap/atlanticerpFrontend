@@ -20,6 +20,9 @@ export interface UserFlags {
   mark_approver?:        boolean
   /** SCRUM-1168 — este entorno tiene el concepto nuevo de cobros (cobro con o sin factura, compensaciones). Solo visual: el menú ofrece «Compensaciones». */
   cobros_v2?:            boolean
+  /** Fase 5a — módulos fuera del núcleo (config/modules.php del backend, apagados por defecto). Solo visual: apagado, el backend no registra sus rutas. */
+  legacy_icg?:           boolean
+  lafayette?:            boolean
 }
 
 /**

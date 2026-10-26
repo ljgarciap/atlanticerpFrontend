@@ -20,6 +20,10 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/hooks/usePermission', () => ({ usePermission: () => false }))
 
+// Fase 5a — el historial de ICG solo existe con el módulo `legacy_icg` encendido (bandera del backend).
+const moduleFlags = vi.hoisted(() => ({ legacyIcg: true }))
+vi.mock('@/lib/modules', () => ({ useModuleEnabled: () => moduleFlags.legacyIcg }))
+
 vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
     clients: {
@@ -147,6 +151,18 @@ describe('ClientDetailModal', () => {
     fireEvent.click(screen.getByText('common:actions.add'))
 
     expect(await screen.findByText('El correo electrónico debe ser una dirección de correo válida.')).toBeInTheDocument()
+  })
+
+  it('Fase 5a: sin el módulo legacy_icg no hay botón de Historial ICG', async () => {
+    moduleFlags.legacyIcg = false
+    try {
+      renderModal()
+      await screen.findByText('Delta Residencial')
+
+      expect(screen.queryByText('ventasDiseno:clients.detail.icgHistory')).not.toBeInTheDocument()
+    } finally {
+      moduleFlags.legacyIcg = true
+    }
   })
 
   it('SCRUM-762: abre el modal de Historial ICG del subcliente correcto', async () => {

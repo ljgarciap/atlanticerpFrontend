@@ -10,6 +10,7 @@ import {
 } from '@/hooks/useBodega'
 import { useComprasSettings } from '@/hooks/useCompras'
 import { useAuthStore } from '@/store/authStore'
+import { useModuleEnabled } from '@/lib/modules'
 import { usePermission } from '@/hooks/usePermission'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Button } from '@/components/ui/Button'
@@ -71,6 +72,7 @@ export default function BodegasPage() {
   const activeId = selectedId ?? operativeWarehouses[0]?.id ?? warehouses[0]?.id ?? null
   const activeWarehouse = warehouses.find(w => w.id === activeId)
   const isSoloConsulta = activeWarehouse?.solo_consulta === true
+  const lafayetteEnabled = useModuleEnabled('lafayette') // Fase 5a — el catálogo externo de Zona Libre solo existe con el módulo encendido
   // SCRUM-1021 — el vendedor entra con `bodega.warehouses.view` y SIN `bodega.read`: consulta pura, sin
   // ningún botón de acción (administrar ubicaciones, solicitudes de reubicación, "Reubicar" en tablas).
   // Quien sí tiene bodega.read ve la pantalla exactamente igual que antes.
@@ -180,7 +182,9 @@ export default function BodegasPage() {
       {/* SCRUM-990 — Zona Libre / Lafayette es de SOLO CONSULTA: su propia vista (aviso, 3 KPIs del catálogo externo, tabla paginada
           en el servidor) reemplaza por completo a los KPIs, filtros, chips, tabla de 15 columnas y paginación de una bodega operativa. */}
       {isSoloConsulta ? (
-        <ZonaLibreCatalogoTable kpis={data?.kpis} />
+        lafayetteEnabled
+          ? <ZonaLibreCatalogoTable kpis={data?.kpis} />
+          : <p className="text-sm text-slate-500 dark:text-slate-400">{t('bodega:warehouses.zonaLibre.sinCatalogo')}</p>
       ) : (
         <>
         {data && (
