@@ -9,6 +9,7 @@ import type { PaymentMethod, PaymentClientOption } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoSearch } from '@/components/icons'
+import { getRegion } from '@/lib/region'
 
 const COMPROBANTE_MAX_BYTES = 10 * 1024 * 1024
 const COMPROBANTE_ACCEPTED  = ['image/jpeg', 'image/png', 'application/pdf']
@@ -16,7 +17,7 @@ const COMPROBANTE_ACCEPTED  = ['image/jpeg', 'image/png', 'application/pdf']
 const METODOS_CONFIRMACION_INMEDIATA: PaymentMethod[] = ['efectivo', 'retencion_impuestos', 'ajuste_cuenta']
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 /** Texto de un input de monto → número con 2 decimales; vacío o inválido = 0. */

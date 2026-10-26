@@ -20,9 +20,10 @@ import RegistrarAbonoModal from '@/components/admin-contab/RegistrarAbonoModal'
 import QuoteViewerModal from '@/components/QuoteViewerModal'
 import GuiaEntregaModal from '@/components/GuiaEntregaModal'
 import { Pagination } from '@/components/ui/Pagination'
+import { getRegion } from '@/lib/region'
 
 function fmt(n: number): string {
-  const abs = new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(Math.abs(n))
+  const abs = new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(Math.abs(n))
   return n < 0 ? `-${abs}` : abs
 }
 

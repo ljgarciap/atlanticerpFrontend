@@ -20,6 +20,7 @@ import type {
 } from '@/types/adminContab'
 import { UserMultiSelect } from '@/components/UserMultiSelect'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { getRegion } from '@/lib/region'
 
 /**
  * Batch 2 del cuerpo principal de Admin&Cont (SCRUM-513→518, REQ-436→441) — Facturación.
@@ -31,7 +32,7 @@ import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
  */
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function mutationErrorMessage(err: unknown, fallback: string): string {

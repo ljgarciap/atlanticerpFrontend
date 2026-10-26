@@ -106,7 +106,9 @@
     "saveError": "Could not save the company profile",
     "validation": {
       "required": "This field is required.",
-      "invalidUrl": "Enter a valid URL."
+      "invalidUrl": "Enter a valid URL.",
+      "currency": "Enter a 3-letter uppercase currency code (e.g. USD).",
+      "locale": "Enter a valid regional format (e.g. en-US)."
     },
     "restricted": {
       "title": "Restricted access",
@@ -174,7 +176,9 @@
       "fields": {
         "moneda": "Currency",
         "anioFiscal": "Fiscal year",
-        "zonaHoraria": "Time zone"
+        "zonaHoraria": "Time zone",
+        "pais": "Country",
+        "locale": "Language and regional format"
       },
       "zonaHorariaOptions": {
         "americaPanama": "America/Panama (GMT-5)"

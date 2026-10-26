@@ -6,9 +6,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoChevronLeft, IcoFileText } from '@/components/icons'
 import type { ClientCollectionReport, ClientCollectionReportParams } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function money(n: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(n)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(n)
 }
 
 type Translate = (key: string, opts?: Record<string, unknown>) => string

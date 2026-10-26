@@ -125,6 +125,14 @@ export interface RedSocial {
   url: string
 }
 
+export interface RegionCountry {
+  code:     string
+  name:     string
+  currency: string
+  timezone: string
+  locale:   string
+}
+
 export interface CompanyProfile {
   /** Solo lectura SIEMPRE — viene de Configuración Fiscal (REQ-556), nunca un valor propio (RN1 REQ-562). */
   razon_social: string
@@ -134,17 +142,21 @@ export interface CompanyProfile {
   descripcion_corta: string
   sitio_web: string
   redes_sociales: RedSocial[]
-  /** Solo lectura SIEMPRE — configuración base ya confirmada (RN1 REQ-565). */
+  /** País, moneda, zona y locale son del tenant (Fase 6a): editables en modo edición. */
+  pais: string
   moneda: string
+  locale: string
+  /** Catálogo de países con su contexto regional por omisión (`config/regions.php` del backend). */
+  paises: RegionCountry[]
   /** Solo lectura SIEMPRE — configuración base ya confirmada (RN1 REQ-565). */
   anio_fiscal: string
-  /** Editable en modo edición — hoy el backend solo acepta 'America/Panama' (RN2 REQ-565). */
+  /** Editable en modo edición — zona IANA válida del tenant (Fase 6a; antes solo America/Panama, RN2 REQ-565). */
   zona_horaria: string
 }
 
 /** Campos editables desde el formulario — excluye los de solo lectura/gobernados por otra pantalla. */
 export type CompanyProfilePayload = Pick<
-  CompanyProfile, 'descripcion_corta' | 'sitio_web' | 'redes_sociales' | 'zona_horaria'
+  CompanyProfile, 'descripcion_corta' | 'sitio_web' | 'redes_sociales' | 'zona_horaria' | 'pais' | 'moneda' | 'locale'
 >
 
 export type LocationType = 'Bodega' | 'Showroom' | 'Oficina' | 'Otra'

@@ -6,10 +6,11 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoChevronLeft } from '@/components/icons'
 import type { InvoiceBookTipo } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function money(n: number): string {
   const sign = n < 0 ? '-' : ''
-  return sign + new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(Math.abs(n))
+  return sign + new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(Math.abs(n))
 }
 
 /**

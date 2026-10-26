@@ -3,14 +3,15 @@ import { useCommissionAccountStatement, useCommissionAccountStatementPdf } from 
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoPrinter } from '@/components/icons'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function monthLabel(mes: string): string {
   const [y, m] = mes.split('-').map(Number)
-  return new Date(y, m - 1, 1).toLocaleDateString('es-PA', { month: 'long', year: 'numeric' })
+  return new Date(y, m - 1, 1).toLocaleDateString(getRegion().locale, { month: 'long', year: 'numeric' })
 }
 
 interface Props {

@@ -12,9 +12,10 @@ import ArchitectCommissionDetailModal from '@/components/admin-contab/ArchitectC
 import type { ArchitectCommissionEstado, ArchitectCommissionEstadoCobroCliente, ArchitectCommissionProject, ArchitectCommissionRow } from '@/types/adminContab'
 import { formatDateShort } from '@/utils/dates'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 const ESTADO_PILL_CLASSES: Record<ArchitectCommissionEstado, string> = {

@@ -10,11 +10,12 @@ import RegistrarGastoCajaChicaModal from '@/components/admin-contab/RegistrarGas
 import GenerarReportePettyCashModal from '@/components/admin-contab/GenerarReportePettyCashModal'
 import DetalleReportePettyCashModal from '@/components/admin-contab/DetalleReportePettyCashModal'
 import DetalleLineaCajaChicaModal from '@/components/admin-contab/DetalleLineaCajaChicaModal'
+import { getRegion } from '@/lib/region'
 
 type Tab = 'pendientes' | 'reportes' | 'rechazados'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 const ESTADO_PILL_CLASS: Record<PettyCashEstadoLinea, string> = {

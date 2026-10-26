@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { UserInfo } from '@/types/auth'
 import i18n from '@/i18n'
 import { queryClient } from '@/lib/queryClient'
+import { setRegion } from '@/lib/region'
 
 // SCRUM-412 (REQ-342) — al cerrar sesión, resetea `atlanticerp_lang` al default del sistema ('es',
 // ver APP_LOCALE en el CLAUDE.md) en vez de dejar el valor que haya quedado en localStorage.
@@ -211,3 +212,10 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 )
+
+// Fase 6a — el contexto regional de la empresa (`user.region`) alimenta los formateadores de moneda, fecha y hora (`lib/region`).
+// Se publica al hidratar la sesión persistida y cada vez que cambia el usuario (login, `/auth/me`, perfil); sin sesión vuelve a Panamá.
+setRegion(useAuthStore.getState().user?.region)
+useAuthStore.subscribe((state, prev) => {
+  if (state.user?.region !== prev.user?.region) setRegion(state.user?.region)
+})

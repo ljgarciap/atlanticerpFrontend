@@ -13,9 +13,10 @@ import QuoteViewerModal from '@/components/QuoteViewerModal'
 import GuiaEntregaModal from '@/components/GuiaEntregaModal'
 import { formatDateShort } from '@/utils/dates'
 import type { ConfirmacionAjustes } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 // SCRUM-787 — `formatDate()` local eliminado, reemplazado por `formatDateShort()` compartido

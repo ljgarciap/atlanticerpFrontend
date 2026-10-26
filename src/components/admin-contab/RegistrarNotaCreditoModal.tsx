@@ -13,6 +13,7 @@ import type {
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoSearch, IcoTruck, IcoAlertTriangle, IcoPaperclip } from '@/components/icons'
+import { getRegion } from '@/lib/region'
 
 const SUBTIPOS_ANULACION: NotaCreditoSubtipoAnulacion[] = ['cancelado', 'correccion']
 const MOTIVOS_CORRECCION: NotaCreditoMotivoCorreccion[] = ['itbms', 'fecha', 'ambos']
@@ -25,7 +26,7 @@ function todayIso(): string {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function round2(value: number): number {

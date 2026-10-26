@@ -10,9 +10,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoAlertTriangle, IcoCheck, IcoPlus } from '@/components/icons'
 import VerSoporteCajaChicaModal from './VerSoporteCajaChicaModal'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function emptyForm(): UpdatePettyCashExpensePayload {

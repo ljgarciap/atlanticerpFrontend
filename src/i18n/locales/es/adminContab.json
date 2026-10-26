@@ -108,7 +108,9 @@
     "saveError": "No se pudo guardar los datos de la empresa",
     "validation": {
       "required": "Este campo es obligatorio.",
-      "invalidUrl": "Ingresa una URL válida."
+      "invalidUrl": "Ingresa una URL válida.",
+      "currency": "Ingresa un código de moneda de 3 letras en mayúsculas (ej. USD).",
+      "locale": "Ingresa un formato regional válido (ej. es-PA)."
     },
     "restricted": {
       "title": "Acceso restringido",
@@ -176,7 +178,9 @@
       "fields": {
         "moneda": "Moneda",
         "anioFiscal": "Año fiscal",
-        "zonaHoraria": "Zona horaria"
+        "zonaHoraria": "Zona horaria",
+        "pais": "País",
+        "locale": "Idioma y formato regional"
       },
       "zonaHorariaOptions": {
         "americaPanama": "América/Panamá (GMT-5)"

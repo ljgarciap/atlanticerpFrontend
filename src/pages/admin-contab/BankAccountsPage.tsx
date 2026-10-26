@@ -13,6 +13,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { IcoDollarSign, IcoEye, IcoPlus } from '@/components/icons'
 import BankAccountDetailModal from './BankAccountDetailModal'
 import type { BankAccount, BankMovement, CreateBankAccountPayload } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 /**
  * Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas Bancarias.
@@ -29,7 +30,7 @@ function mutationErrorMessage(err: unknown, fallback: string): string {
 }
 
 function formatCurrency(value: number, moneda: string): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: moneda || 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: moneda || 'USD' }).format(value)
 }
 
 function accountLabel(account: BankAccount, t: (key: string) => string): string {

@@ -11,6 +11,7 @@ import RegistrarCobroV2Modal from '@/components/admin-contab/RegistrarCobroV2Mod
 import HistorialCobrosPanel from '@/components/admin-contab/HistorialCobrosPanel'
 import DetalleCobroModal from '@/components/admin-contab/DetalleCobroModal'
 import SolicitudesReversoPanel from '@/components/admin-contab/SolicitudesReversoPanel'
+import { getRegion } from '@/lib/region'
 
 const VALID_ESTADOS: PaymentEstado[] = ['confirmado', 'esperando_confirmacion']
 function isPaymentEstado(v: string | null): v is PaymentEstado {
@@ -18,7 +19,7 @@ function isPaymentEstado(v: string | null): v is PaymentEstado {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 /**

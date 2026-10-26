@@ -1,3 +1,5 @@
+import { getRegion } from '@/lib/region'
+
 /**
  * SCRUM-787 — helper compartido para el bug real encontrado en Pre-QA de Batch 12 (Notas Crédito):
  * `new Date("2026-08-24")` (string "date-only", sin componente de hora) se interpreta como
@@ -24,29 +26,29 @@ export function parseDateOnly(iso: string): Date {
 /** Formato corto es-PA (`"24 ago 2026"`) usado en todo Admin&Cont — reemplaza los `formatDate()`
  *  duplicados de Notas Crédito y Cobros. */
 export function formatDateShort(iso: string): string {
-  return parseDateOnly(iso).toLocaleDateString('es-PA', { day: '2-digit', month: 'short', year: 'numeric' })
+  return parseDateOnly(iso).toLocaleDateString(getRegion().locale, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 /** Hora corta es-PA (`"2:34 p. m."`) para timestamps con hora real (`toIso8601String()`), a
  *  diferencia de `formatDateShort()`/`parseDateOnly()`, que son para fechas "date-only".
  *
- *  SCRUM-883 — `timeZone: 'America/Panama'` explícito: sin esto, la hora mostrada depende del
+ *  SCRUM-883 — `timeZone: getRegion().timezone` explícito: sin esto, la hora mostrada depende del
  *  reloj/timezone del sistema operativo del navegador de quien mira la pantalla, no de la hora de
  *  Panamá (criterio de aceptación explícito del ticket). No se toca `formatDateShort()`/
  *  `parseDateOnly()` — esas son fechas "date-only" sin componente de hora; forzar un timeZone ahí
  *  reintroduciría el bug de SCRUM-787 (off-by-one) para cualquier viewer fuera de Panamá, ya que
  *  `parseDateOnly()` depende de que la conversión se haga en el timezone LOCAL del navegador. */
 export function formatTimeShort(iso: string): string {
-  return new Date(iso).toLocaleTimeString('es-PA', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Panama' })
+  return new Date(iso).toLocaleTimeString(getRegion().locale, { hour: 'numeric', minute: '2-digit', timeZone: getRegion().timezone })
 }
 
 /** Fecha+hora corta es-PA (`"12 sep 2026, 2:34 p. m."`) para timestamps con hora real — mismo
  *  criterio de timezone explícito que `formatTimeShort()`. Reemplaza los `toLocaleDateString()`/
  *  `toLocaleString()` directos que hoy dependen del reloj del navegador (SCRUM-883). */
 export function formatDateTimeShort(iso: string): string {
-  return new Date(iso).toLocaleString('es-PA', {
+  return new Date(iso).toLocaleString(getRegion().locale, {
     day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
-    timeZone: 'America/Panama',
+    timeZone: getRegion().timezone,
   })
 }
 
@@ -60,7 +62,7 @@ export function formatDateTimeShort(iso: string): string {
  * Panamá), que es precisamente el bug que este ticket corrige.
  */
 export function formatDateFromTimestamp(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-PA', {
-    day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Panama',
+  return new Date(iso).toLocaleDateString(getRegion().locale, {
+    day: '2-digit', month: 'short', year: 'numeric', timeZone: getRegion().timezone,
   })
 }

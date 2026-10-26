@@ -14,6 +14,7 @@ import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
 import { firstNameOnly } from '@/lib/greeting'
 import { IcoDownload, IcoChevronDown } from '@/components/icons'
 import type { AprobacionItem, ChartMensualItem } from '@/types/gerencia'
+import { getRegion } from '@/lib/region'
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ function moduleLabel(type: string): string {
 }
 
 function todayStr(): string {
-  return new Date().toLocaleDateString('es-PA', {
+  return new Date().toLocaleDateString(getRegion().locale, {
     weekday: 'long', day: 'numeric', month: 'long',
   })
 }
@@ -909,7 +910,7 @@ export default function GerenciaPage() {
                 <div>
                   <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide mb-0.5">Creado</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {new Date(detailItem.created_at).toLocaleString('es-PA', { dateStyle: 'medium', timeStyle: 'short' })}
+                    {new Date(detailItem.created_at).toLocaleString(getRegion().locale, { dateStyle: 'medium', timeStyle: 'short' })}
                   </p>
                 </div>
               )}

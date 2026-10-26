@@ -10,6 +10,7 @@ import { isAxiosError } from 'axios'
 import { auditActivityApi, ACTIVITY_MAX_DAYS, ACTIVITY_TYPES } from '@/api/auditLogsApi'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { getRegion } from '@/lib/region'
 
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip)
 
@@ -21,7 +22,7 @@ const DAY_MS = 86_400_000
 
 /** Fecha de hoy (Y-m-d) en hora de Panamá, igual que interpreta el rango el backend (SCRUM-883). */
 function todayPanama(): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' })
+  return new Date().toLocaleDateString('en-CA', { timeZone: getRegion().timezone })
 }
 
 function shiftDays(ymd: string, days: number): string {
@@ -111,7 +112,7 @@ export default function AuditActivityPage() {
     staleTime: 60_000,
   })
 
-  const numberFmt = useMemo(() => new Intl.NumberFormat(i18n.language === 'en' ? 'en-US' : 'es-PA'), [i18n.language])
+  const numberFmt = useMemo(() => new Intl.NumberFormat(i18n.language === 'en' ? 'en-US' : getRegion().locale), [i18n.language])
   const n = (v: number) => numberFmt.format(v)
 
   function applyPreset(daysBack: number) {

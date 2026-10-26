@@ -15,9 +15,10 @@ import FiscalElectronicStatusBadge from './FiscalElectronicStatusBadge'
 import FeTransmisionesPanel from './FeTransmisionesPanel'
 import FeAccionFiscalBoton from './FeAccionFiscal'
 import type { FeAccionFiscal } from '@/types/adminContab'
+import { getRegion } from '@/lib/region'
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
 }
 
 function DetailField({ label, value }: { label: string; value: string }) {
