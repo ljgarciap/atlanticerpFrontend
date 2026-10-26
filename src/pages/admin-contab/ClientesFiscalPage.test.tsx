@@ -8,6 +8,7 @@ import type { FiscalDirectoryResult } from '@/types/ventasDiseno'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 let permisos: string[] = []

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
+import { useFiscalId } from '@/hooks/useFiscalId'
+import { fiscalIdText } from '@/lib/region'
 import { isAxiosError } from 'axios'
 import { useProvider, useUpdateProvider, useUploadProviderBankImage, useDeleteProviderBankImage, useProviderBankExtraction } from '@/hooks/useCompras'
 import { Button } from '@/components/ui/Button'
@@ -30,6 +32,7 @@ interface Props {
 
 export default function ProviderDetailModal({ providerId, onClose }: Props) {
   const { t } = useTranslation(['common', 'auth', 'compras'])
+  const fiscalId = useFiscalId() // Fase 6c
   const [editing, setEditing] = useState(false)
 
   const { data: provider, isLoading } = useProvider(providerId)
@@ -231,9 +234,9 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
                 {t('compras:providerForm.sections.general')}
               </h3>
               <Field label={t('compras:providerForm.fields.name')} name="name" required />
-              <div className="grid grid-cols-[1fr_6rem] gap-3">
-                <Field label={t('compras:providerForm.fields.taxId')} name="tax_id" />
-                <Field label={t('compras:providerForm.fields.taxIdDv')} name="tax_id_dv" />
+              <div className={fiscalId.uses_dv ? 'grid grid-cols-[1fr_6rem] gap-3' : 'grid grid-cols-1 gap-3'}>
+                <Field label={fiscalIdText(t('compras:providerForm.fields.taxId'), fiscalId)} name="tax_id" />
+                {fiscalId.uses_dv && <Field label={t('compras:providerForm.fields.taxIdDv')} name="tax_id_dv" />}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
