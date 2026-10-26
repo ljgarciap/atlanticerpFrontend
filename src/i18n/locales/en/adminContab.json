@@ -74,7 +74,8 @@
       "docs": {
         "factura": "Operation invoice enabled",
         "notaCredito": "Credit note enabled"
-      }
+      },
+      "sinProveedor": "This company has no electronic invoicing: the documents it generates are internal (non-fiscal) and are not sent to any authority."
     },
     "itbms": {
       "title": "ITBMS rates",

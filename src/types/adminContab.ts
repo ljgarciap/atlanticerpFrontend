@@ -3,7 +3,8 @@
 
 export type RegimenTributario = 'general' | 'pequeno_contribuyente'
 export type PacAmbiente = 'apagado' | 'production' | 'testing'
-export type PacProvider = 'digifact' | 'msl'
+/** `none` = país sin paquete fiscal (Fase 6b): documentos internos, nada viaja a ningún PAC. */
+export type PacProvider = 'digifact' | 'msl' | 'none'
 /** SCRUM-943 — estado real de Facturación Electrónica de una factura o Nota de Crédito puntual.
  *  `null` = certificación nunca corrida (factura previa a esta feature). `error_configuracion`
  *  NUNCA se muestra como "rechazado" — es un problema de configuración nuestro, no un rechazo de
@@ -92,12 +93,19 @@ export interface FiscalSettings {
   petty_cash_max_intentos_rechazo: number
   /** SCRUM-1019 — horas máximas para reintentar un documento electrónico antes de requerir acción manual. Entero 1–720, obligatorio (default 24 en el backend). */
   fe_reintento_max_horas: number
+  /** Fase 6b — ¿la empresa envía documentos a una autoridad fiscal? `false` con el proveedor `none` o el ambiente apagado. */
+  facturacion_electronica_activa?: boolean
+  /** Fase 6b — nombre legible del proveedor activo y país de la empresa; proveedores que sirven en ese país. */
+  pac_provider_label?: string
+  pais?: string
+  pac_providers_disponibles?: { key: PacProvider; label: string }[]
 }
 
 /** Campos editables desde el formulario — excluye los de solo lectura/gobernados por el backend. */
 export type FiscalSettingsPayload = Omit<
   FiscalSettings,
   'pac_last_sync_at' | 'pac_connection_status' | 'pac_provider' | 'primary_approver_user_id'
+  | 'facturacion_electronica_activa' | 'pac_provider_label' | 'pais' | 'pac_providers_disponibles'
 >
 
 export interface ItbmsRate {

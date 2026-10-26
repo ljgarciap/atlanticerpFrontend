@@ -88,6 +88,8 @@ type RateFormData = z.infer<ReturnType<typeof buildRateSchema>>
 export default function FiscalSettingsPanel() {
   const { t } = useTranslation(['common', 'adminContab'])
   const { data: settings, isLoading, isError, error } = useFiscalSettings()
+  // Fase 6b — país sin paquete fiscal: documentos internos, sin ambiente, conexión ni tipos de documento que configurar.
+  const sinProveedor = settings?.pac_provider === 'none'
   const restricted = isError && isForbidden(error)
 
   const updateSettings = useUpdateFiscalSettings()
@@ -283,8 +285,14 @@ export default function FiscalSettingsPanel() {
             <TextField label={t('adminContab:fiscal.facturacionElectronica.fields.proveedor')}>
               {/* Solo lectura SIEMPRE — el proveedor real es un dato paramétrico que se activa vía
                   comando (`admin-contab:set-pac-provider`), nunca editable desde acá (SCRUM-943). */}
-              <input value={settings.pac_provider.toUpperCase()} disabled className={inputClass(false)} />
+              <input value={settings.pac_provider_label ?? settings.pac_provider.toUpperCase()} disabled className={inputClass(false)} />
             </TextField>
+            {sinProveedor ? (
+              <p className="sm:col-span-2 text-xs text-slate-500 dark:text-slate-400" role="note">
+                {t('adminContab:fiscal.facturacionElectronica.sinProveedor')}
+              </p>
+            ) : (
+            <>
             <TextField label={t('adminContab:fiscal.facturacionElectronica.fields.ambiente')}>
               <Controller
                 control={control}
@@ -327,7 +335,10 @@ export default function FiscalSettingsPanel() {
                   : t('adminContab:fiscal.facturacionElectronica.connectionStatus.desconectado')}
               </span>
             </TextField>
+            </>
+            )}
           </div>
+          {!sinProveedor && (
           <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-700">
             <ToggleRow
               label={t('adminContab:fiscal.facturacionElectronica.docs.factura')}
@@ -342,6 +353,7 @@ export default function FiscalSettingsPanel() {
               disabled={!editMode}
             />
           </div>
+          )}
         </Card>
 
         {/* REQ-558/559 — Tasas de ITBMS */}
