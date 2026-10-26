@@ -444,7 +444,7 @@ test('SCRUM-858.3 — PDF del recibo: footer real con paginación "Página X de 
       // este entorno no se ejercita ese caso puntual acá (cubierto en
       // tests/Unit/AdminCont/PdfFooterTextTest.php del backend), pero si algo llegara a quedar
       // mal escapado el footer lo mostraría como basura visible — confirmamos que no aparece.
-      expect(text, 'El pie de página no debe mostrar solo "Atlantic" a secas — falta el texto estándar completo (dirección + sitio web)').toMatch(/Calle 57 Este/)
+      expect(text, 'El pie de página no debe mostrar solo "Atlantic" a secas — falta el texto estándar completo (dirección + sitio web)').toMatch(/Calle Ejemplo 123/)
       expect(text, 'El pie de página no debe tener basura de escape (comilla HTML-entity o backslash sobrante)').not.toMatch(/&#0?39;|\\'/)
     }
   } else {
