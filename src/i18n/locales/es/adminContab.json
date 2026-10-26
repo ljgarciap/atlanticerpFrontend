@@ -76,7 +76,8 @@
       "docs": {
         "factura": "Factura de operación habilitada",
         "notaCredito": "Nota de crédito habilitada"
-      }
+      },
+      "sinProveedor": "Esta empresa no tiene facturación electrónica: los documentos que se generan son internos (no fiscales) y no se envían a ninguna autoridad."
     },
     "itbms": {
       "title": "Tasas de ITBMS",

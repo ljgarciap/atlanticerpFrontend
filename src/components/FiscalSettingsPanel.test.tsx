@@ -77,6 +77,27 @@ beforeEach(() => {
 })
 
 describe('FiscalSettingsPanel', () => {
+  it('Fase 6b: muestra el nombre legible del proveedor que manda el backend', async () => {
+    mockedApi.fiscalSettings.get.mockResolvedValue(makeSettings({ pac_provider: 'msl', pac_provider_label: 'MSL (Panamá)' }))
+    renderPage()
+
+    expect(await screen.findByDisplayValue('MSL (Panamá)')).toBeDisabled()
+    expect(screen.queryByText('adminContab:fiscal.facturacionElectronica.sinProveedor')).not.toBeInTheDocument()
+  })
+
+  it('Fase 6b: sin proveedor fiscal (país sin paquete) explica que los documentos son internos y oculta ambiente y tipos de documento', async () => {
+    mockedApi.fiscalSettings.get.mockResolvedValue(makeSettings({
+      pac_provider: 'none', pac_provider_label: 'Sin facturación electrónica', facturacion_electronica_activa: false, pais: 'CO',
+    }))
+    renderPage()
+
+    expect(await screen.findByDisplayValue('Sin facturación electrónica')).toBeDisabled()
+    expect(screen.getByText('adminContab:fiscal.facturacionElectronica.sinProveedor')).toBeInTheDocument()
+    expect(screen.queryByText('adminContab:fiscal.facturacionElectronica.fields.ambiente')).not.toBeInTheDocument()
+    expect(screen.queryByText('adminContab:fiscal.facturacionElectronica.docs.factura')).not.toBeInTheDocument()
+    expect(screen.queryByText('adminContab:fiscal.facturacionElectronica.docs.notaCredito')).not.toBeInTheDocument()
+  })
+
   it('carga en modo solo lectura por defecto: campos deshabilitados y sin botón Guardar', async () => {
     renderPage()
 
