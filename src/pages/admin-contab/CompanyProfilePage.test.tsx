@@ -35,7 +35,7 @@ function makeProfile(overrides: Partial<CompanyProfile> = {}): CompanyProfile {
     razon_social: 'Atlantic S.A.',
     nombre_comercial: 'Atlantic',
     logo_url: null,
-    descripcion_corta: 'Diseño e iluminación',
+    descripcion_corta: 'Diseño e catalogación',
     sitio_web: 'https://atlantic.com.pa',
     redes_sociales: [],
     pais: 'PA',

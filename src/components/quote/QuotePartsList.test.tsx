@@ -197,7 +197,7 @@ describe('QuotePartsList — reordenar productos dentro de la partida (SCRUM-116
 })
 
 describe('QuotePartsList — nombre de la partida (SCRUM-1161)', () => {
-  const long = 'Iluminación general del lobby principal, mezanine, pasillos de servicio y áreas comunes del piso 3 — fase 2'
+  const long = 'Catalogación general del lobby principal, mezanine, pasillos de servicio y áreas comunes del piso 3 — fase 2'
 
   it('el campo muestra el nombre completo, se ajusta al contenido y no tiene recorte', () => {
     renderList([part(1, long, [item(11, 'A1')])])

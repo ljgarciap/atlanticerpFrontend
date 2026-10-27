@@ -1070,14 +1070,14 @@ describe('QuotePage', () => {
 
   it('agrega una partida nueva', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
-    mockedApi.quotes.parts.create.mockResolvedValue({ id: 1, name: 'Iluminación', position: 0, subtotal: 0, items: [] })
+    mockedApi.quotes.parts.create.mockResolvedValue({ id: 1, name: 'Catalogación', position: 0, subtotal: 0, items: [] })
     renderPage()
     await screen.findByText('Designer Demo')
 
-    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.newPartName'), { target: { value: 'Iluminación' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.newPartName'), { target: { value: 'Catalogación' } })
     fireEvent.click(screen.getByText('ventasDiseno:quote.addPart'))
 
-    await waitFor(() => expect(mockedApi.quotes.parts.create).toHaveBeenCalledWith(1, 'Iluminación'))
+    await waitFor(() => expect(mockedApi.quotes.parts.create).toHaveBeenCalledWith(1, 'Catalogación'))
   })
 
   // ── Cotización-C (REQ-043/044/045/046/047) ──────────────────────────────────

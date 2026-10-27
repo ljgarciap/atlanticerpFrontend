@@ -67,14 +67,14 @@ describe('SolicitudAjustePage', () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [
         {
-          id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+          id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
           bodega: 'Bodega Central', tipo: 'Sumar', cantidad: 5, motivo: 'Conteo',
           descripcion: null, responsable: null,
           evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
           estado: 'Pendiente', motivo_rechazo: null, resuelto_por: null,
         },
         {
-          id: 2, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+          id: 2, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
           bodega: 'Merma', tipo: 'Restar', cantidad: 2, motivo: 'Danado',
           descripcion: null, responsable: null,
           evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -101,7 +101,7 @@ describe('SolicitudAjustePage', () => {
   it('oculta Aprobar/Rechazar por completo en filas Pendiente cuando can_approve es false', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [{
-        id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega: 'Bodega Central', tipo: 'Sumar', cantidad: 5, motivo: 'Conteo',
         descripcion: null, responsable: null,
         evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -111,7 +111,7 @@ describe('SolicitudAjustePage', () => {
     })
 
     renderPage()
-    await screen.findByText('Candelabro')
+    await screen.findByText('Modelo')
     expect(screen.queryByText('bodega:adjustments.actions.approve')).not.toBeInTheDocument()
     expect(screen.queryByText('bodega:adjustments.actions.reject')).not.toBeInTheDocument()
   })
@@ -120,7 +120,7 @@ describe('SolicitudAjustePage', () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [
         {
-          id: 7, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+          id: 7, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
           bodega: 'Bodega Central', tipo: 'Sumar', cantidad: 5, motivo: 'Conteo',
           descripcion: null, responsable: null,
           evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -149,7 +149,7 @@ describe('SolicitudAjustePage', () => {
   it('rebote 2026-08-13 — columna "Ref. fábrica" nueva con la referencia, "Producto" muestra solo el nombre', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [{
-        id: 1, producto: { id: 1, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm' },
+        id: 1, producto: { id: 1, reference: 'NORDIC-40', description: 'Producto colgante Nordic 40cm' },
         bodega: 'Bodega Central', tipo: 'Sumar', cantidad: 5, motivo: 'Conteo',
         descripcion: null, responsable: null,
         evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -162,7 +162,7 @@ describe('SolicitudAjustePage', () => {
 
     const row = await screen.findByTestId('adjustment-row-1')
     expect(row).toHaveTextContent('NORDIC-40')
-    expect(row).toHaveTextContent('Lámpara colgante Nordic 40cm')
+    expect(row).toHaveTextContent('Producto colgante Nordic 40cm')
     expect(screen.getByText('bodega:adjustments.table.factoryReference')).toBeInTheDocument()
 
     // "Ref. fábrica" es la PRIMERA columna, antes de "Producto".
@@ -174,7 +174,7 @@ describe('SolicitudAjustePage', () => {
   it('rechazar sin motivo no permite confirmar', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [{
-        id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        id: 1, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega: 'Bodega Central', tipo: 'Sumar', cantidad: 5, motivo: 'Conteo',
         descripcion: null, responsable: null,
         evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -205,7 +205,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-428 — entrando por "+ Nueva solicitud" (producto libre) sí puede cambiar el producto elegido', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
 
     renderPage()
@@ -223,7 +223,7 @@ describe('SolicitudAjustePage', () => {
   it('agregar bodega deja de ofrecer bodegas ya usadas', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
 
     renderPage()
@@ -244,7 +244,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-428 (corrección de Gerencia Test 2026-08-13) — Motivo es un desplegable con exactamente 6 opciones fijas, ya no texto libre', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
 
     renderPage()
@@ -268,7 +268,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-428 — envía Motivo (desplegable) + Descripción/Responsable (opcionales) por separado en la solicitud', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
     mockedApi.adjustmentRequests.create.mockResolvedValue({ id: 5 })
 
@@ -310,7 +310,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-428 — sin elegir Motivo, no envía la solicitud (Descripción/Responsable nunca son obligatorios)', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
 
     renderPage()
@@ -336,7 +336,7 @@ describe('SolicitudAjustePage', () => {
   it('muestra la advertencia de unidades comprometidas al elegir Restar (RN5, hallazgo Pre-QA)', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
     mockedApi.adjustmentRequests.productWarehouseStock.mockResolvedValue({
       por_servir: 0, // concepto de Ventas & Diseño, deliberadamente 0 — no es la fuente de RN5
@@ -368,13 +368,13 @@ describe('SolicitudAjustePage', () => {
   it('RN5 regresión — un valor alto en productWarehouseStock.por_servir (concepto V&D) por sí solo NO dispara la advertencia', async () => {
     // Bug real encontrado en Pre-QA 2026-07-28: dev.atlanticerp.ai devolvía por_servir=6 en
     // /bodega/inventory (comprometido real) pero por_servir=0 en /adjustment-requests/products/
-    // {id}/warehouse-stock para el MISMO producto (LAMP-COL-001) — son conceptos distintos
+    // {id}/warehouse-stock para el MISMO producto (ITEM-COL-001) — son conceptos distintos
     // (ver docblock en SolicitudAjustePage.tsx). Este test fija el caso inverso: si algún día
     // warehouse-stock volviera a traer un por_servir>0 "de casualidad", eso NO debe ser lo que
     // dispare RN5 — solo el comprometido real de Bodega (`inventory.porServir`) debe hacerlo.
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
     mockedApi.adjustmentRequests.productWarehouseStock.mockResolvedValue({
       por_servir: 99, // concepto V&D con valor alto — no debe influir en RN5
@@ -402,7 +402,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-797 CA5 — "Ver detalle" abre el modal con descripción, responsable y evidencia (sin fetch adicional)', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [{
-        id: 42, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        id: 42, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega: 'Bodega Central', tipo: 'Restar', cantidad: 3, motivo: 'PRODUCTO_DANADO_ROTO',
         descripcion: 'Se rompió durante el traslado.', responsable: 'Jorge Pérez',
         evidencia_url: 'https://s3.example.com/evidencia.jpg', solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -425,7 +425,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-797 CA8/CA9 — "Ver detalle" de una línea rechazada muestra el motivo de rechazo', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue({
       data: [{
-        id: 43, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        id: 43, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega: 'Merma', tipo: 'Restar', cantidad: 1, motivo: 'ROBO_O_PERDIDA',
         descripcion: null, responsable: null,
         evidencia_url: null, solicitado_por: 'Jorge P.', fecha: '2026-07-21T10:00:00Z',
@@ -464,7 +464,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-797 RN6 — 409 al enviar la solicitud muestra el modal de duplicados', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
     mockedApi.adjustmentRequests.create.mockRejectedValue({
       isAxiosError: true,
@@ -484,7 +484,7 @@ describe('SolicitudAjustePage', () => {
   it('SCRUM-797 RN7 — confirmar el duplicado reintenta create() con confirmReplace y cierra el modal', async () => {
     mockedApi.adjustmentRequests.list.mockResolvedValue(EMPTY)
     mockedApi.adjustmentRequests.searchProducts.mockResolvedValue({
-      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' }],
+      data: [{ id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' }],
     })
     mockedApi.adjustmentRequests.create.mockRejectedValueOnce({
       isAxiosError: true,

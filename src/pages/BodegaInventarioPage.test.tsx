@@ -63,11 +63,11 @@ const WAREHOUSES: PhysicalWarehouse[] = [
 
 function makeRow(overrides: Partial<BodegaInventoryRow> = {}): BodegaInventoryRow {
   return {
-    id: 1, photo_url: null, factory_reference: 'CAND-1', reference: 'REF-1', name: 'Candelabro Cristal',
-    description: 'Candelabro de cristal, 5 brazos', barcode: '7501234567890', category: 'Iluminación de techo',
-    brand: 'LightCorp', family_id: 1, family_name: 'Candelabros', rotation: 'alta', warehouse_count: 2,
+    id: 1, photo_url: null, factory_reference: 'CAND-1', reference: 'REF-1', name: 'Modelo Cristal',
+    description: 'Modelo de cristal, 5 brazos', barcode: '7501234567890', category: 'Catalogación de techo',
+    brand: 'Proveedor Demo A', family_id: 1, family_name: 'Modelos', rotation: 'alta', warehouse_count: 2,
     disponible: 12, por_servir: 3, stock_total: 15, por_ingresar: 0, en_camino: 0,
-    reorder_point: 10, estado: 'disponible', provider_id: 1, provider_name: 'LightCorp', is_active: true,
+    reorder_point: 10, estado: 'disponible', provider_id: 1, provider_name: 'Proveedor Demo A', is_active: true,
     arrival_confirmation: { pending_bodega_action: false, awaiting_compras: false, confirmed_quantity: 0, confirmed_by_name: null },
     ...overrides,
   }
@@ -79,8 +79,8 @@ function listResponse(overrides: Partial<BodegaInventoryListResponse> = {}): Bod
     kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_por_servir: 3 },
     data: [makeRow()],
     meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
-    providers: [{ id: 1, name: 'LightCorp' }],
-    brands: ['LightCorp'],
+    providers: [{ id: 1, name: 'Proveedor Demo A' }],
+    brands: ['Proveedor Demo A'],
     ...overrides,
   }
 }
@@ -102,7 +102,7 @@ beforeEach(() => {
   // Fix Pre-QA 2026-07-23 — la pestana Familias/filtro Categoria de Bodega usan el endpoint
   // real `bodega.read` (`bodegaApi.inventory.families.list`), no `ventasDisenoApi` (requiere
   // `ventas_diseno.read`, que ningun rol de Bodega tiene -- ver docs/pre-qa/bloque-b2-ver-inventario-20260723.md).
-  mockedApi.inventory.families.list.mockResolvedValue({ data: [{ id: 1, name: 'Candelabros', description: null, product_count: 4 }] })
+  mockedApi.inventory.families.list.mockResolvedValue({ data: [{ id: 1, name: 'Modelos', description: null, product_count: 4 }] })
   mockedApi.inventory.list.mockResolvedValue(listResponse())
 })
 
@@ -124,7 +124,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
 
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
     expect(screen.getByText('bodega:inventory.title')).toBeInTheDocument()
-    expect(screen.getByText('Candelabro de cristal, 5 brazos')).toBeInTheDocument()
+    expect(screen.getByText('Modelo de cristal, 5 brazos')).toBeInTheDocument()
     // KPI "Total por servir" viene del backend, no del `por_servir` de Ventas & Diseño — hay 2
     // nodos con "3" (el KPI y la celda "Por servir" de la fila), ambos correctos.
     expect(screen.getAllByText('3')).toHaveLength(2)
@@ -153,9 +153,9 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     // Nombres de parámetro verificados contra `BodegaInventoryController::index()` real
     // (reconciliación de contrato 2026-07-23): `family_id`/`rotation`/`brand`. `provider_id`
     // (fix SCRUM-419/422 2026-07-28) viaja con el id que trae la faceta `providers`, no el nombre.
-    fireEvent.change(screen.getByPlaceholderText('bodega:inventory.filters.searchPlaceholder'), { target: { value: 'candelabro' } })
+    fireEvent.change(screen.getByPlaceholderText('bodega:inventory.filters.searchPlaceholder'), { target: { value: 'modelo' } })
     fireEvent.click(screen.getByText('common:actions.search'))
-    await waitFor(() => expect(mockedApi.inventory.list.mock.calls[mockedApi.inventory.list.mock.calls.length - 1]?.[0]).toMatchObject({ search: 'candelabro' }))
+    await waitFor(() => expect(mockedApi.inventory.list.mock.calls[mockedApi.inventory.list.mock.calls.length - 1]?.[0]).toMatchObject({ search: 'modelo' }))
 
     fireEvent.change(screen.getByDisplayValue('bodega:inventory.filters.category'), { target: { value: '1' } })
     await waitFor(() => expect(mockedApi.inventory.list.mock.calls[mockedApi.inventory.list.mock.calls.length - 1]?.[0]).toMatchObject({ family_id: 1 }))
@@ -172,13 +172,13 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     fireEvent.change(screen.getByDisplayValue('bodega:inventory.filters.provider'), { target: { value: '1' } })
     await waitFor(() => expect(mockedApi.inventory.list.mock.calls[mockedApi.inventory.list.mock.calls.length - 1]?.[0]).toMatchObject({ provider_id: 1 }))
 
-    fireEvent.change(screen.getByDisplayValue('bodega:inventory.filters.brand'), { target: { value: 'LightCorp' } })
+    fireEvent.change(screen.getByDisplayValue('bodega:inventory.filters.brand'), { target: { value: 'Proveedor Demo A' } })
 
     await waitFor(() => {
       const lastCall = mockedApi.inventory.list.mock.calls[mockedApi.inventory.list.mock.calls.length - 1]?.[0]
       expect(lastCall).toMatchObject({
-        search: 'candelabro', family_id: 1, estado: 'bajo_stock', rotation: 'media',
-        warehouse_id: 2, provider_id: 1, brand: 'LightCorp',
+        search: 'modelo', family_id: 1, estado: 'bajo_stock', rotation: 'media',
+        warehouse_id: 2, provider_id: 1, brand: 'Proveedor Demo A',
       })
     })
   })
@@ -218,25 +218,25 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     // forma que BodegaInventoryRow (ver docblock de BodegaInventoryFamilyProductRow), no el shape
     // reducido de 4 campos de antes.
     mockedApi.inventory.families.get.mockResolvedValue({
-      id: 1, name: 'Candelabros', description: null,
-      products: [makeRow({ id: 1, reference: 'REF-1', description: 'Candelabro Cristal' })],
+      id: 1, name: 'Modelos', description: null,
+      products: [makeRow({ id: 1, reference: 'REF-1', description: 'Modelo Cristal' })],
     })
     renderPage()
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('bodega:inventory.tabs.families'))
-    await waitFor(() => expect(screen.getByText('Candelabros')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Modelos')).toBeInTheDocument())
     // Etiqueta "[N] producto(s)" explícita (antes solo el número pelado) — mock de families.list
     // default trae product_count: 4 (ver beforeEach).
     expect(screen.getByText(/bodega:inventory\.families\.productsCount/)).toBeInTheDocument()
 
     // Acordeón: la lista de familias sigue visible tras expandir (no "navega" a otra pantalla).
-    const familyToggle = screen.getByRole('button', { name: /Candelabros/ })
+    const familyToggle = screen.getByRole('button', { name: /Modelos/ })
     fireEvent.click(familyToggle)
     await waitFor(() => expect(screen.getAllByText(/REF-1/).length).toBeGreaterThan(0))
-    // "Candelabros" sigue visible en el botón de la familia Y ahora también como celda de la fila
+    // "Modelos" sigue visible en el botón de la familia Y ahora también como celda de la fila
     // (family_name real) — 2 coincidencias esperadas, no una sola.
-    expect(screen.getAllByText('Candelabros').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('Modelos').length).toBeGreaterThanOrEqual(2)
     expect(screen.queryByText(/generatePurchase/i)).not.toBeInTheDocument()
 
     // Misma tabla de 14 columnas que "Productos" (headers reales, no la lista plana de antes).
@@ -247,7 +247,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     // Colapsar vuelve a ocultar el detalle sin perder la lista de familias.
     fireEvent.click(familyToggle)
     await waitFor(() => expect(screen.queryByText('bodega:inventory.table.rotation')).not.toBeInTheDocument())
-    expect(screen.getByText('Candelabros')).toBeInTheDocument()
+    expect(screen.getByText('Modelos')).toBeInTheDocument()
   })
 
   it('modal "Bodega(s)" reusa useProductWarehouseStock (bodega.read) para el desglose', async () => {
@@ -339,7 +339,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     mockedApi.inventory.list.mockResolvedValue(listResponse({ data: [makeRow({ en_camino: 5 })] }))
     mockedApi.inventory.enCamino.mockResolvedValue({
       data: [{
-        purchase_order_id: 10, quantity: 5, estimated_arrival_date: '2026-08-01', provider_name: 'LightCorp',
+        purchase_order_id: 10, quantity: 5, estimated_arrival_date: '2026-08-01', provider_name: 'Proveedor Demo A',
       }],
     })
     renderPage()
@@ -350,7 +350,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     const modalTitle = await screen.findByText(/enCaminoModal\.title/)
     const modal = modalTitle.closest('[class*="rounded-2xl"]') as HTMLElement
     await waitFor(() => expect(within(modal).getByText('2026-08-01')).toBeInTheDocument())
-    expect(within(modal).getByText('LightCorp')).toBeInTheDocument()
+    expect(within(modal).getByText('Proveedor Demo A')).toBeInTheDocument()
     // SCRUM-424 BUG 1 — el numero de orden de compra (purchase_order_id) ya viajaba en la
     // respuesta pero nunca se renderizaba, solo se usaba como React key.
     expect(within(modal).getByText(/enCaminoModal\.order/)).toBeInTheDocument()
@@ -392,7 +392,7 @@ describe('BodegaInventarioPage — Detalle de producto en 2 bloques (rebote SCRU
 
     // Clic en una celda que antes NO tenía onClick propio (Stock mínimo, valor 10 — único en la página).
     fireEvent.click(screen.getByText('10'))
-    expect(await screen.findByText('Candelabro Cristal')).toBeInTheDocument()
+    expect(await screen.findByText('Modelo Cristal')).toBeInTheDocument()
   })
 
   it('clickear un botón de acción dentro de la fila (Solicitar ajuste) NO abre también el detalle', async () => {
@@ -410,15 +410,15 @@ describe('BodegaInventarioPage — Detalle de producto en 2 bloques (rebote SCRU
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
     fireEvent.click(screen.getByText('REF-1'))
 
-    const heading = await screen.findByText('Candelabro Cristal') // nombre, encabezado
+    const heading = await screen.findByText('Modelo Cristal') // nombre, encabezado
     const modal = heading.closest('[class*="rounded-2xl"]') as HTMLElement
-    expect(within(modal).getByText('Iluminación de techo')).toBeInTheDocument() // categoría, debajo del nombre
+    expect(within(modal).getByText('Catalogación de techo')).toBeInTheDocument() // categoría, debajo del nombre
     expect(within(modal).getByText('bodega:inventory.detailModal.sectionInfo')).toBeInTheDocument()
     // REQ-361 Problema 2 — campos que antes faltaban por completo.
     expect(within(modal).getByText('bodega:inventory.detailModal.barcode')).toBeInTheDocument()
     expect(within(modal).getByText('7501234567890')).toBeInTheDocument()
     expect(within(modal).getByText('bodega:inventory.detailModal.description')).toBeInTheDocument()
-    expect(within(modal).getByText('Candelabro de cristal, 5 brazos')).toBeInTheDocument()
+    expect(within(modal).getByText('Modelo de cristal, 5 brazos')).toBeInTheDocument()
     expect(within(modal).getByText('bodega:inventory.table.status')).toBeInTheDocument()
     expect(within(modal).getByText('bodega:inventory.status.disponible')).toBeInTheDocument()
   })
@@ -460,7 +460,7 @@ describe('BodegaInventarioPage — Confirmar llegada física (SCRUM-427)', () =>
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('REF-1'))
-    await screen.findByText('Candelabro Cristal')
+    await screen.findByText('Modelo Cristal')
 
     fireEvent.click(screen.getByText('bodega:inventory.actions.confirmArrival'))
     const input = screen.getByRole('spinbutton')
@@ -506,7 +506,7 @@ describe('BodegaInventarioPage — Confirmar llegada física (SCRUM-427)', () =>
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('REF-1'))
-    await screen.findByText('Candelabro Cristal')
+    await screen.findByText('Modelo Cristal')
 
     expect(screen.queryByText('bodega:inventory.actions.confirmArrival')).not.toBeInTheDocument()
     expect(screen.queryByText('bodega:inventory.confirmArrivalModal.awaitingCompras')).not.toBeInTheDocument()
@@ -530,7 +530,7 @@ describe('BodegaInventarioPage — Ver ficha técnica (SCRUM-425)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('REF-1'))
-    await screen.findByText('Candelabro Cristal')
+    await screen.findByText('Modelo Cristal')
     expect(mockedApi.inventory.get).not.toHaveBeenCalled()
 
     fireEvent.click(screen.getByText('bodega:inventory.technicalSpec.button'))
@@ -546,7 +546,7 @@ describe('BodegaInventarioPage — Ver ficha técnica (SCRUM-425)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('REF-1'))
-    await screen.findByText('Candelabro Cristal')
+    await screen.findByText('Modelo Cristal')
     fireEvent.click(screen.getByText('bodega:inventory.technicalSpec.button'))
 
     expect(await screen.findByText('bodega:inventory.technicalSpec.empty')).toBeInTheDocument()

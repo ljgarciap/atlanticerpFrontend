@@ -108,7 +108,7 @@ describe('CompensacionesPage — lista por cliente', () => {
 
 describe('CompensacionClienteModal — cruce de un cliente', () => {
   it('SCRUM-1168 F5 — «Devolver» pide cuenta, referencia, motivo y comprobante antes de poder enviar, y manda un formulario', async () => {
-    mockedApi.bankAccounts.list.mockResolvedValue([{ id: 4, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1234' }] as never)
+    mockedApi.bankAccounts.list.mockResolvedValue([{ id: 4, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1234' }] as never)
     mockedApi.reversals.requestRefund.mockResolvedValue({ id: 1 } as never)
     await abrirCliente()
 

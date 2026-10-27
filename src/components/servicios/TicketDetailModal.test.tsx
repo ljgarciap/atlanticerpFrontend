@@ -49,7 +49,7 @@ function mockToast(showSpy: (msg: string, type?: 'success' | 'error') => void = 
 function makeDetail(overrides: Partial<TicketDetail> = {}): TicketDetail {
   return {
     id: 1, numero: 'INS-2026-0001', tipo: 'installation', subtipo: 'installation',
-    tipo_instalacion: 'internal', cliente_master: 'Torre Business Park', subcliente: 'Torre Business Park',
+    tipo_instalacion: 'internal', cliente_master: 'Sitio Demo 01', subcliente: 'Sitio Demo 01',
     email: null, sales_project_id: null, proyecto: null, contacto: null, telefono: null, direccion: null,
     scheduled_at: null, scheduled_ends_at: null, requerimientos_especiales: { catalog: [], otros: [] },
     productos: [], inspection_report_status: 'not_applicable', quote_status: 'not_applicable',

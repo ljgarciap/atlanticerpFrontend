@@ -37,7 +37,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     family: { sequence_in_family: null, total_in_family: null, badge: null },
     items_summary: { product_count: 1, unit_count: 2 },
     items: [
-      { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Candelabro', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 0, qty_delivered: 0, shortage_reason: null },
+      { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Modelo', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 0, qty_delivered: 0, shortage_reason: null },
     ],
     documents: [],
     eta_proveedor: null,
@@ -107,7 +107,7 @@ describe('OrderDetailModal', () => {
         contacto_cliente: 'Juan Pérez (6000-1234)',
         direccion_entrega: 'Av. Balboa, Ciudad de Panamá',
         items: [
-          { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: 'FAB-9001', description: 'Candelabro', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 0, qty_delivered: 0, shortage_reason: null },
+          { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: 'FAB-9001', description: 'Modelo', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 0, qty_delivered: 0, shortage_reason: null },
         ],
       }),
       isLoading: false,
@@ -146,8 +146,8 @@ describe('OrderDetailModal', () => {
     mockedUseOrderDetail.mockReturnValue({
       data: detail({
         items: [
-          { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Candelabro', location: 'A-1', qty_requested: 5, qty_reserved: 5, qty_picked: 5, qty_delivered: 3, shortage_reason: 'otra:Llega el martes con el proveedor' },
-          { id: 11, catalog_product_id: 2, reference: 'LAM-02', factory_reference: null, description: 'Lámpara', location: 'A-2', qty_requested: 2, qty_reserved: 2, qty_picked: 2, qty_delivered: 0, shortage_reason: 'sin_stock' },
+          { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Modelo', location: 'A-1', qty_requested: 5, qty_reserved: 5, qty_picked: 5, qty_delivered: 3, shortage_reason: 'otra:Llega el martes con el proveedor' },
+          { id: 11, catalog_product_id: 2, reference: 'LAM-02', factory_reference: null, description: 'Producto', location: 'A-2', qty_requested: 2, qty_reserved: 2, qty_picked: 2, qty_delivered: 0, shortage_reason: 'sin_stock' },
           { id: 12, catalog_product_id: 3, reference: 'FOC-03', factory_reference: null, description: 'Foco', location: 'A-3', qty_requested: 1, qty_reserved: 1, qty_picked: 1, qty_delivered: 1, shortage_reason: null },
         ],
       }),
@@ -195,7 +195,7 @@ describe('OrderDetailModal', () => {
     render(<OrderDetailModal orderId={1} onClose={vi.fn()} onOpenPickingSheet={vi.fn()} />)
 
     fireEvent.click(screen.getByTestId('toggle-items'))
-    expect(screen.getByText('Candelabro')).toBeInTheDocument()
+    expect(screen.getByText('Modelo')).toBeInTheDocument()
   })
 
   it('llama onClose al presionar Escape', () => {

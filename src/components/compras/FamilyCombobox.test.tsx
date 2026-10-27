@@ -58,17 +58,17 @@ describe('FamilyCombobox (SCRUM-237/240)', () => {
 
   it('escribir un nombre nuevo ofrece "Crear familia" y la crea+selecciona al elegirla', async () => {
     mockedComprasApi.families.create.mockResolvedValue({
-      id: 99, name: 'Rieles LED', description: null,
+      id: 99, name: 'Rieles XL', description: null,
     })
     const { onChange } = renderCombobox()
     const input = screen.getByLabelText('compras:inventory.detail.family', { exact: false })
     fireEvent.focus(input)
-    fireEvent.change(input, { target: { value: 'Rieles LED' } })
+    fireEvent.change(input, { target: { value: 'Rieles XL' } })
 
     await waitFor(() => expect(screen.getByText(/familyCreate/)).toBeInTheDocument())
     fireEvent.mouseDown(screen.getByText(/familyCreate/))
 
-    await waitFor(() => expect(mockedComprasApi.families.create).toHaveBeenCalledWith('Rieles LED'))
+    await waitFor(() => expect(mockedComprasApi.families.create).toHaveBeenCalledWith('Rieles XL'))
     await waitFor(() => expect(onChange).toHaveBeenCalledWith(99))
   })
 

@@ -34,7 +34,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrderSummary {
   return {
-    id: 12, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Lider Compras',
+    id: 12, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: null, origin_module: null, created_by_name: 'Lider Compras',
     status: 'por_aprobar', next_status: 'ordenado', is_critical: false, modality: 'directo',
     shipping_type: null, shipping_cost: null,
     estimated_arrival_date: null, requires_primary_approval: false, blocked_by_primary_approval: false,
@@ -53,7 +53,7 @@ function makeResponse(overrides: Partial<PurchaseOrderListResponse> = {}): Purch
   return {
     data: [makeSummary()],
     meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
-    filters: { creators: [], providers: [{ id: 1, name: 'LightCorp' }] },
+    filters: { creators: [], providers: [{ id: 1, name: 'Proveedor Demo A' }] },
     payment_kpis: { total_pending_balance: 100, sin_enviar: 1, por_pagar: 0, parcial: 0, completo: 0 },
     ...overrides,
   }
@@ -97,7 +97,7 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
     mockedComprasApi.orders.list.mockResolvedValue(makeResponse())
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'option' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A', { selector: 'option' })).toBeInTheDocument())
 
     expect(screen.getByPlaceholderText('compras:payments.filters.searchPlaceholder')).toBeInTheDocument()
 
@@ -114,7 +114,7 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
     mockedComprasApi.orders.list.mockResolvedValue(makeResponse())
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'option' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A', { selector: 'option' })).toBeInTheDocument())
 
     // Proveedor primero, mientras el <select> todavía tiene la opción cargada del fetch inicial
     // — cada cambio de filtro dispara un refetch con una queryKey nueva (React Query), así que
@@ -155,7 +155,7 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
     mockedComprasApi.orders.list.mockResolvedValue(makeResponse())
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'td' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A', { selector: 'td' })).toBeInTheDocument())
 
     const headers = screen.getAllByRole('columnheader').map(h => h.textContent)
     expect(headers).toEqual([
@@ -180,7 +180,7 @@ describe('PaymentsPage (SCRUM-250, corrección Gerencia Test)', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'td' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A', { selector: 'td' })).toBeInTheDocument())
     const cells = screen.getAllByRole('cell').map(c => c.textContent)
     expect(cells).toContain('$1,000.00') // Monto de la orden (solo productos)
     expect(cells).toContain('$1,230.00') // Monto a pagar

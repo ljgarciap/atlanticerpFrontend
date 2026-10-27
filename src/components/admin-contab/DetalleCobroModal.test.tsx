@@ -52,7 +52,7 @@ function makeDetail(overrides: Partial<PaymentDetail> = {}): PaymentDetail {
     metodo_pago: 'efectivo', referencia: 'TRF-88213', bank_account_id: 1, numero_documento_retencion: null,
     comentario_ajuste: null, estado: 'confirmado', created_at: '2026-07-02T00:00:00Z',
     cliente: 'Grupo Sensei', metodo_pago_label: 'Efectivo',
-    registrado_por: 'Contabilidad Test', bank_account: 'Banco General — Cuenta Corriente', tiene_comprobante: false,
+    registrado_por: 'Contabilidad Test', bank_account: 'Banco Demo A — Cuenta Corriente', tiene_comprobante: false,
     total_facturas: 6200, confirmacion: null,
     facturas: [
       {

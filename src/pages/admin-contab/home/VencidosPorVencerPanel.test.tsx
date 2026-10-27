@@ -45,7 +45,7 @@ describe('VencidosPorVencerPanel', () => {
         { numero: 'FAC-4410', cliente: 'Torres Pacífico', dias_vencido: 12, monto: 6200, fecha_vencimiento: '2026-08-15' },
       ],
       por_vencer: [
-        { numero: 'FAC-4421', cliente: 'Hotel Riu', dias_para_vencer: 3, monto: 9800, fecha_vencimiento: '2026-09-01' },
+        { numero: 'FAC-4421', cliente: 'Sitio Demo 02', dias_para_vencer: 3, monto: 9800, fecha_vencimiento: '2026-09-01' },
       ],
     }
     mockedApi.home.vencidosPorVencer.mockResolvedValue(data)
@@ -56,7 +56,7 @@ describe('VencidosPorVencerPanel', () => {
     expect(screen.getByText('adminContab:home.vencidosPorVencer.vencidos.texto:dias=12')).toBeInTheDocument()
 
     expect(screen.getByText('FAC-4421')).toBeInTheDocument()
-    expect(screen.getByText('Hotel Riu')).toBeInTheDocument()
+    expect(screen.getByText('Sitio Demo 02')).toBeInTheDocument()
     expect(screen.getByText('adminContab:home.vencidosPorVencer.porVencer.texto:dias=3')).toBeInTheDocument()
   })
 

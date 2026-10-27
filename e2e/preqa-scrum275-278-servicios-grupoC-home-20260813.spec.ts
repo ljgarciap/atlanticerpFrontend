@@ -41,15 +41,15 @@ test.describe('Grupo C — Home de Servicios', () => {
   test('REQ-213 — Insumos pendientes muestra el producto con "Por confirmar"', async ({ page }) => {
     await login(page, LIDER_SERVICIOS)
     await page.goto('/servicios/inicio')
-    await expect(page.getByText('Driver LED 24V QA')).toBeVisible({ timeout: 10000 })
-    const row = page.locator('tr', { hasText: 'Driver LED 24V QA' })
+    await expect(page.getByText('Driver XL 24V QA')).toBeVisible({ timeout: 10000 })
+    const row = page.locator('tr', { hasText: 'Driver XL 24V QA' })
     await expect(row.getByText('Por confirmar')).toBeVisible()
   })
 
   test('REQ-214 — Ver ticket abre modal de solo lectura con Agendar (lider_servicios) sin Editar/Cancelar', async ({ page }) => {
     await login(page, LIDER_SERVICIOS)
     await page.goto('/servicios/inicio')
-    const row = page.locator('tr', { hasText: 'Driver LED 24V QA' })
+    const row = page.locator('tr', { hasText: 'Driver XL 24V QA' })
     await row.getByRole('button', { name: /ver ticket/i }).click()
 
     const modal = page.locator('div.z-50').first()
@@ -65,7 +65,7 @@ test.describe('Grupo C — Home de Servicios', () => {
   test('REQ-214 — con un rol sin permiso de agendar, tampoco se ve Agendar en el modal de solo lectura', async ({ page }) => {
     await login(page, TECNICO)
     await page.goto('/servicios/inicio')
-    const row = page.locator('tr', { hasText: 'Driver LED 24V QA' })
+    const row = page.locator('tr', { hasText: 'Driver XL 24V QA' })
     await row.getByRole('button', { name: /ver ticket/i }).click()
 
     const modal = page.locator('div.z-50').first()

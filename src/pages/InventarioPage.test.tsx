@@ -47,12 +47,12 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeProduct(overrides: Partial<InventoryProduct> = {}): InventoryProduct {
   return {
-    id: 1, reference: 'REF-1', description: 'Bombillo E27', brand: null, photo_url: null,
+    id: 1, reference: 'REF-1', description: 'Artículo E27', brand: null, photo_url: null,
     category: null, rotation: null, reorder_point: null, warehouses: [],
     price_full: 20, stock_quantity: 10, por_servir: 0, disponible: 10, por_ingresar: 0, en_camino: 0,
     estado: 'disponible', is_active: true,
     cost: 12, margin_percent: 40, factory_reference: null,
-    provider_id: 1, provider_name: 'LightCorp', barcode: null,
+    provider_id: 1, provider_name: 'Proveedor Demo A', barcode: null,
     ...overrides,
   }
 }
@@ -101,7 +101,7 @@ beforeEach(() => {
     fuzzy: false,
     kpis: { total_providers: 1, average_rating: null, low_rating_count: 0, active_categories: 0, categories: [] },
     data: [
-      { id: 9, name: 'LightCorp', category: null, origin: 'internacional', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null },
+      { id: 9, name: 'Proveedor Demo A', category: null, origin: 'internacional', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null },
       { id: 10, name: 'Otra SA', category: null, origin: 'local', currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null },
     ],
     meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
@@ -113,7 +113,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
-      data: [{ id: 1, reference: 'REF-1', description: 'Bombillo E27', brand: null, photo_url: null,
+      data: [{ id: 1, reference: 'REF-1', description: 'Artículo E27', brand: null, photo_url: null,
         category: null, rotation: null, reorder_point: null, warehouses: [],
         price_full: 20, stock_quantity: 10, por_servir: 0, disponible: 10,
         por_ingresar: 0, en_camino: 0, provider_name: null,
@@ -611,7 +611,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     })
     mockedComprasApi.inventory.get.mockResolvedValue(makeProduct())
     mockedComprasApi.inventory.warehouseStock.mockResolvedValue({ data: [] })
-    mockedComprasApi.inventory.update.mockResolvedValue(makeProduct({ description: 'Bombillo LED E27' }))
+    mockedComprasApi.inventory.update.mockResolvedValue(makeProduct({ description: 'Artículo XL E27' }))
 
     renderPage()
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
@@ -627,8 +627,8 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     // así que ya no alcanza con buscar por displayValue (ambiguo entre los 2) — se identifica el
     // textarea de Descripción por su label específico.
     const descriptionInput = screen.getByLabelText('compras:inventory.detail.description', { selector: 'textarea' })
-    expect(descriptionInput).toHaveValue('Bombillo E27')
-    fireEvent.change(descriptionInput, { target: { value: 'Bombillo LED E27' } })
+    expect(descriptionInput).toHaveValue('Artículo E27')
+    fireEvent.change(descriptionInput, { target: { value: 'Artículo XL E27' } })
     fireEvent.click(screen.getByText('compras:inventory.actions.save'))
 
     // Escenario 2 (RN4): aparece el resumen de confirmación in-app — nada se guarda todavía.
@@ -638,7 +638,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.click(screen.getByText('compras:inventory.actions.confirm'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.update).toHaveBeenCalledWith(
-      1, expect.objectContaining({ reference: 'REF-1', description: 'Bombillo LED E27', brand: null }),
+      1, expect.objectContaining({ reference: 'REF-1', description: 'Artículo XL E27', brand: null }),
     ))
   })
 
@@ -664,7 +664,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.providers')} *`), { target: { value: 'Light' } })
     // El picker de proveedor usa onMouseDown (no onClick), mismo motivo que NewPurchaseOrderPage:
     // dispara ANTES del blur del input de búsqueda, que si no cerraría la lista primero.
-    fireEvent.mouseDown(await screen.findByText('LightCorp'))
+    fireEvent.mouseDown(await screen.findByText('Proveedor Demo A'))
   }
 
   // El mock de t() de este archivo concatena opts, no aplica acá (sin opts) — se define un alias
@@ -675,7 +675,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     name: string; factoryReference: string; reference: string; brand: string; barcode: string;
     category: string; cost: string; additionalCost: string; priceFull: string; reorderPoint: string;
   }> = {}) {
-    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.create.name')} *`), { target: { value: overrides.name ?? 'Lámpara nueva' } })
+    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.create.name')} *`), { target: { value: overrides.name ?? 'Producto nueva' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.factoryReference')} *`), { target: { value: overrides.factoryReference ?? 'FAB-1' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.reference')} *`), { target: { value: overrides.reference ?? 'REF-1' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.brand')} *`), { target: { value: overrides.brand ?? 'Marca X' } })
@@ -723,8 +723,8 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.objectContaining({
         // SCRUM-240 (rebote de Gerencia Test 2026-08-12) — Nombre y Descripción ya no comparten
-        // columna: "Lámpara nueva" va a `name`, `description` queda vacío (no se llenó en este test).
-        reference: 'REF-1', factory_reference: 'FAB-1', name: 'Lámpara nueva', description: '',
+        // columna: "Producto nueva" va a `name`, `description` queda vacío (no se llenó en este test).
+        reference: 'REF-1', factory_reference: 'FAB-1', name: 'Producto nueva', description: '',
         brand: 'Marca X', barcode: '7501234567890', category: 'bombillos',
         provider_id: 9, cost: 15, price_full: 30, other_cost: 2,
         initial_stock: [{ warehouse_id: 1, quantity: 5 }],
@@ -744,10 +744,10 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     mockedComprasApi.inventory.create.mockResolvedValue(makeProduct())
     await openCreateModalAndSelectProvider()
 
-    fillRequiredFields({ name: 'Lámpara colgante' })
+    fillRequiredFields({ name: 'Producto colgante' })
     fireEvent.change(
       screen.getByLabelText(`${t('compras:inventory.detail.description')} (${t('compras:inventory.create.optional')})`, { exact: false }),
-      { target: { value: 'Colgante de metal negro, 3 luces, incluye bombillos LED' } },
+      { target: { value: 'Colgante de metal negro, 3 luces, incluye artículos XL' } },
     )
     fillTechnicalSheetLink()
     selectPhoto()
@@ -756,8 +756,8 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     await waitFor(() => expect(mockedComprasApi.inventory.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Lámpara colgante',
-        description: 'Colgante de metal negro, 3 luces, incluye bombillos LED',
+        name: 'Producto colgante',
+        description: 'Colgante de metal negro, 3 luces, incluye artículos XL',
       }),
       expect.anything(),
       expect.anything(),
@@ -874,7 +874,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
         status: 422,
         data: {
           message: 'The reference has already been taken.',
-          errors: { reference: ["La referencia pública 'DUP-1' ya pertenece al producto 'Bombillo Original'."] },
+          errors: { reference: ["La referencia pública 'DUP-1' ya pertenece al producto 'Artículo Original'."] },
         },
       },
     })
@@ -885,7 +885,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     fireEvent.click(screen.getByText('compras:inventory.create.submit'))
 
-    expect(await screen.findByText("La referencia pública 'DUP-1' ya pertenece al producto 'Bombillo Original'.")).toBeInTheDocument()
+    expect(await screen.findByText("La referencia pública 'DUP-1' ya pertenece al producto 'Artículo Original'.")).toBeInTheDocument()
   })
 
   it('"Cancelar" con datos sin guardar pide confirmación antes de cerrar', async () => {
@@ -897,7 +897,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.getByText('compras:inventory.create.discardWarning')).toBeInTheDocument()
     // "Cancelar" en el aviso de confirmación vuelve al formulario, sin cerrar ni perder los datos.
     fireEvent.click(screen.getByText('compras:inventory.actions.cancel'))
-    expect(screen.getByDisplayValue('Lámpara nueva')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Producto nueva')).toBeInTheDocument()
   })
 
   it('SCRUM-242 — Generar orden con proveedor asignado permite continuar a Nueva Orden precargada', async () => {
@@ -930,7 +930,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(navigateMock).toHaveBeenCalledWith('/compras/ordenes/nueva', {
       state: {
         providerId: 7,
-        product: { id: 1, reference: 'REF-1', description: 'Bombillo E27', unitCost: 12, quantity: 4 },
+        product: { id: 1, reference: 'REF-1', description: 'Artículo E27', unitCost: 12, quantity: 4 },
       },
     })
   })
@@ -1382,7 +1382,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   }
 
   it('SCRUM-1126 — editar Información del producto permite cambiar Proveedores (varios) y Stock mínimo y los envía', async () => {
-    setupProductWithList(makeProduct({ reorder_point: 5, provider_id: 1, provider_name: 'LightCorp', providers: [{ id: 1, name: 'LightCorp' }] }))
+    setupProductWithList(makeProduct({ reorder_point: 5, provider_id: 1, provider_name: 'Proveedor Demo A', providers: [{ id: 1, name: 'Proveedor Demo A' }] }))
     await openProductDetail()
 
     fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
@@ -1399,7 +1399,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   })
 
   it('SCRUM-1126 — no se puede guardar la información del producto sin ningún proveedor', async () => {
-    setupProductWithList(makeProduct({ provider_id: 1, provider_name: 'LightCorp', providers: [{ id: 1, name: 'LightCorp' }] }))
+    setupProductWithList(makeProduct({ provider_id: 1, provider_name: 'Proveedor Demo A', providers: [{ id: 1, name: 'Proveedor Demo A' }] }))
     await openProductDetail()
 
     fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
@@ -1411,12 +1411,12 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
   it('SCRUM-1126 — el detalle muestra todos los proveedores asociados', async () => {
     setupProductWithList(makeProduct({
-      provider_id: 1, provider_name: 'LightCorp',
-      providers: [{ id: 1, name: 'LightCorp' }, { id: 2, name: 'Otra SA' }],
+      provider_id: 1, provider_name: 'Proveedor Demo A',
+      providers: [{ id: 1, name: 'Proveedor Demo A' }, { id: 2, name: 'Otra SA' }],
     }))
     await openProductDetail()
 
-    expect(screen.getAllByText('LightCorp, Otra SA').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Proveedor Demo A, Otra SA').length).toBeGreaterThan(0)
   })
 
   it('SCRUM-1126 — al crear un producto se pueden asignar varios proveedores y viajan en provider_ids', async () => {
@@ -1519,21 +1519,21 @@ describe('InventarioPage — filtro de Bodegas (SCRUM-743)', () => {
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
     fireEvent.change(screen.getByPlaceholderText('compras:inventory.filters.searchPlaceholder'), {
-      target: { value: 'bombillo' },
+      target: { value: 'artículo' },
     })
     fireEvent.click(screen.getByText('common:actions.search'))
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
-      expect.objectContaining({ search: 'bombillo' }),
+      expect.objectContaining({ search: 'artículo' }),
     ))
 
     fireEvent.click(screen.getByText('inventory.filters.warehousesAll'))
     fireEvent.click(screen.getByLabelText('Bodega Norte'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.list).toHaveBeenCalledWith(
-      expect.objectContaining({ search: 'bombillo', warehouse_ids: [2] }),
+      expect.objectContaining({ search: 'artículo', warehouse_ids: [2] }),
     ))
     // La búsqueda sigue en el input, no se perdió.
-    expect(screen.getByDisplayValue('bombillo')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('artículo')).toBeInTheDocument()
   })
 
   it('"Limpiar filtros" también resetea la selección de bodegas', async () => {

@@ -281,7 +281,7 @@ describe('VentasDisenoReportsPage', () => {
 
   it('clic en la fila de un cliente (no solo el ícono) navega a Pipeline filtrado en Aprobado (SCRUM-91)', async () => {
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
-      best_clients: [{ client_name: '[DEMO] Delta Residencial S.A.', client_id: 3, client_type: 'master', amount: 433.35 }],
+      best_clients: [{ client_name: '[DEMO] Cliente A1 S.A.', client_id: 3, client_type: 'master', amount: 433.35 }],
     }))
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(
@@ -295,7 +295,7 @@ describe('VentasDisenoReportsPage', () => {
       </MemoryRouter>,
     )
 
-    const row = await screen.findByText('[DEMO] Delta Residencial S.A.')
+    const row = await screen.findByText('[DEMO] Cliente A1 S.A.')
     fireEvent.click(row)
 
     expect(await screen.findByText('PIPELINE_PROBE')).toBeInTheDocument()

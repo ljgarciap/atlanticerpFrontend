@@ -31,8 +31,8 @@ vi.mock('@/api/adminContabApi', () => ({
 const mockedApi = vi.mocked(adminContabApi, true)
 
 const CLIENT: PaymentClientOption = { id: 7, name: 'Vitrio Retail, S.A.' }
-const CORRIENTE: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
-const TARJETA: BankAccount = { id: 2, banco: 'Banistmo', tipo_cuenta: 'tarjeta_credito', ultimos_4_digitos: '2222', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const CORRIENTE: BankAccount = { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const TARJETA: BankAccount = { id: 2, banco: 'Banco Demo B', tipo_cuenta: 'tarjeta_credito', ultimos_4_digitos: '2222', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvoicesResult {
   return {
@@ -72,7 +72,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.payments.searchClients.mockResolvedValue([CLIENT])
   mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices())
-  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: CORRIENTE.id, label: 'Banco General — Cuenta Corriente' })
+  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: CORRIENTE.id, label: 'Banco Demo A — Cuenta Corriente' })
   mockedApi.bankAccounts.list.mockResolvedValue([CORRIENTE, TARJETA])
 })
 
@@ -237,7 +237,7 @@ describe('RegistrarCobroModal — SCRUM-902 §4.4 saldo a favor a nivel Cliente 
 })
 
 describe('RegistrarCobroModal — REQ-466 método de pago y cuenta bancaria', () => {
-  it('Tarjeta autocompleta Banistmo — Tarjeta de Crédito', async () => {
+  it('Tarjeta autocompleta Banco Demo B — Tarjeta de Crédito', async () => {
     mockedApi.payments.defaultBankAccount.mockImplementation((metodo) =>
       Promise.resolve(metodo === 'tarjeta' ? { id: TARJETA.id, label: 'x' } : { id: CORRIENTE.id, label: 'x' }))
     renderModal()
@@ -252,7 +252,7 @@ describe('RegistrarCobroModal — REQ-466 método de pago y cuenta bancaria', ()
     })
   })
 
-  it('el método por defecto (Transferencia) ya trae Banco General — Cuenta Corriente sin tocar nada', async () => {
+  it('el método por defecto (Transferencia) ya trae Banco Demo A — Cuenta Corriente sin tocar nada', async () => {
     renderModal()
     await selectClient()
     fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))

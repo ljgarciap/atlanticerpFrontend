@@ -398,7 +398,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
   // ver docblock de `ProductWarehouseStockResponse` en `types/bodega.ts`) — NO el "comprometido"
   // real de Bodega (clientes/pedidos con unidades ya asignadas, el mismo dato que muestra el modal
   // "Por servir" de Ver Inventario, `commitment-detail`). Confirmado en vivo contra
-  // dev.atlanticerp.ai: LAMP-COL-001 tiene por_servir=6 en `/bodega/inventory` (comprometido real) pero
+  // dev.atlanticerp.ai: ITEM-COL-001 tiene por_servir=6 en `/bodega/inventory` (comprometido real) pero
   // `warehouse-stock` devolvía 0 para el MISMO producto — la advertencia de RN5 nunca se disparaba
   // para el caso real que el ticket pide cubrir. Se reemplaza por `useBodegaPorServir` (mismo
   // endpoint que ya usa `PorServirModal` en `BodegaInventarioPage.tsx`), sumando las líneas reales.

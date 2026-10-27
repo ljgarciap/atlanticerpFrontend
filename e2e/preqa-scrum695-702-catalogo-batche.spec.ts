@@ -45,7 +45,7 @@ test('REQ-615 — vista comercial sin costos, en la UI (network + DOM)', async (
 
   // Nota: no se agrega un chequeo de texto libre tipo /margen|costo total/i sobre el body —
   // primer intento de esta suite lo tuvo y dio falso positivo con fixtures demo reales
-  // (`VentasDisenoDemoSeeder`, ids 95/96: "Bombillo LED... (demo sustitutos — margen alto)"),
+  // (`VentasDisenoDemoSeeder`, ids 95/96: "Artículo XL... (demo sustitutos — margen alto)"),
   // texto de MARKETING del producto, no el campo financiero interno. El check de JSON de arriba
   // (claves exactas cost/margin_percent/etc.) es la fuente de verdad real de RN1/RN2.
 
@@ -92,7 +92,7 @@ test('REQ-617 — filtro Categoría y Familia son independientes (producto de ca
   await gotoCatalog(page)
 
   const categorySelect = page.locator('select').nth(0)
-  await categorySelect.selectOption({ label: /iluminación exterior|iluminacion exterior/i }).catch(async () => {
+  await categorySelect.selectOption({ label: /catalogación exterior|catalogación exterior/i }).catch(async () => {
     // fallback: pick whatever option contains "exterior"
     const options = await categorySelect.locator('option').allTextContents()
     const match = options.find(o => /exterior/i.test(o))

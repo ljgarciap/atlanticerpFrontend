@@ -46,7 +46,7 @@ function makeResult(overrides: Partial<SaldoFavorResult> = {}): SaldoFavorResult
       },
       {
         origen_tipo: 'abono', origen: 'Abono de más', master_client_id: 2, cliente: 'Restaurante Sensei',
-        sales_project_id: 7, proyecto: 'Costa del Este', invoice_id: null, factura: null, asociado_a: 'Proyecto: Costa del Este',
+        sales_project_id: 7, proyecto: 'Zona Demo', invoice_id: null, factura: null, asociado_a: 'Proyecto: Zona Demo',
         referencia: 'Cobro REC-055', fecha: '2026-07-01',
         monto_original: 120, monto_usado: 0, monto_disponible: 120, estado: 'disponible',
       },
@@ -92,10 +92,10 @@ describe('SaldoFavorPage', () => {
     renderPage()
     await screen.findByText('Vitrio Construcciones, S.A.')
 
-    fireEvent.change(screen.getByPlaceholderText('saldoFavor.filtroProyecto'), { target: { value: 'Costa del Este' } })
+    fireEvent.change(screen.getByPlaceholderText('saldoFavor.filtroProyecto'), { target: { value: 'Zona Demo' } })
 
     await waitFor(() => expect(mockedApi.saldoFavor.list).toHaveBeenLastCalledWith(
-      expect.objectContaining({ proyecto: 'Costa del Este', page: 1 }),
+      expect.objectContaining({ proyecto: 'Zona Demo', page: 1 }),
     ))
   })
 })

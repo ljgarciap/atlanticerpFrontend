@@ -28,7 +28,7 @@ function detail(overrides: Partial<OrderStatusDetail> = {}): OrderStatusDetail {
     telefono:      '6000-1234',
     fecha_estatus: '2026-07-23',
     items: [
-      { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Lámpara colgante', imagen: 'https://example.com/photo.jpg', solicitada: 10, entregado: 4, pendiente: 6 },
+      { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Producto colgante', imagen: 'https://example.com/photo.jpg', solicitada: 10, entregado: 4, pendiente: 6 },
     ],
     ...overrides,
   }
@@ -61,7 +61,7 @@ describe('OrderStatusDetailModal', () => {
 
     const row = screen.getByTestId('order-status-item-row')
     expect(row).toHaveTextContent('REF-100')
-    expect(row).toHaveTextContent('Lámpara colgante')
+    expect(row).toHaveTextContent('Producto colgante')
     expect(row).toHaveTextContent('10')
     expect(row).toHaveTextContent('4')
     expect(screen.getByTestId('order-status-item-pending')).toHaveTextContent('6')
@@ -71,8 +71,8 @@ describe('OrderStatusDetailModal', () => {
     mockedUseOrderStatusDetail.mockReturnValue({
       data: detail({
         items: [
-          { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Lámpara colgante', imagen: null, solicitada: 10, entregado: 10, pendiente: 0 },
-          { catalog_product_id: 8, reference: 'REF-200', factory_reference: 'FAB-9002', description: 'Riel LED', imagen: null, solicitada: 5, entregado: 5, pendiente: 0 },
+          { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Producto colgante', imagen: null, solicitada: 10, entregado: 10, pendiente: 0 },
+          { catalog_product_id: 8, reference: 'REF-200', factory_reference: 'FAB-9002', description: 'Riel XL', imagen: null, solicitada: 5, entregado: 5, pendiente: 0 },
         ],
       }),
       isLoading: false,
@@ -86,7 +86,7 @@ describe('OrderStatusDetailModal', () => {
 
   it('sin imagen muestra el ícono de fallback en vez de un <img> roto', () => {
     mockedUseOrderStatusDetail.mockReturnValue({
-      data: detail({ items: [{ catalog_product_id: 7, reference: 'REF-100', factory_reference: null, description: 'Lámpara colgante', imagen: null, solicitada: 10, entregado: 4, pendiente: 6 }] }),
+      data: detail({ items: [{ catalog_product_id: 7, reference: 'REF-100', factory_reference: null, description: 'Producto colgante', imagen: null, solicitada: 10, entregado: 4, pendiente: 6 }] }),
       isLoading: false,
     } as ReturnType<typeof useOrderStatusDetail>)
     render(<OrderStatusDetailModal orderId={42} onClose={vi.fn()} />)

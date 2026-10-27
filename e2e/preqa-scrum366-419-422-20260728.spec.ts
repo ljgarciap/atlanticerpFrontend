@@ -123,7 +123,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
 
     const options = await providerSelect(page).locator('option').allTextContents()
     expect(options.length).toBeGreaterThan(1)
-    expect(options.some(o => /lightcorp/i.test(o))).toBeTruthy()
+    expect(options.some(o => /proveedor demo a/i.test(o))).toBeTruthy()
   })
 
   test('BUG (marly) — el dropdown Marca tiene opciones reales, no solo el placeholder', async ({ page }) => {
@@ -133,7 +133,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
 
     const options = await brandSelect(page).locator('option').allTextContents()
     expect(options.length).toBeGreaterThan(1)
-    expect(options.some(o => /atlantic home/i.test(o))).toBeTruthy()
+    expect(options.some(o => /marca demo a/i.test(o))).toBeTruthy()
   })
 
   test('RN1 — filtrar por Marca no encoge el propio dropdown de facetas', async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    await brandSelect(page).selectOption({ label: 'Atlantic Home' })
+    await brandSelect(page).selectOption({ label: 'Marca Demo A' })
     await page.waitForTimeout(1200)
 
     const optionsAfter = await brandSelect(page).locator('option').allTextContents()
@@ -161,7 +161,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
 
     const bodyBefore = await page.locator('tbody').innerText()
 
-    await providerSelect(page).selectOption({ label: 'LightCorp' })
+    await providerSelect(page).selectOption({ label: 'Proveedor Demo A' })
     await page.waitForTimeout(1500)
 
     const bodyAfter = await page.locator('tbody').innerText()
@@ -186,11 +186,11 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     await page.waitForTimeout(1000)
     const afterEstado = await page.locator('tbody tr').count()
 
-    await providerSelect(page).selectOption({ label: 'LightCorp' })
+    await providerSelect(page).selectOption({ label: 'Proveedor Demo A' })
     await page.waitForTimeout(1000)
     const afterProvider = await page.locator('tbody tr').count()
-    // Confirmado en vivo (2026-07-28): Estado=Disponible da 20 filas, +Proveedor=LightCorp
-    // reduce a 2 (CAND-SAL-005, MESA-LAMP-015) — el proveedor sí resta sobre el estado ya
+    // Confirmado en vivo (2026-07-28): Estado=Disponible da 20 filas, +Proveedor=Proveedor Demo A
+    // reduce a 2 (CAND-SAL-005, MESA-ITEM-015) — el proveedor sí resta sobre el estado ya
     // aplicado, no lo reemplaza ni lo ignora.
     expect(afterProvider).toBeLessThan(afterEstado)
 
@@ -206,8 +206,8 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
   test('camino de ruptura — Proveedor + búsqueda de texto sin intersección da tabla vacía sin romper la UI', async ({ page }) => {
     // Combo garantizado vacío (a diferencia de adivinar una combinación Proveedor+Marca sin
     // solapamiento, que resultó ser un falso terreno — ver nota de la sesión: un intento inicial
-    // asumió que LightCorp + "Atlantic Home" no se solapaban, pero re-verificado en vivo SÍ
-    // hay intersección real (MESA-LAMP-015 es de esa marca) — usar un texto de búsqueda inexistente
+    // asumió que Proveedor Demo A + "Marca Demo A" no se solapaban, pero re-verificado en vivo SÍ
+    // hay intersección real (MESA-ITEM-015 es de esa marca) — usar un texto de búsqueda inexistente
     // combinado con un Proveedor real sí garantiza 0 resultados sin depender de qué marca tiene
     // cada producto.
     const errors: string[] = []
@@ -216,7 +216,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    await providerSelect(page).selectOption({ label: 'LightCorp' })
+    await providerSelect(page).selectOption({ label: 'Proveedor Demo A' })
     await page.waitForTimeout(1000)
     const search = page.getByPlaceholder('Buscar por referencia o descripción...')
     await search.fill('zzzzz-no-existe-zzzzz')
@@ -242,7 +242,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    for (const label of ['Iluminex SA', 'LightCorp', 'Zona Libre de Colón']) {
+    for (const label of ['Proveedor Demo B SA', 'Proveedor Demo A', 'Zona Libre de Colón']) {
       await providerSelect(page).selectOption({ label })
       await page.waitForTimeout(1000)
       const rowCount = await page.locator('tbody tr').count()
@@ -262,7 +262,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    await providerSelect(page).selectOption({ label: 'LightCorp' })
+    await providerSelect(page).selectOption({ label: 'Proveedor Demo A' })
     await page.waitForTimeout(1000)
     await page.reload()
     await page.waitForTimeout(1800)
@@ -490,15 +490,15 @@ test.describe('SCRUM-421 — tabla de catálogo, 15 columnas', () => {
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
 
-    // LAMP-COL-001: Disponible=18, Por servir=6 (comprometido), Stock Total=24 (confirmado en
+    // ITEM-COL-001: Disponible=18, Por servir=6 (comprometido), Stock Total=24 (confirmado en
     // vivo) — a diferencia de otros productos del catálogo con Por servir=0, este SÍ ejercita la
     // suma real del RN1, no un caso degenerado (18 + 0 = 18 no distingue una suma de un copy-paste).
     const search = page.getByPlaceholder('Buscar por referencia o descripción...')
-    await search.fill('LAMP-COL-001')
+    await search.fill('ITEM-COL-001')
     await page.getByRole('button', { name: 'Buscar', exact: true }).click()
     await page.waitForTimeout(1200)
 
-    const row = page.locator('tbody tr', { hasText: 'LAMP-COL-001' }).first()
+    const row = page.locator('tbody tr', { hasText: 'ITEM-COL-001' }).first()
     await expect(row).toBeVisible()
     const cells = await row.locator('td').allInnerTexts()
     // Índices (0-based): 0 imagen, 1 ref, 2 producto, 3 categoría, 4 rotación, 5 bodega(s),

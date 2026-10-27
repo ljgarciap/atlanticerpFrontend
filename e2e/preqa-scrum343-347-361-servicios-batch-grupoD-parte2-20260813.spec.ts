@@ -18,7 +18,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * Compras con Origen: Servicios" — el dato existía en BD (`origin_module`) pero nunca se exponía
  * ni se pintaba. Este spec verifica el badge ya corregido (test 6).
  *
- * PRODUCT_SEARCH ("Bombillo") es el único producto demo local con provider_id asignado
+ * PRODUCT_SEARCH ("Artículo") es el único producto demo local con provider_id asignado
  * (CatalogUatTestDataSeeder) — necesario para que REQ-274/277 puedan generar una orden real.
  */
 test.describe.configure({ mode: 'serial' })
@@ -26,7 +26,7 @@ test.describe.configure({ mode: 'serial' })
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 const API_BASE = process.env.PREQA_API_BASE_URL ?? 'http://localhost:8090'
 const DL_DIR = 'e2e/.tmp/preqa-servicios-grupoD-parte2'
-const PRODUCT_SEARCH = 'Bombillo decorativo'
+const PRODUCT_SEARCH = 'Artículo decorativo'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -101,7 +101,7 @@ test('4. Lider Servicios — REQ-275 Escenario 2: buscar un insumo que NO existe
   await expect(page.locator('[data-testid="insumo-create-modal"]')).toHaveCount(0)
 })
 
-test('5. Lider Servicios — REQ-275 Escenario 1: agregar "Bombillo decorativo" (mínimo=3, cantidad inicial=5) crea la fila en 0 disponible / Bajo mínimo', async ({ page }) => {
+test('5. Lider Servicios — REQ-275 Escenario 1: agregar "Artículo decorativo" (mínimo=3, cantidad inicial=5) crea la fila en 0 disponible / Bajo mínimo', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoInsumos(page)
 
@@ -158,7 +158,7 @@ test('7. Lider Compras (Compras) — la orden generada por Lider Servicios apare
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/08-compras-ver-ordenes.png`, fullPage: true })
 
-  const row = page.locator('tbody tr').filter({ hasText: 'LightCorp' }).first()
+  const row = page.locator('tbody tr').filter({ hasText: 'Proveedor Demo A' }).first()
   await expect(row).toBeVisible()
   await expect(row.getByText('Origen: Servicios')).toBeVisible()
 })
@@ -167,11 +167,11 @@ test('8. Lider Compras — avanza la orden hasta Recibido (Pendiente → Ordenad
   await login(page, 'lidercompras@test.com')
 
   const token = await apiToken(request, 'lidercompras@test.com')
-  const listRes = await request.get(`${API_BASE}/api/compras/orders?search=LightCorp`, {
+  const listRes = await request.get(`${API_BASE}/api/compras/orders?search=Proveedor Demo A`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   const { data: orders } = await listRes.json()
-  const order = orders.find((o: { provider_name: string }) => o.provider_name === 'LightCorp')
+  const order = orders.find((o: { provider_name: string }) => o.provider_name === 'Proveedor Demo A')
   expect(order).toBeTruthy()
   const orderId = order.id
   console.log('[REQ-277] orden de Servicios detectada, id:', orderId)
@@ -180,7 +180,7 @@ test('8. Lider Compras — avanza la orden hasta Recibido (Pendiente → Ordenad
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/09-orden-detalle-pendiente.png`, fullPage: true })
 
-  // LightCorp (único proveedor con provider_id en el catálogo demo local) es internacional →
+  // Proveedor Demo A (único proveedor con provider_id en el catálogo demo local) es internacional →
   // secuencia completa de 5 pasos (Pendiente → Ordenado → En tránsito → En aduana → En tránsito
   // local → Recibido), no la de 3 pasos de un proveedor local. Avanza hasta "En tránsito local"
   // (RN de Ingreso de Mercancía: solo se puede recibir en esa etapa), haciendo click mientras el

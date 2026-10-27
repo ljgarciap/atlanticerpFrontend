@@ -34,7 +34,7 @@ vi.mock('@/api/adminContabApi', () => ({
 
 const mockedApi = vi.mocked(adminContabApi, true)
 
-const CORRIENTE: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const CORRIENTE: BankAccount = { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 function makeAbono(overrides: Partial<Abono> = {}): Abono {
   return {
@@ -69,7 +69,7 @@ beforeEach(() => {
   mockedApi.abonos.facturas.mockResolvedValue([])
   mockedApi.abonos.invoicesForSubClient.mockResolvedValue([])
   mockedApi.payments.searchClients.mockResolvedValue([{ id: 3, name: 'Torres Pacífico' }])
-  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: 1, label: 'Banco General — Cuenta Corriente' })
+  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: 1, label: 'Banco Demo A — Cuenta Corriente' })
   mockedApi.bankAccounts.list.mockResolvedValue([CORRIENTE])
 })
 

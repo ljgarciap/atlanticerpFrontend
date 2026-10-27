@@ -32,7 +32,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeProvider(overrides: Partial<ProviderDetail> = {}): ProviderDetail {
   return {
-    id: 1, name: 'LightCorp', tax_id: null, category: 'china', origin: 'internacional',
+    id: 1, name: 'Proveedor Demo A', tax_id: null, category: 'china', origin: 'internacional',
     currency: 'USD', is_active: true, rating: null, last_purchase_at: null,
     contact_name: null, whatsapp: null, phone: null, email: null,
     address: null, country: null, bank_name: null,
@@ -248,7 +248,7 @@ describe('ProviderFormDrawer — imagen de respaldo bancario (SCRUM-819)', () =>
         id: 'a1', status: 'completed', error: null,
         result: {
           fields_found: ['bank_name', 'bank_account_number'],
-          bank_name: 'Banco General', bank_account_number: '04-01-01-123456-7',
+          bank_name: 'Banco Demo A', bank_account_number: '04-01-01-123456-7',
           bank_swift: null, bank_beneficiary: null, confidence: 'alta',
         },
       })
@@ -278,7 +278,7 @@ describe('ProviderFormDrawer — imagen de respaldo bancario (SCRUM-819)', () =>
     // timeout explícito mayor a eso, el default de waitFor (1s) no alcanza.
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(created), { timeout: 3000 })
     const bankNameInput = document.querySelector('input[name="bank_name"]') as HTMLInputElement
-    expect(bankNameInput.value).toBe('Banco General')
+    expect(bankNameInput.value).toBe('Banco Demo A')
   })
 
   it('con proveedor ya guardado y sin imagen, seleccionar un archivo llama a uploadBankImage', async () => {
@@ -332,7 +332,7 @@ describe('ProviderFormDrawer — imagen de respaldo bancario (SCRUM-819)', () =>
       category: 'china', bank_image: { url: 'https://s3.test/foto.jpg', filename: 'foto.jpg' },
     }))
     const { container } = renderDrawer(1)
-    await screen.findByDisplayValue('LightCorp')
+    await screen.findByDisplayValue('Proveedor Demo A')
 
     const categorySelect = document.querySelector('select[name="category"]') as HTMLSelectElement
     await waitFor(() => expect(categorySelect.value).toBe('china'))

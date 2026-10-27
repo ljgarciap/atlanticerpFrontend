@@ -282,7 +282,7 @@ describe('OrderCardTile', () => {
         status_message: 'Factura F-0099 generada por Administración & Contabilidad.',
         invoice_numero: 'F-0099', subtotal: 100, itbms: 7, total: 107, monto: 107,
         saldo_aplicado: 0, total_a_pagar: 107,
-        items: [{ descripcion: 'Lámpara LED', cantidad: 2, precio_unitario: 50, subtotal: 100 }],
+        items: [{ descripcion: 'Producto XL', cantidad: 2, precio_unitario: 50, subtotal: 100 }],
       })
     })
     render(
@@ -292,7 +292,7 @@ describe('OrderCardTile', () => {
     fireEvent.click(screen.getByTestId('invoice-view-button'))
 
     expect(screen.queryByTestId('invoice-status-message')).not.toBeInTheDocument()
-    expect(screen.getByText('Lámpara LED')).toBeInTheDocument()
+    expect(screen.getByText('Producto XL')).toBeInTheDocument()
     expect(screen.getByText('adminContab:facturacion.detalle.verPdf')).toBeInTheDocument()
   })
 

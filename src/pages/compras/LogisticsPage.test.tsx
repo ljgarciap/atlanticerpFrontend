@@ -55,7 +55,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrderSummary {
   return {
-    id: 42, provider_id: 1, provider_name: 'LightCorp', provider_origin: 'internacional', origin_module: null, created_by_name: 'Ana',
+    id: 42, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: 'internacional', origin_module: null, created_by_name: 'Ana',
     status: 'en_transito', next_status: 'en_aduana', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
     estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
@@ -315,7 +315,7 @@ describe('LogisticsPage — subir documento exige compras.edit (SCRUM-773)', () 
 
     renderPage()
 
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     expect(screen.queryByText('compras:logistics.documents.upload')).not.toBeInTheDocument()
   })
 
@@ -358,7 +358,7 @@ describe('LogisticsPage — Recepción y enlace a Ingreso de Mercancía (REQ-157
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:logistics.card.goodsReceiptLink')).not.toBeInTheDocument()
   })
 
@@ -490,7 +490,7 @@ describe('LogisticsPage — botón de avance solo para Compras (REQ-154 RN7)', (
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText(/compras:logistics.card.completeStage/)).not.toBeInTheDocument()
   })
 
@@ -579,7 +579,7 @@ describe('LogisticsPage — remanente pendiente (SCRUM-208, rediseño 2026-08-15
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.advanceRemainderCta')).toBeNull()
   })
 
@@ -594,7 +594,7 @@ describe('LogisticsPage — remanente pendiente (SCRUM-208, rediseño 2026-08-15
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.confirmPendingReceiptsCta')).toBeNull()
     expect(screen.queryByText('compras:orders.actions.advanceRemainderCta')).toBeNull()
   })
@@ -650,7 +650,7 @@ describe('LogisticsPage — confirmar pendientes a Inventario (SCRUM-208, redise
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.confirmPendingReceiptsCta')).toBeInTheDocument()
     expect(screen.getByText('compras:orders.actions.advanceRemainderCta')).toBeInTheDocument()
   })

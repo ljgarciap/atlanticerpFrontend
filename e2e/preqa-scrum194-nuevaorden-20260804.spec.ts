@@ -71,9 +71,9 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
   const pubRef = `PREQA-PUB-${STAMP}`
   const facRef = `PREQA-FAB-${STAMP}`
 
-  await test.step('0) Setup — crea producto persistido en catalogo (LightCorp) para usar como colision', async () => {
+  await test.step('0) Setup — crea producto persistido en catalogo (Proveedor Demo A) para usar como colision', async () => {
     await login(page)
-    await selectProvider(page, 'LightCorp')
+    await selectProvider(page, 'Proveedor Demo A')
     await openNewProductModal(page)
     await fillNewProductForm(page, {
       reference: pubRef,
@@ -101,7 +101,7 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
   })
 
   await test.step('1) Visual — campos del modal "+ Producto nuevo" contra el mockup 2H', async () => {
-    await selectProvider(page, 'LightCorp')
+    await selectProvider(page, 'Proveedor Demo A')
     await openNewProductModal(page)
     await page.screenshot({ path: 'test-results/scrum194-01-modal-campos.png' })
     for (const label of [
@@ -135,7 +135,7 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
     await openNewProductModal(page)
     await fillNewProductForm(page, {
       reference: `PREQA-PUB-2A-${STAMP}`,
-      factoryReference: facRef, // ya existe para LightCorp (paso 0)
+      factoryReference: facRef, // ya existe para Proveedor Demo A (paso 0)
     })
     await clickModalAgregar(page)
     await expect(page.getByText('Esta referencia ya existe para este proveedor')).toBeVisible()
@@ -144,11 +144,11 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
   })
 
   await test.step('3b) Escenario 2 — referencia de fabrica repetida, proveedor DISTINTO SI se permite', async () => {
-    await selectProvider(page, 'Iluminex SA')
+    await selectProvider(page, 'Proveedor Demo B SA')
     await openNewProductModal(page)
     await fillNewProductForm(page, {
       reference: `PREQA-PUB-2B-${STAMP}`,
-      factoryReference: facRef, // pertenece a LightCorp, NO a Iluminex
+      factoryReference: facRef, // pertenece a Proveedor Demo A, NO a Proveedor Demo B
     })
     await clickModalAgregar(page)
     await expect(page.getByRole('heading', { name: 'Producto nuevo' })).not.toBeVisible({ timeout: 5000 })
@@ -181,7 +181,7 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
   })
 
   await test.step('5) Escenario 4 — falla de red en el precheck NO bloquea agregar la linea', async () => {
-    await selectProvider(page, 'LightCorp')
+    await selectProvider(page, 'Proveedor Demo A')
     await page.route('**/api/compras/products**', route => route.abort('failed'))
     await openNewProductModal(page)
     await fillNewProductForm(page, { reference: `PREQA-NETFAIL-${STAMP}` })
@@ -193,7 +193,7 @@ test('SCRUM-194 — Producto nuevo: validacion de referencia duplicada (5 escena
   })
 
   await test.step('6) Escenario 5 — el error de duplicado se limpia al editar el campo', async () => {
-    await selectProvider(page, 'LightCorp')
+    await selectProvider(page, 'Proveedor Demo A')
     await openNewProductModal(page)
     await fillNewProductForm(page, { reference: pubRef }) // duplicado conocido
     await clickModalAgregar(page)

@@ -69,7 +69,7 @@ test('crear ticket: buscador de productos filtra por proyecto tras elegir Client
 
   await selectFixtureProject(page)
   const filteredResult = await openProductPickerAndAssertFiltered(
-    page, /Buscar producto en inventario/i, 'lampara canasta', 'ICG-62272',
+    page, /Buscar producto en inventario/i, 'producto canasta', 'ICG-62272',
   )
 
   // Elegimos el único resultado filtrado — cierra el picker (mismo flujo real: pickProduct()
@@ -122,7 +122,7 @@ test('ticket viejo sin proyecto (sales_project_id null): el buscador de producto
   await expect(page.getByRole('heading', { name: /buscar producto en inventario/i })).toBeVisible()
 
   const searchInput = page.locator('input[type="text"]').last()
-  await searchInput.fill('lampara canasta')
+  await searchInput.fill('producto canasta')
   await page.waitForTimeout(700)
 
   // Sin sales_project_id, el picker debe comportarse como catálogo completo — AMBOS productos
@@ -150,7 +150,7 @@ test('regresion: item Producto de Cotizacion de Servicio (ticket 25, OTRO proyec
   await expect(page.getByRole('heading', { name: /elegir producto del cat[aá]logo/i })).toBeVisible()
 
   const searchInput = page.locator('input[type="text"]').last()
-  await searchInput.fill('lampara canasta')
+  await searchInput.fill('producto canasta')
   await page.waitForTimeout(700)
 
   const results = page.locator('ul li button')

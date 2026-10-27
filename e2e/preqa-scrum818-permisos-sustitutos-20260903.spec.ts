@@ -34,7 +34,7 @@ test('Hallazgo 1 — Gerencia (Gerencia, acceso solo vía rol) VE la solicitud P
   // Antes del fix: "No hay solicitudes de reemplazo registradas" pese a existir. Varias filas
   // comparten el mismo producto original (fixtures de esta sesión) — solo importa que la lista
   // no esté vacía y que el botón de aprobar exista (Pendiente Gerencia + can_decide=true).
-  await expect(page.getByText('PreQA818 Lampara Original').first()).toBeVisible()
+  await expect(page.getByText('PreQA818 Producto Original').first()).toBeVisible()
   await expect(page.getByRole('button', { name: /aprobar/i }).first()).toBeVisible()
 })
 
@@ -46,12 +46,12 @@ test('Hallazgo 2 — Gerencia encuentra el proyecto al buscar sustituto (picker 
   await page.getByRole('button', { name: 'Buscar sustituto' }).click()
 
   // 1) Elegir el producto original.
-  await page.getByPlaceholder('Buscar producto…').fill('PreQA818 Lampara Original')
+  await page.getByPlaceholder('Buscar producto…').fill('PreQA818 Producto Original')
   await page.waitForTimeout(500)
   await page.getByRole('button', { name: 'Seleccionar' }).first().click()
 
   // 2) Método "Buscar en catálogo" (default) — buscar el sustituto.
-  await page.getByPlaceholder('Buscar por nombre o categoría…').fill('PreQA818 Lampara Sustituto')
+  await page.getByPlaceholder('Buscar por nombre o categoría…').fill('PreQA818 Producto Sustituto')
   await page.waitForTimeout(500)
 
   // 3) Abrir el modal de generar solicitud sobre el resultado.
@@ -83,7 +83,7 @@ test('Hallazgo 3 — Lider Compras (Compras, acceso solo vía rol) VE la lista y
   // Antes del fix: lista vacía para Lider Compras (mismo síntoma que Gerencia). Lider Compras tiene acceso completo
   // (lider_compras), por lo que ve ambas Rechazadas sembradas (id 28 y 29) — solo importa que
   // vea al menos un botón "Generar orden" (can_generate_order=true para su rol).
-  await expect(page.getByText('PreQA818 Lampara Original').first()).toBeVisible()
+  await expect(page.getByText('PreQA818 Producto Original').first()).toBeVisible()
   await expect(page.getByRole('button', { name: /generar orden/i }).first()).toBeVisible()
 })
 
@@ -94,6 +94,6 @@ test('Hallazgo 3(b) — un Vendedor VE su propia solicitud Rechazada, pero NUNCA
 
   // Solicitud rechazada #29, atada a su propio proyecto (PQ818-COT-1) — debe verla en su lista
   // scopeada, pero can_generate_order debe ser false (rol distinto de lider_compras/superadmin).
-  await expect(page.getByText('PreQA818 Lampara Original').first()).toBeVisible()
+  await expect(page.getByText('PreQA818 Producto Original').first()).toBeVisible()
   await expect(page.getByRole('button', { name: /generar orden/i })).toHaveCount(0)
 })

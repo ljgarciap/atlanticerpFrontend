@@ -241,7 +241,7 @@ test('SCRUM-953 — Cotización: las partidas se muestran en el navegador en el 
   const aIndex = texts.findIndex(t => t.startsWith('Partida A - araña'))
   const mIndex = texts.findIndex(t => t.startsWith('Partida M - modulo'))
   const zCopyIndex = texts.findIndex(t => t.includes('copia'))
-  const bIndex = texts.findIndex(t => t.startsWith('Partida B - bombillo'))
+  const bIndex = texts.findIndex(t => t.startsWith('Partida B - artículo'))
 
   expect(zIndex).toBeLessThan(aIndex)
   expect(aIndex).toBeLessThan(mIndex)

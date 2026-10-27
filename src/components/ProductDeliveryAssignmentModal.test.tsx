@@ -28,7 +28,7 @@ function makeRow(overrides: Partial<PipelineCardProductDeliveryRow> = {}): Pipel
     quote_item_id:           1,
     catalog_product_id:      1,
     code:                    'P-001',
-    name:                    'Lámpara colgante',
+    name:                    'Producto colgante',
     quantity_ordered:        10,
     quantity_available:      10,
     assigned_delivery_date:  null,
@@ -63,7 +63,7 @@ describe('ProductDeliveryAssignmentModal', () => {
     renderModal()
 
     expect(await screen.findByText('P-001')).toBeInTheDocument()
-    expect(screen.getByText('Lámpara colgante')).toBeInTheDocument()
+    expect(screen.getByText('Producto colgante')).toBeInTheDocument()
     expect(screen.getAllByText('10')).toHaveLength(2) // Pedido y Disponible, ambos 10
   })
 

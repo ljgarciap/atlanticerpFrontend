@@ -32,7 +32,7 @@ function detailFixture(): CustomerReturnDetail {
     destination_warehouse: null, created_at: '2026-07-11T10:00:00Z', received_at: null, finalized_at: null,
     rejected_at: null, rejection_reason: null, credit_note_id: null, history: [],
     products: [
-      { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm', qty_requested: 3, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
+      { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Producto colgante Nordic 40cm', qty_requested: 3, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
     ],
   }
 }
@@ -55,7 +55,7 @@ beforeEach(() => {
 describe('ConfirmReturnReceptionModal', () => {
   it('precarga la cantidad real recibida con la cantidad solicitada', async () => {
     renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     // Flaky bajo la suite completa: el texto del producto y el value precargado del spinbutton
     // vienen de la misma respuesta pero no necesariamente del mismo ciclo de render — esperar
     // el value explícitamente en vez de asumirlo ya asentado apenas aparece el texto.
@@ -65,7 +65,7 @@ describe('ConfirmReturnReceptionModal', () => {
   it('guardar confirma la recepción con las líneas y la bodega elegidas', async () => {
     mockedApi.returns.confirmReception.mockResolvedValue({} as CustomerReturnDetail)
     const { onClose } = renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.save'))
 
@@ -78,7 +78,7 @@ describe('ConfirmReturnReceptionModal', () => {
 
   it('REQ-411 RN2 — el primer clic en "Rechazar devolución" solo revela el motivo, sin enviar nada', async () => {
     renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.reject'))
 
@@ -89,7 +89,7 @@ describe('ConfirmReturnReceptionModal', () => {
 
   it('REQ-411 RN2 — el segundo clic sin motivo escrito no confirma el rechazo', async () => {
     renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.reject'))
 
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.confirmReject'))
@@ -101,7 +101,7 @@ describe('ConfirmReturnReceptionModal', () => {
   it('REQ-411 RN2 — el segundo clic con motivo escrito sí confirma el rechazo', async () => {
     mockedApi.returns.reject.mockResolvedValue({} as CustomerReturnDetail)
     const { onClose } = renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.reject'))
 
     fireEvent.change(screen.getByPlaceholderText('bodega:returns.receptionModal.rejectReasonPlaceholder'), {
@@ -117,7 +117,7 @@ describe('ConfirmReturnReceptionModal', () => {
 
   it('guardar sin cantidad válida muestra error y no llama al backend', async () => {
     renderModal()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '' } })
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.save'))

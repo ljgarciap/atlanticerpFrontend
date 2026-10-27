@@ -29,7 +29,7 @@ describe('useDebouncedSearchTerm', () => {
       return term
     }, { initialProps: { v: '' } })
 
-    const word = 'luminaria1'
+    const word = 'producto1'
     for (let i = 1; i <= word.length; i++) {
       rerender({ v: word.slice(0, i) })
       act(() => { vi.advanceTimersByTime(50) })
@@ -37,8 +37,8 @@ describe('useDebouncedSearchTerm', () => {
     expect(result.current).toBe('')
     act(() => { vi.advanceTimersByTime(250) })
 
-    expect(result.current).toBe('luminaria1')
-    expect(seen).toEqual(['', 'luminaria1'])
+    expect(result.current).toBe('producto1')
+    expect(seen).toEqual(['', 'producto1'])
   })
 
   it('un solo carácter no dispara: conserva el último término válido', () => {

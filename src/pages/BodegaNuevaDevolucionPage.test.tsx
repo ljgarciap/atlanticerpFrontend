@@ -28,10 +28,10 @@ const mockedApi = vi.mocked(bodegaApi, true)
 
 const ORDER: ReturnSearchOrderResult = {
   order_id: 10, order_number: '2201', customer_name: 'Constructora Pacífico SA',
-  project: 'Residencia Punta Pacífica', committed_delivery_date: '2026-06-20', vendedor: 'Vendedor Disenador',
+  project: 'Residencia Demo', committed_delivery_date: '2026-06-20', vendedor: 'Vendedor Disenador',
   items: [
-    { order_item_id: 900, reference: 'NORDIC-40', factory_reference: 'FAB-NORDIC-40', description: 'Lámpara colgante Nordic 40cm', qty_delivered: 4 },
-    { order_item_id: 901, reference: 'PERFIL-2M', factory_reference: null, description: 'Perfil LED empotrable 2m', qty_delivered: 10 },
+    { order_item_id: 900, reference: 'NORDIC-40', factory_reference: 'FAB-NORDIC-40', description: 'Producto colgante Nordic 40cm', qty_delivered: 4 },
+    { order_item_id: 901, reference: 'PERFIL-2M', factory_reference: null, description: 'Perfil XL empotrable 2m', qty_delivered: 10 },
   ],
 }
 
@@ -74,7 +74,7 @@ describe('BodegaNuevaDevolucionPage', () => {
     await searchAndSelectOrder()
 
     expect(screen.getByText('Constructora Pacífico SA')).toBeInTheDocument()
-    expect(screen.getByText('Residencia Punta Pacífica')).toBeInTheDocument()
+    expect(screen.getByText('Residencia Demo')).toBeInTheDocument()
     // Campos de solo lectura — no hay input editable para Cliente/Proyecto.
     expect(screen.queryByDisplayValue('Constructora Pacífico SA')).not.toBeInTheDocument()
   })

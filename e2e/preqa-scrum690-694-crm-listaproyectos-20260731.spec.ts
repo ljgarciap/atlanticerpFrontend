@@ -35,11 +35,11 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
-    // Solo sus 2 tarjetas sembradas (Torre Delta Fase 1 / Lobby Costa Bella), nunca las de
+    // Solo sus 2 tarjetas sembradas (Proyecto Alfa Fase 1 / Proyecto Beta), nunca las de
     // Vendedor Disenador o Gerencia.
-    await expect(page.getByText('[DEMO] Torre Delta Fase 1')).toBeVisible()
-    await expect(page.getByText('[DEMO] Lobby Costa Bella')).toBeVisible()
-    await expect(page.getByText('[DEMO] Amenidades Delta')).not.toBeVisible()
+    await expect(page.getByText('[DEMO] Proyecto Alfa Fase 1')).toBeVisible()
+    await expect(page.getByText('[DEMO] Proyecto Beta')).toBeVisible()
+    await expect(page.getByText('[DEMO] Proyecto Gamma')).not.toBeVisible()
 
     // RN4 (REQ-611): el filtro Responsable / toggle de alcance no tiene efecto útil para
     // Vendedor — el desarrollo lo esconde por completo (can_view_team=false del backend).
@@ -102,7 +102,7 @@ test.describe('SCRUM-692 — click en fila navega a Pipeline con highlight', () 
     await page.goto('/crm/projects')
     await page.waitForTimeout(1000)
 
-    const row = page.getByText('[DEMO] Torre Delta Fase 1').locator('xpath=ancestor::tr')
+    const row = page.getByText('[DEMO] Proyecto Alfa Fase 1').locator('xpath=ancestor::tr')
     await row.click()
     await page.waitForURL(/\/ventas-diseno\/pipeline\?card=\d+/, { timeout: 8000 })
     expect(page.url()).toMatch(/\/ventas-diseno\/pipeline\?card=\d+/)
@@ -132,8 +132,8 @@ test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas e
       'Proyecto', 'Cliente', 'Etapa', 'Etiqueta', 'Responsable',
       'Valor', 'Superficie trabajada', 'Días en etapa', 'Fecha de entrega', 'Archivos',
     ])
-    // Solo las filas de Vendedor Disenador — nunca "Amenidades Delta" (de Gerencia/Vanessa).
-    expect(content).not.toContain('Amenidades Delta')
+    // Solo las filas de Vendedor Disenador — nunca "Proyecto Gamma" (de Gerencia/Vanessa).
+    expect(content).not.toContain('Proyecto Gamma')
     expect(content).not.toContain('RUC')
     expect(content).not.toContain('Teléfono')
   })

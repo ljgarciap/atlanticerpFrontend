@@ -45,7 +45,7 @@ function makeSummary(overrides: Partial<HomeSummary> = {}): HomeSummary {
 function makeCard(overrides: Partial<PipelineCard> = {}): PipelineCard {
   return {
     id: 1, stage: 'lead',
-    sales_project: { id: 1, name: 'Torre Delta', tag: null },
+    sales_project: { id: 1, name: 'Proyecto Alfa', tag: null },
     master_client: { id: 1, name: 'Grupo Delta' },
     sub_client: { id: 1, business_name: 'Delta Residencial' },
     owner: { id: 1, name: 'Ana Diaz' },
@@ -145,7 +145,7 @@ describe('VentasDisenoHomePage', () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       pendientes: [{
         type: 'no_contact', priority: 'high', card_id: 1, client: 'Constructora del Istmo',
-        project: 'Torre Delta', assignee: 'Ana Diaz', days: 20, suggestion: 'Priorizar el contacto.',
+        project: 'Proyecto Alfa', assignee: 'Ana Diaz', days: 20, suggestion: 'Priorizar el contacto.',
       }],
     }))
     renderPage()
@@ -187,13 +187,13 @@ describe('VentasDisenoHomePage', () => {
   it('lista Final Stage y abre el detalle con etapa/días/valor (SCRUM-68)', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       final_stage: [{
-        id: 1, project_name: 'Torre Delta', client_name: 'Grupo Delta', notes: 'Falta firma',
+        id: 1, project_name: 'Proyecto Alfa', client_name: 'Grupo Delta', notes: 'Falta firma',
         days_in_stage: 3, amount: 4275.5,
       }],
     }))
     renderPage()
 
-    fireEvent.click(await screen.findByText('Torre Delta'))
+    fireEvent.click(await screen.findByText('Proyecto Alfa'))
     expect(await screen.findByText('Falta firma')).toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:home.finalStage.nextStep:3')).toBeInTheDocument()
     expect(screen.getByText('$4,275.5')).toBeInTheDocument()
@@ -219,7 +219,7 @@ describe('VentasDisenoHomePage', () => {
   it('SCRUM-765 — el botón "Ver" del detalle de Final Stage navega a Pipeline con ?card=<id>', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       final_stage: [{
-        id: 42, project_name: 'Torre Delta', client_name: 'Grupo Delta', notes: 'Falta firma',
+        id: 42, project_name: 'Proyecto Alfa', client_name: 'Grupo Delta', notes: 'Falta firma',
         days_in_stage: 3, amount: 4275.5,
       }],
     }))
@@ -235,7 +235,7 @@ describe('VentasDisenoHomePage', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(await screen.findByText('Torre Delta'))
+    fireEvent.click(await screen.findByText('Proyecto Alfa'))
     fireEvent.click(await screen.findByText('common:actions.view'))
 
     expect(await screen.findByText('PIPELINE_PROBE ?card=42')).toBeInTheDocument()
@@ -247,7 +247,7 @@ describe('VentasDisenoHomePage', () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       pendientes: [{
         type: 'missing_architect', priority: 'high', card_id: 77, client: 'Constructora del Istmo',
-        project: 'Torre Delta', assignee: 'Ana Diaz', days: 5, suggestion: 'Solicitar el contacto del arquitecto.',
+        project: 'Proyecto Alfa', assignee: 'Ana Diaz', days: 5, suggestion: 'Solicitar el contacto del arquitecto.',
       }],
     }))
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })

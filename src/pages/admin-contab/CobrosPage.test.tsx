@@ -59,7 +59,7 @@ function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvo
 }
 
 function makeBankAccount(overrides: Partial<BankAccount> = {}): BankAccount {
-  return { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0, ...overrides }
+  return { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0, ...overrides }
 }
 
 function renderPage(initialEntries: string[] = ['/admin-contab/cobros']) {
@@ -126,7 +126,7 @@ describe('CobrosPage — SCRUM-1168 F2 formulario según la bandera cobros_v2', 
     mockedApi.payments.historial.mockResolvedValue({ rows: [], total: 0, meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } } as never)
     mockedApi.payments.searchClients.mockResolvedValue([])
     mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices())
-    mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: 1, label: 'Banco General' })
+    mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: 1, label: 'Banco Demo A' })
     mockedApi.bankAccounts.list.mockResolvedValue([makeBankAccount()])
   })
 

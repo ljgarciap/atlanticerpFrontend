@@ -37,7 +37,7 @@ function makeRow(overrides: Partial<QuoteListRow> = {}): QuoteListRow {
   return {
     id: 1, folio: 'COT-2026-0001',
     master_client: { id: 1, name: 'Grupo Delta' }, sub_client: { id: 1, business_name: 'Delta Residencial' },
-    sales_project: { id: 1, name: 'Torre Delta', tag: null }, amount: 1070, stage: 'quote', price_type: 'public',
+    sales_project: { id: 1, name: 'Proyecto Alfa', tag: null }, amount: 1070, stage: 'quote', price_type: 'public',
     owner: { id: 1, name: 'Designer Demo' }, quote_date: '2026-07-01T00:00:00Z', document_status: 'sent',
     ...overrides,
   }

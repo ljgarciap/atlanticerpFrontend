@@ -55,7 +55,7 @@ function makeDetail(overrides: Partial<PipelineCardDetail> = {}): PipelineCardDe
   return {
     id: 1,
     stage: 'lead',
-    sales_project: { id: 1, name: 'Torre Delta', tag: null },
+    sales_project: { id: 1, name: 'Proyecto Alfa', tag: null },
     master_client: { id: 1, name: 'Grupo Delta' },
     sub_client: { id: 1, business_name: 'Delta Residencial' },
     owner: { id: 1, name: 'Ana Diaz' },
@@ -95,9 +95,9 @@ function renderModal(cardId = 1) {
 // modo edición explícitamente antes de poder interactuar con cualquier input/select del
 // formulario, igual que un usuario real haría clic en "Editar" primero.
 async function openEditMode() {
-  await screen.findByText('Torre Delta')
+  await screen.findByText('Proyecto Alfa')
   fireEvent.click(screen.getByText('common:actions.edit'))
-  await screen.findByDisplayValue('Torre Delta')
+  await screen.findByDisplayValue('Proyecto Alfa')
 }
 
 beforeEach(() => {
@@ -113,7 +113,7 @@ beforeEach(() => {
 describe('PipelineCardModal', () => {
   it('muestra los datos del detalle (modo vista, sin abrir edición)', async () => {
     renderModal()
-    expect(await screen.findByText('Torre Delta')).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.getByText('Ana Diaz')).toBeInTheDocument()
   })
 
@@ -122,7 +122,7 @@ describe('PipelineCardModal', () => {
       makeDetail({ owner: { id: 1, name: 'Ana Diaz' }, creator: { id: 2, name: 'Beto Solis' } }),
     )
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(screen.getByText('Beto Solis')).toBeInTheDocument()
     expect(screen.getByText('Ana Diaz')).toBeInTheDocument()
@@ -139,7 +139,7 @@ describe('PipelineCardModal', () => {
   // abre siempre en modo vista, con un botón "Editar" explícito.
   it('abre en modo vista — sin Editar, no hay ningún input de texto visible', async () => {
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(document.querySelectorAll('input, select, textarea')).toHaveLength(0)
     expect(screen.getByText('common:actions.edit')).toBeInTheDocument()
@@ -151,11 +151,11 @@ describe('PipelineCardModal', () => {
     await openEditMode()
 
     expect(screen.getByText('common:actions.save')).toBeInTheDocument()
-    fireEvent.change(screen.getByDisplayValue('Torre Delta'), { target: { value: 'Cambiado sin guardar' } })
+    fireEvent.change(screen.getByDisplayValue('Proyecto Alfa'), { target: { value: 'Cambiado sin guardar' } })
 
     fireEvent.click(screen.getByText('common:actions.cancel'))
 
-    expect(await screen.findByText('Torre Delta')).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.queryByText('Cambiado sin guardar')).not.toBeInTheDocument()
     expect(screen.queryByText('common:actions.save')).not.toBeInTheDocument()
     expect(mockedApi.pipeline.update).not.toHaveBeenCalled()
@@ -182,7 +182,7 @@ describe('PipelineCardModal', () => {
   it('no muestra el aviso cuando ya hay contacto Arquitecto', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ has_architect_contact: true }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.missingArchitect')).not.toBeInTheDocument()
   })
 
@@ -203,7 +203,7 @@ describe('PipelineCardModal', () => {
         </QueryClientProvider>
       </MemoryRouter>,
     )
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     fireEvent.keyDown(document, { key: 'Escape' })
 
@@ -281,7 +281,7 @@ describe('PipelineCardModal', () => {
         stage, can_edit: true, delivery_type: 'partial', delivery_dates: ['2026-09-01', '2026-09-15'],
       }))
       renderModal()
-      await screen.findByText('Torre Delta')
+      await screen.findByText('Proyecto Alfa')
       expect(screen.queryByText('ventasDiseno:modal.deliveryType')).not.toBeInTheDocument()
       expect(screen.queryByText('ventasDiseno:modal.assignProductsToDelivery')).not.toBeInTheDocument()
 
@@ -402,7 +402,7 @@ describe('PipelineCardModal', () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lead', can_edit: true }))
     mockedApi.pipeline.changeStage.mockResolvedValue(makeDetail({ stage: 'design' }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     fireEvent.click(screen.getByText('ventasDiseno:modal.moveToNext'))
 
@@ -426,7 +426,7 @@ describe('PipelineCardModal', () => {
   it('NO muestra "Marcar como Perdido" (ni ningún botón de movimiento) para una tarjeta Aprobada, aunque can_edit sea true', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'approved', can_edit: true }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(screen.queryByText('ventasDiseno:modal.markAsLost')).not.toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:modal.moveToNext')).not.toBeInTheDocument()
@@ -443,7 +443,7 @@ describe('PipelineCardModal', () => {
       response: { data: { message: 'Falta la superficie trabajada (m²) antes de mover a Propuesta.' } },
     })
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     fireEvent.click(screen.getByText('ventasDiseno:modal.moveToNext'))
 
@@ -464,7 +464,7 @@ describe('PipelineCardModal', () => {
       response: { data: { message: 'Falta la superficie trabajada (m²) antes de mover a Propuesta.' } },
     })
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     fireEvent.click(screen.getByText('ventasDiseno:modal.moveToNext'))
     expect(await screen.findByText('Falta la superficie trabajada (m²) antes de mover a Propuesta.')).toBeInTheDocument()
@@ -681,7 +681,7 @@ describe('PipelineCardModal', () => {
     renderModal()
     await openEditMode()
 
-    fireEvent.change(screen.getByDisplayValue('Torre Delta'), { target: { value: 'Nombre editado sin guardar' } })
+    fireEvent.change(screen.getByDisplayValue('Proyecto Alfa'), { target: { value: 'Nombre editado sin guardar' } })
 
     const file = new File(['contenido'], 'plano.pdf', { type: 'application/pdf' })
     const fileInputs = document.querySelectorAll('input[type="file"]')
@@ -691,7 +691,7 @@ describe('PipelineCardModal', () => {
     await waitFor(() => expect(mockedApi.pipeline.get).toHaveBeenCalledTimes(2))
 
     expect(screen.getByDisplayValue('Nombre editado sin guardar')).toBeInTheDocument()
-    expect(screen.queryByDisplayValue('Torre Delta')).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue('Proyecto Alfa')).not.toBeInTheDocument()
   })
 
   it('subir la cotización firmada en Cotización avanza la tarjeta a Propuesta automáticamente (SCRUM-85)', async () => {
@@ -752,7 +752,7 @@ describe('PipelineCardModal', () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ latest_quote_id: null }))
     renderModal()
 
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.viewProjectQuotes')).not.toBeInTheDocument()
   })
 
@@ -915,7 +915,7 @@ describe('PipelineCardModal', () => {
   it('no muestra "Asignar productos a entrega" sin Tipo de entrega elegido', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ delivery_type: null }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(screen.queryByText('ventasDiseno:modal.assignProductsToDelivery')).not.toBeInTheDocument()
   })
@@ -923,7 +923,7 @@ describe('PipelineCardModal', () => {
   it('no muestra "Asignar productos a entrega" con Entrega Única', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ delivery_type: 'single', delivery_dates: ['2026-09-01'] }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(screen.queryByText('ventasDiseno:modal.assignProductsToDelivery')).not.toBeInTheDocument()
   })
@@ -933,16 +933,16 @@ describe('PipelineCardModal', () => {
       stage: 'proposal', delivery_type: 'partial', delivery_dates: ['2026-09-01', '2026-09-15'],
     }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Lámpara colgante', quantity_ordered: 10, quantity_available: 10, assigned_delivery_date: null, suggested_delivery_date: null },
+      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Producto colgante', quantity_ordered: 10, quantity_available: 10, assigned_delivery_date: null, suggested_delivery_date: null },
     ])
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     fireEvent.click(screen.getByText('ventasDiseno:modal.assignProductsToDelivery'))
 
     expect(await screen.findByText('ventasDiseno:modal.productAssignment.title')).toBeInTheDocument()
     expect(await screen.findByText('P-001')).toBeInTheDocument()
-    expect(await screen.findByText('Lámpara colgante')).toBeInTheDocument()
+    expect(await screen.findByText('Producto colgante')).toBeInTheDocument()
   })
 
   it('precarga la fecha más lejana cuando falta inventario, y el usuario puede cambiarla (criterio 3)', async () => {
@@ -953,7 +953,7 @@ describe('PipelineCardModal', () => {
       { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Sin stock suficiente', quantity_ordered: 10, quantity_available: 2, assigned_delivery_date: null, suggested_delivery_date: '2026-10-15' },
     ])
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     fireEvent.click(screen.getByText('ventasDiseno:modal.assignProductsToDelivery'))
     await screen.findByText('P-001')
 
@@ -970,10 +970,10 @@ describe('PipelineCardModal', () => {
       delivery_type: 'partial', delivery_dates: ['2026-09-01', '2026-10-15'],
     }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Lámpara', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
+      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Producto', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
     ])
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     const moveButton = await screen.findByText('ventasDiseno:modal.moveToNext')
     expect(moveButton.closest('button')).toBeDisabled()
@@ -989,11 +989,11 @@ describe('PipelineCardModal', () => {
       delivery_type: 'partial', delivery_dates: ['2026-09-01', '2026-10-15'],
     }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Lámpara', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: '2026-09-01', suggested_delivery_date: null },
+      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Producto', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: '2026-09-01', suggested_delivery_date: null },
     ])
     mockedApi.pipeline.changeStage.mockResolvedValue(makeDetail({ stage: 'approved' }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     const moveButton = await screen.findByText('ventasDiseno:modal.moveToNext')
     await waitFor(() => expect(moveButton.closest('button')).not.toBeDisabled())
@@ -1008,7 +1008,7 @@ describe('PipelineCardModal', () => {
       delivery_type: 'partial', delivery_dates: ['2026-09-01', '2026-10-15'],
     }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Lámpara', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
+      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Producto', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
     ])
     mockedApi.pipeline.uploadFile.mockResolvedValue({
       id: 1, type: 'approval_proof', file_name: 'comprobante.pdf', size_bytes: 100, mime_type: 'application/pdf', created_at: '2026-07-09T00:00:00Z',
@@ -1035,7 +1035,7 @@ describe('PipelineCardModal', () => {
   it('el modal de asignación muestra las fechas recién definidas en edición, sin necesidad de guardar antes (SCRUM-909)', async () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Lámpara', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
+      { quote_item_id: 1, catalog_product_id: 1, code: 'P-001', name: 'Producto', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
     ])
     renderModal()
     await openEditMode()
@@ -1063,7 +1063,7 @@ describe('PipelineCardModal', () => {
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true }))
     mockedApi.pipeline.update.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true }))
     mockedApi.pipeline.productDeliveryAssignments.list.mockResolvedValue([
-      { quote_item_id: 7, catalog_product_id: 1, code: 'P-007', name: 'Lámpara', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
+      { quote_item_id: 7, catalog_product_id: 1, code: 'P-007', name: 'Producto', quantity_ordered: 5, quantity_available: 5, assigned_delivery_date: null, suggested_delivery_date: null },
     ])
     renderModal()
     await openEditMode()
@@ -1197,7 +1197,7 @@ describe('PipelineCardModal — SCRUM-1115 crear cotización con historial', () 
       contacts: [{ id: 5, name: 'Ana Cliente', role: 'client', phone: '6111-1111', email: 'ana@cliente.test' }],
     }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
 
     expect(screen.queryByTestId('associates-search')).not.toBeInTheDocument()
     expect(screen.queryByTestId('associates-section')).not.toBeInTheDocument()
@@ -1226,7 +1226,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     asUser([])
     mockedApi.pipeline.get.mockResolvedValue(approved())
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.passToOrder.button')).not.toBeInTheDocument()
   })
 
@@ -1294,7 +1294,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/admin-contab/abonos', {
       state: { abonoPrefill: {
         masterClientId: 1, masterClientName: 'Grupo Delta', subClientId: 1,
-        salesProjectId: 1, projectName: 'Torre Delta', quoteId: 7, quoteFolio: 'COT-0007',
+        salesProjectId: 1, projectName: 'Proyecto Alfa', quoteId: 7, quoteFolio: 'COT-0007',
       } },
     })
   })
@@ -1313,7 +1313,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     asUser(['ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved({ can_pass_to_order: false }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.passToOrder.button')).not.toBeInTheDocument()
   })
 
@@ -1368,7 +1368,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
     asFelix()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true, latest_quote_id: 7 }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('common:actions.edit')).not.toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:modal.markAsLost')).not.toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:modal.viewProjectQuotes')).not.toBeInTheDocument()
@@ -1379,7 +1379,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
     asFelix()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.reactivate')).not.toBeInTheDocument()
   })
 
@@ -1387,7 +1387,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
     asFelix()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: false, delivery_type: 'partial' }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.assignProductsToDelivery')).not.toBeInTheDocument()
     expect(mockedApi.pipeline.productDeliveryAssignments.list).not.toHaveBeenCalled()
   })
@@ -1396,7 +1396,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
     asFelix()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'quote', can_edit: false }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('ventasDiseno:modal.notEditableApproved')).not.toBeInTheDocument()
   })
 
@@ -1454,7 +1454,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
     asFelixEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lead', can_edit: true, latest_quote_id: 7 }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.getByText('common:actions.edit')).toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:modal.markAsLost')).toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:modal.createQuote')).not.toBeInTheDocument()
@@ -1465,7 +1465,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
     asFelixEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'approved', can_edit: false }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('common:actions.edit')).not.toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:modal.notEditableApproved')).toBeInTheDocument()
   })
@@ -1474,7 +1474,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
     asFelixEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.getByText('ventasDiseno:modal.reactivate')).toBeInTheDocument()
   })
 
@@ -1482,7 +1482,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
     mockedStore.mockReturnValue({ user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all'] } } as never)
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true }))
     renderModal()
-    await screen.findByText('Torre Delta')
+    await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('common:actions.edit')).not.toBeInTheDocument()
   })
 })

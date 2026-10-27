@@ -36,7 +36,7 @@ const mockedUseAuthStore = vi.mocked(useAuthStore)
 
 function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderDetail {
   return {
-    id: 12, provider_id: 1, provider_name: 'LightCorp', status: 'ordenado',
+    id: 12, provider_id: 1, provider_name: 'Proveedor Demo A', status: 'ordenado',
     modality: 'directo', requires_primary_approval: false, approved_by: null, approved_by_name: null,
     total_amount: 100, import_cost: null, freight_cost: null, handling_cost: null, other_cost: null,
     additional_costs_total: 0, payable_total: 100, currency: 'USD',

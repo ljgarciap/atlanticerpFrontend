@@ -164,11 +164,11 @@ describe('AbonosPage — SCRUM-1128 precarga desde Pasar a Pedido', () => {
     renderPage({
       abonoPrefill: {
         masterClientId: 1, masterClientName: 'Grupo Delta', subClientId: 4,
-        salesProjectId: 9, projectName: 'Torre Delta', quoteId: 7, quoteFolio: 'COT-0007',
+        salesProjectId: 9, projectName: 'Proyecto Alfa', quoteId: 7, quoteFolio: 'COT-0007',
       },
     })
     expect(await screen.findByDisplayValue('Grupo Delta')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Torre Delta')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.getByDisplayValue('COT-0007')).toBeInTheDocument()
   })
 })

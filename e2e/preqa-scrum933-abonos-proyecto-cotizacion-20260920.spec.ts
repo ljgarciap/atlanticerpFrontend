@@ -56,7 +56,7 @@ async function mockCascada(page: Page) {
   })
 
   await page.route('**/api/admin-contab/bank-accounts', route =>
-    route.fulfill({ json: [{ id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1234', activa: true }] }))
+    route.fulfill({ json: [{ id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1234', activa: true }] }))
   await page.route('**/api/admin-contab/payments/default-bank-account**', route =>
     route.fulfill({ json: { data: null } }))
   await page.route('**/api/admin-contab/abonos?**', route =>

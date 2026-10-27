@@ -184,8 +184,8 @@ test.describe('SCRUM-203 — "Ver detalle" con múltiples proyectos en una orden
 
     // Confirma que NO aparece ningún nombre de proyecto suelto en esa celda (que sería
     // incompleto per el criterio explícito del ticket)
-    await expect(row.getByText('[DEMO] Torre Delta Fase 1')).toHaveCount(0)
-    await expect(row.getByText('[DEMO] Lobby Costa Bella')).toHaveCount(0)
+    await expect(row.getByText('[DEMO] Proyecto Alfa Fase 1')).toHaveCount(0)
+    await expect(row.getByText('[DEMO] Proyecto Beta')).toHaveCount(0)
 
     await projectCell.click()
     await page.waitForTimeout(500)
@@ -208,7 +208,7 @@ test.describe('SCRUM-203 — "Ver detalle" con múltiples proyectos en una orden
     // ESE proyecto, y aun así se presenta como si todo perteneciera a él. Documentado como
     // hallazgo MEDIO, no bloqueante (ver reporte).
     const hasCounterButton = await row.getByRole('button', { name: /proyectos/i }).count()
-    const hasProjectName = await row.getByText('[DEMO] Amenidades Delta').count()
+    const hasProjectName = await row.getByText('[DEMO] Proyecto Gamma').count()
     expect(hasCounterButton).toBe(0)
     expect(hasProjectName).toBeGreaterThan(0)
   })

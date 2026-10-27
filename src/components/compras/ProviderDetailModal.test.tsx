@@ -27,7 +27,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeProvider(overrides: Partial<ProviderDetail> = {}): ProviderDetail {
   return {
-    id: 7, name: 'LightCorp', tax_id: null, category: 'china', origin: 'internacional',
+    id: 7, name: 'Proveedor Demo A', tax_id: null, category: 'china', origin: 'internacional',
     currency: 'USD', is_active: true, rating: 88, last_purchase_at: '2026-07-14',
     contact_name: 'Wei Chen', whatsapp: '+86 138-0000-0000', phone: null, email: null,
     address: null, country: 'China', bank_name: null,
@@ -54,7 +54,7 @@ beforeEach(() => {
 describe('ProviderDetailModal', () => {
   it('abre en modo solo-lectura: sin inputs, campos como texto plano', async () => {
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     expect(screen.queryByRole('textbox')).toBeNull()
     expect(screen.getByText('Wei Chen')).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('ProviderDetailModal', () => {
 
   it('las tarjetas de Última compra y Calificación se muestran siempre, aun en modo edición', async () => {
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     expect(screen.getByText('2026-07-14')).toBeInTheDocument()
     expect(screen.getByText('88/100')).toBeInTheDocument()
 
@@ -94,11 +94,11 @@ describe('ProviderDetailModal', () => {
 
   it('"Editar" habilita los campos', async () => {
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
 
-    expect(screen.getByDisplayValue('LightCorp')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Proveedor Demo A')).toBeInTheDocument()
     expect(screen.getByText('compras:providerForm.actions.save')).toBeInTheDocument()
     expect(screen.getByText('compras:providerForm.actions.cancel')).toBeInTheDocument()
   })
@@ -109,7 +109,7 @@ describe('ProviderDetailModal', () => {
   it('permite desactivar el proveedor desde el checkbox "Activo" en modo edición', async () => {
     mockedComprasApi.providers.update.mockResolvedValue(makeProvider({ is_active: false }))
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     expect(screen.getByText('common:labels.active')).toBeInTheDocument()
 
@@ -126,31 +126,31 @@ describe('ProviderDetailModal', () => {
 
   it('"Cancelar" descarta el cambio sin guardar y vuelve a solo-lectura', async () => {
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
-    const nameInput = screen.getByDisplayValue('LightCorp')
+    const nameInput = screen.getByDisplayValue('Proveedor Demo A')
     fireEvent.change(nameInput, { target: { value: 'Otro Nombre' } })
 
     fireEvent.click(screen.getByText('compras:providerForm.actions.cancel'))
 
     expect(mockedComprasApi.providers.update).not.toHaveBeenCalled()
-    expect(screen.getByText('LightCorp')).toBeInTheDocument()
+    expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument()
     expect(screen.queryByText('Otro Nombre')).toBeNull()
     expect(screen.queryByRole('textbox')).toBeNull()
   })
 
   it('"Guardar" persiste el cambio y vuelve a solo-lectura', async () => {
-    mockedComprasApi.providers.update.mockResolvedValue(makeProvider({ name: 'LightCorp Renamed' }))
+    mockedComprasApi.providers.update.mockResolvedValue(makeProvider({ name: 'Proveedor Demo A Renamed' }))
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
-    fireEvent.change(screen.getByDisplayValue('LightCorp'), { target: { value: 'LightCorp Renamed' } })
+    fireEvent.change(screen.getByDisplayValue('Proveedor Demo A'), { target: { value: 'Proveedor Demo A Renamed' } })
     fireEvent.click(screen.getByText('compras:providerForm.actions.save'))
 
     await waitFor(() => expect(mockedComprasApi.providers.update).toHaveBeenCalledWith(
-      7, expect.objectContaining({ name: 'LightCorp Renamed' }),
+      7, expect.objectContaining({ name: 'Proveedor Demo A Renamed' }),
     ))
     await waitFor(() => expect(screen.queryByRole('textbox')).toBeNull())
   })
@@ -159,7 +159,7 @@ describe('ProviderDetailModal', () => {
 describe('ProviderDetailModal — imagen de respaldo bancario (SCRUM-819)', () => {
   it('en modo vista, sin imagen, no muestra el botón de adjuntar (RN10: solo en edición)', async () => {
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     expect(screen.queryByText('compras:providerForm.bankImage.attach')).not.toBeInTheDocument()
   })
@@ -169,7 +169,7 @@ describe('ProviderDetailModal — imagen de respaldo bancario (SCRUM-819)', () =
       bank_image: { url: 'https://s3.test/foto.jpg', filename: 'foto.jpg' },
     }))
     const { container } = renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
     await screen.findByText('compras:providerForm.bankImage.attach')
 
@@ -185,7 +185,7 @@ describe('ProviderDetailModal — imagen de respaldo bancario (SCRUM-819)', () =
       bank_image: { url: 'https://s3.test/foto.jpg', filename: 'foto.jpg' },
     }))
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
 
     expect(screen.getByRole('img')).toHaveAttribute('src', 'https://s3.test/foto.jpg')
     // Modo vista: la imagen se ve, pero sin Cambiar/Eliminar (RN10).
@@ -202,7 +202,7 @@ describe('ProviderDetailModal — imagen de respaldo bancario (SCRUM-819)', () =
     }))
     mockedComprasApi.providers.deleteBankImage.mockResolvedValue(makeProvider())
     renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
     await screen.findByText('compras:providerForm.bankImage.remove')
 
@@ -229,7 +229,7 @@ describe('ProviderDetailModal — imagen de respaldo bancario (SCRUM-819)', () =
       category: 'china', bank_image: { url: 'https://s3.test/foto.jpg', filename: 'foto.jpg' },
     }))
     const { container } = renderModal()
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     fireEvent.click(screen.getByText('compras:providerForm.actions.edit'))
 
     const categorySelect = document.querySelector('select[name="category"]') as HTMLSelectElement

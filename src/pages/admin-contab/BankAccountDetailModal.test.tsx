@@ -26,7 +26,7 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeAccount(overrides: Partial<BankAccount> = {}): BankAccount {
   return {
-    id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455',
+    id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455',
     numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0,
     ...overrides,
   }

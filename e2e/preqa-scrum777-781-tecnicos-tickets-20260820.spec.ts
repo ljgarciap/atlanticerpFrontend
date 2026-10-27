@@ -514,9 +514,9 @@ test('12. SCRUM-781 punto REQ-225 — editar ticket: agregar/editar/quitar produ
   await page.screenshot({ path: `${DL_DIR}/21-picker-producto-editar.png`, fullPage: true })
 
   const searchInput = page.locator('input[type="text"], input[type="search"]').last()
-  await searchInput.fill('bombillo')
+  await searchInput.fill('artículo')
   await page.waitForTimeout(1000)
-  const firstResult = page.getByText(/bombillo/i).first()
+  const firstResult = page.getByText(/artículo/i).first()
   await firstResult.click({ timeout: 8000 })
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/22-producto-agregado.png`, fullPage: true })

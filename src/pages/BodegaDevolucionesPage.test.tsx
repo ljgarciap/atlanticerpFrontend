@@ -45,7 +45,7 @@ function makeRow(overrides: Partial<CustomerReturnRow> = {}): CustomerReturnRow 
     destination_warehouse: null, created_at: '2026-07-11T10:00:00Z', received_at: null, finalized_at: null,
     rejected_at: null, credit_note_id: null,
     products: [
-      { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm', qty_requested: 1, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
+      { id: 100, order_item_id: 900, reference: 'NORDIC-40', description: 'Producto colgante Nordic 40cm', qty_requested: 1, qty_received: null, reason: 'danado_defectuoso', reason_detail: null },
     ],
     ...overrides,
   }
@@ -182,8 +182,8 @@ describe('BodegaDevolucionesPage', () => {
     mockedApi.returns.list.mockResolvedValue({
       data: [makeRow({
         products: [
-          { id: 100, order_item_id: 900, reference: 'CRISTAL', description: 'Candelabro Cristal Imperial', qty_requested: 1, qty_received: null, reason: 'cliente_cambio_opinion', reason_detail: null },
-          { id: 101, order_item_id: 901, reference: 'PERFIL-2M', description: 'Perfil LED empotrable 2m', qty_requested: 2, qty_received: null, reason: 'excedente', reason_detail: null },
+          { id: 100, order_item_id: 900, reference: 'CRISTAL', description: 'Modelo Cristal Imperial', qty_requested: 1, qty_received: null, reason: 'cliente_cambio_opinion', reason_detail: null },
+          { id: 101, order_item_id: 901, reference: 'PERFIL-2M', description: 'Perfil XL empotrable 2m', qty_requested: 2, qty_received: null, reason: 'excedente', reason_detail: null },
         ],
       })],
       meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
@@ -191,18 +191,18 @@ describe('BodegaDevolucionesPage', () => {
     renderPage()
 
     const trigger = await screen.findByText('returns.productsCell.count:{"count":2}')
-    expect(screen.queryByText('Candelabro Cristal Imperial')).not.toBeInTheDocument()
+    expect(screen.queryByText('Modelo Cristal Imperial')).not.toBeInTheDocument()
 
     fireEvent.click(trigger)
 
-    expect(await screen.findByText('Candelabro Cristal Imperial')).toBeInTheDocument()
-    expect(screen.getByText('Perfil LED empotrable 2m')).toBeInTheDocument()
+    expect(await screen.findByText('Modelo Cristal Imperial')).toBeInTheDocument()
+    expect(screen.getByText('Perfil XL empotrable 2m')).toBeInTheDocument()
   })
 
   it('1 solo producto muestra el nombre directo, sin expandir', async () => {
     mockedApi.returns.list.mockResolvedValue({ data: [makeRow()], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 } })
     renderPage()
-    expect(await screen.findByText('Lámpara colgante Nordic 40cm')).toBeInTheDocument()
+    expect(await screen.findByText('Producto colgante Nordic 40cm')).toBeInTheDocument()
   })
 
   it('hallazgo de Visual Reviewer 2026-07-26 — muestra la columna Proyecto del mockup 3J', async () => {

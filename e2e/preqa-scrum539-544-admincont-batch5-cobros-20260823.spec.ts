@@ -7,7 +7,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Fixture real sembrado vía tinker (dev.atlanticerp.ai no tenía ninguna factura real facturada en el
  * momento de este Pre-QA): MasterClient "PreQA Cobros SCRUM539" (id 7560) con 2 facturas abiertas
  * (F-PREQA-COBROS-1 $4,000 / F-PREQA-COBROS-2 $2,200). Cuentas bancarias reales creadas también en
- * este Pre-QA (Banco General/Corriente id 8, Banistmo/Tarjeta id 9 — dev.atlanticerp.ai solo tenía
+ * este Pre-QA (Banco Demo A/Corriente id 8, Banco Demo B/Tarjeta id 9 — dev.atlanticerp.ai solo tenía
  * fixtures de QA, ninguna cuenta real) con últimos 4 dígitos placeholder "0000" — Contabilidad/Yaneth
  * deben corregirlos con los reales antes de que el auto-completado tenga sentido para el negocio.
  *
@@ -68,8 +68,8 @@ test('2. REQ-464/465/466/467 — registrar cobro real: 2 facturas, saldo a favor
   await page.waitForTimeout(400)
   await page.screenshot({ path: `${DL_DIR}/04-facturas-seleccionadas-total.png`, fullPage: true })
 
-  // REQ-466 RN5 — método por defecto Transferencia ya trae Banco General/Corriente autocompletado.
-  const bankSelect = page.locator('select').filter({ hasText: /banco general/i })
+  // REQ-466 RN5 — método por defecto Transferencia ya trae Banco Demo A/Corriente autocompletado.
+  const bankSelect = page.locator('select').filter({ hasText: /banco demo a/i })
   await expect(bankSelect).toBeVisible()
   const selectedValue = await bankSelect.inputValue()
   console.log('[Cobros] cuenta bancaria autocompletada (Transferencia):', selectedValue)
@@ -86,7 +86,7 @@ test('2. REQ-464/465/466/467 — registrar cobro real: 2 facturas, saldo a favor
   expect(invoicesAfter.invoices.length).toBe(0)
 })
 
-test('3. REQ-466 — Tarjeta autocompleta Banistmo, oculto para Retención de impuestos', async ({ page }) => {
+test('3. REQ-466 — Tarjeta autocompleta Banco Demo B, oculto para Retención de impuestos', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
   await page.goto(`${BASE}/admin-contab/cobros`)
   await page.waitForTimeout(1200)

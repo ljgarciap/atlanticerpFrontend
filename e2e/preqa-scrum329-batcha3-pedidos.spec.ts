@@ -128,7 +128,7 @@ test('Pedidos — modal Ver Detalle: contacto/direccion/ref fabrica reales (SCRU
   await page.screenshot({ path: 'e2e/.tmp/detail-modal-collapsed.png' })
 
   await expect(page.locator('body')).toContainText('Juan Perez')
-  await expect(page.locator('body')).toContainText('Calle 50, Torre Delta')
+  await expect(page.locator('body')).toContainText('Calle 50, Proyecto Alfa')
 
   // RN1 — tabla colapsada por defecto.
   await expect(page.locator('table')).toHaveCount(0)
@@ -136,7 +136,7 @@ test('Pedidos — modal Ver Detalle: contacto/direccion/ref fabrica reales (SCRU
   await page.waitForTimeout(300)
   await page.screenshot({ path: 'e2e/.tmp/detail-modal-expanded.png' })
   await expect(page.locator('table')).toHaveCount(1)
-  await expect(page.locator('body')).toContainText('FCT-LAMP-0001')
+  await expect(page.locator('body')).toContainText('FCT-ITEM-0001')
 })
 
 test('Pedidos — recargar con modal abierto no rompe (foco de ruptura)', async ({ page }) => {

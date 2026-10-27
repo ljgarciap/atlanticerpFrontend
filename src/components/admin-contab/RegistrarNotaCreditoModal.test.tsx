@@ -48,14 +48,14 @@ const FACTURAS: NotaCreditoFacturaOrigen[] = [
   },
 ]
 
-const BANK_ACCOUNT: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const BANK_ACCOUNT: BankAccount = { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 const DEVOLUCION: NotaCreditoDevolucionPrecargada = {
   cliente_id: 1,
   cliente_nombre: 'Grupo Sensei',
   factura_origen_id: 5,
   referencia: 'HS-3402',
-  productos: [{ descripcion: 'Luminaria LED', cantidad: 2, monto_unitario: 150 }],
+  productos: [{ descripcion: 'Producto XL', cantidad: 2, monto_unitario: 150 }],
   persona_devuelve: 'María Torres',
   proyecto: 'Torres Pacífico',
   conformidad_disponible: true,
@@ -195,7 +195,7 @@ describe('RegistrarNotaCreditoModal — REQ-481 Devolución de mercancía precar
     renderModal({
       devolucionPrecargada: {
         ...DEVOLUCION,
-        productos: [{ descripcion: 'LAMP RIEL MAGNETIC9W', cantidad: 2, monto_unitario: 64.38 }],
+        productos: [{ descripcion: 'ITEM RIEL MAGNETIC9W', cantidad: 2, monto_unitario: 64.38 }],
         factura_monto: 137.77,
         factura_saldo_pendiente: 137.77,
       },

@@ -43,10 +43,10 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeOrderProducts(overrides: Partial<GoodsReceiptOrderProducts> = {}): GoodsReceiptOrderProducts {
   return {
-    id: 10, provider_id: 1, provider_name: 'LightCorp', provider_origin: 'internacional',
+    id: 10, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: 'internacional',
     status: 'en_aduana',
     products: [
-      { catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27', unit_cost: 10, expected_quantity: 10, remaining: 10 },
+      { catalog_product_id: 5, reference: 'REF-1', description: 'Artículo E27', unit_cost: 10, expected_quantity: 10, remaining: 10 },
     ],
     ...overrides,
   }
@@ -54,12 +54,12 @@ function makeOrderProducts(overrides: Partial<GoodsReceiptOrderProducts> = {}): 
 
 function makeReceipt(overrides: Partial<GoodsReceiptDetail> = {}): GoodsReceiptDetail {
   return {
-    id: 1, purchase_order_id: 10, provider_name: 'LightCorp', order_status: 'en_aduana',
+    id: 1, purchase_order_id: 10, provider_name: 'Proveedor Demo A', order_status: 'en_aduana',
     lines_count: 1, total_units: 10, editable: true, created_at: '2026-07-19T00:00:00Z',
     invoice_storage_key: null, invoice_original_filename: null,
     import_cost_total: null, freight_total: null, handling_total: null, other_costs_total: null,
     lines: [{
-      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27',
+      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Artículo E27',
       quantity: 10, unit_cost: 10, itbms_amount: null, import_cost_share: null, freight_cost_share: null, handling_cost_share: null, other_cost_share: null, cost_total: 100, warehouse_id: 1, warehouse_name: 'Atlantic',
       is_pending: true,
     }],
@@ -88,7 +88,7 @@ beforeEach(() => {
 
 describe('GoodsReceiptWizardPage — navegación real éxito → corregir (regresión Pre-QA 2026-07-20)', () => {
   it('clic en "Corregir ingreso" navega a /editar y muestra el formulario, no se queda pegado en la pantalla de éxito', async () => {
-    const eligible: GoodsReceiptEligibleOrder[] = [{ id: 10, provider_name: 'LightCorp', status: 'en_aduana' }]
+    const eligible: GoodsReceiptEligibleOrder[] = [{ id: 10, provider_name: 'Proveedor Demo A', status: 'en_aduana' }]
     mockedComprasApi.goodsReceipts.eligibleOrders.mockResolvedValue({ data: eligible })
     mockedComprasApi.goodsReceipts.orderProducts.mockResolvedValue(makeOrderProducts())
     mockedComprasApi.goodsReceipts.create.mockResolvedValue(makeReceipt({ id: 42 }))
@@ -97,8 +97,8 @@ describe('GoodsReceiptWizardPage — navegación real éxito → corregir (regre
     renderApp()
 
     fireEvent.change(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder'), { target: { value: '10' } })
-    fireEvent.click(await screen.findByText(/#10 — LightCorp/))
-    await screen.findByText('Bombillo E27')
+    fireEvent.click(await screen.findByText(/#10 — Proveedor Demo A/))
+    await screen.findByText('Artículo E27')
     fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } })
     fireEvent.click(screen.getByText('compras:goodsReceipts.wizard.actions.save'))
 

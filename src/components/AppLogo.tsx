@@ -5,7 +5,7 @@ interface Props {
 }
 
 /**
- * Logo de AtlanticERP (reemplaza IlluminationsLogo.tsx, 2026-08-30). El ícono viene del
+ * Logo de AtlanticERP (reemplaza el logo anterior, 2026-08-30). El ícono viene del
  * isólogo real de la marca (Atlantic/ats.jpeg, recortado — ver public/logo-icon.png); el
  * wordmark es texto real (no horneado en la imagen), así se lee "AtlanticERP" siempre, sin
  * depender de mantener sincronizados archivos de imagen por tema claro/oscuro.

@@ -55,7 +55,7 @@ function makeCard(overrides: Partial<PipelineCard> = {}): PipelineCard {
   return {
     id: 1,
     stage: 'lead',
-    sales_project: { id: 1, name: 'Torre Delta', tag: null },
+    sales_project: { id: 1, name: 'Proyecto Alfa', tag: null },
     master_client: { id: 1, name: 'Grupo Delta' },
     sub_client: { id: 1, business_name: 'Delta Residencial' },
     owner: { id: 1, name: 'Ana Diaz' },
@@ -145,7 +145,7 @@ describe('VentasDisenoPipelinePage', () => {
   it('lista una tarjeta bajo la columna de su etapa', async () => {
     mockedApi.pipeline.list.mockResolvedValue([makeCard({ stage: 'design' })])
     renderPage()
-    expect(await screen.findByText('Torre Delta')).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.getByText('Grupo Delta')).toBeInTheDocument()
   })
 
@@ -153,17 +153,17 @@ describe('VentasDisenoPipelinePage', () => {
   // se pintaba en la tarjeta del tablero, solo dentro del modal de edición.
   it('muestra la etiqueta del proyecto en la tarjeta cuando está definida', async () => {
     mockedApi.pipeline.list.mockResolvedValue([
-      makeCard({ stage: 'design', sales_project: { id: 1, name: 'Torre Delta', tag: 'design' } }),
+      makeCard({ stage: 'design', sales_project: { id: 1, name: 'Proyecto Alfa', tag: 'design' } }),
     ])
     renderPage()
-    expect(await screen.findByText('Torre Delta')).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.getByText('tag.design')).toBeInTheDocument()
   })
 
   it('no muestra ninguna etiqueta cuando el proyecto no tiene una definida', async () => {
     mockedApi.pipeline.list.mockResolvedValue([makeCard({ stage: 'design' })]) // tag: null por defecto
     renderPage()
-    expect(await screen.findByText('Torre Delta')).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa')).toBeInTheDocument()
     expect(screen.queryByText(/^tag\./)).not.toBeInTheDocument()
   })
 
@@ -298,7 +298,7 @@ describe('VentasDisenoPipelinePage', () => {
       mockedApi.pipeline.changeStage.mockResolvedValue({} as never)
       renderPage()
 
-      await screen.findByText('Torre Delta')
+      await screen.findByText('Proyecto Alfa')
       dragCardToColumn(7, 'design')
 
       await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(7, 'design'))
@@ -308,7 +308,7 @@ describe('VentasDisenoPipelinePage', () => {
       mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
       renderPage()
 
-      await screen.findByText('Torre Delta')
+      await screen.findByText('Proyecto Alfa')
       dragCardToColumn(7, 'lead')
 
       expect(mockedApi.pipeline.changeStage).not.toHaveBeenCalled()
@@ -323,7 +323,7 @@ describe('VentasDisenoPipelinePage', () => {
       })
       renderPage()
 
-      await screen.findByText('Torre Delta')
+      await screen.findByText('Proyecto Alfa')
       dragCardToColumn(7, 'approved')
 
       await waitFor(() => expect(showSpy).toHaveBeenCalledWith(

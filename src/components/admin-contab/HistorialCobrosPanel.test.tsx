@@ -32,7 +32,7 @@ function makeResult(overrides: Partial<PaymentHistorialResult> = {}): PaymentHis
     total: 6,
     rows: [
       {
-        id: 1, numero_recibo: 'REC-006', fecha: '2026-06-28T00:00:00Z', cliente: 'Hotel Riu',
+        id: 1, numero_recibo: 'REC-006', fecha: '2026-06-28T00:00:00Z', cliente: 'Sitio Demo 02',
         facturas: ['F-0010'], monto_recibido: 500, metodo_pago: 'link_pago', estado: 'esperando_confirmacion',
         referencia: 'LINK-88213', registrado_por: 'Contabilidad Test', tiene_comprobante: true,
       },
@@ -65,7 +65,7 @@ describe('HistorialCobrosPanel — REQ-470', () => {
   it('muestra las filas del historial con el contador Mostrando X de Y', async () => {
     renderPanel()
 
-    expect(await screen.findByRole('cell', { name: 'Hotel Riu' })).toBeInTheDocument()
+    expect(await screen.findByRole('cell', { name: 'Sitio Demo 02' })).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: 'Grupo Sensei' })).toBeInTheDocument()
     // SCRUM-947 — el "total" de este contador ahora es meta.total (filtrado/paginado real), no
     // el `total` global sin filtrar del payload (ese sigue existiendo, pero ya no se usa acá).
@@ -76,25 +76,25 @@ describe('HistorialCobrosPanel — REQ-470', () => {
     const onSelectPayment = vi.fn()
     renderPanel(onSelectPayment)
 
-    fireEvent.click(await screen.findByRole('cell', { name: 'Hotel Riu' }))
+    fireEvent.click(await screen.findByRole('cell', { name: 'Sitio Demo 02' }))
     expect(onSelectPayment).toHaveBeenCalledWith(1)
   })
 
   it('Escenario 1 — filtrar por método y cliente combina ambos filtros (AND)', async () => {
     renderPanel()
-    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    await screen.findByRole('cell', { name: 'Sitio Demo 02' })
 
-    fireEvent.change(screen.getByDisplayValue('cobros.historial.filtroCliente'), { target: { value: 'Hotel Riu' } })
+    fireEvent.change(screen.getByDisplayValue('cobros.historial.filtroCliente'), { target: { value: 'Sitio Demo 02' } })
     fireEvent.change(screen.getByDisplayValue('cobros.historial.filtroMetodo'), { target: { value: 'link_pago' } })
 
     await waitFor(() => expect(mockedApi.payments.historial).toHaveBeenLastCalledWith(
-      expect.objectContaining({ cliente: 'Hotel Riu', metodo: 'link_pago' }),
+      expect.objectContaining({ cliente: 'Sitio Demo 02', metodo: 'link_pago' }),
     ))
   })
 
   it('Escenario 2 — buscar texto libre lo manda como filtro search', async () => {
     renderPanel()
-    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    await screen.findByRole('cell', { name: 'Sitio Demo 02' })
 
     fireEvent.change(screen.getByPlaceholderText('cobros.historial.searchPlaceholder'), { target: { value: 'REC-004' } })
 
@@ -105,7 +105,7 @@ describe('HistorialCobrosPanel — REQ-470', () => {
 
   it('RN4 — "Limpiar filtros" resetea todos los campos', async () => {
     renderPanel()
-    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    await screen.findByRole('cell', { name: 'Sitio Demo 02' })
 
     fireEvent.change(screen.getByPlaceholderText('cobros.historial.searchPlaceholder'), { target: { value: 'REC-004' } })
     fireEvent.click(await screen.findByText('cobros.historial.limpiarFiltros'))
@@ -129,7 +129,7 @@ describe('HistorialCobrosPanel — REQ-470', () => {
 describe('HistorialCobrosPanel — SCRUM-947 paginación', () => {
   it('pide la página 1 con 20 por página por defecto', async () => {
     renderPanel()
-    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    await screen.findByRole('cell', { name: 'Sitio Demo 02' })
     expect(mockedApi.payments.historial).toHaveBeenCalledWith(expect.objectContaining({ page: 1, per_page: 20 }))
   })
 
@@ -138,7 +138,7 @@ describe('HistorialCobrosPanel — SCRUM-947 paginación', () => {
       makeResult({ meta: { total: 45, per_page: 20, current_page: 2, last_page: 3 } }),
     )
     renderPanel()
-    await screen.findByRole('cell', { name: 'Hotel Riu' })
+    await screen.findByRole('cell', { name: 'Sitio Demo 02' })
 
     fireEvent.click(screen.getByRole('button', { name: '2' }))
     await waitFor(() => expect(mockedApi.payments.historial).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })))
