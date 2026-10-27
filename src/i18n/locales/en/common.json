@@ -76,7 +76,12 @@
       "loadError": "Could not load the catalogs.",
       "props": {
         "origen": "Origin",
-        "valida_identificacion": "Validates tax ID"
+        "valida_identificacion": "Validates tax ID",
+        "comportamiento": "Behavior (inherited flow)",
+        "prefijo": "Folio prefix",
+        "sla_dias": "SLA (business days)",
+        "color": "Color (hex)",
+        "subtipos": "Subtypes (comma-separated)"
       }
     },
     "globalTab": {

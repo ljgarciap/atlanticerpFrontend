@@ -71,4 +71,30 @@ describe('CatalogsPanel', () => {
     fireEvent.click(screen.getByText('globalSettings.catalogsTab.delete'))
     expect(await screen.findByRole('alert')).toHaveTextContent(/globalSettings.catalogsTab.deleteError|Hay registros/)
   })
+  it('edita propiedades de texto, entero y lista (dominio ticket_type)', async () => {
+    api.domains.mockResolvedValue([{
+      domain: 'ticket_type', label: 'Tipos de ticket',
+      props: {
+        comportamiento: { type: 'enum', values: ['reclamo', 'generico'], default: 'generico' },
+        prefijo: { type: 'string', max: 5, default: 'TCK' },
+        sla_dias: { type: 'int', min: 1, max: 365, default: 7 },
+        subtipos: { type: 'list', max: 20, default: [] },
+      },
+    }])
+    api.adminList.mockResolvedValue([entry({ domain: 'ticket_type', key: 'claim', label: 'Reclamo', props: { comportamiento: 'reclamo', prefijo: 'REC', sla_dias: 2, subtipos: [] } })])
+    api.update.mockResolvedValue(entry({}))
+    renderPanel()
+    await screen.findByDisplayValue('Reclamo')
+
+    fireEvent.change(screen.getAllByLabelText('comportamiento')[0], { target: { value: 'generico' } })
+    fireEvent.change(screen.getAllByLabelText('prefijo')[0], { target: { value: 'RCL' } })
+    fireEvent.change(screen.getAllByLabelText('sla_dias')[0], { target: { value: '5' } })
+    fireEvent.change(screen.getAllByLabelText('subtipos')[0], { target: { value: 'preventivo, correctivo ,' } })
+    fireEvent.click(screen.getAllByText('globalSettings.catalogsTab.save')[0])
+
+    await waitFor(() => expect(api.update).toHaveBeenCalledWith('ticket_type', 1, {
+      label: 'Reclamo', sort_order: 0,
+      props: { comportamiento: 'generico', prefijo: 'RCL', sla_dias: 5, subtipos: ['preventivo', 'correctivo'] },
+    }))
+  })
 })

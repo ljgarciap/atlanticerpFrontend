@@ -6,13 +6,16 @@
 // terminar este batch; estos tipos son el contrato esperado, a reconciliar por
 // Arquitecto/PM cuando ambos lados terminen (ver nota en el reporte de esta tarea).
 
-export type TicketType = 'installation' | 'warranty' | 'claim' | 'retrofit'
+/**
+ * Clave de un tipo de ticket. Desde la Fase 7b los tipos son un catálogo por empresa (`ticket_type`): además de los 4 de sistema
+ * (`KnownTicketType`) una empresa puede tener los suyos, así que la clave es un texto. Lo que el flujo hereda lo dice el
+ * `comportamiento` del tipo (`useTicketTypes`), no la clave.
+ */
+export type TicketType = string
+export type KnownTicketType = 'installation' | 'warranty' | 'claim' | 'retrofit'
 
 // Solo installation/warranty tienen subtipo (REQ-279 RN4) — claim/retrofit siempre null.
-export type TicketSubtype =
-  | 'installation' | 'inspection'                  // tipo = installation
-  | 'warranty_generic' | 'replacement_inspection'   // tipo = warranty
-  | null
+export type TicketSubtype = string | null
 
 export type TicketInstallationKind = 'internal' | 'subcontracted' | null
 
@@ -22,7 +25,8 @@ export const TICKET_STATUSES: TicketStatus[] = [
   'reported', 'scheduled', 'on_site', 'resolved', 'closed', 'cancelled',
 ]
 
-export const TICKET_TYPES: TicketType[] = ['installation', 'warranty', 'claim', 'retrofit']
+/** Los 4 tipos de sistema: respaldo mientras el catálogo carga o si falla (los valores de siempre). */
+export const TICKET_TYPES: KnownTicketType[] = ['installation', 'warranty', 'claim', 'retrofit']
 
 // REQ-219 — valor CRUDO que manda el backend (Ticket::QUOTE_STATUSES en
 // app/Modules/Servicios/Models/Ticket.php) — reconciliado 2026-08-02 tras hallazgo de Visual
