@@ -14,6 +14,7 @@ import ReportsConfigPanel from '@/components/ReportsConfigPanel'
 import BodegaSettingsPanel from '@/components/BodegaSettingsPanel'
 import ServiciosSettingsPanel from '@/components/ServiciosSettingsPanel'
 import GlobalSettingsPanel from '@/components/GlobalSettingsPanel'
+import CatalogsPanel from '@/components/CatalogsPanel'
 
 /**
  * SCRUM-944/945 — vista NUEVA, exclusiva de superadmin, que agrega en un solo lugar todos los
@@ -34,7 +35,7 @@ import GlobalSettingsPanel from '@/components/GlobalSettingsPanel'
  * La tab "Global" (hallazgo E del Pre-QA) expone las claves numéricas de `GlobalSetting`.
  */
 
-type TabKey = 'fiscal' | 'fraude' | 'compras' | 'pricing' | 'orders' | 'conditions' | 'reports' | 'bodega' | 'servicios' | 'crm' | 'salesCommissions' | 'global'
+type TabKey = 'fiscal' | 'fraude' | 'compras' | 'pricing' | 'orders' | 'conditions' | 'reports' | 'bodega' | 'servicios' | 'crm' | 'salesCommissions' | 'catalogs' | 'global'
 
 const TABS: { key: TabKey; panel: React.ComponentType }[] = [
   { key: 'fiscal',           panel: FiscalSettingsPanel },
@@ -48,6 +49,7 @@ const TABS: { key: TabKey; panel: React.ComponentType }[] = [
   { key: 'servicios',        panel: ServiciosSettingsPanel },
   { key: 'crm',              panel: CrmSettingsPanel },
   { key: 'salesCommissions', panel: SalesCommissionTiersPanel },
+  { key: 'catalogs',         panel: CatalogsPanel },
   { key: 'global',           panel: GlobalSettingsPanel },
 ]
 

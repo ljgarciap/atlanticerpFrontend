@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
 import ImageLightboxModal from '@/components/ImageLightboxModal'
-import { buildSchema, PROVIDER_CATEGORIES, type ProviderFormData } from './ProviderFormDrawer'
+import { buildSchema, useProviderCategoryOptions, type ProviderFormData } from './ProviderFormDrawer'
 import type { ProviderCategory, ProviderBankField } from '@/types/compras'
 
 /**
@@ -32,6 +32,7 @@ interface Props {
 
 export default function ProviderDetailModal({ providerId, onClose }: Props) {
   const { t } = useTranslation(['common', 'auth', 'compras'])
+  const categoryOptions = useProviderCategoryOptions(t)
   const fiscalId = useFiscalId() // Fase 6c
   const [editing, setEditing] = useState(false)
 
@@ -246,13 +247,13 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
                   {editing ? (
                     <select {...register('category')} className={inputCls(false)}>
                       <option value="">—</option>
-                      {PROVIDER_CATEGORIES.map(c => (
-                        <option key={c} value={c}>{t(`compras:providerForm.category.${c}`)}</option>
+                      {categoryOptions.map(c => (
+                        <option key={c.key} value={c.key}>{c.label}</option>
                       ))}
                     </select>
                   ) : (
                     <div className={readOnlyCls}>
-                      {provider.category ? t(`compras:providerForm.category.${provider.category}`) : '—'}
+                      {provider.category ? (categoryOptions.find(c => c.key === provider.category)?.label ?? provider.category) : '—'}
                     </div>
                   )}
                 </div>
