@@ -1,24 +1,16 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import CountBadge from '@/components/ui/CountBadge'
 import ShowMoreListModal from '@/components/ShowMoreListModal'
 import { IcoAlertTriangle } from '@/components/icons'
 import { MAX_HOME_CARD_ITEMS } from '@/lib/homeCards'
-import type { HomeSinResponder, HomeSinResponderItem, TicketType } from '@/types/servicios'
+import type { HomeSinResponder, HomeSinResponderItem } from '@/types/servicios'
 
 interface Props {
   data: HomeSinResponder | undefined
-}
-
-// Mismos 4 colores que TicketBoard.tsx (no exporta su TYPE_COLORS, ver ReportsYearlyChart.tsx
-// para el mismo criterio ya establecido en este módulo — redeclarado local a propósito).
-const TYPE_COLORS: Record<TicketType, string> = {
-  installation: '#5BA5A0',
-  warranty:     '#9fc54d',
-  claim:        '#ef4444',
-  retrofit:     '#8b5cf6',
 }
 
 // REQ-212 (Grupo C, SCRUM-275) — panel "Servicios sin responder" de Inicio. RN4 (mismo criterio
@@ -30,6 +22,7 @@ const TYPE_COLORS: Record<TicketType, string> = {
 // estilo píldora pastel (antes círculo sólido rojo con texto blanco).
 export default function ServiciosSinResponderPanel({ data }: Props) {
   const { t }  = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
   const items  = data?.items ?? []
   const count  = data?.count ?? 0
   const [showAll, setShowAll] = useState(false)
@@ -43,9 +36,9 @@ export default function ServiciosSinResponderPanel({ data }: Props) {
         </div>
         <span
           className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap shrink-0"
-          style={{ background: TYPE_COLORS[item.tipo] }}
+          style={{ background: ticketTypes.color(item.tipo) }}
         >
-          {t(`tickets.types.${item.tipo}`)}
+          {ticketTypes.label(item.tipo)}
         </span>
       </div>
       <p className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 mt-1.5">

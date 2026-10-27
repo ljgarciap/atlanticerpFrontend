@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { TICKET_STATUSES, TICKET_TYPES } from '@/types/servicios'
+import { TICKET_STATUSES } from '@/types/servicios'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import type { TicketStatus, TicketType, TechnicianOption } from '@/types/servicios'
 
 export interface TicketFilterState {
@@ -26,6 +27,7 @@ interface Props {
 // traía; se elimina acá por instrucción explícita — no duplicar el mismo control dos veces).
 export default function TicketFiltersBar({ value, onChange, technicians, shown, total }: Props) {
   const { t } = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
 
   const hasActiveFilters = value.search !== '' || value.tipo !== '' || value.internal_technician_id !== '' || value.estado !== ''
 
@@ -51,8 +53,8 @@ export default function TicketFiltersBar({ value, onChange, technicians, shown, 
           className="rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-2 py-2 text-sm bg-white focus:outline-none focus:border-primary"
         >
           <option value="">{t('tickets.filters.allTypes')}</option>
-          {TICKET_TYPES.map(type => (
-            <option key={type} value={type}>{t(`tickets.types.${type}`)}</option>
+          {ticketTypes.types.map(type => (
+            <option key={type.key} value={type.key}>{type.label}</option>
           ))}
         </select>
 

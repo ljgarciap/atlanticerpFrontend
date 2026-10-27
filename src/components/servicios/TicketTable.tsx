@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import type { Ticket } from '@/types/servicios'
 import { deriveQuoteDisplayStatus } from '@/types/servicios'
 import TechnicianBadge from './TechnicianBadge'
@@ -29,6 +30,7 @@ function formatDate(iso: string | null): string {
 // reporte más reciente primero.
 export default function TicketTable({ tickets, canEditStatus, onViewDetail, onSchedule, onOpenQuote, onOpenReport }: Props) {
   const { t } = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
 
   if (tickets.length === 0) {
     return (
@@ -69,7 +71,7 @@ export default function TicketTable({ tickets, canEditStatus, onViewDetail, onSc
                     <div className="text-[12px] text-slate-400 max-w-[220px] truncate">{ticket.descripcion}</div>
                   )}
                 </td>
-                <td className="px-3 py-2.5 whitespace-nowrap">{t(`tickets.types.${ticket.tipo}`)}</td>
+                <td className="px-3 py-2.5 whitespace-nowrap">{ticketTypes.label(ticket.tipo)}</td>
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {ticket.subtipo ? t(`tickets.subtypes.${ticket.subtipo}`) : '—'}
                 </td>

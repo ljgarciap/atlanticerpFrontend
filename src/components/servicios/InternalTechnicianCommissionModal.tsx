@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { hasAnyPermission } from '@/lib/accessGuards'
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { serviciosApi } from '@/api/serviciosApi'
@@ -38,6 +39,7 @@ function periodLabel(period: { year: number; month: number }, locale: string): s
 // explícitos, pero el formulario siempre operaba sobre el mes del navegador).
 export default function InternalTechnicianCommissionModal({ technician, onClose }: Props) {
   const { t, i18n } = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
   const toast   = useToastStore(s => s.show)
   const qc      = useQueryClient()
   const user    = useAuthStore(s => s.user)
@@ -98,10 +100,7 @@ export default function InternalTechnicianCommissionModal({ technician, onClose 
 
   useEffect(() => {
     if (sla) {
-      setSlaForm({
-        claim: String(sla.claim), warranty: String(sla.warranty),
-        installation: String(sla.installation), retrofit: String(sla.retrofit),
-      })
+      setSlaForm(Object.fromEntries(Object.entries(sla).map(([tipo, dias]) => [tipo, String(dias)])))
     }
   }, [sla])
 
@@ -126,10 +125,9 @@ export default function InternalTechnicianCommissionModal({ technician, onClose 
   })
 
   const slaMutation = useMutation({
-    mutationFn: () => serviciosApi.internalTechnicians.updateSlaSettings({
-      claim: Number(slaForm.claim), warranty: Number(slaForm.warranty),
-      installation: Number(slaForm.installation), retrofit: Number(slaForm.retrofit),
-    }),
+    mutationFn: () => serviciosApi.internalTechnicians.updateSlaSettings(
+      Object.fromEntries(Object.entries(slaForm).map(([tipo, dias]) => [tipo, Number(dias)])),
+    ),
     onSuccess: () => {
       toast(t('technicians.internal.commissionModal.slaSaved'), 'success')
       void qc.invalidateQueries({ queryKey: ['servicios-sla-settings'] })
@@ -241,9 +239,9 @@ export default function InternalTechnicianCommissionModal({ technician, onClose 
                     {t('technicians.internal.commissionModal.slaSection')}
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {(['claim', 'warranty', 'installation', 'retrofit'] as const).map(tipo => (
+                    {Object.keys(sla).map(tipo => (
                       <label key={tipo} className="text-xs">
-                        <span className="block text-slate-500 mb-1">{t(`technicians.internal.commissionModal.slaTypes.${tipo}`)}</span>
+                        <span className="block text-slate-500 mb-1">{ticketTypes.label(tipo)}</span>
                         <input
                           type="number" min={1}
                           value={slaForm[tipo] ?? ''}

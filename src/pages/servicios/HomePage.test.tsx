@@ -51,6 +51,8 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn().mockRejectedValue(new Error('sin catálogo en este test')) } }))
+
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: {
     home: { summary: vi.fn(), updateInstallationGoal: vi.fn(), estadoTickets: vi.fn() },

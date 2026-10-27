@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
 import { isAxiosError } from 'axios'
 import { serviciosApi } from '@/api/serviciosApi'
 import { TICKET_STATUSES, deriveQuoteDisplayStatus } from '@/types/servicios'
-import type { Ticket, TicketStatus, TicketCloseBlockedResponse, TicketType } from '@/types/servicios'
+import type { Ticket, TicketStatus, TicketCloseBlockedResponse } from '@/types/servicios'
 import TechnicianBadge from './TechnicianBadge'
 import { QuoteIndicator, InspectionReportIndicator } from './TicketIndicators'
 import TicketCancelModal from './TicketCancelModal'
@@ -34,13 +35,6 @@ const STATUS_COLORS: Record<TicketStatus, string> = {
   cancelled: '#ef4444',
 }
 
-const TYPE_COLORS: Record<TicketType, string> = {
-  installation: '#5BA5A0',
-  warranty:     '#9fc54d',
-  claim:        '#ef4444',
-  retrofit:     '#8b5cf6',
-}
-
 function formatDate(iso: string): string {
   return formatDateFromTimestamp(iso)
 }
@@ -56,6 +50,7 @@ interface CardProps {
 
 function TicketCard({ ticket, canDrag, onViewDetail, onSchedule, onOpenQuote, onOpenReport }: CardProps) {
   const { t } = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
   return (
     // SCRUM-781 (Corrección visual #7, rebote Gerencia 2026-08-20 sobre el fix anterior) — el badge
     // de tipo/subtipo y el número de ticket compartían una sola fila (`justify-between`); un badge
@@ -79,10 +74,10 @@ function TicketCard({ ticket, canDrag, onViewDetail, onSchedule, onOpenQuote, on
       <div className="mb-1">
         <span
           className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white whitespace-nowrap max-w-full truncate align-bottom"
-          style={{ background: TYPE_COLORS[ticket.tipo] }}
-          title={`${t(`tickets.types.${ticket.tipo}`)}${ticket.subtipo ? ` · ${t(`tickets.subtypes.${ticket.subtipo}`)}` : ''}`}
+          style={{ background: ticketTypes.color(ticket.tipo) }}
+          title={`${ticketTypes.label(ticket.tipo)}${ticket.subtipo ? ` · ${t(`tickets.subtypes.${ticket.subtipo}`, { defaultValue: ticket.subtipo })}` : ''}`}
         >
-          {t(`tickets.types.${ticket.tipo}`)}{ticket.subtipo ? ` · ${t(`tickets.subtypes.${ticket.subtipo}`)}` : ''}
+          {ticketTypes.label(ticket.tipo)}{ticket.subtipo ? ` · ${t(`tickets.subtypes.${ticket.subtipo}`, { defaultValue: ticket.subtipo })}` : ''}
         </span>
       </div>
       <p title={ticket.cliente ?? undefined} className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate mb-1.5">{ticket.cliente}</p>

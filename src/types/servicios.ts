@@ -477,12 +477,8 @@ export interface SaveCommissionCapturePayload {
 }
 
 // REQ-292 RN2 — SLA (días hábiles) por tipo de ticket, ajustable por Gerencia.
-export interface SlaSettings {
-  claim:         number
-  warranty:      number
-  installation:  number
-  retrofit:      number
-}
+/** Clave del tipo de ticket => días hábiles (Fase 7b: una entrada por cada tipo activo del catálogo, no solo los 4 de sistema). */
+export type SlaSettings = Record<string, number>
 
 // Batch 10 (REQ-258) — desglose + total ponderado, calculado en vivo (no se captura, se deriva
 // de CommissionCapture + tickets reales). `null` = sin captura del período (mismo criterio que

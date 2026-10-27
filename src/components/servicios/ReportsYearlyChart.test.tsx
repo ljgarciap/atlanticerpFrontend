@@ -9,6 +9,8 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }))
 
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn().mockRejectedValue(new Error('sin catálogo en este test')) } }))
+
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: { reportes: { completadosAnio: vi.fn() } },
 }))
