@@ -1,23 +1,12 @@
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useQuery } from '@tanstack/react-query'
 import { serviciosApi } from '@/api/serviciosApi'
 import { Card } from '@/components/ui/Card'
 import { IcoBarChart } from '@/components/icons'
-import { TICKET_TYPES } from '@/types/servicios'
-import type { TicketType } from '@/types/servicios'
 
 interface Props {
   year: number
-}
-
-// TicketBoard.tsx no exporta su TYPE_COLORS — redeclarado local a propósito (mismos 4 hex, ver
-// diseño de esta tarea) en vez de acoplar un componente de tablero con uno de reportes que no
-// comparten ciclo de vida.
-const TYPE_COLORS: Record<TicketType, string> = {
-  installation: '#5BA5A0',
-  warranty:     '#9fc54d',
-  claim:        '#ef4444',
-  retrofit:     '#8b5cf6',
 }
 
 /**
@@ -34,6 +23,7 @@ const TYPE_COLORS: Record<TicketType, string> = {
  * todavía (hallazgo real de Senior Review, corregido antes de Visual Review/Pre-QA).
  */
 export default function ReportsYearlyChart({ year }: Props) {
+  const ticketTypes = useTicketTypes()
   const { t, i18n } = useTranslation('servicios')
 
   const { data, isLoading } = useQuery({
@@ -43,7 +33,7 @@ export default function ReportsYearlyChart({ year }: Props) {
 
   const months = (data ?? []).map(item => item.mes)
   const byMonth = new Map((data ?? []).map(item => [item.mes, item]))
-  const globalMax = Math.max(1, ...(data ?? []).flatMap(item => TICKET_TYPES.map(tipo => item.por_tipo[tipo] ?? 0)))
+  const globalMax = Math.max(1, ...(data ?? []).flatMap(item => ticketTypes.keys.map(tipo => item.por_tipo[tipo] ?? 0)))
 
   return (
     <Card variant="panel" className="p-4">
@@ -68,7 +58,7 @@ export default function ReportsYearlyChart({ year }: Props) {
               // barra); si NINGÚN tipo tiene datos, el mes queda en blanco (solo la etiqueta del
               // mes, sin números ni barras ni total) pero conserva su posición en la grilla de 6
               // columnas — nunca se elimina ni reordena.
-              const visibleTipos = TICKET_TYPES.filter(tipo => (item?.por_tipo[tipo] ?? 0) > 0)
+              const visibleTipos = ticketTypes.keys.filter(tipo => (item?.por_tipo[tipo] ?? 0) > 0)
               const total        = item?.total ?? 0
               return (
                 <div key={mes} className="flex flex-col items-center gap-1.5">
@@ -96,9 +86,9 @@ export default function ReportsYearlyChart({ year }: Props) {
                         <div
                           key={tipo}
                           data-testid="tipo-bar"
-                          title={`${t(`tickets.types.${tipo}`)}: ${count}`}
+                          title={`${ticketTypes.label(tipo)}: ${count}`}
                           className="w-3 rounded-t-sm"
-                          style={{ height: `${Math.max(heightPct, 4)}%`, background: TYPE_COLORS[tipo] }}
+                          style={{ height: `${Math.max(heightPct, 4)}%`, background: ticketTypes.color(tipo) }}
                         />
                       )
                     })}
@@ -113,10 +103,10 @@ export default function ReportsYearlyChart({ year }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
-            {TICKET_TYPES.map(tipo => (
+            {ticketTypes.keys.map(tipo => (
               <div key={tipo} className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                <span className="w-2 h-2 rounded-sm" style={{ background: TYPE_COLORS[tipo] }} />
-                {t(`tickets.types.${tipo}`)}
+                <span className="w-2 h-2 rounded-sm" style={{ background: ticketTypes.color(tipo) }} />
+                {ticketTypes.label(tipo)}
               </div>
             ))}
           </div>

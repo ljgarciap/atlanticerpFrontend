@@ -7,7 +7,7 @@ import type {
   TicketType, TicketSubtype, TicketInstallationKind, RequirementsPayload,
   MasterClientOption, SubClientOption, ProjectOption, ProductOption, TicketProductInput,
 } from '@/types/servicios'
-import { TICKET_TYPES } from '@/types/servicios'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoSearch, IcoPaperclip } from '@/components/icons'
@@ -26,13 +26,6 @@ const ACCEPTED_ATTACHMENT_EXTENSIONS = [
 interface DraftAttachment {
   key:  string
   file: File
-}
-
-// REQ-279 RN4 — solo installation/warranty manejan subtipo (mismo mapeo que
-// `Ticket::SUBTIPOS_BY_TIPO`, ver también TicketDetailModal).
-const SUBTYPES_BY_TIPO: Partial<Record<TicketType, TicketSubtype[]>> = {
-  installation: ['installation', 'inspection'],
-  warranty:     ['warranty_generic', 'replacement_inspection'],
 }
 
 const EMPTY_REQUIREMENTS: RequirementsPayload = { catalog: [], otros: [] }
@@ -60,8 +53,13 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
   const qc     = useQueryClient()
   const toast  = useToastStore(s => s.show)
 
-  const [tipo, setTipo]                       = useState<TicketType>('installation')
-  const [subtipo, setSubtipo]                 = useState<TicketSubtype>('installation')
+  // Fase 7b — los tipos y subtipos vienen del catálogo `ticket_type` (REQ-279 RN4: un tipo sin subtipos exige `subtipo` vacío).
+  const ticketTypes                           = useTicketTypes()
+  const [tipoSel, setTipoSel]                 = useState<TicketType | null>(null)
+  const [subtipoSel, setSubtipoSel]           = useState<TicketSubtype | undefined>(undefined)
+  const tipo                                  = tipoSel ?? ticketTypes.keys[0] ?? 'installation'
+  const subtypeOptions                        = ticketTypes.subtypes(tipo)
+  const subtipo: TicketSubtype                = subtipoSel === undefined ? (subtypeOptions[0] ?? null) : subtipoSel
   const [tipoInstalacion, setTipoInstalacion] = useState<Exclude<TicketInstallationKind, null>>('internal')
   const [descripcion, setDescripcion]         = useState('')
   const [contacto, setContacto]               = useState('')
@@ -83,8 +81,8 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
   const [activePicker, setActivePicker] = useState<SearchPicker>(null)
 
   function onTipoChange(next: TicketType) {
-    setTipo(next)
-    setSubtipo(SUBTYPES_BY_TIPO[next]?.[0] ?? null)
+    setTipoSel(next)
+    setSubtipoSel(ticketTypes.subtypes(next)[0] ?? null)
   }
 
   function pickMaster(item: MasterClientOption) {
@@ -189,7 +187,6 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
     },
   })
 
-  const subtypeOptions = SUBTYPES_BY_TIPO[tipo] ?? []
   const excludedProductIds = productos.map(p => p.catalog_product_id)
   const canSave = descripcion.trim() !== '' && !mutation.isPending
 
@@ -209,7 +206,7 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
                 onChange={e => onTipoChange(e.target.value as TicketType)}
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm"
               >
-                {TICKET_TYPES.map(tp => <option key={tp} value={tp}>{t(`tickets.types.${tp}`)}</option>)}
+                {ticketTypes.types.map(tp => <option key={tp.key} value={tp.key}>{tp.label}</option>)}
               </select>
             </Field>
 
@@ -217,11 +214,11 @@ export default function TicketCreateModal({ onClose, onCreated }: Props) {
               <Field label={t('tickets.detail.fields.subtipo')}>
                 <select
                   value={subtipo ?? ''}
-                  onChange={e => setSubtipo(e.target.value as TicketSubtype)}
+                  onChange={e => setSubtipoSel(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm"
                 >
                   {subtypeOptions.map(st => (
-                    <option key={st ?? ''} value={st ?? ''}>{t(`tickets.subtypes.${st}`)}</option>
+                    <option key={st ?? ''} value={st ?? ''}>{t(`tickets.subtypes.${st}`, { defaultValue: st ?? '' })}</option>
                   ))}
                 </select>
               </Field>

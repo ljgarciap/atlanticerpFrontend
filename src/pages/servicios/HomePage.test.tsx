@@ -51,6 +51,8 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn().mockRejectedValue(new Error('sin catálogo en este test')) } }))
+
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: {
     home: { summary: vi.fn(), updateInstallationGoal: vi.fn(), estadoTickets: vi.fn() },
@@ -310,7 +312,8 @@ describe('ServiciosHomePage', () => {
 
     await waitFor(() => expect(screen.getByText('Torre Azul')).toBeInTheDocument())
     expect(screen.getByText('Luces parpadean')).toBeInTheDocument()
-    expect(screen.getByText('Garantía')).toBeInTheDocument()
+    // Fase 7b: «Garantía» sale dos veces — el chip de tipo del panel de estado y el badge del servicio sin responder.
+    expect(screen.getAllByText('Garantía')).toHaveLength(2)
   })
 
   // REQ-213 (Grupo C, SCRUM-276) — panel "Insumos y herramientas pendientes".
@@ -377,7 +380,7 @@ describe('ServiciosHomePage', () => {
     renderPage()
 
     await waitFor(() => expect(mockedApi.home.estadoTickets).toHaveBeenCalledWith(''))
-    fireEvent.click(screen.getByText('home.estadoTickets.chips.installation'))
+    fireEvent.click(screen.getByRole('button', { name: 'Instalación' }))
 
     await waitFor(() => expect(mockedApi.home.estadoTickets).toHaveBeenCalledWith('installation'))
   })

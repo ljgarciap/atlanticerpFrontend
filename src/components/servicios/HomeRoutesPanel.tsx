@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/Card'
 import { IcoMapPin, IcoClock } from '@/components/icons'
@@ -57,6 +58,7 @@ export default function HomeRoutesPanel({ data }: Props) {
 }
 
 function RouteRow({ visit }: { visit: HomeRouteVisit }) {
+  const ticketTypes = useTicketTypes()
   const { t } = useTranslation('servicios')
 
   // SCRUM-271 (rebote QA 2026-08-13) — RN5/mockup piden "dirección con botón de navegación
@@ -84,7 +86,7 @@ function RouteRow({ visit }: { visit: HomeRouteVisit }) {
 
         <span className="min-w-0 flex-1 text-sm text-slate-700 dark:text-slate-200 truncate">
           {visit.cliente ?? '—'}
-          <span className="text-slate-400 dark:text-slate-500"> · {t(`tickets.types.${visit.tipo}`)}</span>
+          <span className="text-slate-400 dark:text-slate-500"> · {ticketTypes.label(visit.tipo)}</span>
         </span>
 
         {visit.direccion && (

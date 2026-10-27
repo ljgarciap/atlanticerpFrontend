@@ -8,6 +8,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
+// Fase 7b: la etiqueta del tipo sale de useTicketTypes (catálogo); aquí no se prueba el catálogo.
+vi.mock('@/hooks/useTicketTypes', () => ({ useTicketTypes: () => ({ label: (tipo: string) => `tickets.types.${tipo}` }) }))
+
 function makeData(overrides: Partial<HomeRutasDia> = {}): HomeRutasDia {
   return {
     visitas:  [],

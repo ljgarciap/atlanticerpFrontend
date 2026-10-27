@@ -7,11 +7,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoSearch } from '@/components/icons'
 import { TICKET_STATUSES } from '@/types/servicios'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import type { TicketType, TicketStatus } from '@/types/servicios'
 
 type TypeChip = TicketType | ''
-
-const TYPE_CHIPS: TypeChip[] = ['', 'installation', 'warranty', 'claim', 'retrofit']
 
 // REQ-215 (Grupo C, SCRUM-278) — panel "Estado de tickets" de Inicio. Query propia (separada de
 // `servicios-home-summary`), re-consultada por `tipo` de chip activo para no recargar el resto de
@@ -21,6 +20,8 @@ const TYPE_CHIPS: TypeChip[] = ['', 'installation', 'warranty', 'claim', 'retrof
 // lista completa a propósito, sin recortarla para calzar con el mockup viejo.
 export default function EstadoTicketsPanel() {
   const { t }      = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
+  const typeChips: TypeChip[] = ['', ...ticketTypes.keys]
   const navigate   = useNavigate()
   const [chip, setChip] = useState<TypeChip>('')
 
@@ -46,13 +47,13 @@ export default function EstadoTicketsPanel() {
       </div>
 
       <div className="flex flex-wrap rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden w-fit mb-3">
-        {TYPE_CHIPS.map(value => (
+        {typeChips.map(value => (
           <Button
             key={value || 'all'}
             variant="secondary" active={chip === value} className="!rounded-none !border-0"
             onClick={() => setChip(value)}
           >
-            {t(`home.estadoTickets.chips.${value || 'all'}`)}
+            {value === '' ? t('home.estadoTickets.chips.all') : ticketTypes.label(value)}
           </Button>
         ))}
       </div>

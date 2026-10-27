@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useQuery } from '@tanstack/react-query'
 import { Chart as ChartJS, ArcElement, DoughnutController, Tooltip, Legend } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
@@ -21,6 +22,7 @@ interface Props {
  */
 export default function ReportsTypeDonut({ period }: Props) {
   const { t } = useTranslation('servicios')
+  const ticketTypes = useTicketTypes()
 
   const { data, isLoading } = useQuery({
     queryKey: ['servicios-reports-distribucion-tipo', period.year, period.month],
@@ -30,7 +32,7 @@ export default function ReportsTypeDonut({ period }: Props) {
   const total = (data ?? []).reduce((sum, item) => sum + item.count, 0)
 
   const chartData = data ? {
-    labels: data.map(item => t(`tickets.types.${item.tipo}`)),
+    labels: data.map(item => ticketTypes.label(item.tipo)),
     datasets: [{
       data: data.map(item => item.count),
       backgroundColor: data.map(item => item.color),
@@ -62,7 +64,7 @@ export default function ReportsTypeDonut({ period }: Props) {
             {data.map(item => (
               <div key={item.tipo} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                 <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: item.color }} />
-                {t(`tickets.types.${item.tipo}`)} ({item.count})
+                {ticketTypes.label(item.tipo)} ({item.count})
               </div>
             ))}
           </div>

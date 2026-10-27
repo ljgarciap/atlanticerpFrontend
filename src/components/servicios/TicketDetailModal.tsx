@@ -6,7 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { serviciosApi } from '@/api/serviciosApi'
 import type { TicketType, TicketSubtype, TicketInstallationKind, RequirementsPayload, RequirementsDetail, ProductOption } from '@/types/servicios'
-import { TICKET_TYPES, deriveQuoteDisplayStatus } from '@/types/servicios'
+import { deriveQuoteDisplayStatus } from '@/types/servicios'
+import { useTicketTypes } from '@/hooks/useTicketTypes'
 import { useAuthStore } from '@/store/authStore'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -44,13 +45,6 @@ function canDownloadBlankInspectionReport(permissions: readonly string[] | undef
 function canEditClaimSheet(permissions: readonly string[] | undefined, userId: number | undefined, technicianId: number | null | undefined): boolean {
   if (hasAnyPermission(permissions, ['servicios.tickets.manage'])) return true
   return hasAnyPermission(permissions, ['servicios.claim_sheets.manage']) && userId != null && userId === technicianId
-}
-
-// REQ-279 RN4 — solo installation/warranty manejan subtipo (mismo mapeo que
-// `Ticket::SUBTIPOS_BY_TIPO` en el backend, ver StoreTicketRequest/UpdateTicketRequest).
-const SUBTYPES_BY_TIPO: Partial<Record<TicketType, TicketSubtype[]>> = {
-  installation: ['installation', 'inspection'],
-  warranty:     ['warranty_generic', 'replacement_inspection'],
 }
 
 interface Props {
@@ -111,6 +105,8 @@ function formatRequirements(value: RequirementsDetail, t: TFunction): string {
 // separado — mismo patrón que el mockup del cliente, `toggleEdicionTicket()`).
 export default function TicketDetailModal({ ticketId, canEdit, onClose, initialDoc, canSchedule }: Props) {
   const { t }   = useTranslation('servicios')
+  // Fase 7b — tipos y subtipos del catálogo `ticket_type`; REQ-279 RN4: un tipo sin subtipos exige `subtipo` vacío.
+  const ticketTypes = useTicketTypes()
   const qc      = useQueryClient()
   const toast   = useToastStore(s => s.show)
   const user    = useAuthStore(s => s.user)
@@ -159,7 +155,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
   const { data: claimSheet } = useQuery({
     queryKey: ['servicios-claim-sheet', ticketId],
     queryFn:  () => serviciosApi.claimSheets.get(ticketId),
-    enabled:  ticket?.tipo === 'claim',
+    enabled:  ticketTypes.is(ticket?.tipo, 'reclamo'),
   })
 
   const invalidateTicketLists = () => {
@@ -275,7 +271,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
       ...d,
       tipo,
       // RN4 — al cambiar el tipo, el subtipo se recalcula según las opciones del nuevo tipo.
-      subtipo: SUBTYPES_BY_TIPO[tipo]?.[0] ?? null,
+      subtipo: ticketTypes.subtypes(tipo)[0] ?? null,
     })
   }
 
@@ -296,7 +292,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
     }
   }
 
-  const subtypeOptions = draft ? SUBTYPES_BY_TIPO[draft.tipo] ?? [] : []
+  const subtypeOptions = draft ? ticketTypes.subtypes(draft.tipo) : []
   const clienteCollapsed = ticket && ticket.cliente_master === ticket.subcliente
 
   return (
@@ -343,7 +339,9 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
                     onChange={e => onTipoChange(e.target.value as TicketType)}
                     className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm"
                   >
-                    {TICKET_TYPES.map(tp => <option key={tp} value={tp}>{t(`tickets.types.${tp}`)}</option>)}
+                    {ticketTypes.types.map(tp => <option key={tp.key} value={tp.key}>{tp.label}</option>)}
+                    {/* Un ticket viejo puede tener un tipo ya desactivado: se conserva como opción para no perderlo al editar. */}
+                    {!ticketTypes.keys.includes(draft.tipo) && <option value={draft.tipo}>{ticketTypes.label(draft.tipo)}</option>}
                   </select>
                 </label>
 
@@ -358,7 +356,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm"
                     >
                       {subtypeOptions.map(st => (
-                        <option key={st ?? ''} value={st ?? ''}>{t(`tickets.subtypes.${st}`)}</option>
+                        <option key={st ?? ''} value={st ?? ''}>{t(`tickets.subtypes.${st}`, { defaultValue: st ?? '' })}</option>
                       ))}
                     </select>
                   </label>
@@ -532,7 +530,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
           ) : (
             <div className="flex flex-col gap-3 text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                <DetailField label={t('tickets.detail.fields.tipo')} value={t(`tickets.types.${ticket.tipo}`)} />
+                <DetailField label={t('tickets.detail.fields.tipo')} value={ticketTypes.label(ticket.tipo)} />
                 <DetailField label={t('tickets.detail.fields.subtipo')} value={ticket.subtipo ? t(`tickets.subtypes.${ticket.subtipo}`) : '—'} />
                 {clienteCollapsed ? (
                   <DetailField label={t('tickets.detail.fields.cliente')} value={ticket.cliente_master ?? '—'} />
@@ -610,9 +608,9 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
 
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
-                  {ticket.tipo === 'claim' ? t('tickets.claimSheet.fieldLabel') : t('tickets.detail.fields.informe')}
+                  {ticketTypes.is(ticket.tipo, 'reclamo') ? t('tickets.claimSheet.fieldLabel') : t('tickets.detail.fields.informe')}
                 </p>
-                {ticket.tipo === 'claim' ? (
+                {ticketTypes.is(ticket.tipo, 'reclamo') ? (
                   <ClaimSheetIndicator
                     status={claimSheet?.estado}
                     onOpen={() => setClaimSheetOpen(true)}
