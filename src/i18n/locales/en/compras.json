@@ -603,7 +603,7 @@
         "internacional": "Non-local provider"
       },
       "costing": {
-        "localNote": "Local provider: ITBMS (7%) is calculated automatically per line.",
+        "localNote": "Local provider: {{tax}} (7%) is calculated automatically per line.",
         "importCostTotal": "Import cost",
         "freightTotal": "Freight",
         "handlingTotal": "Handling",

@@ -321,7 +321,7 @@
       "editContact": "Edit",
       "newQuote": "+ New quote",
       "newQuoteUnavailable": "Available once Quote is implemented",
-      "exentoItbms": "ITBMS-exempt"
+      "exentoItbms": "{{tax}}-exempt"
     },
     "createModal": {
       "titleClient": "Create client",
@@ -374,8 +374,8 @@
       "guardar": "Save changes",
       "guardando": "Saving…",
       "errorGenerico": "Could not save the changes. Try again.",
-      "avisoExento": "This client is ITBMS-exempt (document: {{documento}}). If you change its tax ID, check digit or type, Administration must review the exemption.",
-      "exencionARevisar": "Changes saved. This client is still marked ITBMS-exempt: let Administration know so they can review whether the exemption applies with the new tax ID or type.",
+      "avisoExento": "This client is {{tax}}-exempt (document: {{documento}}). If you change its tax ID, check digit or type, Administration must review the exemption.",
+      "exencionARevisar": "Changes saved. This client is still marked {{tax}}-exempt: let Administration know so they can review whether the exemption applies with the new tax ID or type.",
       "entendido": "Understood"
     },
     "receptorTipo": {
@@ -528,7 +528,7 @@
       "title": "Totals",
       "discount": "Discount",
       "net": "Net",
-      "itbms": "ITBMS (7%)",
+      "itbms": "{{tax}} (7%)",
       "grandTotal": "Total"
     },
     "validation": {
@@ -589,9 +589,9 @@
     "partName": "Part name",
     "reorderError": "The new order could not be saved. The quote was reloaded; please try again.",
     "exencion": {
-      "exenta": "ITBMS-exempt client: this quote includes no ITBMS.",
-      "conservaExenta": "This quote keeps its ITBMS exemption even though the client is no longer marked exempt.",
-      "conservaItbms": "The client is now ITBMS-exempt, but this quote was already confirmed and keeps its ITBMS; it will be invoiced with it. If that is wrong, Administration can fix it with the correction credit note."
+      "exenta": "{{tax}}-exempt client: this quote includes no {{tax}}.",
+      "conservaExenta": "This quote keeps its {{tax}} exemption even though the client is no longer marked exempt.",
+      "conservaItbms": "The client is now {{tax}}-exempt, but this quote was already confirmed and keeps its {{tax}}; it will be invoiced with it. If that is wrong, Administration can fix it with the correction credit note."
     }
   },
   "document": {

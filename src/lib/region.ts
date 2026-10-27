@@ -27,6 +27,22 @@ export function setRegion(region: Partial<Region> | null | undefined): void {
 }
 
 /**
+ * Fase 6d — nombre VISIBLE del impuesto sobre ventas del país (`user.tax_label` del backend): «ITBMS» en Panamá, «IVA» en Colombia, «Sales tax» en
+ * EE. UU. Solo es texto de pantalla; los textos traducidos lo reciben como `{{tax}}` (ver `i18n/index.ts`). Sin sesión rige Panamá.
+ */
+export const DEFAULT_TAX_LABEL = 'ITBMS'
+
+let taxLabel = DEFAULT_TAX_LABEL
+
+export function getTaxLabel(): string {
+  return taxLabel
+}
+
+export function setTaxLabel(label: string | null | undefined): void {
+  taxLabel = label && label.trim() !== '' ? label : DEFAULT_TAX_LABEL
+}
+
+/**
  * Fase 6c — cómo se llama y cómo se captura la identificación fiscal del país de la empresa (`user.fiscal_id` del backend): «RUC» con DV de
  * 1-2 dígitos en Panamá, «NIT» con DV de 1 en Colombia, «EIN / Tax ID» sin DV en EE. UU. Sin sesión (o sesión anterior a la 6c) rige Panamá.
  */

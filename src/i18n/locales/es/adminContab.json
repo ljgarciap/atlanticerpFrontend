@@ -24,7 +24,7 @@
   },
   "fiscal": {
     "title": "Configuración Fiscal",
-    "subtitle": "Datos fiscales, facturación electrónica y tasas de ITBMS — configuración crítica, exclusiva del aprobador configurado",
+    "subtitle": "Datos fiscales, facturación electrónica y tasas de {{tax}} — configuración crítica, exclusiva del aprobador configurado",
     "saveChanges": "Guardar cambios",
     "confirmSave": "¿Confirmás aplicar estos cambios? La pantalla vuelve a modo solo lectura.",
     "saveError": "No se pudo guardar la configuración fiscal",
@@ -80,7 +80,7 @@
       "sinProveedor": "Esta empresa no tiene facturación electrónica: los documentos que se generan son internos (no fiscales) y no se envían a ninguna autoridad."
     },
     "itbms": {
-      "title": "Tasas de ITBMS",
+      "title": "Tasas de {{tax}}",
       "addRate": "+ Agregar tasa",
       "detailTitle": "Detalle de tasa",
       "toggleActive": "Activar o desactivar tasa",
@@ -327,7 +327,7 @@
       "totalAPagar": "Total a pagar",
       "subtotal": "Subtotal",
       "descuentos": "Descuentos",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "saldoAplicado": "Saldo a favor aplicado",
       "aplicarSaldo": "Aplicar saldo a favor disponible ({{monto}})",
       "avisoSaldoSoloPrimera": "El saldo a favor solo se aplicará a la primera factura de este lote.",
@@ -727,8 +727,8 @@
       }
     },
     "regimen": {
-      "con_itbms": "Con ITBMS",
-      "sin_itbms": "Sin ITBMS"
+      "con_itbms": "Con {{tax}}",
+      "sin_itbms": "Sin {{tax}}"
     }
   },
   "notasCredito": {
@@ -752,7 +752,7 @@
       "correccion": "Corrección de datos — el trabajo sí se entregó, hay que refacturar"
     },
     "motivosCorreccion": {
-      "itbms": "Tratamiento de ITBMS incorrecto",
+      "itbms": "Tratamiento de {{tax}} incorrecto",
       "fecha": "Fecha de facturación incorrecta",
       "ambos": "Ambos"
     },
@@ -770,7 +770,7 @@
       "correccionAviso": "La cotización, el pedido y el documento de salida de Bodega no se tocan — el trabajo ya se entregó correctamente, solo se corrige el papel.",
       "motivoCorreccionLabel": "¿Qué estaba mal?",
       "motivoCorreccionPlaceholder": "Selecciona un motivo...",
-      "tratamientoActualLabel": "Tratamiento de ITBMS actual (el que tiene la factura hoy)",
+      "tratamientoActualLabel": "Tratamiento de {{tax}} actual (el que tiene la factura hoy)",
       "tratamientoCorrectoLabel": "Tratamiento correcto",
       "tratamientoCorrectoPlaceholder": "Selecciona...",
       "nuevaFechaLabel": "Nueva fecha de factura",
@@ -778,7 +778,7 @@
       "correccionRevisarButton": "Revisar y continuar",
       "referenciaLabel": "Referencia (Guía de Entrega / Cotización)",
       "productosDevueltosLabel": "Productos devueltos",
-      "productosSinItbmsHint": "Precios sin ITBMS. El monto sugerido ya incluye el ITBMS de la factura de origen ({{pct}} %).",
+      "productosSinItbmsHint": "Precios sin {{tax}}. El monto sugerido ya incluye el {{tax}} de la factura de origen ({{pct}} %).",
       "facturaTotalReferencia": "Total de la factura {{numero}}: {{monto}} · Saldo pendiente: {{saldo}}",
       "personaDevuelveLabel": "Persona que devuelve",
       "proyectoLabel": "Proyecto",
@@ -796,9 +796,9 @@
       "sinValorAcreditable": "La factura {{numero}} ya está completamente acreditada por notas previas: no queda valor que anular.",
       "montoSuperaAcreditable": "El monto supera el valor que aún se puede acreditar de la factura ({{acreditable}}).",
       "facturaSaldoPendiente": "saldo pendiente",
-      "montoLabel": "Monto total (con ITBMS)",
+      "montoLabel": "Monto total (con {{tax}})",
       "subtotalLabel": "Subtotal",
-      "itbmsLabel": "ITBMS",
+      "itbmsLabel": "{{tax}}",
       "motivoLabel": "Motivo",
       "fechaLabel": "Fecha",
       "excedenteAviso": "El monto supera el saldo pendiente de la factura — el excedente",
@@ -852,7 +852,7 @@
       "title": "Detalle de la nota",
       "monto": "Monto",
       "subtotal": "Subtotal",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "estado": "Estado",
       "cotizacion": "Cotización",
       "guiaEntrega": "Guía de Entrega",
@@ -1225,7 +1225,7 @@
     },
     "regimenes": {
       "exento": "Exento",
-      "con_itbms": "Con ITBMS (7%)",
+      "con_itbms": "Con {{tax}} (7%)",
       "retencion_50": "Retención del 50% (3.5%)"
     },
     "datosFiscales": {
@@ -1417,7 +1417,7 @@
         "proveedor": "Proveedor",
         "descripcion": "Descripción",
         "montoBruto": "M. Bruto",
-        "itbms": "ITBMS",
+        "itbms": "{{tax}}",
         "total": "Total",
         "estado": "Estado",
         "soporte": "Soporte"
@@ -1425,7 +1425,7 @@
       "subtotal": "Subtotal — {{solicitante}}",
       "totalGeneral": "Total general",
       "verSoportes": "Ver ({{count}})",
-      "footnote": "El Monto Bruto y el ITBMS se escriben tal como aparecen en el recibo o factura del gasto — no se calculan, son montos de terceros. El Total sí se calcula solo (Bruto + ITBMS)."
+      "footnote": "El Monto Bruto y el {{tax}} se escriben tal como aparecen en el recibo o factura del gasto — no se calculan, son montos de terceros. El Total sí se calcula solo (Bruto + {{tax}})."
     },
     "nuevoGastoModal": {
       "title": "Registrar nuevo(s) gasto(s)",
@@ -1439,7 +1439,7 @@
       "proveedor": "Proveedor",
       "descripcion": "Descripción",
       "montoBruto": "Monto bruto",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "itbmsHint": "Escribe 0 si no aplica",
       "foto": "Foto del recibo",
       "fotoRequerida": "Falta la foto del recibo en esta línea.",
@@ -1512,7 +1512,7 @@
       "editarError": "No se pudieron guardar los cambios.",
       "reabrirError": "No se pudo reabrir este gasto.",
       "agregarSoporteError": "No se pudo agregar el soporte. Intenta de nuevo.",
-      "montos": "Monto Bruto / ITBMS / Total",
+      "montos": "Monto Bruto / {{tax}} / Total",
       "soportes": "Soportes",
       "sinSoportes": "Sin soportes adjuntos.",
       "agregarSoporte": "Agregar soporte",
@@ -1653,7 +1653,7 @@
       "facturas": "Facturas",
       "notasCredito": "Notas de crédito",
       "baseImponible": "Base imponible",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Total del período",
       "columnas": {
@@ -1665,7 +1665,7 @@
         "documento": "N° Documento",
         "baseImponible": "Base Imponible",
         "porcentaje": "%",
-        "itbms": "Cuota ITBMS",
+        "itbms": "Cuota {{tax}}",
         "total": "Total",
         "vendedor": "Vendedor"
       }
@@ -1686,7 +1686,7 @@
       "sinFacturas": "No hay facturas en el rango/cliente seleccionado.",
       "facturasCobradas": "Facturas cobradas",
       "baseImponible": "Base imponible",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Total del período",
       "pendientesTitle": "Pendientes de cobro (sin método de pago todavía)",
@@ -1695,7 +1695,7 @@
         "cliente": "Cliente",
         "documento": "N° Documento",
         "baseImponible": "Base Imponible",
-        "itbms": "ITBMS",
+        "itbms": "{{tax}}",
         "total": "Total"
       },
       "metodos": {
@@ -1834,7 +1834,7 @@
       "cliente": "Cliente",
       "ruc": "RUC",
       "dv": "DV",
-      "itbms": "ITBMS"
+      "itbms": "{{tax}}"
     },
     "editar": "Editar datos fiscales",
     "bloqueado": "Bloqueado",
@@ -1845,10 +1845,10 @@
     "exento": "Exento",
     "noExento": "—",
     "exencion": {
-      "titulo": "Marcar cliente exento de ITBMS",
-      "tituloQuitar": "Quitar la exención de ITBMS",
-      "ayuda": "Desde ahora, las cotizaciones nuevas y los borradores de este cliente no incluyen ITBMS, y se factura a tasa 0%. Las cotizaciones ya confirmadas y las facturas emitidas no cambian.",
-      "ayudaQuitar": "Las cotizaciones nuevas y los borradores de este cliente vuelven a incluir ITBMS. Las cotizaciones ya confirmadas y las facturas emitidas no cambian.",
+      "titulo": "Marcar cliente exento de {{tax}}",
+      "tituloQuitar": "Quitar la exención de {{tax}}",
+      "ayuda": "Desde ahora, las cotizaciones nuevas y los borradores de este cliente no incluyen {{tax}}, y se factura a tasa 0%. Las cotizaciones ya confirmadas y las facturas emitidas no cambian.",
+      "ayudaQuitar": "Las cotizaciones nuevas y los borradores de este cliente vuelven a incluir {{tax}}. Las cotizaciones ya confirmadas y las facturas emitidas no cambian.",
       "documento": "Documento que respalda la exención",
       "documentoPlaceholder": "Ej. Resolución 201-1234 o Ley 8 de 2010",
       "documentoActual": "Documento vigente",
@@ -1858,15 +1858,15 @@
       "quitarAccion": "Quitar exención",
       "cancelar": "Cancelar",
       "cerrar": "Cerrar",
-      "marcada": "El cliente quedó exento de ITBMS.",
-      "quitada": "Se quitó la exención de ITBMS del cliente.",
+      "marcada": "El cliente quedó exento de {{tax}}.",
+      "quitada": "Se quitó la exención de {{tax}} del cliente.",
       "borradores": "Se actualizó {{count}} cotización en borrador.",
       "borradores_other": "Se actualizaron {{count}} cotizaciones en borrador.",
       "error": "No se pudo guardar el cambio.",
-      "avisoConfirmadas": "Hay {{count}} cotización confirmada sin facturar que conserva su ITBMS y se facturará con él. Si no corresponde, corrígela con la nota de crédito de corrección después de facturar.",
-      "avisoConfirmadas_other": "Hay {{count}} cotizaciones confirmadas sin facturar que conservan su ITBMS y se facturarán con él. Si no corresponde, corrígelas con la nota de crédito de corrección después de facturar.",
-      "avisoConfirmadasQuitar": "Hay {{count}} cotización confirmada sin facturar que conserva su exención y se facturará sin ITBMS.",
-      "avisoConfirmadasQuitar_other": "Hay {{count}} cotizaciones confirmadas sin facturar que conservan su exención y se facturarán sin ITBMS."
+      "avisoConfirmadas": "Hay {{count}} cotización confirmada sin facturar que conserva su {{tax}} y se facturará con él. Si no corresponde, corrígela con la nota de crédito de corrección después de facturar.",
+      "avisoConfirmadas_other": "Hay {{count}} cotizaciones confirmadas sin facturar que conservan su {{tax}} y se facturarán con él. Si no corresponde, corrígelas con la nota de crédito de corrección después de facturar.",
+      "avisoConfirmadasQuitar": "Hay {{count}} cotización confirmada sin facturar que conserva su exención y se facturará sin {{tax}}.",
+      "avisoConfirmadasQuitar_other": "Hay {{count}} cotizaciones confirmadas sin facturar que conservan su exención y se facturarán sin {{tax}}."
     }
   },
   "compensaciones": {

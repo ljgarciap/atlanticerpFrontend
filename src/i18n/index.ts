@@ -13,6 +13,7 @@ import esBodega    from './locales/es/bodega.json'
 import esServicios from './locales/es/servicios.json'
 import esAdminContab from './locales/es/adminContab.json'
 import esLogs      from './locales/es/logs.json'
+import { getTaxLabel } from '@/lib/region'
 import enCommon   from './locales/en/common.json'
 import enAuth     from './locales/en/auth.json'
 import enSecurity from './locales/en/security.json'
@@ -37,7 +38,8 @@ i18n.use(initReactI18next).init({
   fallbackLng:  'en',
   defaultNS:    'common',
   ns:           ['common', 'auth', 'security', 'settings', 'crm', 'ventasDiseno', 'compras', 'aiUsage', 'bodega', 'servicios', 'adminContab', 'logs'],
-  interpolation: { escapeValue: false },
+  // Fase 6d — `{{tax}}` en los textos = nombre del impuesto del país (getter: se lee en cada traducción, así cambia con la sesión).
+  interpolation: { escapeValue: false, defaultVariables: { get tax() { return getTaxLabel() } } },
 })
 
 // BUG-07/10 (SCRUM-29): document.documentElement.lang nunca se actualizaba,

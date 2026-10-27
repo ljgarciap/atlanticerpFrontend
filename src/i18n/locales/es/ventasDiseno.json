@@ -321,7 +321,7 @@
       "editContact": "Editar",
       "newQuote": "+ Nueva cotización",
       "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
-      "exentoItbms": "Exento de ITBMS"
+      "exentoItbms": "Exento de {{tax}}"
     },
     "createModal": {
       "titleClient": "Crear cliente",
@@ -374,8 +374,8 @@
       "guardar": "Guardar cambios",
       "guardando": "Guardando…",
       "errorGenerico": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
-      "avisoExento": "Este cliente está exento de ITBMS (documento: {{documento}}). Si cambias su RUC, DV o tipo, Administración debe revisar la exención.",
-      "exencionARevisar": "Se guardaron los cambios. Este cliente sigue marcado como exento de ITBMS: avisa a Administración para que revise si la exención aplica con el nuevo RUC o tipo.",
+      "avisoExento": "Este cliente está exento de {{tax}} (documento: {{documento}}). Si cambias su RUC, DV o tipo, Administración debe revisar la exención.",
+      "exencionARevisar": "Se guardaron los cambios. Este cliente sigue marcado como exento de {{tax}}: avisa a Administración para que revise si la exención aplica con el nuevo RUC o tipo.",
       "entendido": "Entendido"
     },
     "receptorTipo": {
@@ -529,9 +529,9 @@
       "title": "Totales",
       "discount": "Descuento",
       "net": "Neto",
-      "itbms": "ITBMS ({{percentage}}%)",
+      "itbms": "{{tax}} ({{percentage}}%)",
       "grandTotal": "Total",
-      "itbmsExento": "ITBMS (Exento)"
+      "itbmsExento": "{{tax}} (Exento)"
     },
     "validation": {
       "check": "Verificar cotización",
@@ -591,9 +591,9 @@
     "partName": "Nombre de la partida",
     "reorderError": "No se pudo guardar el nuevo orden. Se recargó la cotización; intenta de nuevo.",
     "exencion": {
-      "exenta": "Cliente exento de ITBMS: esta cotización no incluye ITBMS.",
-      "conservaExenta": "Esta cotización conserva su exención de ITBMS, aunque el cliente ya no está marcado como exento.",
-      "conservaItbms": "El cliente ahora está exento de ITBMS, pero esta cotización ya estaba confirmada y conserva su ITBMS; se facturará con él. Si no corresponde, Administración puede corregirlo con la nota de crédito de corrección."
+      "exenta": "Cliente exento de {{tax}}: esta cotización no incluye {{tax}}.",
+      "conservaExenta": "Esta cotización conserva su exención de {{tax}}, aunque el cliente ya no está marcado como exento.",
+      "conservaItbms": "El cliente ahora está exento de {{tax}}, pero esta cotización ya estaba confirmada y conserva su {{tax}}; se facturará con él. Si no corresponde, Administración puede corregirlo con la nota de crédito de corrección."
     }
   },
   "document": {

@@ -53,6 +53,8 @@ export interface UserInfo {
   // siempre las 7 llaves del catálogo, en false por defecto).
   modules?:      Record<string, ModulePermissions>
   flags?:        UserFlags
+  /** Fase 6d — nombre visible del impuesto del país (ITBMS / IVA / Sales tax). Ausente: «ITBMS». */
+  tax_label?:    string
   /** Fase 6a — contexto regional de la empresa (viene del tenant). Ausente en sesiones anteriores: rige el de Panamá (`lib/region`). */
   region?:       { country: string; currency: string; timezone: string; locale: string }
   /** Fase 6c — cómo se llama y se captura la identificación fiscal del país (RUC+DV, NIT+DV, EIN). Ausente en sesiones anteriores: rige Panamá. */

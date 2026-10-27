@@ -729,7 +729,7 @@
       "observations": "Observaciones",
       "subtotal": "Subtotal",
       "discountPercent": "Descuento (%)",
-      "itbms": "ITBMS ({{percent}}%)",
+      "itbms": "{{tax}} ({{percent}}%)",
       "total": "Total",
       "save": "Guardar",
       "saved": "Cotización guardada.",
