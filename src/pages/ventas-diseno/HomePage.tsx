@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { Pendiente, FinalStageItem } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -25,6 +25,7 @@ type PipelineChip = 'all' | 'final_stage' | 'stagnant'
 
 export default function VentasDisenoHomePage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const canSeeTeam = hasGerenciaScope(user)
@@ -80,17 +81,19 @@ export default function VentasDisenoHomePage() {
   // chip Final Stage/Estancados activo).
   const stageCounts = useMemo(() => {
     const cards = pipelineCards ?? []
-    return PIPELINE_STAGES.map(stage => {
+    return pipelineStages.stages.map(s => {
+      const stage = { id: s.key, color: s.color, label: s.label }
       const inStage = cards.filter(c => c.stage === stage.id)
+      // «Final Stage» = Propuesta y las etapas propias abiertas que vayan después (Fase 7c).
       const visible = pipelineChip === 'final_stage'
-        ? (stage.id === 'proposal' ? inStage : [])
+        ? (s.category === 'abierta' && pipelineStages.isAtOrAfter(s.key, 'proposal') ? inStage : [])
         : pipelineChip === 'stagnant'
           ? inStage.filter(c => c.is_stagnant)
           : inStage
       const amount = visible.reduce((sum, c) => sum + (c.amount ?? 0), 0)
       return { stage, count: visible.length, amount }
     })
-  }, [pipelineCards, pipelineChip])
+  }, [pipelineCards, pipelineChip, pipelineStages.stages])
 
   const pendientes = summary?.pendientes ?? []
   const finalStage = summary?.final_stage ?? []
@@ -342,7 +345,7 @@ export default function VentasDisenoHomePage() {
                 className="rounded-lg border border-slate-100 dark:border-slate-700 p-2 text-center hover:bg-slate-50 dark:hover:bg-slate-900"
               >
                 <span className="block text-lg font-bold" style={{ color: stage.color }}>{count}</span>
-                <span className="block text-[10px] text-slate-500 dark:text-slate-400">{t(`ventasDiseno:stages.${stage.id}`)}</span>
+                <span className="block text-[10px] text-slate-500 dark:text-slate-400">{stage.label}</span>
                 {/* SCRUM-834 — monto acumulado de la etapa, debajo del conteo (mockup 1__Ventas_Diseño_Home) */}
                 <span className="block text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">${formatInt(amount)}</span>
               </button>

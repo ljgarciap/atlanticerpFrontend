@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { PipelineStage } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -34,6 +34,7 @@ function fmtArea(n: number | null): string {
 export default function CrmProjectsListPage() {
   const { t: tCrm }    = useTranslation('crm')
   const { t: tVd }     = useTranslation('ventasDiseno')
+  const pipelineStages = usePipelineStages()
   const { t: tCommon } = useTranslation('common')
   const navigate  = useNavigate()
   const showToast = useToastStore(s => s.show)
@@ -165,8 +166,8 @@ export default function CrmProjectsListPage() {
           className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
         >
           <option value="">{tCrm('projectsList.filters.allStages')}</option>
-          {PIPELINE_STAGES.map(s => (
-            <option key={s.id} value={s.id}>{tVd(`stages.${s.id}`)}</option>
+          {pipelineStages.stages.map(s => (
+            <option key={s.key} value={s.key}>{s.label}</option>
           ))}
         </select>
 
@@ -214,7 +215,7 @@ export default function CrmProjectsListPage() {
               </tr>
             )}
             {rows.map(row => {
-              const stageMeta = PIPELINE_STAGES.find(s => s.id === row.stage)
+              const stageMeta = pipelineStages.info(row.stage)
               return (
                 // REQ-612: clic en cualquier parte de la fila navega a Pipeline con la
                 // tarjeta resaltada — mismo mecanismo (?card=) que REQ-022/065 desde Clientes.
@@ -226,9 +227,9 @@ export default function CrmProjectsListPage() {
                   <td className="px-4 py-3 font-semibold text-slate-800">{row.sales_project.name}</td>
                   <td className="px-4 py-3 text-slate-600">{row.master_client?.name ?? '—'}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: stageMeta?.color }}>
-                      <span className="w-2 h-2 rounded-full" style={{ background: stageMeta?.color }} />
-                      {tVd(`stages.${row.stage}`)}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: stageMeta.color }}>
+                      <span className="w-2 h-2 rounded-full" style={{ background: stageMeta.color }} />
+                      {stageMeta.label}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-slate-600">

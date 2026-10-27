@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import type { Plugin } from 'chart.js'
@@ -70,6 +71,7 @@ const PERIODS: ReportPeriod[] = ['month', 'quarter', 'year']
 
 export default function VentasDisenoReportsPage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuthStore()
@@ -433,7 +435,7 @@ export default function VentasDisenoReportsPage() {
                 <tbody>
                   {summary.forecast.stage_breakdown.map(row => (
                     <tr key={row.stage} className="border-t border-slate-100 dark:border-slate-800">
-                      <td className="py-1.5 pr-2">{t(`ventasDiseno:stages.${row.stage}`)}</td>
+                      <td className="py-1.5 pr-2">{pipelineStages.label(row.stage)}</td>
                       <td className="py-1.5 pr-2">{row.projects}</td>
                       <td className="py-1.5 pr-2">${row.open_amount.toLocaleString()}</td>
                       <td className="py-1.5 pr-2">{row.probability_percent}%</td>

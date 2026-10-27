@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
@@ -20,6 +20,7 @@ interface Props {
 // siempre el name sin cambios.
 export default function ArchitectDetailModal({ architectId, onClose }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
   const navigate = useNavigate()
   const qc = useQueryClient()
 
@@ -129,7 +130,7 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
                   </thead>
                   <tbody>
                     {architect.projects.map(p => {
-                      const stage = PIPELINE_STAGES.find(s => s.id === p.stage)
+                      const stage = pipelineStages.info(p.stage)
                       return (
                         <tr
                           key={p.id}
@@ -142,7 +143,7 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
                             {stage && (
                               <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: stage.color }}>
                                 <span className="inline-block w-2 h-2 rounded-full" style={{ background: stage.color }} />
-                                {t(`ventasDiseno:stages.${p.stage}`)}
+                                {stage.label}
                               </span>
                             )}
                           </td>

@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
 import { useToastStore } from '@/store/toastStore'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import type { PipelineCard, PipelineStage } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -47,6 +47,8 @@ export default function VentasDisenoPipelinePage() {
   const pipelineOnlyAccess = (readsAllPipeline || hasPipelineEdit) && !perms.includes('ventas_diseno.read') && !perms.includes('superadmin.all')
   const qc = useQueryClient()
   const toast = useToastStore(s => s.show)
+  // Fase 7c — las columnas del tablero salen del catálogo `pipeline_stage` (las 6 de sistema + las etapas propias de la empresa).
+  const pipelineStages = usePipelineStages()
 
   // SCRUM-849.1 — mover una tarjeta arrastrándola entre columnas, reusando el mismo
   // endpoint/gate que ya usa el botón "Mover a..." del modal de detalle
@@ -92,7 +94,7 @@ export default function VentasDisenoPipelinePage() {
   // según el valor.
   const stageParam = params.get('stage')
   const isOtherStageParam = (v: string | null): v is PipelineStage =>
-    v !== 'approved' && v !== 'proposal' && v !== 'stagnant' && PIPELINE_STAGES.some(s => s.id === v)
+    v !== 'approved' && v !== 'proposal' && v !== 'stagnant' && pipelineStages.keys.includes(v ?? '')
 
   const [scope,  setScope]  = useState<'own' | 'team'>(() => {
     if (!canViewTeamScope) return 'own'
@@ -146,13 +148,16 @@ export default function VentasDisenoPipelinePage() {
   // Propuesta, no las 6 columnas con la mayoria vacia. SCRUM-91 (REQ-022/074) — llegar
   // desde "Mejores clientes" en Reportes (?stage=approved) tiene el mismo problema.
   // SCRUM-796 (secc. 1.1/1.2) — `stage` (los otros 5 stages) restringe la misma forma.
-  const visibleStages = PIPELINE_STAGES.filter(s => {
-    if (chip === 'final_stage') return s.id === 'proposal'
-    if (chip === 'approved') return s.id === 'approved'
-    if (orders) return s.id === 'approved'
-    if (stage) return s.id === stage
-    return true
-  })
+  // «Final Stage» = Propuesta y las etapas propias abiertas que vayan después; «Aprobado»/pedidos = las etapas ganadas.
+  const visibleStages = pipelineStages.stages
+    .map(s => ({ id: s.key, color: s.color, label: s.label, category: s.category }))
+    .filter(s => {
+      if (chip === 'final_stage') return s.category === 'abierta' && pipelineStages.isAtOrAfter(s.id, 'proposal')
+      if (chip === 'approved') return s.category === 'ganada'
+      if (orders) return s.category === 'ganada'
+      if (stage) return s.id === stage
+      return true
+    })
 
   const CHIP_OPTS: { value: Chip; label: string }[] = [
     { value: 'all',         label: t('ventasDiseno:filters.all') },
@@ -274,7 +279,7 @@ export default function VentasDisenoPipelinePage() {
             (indicadores/gráfica "Proyectos por etapa"), removible como cualquier filtro. */}
         {stage && (
           <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-[#E3F0EE] text-primary-dark flex items-center gap-1.5">
-            {t(`ventasDiseno:stages.${stage}`)}
+            {pipelineStages.label(stage)}
             <button type="button" onClick={() => setStage(null)} className="hover:opacity-70" aria-label={t('common:actions.clear')}>
               ×
             </button>
@@ -306,7 +311,7 @@ export default function VentasDisenoPipelinePage() {
               const stageCards = allCards.filter(c => c.stage === stage.id)
               const totalValue = stageCards.reduce((sum, c) => sum + (c.amount ?? 0), 0)
 
-              const isLost = stage.id === 'lost'
+              const isLost = stage.category === 'perdida'
               const isDropTarget = dragOverStage === stage.id
 
               return (
@@ -335,7 +340,7 @@ export default function VentasDisenoPipelinePage() {
                         className={isLost ? 'text-xs font-bold uppercase' : 'text-xs font-medium'}
                         style={{ color: stage.color }}
                       >
-                        {t(`ventasDiseno:stages.${stage.id}`)}
+                        {stage.label}
                       </span>
                     </div>
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white dark:bg-slate-800" style={{ color: stage.color }}>

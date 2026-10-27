@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
@@ -17,6 +17,7 @@ interface Props {
 // que lee ?card={id} para reabrir el mismo modal de detalle).
 export default function ClientProjectsModal({ masterClientId, masterClientName, onClose }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
   const navigate = useNavigate()
 
   const { data: projects, isLoading } = useQuery({
@@ -51,7 +52,7 @@ export default function ClientProjectsModal({ masterClientId, masterClientName, 
               </thead>
               <tbody>
                 {projects.map(p => {
-                  const stage = PIPELINE_STAGES.find(s => s.id === p.stage)
+                  const stage = pipelineStages.info(p.stage)
                   return (
                     <tr
                       key={p.id}
@@ -64,7 +65,7 @@ export default function ClientProjectsModal({ masterClientId, masterClientName, 
                         {stage && (
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: stage.color }}>
                             <span className="inline-block w-2 h-2 rounded-full" style={{ background: stage.color }} />
-                            {t(`ventasDiseno:stages.${p.stage}`)}
+                            {stage.label}
                           </span>
                         )}
                       </td>

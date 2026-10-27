@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -8,7 +9,6 @@ import type { Plugin, ChartEvent, ActiveElement } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoBarChart, IcoDonutChart } from '@/components/icons'
@@ -53,6 +53,7 @@ const barCountLabelsPlugin: Plugin<'bar'> = {
 // en App.tsx). Siempre lee el equipo completo, sin selector Mío/Equipo (REQ-609 RN2/RN3).
 export default function CrmDashboardPage() {
   const { t: tCrm }    = useTranslation('crm')
+  const pipelineStages = usePipelineStages()
   const { t: tVd }     = useTranslation('ventasDiseno')
   const { t: tCommon } = useTranslation('common')
   const navigate = useNavigate()
@@ -104,11 +105,11 @@ export default function CrmDashboardPage() {
   }
 
   const barData = {
-    labels: PIPELINE_STAGES.map(s => tVd(`stages.${s.id}`)),
+    labels: pipelineStages.stages.map(s => s.label),
     datasets: [{
       label: tCrm('dashboard.byStage'),
-      data: PIPELINE_STAGES.map(s => summary.stage_counts[s.id]),
-      backgroundColor: PIPELINE_STAGES.map(s => s.color),
+      data: pipelineStages.stages.map(s => summary.stage_counts[s.key] ?? 0),
+      backgroundColor: pipelineStages.stages.map(s => s.color),
       borderRadius: 4,
       minBarLength: 4,
     }],
@@ -117,8 +118,8 @@ export default function CrmDashboardPage() {
   // SCRUM-796 (secc. 1.1/1.2) — mismo destino/filtro que las tarjetas de indicadores.
   function goToStage(_event: ChartEvent, elements: ActiveElement[]): void {
     if (elements.length === 0) return
-    const stage = PIPELINE_STAGES[elements[0].index]
-    if (stage) navigate(`/ventas-diseno/pipeline?stage=${stage.id}`)
+    const stage = pipelineStages.stages[elements[0].index]
+    if (stage) navigate(`/ventas-diseno/pipeline?stage=${stage.key}`)
   }
 
   const tagEntries: ('design' | 'quote' | 'both')[] = ['design', 'quote', 'both']
@@ -227,19 +228,19 @@ export default function CrmDashboardPage() {
       {/* REQ-605: 8 tarjetas de resumen — 6 conteos de etapa + 2 totales monetarios.
           SCRUM-796 (secc. 1.1) — cada tarjeta de etapa navega al Pipeline filtrado. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        {PIPELINE_STAGES.map(stage => (
+        {pipelineStages.stages.map(stage => (
           <button
-            key={stage.id}
+            key={stage.key}
             type="button"
-            onClick={() => navigate(`/ventas-diseno/pipeline?stage=${stage.id}`)}
+            onClick={() => navigate(`/ventas-diseno/pipeline?stage=${stage.key}`)}
             className="text-left"
           >
             <Card className="p-4 transition-shadow hover:shadow-md cursor-pointer">
               <div className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-400">
-                {tVd(`stages.${stage.id}`)}
+                {stage.label}
               </div>
               <div className="text-2xl font-bold mt-1" style={{ color: stage.color }}>
-                {summary.stage_counts[stage.id]}
+                {summary.stage_counts[stage.key] ?? 0}
               </div>
             </Card>
           </button>
