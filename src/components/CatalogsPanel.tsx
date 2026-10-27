@@ -19,32 +19,36 @@ function errorMessage(err: unknown, fallback: string): string {
 }
 
 /** Editor de una propiedad de comportamiento: casilla (bool), selector (enum), número (int), texto (string) o lista separada por comas (list). */
-function PropField({ name, def, value, onChange, label }: {
-  name: string, def: CatalogPropDef, value: CatalogPropValue | undefined, onChange: (v: CatalogPropValue) => void, label: string
+function PropField({ name, def, value, onChange, label, locked = false, hideValues = [] }: {
+  name: string, def: CatalogPropDef, value: CatalogPropValue | undefined, onChange: (v: CatalogPropValue) => void, label: string,
+  /** La propiedad no se puede cambiar (entrada de sistema, Fase 7c). */
+  locked?: boolean,
+  /** Valores de un enum que no se ofrecen (los `system_only` en una entrada propia). */
+  hideValues?: string[],
 }) {
   const current = value ?? def.default
   let control: ReactNode
   if (def.type === 'bool') {
-    control = <input type="checkbox" aria-label={label} checked={current === true} onChange={e => onChange(e.target.checked)} />
+    control = <input type="checkbox" aria-label={label} checked={current === true} disabled={locked} onChange={e => onChange(e.target.checked)} />
   } else if (def.type === 'enum') {
     control = (
-      <select aria-label={label} className={inputCls} value={String(current)} onChange={e => onChange(e.target.value)}>
-        {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+      <select aria-label={label} className={inputCls} value={String(current)} disabled={locked} onChange={e => onChange(e.target.value)}>
+        {def.values.filter(v => !hideValues.includes(v) || v === current).map(v => <option key={v} value={v}>{v}</option>)}
       </select>
     )
   } else if (def.type === 'int') {
     control = (
-      <input type="number" aria-label={label} className={`${inputCls} w-20`} min={def.min} max={def.max} value={String(current ?? '')}
+      <input type="number" aria-label={label} className={`${inputCls} w-20`} min={def.min} max={def.max} value={String(current ?? '')} disabled={locked}
         onChange={e => onChange(Number(e.target.value))} />
     )
   } else if (def.type === 'list') {
     control = (
-      <input type="text" aria-label={label} className={`${inputCls} w-48`} value={Array.isArray(current) ? current.join(', ') : ''}
+      <input type="text" aria-label={label} className={`${inputCls} w-48`} value={Array.isArray(current) ? current.join(', ') : ''} disabled={locked}
         onChange={e => onChange(e.target.value.split(',').map(v => v.trim()).filter(Boolean))} />
     )
   } else {
     control = (
-      <input type="text" aria-label={label} className={`${inputCls} w-28`} maxLength={def.max} value={typeof current === 'string' ? current : ''}
+      <input type="text" aria-label={label} className={`${inputCls} w-28`} maxLength={def.max} value={typeof current === 'string' ? current : ''} disabled={locked}
         onChange={e => onChange(e.target.value)} />
     )
   }
@@ -57,8 +61,8 @@ function PropField({ name, def, value, onChange, label }: {
   )
 }
 
-function EntryRow({ domain, entry, defs, propLabel }: {
-  domain: string, entry: CatalogEntry, defs: CatalogDomain['props'], propLabel: (name: string) => string
+function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [] }: {
+  domain: string, entry: CatalogEntry, defs: CatalogDomain['props'], propLabel: (name: string) => string, lockedWhenSystem?: string[]
 }) {
   const { t } = useTranslation('common')
   const qc = useQueryClient()
@@ -89,9 +93,12 @@ function EntryRow({ domain, entry, defs, propLabel }: {
       <div className="flex flex-wrap items-center gap-2">
         <code className="text-[11px] text-slate-400 w-28 truncate" title={entry.key}>{entry.key}</code>
         <input aria-label={t('globalSettings.catalogsTab.label')} className={`${inputCls} flex-1 min-w-[10rem]`} value={label} onChange={e => setLabel(e.target.value)} />
-        <input aria-label={t('globalSettings.catalogsTab.order')} className={`${inputCls} w-16`} type="number" min={0} value={sort} onChange={e => setSort(e.target.value)} />
+        <input aria-label={t('globalSettings.catalogsTab.order')} className={`${inputCls} w-16`} type="number" min={0} value={sort}
+          disabled={entry.is_system && lockedWhenSystem.includes('sort_order')} onChange={e => setSort(e.target.value)} />
         {Object.entries(defs).map(([name, def]) => (
-          <PropField key={name} name={name} def={def} label={propLabel(name)} value={props[name]} onChange={v => setProps(p => ({ ...p, [name]: v }))} />
+          <PropField key={name} name={name} def={def} label={propLabel(name)} value={props[name]} onChange={v => setProps(p => ({ ...p, [name]: v }))}
+            locked={entry.is_system && lockedWhenSystem.includes(name)}
+            hideValues={!entry.is_system && def.type === 'enum' ? def.system_only : undefined} />
         ))}
         <label className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300">
           <input type="checkbox" checked={entry.is_active} disabled={entry.is_system} onChange={e => save.mutate({ is_active: e.target.checked })} aria-label={t('globalSettings.catalogsTab.active')} />
@@ -133,7 +140,8 @@ function NewEntryForm({ domain, defs, propLabel }: { domain: string, defs: Catal
       <input aria-label={t('globalSettings.catalogsTab.newKey')} placeholder={t('globalSettings.catalogsTab.newKey')} className={`${inputCls} w-36`} value={key} onChange={e => setKey(e.target.value)} />
       <input aria-label={t('globalSettings.catalogsTab.newLabel')} placeholder={t('globalSettings.catalogsTab.newLabel')} className={`${inputCls} flex-1 min-w-[10rem]`} value={label} onChange={e => setLabel(e.target.value)} />
       {Object.entries(defs).map(([name, def]) => (
-        <PropField key={name} name={name} def={def} label={propLabel(name)} value={props[name]} onChange={v => setProps(p => ({ ...p, [name]: v }))} />
+        <PropField key={name} name={name} def={def} label={propLabel(name)} value={props[name]} onChange={v => setProps(p => ({ ...p, [name]: v }))}
+          hideValues={def.type === 'enum' ? def.system_only : undefined} />
       ))}
       <Button type="submit" variant="outline" className="!px-3 !py-1.5 !text-sm" disabled={create.isPending || key === '' || label === ''}>{t('globalSettings.catalogsTab.add')}</Button>
       {error && <p role="alert" className="w-full text-xs text-red-500">{error}</p>}
@@ -177,7 +185,7 @@ export default function CatalogsPanel() {
       {active && def && (
         <>
           <ul>
-            {(entries.data ?? []).map(e => <EntryRow key={e.id} domain={active} entry={e} defs={def.props} propLabel={propLabel} />)}
+            {(entries.data ?? []).map(e => <EntryRow key={e.id} domain={active} entry={e} defs={def.props} propLabel={propLabel} lockedWhenSystem={def.locked_when_system} />)}
           </ul>
           <NewEntryForm domain={active} defs={def.props} propLabel={propLabel} />
         </>

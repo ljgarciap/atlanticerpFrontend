@@ -97,4 +97,29 @@ describe('CatalogsPanel', () => {
       props: { comportamiento: 'generico', prefijo: 'RCL', sla_dias: 5, subtipos: ['preventivo', 'correctivo'] },
     }))
   })
+  it('pipeline_stage: las etapas de sistema bloquean su orden y su categoría; una propia solo ofrece «abierta»', async () => {
+    api.domains.mockResolvedValue([{
+      domain: 'pipeline_stage', label: 'Etapas del pipeline',
+      locked_when_system: ['sort_order', 'categoria'],
+      props: { categoria: { type: 'enum', values: ['abierta', 'ganada', 'perdida'], system_only: ['ganada', 'perdida'], default: 'abierta' } },
+    }])
+    api.adminList.mockResolvedValue([
+      entry({ id: 1, domain: 'pipeline_stage', key: 'approved', label: 'Aprobado', sort_order: 500, is_system: true, props: { categoria: 'ganada' } }),
+      entry({ id: 2, domain: 'pipeline_stage', key: 'negociacion', label: 'Negociación', sort_order: 450, is_system: false, props: { categoria: 'abierta' } }),
+    ])
+    renderPanel()
+    await screen.findByDisplayValue('Aprobado')
+
+    const ordenes = screen.getAllByLabelText('globalSettings.catalogsTab.order')
+    expect(ordenes[0]).toBeDisabled()
+    expect(ordenes[1]).not.toBeDisabled()
+
+    const categorias = screen.getAllByLabelText('categoria') as HTMLSelectElement[]
+    expect(categorias[0]).toBeDisabled()
+    expect(categorias[0].value).toBe('ganada')
+    expect(categorias[1]).not.toBeDisabled()
+    expect(Array.from(categorias[1].options).map(o => o.value)).toEqual(['abierta'])
+    // el formulario de «nueva etapa» tampoco ofrece ganada/perdida
+    expect(Array.from(categorias[2].options).map(o => o.value)).toEqual(['abierta'])
+  })
 })
