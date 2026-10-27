@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import TaxIdValidator from '@/components/TaxIdValidator'
+import { dvPattern, useFiscalId } from '@/hooks/useFiscalId'
+import { fiscalIdText } from '@/lib/region'
 import ReceptorTipoSelect from '@/components/ReceptorTipoSelect'
 
 const CATEGORIES: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
@@ -26,7 +28,6 @@ function emptyContact(): ContactDraft {
 }
 
 // SCRUM-928 — DV del RUC: solo dígitos, 1 o 2 caracteres.
-const DV_PATTERN = /^\d{1,2}$/
 
 function contactsValid(contacts: ContactDraft[]): boolean {
   return contacts.length > 0 && contacts.every(c => c.name.trim() !== '' && (c.phone.trim() !== '' || c.email.trim() !== ''))
@@ -51,6 +52,7 @@ export default function CreateClientModal(props: Props) {
   const [receptorTipo, setReceptorTipo]     = useState<ReceptorTipo>('01')
   const [taxId, setTaxId]                   = useState('')
   const [taxIdDv, setTaxIdDv]               = useState('')
+  const fiscalId = useFiscalId() // Fase 6c: RUC+DV en Panamá, NIT+DV en Colombia, EIN sin DV en EE. UU.
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [category, setCategory]             = useState<SubClientCategory | ''>('')
   const [priceType, setPriceType]           = useState<PriceType | ''>('')
@@ -60,7 +62,7 @@ export default function CreateClientModal(props: Props) {
   // SCRUM-1003 — Consumidor Final no manda RUC ni DV.
   const fiscalPayload = () => receptorTipo === '02'
     ? { receptor_tipo: receptorTipo }
-    : { receptor_tipo: receptorTipo, tax_id: taxId, tax_id_dv: taxIdDv.trim() }
+    : { receptor_tipo: receptorTipo, tax_id: taxId, tax_id_dv: fiscalId.uses_dv ? taxIdDv.trim() : '' }
 
   const contactsPayload = () => contacts.map(c => ({
     name: c.name, role: c.role, phone: c.phone || null, email: c.email || null,
@@ -118,7 +120,7 @@ export default function CreateClientModal(props: Props) {
     }
   }
 
-  const taxDataValid = receptorTipo === '02' || (taxId.trim() !== '' && (taxIdDv.trim() === '' || DV_PATTERN.test(taxIdDv.trim())))
+  const taxDataValid = receptorTipo === '02' || (taxId.trim() !== '' && (!fiscalId.uses_dv || taxIdDv.trim() === '' || dvPattern(fiscalId).test(taxIdDv.trim())))
   const formValid = businessName.trim() !== '' && taxDataValid && contactsValid(contacts)
     && (props.mode === 'sub-client' || name.trim() !== '')
 
@@ -164,11 +166,11 @@ export default function CreateClientModal(props: Props) {
             {receptorTipo === '01' && <div className="flex gap-2">
               <div className="flex-1 min-w-0">
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
-                  {t('ventasDiseno:clients.createModal.taxId')} *
+                  {fiscalIdText(t('ventasDiseno:clients.createModal.taxId'), fiscalId)} *
                 </label>
                 <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} className={inputClass} />
               </div>
-              <div className="w-20 shrink-0">
+              {fiscalId.uses_dv && <div className="w-20 shrink-0">
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                   {t('ventasDiseno:clients.createModal.taxIdDv')}
                 </label>
@@ -178,10 +180,10 @@ export default function CreateClientModal(props: Props) {
                 <input
                   type="text" inputMode="numeric"
                   value={taxIdDv}
-                  onChange={e => setTaxIdDv(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                  onChange={e => setTaxIdDv(e.target.value.replace(/\D/g, '').slice(0, fiscalId.dv_max_length))}
                   className={inputClass}
                 />
-              </div>
+              </div>}
             </div>}
             {/* SCRUM-1002 — valida contra la DGI sin bloquear el guardado; propone (nunca pisa) el DV y la razón social oficiales. */}
             {receptorTipo === '01' && <div className="sm:col-span-2">

@@ -5,9 +5,12 @@ import { AxiosError, type AxiosResponse } from 'axios'
 import EditSubClientTaxDataModal from './EditSubClientTaxDataModal'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import type { SubClientDetail } from '@/types/ventasDiseno'
+import { useAuthStore } from '@/store/authStore'
+import type { UserInfo } from '@/types/auth'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 let mockCanMarkConsumidorFinal = true
@@ -30,7 +33,44 @@ function renderModal(onClose = vi.fn(), subClient: SubClientDetail = SUB) {
   return { onClose }
 }
 
-beforeEach(() => { vi.clearAllMocks(); mockCanMarkConsumidorFinal = true })
+beforeEach(() => { vi.clearAllMocks(); mockCanMarkConsumidorFinal = true; useAuthStore.setState({ user: null }) })
+
+function conPais(fiscal_id: { label: string; uses_dv: boolean; dv_max_length: number }) {
+  useAuthStore.setState({ user: { id: 1, first_name: 'A', last_name: 'B', email: 'a@b.test', role: 'management', permissions: [], fiscal_id } as UserInfo })
+}
+
+describe('EditSubClientTaxDataModal — identificación fiscal por país (Fase 6c)', () => {
+  it('en Colombia la identificación se llama NIT y el DV es de un solo dígito', () => {
+    conPais({ label: 'NIT', uses_dv: true, dv_max_length: 1 })
+    renderModal()
+
+    expect(screen.getByLabelText('NIT *')).toBeInTheDocument()
+    const dv = screen.getByLabelText(/createModal.taxIdDv/)
+    fireEvent.change(dv, { target: { value: '39' } })
+    expect(dv).toHaveValue('3')
+  })
+
+  it('en Estados Unidos no hay campo de DV y no se envía', async () => {
+    conPais({ label: 'EIN / Tax ID', uses_dv: false, dv_max_length: 0 })
+    api.updateSubClientTaxData.mockResolvedValue({ ...SUB, tax_id: '12-3456789', tax_id_dv: null })
+    renderModal()
+
+    expect(screen.queryByLabelText(/createModal.taxIdDv/)).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('EIN / Tax ID *'), { target: { value: '12-3456789' } })
+    fireEvent.click(screen.getByText('ventasDiseno:clients.editTaxData.guardar'))
+
+    await waitFor(() => expect(api.updateSubClientTaxData).toHaveBeenCalledWith(10, expect.objectContaining({ tax_id: '12-3456789', tax_id_dv: '' })))
+  })
+
+  it('sin país configurado (sesión anterior) rige Panamá: RUC con DV de 2 dígitos', () => {
+    renderModal()
+
+    expect(screen.getByLabelText(/createModal\.taxId \*/)).toBeInTheDocument()
+    const dv = screen.getByLabelText(/createModal.taxIdDv/)
+    fireEvent.change(dv, { target: { value: '123' } })
+    expect(dv).toHaveValue('12')
+  })
+})
 
 describe('EditSubClientTaxDataModal (SCRUM-1002)', () => {
   it('abre con los datos actuales y avisa que esto cambia el receptor fiscal', () => {

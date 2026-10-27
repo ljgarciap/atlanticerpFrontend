@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
+import { useFiscalId } from '@/hooks/useFiscalId'
+import { fiscalIdText } from '@/lib/region'
 import { isAxiosError } from 'axios'
 import type { TFunction } from 'i18next'
 import {
@@ -109,6 +111,7 @@ interface Props {
 
 export default function ProviderFormDrawer({ providerId, onClose, onSaved }: Props) {
   const { t } = useTranslation(['common', 'auth', 'compras'])
+  const fiscalId = useFiscalId() // Fase 6c: nombre de la identificación fiscal del país y si lleva DV
   const isEdit = providerId !== null
 
   const { data: provider, isLoading } = useProvider(providerId)
@@ -363,16 +366,16 @@ export default function ProviderFormDrawer({ providerId, onClose, onSaved }: Pro
               <div>
                 {/* SCRUM-852 — identificación fiscal, unicidad dura validada por el backend. */}
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  {t('compras:providerForm.fields.taxId')}
+                  {fiscalIdText(t('compras:providerForm.fields.taxId'), fiscalId)}
                 </label>
-                <div className="grid grid-cols-[1fr_5rem] gap-3">
+                <div className={fiscalId.uses_dv ? 'grid grid-cols-[1fr_5rem] gap-3' : 'grid grid-cols-1 gap-3'}>
                   <input {...register('tax_id')} className={inputCls(!!errors.tax_id)} />
-                  <input
-                    {...register('tax_id_dv')} maxLength={2} inputMode="numeric"
+                  {fiscalId.uses_dv && <input
+                    {...register('tax_id_dv')} maxLength={fiscalId.dv_max_length} inputMode="numeric"
                     placeholder={t('compras:providerForm.fields.taxIdDv')}
                     aria-label={t('compras:providerForm.fields.taxIdDv')}
                     className={inputCls(!!errors.tax_id_dv)}
-                  />
+                  />}
                 </div>
                 {errors.tax_id && <p className="text-red-500 text-xs mt-1">{errors.tax_id.message}</p>}
                 {errors.tax_id_dv && <p className="text-red-500 text-xs mt-1">{errors.tax_id_dv.message}</p>}

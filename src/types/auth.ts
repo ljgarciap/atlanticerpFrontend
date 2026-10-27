@@ -55,6 +55,8 @@ export interface UserInfo {
   flags?:        UserFlags
   /** Fase 6a — contexto regional de la empresa (viene del tenant). Ausente en sesiones anteriores: rige el de Panamá (`lib/region`). */
   region?:       { country: string; currency: string; timezone: string; locale: string }
+  /** Fase 6c — cómo se llama y se captura la identificación fiscal del país (RUC+DV, NIT+DV, EIN). Ausente en sesiones anteriores: rige Panamá. */
+  fiscal_id?:    { label: string; uses_dv: boolean; dv_max_length: number }
   // SCRUM-724 — override puntual por usuario de qué ítems de menú ve (por encima de
   // modules arriba, que sigue siendo el gate de MÓDULO por rol). module -> key ->
   // visible; una clave ausente significa visible=true (default) — solo un `false`

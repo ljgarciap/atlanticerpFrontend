@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoAlertTriangle } from '@/components/icons'
 import TaxIdValidator from '@/components/TaxIdValidator'
+import { dvPattern, useFiscalId } from '@/hooks/useFiscalId'
+import { fiscalIdText } from '@/lib/region'
 import ReceptorTipoSelect from '@/components/ReceptorTipoSelect'
 
 /**
@@ -16,7 +18,6 @@ import ReceptorTipoSelect from '@/components/ReceptorTipoSelect'
  * estos datos en vivo: el backend bloquea (409) si el cliente ya tiene documentos certificados o pendientes ante la
  * DGI, y el mensaje se muestra tal cual. Cada cambio queda en la bitácora de auditoría.
  */
-const DV_PATTERN = /^\d{1,2}$/
 
 export default function EditSubClientTaxDataModal({ subClient, onClose }: { subClient: SubClientDetail; onClose: () => void }) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
@@ -26,6 +27,7 @@ export default function EditSubClientTaxDataModal({ subClient, onClose }: { subC
   const [receptorTipo, setReceptorTipo] = useState<ReceptorTipo>(subClient.receptor_tipo ?? '01')
   const [taxId, setTaxId] = useState(subClient.tax_id)
   const [taxIdDv, setTaxIdDv] = useState(subClient.tax_id_dv ?? '')
+  const fiscalId = useFiscalId() // Fase 6c: RUC+DV en Panamá, NIT+DV en Colombia, EIN sin DV en EE. UU.
   const [error, setError] = useState<string | null>(null)
   // SCRUM-1166 — si el cliente es exento y se cambian RUC, DV o tipo, el servidor avisa que la exención hay que revisarla; el modal lo muestra antes de cerrar.
   const [revisarExencion, setRevisarExencion] = useState(false)
@@ -33,7 +35,7 @@ export default function EditSubClientTaxDataModal({ subClient, onClose }: { subC
   const mutation = useMutation({
     mutationFn: () => ventasDisenoApi.clients.updateSubClientTaxData(subClient.id, receptorTipo === '02'
       ? { business_name: businessName.trim(), receptor_tipo: receptorTipo } // SCRUM-1003 — Consumidor Final: sin RUC ni DV
-      : { business_name: businessName.trim(), receptor_tipo: receptorTipo, tax_id: taxId.trim(), tax_id_dv: taxIdDv.trim() }),
+      : { business_name: businessName.trim(), receptor_tipo: receptorTipo, tax_id: taxId.trim(), tax_id_dv: fiscalId.uses_dv ? taxIdDv.trim() : '' }),
     onSuccess: r => {
       qc.invalidateQueries({ queryKey: ['ventas-diseno-client'] })
       qc.invalidateQueries({ queryKey: ['ventas-diseno-clients'] })
@@ -48,7 +50,7 @@ export default function EditSubClientTaxDataModal({ subClient, onClose }: { subC
     },
   })
 
-  const valido = businessName.trim() !== '' && (receptorTipo === '02' || (taxId.trim() !== '' && (taxIdDv.trim() === '' || DV_PATTERN.test(taxIdDv.trim()))))
+  const valido = businessName.trim() !== '' && (receptorTipo === '02' || (taxId.trim() !== '' && (!fiscalId.uses_dv || taxIdDv.trim() === '' || dvPattern(fiscalId).test(taxIdDv.trim()))))
   const inputClass = 'w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-[#5BA5A0] focus:outline-none'
   const labelClass = 'block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1'
 
@@ -86,16 +88,16 @@ export default function EditSubClientTaxDataModal({ subClient, onClose }: { subC
           {receptorTipo === '01' && <>
             <div className="flex gap-2">
               <div className="flex-1 min-w-0">
-                <label htmlFor="edit-tax-id" className={labelClass}>{t('ventasDiseno:clients.createModal.taxId')} *</label>
+                <label htmlFor="edit-tax-id" className={labelClass}>{fiscalIdText(t('ventasDiseno:clients.createModal.taxId'), fiscalId)} *</label>
                 <input id="edit-tax-id" type="text" value={taxId} onChange={e => setTaxId(e.target.value)} className={inputClass} />
               </div>
-              <div className="w-20 shrink-0">
+              {fiscalId.uses_dv && <div className="w-20 shrink-0">
                 <label htmlFor="edit-tax-dv" className={labelClass}>{t('ventasDiseno:clients.createModal.taxIdDv')}</label>
                 <input
                   id="edit-tax-dv" type="text" inputMode="numeric" value={taxIdDv}
-                  onChange={e => setTaxIdDv(e.target.value.replace(/\D/g, '').slice(0, 2))} className={inputClass}
+                  onChange={e => setTaxIdDv(e.target.value.replace(/\D/g, '').slice(0, fiscalId.dv_max_length))} className={inputClass}
                 />
-              </div>
+              </div>}
             </div>
 
             <TaxIdValidator

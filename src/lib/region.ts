@@ -25,3 +25,20 @@ export function getRegion(): Region {
 export function setRegion(region: Partial<Region> | null | undefined): void {
   current = region ? { ...DEFAULT_REGION, ...region } : DEFAULT_REGION
 }
+
+/**
+ * Fase 6c — cómo se llama y cómo se captura la identificación fiscal del país de la empresa (`user.fiscal_id` del backend): «RUC» con DV de
+ * 1-2 dígitos en Panamá, «NIT» con DV de 1 en Colombia, «EIN / Tax ID» sin DV en EE. UU. Sin sesión (o sesión anterior a la 6c) rige Panamá.
+ */
+export interface FiscalId {
+  label:         string
+  uses_dv:       boolean
+  dv_max_length: number
+}
+
+export const DEFAULT_FISCAL_ID: FiscalId = { label: 'RUC', uses_dv: true, dv_max_length: 2 }
+
+/** Texto de un campo de identificación: en Panamá el que ya tenía la pantalla («RUC / Cédula»); en otro país, el nombre de su identificación. */
+export function fiscalIdText(panamaText: string, fiscalId: FiscalId): string {
+  return fiscalId.label === DEFAULT_FISCAL_ID.label ? panamaText : fiscalId.label
+}
