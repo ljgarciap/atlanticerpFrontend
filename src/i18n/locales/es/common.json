@@ -56,7 +56,28 @@
       "servicios": "Servicios",
       "crm": "CRM",
       "salesCommissions": "Comisión de vendedores",
+      "catalogs": "Catálogos",
       "global": "Global"
+    },
+    "catalogsTab": {
+      "title": "Catálogos de vocabulario",
+      "subtitle": "Listas que cada empresa puede ajustar a su negocio (categorías de proveedor, tipos de asociado). Las entradas de sistema se renombran y reordenan, pero no se borran.",
+      "label": "Etiqueta",
+      "order": "Orden",
+      "active": "Activa",
+      "save": "Guardar",
+      "delete": "Borrar",
+      "system": "De sistema",
+      "add": "Agregar",
+      "newKey": "Clave (ej. mayorista)",
+      "newLabel": "Nombre visible",
+      "saveError": "No se pudo guardar.",
+      "deleteError": "No se pudo borrar.",
+      "loadError": "No se pudieron cargar los catálogos.",
+      "props": {
+        "origen": "Origen",
+        "valida_identificacion": "Valida identificación fiscal"
+      }
     },
     "globalTab": {
       "title": "Valores globales",

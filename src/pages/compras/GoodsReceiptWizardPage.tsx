@@ -175,10 +175,11 @@ export default function GoodsReceiptWizardPage() {
 
   // REQ-164 Escenario 1 (fix Pre-QA 2026-07-20, rechazado por marly: el reparto no era
   // observable) — preview client-side del costeo por línea, mismo cálculo que
-  // GoodsReceiptController::saveReceipt() (proveedor local: ITBMS 7%; no local: prorrateo
+  // GoodsReceiptController::saveReceipt() (proveedor local: impuesto con la tasa de Configuración Fiscal; no local: prorrateo
   // proporcional al valor de línea). Es solo un preview -- la fuente de verdad persistida es la
   // respuesta del backend al guardar (GoodsReceiptLine.cost_total).
-  const ITBMS_RATE_LOCAL_PREVIEW = 0.07
+  // Fase 7a — la tasa la manda el backend (`local_tax_percentage`, la de Configuración Fiscal): ya no hay un 7 % fijo de Panamá.
+  const localTaxRate = (orderProducts?.local_tax_percentage ?? 0) / 100
   const lineValue = (l: LineDraft): number => (Number(l.quantity) || 0) * (Number(l.unitCost) || 0)
   const totalLineValue = lines.reduce((sum, l) => sum + lineValue(l), 0)
   const shippingTotal = (Number(importCostTotal) || 0) + (Number(freightTotal) || 0)
@@ -186,7 +187,7 @@ export default function GoodsReceiptWizardPage() {
   const previewLineCostTotal = (l: LineDraft): number => {
     const value = lineValue(l)
     if (isLocal) {
-      return value + value * ITBMS_RATE_LOCAL_PREVIEW
+      return value + value * localTaxRate
     }
     if (shippingTotal <= 0 || totalLineValue <= 0) {
       return value

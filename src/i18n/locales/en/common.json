@@ -56,7 +56,28 @@
       "servicios": "Services",
       "crm": "CRM",
       "salesCommissions": "Sales commission",
+      "catalogs": "Catalogs",
       "global": "Global"
+    },
+    "catalogsTab": {
+      "title": "Vocabulary catalogs",
+      "subtitle": "Lists each company can adapt to its business (supplier categories, associate types). System entries can be renamed and reordered, but not deleted.",
+      "label": "Label",
+      "order": "Order",
+      "active": "Active",
+      "save": "Save",
+      "delete": "Delete",
+      "system": "System",
+      "add": "Add",
+      "newKey": "Key (e.g. wholesaler)",
+      "newLabel": "Display name",
+      "saveError": "Could not save.",
+      "deleteError": "Could not delete.",
+      "loadError": "Could not load the catalogs.",
+      "props": {
+        "origen": "Origin",
+        "valida_identificacion": "Validates tax ID"
+      }
     },
     "globalTab": {
       "title": "Global values",

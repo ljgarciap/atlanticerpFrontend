@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useFiscalId } from '@/hooks/useFiscalId'
+import { useCatalogOptions } from '@/hooks/useCatalog'
 import { fiscalIdText } from '@/lib/region'
 import { isAxiosError } from 'axios'
 import type { TFunction } from 'i18next'
@@ -26,6 +27,14 @@ const PHONE_REGEX = /^\+?[0-9\s-]{7,20}$/
 // SCRUM-820 — "latinoamerica" agregada 2026-08-31 a pedido de Gerencia Test.
 export const PROVIDER_CATEGORIES = ['locales', 'zona_libre', 'china', 'europa', 'online', 'latinoamerica'] as const
 
+/**
+ * Fase 7a — categorías de proveedor de la empresa (catálogo `provider_category`, editable en Configuración → Catálogos). Mientras el
+ * catálogo carga o si falla, rigen las de siempre con su texto traducido.
+ */
+export function useProviderCategoryOptions(t: TFunction): { key: string, label: string }[] {
+  return useCatalogOptions('provider_category', PROVIDER_CATEGORIES.map(c => ({ key: c, label: t(`compras:providerForm.category.${c}`) })))
+}
+
 // REQ-126 RN1 (realineado SCRUM-189, 2026-08-06 — hallazgo Gerencia Test): al CREAR, obligatorios
 // nombre, categoría y país, más al menos un medio de contacto (WhatsApp/Teléfono/Correo). Al
 // EDITAR, categoría y país siguen siendo opcionales — hay un caso protegido (Senior Review
@@ -46,12 +55,10 @@ export function buildSchema(t: TFunction, isEdit: boolean) {
   // tipo válido), así que la obligatoriedad de categoría pasa a validarse con `.refine()` en vez
   // de por tipo — esto ya no aborta el resto de la cadena.
   const categoryField = isEdit
-    ? z.preprocess(v => (v === '' ? null : v), z.string().nullable().optional()
-        .refine(v => v == null || (PROVIDER_CATEGORIES as readonly string[]).includes(v), {
-          message: t('compras:providerForm.validation.categoryRequired'),
-        }))
+    ? z.preprocess(v => (v === '' ? null : v), z.string().nullable().optional())
+    // Fase 7a — la lista de categorías es un catálogo de la empresa: aquí solo se exige elegir una; el backend valida contra el catálogo.
     : z.preprocess(v => (v === '' ? null : v), z.string().nullable()
-        .refine((v): v is (typeof PROVIDER_CATEGORIES)[number] => v != null && (PROVIDER_CATEGORIES as readonly string[]).includes(v), {
+        .refine((v): v is string => v != null && v !== '', {
           message: t('compras:providerForm.validation.categoryRequired'),
         }))
   const countryField = isEdit
@@ -111,6 +118,7 @@ interface Props {
 
 export default function ProviderFormDrawer({ providerId, onClose, onSaved }: Props) {
   const { t } = useTranslation(['common', 'auth', 'compras'])
+  const categoryOptions = useProviderCategoryOptions(t)
   const fiscalId = useFiscalId() // Fase 6c: nombre de la identificación fiscal del país y si lleva DV
   const isEdit = providerId !== null
 
@@ -387,8 +395,8 @@ export default function ProviderFormDrawer({ providerId, onClose, onSaved }: Pro
                   </label>
                   <select {...register('category')} className={inputCls(!!errors.category)}>
                     <option value="">—</option>
-                    {PROVIDER_CATEGORIES.map(c => (
-                      <option key={c} value={c}>{t(`compras:providerForm.category.${c}`)}</option>
+                    {categoryOptions.map(c => (
+                      <option key={c.key} value={c.key}>{c.label}</option>
                     ))}
                   </select>
                   {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}

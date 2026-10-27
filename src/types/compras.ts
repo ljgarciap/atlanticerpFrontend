@@ -14,7 +14,8 @@ export type ProviderOrigin = 'local' | 'internacional'
 // 2026-07-30 (SCRUM-189, hallazgo de Gerencia Test) — `origin` se deriva de esto server-side,
 // ya no es un campo propio del form.
 // SCRUM-820 — "latinoamerica" agregada 2026-08-31 a pedido de Gerencia Test.
-export type ProviderCategory = 'locales' | 'zona_libre' | 'china' | 'europa' | 'online' | 'latinoamerica'
+// Fase 7a — la lista es un catálogo de la empresa (`provider_category`): la clave puede ser una creada por el cliente.
+export type ProviderCategory = string
 
 export interface Provider {
   id:               number
@@ -1072,6 +1073,8 @@ export interface GoodsReceiptOrderProducts {
   provider_id:      number
   provider_name:    string | null
   provider_origin:  ProviderOrigin
+  /** Fase 7a — tasa del impuesto que el backend aplica a un proveedor local (Configuración Fiscal); null si no es local. */
+  local_tax_percentage?: number | null
   status:           string
   products:         GoodsReceiptExpectedProduct[]
 }
