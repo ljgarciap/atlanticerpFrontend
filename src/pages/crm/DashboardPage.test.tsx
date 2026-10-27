@@ -191,7 +191,7 @@ describe('CrmDashboardPage', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(await screen.findByText('stages.lead'))
+    fireEvent.click(await screen.findByText('ventasDiseno:stages.lead'))
     expect(await screen.findByText('PIPELINE_PROBE')).toBeInTheDocument()
   })
 

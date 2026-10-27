@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
 import type { PipelineStage } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -16,7 +16,7 @@ import { UserMultiSelect } from '@/components/UserMultiSelect'
 import { formatDateFromTimestamp } from '@/utils/dates'
 import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
-const LISTED_STAGES: PipelineStage[] = ['quote', 'proposal', 'approved', 'lost']
+// Las cotizaciones se listan por las etapas de Cotización en adelante y la perdida (Fase 7c: salen del catálogo, con las propias).
 
 function monthName(mes: string): string {
   const [y, m] = mes.split('-')
@@ -26,6 +26,8 @@ function monthName(mes: string): string {
 
 export default function VentasDisenoQuotesListPage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
+  const listedStages = pipelineStages.keys.filter(k => pipelineStages.isAtOrAfter(k, 'quote') || pipelineStages.isLost(k))
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const canSeeTeam = hasGerenciaScope(user)
@@ -182,8 +184,8 @@ export default function VentasDisenoQuotesListPage() {
           className="rounded-lg border border-slate-200 px-2 py-2 text-sm bg-white focus:outline-none focus:border-[#5BA5A0]"
         >
           <option value="">{t('ventasDiseno:quotesList.filters.allStages')}</option>
-          {LISTED_STAGES.map(s => (
-            <option key={s} value={s}>{t(`ventasDiseno:stages.${s}`)}</option>
+          {listedStages.map(s => (
+            <option key={s} value={s}>{pipelineStages.label(s)}</option>
           ))}
         </select>
         {(search || stage) && (
@@ -223,7 +225,7 @@ export default function VentasDisenoQuotesListPage() {
               </thead>
               <tbody>
                 {rows.map(row => {
-                  const stageMeta = PIPELINE_STAGES.find(s => s.id === row.stage)
+                  const stageMeta = pipelineStages.info(row.stage)
                   return (
                     <tr key={row.id} className="border-b border-slate-100 dark:border-slate-800">
                       <td className="px-3 py-2 font-medium">{row.folio ?? '—'}</td>
@@ -234,8 +236,8 @@ export default function VentasDisenoQuotesListPage() {
                       <td className="px-3 py-2">
                         {row.stage ? (
                           <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block w-2 h-2 rounded-full" style={{ background: stageMeta?.color }} />
-                            {t(`ventasDiseno:stages.${row.stage}`)}
+                            <span className="inline-block w-2 h-2 rounded-full" style={{ background: stageMeta.color }} />
+                            {stageMeta.label}
                           </span>
                         ) : t('ventasDiseno:quotesList.table.noStage')}
                       </td>

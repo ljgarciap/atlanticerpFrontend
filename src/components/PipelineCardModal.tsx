@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useAuthStore } from '@/store/authStore'
 import type { ContactRole, PipelineCardDetail, PipelineCardFile, PipelineCardProductDeliveryAssignmentPayload, PipelineFileType, PipelineStage } from '@/types/ventasDiseno'
-import { PIPELINE_STAGES } from '@/types/ventasDiseno'
+import { usePipelineStages } from '@/hooks/usePipelineStages'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose, IcoClock, IcoFile, IcoPencil, IcoDownload, IcoTrash } from '@/components/icons'
@@ -18,21 +18,15 @@ import { sanitizeUnsignedDecimalInput } from '@/lib/decimalInput'
 import { formatDateTimeShort } from '@/utils/dates'
 import { hasGerenciaScope } from '@/lib/gerenciaScope'
 
-// Flujo lineal Lead → Diseño → Cotización → Propuesta → Aprobado (REQ-011/014/016/017).
-// "lost" se alcanza desde cualquier etapa activa sin gate; se sale de "lost" únicamente
-// reactivando a Lead (REQ-018), fuera de esta cadena.
-const STAGE_FLOW: Record<Exclude<PipelineStage, 'lost'>, PipelineStage | null> = {
-  lead: 'design', design: 'quote', quote: 'proposal', proposal: 'approved', approved: null,
-}
+// Flujo lineal Lead → Diseño → Cotización → Propuesta → Aprobado (REQ-011/014/016/017), con las etapas propias de la empresa intercaladas
+// (Fase 7c: sale del catálogo `pipeline_stage` vía `usePipelineStages().next()`, ya no es un mapa fijo). "perdida" se alcanza desde
+// cualquier etapa abierta sin gate; se sale de ella únicamente reactivando a Lead (REQ-018), fuera de esta cadena.
 
 const FILE_TYPES: PipelineFileType[] = ['design', 'signed_quote', 'approval_proof', 'proposal', 'photo']
 
-// SCRUM-909 (rebote 2026-09-14) — antes el campo "Fecha estimada de entrega" (y "Asignar
-// productos a entrega") era visible en las 5 etapas por igual (ver docblock de SCRUM-874 más
-// abajo). Vuelve a acotarse a las 3 etapas donde el backend realmente permite guardarlo — ya no
-// es un callejón sin salida en Cotización porque `PipelineController::update()` ahora también
-// acepta esa etapa (antes solo Propuesta/Aprobado).
-const DELIVERY_DATE_STAGES: PipelineStage[] = ['quote', 'proposal', 'approved']
+// SCRUM-909 (rebote 2026-09-14) — el campo "Fecha estimada de entrega" (y "Asignar productos a entrega") se acota a las etapas donde el
+// backend realmente permite guardarlo: Cotización en adelante (`isAtOrAfter(stage, 'quote')`, también las etapas propias que vayan después;
+// ya no es un callejón sin salida en Cotización porque `PipelineController::update()` acepta esa etapa).
 
 interface Props {
   cardId:  number
@@ -41,6 +35,7 @@ interface Props {
 
 export default function PipelineCardModal({ cardId, onClose }: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const pipelineStages = usePipelineStages()
   const qc = useQueryClient()
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -371,9 +366,10 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       // tarjeta automaticamente, en vez de dejar un clic extra en "Mover a...". Si el
       // otro requisito del gate (superficie / fecha de entrega) todavia falta, la
       // mutation falla igual que un clic manual y stageError ya lo muestra.
-      if (type === 'signed_quote' && card?.stage === 'quote') {
-        changeStageMutation.mutate('proposal')
-      } else if (type === 'approval_proof' && card?.stage === 'proposal') {
+      const nextStage = pipelineStages.next(card?.stage)
+      if (type === 'signed_quote' && card?.stage === 'quote' && nextStage) {
+        changeStageMutation.mutate(nextStage)
+      } else if (type === 'approval_proof' && nextStage === 'approved') {
         // SCRUM-909 (criterio 4) — defensa en profundidad en frontend: si el proyecto es
         // Entrega Parcial y falta asignar fecha a algún producto, ni siquiera se intenta el
         // auto-avance (el backend igual lo rechazaría, pero evita el roundtrip fallido y deja
@@ -468,18 +464,18 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     [masterClient],
   )
 
-  const stage = PIPELINE_STAGES.find(s => s.id === card?.stage)
+  const stage = card ? pipelineStages.info(card.stage) : undefined
   // SCRUM-1128 — el acceso de solo lectura del Pipeline nunca ve controles de escritura, aunque el payload
   // diga can_edit=true: el backend ya le responde 403 en cualquier escritura. SCRUM-1139 — con
   // `pipeline.edit` deja de ser solo lectura y manda `can_edit` del payload, como para cualquier editor.
   const canEdit = (card?.can_edit ?? false) && !readsPipelineReadOnly
 
-  // SCRUM-909 (criterio 4) — la única transición del STAGE_FLOW que aterriza en 'approved' es
-  // proposal->approved; bloquear "Mover a Aprobado" (botón genérico o auto-avance por archivo)
+  // SCRUM-909 (criterio 4) — la única transición del flujo que aterriza en 'approved' es la de la etapa anterior a Aprobado
+  // (Propuesta, o la última etapa propia que se intercale); bloquear "Mover a Aprobado" (botón genérico o auto-avance por archivo)
   // cuando el proyecto es Entrega Parcial y algún producto sigue sin fecha asignada. Defensa en
   // profundidad — el backend valida lo mismo, esto solo evita el roundtrip fallido y da el
   // mensaje antes del clic.
-  const nextStageForCard = card ? STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] : null
+  const nextStageForCard = card ? pipelineStages.next(card.stage) : null
   const deliveryAssignmentBlocksApproval = nextStageForCard === 'approved' && hasUnassignedProductDelivery
 
   // SCRUM-1115 — un proyecto restaurado desde Perdido vuelve a Lead/Diseño con su historial de cotizaciones: ofrecer partir de la
@@ -646,7 +642,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
           <div className="flex items-center gap-2">
             {stage && <span className="inline-block w-2 h-2 rounded-full" style={{ background: stage.color }} />}
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              {card ? t(`ventasDiseno:stages.${card.stage}`) : t('common:labels.loading')}
+              {card ? pipelineStages.label(card.stage) : t('common:labels.loading')}
             </h2>
           </div>
           <Button variant="icon" onClick={onClose}><IcoClose /></Button>
@@ -657,9 +653,9 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             <p className="text-slate-400 text-sm">{t('common:labels.loading')}</p>
           ) : (
             <>
-              {!canEdit && !(readsPipelineReadOnly && card.stage !== 'lost' && card.stage !== 'approved') && (
+              {!canEdit && !(readsPipelineReadOnly && pipelineStages.isOpen(card.stage)) && (
                 <div className="mb-4 px-3 py-2 rounded-lg border text-[12px] font-medium bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300">
-                  {card.stage === 'lost'
+                  {pipelineStages.isLost(card.stage)
                     ? t('ventasDiseno:modal.notEditableLost')
                     : t('ventasDiseno:modal.notEditableApproved')}
                 </div>
@@ -827,7 +823,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   )}
                 </div>
 
-                {DELIVERY_DATE_STAGES.includes(card.stage) && (
+                {pipelineStages.isAtOrAfter(card.stage, 'quote') && (
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                     {t('ventasDiseno:modal.deliveryType')}
@@ -908,7 +904,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   QuotePage/2026-07-11 arriba. El criterio de negocio pasaba a ser el mismo en las
                   5 etapas. SCRUM-909 lo vuelve a acotar a DELIVERY_DATE_STAGES (ver ese
                   docblock) — ya no hay callejón sin salida porque Cotización ahora sí guarda. */}
-              {DELIVERY_DATE_STAGES.includes(card.stage) && deliveryType && (
+              {pipelineStages.isAtOrAfter(card.stage, 'quote') && deliveryType && (
                 <div className="mb-3">
                   <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">
                     {t('ventasDiseno:modal.deliveryDates')}
@@ -1028,7 +1024,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                             approval_proof queda afuera a proposito, ver PipelineController::uploadFile.
                             SCRUM-78 — tambien gateado por isEditing, como el resto del formulario. */}
                         {canEdit && isEditing && !(
-                          (type === 'design' || type === 'proposal') && card.stage === 'approved'
+                          (type === 'design' || type === 'proposal') && pipelineStages.isWon(card.stage)
                         ) && (
                           <>
                             <input
@@ -1193,7 +1189,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             )}
             {/* SCRUM-1128 — `can_edit` es false en Perdido para todos los roles, así que no sirve
                 de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Contabilidad). */}
-            {card?.stage === 'lost' && !readsPipelineReadOnly && (
+            {pipelineStages.isLost(card?.stage) && !readsPipelineReadOnly && (
               <Button
                 variant="accent"
                 onClick={() => changeStageMutation.mutate('lead')}
@@ -1207,14 +1203,14 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 botón de movimiento (ni "Mover a siguiente" — ya cubierto por STAGE_FLOW.approved
                 === null — ni "Marcar como Perdido", que sí se colaba para un usuario con permiso
                 de editar Aprobado, ej. Gerencia). */}
-            {card && canEdit && card.stage !== 'lost' && card.stage !== 'approved' && (
+            {card && canEdit && pipelineStages.isOpen(card.stage) && (
               <>
                 {/* RN5 (SCRUM-677/680): nunca un botón genérico de movimiento hacia Cotización —
                     la única vía a esa etapa es "Crear cotización" (abajo), generando una
                     cotización real. Hoy el único salto que apunta a 'quote' en STAGE_FLOW es
                     design->quote; excluirlo por destino (no por etapa origen) para que la regla
                     se sostenga sola si el flujo cambia más adelante. */}
-                {STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] && STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>] !== 'quote' && (
+                {nextStageForCard && nextStageForCard !== 'quote' && (
                   <Button
                     variant="secondary"
                     onClick={() => {
@@ -1223,20 +1219,20 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                         setStageError(t('ventasDiseno:modal.deliveryAssignmentIncomplete'))
                         return
                       }
-                      changeStageMutation.mutate(STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>]!)
+                      changeStageMutation.mutate(nextStageForCard)
                     }}
                     disabled={changeStageMutation.isPending || deliveryAssignmentBlocksApproval}
                     loading={changeStageMutation.isPending}
                   >
                     {t('ventasDiseno:modal.moveToNext', {
-                      stage: t(`ventasDiseno:stages.${STAGE_FLOW[card.stage as Exclude<PipelineStage, 'lost'>]}`),
+                      stage: pipelineStages.label(nextStageForCard),
                     })}
                   </Button>
                 )}
                 {/* REQ-050: precarga la cotización nueva con Cliente Master/Subcliente/
                     RUC/Proyecto/primer contacto de esta tarjeta — solo tiene sentido
                     antes de que la tarjeta ya esté en Cotización o más adelante. */}
-                {(card.stage === 'lead' || card.stage === 'design') && !readsPipelineOnly && (
+                {pipelineStages.isBefore(card.stage, 'quote') && !readsPipelineOnly && (
                   <Button
                     variant="secondary"
                     onClick={handleCreateQuoteClick}
@@ -1269,7 +1265,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             ) : (
               <>
                 {/* SCRUM-1128 — a la izquierda de "Cerrar": botón (pendiente) o quién/cuándo (ya pasado). */}
-                {card?.stage === 'approved' && card.order_status === 'pending' && card.can_pass_to_order === true && canPassToOrder && (
+                {pipelineStages.isWon(card?.stage) && card?.order_status === 'pending' && card.can_pass_to_order === true && canPassToOrder && (
                   <Button
                     variant="accent"
                     onClick={() => { setPassToOrderError(null); setShowPassToOrderDialog(true) }}
@@ -1277,7 +1273,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                     {t('ventasDiseno:modal.passToOrder.button')}
                   </Button>
                 )}
-                {card?.stage === 'approved' && card.order_status === 'approved' && card.order_approved_by && (
+                {pipelineStages.isWon(card?.stage) && card?.order_status === 'approved' && card.order_approved_by && (
                   <div className="text-[12px] text-slate-600 dark:text-slate-300 leading-tight self-center" data-testid="pass-to-order-info">
                     <p>
                       <span className="font-semibold">{t('ventasDiseno:modal.passToOrder.passedBy')}:</span> {card.order_approved_by.name}
