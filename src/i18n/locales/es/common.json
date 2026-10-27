@@ -76,7 +76,12 @@
       "loadError": "No se pudieron cargar los catálogos.",
       "props": {
         "origen": "Origen",
-        "valida_identificacion": "Valida identificación fiscal"
+        "valida_identificacion": "Valida identificación fiscal",
+        "comportamiento": "Comportamiento (flujo que hereda)",
+        "prefijo": "Prefijo del folio",
+        "sla_dias": "SLA (días hábiles)",
+        "color": "Color (hex)",
+        "subtipos": "Subtipos (separados por coma)"
       }
     },
     "globalTab": {

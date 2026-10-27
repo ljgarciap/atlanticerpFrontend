@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -6,7 +6,7 @@ import { catalogsApi } from '@/api/catalogsApi'
 import { catalogQueryKey } from '@/hooks/useCatalog'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import type { CatalogDomain, CatalogEntry, CatalogPropDef } from '@/types/catalogs'
+import type { CatalogDomain, CatalogEntry, CatalogPropDef, CatalogPropValue } from '@/types/catalogs'
 
 const inputCls = 'border border-slate-200 dark:border-slate-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-slate-800'
 
@@ -18,21 +18,40 @@ function errorMessage(err: unknown, fallback: string): string {
   return fallback
 }
 
-/** Editor de una propiedad de comportamiento (casilla para booleanos, selector para enumerados). */
+/** Editor de una propiedad de comportamiento: casilla (bool), selector (enum), número (int), texto (string) o lista separada por comas (list). */
 function PropField({ name, def, value, onChange, label }: {
-  name: string, def: CatalogPropDef, value: string | boolean | undefined, onChange: (v: string | boolean) => void, label: string
+  name: string, def: CatalogPropDef, value: CatalogPropValue | undefined, onChange: (v: CatalogPropValue) => void, label: string
 }) {
   const current = value ?? def.default
+  let control: ReactNode
+  if (def.type === 'bool') {
+    control = <input type="checkbox" aria-label={label} checked={current === true} onChange={e => onChange(e.target.checked)} />
+  } else if (def.type === 'enum') {
+    control = (
+      <select aria-label={label} className={inputCls} value={String(current)} onChange={e => onChange(e.target.value)}>
+        {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+      </select>
+    )
+  } else if (def.type === 'int') {
+    control = (
+      <input type="number" aria-label={label} className={`${inputCls} w-20`} min={def.min} max={def.max} value={String(current ?? '')}
+        onChange={e => onChange(Number(e.target.value))} />
+    )
+  } else if (def.type === 'list') {
+    control = (
+      <input type="text" aria-label={label} className={`${inputCls} w-48`} value={Array.isArray(current) ? current.join(', ') : ''}
+        onChange={e => onChange(e.target.value.split(',').map(v => v.trim()).filter(Boolean))} />
+    )
+  } else {
+    control = (
+      <input type="text" aria-label={label} className={`${inputCls} w-28`} maxLength={def.max} value={typeof current === 'string' ? current : ''}
+        onChange={e => onChange(e.target.value)} />
+    )
+  }
   return (
     <label className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
       <span>{label}</span>
-      {def.type === 'bool'
-        ? <input type="checkbox" aria-label={label} checked={current === true} onChange={e => onChange(e.target.checked)} />
-        : (
-          <select aria-label={label} className={inputCls} value={String(current)} onChange={e => onChange(e.target.value)}>
-            {def.values.map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
-        )}
+      {control}
       <span className="sr-only">{name}</span>
     </label>
   )
