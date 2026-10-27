@@ -48,7 +48,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeSummary(overrides: Partial<GoodsReceiptSummary> = {}): GoodsReceiptSummary {
   return {
-    id: 1, purchase_order_id: 10, provider_name: 'LightCorp', order_status: 'en_aduana',
+    id: 1, purchase_order_id: 10, provider_name: 'Proveedor Demo A', order_status: 'en_aduana',
     lines_count: 2, total_units: 30, editable: true, created_at: '2026-07-19T00:00:00Z',
     ...overrides,
   }
@@ -60,7 +60,7 @@ function makeDetail(overrides: Partial<GoodsReceiptDetail> = {}): GoodsReceiptDe
     invoice_storage_key: null, invoice_original_filename: null,
     import_cost_total: null, freight_total: null, handling_total: null, other_costs_total: null,
     lines: [{
-      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27',
+      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Artículo E27',
       quantity: 10, unit_cost: 10, itbms_amount: null, import_cost_share: null, freight_cost_share: null, handling_cost_share: null, other_cost_share: null, cost_total: 100, warehouse_id: 1, warehouse_name: 'Atlantic',
       is_pending: true,
     }],
@@ -92,7 +92,7 @@ describe('GoodsReceiptsPage — Ver registros de ingreso (REQ-159)', () => {
 
     renderPage()
 
-    expect(await screen.findByText('LightCorp')).toBeInTheDocument()
+    expect(await screen.findByText('Proveedor Demo A')).toBeInTheDocument()
     expect(screen.getByText('#10')).toBeInTheDocument()
   })
 
@@ -101,7 +101,7 @@ describe('GoodsReceiptsPage — Ver registros de ingreso (REQ-159)', () => {
     mockedComprasApi.goodsReceipts.get.mockResolvedValue(makeDetail())
 
     renderPage()
-    fireEvent.click(await screen.findByText('LightCorp'))
+    fireEvent.click(await screen.findByText('Proveedor Demo A'))
 
     fireEvent.click(await screen.findByText('compras:goodsReceipts.detail.edit'))
 
@@ -113,7 +113,7 @@ describe('GoodsReceiptsPage — Ver registros de ingreso (REQ-159)', () => {
     mockedComprasApi.goodsReceipts.get.mockResolvedValue(makeDetail({ editable: false }))
 
     renderPage()
-    fireEvent.click(await screen.findByText('LightCorp'))
+    fireEvent.click(await screen.findByText('Proveedor Demo A'))
 
     expect(await screen.findByText('compras:goodsReceipts.detail.locked')).toBeInTheDocument()
     expect(screen.queryByText('compras:goodsReceipts.detail.edit')).not.toBeInTheDocument()
@@ -127,7 +127,7 @@ describe('GoodsReceiptsPage — "+ Nuevo ingreso" exige compras.edit (SCRUM-773 
 
     renderPage()
 
-    await screen.findByText('LightCorp')
+    await screen.findByText('Proveedor Demo A')
     expect(screen.queryByText('compras:goodsReceipts.actions.new')).not.toBeInTheDocument()
   })
 

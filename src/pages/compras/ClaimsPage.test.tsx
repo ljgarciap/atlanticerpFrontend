@@ -28,8 +28,8 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeSummary(overrides: Partial<PurchaseOrderClaimSummary> = {}): PurchaseOrderClaimSummary {
   return {
-    id: 1, code: 'R-1001', purchase_order_id: 13, provider_name: 'LightCorp', provider_id: 1,
-    product: 'Candelabro Cristal Imperial', expected_resolution: 'reposicion',
+    id: 1, code: 'R-1001', purchase_order_id: 13, provider_name: 'Proveedor Demo A', provider_id: 1,
+    product: 'Modelo Cristal Imperial', expected_resolution: 'reposicion',
     status: 'en_revision', status_changed_at: '2026-08-01T00:00:00Z', needs_attention: false,
     total_amount: 90, created_at: '2026-08-01T00:00:00Z', service_ticket: null,
     ...overrides,
@@ -41,7 +41,7 @@ function makeResponse(overrides: Partial<PurchaseOrderClaimListResponse> = {}): 
     data: [makeSummary()],
     meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
     kpis: { total: 1, reportados_en_revision: 1, resueltos_este_mes: 0, disputed_amount: 90 },
-    filters: { providers: [{ id: 1, name: 'LightCorp' }] },
+    filters: { providers: [{ id: 1, name: 'Proveedor Demo A' }] },
     ...overrides,
   }
 }
@@ -105,15 +105,15 @@ describe('ClaimsPage (SCRUM-257/258)', () => {
 
     // Esperar a que la lista de proveedores del filtro haya cargado (viene en la misma
     // respuesta que la primera página de reclamos), no solo a que se haya llamado el mock.
-    await waitFor(() => expect(screen.getByText('LightCorp', { selector: 'option' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A', { selector: 'option' })).toBeInTheDocument())
 
     fireEvent.change(screen.getByText('compras:claims.filters.allProviders').closest('select')!, { target: { value: '1' } })
     fireEvent.change(screen.getByText('compras:claims.filters.allResolutions').closest('select')!, { target: { value: 'negado' } })
-    fireEvent.change(screen.getByPlaceholderText('compras:claims.filters.searchPlaceholder'), { target: { value: 'candelabro' } })
+    fireEvent.change(screen.getByPlaceholderText('compras:claims.filters.searchPlaceholder'), { target: { value: 'modelo' } })
     fireEvent.click(screen.getByText('common:actions.search'))
 
     await waitFor(() => expect(mockedComprasApi.claims.list).toHaveBeenCalledWith({
-      chip: undefined, search: 'candelabro', provider_id: 1, expected_resolution: 'negado',
+      chip: undefined, search: 'modelo', provider_id: 1, expected_resolution: 'negado',
       page: 1, per_page: 20,
     }))
   })
@@ -154,7 +154,7 @@ describe('ClaimsPage (SCRUM-257/258)', () => {
       'compras:orders.table.actions',
     ])
 
-    expect(screen.getByText('Candelabro Cristal Imperial')).toBeInTheDocument()
+    expect(screen.getByText('Modelo Cristal Imperial')).toBeInTheDocument()
     // Ticket Servicios vacío -- solo lectura, sin ningún control interactivo en esa celda.
     const ticketCell = screen.getByText('—', { selector: 'td.text-slate-400' })
     expect(ticketCell.querySelector('button, select, input')).toBeNull()

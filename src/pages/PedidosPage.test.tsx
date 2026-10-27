@@ -326,7 +326,7 @@ describe('PedidosPage', () => {
         picker_id: 10,
         orders_count: 2,
         items: [
-          { catalog_product_id: 1, reference: 'CAND-01', description: 'Candelabro', qty_requested: 5, orders: [{ order_id: 1, order_number: 'PED-001', qty_requested: 3 }, { order_id: 2, order_number: 'PED-002', qty_requested: 2 }] },
+          { catalog_product_id: 1, reference: 'CAND-01', description: 'Modelo', qty_requested: 5, orders: [{ order_id: 1, order_number: 'PED-001', qty_requested: 3 }, { order_id: 2, order_number: 'PED-002', qty_requested: 2 }] },
         ],
       },
       isLoading: false,
@@ -360,7 +360,7 @@ describe('PedidosPage', () => {
         order_id: 5,
         editable: false,
         items: [
-          { id: 100, reference: 'CAND-01', factory_reference: null, description: 'Candelabro', location: 'A-1', found_at: null, qty_requested: 2, qty_picked: 2, picking_notes: null },
+          { id: 100, reference: 'CAND-01', factory_reference: null, description: 'Modelo', location: 'A-1', found_at: null, qty_requested: 2, qty_picked: 2, picking_notes: null },
         ],
       },
       isLoading: false,

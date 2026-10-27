@@ -106,7 +106,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
   test('Cotización → Mover a Propuesta: 2 gates distintos en secuencia, cada banner se limpia sin mezclarse', async ({ page }) => {
     test.setTimeout(60000)
     await login(page, 'gerencia@test.com')
-    await openCard(page, '[DEMO] Amenidades Delta')
+    await openCard(page, '[DEMO] Proyecto Gamma')
 
     await page.getByRole('button', { name: /Mover a Propuesta/ }).click()
     await expect(page.getByText('Falta la superficie trabajada (m²) antes de mover a Propuesta.')).toBeVisible()

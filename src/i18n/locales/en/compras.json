@@ -222,8 +222,7 @@
         "iluminacion_exterior": "Outdoor Lighting",
         "lamparas_piso_mesa": "Floor and Table Lamps",
         "iluminacion_empotrada": "Recessed Lighting",
-        "bombillos": "Bulbs",
-        "LAMPARAS": "Lamps"
+        "bombillos": "Bulbs"
       },
       "rotation": "Expected rotation",
       "rotations": {

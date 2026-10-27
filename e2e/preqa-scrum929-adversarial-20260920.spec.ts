@@ -38,7 +38,7 @@ $sub = \\App\\Modules\\VentasDiseno\\Models\\SubClient::create(['master_client_i
 $project = \\App\\Modules\\VentasDiseno\\Models\\SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'Proyecto ${tag}']);
 $quote = \\App\\Modules\\VentasDiseno\\Models\\Quote::create(['owner_id' => $ownerId, 'sales_project_id' => $project->id, 'master_client_id' => $master->id, 'folio' => 'COT-${tag}-' . random_int(1000, 999999), 'generated_at' => now()]);
 $part = \\App\\Modules\\VentasDiseno\\Models\\QuotePart::create(['quote_id' => $quote->id, 'name' => 'Partida 1', 'position' => 1]);
-$item = $part->items()->create(['catalog_product_id' => null, 'is_custom' => true, 'reference' => 'REF-${tag}', 'description' => 'Panel LED (${tag})', 'quantity' => 9, 'unit_price' => 100.00, 'discount_percent' => 0]);
+$item = $part->items()->create(['catalog_product_id' => null, 'is_custom' => true, 'reference' => 'REF-${tag}', 'description' => 'Panel XL (${tag})', 'quantity' => 9, 'unit_price' => 100.00, 'discount_percent' => 0]);
 $quote = \\App\\Modules\\VentasDiseno\\Models\\Quote::with('parts.items')->findOrFail($quote->id);
 $card = \\App\\Modules\\VentasDiseno\\Models\\PipelineCard::create(['sales_project_id' => $project->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $ownerId, 'amount' => $quote->grandTotal(), 'stage_changed_at' => now()]);
 $root = \\App\\Modules\\Bodega\\Models\\Order::create(['order_number' => '${orderNumber}', 'pipeline_card_id' => $card->id, 'order_type' => \\App\\Modules\\Bodega\\Models\\Order::ORDER_TYPE_PEDIDO, 'stage' => \\App\\Modules\\Bodega\\Models\\Order::STAGE_POR_DESPACHAR, 'customer_name' => $sub->business_name]);

@@ -127,7 +127,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       contact_name: 'PERSONA QUE DEVUELVE DANIELA',
       contact_phone: '54345434',
       has_signed_document: true,
-      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
+      productos: [{ reference: 'XL-100', description: 'Producto XL', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
       { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
@@ -141,7 +141,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
     expect(screen.getByText('PERSONA QUE DEVUELVE DANIELA — 54345434')).toBeInTheDocument()
     expect(screen.getByText('notasCredito.formulario.conformidadVerDocumento')).toBeInTheDocument()
     expect(screen.queryByText('notasCredito.formulario.precargaDatoNoDisponible')).not.toBeInTheDocument()
-    expect(screen.getByText(/Luminaria LED/)).toBeInTheDocument()
+    expect(screen.getByText(/Producto XL/)).toBeInTheDocument()
     expect(screen.queryByPlaceholderText('notasCredito.formulario.clientePlaceholder')).not.toBeInTheDocument()
   })
 
@@ -165,7 +165,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       contact_name: '',
       contact_phone: '',
       has_signed_document: false,
-      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
+      productos: [{ reference: 'XL-100', description: 'Producto XL', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
       { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
@@ -192,7 +192,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       customer_return_id: 44, return_number: 'DEV-2026-0044', master_client_id: 1, cliente: 'Grupo Sensei',
       factura_origen_id: 5, factura_origen_numero: 'HS-3402', project: null, contact_name: '', contact_phone: '',
       has_signed_document: false,
-      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: 100, qty_received: 2, reason: null, reason_detail: null }],
+      productos: [{ reference: 'XL-100', description: 'Producto XL', unit_price: 100, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
       { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, monto_acreditable: 350, notas_previas_total: 150, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
@@ -225,14 +225,14 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       contact_name: '',
       contact_phone: '',
       has_signed_document: false,
-      productos: [{ reference: 'LED-100', description: 'Luminaria LED', unit_price: 45.5, qty_received: 2, reason: null, reason_detail: null }],
+      productos: [{ reference: 'XL-100', description: 'Producto XL', unit_price: 45.5, qty_received: 2, reason: null, reason_detail: null }],
     })
     mockedApi.notasCredito.facturas.mockResolvedValue([
       { id: 5, numero: 'HS-3402', monto: 500, saldo_pendiente: 500, itbms_percentage: 7, itbms_rate_id: null, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
     ])
     renderPage()
     fireEvent.click(await screen.findByText('HS-3402'))
-    await screen.findByText(/Luminaria LED/)
+    await screen.findByText(/Producto XL/)
     // 2 unidades × $45.50 = $91.00 neto (línea del producto, sin ITBMS) — antes de SCRUM-786 habría sido $0.00 siempre.
     expect(screen.getAllByText(/91\.00/).length).toBeGreaterThan(0)
     // El monto sugerido es el total CON ITBMS 7 %: 91.00 × 1.07 = 97.37 (NC-0001, 2026-10-06 — antes quedaba en 91.00 y la NC acreditaba solo el neto).

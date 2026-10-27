@@ -76,12 +76,12 @@ function makeDetail(overrides: Partial<GeneralCountDetail> = {}): GeneralCountDe
     aplicado_at: null, fecha_solicitud_aprobacion: null,
     lines: [
       {
-        id: 100, producto: { id: 1, reference: 'NORDIC-40', description: 'Lámpara colgante Nordic 40cm' },
+        id: 100, producto: { id: 1, reference: 'NORDIC-40', description: 'Producto colgante Nordic 40cm' },
         cantidad_sistema: 2, cantidad_contada: null, diferencia: null,
         tiene_cruce_pendiente: false, cruce_fecha: null,
       },
       {
-        id: 101, producto: { id: 2, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro Cristal Imperial' },
+        id: 101, producto: { id: 2, reference: 'CRISTAL-IMPERIAL', description: 'Modelo Cristal Imperial' },
         cantidad_sistema: 8, cantidad_contada: null, diferencia: null,
         tiene_cruce_pendiente: true, cruce_fecha: '2026-06-26T00:00:00Z',
       },
@@ -258,7 +258,7 @@ describe('BodegaInventarioGeneralPage', () => {
       isAxiosError: true,
       response: {
         status: 409,
-        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Lámpara colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
+        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Producto colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
       },
     })
 
@@ -274,7 +274,7 @@ describe('BodegaInventarioGeneralPage', () => {
       isAxiosError: true,
       response: {
         status: 409,
-        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Lámpara colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
+        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Producto colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
       },
     })
     mockedApi.generalCounts.create.mockResolvedValueOnce({ id: 11, total_productos: 2 })
@@ -295,7 +295,7 @@ describe('BodegaInventarioGeneralPage', () => {
       isAxiosError: true,
       response: {
         status: 409,
-        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Lámpara colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
+        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Producto colgante Nordic 40cm', general_count: { id: 5, estado: 'evaluado', fecha: '2026-08-20T10:00:00Z' } }] },
       },
     })
 
@@ -320,7 +320,7 @@ describe('BodegaInventarioGeneralPage', () => {
       isAxiosError: true,
       response: {
         status: 409,
-        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Lámpara colgante Nordic 40cm', general_count: { id: 7, estado: 'evaluado', fecha: '2026-08-21T10:00:00Z' } }] },
+        data: { duplicates: [{ catalog_product_id: 1, product_reference: 'NORDIC-40', product_name: 'Producto colgante Nordic 40cm', general_count: { id: 7, estado: 'evaluado', fecha: '2026-08-21T10:00:00Z' } }] },
       },
     })
     mockedApi.generalCounts.submit.mockResolvedValueOnce(makeDetail({ estado: 'pendiente_aprobacion' }))
@@ -430,7 +430,7 @@ describe('BodegaInventarioGeneralPage', () => {
       motivo_rechazo: 'El conteo no coincidía.', resuelto_por: 'Gerencia', resuelto_at: '2026-06-16T10:00:00Z',
       aplicado_at: null, fecha_solicitud_aprobacion: '2026-06-15T12:00:00Z',
       lines: [{
-        id: 9, producto: { id: 1, reference: 'REF-1', description: 'Bombillo LED' },
+        id: 9, producto: { id: 1, reference: 'REF-1', description: 'Artículo XL' },
         cantidad_sistema: 10, cantidad_contada: 8, diferencia: -2, tiene_cruce_pendiente: false, cruce_fecha: null,
       }],
     })
@@ -439,7 +439,7 @@ describe('BodegaInventarioGeneralPage', () => {
     fireEvent.click(await screen.findByText('bodega:generalCounts.tray.actions.viewDetail'))
 
     expect(await screen.findByText('El conteo no coincidía.')).toBeInTheDocument()
-    expect(screen.getByText('Bombillo LED')).toBeInTheDocument()
+    expect(screen.getByText('Artículo XL')).toBeInTheDocument()
     expect(mockedApi.generalCounts.detail).toHaveBeenCalledWith(2)
   })
 
@@ -583,7 +583,7 @@ describe('BodegaInventarioGeneralPage', () => {
     mockedApi.generalCounts.detail.mockResolvedValue(makeDetail({
       id: 8, warehouse_id: 2, bodega: 'Merma', estado: 'evaluado', diferencias_encontradas: 1,
       lines: [{
-        id: 200, producto: { id: 9, reference: 'FOCO-LED-1', description: 'Foco LED' },
+        id: 200, producto: { id: 9, reference: 'FOCO-XL-1', description: 'Foco XL' },
         cantidad_sistema: 10, cantidad_contada: 8, diferencia: -2, tiene_cruce_pendiente: false, cruce_fecha: null,
       }],
     }))
@@ -595,7 +595,7 @@ describe('BodegaInventarioGeneralPage', () => {
     // el panel de arriba, con la columna Diferencia ya visible (evaluated=true de una).
     await waitFor(() => expect(mockedApi.generalCounts.detail).toHaveBeenCalledWith(8))
     expect(mockedApi.generalCounts.create).not.toHaveBeenCalled()
-    await waitFor(() => expect(screen.getByText('FOCO-LED-1')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('FOCO-XL-1')).toBeInTheDocument())
     expect(screen.getByText('-2')).toBeInTheDocument()
   })
 

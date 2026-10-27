@@ -48,8 +48,8 @@ function serveProducts(all: unknown[]) {
   })
 }
 
-const PROVIDER = { id: 1, name: 'LightCorp', tax_id: null, category: null, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null }
-const PRODUCT = { id: 10, reference: 'REF-1', factory_reference: null, name: 'Bombillo E27', description: 'Bombillo E27', brand: null, photo_url: null, price_full: 20, cost: 12, stock_quantity: 5, reorder_point: null }
+const PROVIDER = { id: 1, name: 'Proveedor Demo A', tax_id: null, category: null, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: null }
+const PRODUCT = { id: 10, reference: 'REF-1', factory_reference: null, name: 'Artículo E27', description: 'Artículo E27', brand: null, photo_url: null, price_full: 20, cost: 12, stock_quantity: 5, reorder_point: null }
 
 function renderPage(prefill?: NewOrderPrefillState) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -92,7 +92,7 @@ describe('NewPurchaseOrderPage', () => {
     // REQ-128 Escenario 1.
     renderPage()
     fireEvent.focus(screen.getByPlaceholderText('compras:newOrder.provider.searchPlaceholder'))
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:newOrder.steps.products')).not.toBeInTheDocument()
   })
 
@@ -100,15 +100,15 @@ describe('NewPurchaseOrderPage', () => {
     renderPage()
     // No debe estar permanentemente desplegado apenas hay resultados — solo al enfocar.
     await waitFor(() => expect(mockedComprasApi.providers.list).toHaveBeenCalled())
-    expect(screen.queryByText('LightCorp')).not.toBeInTheDocument()
+    expect(screen.queryByText('Proveedor Demo A')).not.toBeInTheDocument()
 
     fireEvent.focus(screen.getByPlaceholderText('compras:newOrder.provider.searchPlaceholder'))
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
   })
 
   it('elegir un proveedor revela el paso Productos', async () => {
     renderPage()
-    await selectFirstProvider('LightCorp')
+    await selectFirstProvider('Proveedor Demo A')
 
     await waitFor(() => expect(screen.getByText('compras:newOrder.steps.products')).toBeInTheDocument())
   })
@@ -116,8 +116,8 @@ describe('NewPurchaseOrderPage', () => {
   it('agregar un producto existente crea una línea con el costo real del catálogo', async () => {
     // REQ-130 Escenario 2 (precarga) — el costo mostrado viene del catálogo, no se inventa.
     renderPage()
-    await selectFirstProvider('LightCorp')
-    await waitFor(() => expect(screen.getByText('Bombillo E27')).toBeInTheDocument())
+    await selectFirstProvider('Proveedor Demo A')
+    await waitFor(() => expect(screen.getByText('Artículo E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:newOrder.products.add'))
 
@@ -133,7 +133,7 @@ describe('NewPurchaseOrderPage', () => {
     const productos = Array.from({ length: 45 }, (_, i) => ({ ...PRODUCT, id: 100 + i, reference: `REF-${i + 1}`, description: `Producto ${i + 1}`, name: `Producto ${i + 1}` }))
     serveProducts(productos)
     renderPage()
-    await selectFirstProvider('LightCorp')
+    await selectFirstProvider('Proveedor Demo A')
 
     await waitFor(() => expect(screen.getByText('Producto 1')).toBeInTheDocument())
     expect(screen.getAllByText('compras:newOrder.products.add')).toHaveLength(20)
@@ -159,7 +159,7 @@ describe('NewPurchaseOrderPage', () => {
     const muchos = Array.from({ length: 130 }, (_, i) => ({ ...PRODUCT, id: 500 + i, reference: `TOPE-${i}`, description: `Tope ${i}`, name: `Tope ${i}` }))
     serveProducts(muchos)
     renderPage()
-    await selectFirstProvider('LightCorp')
+    await selectFirstProvider('Proveedor Demo A')
 
     await screen.findByText('Tope 0')
     expect(screen.queryByTestId('product-search-capped-hint')).not.toBeInTheDocument()
@@ -173,13 +173,13 @@ describe('NewPurchaseOrderPage', () => {
   it('distingue «proveedor sin productos», «búsqueda sin resultados» y «ya agregaste todos» (SCRUM-1172)', async () => {
     serveProducts([])
     const { unmount } = renderPage()
-    await selectFirstProvider('LightCorp')
+    await selectFirstProvider('Proveedor Demo A')
     expect(await screen.findByTestId('product-picker-empty-noProducts')).toHaveTextContent('compras:newOrder.products.empty')
     unmount()
 
     serveProducts([{ ...PRODUCT, id: 700, reference: 'UNICO-1', description: 'Producto unico', name: 'Producto unico' }])
     renderPage()
-    await selectFirstProvider('LightCorp')
+    await selectFirstProvider('Proveedor Demo A')
     await screen.findByText('Producto unico')
 
     fireEvent.change(screen.getByPlaceholderText('compras:newOrder.products.searchPlaceholder'), { target: { value: 'zzzz-no-existe' } })
@@ -194,8 +194,8 @@ describe('NewPurchaseOrderPage', () => {
   it('conserva el proveedor y las líneas al recargar y se limpia al crear la orden (SCRUM-1172)', async () => {
     useAuthStore.setState({ user: { id: 7 } as never })
     const { unmount } = renderPage()
-    await selectFirstProvider('LightCorp')
-    await waitFor(() => expect(screen.getByText('Bombillo E27')).toBeInTheDocument())
+    await selectFirstProvider('Proveedor Demo A')
+    await waitFor(() => expect(screen.getByText('Artículo E27')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.products.add'))
     await waitFor(() => expect(screen.getByText('compras:newOrder.actions.submit')).toBeInTheDocument())
     unmount()
@@ -208,8 +208,8 @@ describe('NewPurchaseOrderPage', () => {
   it('el borrador es por usuario: otra persona en el mismo navegador no lo ve (SCRUM-1172)', async () => {
     useAuthStore.setState({ user: { id: 7 } as never })
     const { unmount } = renderPage()
-    await selectFirstProvider('LightCorp')
-    await waitFor(() => expect(screen.getByText('Bombillo E27')).toBeInTheDocument())
+    await selectFirstProvider('Proveedor Demo A')
+    await waitFor(() => expect(screen.getByText('Artículo E27')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.products.add'))
     await waitFor(() => expect(screen.getByText('compras:newOrder.actions.submit')).toBeInTheDocument())
     unmount()
@@ -232,8 +232,8 @@ describe('NewPurchaseOrderPage', () => {
 
   // Pre-QA SCRUM-1172 — forma válida pero contenido malformado (una línea null) dejaba la pantalla en blanco hasta cerrar la pestaña.
   it.each([
-    [{ providerId: 1, providerName: 'LightCorp', draft: { lines: [null] } }],
-    [{ providerId: 1, providerName: 'LightCorp', draft: { lines: [{}], shippingType: 'terrestre', whoPaysShipping: 'cliente', modality: 'directo' } }],
+    [{ providerId: 1, providerName: 'Proveedor Demo A', draft: { lines: [null] } }],
+    [{ providerId: 1, providerName: 'Proveedor Demo A', draft: { lines: [{}], shippingType: 'terrestre', whoPaysShipping: 'cliente', modality: 'directo' } }],
   ])('un borrador con líneas malformadas se ignora y la pantalla carga (SCRUM-1172) %#', async (saved) => {
     useAuthStore.setState({ user: { id: 7 } as never })
     window.sessionStorage.setItem('atlanticerp:draft:compras-nueva-orden:7', JSON.stringify(saved))
@@ -245,8 +245,8 @@ describe('NewPurchaseOrderPage', () => {
   it('formatea subtotal y total de la orden con separador de miles', async () => {
     serveProducts([{ ...PRODUCT, id: 11, reference: 'REF-2', cost: 12345.50 }])
     renderPage()
-    await selectFirstProvider('LightCorp')
-    await waitFor(() => expect(screen.getByText('Bombillo E27')).toBeInTheDocument())
+    await selectFirstProvider('Proveedor Demo A')
+    await waitFor(() => expect(screen.getByText('Artículo E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:newOrder.products.add'))
 
@@ -257,7 +257,7 @@ describe('NewPurchaseOrderPage', () => {
 
   it('crear la orden envía provider_id y las líneas al backend', async () => {
     mockedComprasApi.orders.create.mockResolvedValue({
-      id: 99, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Designer',
+      id: 99, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: null, origin_module: null, created_by_name: 'Designer',
       status: 'por_aprobar',
       next_status: 'ordenado', is_critical: false, modality: 'directo', estimated_arrival_date: null,
       requires_primary_approval: false, blocked_by_primary_approval: false, approved_by: null,
@@ -277,8 +277,8 @@ describe('NewPurchaseOrderPage', () => {
       notes: null, lines: [],
     })
     renderPage()
-    await selectFirstProvider('LightCorp')
-    await waitFor(() => expect(screen.getByText('Bombillo E27')).toBeInTheDocument())
+    await selectFirstProvider('Proveedor Demo A')
+    await waitFor(() => expect(screen.getByText('Artículo E27')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.products.add'))
     await waitFor(() => expect(screen.getByText('compras:newOrder.actions.submit')).toBeInTheDocument())
 
@@ -301,18 +301,18 @@ describe('NewPurchaseOrderPage', () => {
     });
     renderPage({
       providerId: 1,
-      product: { id: 10, reference: 'REF-1', description: 'Bombillo E27', unitCost: 12, quantity: 3 },
+      product: { id: 10, reference: 'REF-1', description: 'Artículo E27', unitCost: 12, quantity: 3 },
     })
 
     // El Paso 1 ya llega "cerrado" — nunca se muestra el buscador de proveedor.
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByPlaceholderText('compras:newOrder.provider.searchPlaceholder')).not.toBeInTheDocument()
 
     // La línea prefilled ya está en la tabla, con la cantidad sugerida por Inventario.
-    // ("Bombillo E27" aparece 2 veces: el resultado del buscador de productos y la línea ya
+    // ("Artículo E27" aparece 2 veces: el resultado del buscador de productos y la línea ya
     // agregada — se identifica la línea por su input de cantidad, único en toda la página).
     expect(screen.getByText('compras:newOrder.steps.lines')).toBeInTheDocument()
-    expect(screen.getAllByText('Bombillo E27').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Artículo E27').length).toBeGreaterThan(0)
     expect(screen.getByDisplayValue('3')).toBeInTheDocument()
   })
 
@@ -325,14 +325,14 @@ describe('NewPurchaseOrderPage', () => {
     renderPage({
       providerId: 1,
       products: [
-        { id: 10, reference: 'REF-1', description: 'Bombillo E27', unitCost: 12, quantity: 7 },
-        { id: 11, reference: 'REF-2', description: 'Panel LED 60x60', unitCost: 30, quantity: 4 },
+        { id: 10, reference: 'REF-1', description: 'Artículo E27', unitCost: 12, quantity: 7 },
+        { id: 11, reference: 'REF-2', description: 'Panel XL 60x60', unitCost: 30, quantity: 4 },
       ],
     })
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
-    expect(screen.getAllByText('Bombillo E27').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Panel LED 60x60').length).toBeGreaterThan(0)
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
+    expect(screen.getAllByText('Artículo E27').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Panel XL 60x60').length).toBeGreaterThan(0)
     expect(screen.getByDisplayValue('7')).toBeInTheDocument()
     expect(screen.getByDisplayValue('4')).toBeInTheDocument()
   })

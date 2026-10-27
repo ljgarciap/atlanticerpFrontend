@@ -88,10 +88,10 @@ function detailResponse(overrides: Partial<WarehouseDetailResponse> = {}): Wareh
     ubicaciones: ['A-1-03'],
     data: [{
       stock_id: 1, catalog_product_id: 99, factory_reference: 'CAND-CRIS-IMP', reference: 'CRISTAL-IMPERIAL',
-      ubicacion: 'A-1-03', description: 'Candelabro Cristal Imperial', categoria: 'Candelabros y Colgantes',
+      ubicacion: 'A-1-03', description: 'Modelo Cristal Imperial', categoria: 'Candelabros y Colgantes',
       unidades_en_bodega: 8,
       disponible: 12, por_servir: 3, stock_total: 15, por_ingresar: 0, en_camino: 0,
-      stock_minimo: 10, estado: 'disponible', proveedor: 'LightCorp',
+      stock_minimo: 10, estado: 'disponible', proveedor: 'Proveedor Demo A',
     }],
     // SCRUM-754 (rebote 2026-08-18) — "Bodega → Bodegas" pasa a paginar desde el backend.
     meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
@@ -188,9 +188,9 @@ describe('BodegasPage', () => {
       warehouse: WAREHOUSES[2],
       data: [{
         stock_id: 2, catalog_product_id: 55, factory_reference: null, reference: 'BAUHAUS', ubicacion: null,
-        description: 'Lámpara de mesa Bauhaus', categoria: null, unidades_en_bodega: 14, disponible: 14, por_servir: 0,
+        description: 'Producto de mesa Bauhaus', categoria: null, unidades_en_bodega: 14, disponible: 14, por_servir: 0,
         stock_total: 14, por_ingresar: 0, en_camino: 0, stock_minimo: 8, estado: 'disponible',
-        proveedor: 'LightCorp', cliente: 'Constructora Pacífico SA',
+        proveedor: 'Proveedor Demo A', cliente: 'Constructora Pacífico SA',
       }],
     }))
 
@@ -338,7 +338,7 @@ describe('BodegasPage', () => {
     mockedBodegaApi.relocations.list.mockResolvedValue({
       data: [{
         id: 5,
-        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
         fecha: '2026-07-24T10:00:00Z', estado: 'pendiente', motivo_rechazo: null, resuelto_por: null,
@@ -363,9 +363,9 @@ describe('BodegasPage', () => {
   describe('SCRUM-1160 — Ver detalle de una solicitud de reubicación', () => {
     const MOTIVO_LARGO = 'Reorganización del piso de venta por cambio de temporada: se mueve el producto a la bodega de showroom para exhibirlo junto a la línea nueva y liberar espacio en la ubicación A-12 antes de la llegada del contenedor.'
     const filas = [
-      { id: 5, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro de cristal' }, bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
+      { id: 5, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo de cristal' }, bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: MOTIVO_LARGO, solicitado_por: 'Jorge P.', fecha: '2026-07-24T10:00:00Z', estado: 'pendiente' as const, motivo_rechazo: null, resuelto_por: null },
-      { id: 6, producto: { id: 2, reference: 'NORDIC-40', description: 'Lámpara colgante' }, bodega_origen: 'Bodega Central', bodega_destino: 'Showroom',
+      { id: 6, producto: { id: 2, reference: 'NORDIC-40', description: 'Producto colgante' }, bodega_origen: 'Bodega Central', bodega_destino: 'Showroom',
         cantidad: 2, motivo: 'Exhibición', solicitado_por: 'Ana R.', fecha: '2026-07-23T09:00:00Z', estado: 'aprobada' as const, motivo_rechazo: null, resuelto_por: 'Gerencia B.' },
       { id: 7, producto: { id: 3, reference: 'SPOT-9', description: 'Spot magnético' }, bodega_origen: 'Merma', bodega_destino: 'Bodega Central',
         cantidad: 1, motivo: 'Corrección', solicitado_por: 'Luis G.', fecha: '2026-07-22T08:00:00Z', estado: 'rechazada' as const, motivo_rechazo: 'No hay espacio en destino', resuelto_por: 'Gerencia B.' },
@@ -394,7 +394,7 @@ describe('BodegasPage', () => {
       const modal = await screen.findByTestId('relocation-detail-modal')
       const dentro = within(modal)
       expect(dentro.getByText('CRISTAL-IMPERIAL')).toBeInTheDocument()
-      expect(dentro.getByText('Candelabro de cristal')).toBeInTheDocument()
+      expect(dentro.getByText('Modelo de cristal')).toBeInTheDocument()
       expect(dentro.getByText('4')).toBeInTheDocument()
       expect(dentro.getByText('Bodega Central')).toBeInTheDocument()
       expect(dentro.getByText('Merma')).toBeInTheDocument()
@@ -470,7 +470,7 @@ describe('BodegasPage', () => {
     mockedBodegaApi.relocations.list.mockResolvedValue({
       data: [{
         id: 5,
-        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
         fecha: '2026-07-24T10:00:00Z', estado: 'pendiente', motivo_rechazo: null, resuelto_por: null,
@@ -495,7 +495,7 @@ describe('BodegasPage', () => {
     mockedBodegaApi.relocations.list.mockResolvedValue({
       data: [{
         id: 5,
-        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
         fecha: '2026-07-24T10:00:00Z', estado: 'pendiente', motivo_rechazo: null, resuelto_por: null,
@@ -520,7 +520,7 @@ describe('BodegasPage', () => {
     mockedBodegaApi.relocations.list.mockResolvedValue({
       data: [{
         id: 6,
-        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+        producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
         bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
         fecha: '2026-07-24T10:00:00Z', estado: 'rechazada',
@@ -643,7 +643,7 @@ describe('BodegasPage — solo consulta por permiso y navegación', () => {
   describe('navegación desde la notificación de reubicación (SCRUM-1154)', () => {
     const pendiente = (id: number) => ({
       id,
-      producto: { id: 1, reference: `REF-${id}`, description: 'Candelabro' },
+      producto: { id: 1, reference: `REF-${id}`, description: 'Modelo' },
       bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
       cantidad: 4, motivo: 'Reorganización', solicitado_por: 'Jorge P.',
       fecha: '2026-07-24T10:00:00Z', estado: 'pendiente' as const, motivo_rechazo: null, resuelto_por: null,

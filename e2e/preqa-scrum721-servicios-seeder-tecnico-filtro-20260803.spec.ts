@@ -106,26 +106,26 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
   expect(rowsAfter).toBeGreaterThan(0)
 })
 
-test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente) BLOQUEA el cierre', async ({ page }) => {
+test('4. REQ-218 — Sitio Demo 03 (Instalación, on_site, informe pendiente) BLOQUEA el cierre', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
-  await searchInput.fill('Clínica Paitilla')
+  await searchInput.fill('Sitio Demo 03')
   await page.waitForTimeout(800)
-  await page.screenshot({ path: `${DL_DIR}/04-buscar-paitilla.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/04-buscar-Sitio-03.png`, fullPage: true })
 
-  const row = page.locator('table tbody tr').filter({ hasText: 'Clínica Paitilla' }).first()
-  await expect(row, 'ticket demo "Clínica Paitilla" no encontrado en la tabla').toBeVisible()
+  const row = page.locator('table tbody tr').filter({ hasText: 'Sitio Demo 03' }).first()
+  await expect(row, 'ticket demo "Sitio Demo 03" no encontrado en la tabla').toBeVisible()
 
   const select = row.locator('select')
   await expect(select).toBeVisible()
   const optionsText = await select.locator('option').allTextContents()
-  console.log('[SCRUM-721 REQ-218] Opciones de estado disponibles en el ticket Paitilla:', JSON.stringify(optionsText))
+  console.log('[SCRUM-721 REQ-218] Opciones de estado disponibles en el ticket Sitio-03:', JSON.stringify(optionsText))
 
   await select.selectOption({ label: 'Resuelto' })
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: `${DL_DIR}/05-paitilla-tras-intentar-resolver.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/05-Sitio-03-tras-intentar-resolver.png`, fullPage: true })
 
   const bodyText = (await page.textContent('body')) ?? ''
   const hasBlockMsg = /informe/i.test(bodyText)
@@ -137,17 +137,17 @@ test('4. REQ-218 — Clínica Paitilla (Instalación, on_site, informe pendiente
   expect(hasBlockMsg, 'debe mostrar mensaje de bloqueo mencionando informe pendiente').toBe(true)
 })
 
-test('5. REQ-218 — Oficinas Grupo Melo (Garantía, on_site, cotización enviada no aprobada) BLOQUEA el cierre', async ({ page }) => {
+test('5. REQ-218 — Sitio Demo 05 (Garantía, on_site, cotización enviada no aprobada) BLOQUEA el cierre', async ({ page }) => {
   await login(page, 'liderservicios@test.com')
   await gotoTickets(page)
 
   const searchInput = page.locator('input[placeholder*="Buscar"]').first()
-  await searchInput.fill('Oficinas Grupo Melo')
+  await searchInput.fill('Sitio Demo 05')
   await page.waitForTimeout(800)
   await page.screenshot({ path: `${DL_DIR}/06-buscar-melo.png`, fullPage: true })
 
-  const row = page.locator('table tbody tr').filter({ hasText: 'Oficinas Grupo Melo' }).first()
-  await expect(row, 'ticket demo "Oficinas Grupo Melo" no encontrado en la tabla').toBeVisible()
+  const row = page.locator('table tbody tr').filter({ hasText: 'Sitio Demo 05' }).first()
+  await expect(row, 'ticket demo "Sitio Demo 05" no encontrado en la tabla').toBeVisible()
 
   const select = row.locator('select')
   await expect(select).toBeVisible()

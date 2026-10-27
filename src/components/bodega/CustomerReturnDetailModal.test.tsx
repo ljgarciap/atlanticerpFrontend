@@ -31,12 +31,12 @@ beforeEach(() => { vi.clearAllMocks() })
 describe('CustomerReturnDetailModal', () => {
   it('muestra el texto libre del motivo cuando reason es "otra" y trae reason_detail', async () => {
     const detail: CustomerReturnDetail = {
-      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: 'Torre Marina Bahía',
+      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Sitio Demo 02', project: 'Torre Marina Bahía',
       status: 'pendiente', has_signed_document: true, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: null, finalized_at: null,
       rejected_at: null, rejection_reason: null, credit_note_id: null,
       products: [
-        { id: 200, order_item_id: 950, reference: 'AMBAR-E27', description: 'Bombillo decorativo E27 Ámbar', qty_requested: 2, qty_received: null, reason: 'otra', reason_detail: 'Cliente pidió color distinto al catálogo.' },
+        { id: 200, order_item_id: 950, reference: 'AMBAR-E27', description: 'Artículo decorativo E27 Ámbar', qty_requested: 2, qty_received: null, reason: 'otra', reason_detail: 'Cliente pidió color distinto al catálogo.' },
       ],
       history: [{ step: 'created', label: 'Devolución solicitada', at: '2026-07-09T10:00:00Z', by: 'Jorge P.' }],
     }
@@ -50,7 +50,7 @@ describe('CustomerReturnDetailModal', () => {
 
   it('el historial muestra la bodega destino y el motivo de rechazo cuando el backend los envía', async () => {
     const detail: CustomerReturnDetail = {
-      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: null,
+      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Sitio Demo 02', project: null,
       status: 'rechazada', has_signed_document: true, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: '2026-07-10T10:00:00Z', finalized_at: null,
       rejected_at: '2026-07-11T10:00:00Z', rejection_reason: 'Producto llegó dañado más allá de lo aceptable', credit_note_id: null, products: [],
@@ -68,7 +68,7 @@ describe('CustomerReturnDetailModal', () => {
 
   it('sin historial muestra el mensaje "sin historial"', async () => {
     const detail: CustomerReturnDetail = {
-      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Hotel Riu Panamá', project: null,
+      id: 1, return_number: 'DEV-1', order_id: 10, order_number: '2201', customer_name: 'Sitio Demo 02', project: null,
       status: 'pendiente', has_signed_document: false, contact_name: 'Camila Rojas', contact_phone: '+507 6000-0000',
       destination_warehouse: null, created_at: '2026-07-09T10:00:00Z', received_at: null, finalized_at: null,
       rejected_at: null, rejection_reason: null, credit_note_id: null, products: [], history: [],

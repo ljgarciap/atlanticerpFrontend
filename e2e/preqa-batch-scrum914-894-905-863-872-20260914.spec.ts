@@ -42,8 +42,8 @@ function getToken(page: Page): Promise<string> {
 // SCRUM-914 + SCRUM-894 (rebote Gerencia) — Guia de Entrega: stage correcto + cantidades reales
 // Un solo flujo real de entrega parcial cubre ambos: pedido PED-2026-0004 (id 4), en Packing,
 // 3 items: PREQA-VERIFY-265 (qty_picked=10=requested), PREQA-INT-B-... (qty_picked=6, requested=10,
-// shortage sin_stock ya desde picking), QA-LED-004 (qty_picked=5=requested).
-// Entregamos: item 265 y LED completos, item INT-B a 0 (motivo sin_stock) — reproduce EXACTO el
+// shortage sin_stock ya desde picking), QA-XL-004 (qty_picked=5=requested).
+// Entregamos: item 265 y XL completos, item INT-B a 0 (motivo sin_stock) — reproduce EXACTO el
 // reclamo de Gerencia: "un producto con 0 unidades por falta de stock, otro con unidades reales".
 // ============================================================
 
@@ -122,11 +122,11 @@ test('SCRUM-894 — GuiaEntregaModal (vista previa en-app): solo items con qty_d
   await page.screenshot({ path: 'test-results/scrum894-guia-modal.png', fullPage: true }).catch(() => {})
 
   console.log('SCRUM-894 — modal contiene PREQA-VERIFY-265 (esperado true):', bodyText.includes('PREQA-VERIFY-265'))
-  console.log('SCRUM-894 — modal contiene QA-LED-004 (esperado true):', bodyText.includes('QA-LED-004'))
+  console.log('SCRUM-894 — modal contiene QA-XL-004 (esperado true):', bodyText.includes('QA-XL-004'))
   console.log('SCRUM-894 — modal contiene PREQA-INT-B (esperado FALSE, qty_delivered=0):', /PREQA-INT-B/.test(bodyText))
 
   expect(bodyText, 'debe mostrar el item entregado completo 265').toContain('PREQA-VERIFY-265')
-  expect(bodyText, 'debe mostrar el item entregado completo LED').toContain('QA-LED-004')
+  expect(bodyText, 'debe mostrar el item entregado completo XL').toContain('QA-XL-004')
   expect(bodyText, 'NO debe mostrar el item con qty_delivered=0 (sin stock)').not.toMatch(/PREQA-INT-B/)
 })
 
@@ -158,7 +158,7 @@ test('SCRUM-914/894 — PDF real descargado: stage=por_despachar y mismos items 
   expect(text, 'el PDF debe decir Estado de la entrega: por_despachar').toMatch(/Estado de la entrega:\s*por_despachar/)
   expect(text).not.toMatch(/Estado de la entrega:\s*packing/)
   expect(text).toContain('PREQA-VERIFY-265')
-  expect(text).toContain('QA-LED-004')
+  expect(text).toContain('QA-XL-004')
   expect(text).not.toContain('PREQA-INT-B')
 })
 

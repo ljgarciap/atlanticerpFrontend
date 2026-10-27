@@ -31,12 +31,12 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     items: [
       {
         id: 100, catalog_product_id: 5, reference: 'REF-1', factory_reference: 'FAB-1',
-        description: 'Lámpara colgante', location: 'A1', qty_requested: 10, qty_reserved: 10,
+        description: 'Producto colgante', location: 'A1', qty_requested: 10, qty_reserved: 10,
         qty_picked: 10, qty_delivered: 0, shortage_reason: null,
       },
       {
         id: 101, catalog_product_id: 6, reference: 'REF-2', factory_reference: 'FAB-2',
-        description: 'Foco LED', location: 'B2', qty_requested: 3, qty_reserved: 3,
+        description: 'Foco XL', location: 'B2', qty_requested: 3, qty_reserved: 3,
         qty_picked: 3, qty_delivered: 0, shortage_reason: null,
       },
     ],
@@ -156,7 +156,7 @@ describe('RegisterDeliveryModal', () => {
         items: [
           {
             id: 200, catalog_product_id: 7, reference: 'REF-3', factory_reference: 'FAB-3',
-            description: 'Riel LED', location: 'C3', qty_requested: 8, qty_reserved: 6,
+            description: 'Riel XL', location: 'C3', qty_requested: 8, qty_reserved: 6,
             qty_picked: 6, qty_delivered: 0, shortage_reason: null,
           },
         ],

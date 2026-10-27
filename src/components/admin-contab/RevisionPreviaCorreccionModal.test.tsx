@@ -46,7 +46,7 @@ function makePreview(overrides: Partial<PreviewCorreccionResponse> = {}): Previe
     factura_preview: {
       order_number: 'PED-0055', cliente: 'Grupo Sensei', monto: 6200,
       subtotal: 5794.39, itbms: 405.61, total: 6200,
-      items: [{ descripcion: 'Luminaria LED', cantidad: 2, precio_unitario: 150, subtotal: 300 }],
+      items: [{ descripcion: 'Producto XL', cantidad: 2, precio_unitario: 150, subtotal: 300 }],
     },
     monto: 6200,
     requiere_aprobacion: false,
@@ -98,7 +98,7 @@ describe('RevisionPreviaCorreccionModal — REQ-489', () => {
     renderModal()
     await screen.findByText('F-0001')
     fireEvent.click(screen.getByText('notasCredito.correccion.verFacturaButton'))
-    expect(await screen.findByText('Luminaria LED')).toBeInTheDocument()
+    expect(await screen.findByText('Producto XL')).toBeInTheDocument()
     expect(screen.getByText(/6,200\.00/)).toBeInTheDocument()
   })
 

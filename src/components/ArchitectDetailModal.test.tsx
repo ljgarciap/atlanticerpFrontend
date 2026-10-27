@@ -29,7 +29,7 @@ const mockedApi = vi.mocked(ventasDisenoApi, true)
 function makeDetail(overrides: Partial<ArchitectDetail> = {}): ArchitectDetail {
   return {
     id: 1, name: 'Arq. Fernando Solís', phone: '6000-0000', email: 'fernando@example.com',
-    projects: [{ id: 10, sub_client: { id: 1, business_name: 'Sub Test' }, project: { id: 1, name: 'Torre Delta' }, stage: 'quote', amount: 5000 }],
+    projects: [{ id: 10, sub_client: { id: 1, business_name: 'Sub Test' }, project: { id: 1, name: 'Proyecto Alfa' }, stage: 'quote', amount: 5000 }],
     ...overrides,
   }
 }
@@ -56,7 +56,7 @@ describe('ArchitectDetailModal', () => {
     expect(await screen.findByText('Arq. Fernando Solís')).toBeInTheDocument()
     expect(screen.getByText('6000-0000')).toBeInTheDocument()
     expect(screen.getByText('fernando@example.com')).toBeInTheDocument()
-    expect(screen.getByText('Torre Delta')).toBeInTheDocument()
+    expect(screen.getByText('Proyecto Alfa')).toBeInTheDocument()
   })
 
   it('sin proyectos asociados muestra el estado vacío', async () => {

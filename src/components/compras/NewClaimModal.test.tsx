@@ -28,7 +28,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderDetail {
   return {
-    id: 13, provider_id: 1, provider_name: 'LightCorp', status: 'recibido',
+    id: 13, provider_id: 1, provider_name: 'Proveedor Demo A', status: 'recibido',
     modality: 'directo', requires_primary_approval: false, currency: 'USD',
     total_amount: 100, created_by: 1, created_at: '2026-08-01T00:00:00Z',
     shipping_type: null, shipping_cost: null, estimated_arrival_date: null,
@@ -37,7 +37,7 @@ function makeOrder(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrderD
     container_number: null, carrier: null, approved_at: null,
     pending_amount_change: null, amount_change_requested_by: null, notes: null,
     lines: [
-      { id: 501, catalog_product_id: 1, description: 'Candelabro Cristal Imperial', quantity: 5, unit_cost: 45, subtotal: 225, project_id: null, project_name: null },
+      { id: 501, catalog_product_id: 1, description: 'Modelo Cristal Imperial', quantity: 5, unit_cost: 45, subtotal: 225, project_id: null, project_name: null },
     ],
     ...overrides,
   } as unknown as PurchaseOrderDetail
@@ -59,7 +59,7 @@ beforeEach(() => {
 describe('NewClaimModal (SCRUM-260)', () => {
   it('muestra "De X unidades pedidas" y calcula el Monto en disputa al declarar unidades afectadas', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
-      data: [{ id: 13, provider_name: 'LightCorp' }],
+      data: [{ id: 13, provider_name: 'Proveedor Demo A' }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     } as never)
     mockedComprasApi.orders.get.mockResolvedValue(makeOrder())
@@ -67,10 +67,10 @@ describe('NewClaimModal (SCRUM-260)', () => {
     renderModal()
 
     fireEvent.change(screen.getByPlaceholderText('compras:claims.new.searchOrder'), { target: { value: '13' } })
-    await waitFor(() => expect(screen.getByText(/LightCorp/)).toBeInTheDocument())
-    fireEvent.click(screen.getByText(/LightCorp/))
+    await waitFor(() => expect(screen.getByText(/Proveedor Demo A/)).toBeInTheDocument())
+    fireEvent.click(screen.getByText(/Proveedor Demo A/))
 
-    await waitFor(() => expect(screen.getByText('Candelabro Cristal Imperial')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Modelo Cristal Imperial')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('checkbox'))
 
     // Default affected quantity is '1' as soon as the checkbox is checked.
@@ -84,7 +84,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
 
   it('"Tipo de resolución" es un desplegable con las 5 opciones fijas, no texto libre', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
-      data: [{ id: 13, provider_name: 'LightCorp' }],
+      data: [{ id: 13, provider_name: 'Proveedor Demo A' }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     } as never)
     mockedComprasApi.orders.get.mockResolvedValue(makeOrder())
@@ -93,9 +93,9 @@ describe('NewClaimModal (SCRUM-260)', () => {
     renderModal()
 
     fireEvent.change(screen.getByPlaceholderText('compras:claims.new.searchOrder'), { target: { value: '13' } })
-    await waitFor(() => expect(screen.getByText(/LightCorp/)).toBeInTheDocument())
-    fireEvent.click(screen.getByText(/LightCorp/))
-    await waitFor(() => expect(screen.getByText('Candelabro Cristal Imperial')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Proveedor Demo A/)).toBeInTheDocument())
+    fireEvent.click(screen.getByText(/Proveedor Demo A/))
+    await waitFor(() => expect(screen.getByText('Modelo Cristal Imperial')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('checkbox'))
 
     const select = screen.getByText('compras:claims.new.expectedResolutionPlaceholder').closest('select')
@@ -116,7 +116,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
   // canSubmit solo chequeaba > 0). Ahora debe bloquear el guardado y mostrar el mensaje real.
   it('rebote 2026-08-12 — no permite guardar con unidades afectadas por encima de lo pedido', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
-      data: [{ id: 13, provider_name: 'LightCorp' }],
+      data: [{ id: 13, provider_name: 'Proveedor Demo A' }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     } as never)
     mockedComprasApi.orders.get.mockResolvedValue(makeOrder())
@@ -124,9 +124,9 @@ describe('NewClaimModal (SCRUM-260)', () => {
     renderModal()
 
     fireEvent.change(screen.getByPlaceholderText('compras:claims.new.searchOrder'), { target: { value: '13' } })
-    await waitFor(() => expect(screen.getByText(/LightCorp/)).toBeInTheDocument())
-    fireEvent.click(screen.getByText(/LightCorp/))
-    await waitFor(() => expect(screen.getByText('Candelabro Cristal Imperial')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Proveedor Demo A/)).toBeInTheDocument())
+    fireEvent.click(screen.getByText(/Proveedor Demo A/))
+    await waitFor(() => expect(screen.getByText('Modelo Cristal Imperial')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('checkbox'))
 
     const qtyInput = screen.getByDisplayValue('1')
@@ -139,7 +139,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
 
   it('rebote 2026-08-12 — una cantidad dentro del máximo permite guardar con normalidad', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
-      data: [{ id: 13, provider_name: 'LightCorp' }],
+      data: [{ id: 13, provider_name: 'Proveedor Demo A' }],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     } as never)
     mockedComprasApi.orders.get.mockResolvedValue(makeOrder())
@@ -147,9 +147,9 @@ describe('NewClaimModal (SCRUM-260)', () => {
     renderModal()
 
     fireEvent.change(screen.getByPlaceholderText('compras:claims.new.searchOrder'), { target: { value: '13' } })
-    await waitFor(() => expect(screen.getByText(/LightCorp/)).toBeInTheDocument())
-    fireEvent.click(screen.getByText(/LightCorp/))
-    await waitFor(() => expect(screen.getByText('Candelabro Cristal Imperial')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Proveedor Demo A/)).toBeInTheDocument())
+    fireEvent.click(screen.getByText(/Proveedor Demo A/))
+    await waitFor(() => expect(screen.getByText('Modelo Cristal Imperial')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('checkbox'))
 
     const qtyInput = screen.getByDisplayValue('1')
@@ -165,7 +165,7 @@ describe('NewClaimModal (SCRUM-260)', () => {
   it('rebote 2026-08-12 — el listado de resultados de la búsqueda de orden permite scroll en vez de recortarse', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
       data: [
-        { id: 13, provider_name: 'LightCorp' },
+        { id: 13, provider_name: 'Proveedor Demo A' },
         { id: 14, provider_name: 'QA Prov Beta' },
       ],
       meta: { total: 2, per_page: 5, current_page: 1, last_page: 1 },
@@ -174,9 +174,9 @@ describe('NewClaimModal (SCRUM-260)', () => {
     renderModal()
 
     fireEvent.change(screen.getByPlaceholderText('compras:claims.new.searchOrder'), { target: { value: 'a' } })
-    await waitFor(() => expect(screen.getByText(/LightCorp/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Proveedor Demo A/)).toBeInTheDocument())
 
-    const list = screen.getByText(/LightCorp/).closest('ul')
+    const list = screen.getByText(/Proveedor Demo A/).closest('ul')
     expect(list).not.toBeNull()
     expect(list?.className).toMatch(/overflow-y-auto/)
     expect(list?.className).not.toMatch(/overflow-hidden/)

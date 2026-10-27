@@ -50,14 +50,14 @@ describe('KardexPage', () => {
       data: [
         {
           id: 1, fecha: '2026-07-21T10:00:00Z',
-          producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+          producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
           bodega: 'Bodega Central', tipo: 'Entrada', cantidad: 20,
           referencia: 'Orden #5 recibida', realizado_por: 'Sistema',
           saldo_inicial: 0, saldo_resultante: 20,
         },
         {
           id: 2, fecha: '2026-07-21T11:00:00Z',
-          producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Candelabro' },
+          producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
           bodega: 'Bodega Central', tipo: 'Salida', cantidad: -8,
           referencia: 'Pedido #12 despachado', realizado_por: 'Jorge P.',
           saldo_inicial: 20, saldo_resultante: 12,

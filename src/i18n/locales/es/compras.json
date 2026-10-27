@@ -222,8 +222,7 @@
         "iluminacion_exterior": "Iluminación Exterior",
         "lamparas_piso_mesa": "Lámparas de Piso y Mesa",
         "iluminacion_empotrada": "Iluminación Empotrada",
-        "bombillos": "Bombillos",
-        "LAMPARAS": "Lámparas"
+        "bombillos": "Bombillos"
       },
       "rotation": "Rotación esperada",
       "rotations": {
@@ -854,7 +853,7 @@
     },
     "families": {
       "title": "Familias",
-      "subtitle": "Conjuntos de productos que se instalan/venden juntos para armar una sola lámpara o sistema — la misma lógica de \"familias\" que se usa en Nueva Cotización (Ventas & Diseño).",
+      "subtitle": "Conjuntos de productos que se instalan/venden juntos para armar un solo producto o sistema — la misma lógica de \"familias\" que se usa en Nueva Cotización (Ventas & Diseño).",
       "productCount": "{{count}} producto(s)",
       "totalValue": "Valor total",
       "totalValueLabel": "Valor total (costo × stock)",

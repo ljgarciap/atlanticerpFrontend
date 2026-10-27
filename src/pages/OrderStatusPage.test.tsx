@@ -55,7 +55,7 @@ function detail(overrides: Partial<OrderStatusDetail> = {}): OrderStatusDetail {
     telefono:      '6000-1234',
     fecha_estatus: '2026-07-23',
     items: [
-      { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Lámpara colgante', imagen: null, solicitada: 10, entregado: 4, pendiente: 6 },
+      { catalog_product_id: 7, reference: 'REF-100', factory_reference: 'FAB-9001', description: 'Producto colgante', imagen: null, solicitada: 10, entregado: 4, pendiente: 6 },
     ],
     ...overrides,
   }

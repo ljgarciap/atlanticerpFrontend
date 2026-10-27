@@ -63,7 +63,7 @@ function mockAuthState(permissions: string[]) {
 
 function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrderSummary {
   return {
-    id: 42, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Ana',
+    id: 42, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: null, origin_module: null, created_by_name: 'Ana',
     status: 'ordenado', next_status: 'en_transito', is_critical: false, modality: 'directo',
     shipping_type: 'maritimo', shipping_cost: null,
     estimated_arrival_date: '2026-08-01', requires_primary_approval: false,
@@ -87,7 +87,7 @@ function makeDetail(overrides: Partial<PurchaseOrderDetail> = {}): PurchaseOrder
     container_number: null, carrier: null, approved_at: null,
     pending_amount_change: null, amount_change_requested_by: null, notes: null,
     lines: [{
-      id: 1, catalog_product_id: 5, reference: 'REF-1', factory_reference: null, description: 'Lámpara LED',
+      id: 1, catalog_product_id: 5, reference: 'REF-1', factory_reference: null, description: 'Producto XL',
       quantity: 2, unit_cost: 150, subtotal: 300, additional_cost_percent: null,
       additional_cost_amount: null, additional_cost_type: null,
       sales_project_id: null, sales_project_name: null,
@@ -131,7 +131,7 @@ describe('OrderDetailPage', () => {
     // Proveedores", ahora ese panel está detrás de un modal.
     expect(screen.getByText((_, el) => el?.tagName === 'DIV' && el.textContent === 'compras:newOrder.lines.total: $500.00')).toBeInTheDocument()
     expect(screen.getByText('$300.00')).toBeInTheDocument() // subtotal de la línea
-    expect(screen.getByText('Lámpara LED')).toBeInTheDocument()
+    expect(screen.getByText('Producto XL')).toBeInTheDocument()
 
     // SCRUM-736 — "Pagos a Proveedores" ahora es un modal separado; al abrirlo, el mismo saldo
     // pendiente ($500.00, sin pagos registrados) aparece dentro del panel.
@@ -145,7 +145,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       total_amount: 61329.50, payable_total: 61329.50, shipping_type: 'maritimo', shipping_cost: 2500.75,
       lines: [{
-        id: 1, catalog_product_id: 5, reference: 'REF-1', factory_reference: null, description: 'Lámpara LED',
+        id: 1, catalog_product_id: 5, reference: 'REF-1', factory_reference: null, description: 'Producto XL',
         quantity: 5, unit_cost: 12345.5, subtotal: 61727.5, additional_cost_percent: null,
         additional_cost_amount: null, additional_cost_type: null,
         sales_project_id: null, sales_project_name: null,
@@ -187,7 +187,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       lines: [{
         id: 1, catalog_product_id: 5, reference: 'PUB-REF-1', factory_reference: 'FAB-REF-1',
-        description: 'Lámpara LED', quantity: 2, unit_cost: 150, subtotal: 300,
+        description: 'Producto XL', quantity: 2, unit_cost: 150, subtotal: 300,
         additional_cost_percent: null, additional_cost_amount: null, additional_cost_type: null,
         sales_project_id: null, sales_project_name: null,
         received_quantity: 0, reception_status: 'pendiente',
@@ -195,7 +195,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:newOrder.lines.factoryRef')).toBeInTheDocument()
     expect(screen.getByText('compras:newOrder.lines.publicRef')).toBeInTheDocument()
     expect(screen.getByText('FAB-REF-1')).toBeInTheDocument()
@@ -206,7 +206,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       lines: [{
         id: 1, catalog_product_id: 5, reference: 'PUB-REF-2', factory_reference: null,
-        description: 'Lámpara LED', quantity: 2, unit_cost: 150, subtotal: 300,
+        description: 'Producto XL', quantity: 2, unit_cost: 150, subtotal: 300,
         additional_cost_percent: null, additional_cost_amount: null, additional_cost_type: null,
         sales_project_id: null, sales_project_name: null,
         received_quantity: 0, reception_status: 'pendiente',
@@ -214,7 +214,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     // "—" también aparece en "Fecha de pago" (last_payment_date null en el fixture) — se acota la
     // aserción a la fila de la línea para confirmar que la celda de Ref. fábrica específicamente
     // (no cualquier "—" del DOM) muestra el placeholder.
@@ -228,7 +228,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.advance.mockResolvedValue(makeDetail({ status: 'en_transito' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.actions.advanceTo'))
 
     await waitFor(() => expect(mockedComprasApi.orders.advance).toHaveBeenCalledWith(42))
@@ -240,7 +240,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.edit')).not.toBeInTheDocument()
   })
 
@@ -250,7 +250,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.edit')).toBeInTheDocument()
   })
 
@@ -261,7 +261,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:newOrder.actions.approve')).toBeInTheDocument()
     expect(screen.getByText('compras:orders.actions.advanceTo').closest('button')).toBeDisabled()
   })
@@ -274,7 +274,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.approve.mockResolvedValue(makeDetail({ approved_by: 9 }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.actions.approve'))
 
     await waitFor(() => expect(mockedComprasApi.orders.approve).toHaveBeenCalledWith(42))
@@ -288,7 +288,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:newOrder.actions.approve')).not.toBeInTheDocument()
   })
 
@@ -300,7 +300,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.advanceTo')).toBeNull()
     expect(screen.queryByText('compras:orders.actions.edit')).toBeNull()
     expect(screen.queryByText('compras:orders.actions.confirmPendingReceiptsCta')).toBeNull()
@@ -319,7 +319,7 @@ describe('OrderDetailPage', () => {
     })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.actions.advanceTo'))
 
     expect(await screen.findByText('Esta orden requiere la aprobación del aprobador configurado antes de avanzar.')).toBeInTheDocument()
@@ -331,7 +331,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.advance.mockRejectedValue(new Error('network down'))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.actions.advanceTo'))
 
     expect(await screen.findByText('compras:orders.errors.advanceGeneric')).toBeInTheDocument()
@@ -346,7 +346,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: 'en_aduana' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.detail.pendingRemainder')).toBeInTheDocument()
   })
 
@@ -354,7 +354,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: null }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.detail.pendingRemainder')).toBeNull()
   })
 
@@ -370,7 +370,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     const advanceButton = screen.getByText('compras:orders.actions.advanceTo').closest('button')!
     expect(advanceButton).toBeDisabled()
 
@@ -386,7 +386,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.advanceTo').closest('button')).not.toBeDisabled()
   })
 
@@ -400,7 +400,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.errors.advanceGeneric')).toBeNull()
   })
 })
@@ -415,7 +415,7 @@ describe('OrderDetailPage — avance del remanente (SCRUM-208, rediseño 2026-08
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: null }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.advanceRemainderCta')).toBeNull()
     expect(screen.queryByText(/compras:orders.actions.advanceRemainderTo/)).toBeNull()
   })
@@ -424,7 +424,7 @@ describe('OrderDetailPage — avance del remanente (SCRUM-208, rediseño 2026-08
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: 'ordenado' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.advanceRemainderCta')).toBeInTheDocument()
   })
 
@@ -434,7 +434,7 @@ describe('OrderDetailPage — avance del remanente (SCRUM-208, rediseño 2026-08
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.advanceRemainderTo')).toBeInTheDocument()
     expect(screen.queryByText('compras:orders.actions.advanceRemainderCta')).toBeNull()
   })
@@ -470,7 +470,7 @@ describe('OrderDetailPage — confirmar pendientes a Inventario (SCRUM-208, redi
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: null }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.confirmPendingReceiptsCta')).toBeNull()
   })
 
@@ -478,7 +478,7 @@ describe('OrderDetailPage — confirmar pendientes a Inventario (SCRUM-208, redi
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ pending_remainder_status: 'ordenado' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.actions.confirmPendingReceiptsCta')).toBeInTheDocument()
     expect(screen.getByText('compras:orders.actions.advanceRemainderCta')).toBeInTheDocument()
   })
@@ -515,7 +515,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.status.pendienteLiquidarDirecto')).toBeInTheDocument()
     expect(screen.queryByText('compras:orders.status.pendiente_liquidar')).toBeNull()
   })
@@ -526,7 +526,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.status.pendienteLiquidarZonaLibre')).toBeInTheDocument()
   })
 
@@ -546,7 +546,7 @@ describe('OrderDetailPage', () => {
     })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:newOrder.actions.approve'))
 
     expect(await screen.findByText('Solo el aprobador configurado puede aprobar esta orden.')).toBeInTheDocument()
@@ -558,7 +558,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ modality: 'directo' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.detail.liquidationAgency')).not.toBeInTheDocument()
   })
 
@@ -577,7 +577,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.detail.liquidationAgencyNone')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('compras:orders.actions.liquidate'))
@@ -600,7 +600,7 @@ describe('OrderDetailPage', () => {
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.actions.liquidate'))
     fireEvent.click(screen.getByText('compras:orders.detail.newAgency'))
     fireEvent.change(screen.getByPlaceholderText('compras:orders.detail.newAgencyPlaceholder'), { target: { value: 'Agencia Nueva' } })
@@ -617,7 +617,7 @@ describe('OrderDetailPage', () => {
     mockedComprasApi.documents.list.mockResolvedValue({ data: [] })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(await screen.findByText('compras:orders.detail.providerConfirmation.empty')).toBeInTheDocument()
     expect(screen.queryByText('compras:orders.detail.providerConfirmation.viewDocument')).not.toBeInTheDocument()
   })
@@ -629,7 +629,7 @@ describe('OrderDetailPage', () => {
     })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Lámpara LED')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     const link = await screen.findByText('compras:orders.detail.providerConfirmation.viewDocument')
     expect(link.closest('a')).toHaveAttribute('href', 'https://s3/confirmacion.pdf')
     expect(screen.getByText('compras:logistics.providerConfirmation.validate')).toBeInTheDocument()
@@ -650,7 +650,7 @@ describe('OrderDetailPage', () => {
     renderPage()
 
     await waitFor(() => expect(screen.getByText('compras:orders.detail.title 42')).toBeInTheDocument())
-    expect(screen.getByText('Lámpara LED')).toBeInTheDocument()
+    expect(screen.getByText('Producto XL')).toBeInTheDocument()
     expect(screen.queryByText('compras:newOrder.lines.unitCost')).toBeNull()
     expect(screen.queryByText('compras:newOrder.lines.subtotal')).toBeNull()
     expect(screen.queryByText(/compras:newOrder\.lines\.total:/)).toBeNull()

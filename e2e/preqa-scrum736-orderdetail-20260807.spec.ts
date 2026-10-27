@@ -59,7 +59,7 @@ $stamp = ${stamp};
 $provLocal = \\App\\Modules\\Compras\\Models\\Provider::create(['name' => "PreQA736 Prov Local {$stamp}", 'currency' => 'USD', 'origin' => 'local', 'category' => 'locales']);
 $provIntl = \\App\\Modules\\Compras\\Models\\Provider::create(['name' => "PreQA736 Prov Intl {$stamp}", 'currency' => 'USD', 'origin' => 'internacional', 'category' => 'europa']);
 
-$prod1 = \\App\\Modules\\VentasDiseno\\Models\\CatalogProduct::create(['reference' => "PREQA736-REF1-{$stamp}", 'factory_reference' => "PREQA736-FAB1-{$stamp}", 'description' => 'PreQA736 Lampara Normal', 'price_full' => 100, 'cost' => 50, 'is_active' => true]);
+$prod1 = \\App\\Modules\\VentasDiseno\\Models\\CatalogProduct::create(['reference' => "PREQA736-REF1-{$stamp}", 'factory_reference' => "PREQA736-FAB1-{$stamp}", 'description' => 'PreQA736 Producto Normal', 'price_full' => 100, 'cost' => 50, 'is_active' => true]);
 $prodDoomed = \\App\\Modules\\VentasDiseno\\Models\\CatalogProduct::create(['reference' => "PREQA736-DOOMED-{$stamp}", 'factory_reference' => "PREQA736-DOOMED-FAB-{$stamp}", 'description' => 'PreQA736 Producto A Eliminar', 'price_full' => 75, 'cost' => 40, 'is_active' => true]);
 
 $orderA = \\App\\Modules\\Compras\\Models\\PurchaseOrder::create(['provider_id' => $provLocal->id, 'created_by' => $owner->id, 'status' => 'en_transito_local', 'status_changed_at' => now(), 'modality' => 'zona_libre', 'shipping_type' => 'maritimo', 'who_pays_shipping' => 'cliente', 'total_amount' => 800, 'currency' => 'USD', 'requires_primary_approval' => false, 'ordenado_at' => now()->subDays(3), 'en_transito_local_at' => now()]);

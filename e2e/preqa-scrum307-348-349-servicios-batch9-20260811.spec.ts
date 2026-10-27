@@ -57,10 +57,10 @@ test('SCRUM-348 RN1/RN2 — precarga de secciones 1-2 en Hoja de Reclamo (ticket
   await page.screenshot({ path: 'test-results/scrum348-precarga.png' })
 
   // Sección 1 — datos del reclamante, auto-precargados del ticket
-  await expect(modal.getByText('Super 99', { exact: false }).first()).toBeVisible()
+  await expect(modal.getByText('Sitio Demo 08', { exact: false }).first()).toBeVisible()
   // Sección 2 — producto reclamado, auto-precargado de ticket_products
   await expect(modal.getByText('Philips', { exact: false })).toBeVisible()
-  await expect(modal.getByText('LED-2026', { exact: false })).toBeVisible()
+  await expect(modal.getByText('XL-2026', { exact: false })).toBeVisible()
   await expect(modal.getByText(/Cant\. reclamo.*10/)).toBeVisible()
 
   // RN5 — ya completada, campos de captura bloqueados sin excepción de rol (Lider Servicios = superadmin)

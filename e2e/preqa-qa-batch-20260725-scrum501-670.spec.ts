@@ -23,8 +23,8 @@ test('SCRUM-501 — Kanban Pedidos muestra los pedidos sembrados en sus etapas r
   const body = page.locator('body')
   await expect(body).toContainText('Residencial Las Brisas')
   await expect(body).toContainText('Torre Marina Bahía')
-  await expect(body).toContainText('Local Comercial Multiplaza')
-  await expect(body).toContainText('Restaurante Costa del Este')
+  await expect(body).toContainText('Local Comercial Demo')
+  await expect(body).toContainText('Restaurante Demo')
 
   await page.screenshot({ path: 'e2e/.tmp/scrum501-pedidos-board.png', fullPage: true })
   expect(errors).toEqual([])

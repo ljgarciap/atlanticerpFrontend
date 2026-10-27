@@ -53,7 +53,7 @@ function mockAuthState(permissions: string[] | null = null) {
 
 function makeSummary(overrides: Partial<PurchaseOrderSummary> = {}): PurchaseOrderSummary {
   return {
-    id: 1, provider_id: 1, provider_name: 'LightCorp', provider_origin: null, origin_module: null, created_by_name: 'Ana',
+    id: 1, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: null, origin_module: null, created_by_name: 'Ana',
     status: 'por_aprobar', next_status: 'ordenado', is_critical: false, modality: 'directo',
     // REQ-140 (SCRUM-203) — "Tipo de envío"/"Costo de envío"/"Fecha de pago", ausentes de la
     // tabla principal hasta este ticket (gap real vs. mockup 2A/Excel de requerimientos).
@@ -98,7 +98,7 @@ beforeEach(() => {
 describe('OrdersPage — SCRUM-949 buscador con autocompletado', () => {
   it('elegir una sugerencia (proveedor o proyecto) filtra la tabla sin clic en Buscar', async () => {
     mockedComprasApi.orders.list.mockResolvedValue({
-      data: [makeSummary({ provider_name: 'LightCorp', sales_project_summary: 'Torre Azul' })],
+      data: [makeSummary({ provider_name: 'Proveedor Demo A', sales_project_summary: 'Torre Azul' })],
       meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
       filters: { creators: [] },
     })
@@ -112,10 +112,10 @@ describe('OrdersPage — SCRUM-949 buscador con autocompletado', () => {
       expect.objectContaining({ search: 'Light', per_page: 8 }),
     ))
     const listbox = await screen.findByRole('listbox')
-    fireEvent.mouseDown(within(listbox).getByText('LightCorp'))
+    fireEvent.mouseDown(within(listbox).getByText('Proveedor Demo A'))
 
     await waitFor(() => expect(mockedComprasApi.orders.list).toHaveBeenLastCalledWith(
-      expect.objectContaining({ search: 'LightCorp', page: 1 }),
+      expect.objectContaining({ search: 'Proveedor Demo A', page: 1 }),
     ))
   })
 })
@@ -129,7 +129,7 @@ describe('OrdersPage — columna "Proyecto asignado" (REQ-140/146)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.table.projectNone')).toBeInTheDocument()
   })
 
@@ -142,7 +142,7 @@ describe('OrdersPage — columna "Proyecto asignado" (REQ-140/146)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('Torre Norte')).toBeInTheDocument()
     expect(screen.queryByText('compras:orders.table.projectNone')).not.toBeInTheDocument()
   })
@@ -158,7 +158,7 @@ describe('OrdersPage — columna "Proyecto asignado" (REQ-140/146)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.table.projectMultiple 3')).toBeInTheDocument()
   })
 
@@ -198,7 +198,7 @@ describe('OrdersPage — columna "Proyecto asignado" (REQ-140/146)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:orders.table.projectMultiple 2'))
 
     expect(mockNavigate).not.toHaveBeenCalled()
@@ -228,7 +228,7 @@ describe('OrdersPage — columnas faltantes de REQ-140 (SCRUM-203)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:newOrder.shipping.typeAereo')).toBeInTheDocument()
     expect(screen.getByText('María G.')).toBeInTheDocument()
     expect(screen.getByText('$850.00')).toBeInTheDocument()
@@ -247,7 +247,7 @@ describe('OrdersPage — columnas faltantes de REQ-140 (SCRUM-203)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     // 4 columnas nullable en esta orden (tipo de envío, costo de envío, fecha de pago,
     // responsable) — todas caen al mismo placeholder "—", consistente con el mockup.
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(4)
@@ -270,7 +270,7 @@ describe('OrdersPage — badge de Origen: Servicios (Pre-QA REQ-274 RN3, SCRUM-3
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.originServicios')).toBeInTheDocument()
   })
 
@@ -283,7 +283,7 @@ describe('OrdersPage — badge de Origen: Servicios (Pre-QA REQ-274 RN3, SCRUM-3
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.originServicios')).not.toBeInTheDocument()
   })
 })
@@ -328,7 +328,7 @@ describe('OrdersPage — etiqueta de estado por modalidad (SCRUM-204)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     // El <select> de filtro sigue usando el texto genérico para "todos los estados posibles" —
     // solo la celda de la fila (una orden puntual, con modality real) debe usar la etiqueta
     // derivada. queryAllByText en vez de getByText porque la clave genérica también existe como
@@ -345,7 +345,7 @@ describe('OrdersPage — etiqueta de estado por modalidad (SCRUM-204)', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.status.pendienteLiquidarZonaLibre')).toBeInTheDocument()
   })
 })
@@ -361,7 +361,7 @@ describe('OrdersPage — "+ Nueva orden" exige compras.write (SCRUM-773 CA1)', (
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.actions.create')).not.toBeInTheDocument()
   })
 

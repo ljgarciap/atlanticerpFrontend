@@ -43,10 +43,10 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeOrderProducts(overrides: Partial<GoodsReceiptOrderProducts> = {}): GoodsReceiptOrderProducts {
   return {
-    id: 10, provider_id: 1, provider_name: 'LightCorp', provider_origin: 'internacional',
+    id: 10, provider_id: 1, provider_name: 'Proveedor Demo A', provider_origin: 'internacional',
     status: 'en_aduana',
     products: [
-      { catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27', unit_cost: 10, expected_quantity: 120, remaining: 120 },
+      { catalog_product_id: 5, reference: 'REF-1', description: 'Artículo E27', unit_cost: 10, expected_quantity: 120, remaining: 120 },
     ],
     ...overrides,
   }
@@ -54,12 +54,12 @@ function makeOrderProducts(overrides: Partial<GoodsReceiptOrderProducts> = {}): 
 
 function makeReceipt(overrides: Partial<GoodsReceiptDetail> = {}): GoodsReceiptDetail {
   return {
-    id: 1, purchase_order_id: 10, provider_name: 'LightCorp', order_status: 'en_aduana',
+    id: 1, purchase_order_id: 10, provider_name: 'Proveedor Demo A', order_status: 'en_aduana',
     lines_count: 1, total_units: 10, editable: true, created_at: '2026-07-19T00:00:00Z',
     invoice_storage_key: null, invoice_original_filename: null,
     import_cost_total: null, freight_total: null, handling_total: null, other_costs_total: null,
     lines: [{
-      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Bombillo E27',
+      id: 1, catalog_product_id: 5, reference: 'REF-1', description: 'Artículo E27',
       quantity: 10, unit_cost: 10, itbms_amount: null, import_cost_share: null, freight_cost_share: null, handling_cost_share: null, other_cost_share: null, cost_total: 100, warehouse_id: 1, warehouse_name: 'Atlantic',
       is_pending: true,
     }],
@@ -100,30 +100,30 @@ beforeEach(() => {
 
 describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
   it('al elegir una orden, precarga los productos esperados con su cantidad completa', async () => {
-    const eligible: GoodsReceiptEligibleOrder[] = [{ id: 10, provider_name: 'LightCorp', status: 'en_aduana' }]
+    const eligible: GoodsReceiptEligibleOrder[] = [{ id: 10, provider_name: 'Proveedor Demo A', status: 'en_aduana' }]
     mockedComprasApi.goodsReceipts.eligibleOrders.mockResolvedValue({ data: eligible })
     mockedComprasApi.goodsReceipts.orderProducts.mockResolvedValue(makeOrderProducts())
 
     renderCreate()
 
     fireEvent.change(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder'), { target: { value: '10' } })
-    fireEvent.click(await screen.findByText(/#10 — LightCorp/))
+    fireEvent.click(await screen.findByText(/#10 — Proveedor Demo A/))
 
-    expect(await screen.findByText('Bombillo E27')).toBeInTheDocument()
+    expect(await screen.findByText('Artículo E27')).toBeInTheDocument()
     expect(screen.getByDisplayValue('120')).toBeInTheDocument()
   })
 
   it('proveedor no local muestra los 4 campos de desglose y los envía al guardar', async () => {
     mockedComprasApi.goodsReceipts.eligibleOrders.mockResolvedValue({
-      data: [{ id: 10, provider_name: 'LightCorp', status: 'en_aduana' }],
+      data: [{ id: 10, provider_name: 'Proveedor Demo A', status: 'en_aduana' }],
     })
     mockedComprasApi.goodsReceipts.orderProducts.mockResolvedValue(makeOrderProducts())
     mockedComprasApi.goodsReceipts.create.mockResolvedValue(makeReceipt())
 
     renderCreate()
     fireEvent.change(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder'), { target: { value: '10' } })
-    fireEvent.click(await screen.findByText(/#10 — LightCorp/))
-    await screen.findByText('Bombillo E27')
+    fireEvent.click(await screen.findByText(/#10 — Proveedor Demo A/))
+    await screen.findByText('Artículo E27')
 
     fireEvent.change(screen.getByLabelText('compras:goodsReceipts.wizard.costing.freightTotal'), { target: { value: '300' } })
     fireEvent.change(screen.getByDisplayValue('120'), { target: { value: '20' } })
@@ -156,7 +156,7 @@ describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
 
   it('REQ-165 — entrega parcial muestra el modal y reenvía con el remainder status elegido', async () => {
     mockedComprasApi.goodsReceipts.eligibleOrders.mockResolvedValue({
-      data: [{ id: 10, provider_name: 'LightCorp', status: 'en_aduana' }],
+      data: [{ id: 10, provider_name: 'Proveedor Demo A', status: 'en_aduana' }],
     })
     mockedComprasApi.goodsReceipts.orderProducts.mockResolvedValue(makeOrderProducts())
     mockedComprasApi.goodsReceipts.create
@@ -165,8 +165,8 @@ describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
 
     renderCreate()
     fireEvent.change(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder'), { target: { value: '10' } })
-    fireEvent.click(await screen.findByText(/#10 — LightCorp/))
-    await screen.findByText('Bombillo E27')
+    fireEvent.click(await screen.findByText(/#10 — Proveedor Demo A/))
+    await screen.findByText('Artículo E27')
     fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } })
 
     fireEvent.click(screen.getByText('compras:goodsReceipts.wizard.actions.save'))
@@ -190,7 +190,7 @@ describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
     // etapas de envío (salió de origen/en tránsito/en aduana/en tránsito local), sin ninguna
     // opción para un remanente que todavía no salió del proveedor.
     mockedComprasApi.goodsReceipts.eligibleOrders.mockResolvedValue({
-      data: [{ id: 10, provider_name: 'LightCorp', status: 'en_aduana' }],
+      data: [{ id: 10, provider_name: 'Proveedor Demo A', status: 'en_aduana' }],
     })
     mockedComprasApi.goodsReceipts.orderProducts.mockResolvedValue(makeOrderProducts())
     mockedComprasApi.goodsReceipts.create
@@ -199,8 +199,8 @@ describe('GoodsReceiptWizardPage — crear (SCRUM-220→230)', () => {
 
     renderCreate()
     fireEvent.change(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder'), { target: { value: '10' } })
-    fireEvent.click(await screen.findByText(/#10 — LightCorp/))
-    await screen.findByText('Bombillo E27')
+    fireEvent.click(await screen.findByText(/#10 — Proveedor Demo A/))
+    await screen.findByText('Artículo E27')
     fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } })
     fireEvent.click(screen.getByText('compras:goodsReceipts.wizard.actions.save'))
     await screen.findByText('compras:goodsReceipts.wizard.partial.title')
@@ -229,7 +229,7 @@ describe('GoodsReceiptWizardPage — Paso 0, detección de factura (SCRUM-224)',
         matched_order_id: 10, matched_provider_id: 1,
         lines: [{ catalog_product_id: 5, quantity: 120, unit_cost: 10 }],
         unmatched_count: 0, confidence: 'alta',
-        detected_order_reference: '10', detected_provider_name: 'LightCorp',
+        detected_order_reference: '10', detected_provider_name: 'Proveedor Demo A',
       },
     })
 
@@ -241,14 +241,14 @@ describe('GoodsReceiptWizardPage — Paso 0, detección de factura (SCRUM-224)',
     fireEvent.click(screen.getByText('compras:goodsReceipts.wizard.invoice.detectButton'))
 
     // La orden se auto-selecciona: sus productos precargan (mismo efecto que elegirla a mano).
-    expect(await screen.findByText('Bombillo E27')).toBeInTheDocument()
+    expect(await screen.findByText('Artículo E27')).toBeInTheDocument()
 
     // El usuario decide que la detección se equivocó y presiona "Cambiar".
     fireEvent.click(screen.getByText('compras:goodsReceipts.wizard.order.change'))
 
     // Sin el guard por jobId, el efecto de auto-selección volvía a disparar apenas orderId
     // pasaba a null, dejando "Cambiar" sin efecto visible.
-    expect(screen.queryByText('Bombillo E27')).not.toBeInTheDocument()
+    expect(screen.queryByText('Artículo E27')).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText('compras:goodsReceipts.wizard.order.searchPlaceholder')).toBeInTheDocument()
   })
 
@@ -272,7 +272,7 @@ describe('GoodsReceiptWizardPage — Paso 0, detección de factura (SCRUM-224)',
     )
 
     // La orden ya está vinculada (viene de Logística) — sin necesidad de buscarla a mano.
-    expect(await screen.findByText('Bombillo E27')).toBeInTheDocument()
+    expect(await screen.findByText('Artículo E27')).toBeInTheDocument()
 
     // El input de archivo y el botón de detección deben seguir visibles y funcionales, sin
     // depender de pulsar "Cambiar" primero.
@@ -295,7 +295,7 @@ describe('GoodsReceiptWizardPage — corregir (REQ-167)', () => {
 
     renderEdit(1)
 
-    expect(await screen.findByText('Bombillo E27')).toBeInTheDocument()
+    expect(await screen.findByText('Artículo E27')).toBeInTheDocument()
     // quantity=10 y unit_cost=10 -> 2 inputs con el mismo valor mostrado.
     expect(screen.getAllByDisplayValue('10')).toHaveLength(2)
 

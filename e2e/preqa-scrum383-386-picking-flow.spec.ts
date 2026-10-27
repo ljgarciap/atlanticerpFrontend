@@ -73,12 +73,12 @@ test('SCRUM-383→386 — asignar picker, iniciar picking, completar la Hoja de 
 
   // SCRUM-385 (REQ-315) — 2 artículos reales del fixture, ordenados por ubicación por el backend
   // (A-01 antes que B-02) — no se reordena en frontend.
-  await expect(sheet).toContainText('Foco LED E2E')
-  await expect(sheet).toContainText('Lampara colgante E2E')
+  await expect(sheet).toContainText('Foco XL E2E')
+  await expect(sheet).toContainText('Producto colgante E2E')
   const rows = sheet.locator('[data-testid^="picking-row-"]')
   await expect(rows).toHaveCount(2)
   const firstRowText = await rows.nth(0).innerText()
-  expect(firstRowText).toContain('Foco LED E2E') // A-01 antes que B-02
+  expect(firstRowText).toContain('Foco XL E2E') // A-01 antes que B-02
 
   // Pre-QA 2026-07-27 — el gap de contrato original ("Ref. fábrica"/"Observación" nunca
   // implementadas en el frontend pese a que SCRUM-385 las pedía) se cerró: ambas columnas

@@ -42,7 +42,7 @@ test.beforeAll(async () => {
 
   await api.post(`/api/ventas-diseno/quotes/${seededQuoteId}/parts/${part.id}/items`, {
     headers: auth,
-    data: { reference: 'PREQA-ADHOC-1', description: 'Lámpara Preqa 849.6', quantity: 1, unit_price: 100 },
+    data: { reference: 'PREQA-ADHOC-1', description: 'Producto Preqa 849.6', quantity: 1, unit_price: 100 },
   })
 
   await api.dispose()

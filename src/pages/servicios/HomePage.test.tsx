@@ -322,14 +322,14 @@ describe('ServiciosHomePage', () => {
         count: 1,
         items: [{
           ticket_id: 30, numero: 'INS-2026-0030', cliente: 'Grupo Delta',
-          producto: { marca: 'Philips', referencia: 'LED-100', descripcion: null },
+          producto: { marca: 'Philips', referencia: 'XL-100', descripcion: null },
           solicitado_hace_dias: 5, llegada_estimada: null,
         }],
       },
     }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Philips · LED-100')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Philips · XL-100')).toBeInTheDocument())
     expect(screen.getByText('home.insumosPendientes.llegadaPorConfirmar')).toBeInTheDocument()
   })
 
@@ -341,7 +341,7 @@ describe('ServiciosHomePage', () => {
         count: 1,
         items: [{
           ticket_id: 30, numero: 'INS-2026-0030', cliente: 'Grupo Delta',
-          producto: { marca: 'Philips', referencia: 'LED-100', descripcion: null },
+          producto: { marca: 'Philips', referencia: 'XL-100', descripcion: null },
           solicitado_hace_dias: 5, llegada_estimada: null,
         }],
       },

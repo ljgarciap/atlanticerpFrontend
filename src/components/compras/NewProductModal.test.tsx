@@ -29,7 +29,7 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeMatch(overrides: Partial<ComprasCatalogProduct> = {}): ComprasCatalogProduct {
   return {
-    id: 1, reference: 'REF-1', factory_reference: null, name: 'Bombillo E27', description: 'Bombillo E27', brand: null,
+    id: 1, reference: 'REF-1', factory_reference: null, name: 'Artículo E27', description: 'Artículo E27', brand: null,
     photo_url: null, price_full: 20, cost: 12, stock_quantity: 5, reorder_point: null,
     ...overrides,
   }

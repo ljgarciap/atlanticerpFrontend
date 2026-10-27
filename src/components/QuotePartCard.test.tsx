@@ -31,7 +31,7 @@ const mockedApi = vi.mocked(ventasDisenoApi, true)
 function makeItem(overrides: Partial<QuoteItemRef> = {}): QuoteItemRef {
   return {
     id: 1, catalog_product_id: null, is_custom: true,
-    reference: 'REF-1', description: 'Lámpara', quantity: 2, unit_price: 100, cost: null,
+    reference: 'REF-1', description: 'Producto', quantity: 2, unit_price: 100, cost: null,
     price_type_override: null, discount_percent: null, effective_unit_price: 100, line_total: 200,
     stock_quantity: null, below_min_margin: false, photo_url: null,
     ...overrides,
@@ -121,7 +121,7 @@ describe('QuotePartCard', () => {
   it('muestra el catálogo completo al abrir la lupa, sin necesidad de tipear', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'ITEM-050', factory_reference: null, description: 'Producto colgante XL', brand: 'Marca Demo A', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
@@ -129,7 +129,7 @@ describe('QuotePartCard', () => {
     fireEvent.click(screen.getByText('ventasDiseno:catalog.searchButton'))
 
     await waitFor(() => expect(mockedApi.catalogProducts.search).toHaveBeenCalledWith(''))
-    expect(await screen.findByText('LAMP-050', { exact: false })).toBeInTheDocument()
+    expect(await screen.findByText('ITEM-050', { exact: false })).toBeInTheDocument()
   })
 
   // SCRUM-796 (secc. 6) — el backend ya no busca por heurística (FuzzySearchService,
@@ -138,16 +138,16 @@ describe('QuotePartCard', () => {
   it('busca en el catálogo por coincidencia exacta/parcial, sin banner de aproximados', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'ITEM-050', factory_reference: null, description: 'Producto colgante XL', brand: 'Marca Demo A', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.item.addItem'))
     fireEvent.click(screen.getByText('ventasDiseno:catalog.searchButton'))
-    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'LAMP-050' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'ITEM-050' } })
 
-    await waitFor(() => expect(mockedApi.catalogProducts.search).toHaveBeenCalledWith('LAMP-050'))
-    expect(await screen.findByText('LAMP-050', { exact: false })).toBeInTheDocument()
+    await waitFor(() => expect(mockedApi.catalogProducts.search).toHaveBeenCalledWith('ITEM-050'))
+    expect(await screen.findByText('ITEM-050', { exact: false })).toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:catalog.fuzzyBanner')).not.toBeInTheDocument()
   })
 
@@ -156,18 +156,18 @@ describe('QuotePartCard', () => {
   it('SCRUM-796 — escribir en Referencia dispara búsqueda dinámica (debounce) y autocompleta al elegir', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'ITEM-050', factory_reference: null, description: 'Producto colgante XL', brand: 'Marca Demo A', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.item.addItem'))
-    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.item.reference'), { target: { value: 'LAMP' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.item.reference'), { target: { value: 'ITEM' } })
 
     // No dispara en cada tecla — recién tras el debounce.
-    expect(mockedApi.catalogProducts.search).not.toHaveBeenCalledWith('LAMP')
-    await waitFor(() => expect(mockedApi.catalogProducts.search).toHaveBeenCalledWith('LAMP'), { timeout: 1000 })
+    expect(mockedApi.catalogProducts.search).not.toHaveBeenCalledWith('ITEM')
+    await waitFor(() => expect(mockedApi.catalogProducts.search).toHaveBeenCalledWith('ITEM'), { timeout: 1000 })
 
-    const row = await screen.findByText('LAMP-050', { exact: false })
+    const row = await screen.findByText('ITEM-050', { exact: false })
     expect(screen.getByText('10 disp.', { exact: false })).toBeInTheDocument()
     fireEvent.mouseDown(row)
 
@@ -182,18 +182,18 @@ describe('QuotePartCard', () => {
   it('selecciona un producto de catálogo, ve la ficha técnica y crea el ítem sin precio propio', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'ITEM-050', factory_reference: null, description: 'Producto colgante XL', brand: 'Marca Demo A', photo_url: null, price_full: 189.99, stock_quantity: 10 }],
     })
     mockedApi.quotes.parts.items.create.mockResolvedValue(makeItem({ id: 2, catalog_product_id: 9, is_custom: false }))
     renderCard(makePart({ items: [] }))
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.item.addItem'))
     fireEvent.click(screen.getByText('ventasDiseno:catalog.searchButton'))
-    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'lampara' } })
-    fireEvent.click(await screen.findByText('LAMP-050', { exact: false }))
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'producto' } })
+    fireEvent.click(await screen.findByText('ITEM-050', { exact: false }))
 
     // Ficha técnica (REQ-036 AC2): marca, disponible, precio — nunca costo.
-    expect(await screen.findByText(/Atlantic Home/)).toBeInTheDocument()
+    expect(await screen.findByText(/Marca Demo A/)).toBeInTheDocument()
     expect(screen.getByText('$189.99')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('ventasDiseno:catalog.selectProduct'))
@@ -211,7 +211,7 @@ describe('QuotePartCard', () => {
     renderCard(makePart({ items: [makeItem({ catalog_product_id: 9, is_custom: false })] }))
 
     const referenceInput = screen.getByDisplayValue('REF-1')
-    const descriptionInput = screen.getByDisplayValue('Lámpara')
+    const descriptionInput = screen.getByDisplayValue('Producto')
 
     expect(referenceInput).toBeDisabled()
     expect(descriptionInput).toBeDisabled()
@@ -455,7 +455,7 @@ describe('QuotePartCard', () => {
     fireEvent.click(screen.getByText('common:actions.save'))
 
     await waitFor(() => expect(mockedApi.quotes.parts.items.update).toHaveBeenCalledWith(1, 1, 1, {
-      reference: 'REF-1', description: 'Lámpara', quantity: 5, unit_price: 100, cost: null,
+      reference: 'REF-1', description: 'Producto', quantity: 5, unit_price: 100, cost: null,
       discount_percent: null, price_type_override: null,
     }))
   })
@@ -520,14 +520,14 @@ describe('QuotePartCard', () => {
   it('muestra alerta de stock insuficiente al agregar un ítem nuevo de catálogo', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'LAMP-050', factory_reference: null, description: 'Lámpara colgante LED', brand: 'Atlantic Home', photo_url: null, price_full: 189.99, stock_quantity: 3 }],
+      data: [{ id: 9, reference: 'ITEM-050', factory_reference: null, description: 'Producto colgante XL', brand: 'Marca Demo A', photo_url: null, price_full: 189.99, stock_quantity: 3 }],
     })
     renderCard(makePart({ items: [] }))
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.item.addItem'))
     fireEvent.click(screen.getByText('ventasDiseno:catalog.searchButton'))
-    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'lampara' } })
-    fireEvent.click(await screen.findByText('LAMP-050', { exact: false }))
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalog.searchPlaceholder'), { target: { value: 'producto' } })
+    fireEvent.click(await screen.findByText('ITEM-050', { exact: false }))
     fireEvent.click(screen.getByText('ventasDiseno:catalog.selectProduct'))
 
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.item.quantity'), { target: { value: '10' } })
@@ -552,7 +552,7 @@ describe('QuotePartCard', () => {
   it('el buscador de catálogo muestra la referencia pública aunque el producto tenga referencia de fábrica', async () => {
     mockedApi.catalogProducts.search.mockResolvedValue({
       fuzzy: false,
-      data: [{ id: 9, reference: 'ML-10156EWH', factory_reference: 'MIG_LNP002849', description: 'Lámpara', brand: null, photo_url: null, price_full: 10, stock_quantity: 10 }],
+      data: [{ id: 9, reference: 'ML-10156EWH', factory_reference: 'MIG_LNP002849', description: 'Producto', brand: null, photo_url: null, price_full: 10, stock_quantity: 10 }],
     })
     renderCard(makePart({ items: [] }))
 

@@ -67,7 +67,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
 function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
   return {
     id: 1, numero: 'INS-2026-0001', tipo: 'installation', subtipo: 'installation',
-    tipo_instalacion: 'internal', cliente: 'Grupo Delta', descripcion: 'Instalación de lámparas',
+    tipo_instalacion: 'internal', cliente: 'Grupo Delta', descripcion: 'Instalación de productos',
     estado: 'reported', internal_technician: { id: 5, first_name: 'Tecnico Servicios', last_name: 'Test' },
     quote_status: 'pending', quote_amount: null, inspection_report_status: 'pending',
     scheduled_at: null, created_at: '2026-08-01T10:00:00Z',

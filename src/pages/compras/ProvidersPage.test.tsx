@@ -28,8 +28,8 @@ const LIST_RESPONSE = {
   fuzzy: false,
   kpis: { total_providers: 2, average_rating: null, low_rating_count: 0, active_categories: 1, categories: ['china'] },
   data: [
-    { id: 1, name: 'LightCorp', category: 'china' as const, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: 'Wei Chen', rating: null, last_purchase_at: null },
-    { id: 2, name: 'Iluminex SA', category: null, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: '2026-07-14' },
+    { id: 1, name: 'Proveedor Demo A', category: 'china' as const, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: 'Wei Chen', rating: null, last_purchase_at: null },
+    { id: 2, name: 'Proveedor Demo B SA', category: null, origin: 'internacional' as const, currency: 'USD', is_active: true, contact_name: null, rating: null, last_purchase_at: '2026-07-14' },
   ],
   meta: { total: 2, per_page: 5, current_page: 1, last_page: 1 },
 }
@@ -51,13 +51,13 @@ beforeEach(() => {
 describe('ProvidersPage', () => {
   it('lista los proveedores con sus columnas', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
-    expect(screen.getByText('Iluminex SA')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
+    expect(screen.getByText('Proveedor Demo B SA')).toBeInTheDocument()
   })
 
   it('muestra "Sin calificar" y "Sin compras registradas aún" cuando corresponde', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     // 2 filas + el KPI "Calificación promedio" (también null) reusan la misma clave.
     expect(screen.getAllByText('compras:providers.table.notRated')).toHaveLength(3)
     expect(screen.getByText('compras:providers.table.noPurchases')).toBeInTheDocument()
@@ -66,7 +66,7 @@ describe('ProvidersPage', () => {
 
   it('muestra los 4 KPIs', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     expect(screen.getByText('compras:providers.kpis.total')).toBeInTheDocument()
     expect(screen.getByText('compras:providers.kpis.averageRating')).toBeInTheDocument()
     expect(screen.getByText('compras:providers.kpis.lowRating')).toBeInTheDocument()
@@ -75,13 +75,13 @@ describe('ProvidersPage', () => {
 
   it('busca por nombre y resetea a la página 1', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
 
-    fireEvent.change(screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder'), { target: { value: 'LightCorp' } })
+    fireEvent.change(screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder'), { target: { value: 'Proveedor Demo A' } })
     fireEvent.click(screen.getByText('common:actions.search'))
 
     await waitFor(() => expect(mockedComprasApi.providers.list).toHaveBeenLastCalledWith(
-      expect.objectContaining({ search: 'LightCorp', page: 1 }),
+      expect.objectContaining({ search: 'Proveedor Demo A', page: 1 }),
     ))
   })
 
@@ -89,7 +89,7 @@ describe('ProvidersPage', () => {
   // sugerencia, filtra la tabla sin acciones adicionales (sin clic en "Buscar").
   it('elegir una sugerencia del autocompletado filtra la tabla sin clic en Buscar', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
 
     const buscador = screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder')
     fireEvent.change(buscador, { target: { value: 'Light' } })
@@ -99,16 +99,16 @@ describe('ProvidersPage', () => {
       expect.objectContaining({ search: 'Light', per_page: 8 }),
     ))
 
-    fireEvent.mouseDown(await screen.findByText('LightCorp', { selector: 'li *, li' }))
+    fireEvent.mouseDown(await screen.findByText('Proveedor Demo A', { selector: 'li *, li' }))
 
     await waitFor(() => expect(mockedComprasApi.providers.list).toHaveBeenLastCalledWith(
-      expect.objectContaining({ search: 'LightCorp', page: 1 }),
+      expect.objectContaining({ search: 'Proveedor Demo A', page: 1 }),
     ))
   })
 
   it('sin coincidencias, el autocompletado muestra el estado de "sin resultados"', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
     mockedComprasApi.providers.list.mockResolvedValueOnce({ ...LIST_RESPONSE, data: [] })
 
     fireEvent.change(screen.getByPlaceholderText('compras:providers.filters.searchPlaceholder'), { target: { value: 'zzz' } })
@@ -118,7 +118,7 @@ describe('ProvidersPage', () => {
 
   it('el chip de calificación baja sincroniza con el filtro rating_range', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:providers.filters.lowRatingChip'))
 
@@ -129,7 +129,7 @@ describe('ProvidersPage', () => {
 
   it('abre el drawer de creación al hacer clic en "Agregar proveedor"', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:providers.actions.create'))
     expect(screen.getByText('compras:providerForm.titleCreate')).toBeInTheDocument()
@@ -139,14 +139,14 @@ describe('ProvidersPage', () => {
   // reemplaza Moneda, "Editar" pasa a "Ver detalle" y abre el modal de solo-lectura, no el drawer.
   it('muestra la columna Contacto y "Ver detalle" abre el modal de solo-lectura', async () => {
     mockedComprasApi.providers.get.mockResolvedValue({
-      id: 1, name: 'LightCorp', tax_id: null, category: 'china', origin: 'internacional', currency: 'USD',
+      id: 1, name: 'Proveedor Demo A', tax_id: null, category: 'china', origin: 'internacional', currency: 'USD',
       is_active: true, contact_name: 'Wei Chen', rating: null, last_purchase_at: null,
       whatsapp: null, phone: null, email: null, address: null, country: null,
       bank_name: null, bank_account_number: null, bank_swift: null, bank_beneficiary: null,
       bank_image: null,
     })
     renderPage()
-    await waitFor(() => expect(screen.getByText('LightCorp')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
 
     expect(screen.getByText('compras:providers.table.contact')).toBeInTheDocument()
     expect(screen.getByText('Wei Chen')).toBeInTheDocument()

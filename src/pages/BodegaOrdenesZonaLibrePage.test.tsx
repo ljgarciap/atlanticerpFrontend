@@ -260,12 +260,12 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     mockedApi.zonaLibre.requests.list.mockResolvedValue({ data: [makeRow({ id: 3, status: 'rechazada' })], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 } })
     const detail: ZonaLibreRequestDetail = {
       ...makeRow({ id: 3, status: 'rechazada' }),
-      notes: 'Entrega urgente para el cliente Hotel Riu.',
+      notes: 'Entrega urgente para el cliente Sitio Demo 02.',
       approved_by_name: null,
       rejected_by_name: 'Lider Compras',
       rejection_reason: 'Ya existe una orden similar en camino.',
       lines: [
-        { id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Bombillo LED', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 },
+        { id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Artículo XL', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 },
       ],
     }
     mockedApi.zonaLibre.requests.get.mockResolvedValue(detail)
@@ -276,8 +276,8 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     // Antes de SCRUM-797, este payload ya viajaba desde el backend pero el modal solo mostraba
     // `rejection_reason` — ahora también se ven notas y líneas, que antes se descartaban.
     expect(await screen.findByText('Ya existe una orden similar en camino.')).toBeInTheDocument()
-    expect(screen.getByText('Entrega urgente para el cliente Hotel Riu.')).toBeInTheDocument()
-    expect(screen.getByText('Bombillo LED')).toBeInTheDocument()
+    expect(screen.getByText('Entrega urgente para el cliente Sitio Demo 02.')).toBeInTheDocument()
+    expect(screen.getByText('Artículo XL')).toBeInTheDocument()
     expect(mockedApi.zonaLibre.requests.get).toHaveBeenCalledWith(3)
   })
 
@@ -287,7 +287,7 @@ describe('BodegaOrdenesZonaLibrePage', () => {
     const detalle9: ZonaLibreRequestDetail = {
       ...makeRow({ id: 9, order_number: '1009' }),
       notes: 'Reposición urgente de la línea Nordic.', approved_by_name: null, rejected_by_name: null, rejection_reason: null,
-      lines: [{ id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Bombillo LED', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 }],
+      lines: [{ id: 1, catalog_product_id: 10, reference: 'REF-10', factory_reference: 'FAB-10', description: 'Artículo XL', quantity: 5, unit_cost_snapshot: 12, subtotal: 60 }],
     }
 
     beforeEach(() => {

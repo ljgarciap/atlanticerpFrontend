@@ -29,7 +29,7 @@ vi.mock('@/api/adminContabApi', () => ({
 const mockedApi = vi.mocked(adminContabApi, true)
 
 const CLIENT: PaymentClientOption = { id: 7, name: 'Vitrio Retail, S.A.' }
-const CORRIENTE: BankAccount = { id: 1, banco: 'Banco General', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
+const CORRIENTE: BankAccount = { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'corriente', ultimos_4_digitos: '1111', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 }
 
 function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvoicesResult {
   return {
@@ -68,7 +68,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.payments.searchClients.mockResolvedValue([CLIENT])
   mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices())
-  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: CORRIENTE.id, label: 'Banco General — Cuenta Corriente' })
+  mockedApi.payments.defaultBankAccount.mockResolvedValue({ id: CORRIENTE.id, label: 'Banco Demo A — Cuenta Corriente' })
   mockedApi.bankAccounts.list.mockResolvedValue([CORRIENTE])
 })
 

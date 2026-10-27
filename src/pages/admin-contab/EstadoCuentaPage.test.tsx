@@ -67,9 +67,9 @@ function makeStatement(overrides: Partial<AccountStatement> = {}): AccountStatem
     master_client_id: 7, cliente: 'Torres Pacífico', sales_project_id: null, proyecto: null,
     tarifa: 'public', regimen_fiscal: 'con_itbms', terminos_pago: 'Neto 30',
     saldo: 6200, saldo_a_favor: false,
-    pago_a: 'Atlantic Diseño e Iluminación, S.A.',
-    cuenta_pago: 'Banco General ****4521',
-    banco: 'Banco General', tipo_cuenta: 'corriente', numero_cuenta: '****4521',
+    pago_a: 'Atlantic Diseño e Catalogación, S.A.',
+    cuenta_pago: 'Banco Demo A ****4521',
+    banco: 'Banco Demo A', tipo_cuenta: 'corriente', numero_cuenta: '****4521',
     responsable: 'Contabilidad López',
     nota_contexto: null, proyectos_count: 1,
     movimientos,
@@ -277,10 +277,10 @@ describe('EstadoCuentaPage — REQ-458 bloque de datos de pago (Batch 9)', () =>
     fireEvent.click(screen.getByText('estadoCuenta.busqueda.buscar'))
 
     await screen.findByText('Torres Pacífico')
-    expect(screen.getByText('Atlantic Diseño e Iluminación, S.A.')).toBeInTheDocument()
+    expect(screen.getByText('Atlantic Diseño e Catalogación, S.A.')).toBeInTheDocument()
     expect(screen.getByText('****4521')).toBeInTheDocument()
     expect(screen.getByText('cuentasBancarias.tipos.corriente')).toBeInTheDocument()
-    expect(screen.getByText('Banco General')).toBeInTheDocument()
+    expect(screen.getByText('Banco Demo A')).toBeInTheDocument()
     expect(screen.getByText('Contabilidad López')).toBeInTheDocument()
   })
 })

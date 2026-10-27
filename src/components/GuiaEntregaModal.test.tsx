@@ -35,7 +35,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     family: { sequence_in_family: null, total_in_family: null, badge: null },
     items_summary: { product_count: 1, unit_count: 2 },
     items: [
-      { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Candelabro', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 2, qty_delivered: 0, shortage_reason: null },
+      { id: 10, catalog_product_id: 1, reference: 'CAND-01', factory_reference: null, description: 'Modelo', location: 'A-1', qty_requested: 2, qty_reserved: 2, qty_picked: 2, qty_delivered: 0, shortage_reason: null },
     ],
     documents: [{ id: 99, tipo: 'guia_entrega', created_at: '2026-07-20T10:00:00Z', received_by_name: null }],
     eta_proveedor: null,

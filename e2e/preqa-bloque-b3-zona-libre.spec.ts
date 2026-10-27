@@ -30,7 +30,7 @@ test.describe('Bloque B3 — Nueva Orden Zona Libre (3C)', () => {
     // Buscar producto conocido de la fixture
     await page.locator('input[placeholder]').first().fill('Nordic')
     await page.waitForTimeout(700)
-    await expect(page.getByText('Lámpara colgante Nordic 40cm')).toBeVisible()
+    await expect(page.getByText('Producto colgante Nordic 40cm')).toBeVisible()
 
     // Camino de ruptura — cantidad 0
     const addButtons = page.getByRole('button', { name: /agregar/i })
@@ -44,7 +44,7 @@ test.describe('Bloque B3 — Nueva Orden Zona Libre (3C)', () => {
     await addButtons.first().click()
     await page.waitForTimeout(500)
     // Ya no debe aparecer en disponibles (REQ-365)
-    await expect(page.locator('table').first()).not.toContainText('Lámpara colgante Nordic 40cm')
+    await expect(page.locator('table').first()).not.toContainText('Producto colgante Nordic 40cm')
 
     // Buscar segundo producto y agregarlo
     await page.locator('input[placeholder]').first().fill('Farol')

@@ -36,7 +36,7 @@ test('1. Escenario 1 — clic en cualquier parte de la fila (no solo el nombre) 
   await row.locator('td').nth(3).click()
   await page.waitForTimeout(600)
   await page.screenshot({ path: 'e2e/.tmp/preqa431-01-row-click-opens.png', fullPage: true })
-  await expect(page.getByText('Lámpara colgante Nordic 40cm')).toBeVisible()
+  await expect(page.getByText('Producto colgante Nordic 40cm')).toBeVisible()
 })
 
 test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 columnas, Bloque 2 completo (barcode/descripción antes ausentes)', async ({ page }) => {
@@ -52,7 +52,7 @@ test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 colu
   console.log('MODAL TEXT SCRUM-431:', modalText)
 
   // Encabezado: nombre grande + categoría debajo, NO el título genérico.
-  expect(modalText).toContain('Lámpara colgante Nordic 40cm')
+  expect(modalText).toContain('Producto colgante Nordic 40cm')
   expect(modalText).toContain('Candelabros y Colgantes')
   expect(modalText).not.toContain('Detalle del producto\n')
 
@@ -71,7 +71,7 @@ test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 colu
   expect(modalText).toContain('NL-40C-001')
   expect(modalText).toMatch(/74192837/) // barcode sembrado
   expect(modalTextUpper).toContain('DESCRIPCIÓN')
-  expect(modalText).toContain('Lámpara colgante estilo nórdico')
+  expect(modalText).toContain('Producto colgante estilo nórdico')
   expect(modalText).toContain('Ver ficha técnica')
 
   // Sin precio/costo, nunca (RN3, ya vigente).

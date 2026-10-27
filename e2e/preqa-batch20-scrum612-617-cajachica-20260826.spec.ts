@@ -67,7 +67,7 @@ test('REQ-535 RN1 — ITBMS vacío bloquea, "0" explícito no', async ({ page })
 
   await page.locator('input[type="date"]').first().fill('2026-07-02')
   await page.locator('select').first().selectOption({ index: 1 })
-  await page.locator('input[type="text"]').nth(0).fill('Estacionamiento Multiplaza')
+  await page.locator('input[type="text"]').nth(0).fill('Estacionamiento Demo')
   await page.locator('input[type="text"]').nth(1).fill('Parqueo visita a cliente')
   await page.locator('input[type="number"]').nth(0).fill('8.00')
   // ITBMS se deja vacío a propósito (placeholder, no 0 por default — confirmado en el código).

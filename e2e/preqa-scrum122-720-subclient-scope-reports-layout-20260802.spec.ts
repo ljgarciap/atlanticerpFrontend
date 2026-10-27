@@ -29,8 +29,8 @@ import { test, expect, type Page } from '@playwright/test'
  * targets local (:5173), not dev.atlanticerp.ai.
  *
  * DB fixtures used (confirmed present via direct psql before writing this spec):
- *   MasterClient 1 "[DEMO] Grupo Constructor Delta" -> SubClient 1 "[DEMO] Delta Residencial S.A."  (Sub A)
- *   MasterClient 2 "[DEMO] Inversiones Costa Bella" -> SubClient 2 "[DEMO] Costa Bella Torres S.A." (Sub B)
+ *   MasterClient 1 "[DEMO] Cliente Maestro A" -> SubClient 1 "[DEMO] Cliente A1 S.A."  (Sub A)
+ *   MasterClient 2 "[DEMO] Cliente Maestro B" -> SubClient 2 "[DEMO] Cliente B1 S.A." (Sub B)
  *   architects table empty at session start — every architect created below is fresh.
  */
 test.describe.configure({ mode: 'serial' })
@@ -112,7 +112,7 @@ test('2. Architect field enables once Master Client + Sub-client are chosen', as
   await login(page)
   await newQuote(page)
   await expect(architectInput(page)).toBeDisabled()
-  await selectMasterAndSub(page, '[DEMO] Grupo Constructor Delta', '[DEMO] Delta Residencial S.A.')
+  await selectMasterAndSub(page, '[DEMO] Cliente Maestro A', '[DEMO] Cliente A1 S.A.')
   await expect(architectInput(page)).toBeEnabled({ timeout: 10000 })
 })
 
@@ -124,7 +124,7 @@ test('3-4. Architect created under Sub-client A is scoped: visible under A, abse
 
   // Case 3: create under Sub-client A
   await newQuote(page)
-  await selectMasterAndSub(page, '[DEMO] Grupo Constructor Delta', '[DEMO] Delta Residencial S.A.')
+  await selectMasterAndSub(page, '[DEMO] Cliente Maestro A', '[DEMO] Cliente A1 S.A.')
   await createArchitectInline(page, name, '6000-1234', `scope.${uniq}@example.com`)
   await expect(page.locator('label:text-is("Arquitecto")').locator('xpath=following-sibling::input[1]')).toHaveValue(name)
 
@@ -137,7 +137,7 @@ test('3-4. Architect created under Sub-client A is scoped: visible under A, abse
 
   // Case 4 (CRITICAL): new quote under Sub-client B, search the same name — must NOT appear
   await newQuote(page)
-  await selectMasterAndSub(page, '[DEMO] Inversiones Costa Bella', '[DEMO] Costa Bella Torres S.A.')
+  await selectMasterAndSub(page, '[DEMO] Cliente Maestro B', '[DEMO] Cliente B1 S.A.')
   const inputB = architectInput(page)
   await inputB.click()
   await inputB.fill('')
@@ -194,7 +194,7 @@ test('6. Reloading an existing quote with an assigned architect still hydrates n
   const name = `PreQA Arq Hydrate ${uniq}`
 
   await newQuote(page)
-  await selectMasterAndSub(page, '[DEMO] Grupo Constructor Delta', '[DEMO] Delta Residencial S.A.')
+  await selectMasterAndSub(page, '[DEMO] Cliente Maestro A', '[DEMO] Cliente A1 S.A.')
   await createArchitectInline(page, name, '6000-9999', `hydrate.${uniq}@example.com`)
 
   // architect_id only travels to the backend via buildHeaderPayload() on "Guardar
@@ -203,8 +203,8 @@ test('6. Reloading an existing quote with an assigned architect still hydrates n
   // 2026-08-01), so fill those before saving.
   const projectInput = fieldInput(page, 'Proyecto')
   await projectInput.click()
-  await projectInput.fill('[DEMO] Torre Delta Fase 1')
-  await page.getByText('[DEMO] Torre Delta Fase 1', { exact: true }).click()
+  await projectInput.fill('[DEMO] Proyecto Alfa Fase 1')
+  await page.getByText('[DEMO] Proyecto Alfa Fase 1', { exact: true }).click()
 
   await page.locator('label:text-is("Descripción")').locator('xpath=following-sibling::input[1]')
     .fill(`PreQA SCRUM-122 hydration recheck ${uniq}`)

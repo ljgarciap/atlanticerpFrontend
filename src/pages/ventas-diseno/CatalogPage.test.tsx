@@ -51,7 +51,7 @@ function mockToast(showSpy: (msg: string, type?: 'success' | 'error') => void = 
 
 function makeItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
   return {
-    id: 1, reference: 'IL-DEC-1410A', factory_reference: null, name: 'Lámpara Colgante Decorativa', description: 'Lámpara colgante LED', brand: '770 Lights',
+    id: 1, reference: 'IL-DEC-1410A', factory_reference: null, name: 'Producto Colgante Decorativa', description: 'Producto colgante XL', brand: '770 Lights',
     photo_url: null, price_full: 522, category: 'candelabros_colgantes', family_id: null, family_name: null,
     disponible: 14, en_camino: 0, has_technical_sheet: false, technical_sheet_filename: null,
     technical_sheet_uploaded_at: null,
@@ -113,10 +113,10 @@ describe('VentasDisenoCatalogPage', () => {
 
   it('nunca renderiza costo ni margen', async () => {
     mockedApi.catalog.list.mockResolvedValue(makeResult({
-      data: [makeItem({ description: 'Lámpara test' })],
+      data: [makeItem({ description: 'Producto test' })],
     }))
     renderPage()
-    await screen.findByText('Lámpara test')
+    await screen.findByText('Producto test')
     expect(screen.queryByText(/cost/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/margen/i)).not.toBeInTheDocument()
   })
@@ -136,7 +136,7 @@ describe('VentasDisenoCatalogPage', () => {
     expect(mockedApi.catalog.list).toHaveBeenCalledTimes(1)
 
     const input = screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder')
-    const word = 'luminaria1'
+    const word = 'producto1'
     for (let i = 1; i <= word.length; i++) {
       fireEvent.change(input, { target: { value: word.slice(0, i) } })
       expect(input).toHaveValue(word.slice(0, i))
@@ -160,14 +160,14 @@ describe('VentasDisenoCatalogPage', () => {
     await screen.findByText('IL-DEC-1410A · 770 Lights')
 
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder'), {
-      target: { value: 'lampara' },
+      target: { value: 'producto' },
     })
-    await waitFor(() => expect(mockedApi.catalog.list).toHaveBeenCalledWith(expect.objectContaining({ search: 'lampara' })))
+    await waitFor(() => expect(mockedApi.catalog.list).toHaveBeenCalledWith(expect.objectContaining({ search: 'producto' })))
 
     fireEvent.click(screen.getByText('ventasDiseno:catalogScreen.view.list'))
 
     // El texto del buscador sigue igual tras cambiar de vista.
-    expect(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder')).toHaveValue('lampara')
+    expect(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder')).toHaveValue('producto')
   })
 
   it('REQ-619 — "Enviar seleccionados" solo se habilita con ≥1 seleccionado, "Enviar catálogo completo" siempre habilitado', async () => {
@@ -225,7 +225,7 @@ describe('VentasDisenoCatalogPage', () => {
     expect(screen.getByText('ventasDiseno:catalogScreen.selectedCount:1')).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:catalogScreen.filters.searchPlaceholder'), {
-      target: { value: 'lampara' },
+      target: { value: 'producto' },
     })
     // SCRUM-992 — el filtro efectivo cambia tras el debounce (250 ms), y ahí se limpia la selección.
     expect(await screen.findByText('ventasDiseno:catalogScreen.selectedCount:0')).toBeInTheDocument()

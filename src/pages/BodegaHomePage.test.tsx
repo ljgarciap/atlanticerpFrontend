@@ -187,14 +187,14 @@ describe('BodegaHomePage', () => {
         count: 2,
         items: [
           { type: 'picking_no_iniciado', order_id: 1, order_number: '1001', cliente: 'Constructora del Istmo', horas: 3, suggestion: 'Asignar un picker.' },
-          { type: 'guia_sin_subir', order_id: 2, order_number: '1002', cliente: 'Torre Delta', dias: 2, suggestion: 'Subir la guía.' },
+          { type: 'guia_sin_subir', order_id: 2, order_number: '1002', cliente: 'Proyecto Alfa', dias: 2, suggestion: 'Subir la guía.' },
         ],
       },
     }))
     renderPage()
 
     expect(await screen.findByText('bodega:home.pendientes.text.picking_no_iniciado:1001,Constructora del Istmo,3')).toBeInTheDocument()
-    expect(await screen.findByText('bodega:home.pendientes.text.guia_sin_subir:1002,Torre Delta,2')).toBeInTheDocument()
+    expect(await screen.findByText('bodega:home.pendientes.text.guia_sin_subir:1002,Proyecto Alfa,2')).toBeInTheDocument()
     expect(await screen.findByText('2')).toBeInTheDocument()
   })
 
@@ -240,7 +240,7 @@ describe('BodegaHomePage', () => {
       pendientes: {
         count: 1,
         items: [
-          { type: 'ajuste_inventario_pendiente', adjustment_request_line_id: 55, producto: 'Candelabro', bodega: 'Bodega Central', solicitante: 'Jorge P.', dias: 4, suggestion: 'Revisar.' },
+          { type: 'ajuste_inventario_pendiente', adjustment_request_line_id: 55, producto: 'Modelo', bodega: 'Bodega Central', solicitante: 'Jorge P.', dias: 4, suggestion: 'Revisar.' },
         ],
       },
     }))
@@ -248,7 +248,7 @@ describe('BodegaHomePage', () => {
 
     fireEvent.click(await screen.findByTestId('pendiente-item-0'))
     const modal = await screen.findByTestId('pendiente-detail-modal')
-    expect(modal).toHaveTextContent('Candelabro')
+    expect(modal).toHaveTextContent('Modelo')
     expect(modal).toHaveTextContent('Bodega Central')
 
     fireEvent.click(screen.getByTestId('pendiente-detail-navigate'))
@@ -295,20 +295,20 @@ describe('BodegaHomePage', () => {
   it('Despachos urgentes lista pedidos reales con su etapa (REQ-300)', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       despachos_urgentes: [
-        { order_id: 5, order_number: '2050', cliente: 'Torre Delta', fecha_entrega_comprometida: '2026-07-23T17:00:00Z', stage: 'packing' },
+        { order_id: 5, order_number: '2050', cliente: 'Proyecto Alfa', fecha_entrega_comprometida: '2026-07-23T17:00:00Z', stage: 'packing' },
       ],
     }))
     renderPage()
     expect(await screen.findByText('#2050')).toBeInTheDocument()
-    expect(await screen.findByText('Torre Delta', { exact: false })).toBeInTheDocument()
+    expect(await screen.findByText('Proyecto Alfa', { exact: false })).toBeInTheDocument()
   })
 
   it('Por recibir marca Zona Libre y navega al detalle de la orden en Compras (REQ-301)', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       por_recibir: [
         {
-          purchase_order_id: 77, factory_reference: 'REF-1', reference: 'CAND-1', description: 'Candelabro',
-          quantity: 10, status: 'en_transito', estimated_arrival_date: '2026-06-29', provider_name: 'LightCorp', is_zona_libre: true,
+          purchase_order_id: 77, factory_reference: 'REF-1', reference: 'CAND-1', description: 'Modelo',
+          quantity: 10, status: 'en_transito', estimated_arrival_date: '2026-06-29', provider_name: 'Proveedor Demo A', is_zona_libre: true,
         },
       ],
     }))
@@ -323,7 +323,7 @@ describe('BodegaHomePage', () => {
     // SCRUM-871 — el link "Ver los N" solo aparece pasando el máximo de 5 visibles en la tarjeta.
     const mayorRotacion = Array.from({ length: 6 }, (_, i) => ({
       catalog_product_id: i + 1, factory_reference: `F-${i + 1}`, reference: `REF-${i + 1}`,
-      description: `Lámpara ${i + 1}`, total_salidas: 100 - i,
+      description: `Producto ${i + 1}`, total_salidas: 100 - i,
     }))
     mockedApi.home.summary.mockResolvedValue(makeSummary({ mayor_rotacion: mayorRotacion }))
     renderPage()

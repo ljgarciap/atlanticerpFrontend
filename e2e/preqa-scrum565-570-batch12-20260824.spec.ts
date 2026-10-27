@@ -345,7 +345,7 @@ test('SCRUM-568 RN1/RN2 — fila ámbar en el historial abre el formulario preca
   await expect(modal).toBeVisible()
   // RN2 — precargado: cliente bloqueado, tipo "Devolución de mercancía" de solo lectura
   await expect(modal.getByText(/Devoluci[oó]n de mercanc[ií]a/i)).toBeVisible()
-  await expect(modal.getByText('ENDLESS 30 30 LED WW')).toBeVisible()
+  await expect(modal.getByText('ENDLESS 30 30 XL WW')).toBeVisible()
   await page.screenshot({ path: 'e2e/.tmp/preqa-b12-568-precarga-devolucion.png', fullPage: true })
 
   // GAP YA CONOCIDO (Senior Review 2026-08-24, SCRUM-786) — monto sugerido arranca en $0.00 porque

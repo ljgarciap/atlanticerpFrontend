@@ -53,8 +53,8 @@ beforeEach(() => {
   mockToast()
   mockedApi.lookup.masterClients.mockResolvedValue([{ id: 1, name: 'Inmobiliaria Pacífico' }])
   mockedApi.lookup.subClients.mockResolvedValue([{ id: 10, business_name: 'Pacífico Norte SA' }])
-  mockedApi.lookup.projects.mockResolvedValue([{ id: 100, name: 'Torre Pacífico' }])
-  mockedApi.lookup.products.mockResolvedValue([{ id: 500, reference: 'LUM-COL-014', name: 'Colgante LED', description: 'Colgante LED', brand: 'Atlantic', price_full: 89.9 }])
+  mockedApi.lookup.projects.mockResolvedValue([{ id: 100, name: 'Proyecto Demo 01' }])
+  mockedApi.lookup.products.mockResolvedValue([{ id: 500, reference: 'LUM-COL-014', name: 'Colgante XL', description: 'Colgante XL', brand: 'Atlantic', price_full: 89.9 }])
 })
 
 // REQ-246 — Cliente Master/Subcliente/Proyecto son opcionales desde 2026-10-07 (antes RN6 los exigía); RN3 — descripción obligatoria.
@@ -138,7 +138,7 @@ describe('TicketCreateModal — crear ticket', () => {
 
     // REQ-247 RN3 — buscar y agregar un producto.
     fireEvent.click(screen.getByText('tickets.create.buscarProducto'))
-    fireEvent.click(await screen.findByText('LUM-COL-014 — Colgante LED'))
+    fireEvent.click(await screen.findByText('LUM-COL-014 — Colgante XL'))
 
     const submitBtn = await screen.findByText('tickets.create.submit')
     await waitFor(() => expect(submitBtn).not.toBeDisabled())
@@ -158,7 +158,7 @@ describe('TicketCreateModal — crear ticket', () => {
     await fillRequiredFields()
 
     fireEvent.click(screen.getByText('tickets.create.buscarProducto'))
-    fireEvent.click(await screen.findByText('LUM-COL-014 — Colgante LED'))
+    fireEvent.click(await screen.findByText('LUM-COL-014 — Colgante XL'))
 
     fireEvent.click(screen.getByText('tickets.create.buscarProducto'))
     // SCRUM-781 (punto 4.2) — fillRequiredFields() ya deja un proyecto elegido (sales_project_id

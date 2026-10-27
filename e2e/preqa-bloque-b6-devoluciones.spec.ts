@@ -22,7 +22,7 @@ test.beforeAll(async () => {
 // Pre-QA 2026-07-26 — Bloque B6 "Devoluciones" (SCRUM-473→489, REQ-403→419).
 // Corre contra playwright.config.ts estándar del repo (dev server npm run dev, baseURL :5173,
 // que proxea /api a http://localhost:8090).
-// Fixture: Order VR-9001 (Order::STAGE_DESPACHADO), pipeline card "Residencia Punta Pacifica VR"
+// Fixture: Order VR-9001 (Order::STAGE_DESPACHADO), pipeline card "Residencia Demo VR"
 // (owner id 12 = liderbodega@test.com), 2 OrderItem: NORDIC-40-VR (qty_delivered=5) y
 // PERFIL-2M-VR (qty_delivered=3) — sembrada vía tinker (script en scratchpad de la sesión, mismo
 // que usó Visual Reviewer). infra/test.sh borra este fixture (resetea el schema de tenant) — si
@@ -114,12 +114,12 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
     // nunca en un <input> editable — a diferencia del buscador de arriba, que sí es un input pero
     // no es el campo "Cliente"/"Proyecto" del formulario (solo conserva el texto de búsqueda).
     const readOnlyClientField = page.locator('label:text-is("Cliente") + div')
-    await expect(readOnlyClientField).toHaveText('Residencia Punta Pacifica VR')
+    await expect(readOnlyClientField).toHaveText('Residencia Demo VR')
     await expect(readOnlyClientField.locator('input')).toHaveCount(0)
     const readOnlyProjectField = page.locator('label:text-is("Proyecto") + div')
-    await expect(readOnlyProjectField).toHaveText('Residencia Punta Pacifica VR')
+    await expect(readOnlyProjectField).toHaveText('Residencia Demo VR')
     await expect(readOnlyProjectField.locator('input')).toHaveCount(0)
-    await expect(page.locator('body')).toContainText('Residencia Punta Pacifica VR')
+    await expect(page.locator('body')).toContainText('Residencia Demo VR')
 
     // "Ref. fábrica" visible en la tabla (hallazgo de Visual Reviewer ya corregido).
     await expect(page.locator('thead')).toContainText('Ref. fábrica')
@@ -196,7 +196,7 @@ test.describe('SCRUM-484/485/486/487/488/489 — Nueva devolución', () => {
     await page.waitForTimeout(900)
     await page.getByText(/Pedido #VR-9001/i).click()
     await page.waitForTimeout(500)
-    await expect(page.locator('body')).toContainText('Residencia Punta Pacifica VR')
+    await expect(page.locator('body')).toContainText('Residencia Demo VR')
 
     await page.reload()
     await page.waitForTimeout(800)
@@ -218,7 +218,7 @@ test.describe('SCRUM-474/475/488 — expandir fila multi-producto + Ver detalle'
     await expect(multiProductCell).toBeVisible()
     await multiProductCell.click()
     await page.waitForTimeout(400)
-    await expect(page.locator('body')).toContainText('Luminaria Nordic 40cm')
+    await expect(page.locator('body')).toContainText('Producto Nordic 40cm')
     await expect(page.locator('body')).toContainText('Perfil de aluminio 2m')
     await expect(page.locator('body')).toContainText(/producto dañado|defectuoso/i)
     await expect(page.locator('body')).toContainText(/devolución de prueba pre-qa/i)

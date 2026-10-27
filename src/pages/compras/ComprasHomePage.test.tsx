@@ -122,7 +122,7 @@ describe('ComprasHomePage', () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       pendientes: [{
         type: 'orden_sin_aprobar', priority: 'media', order_id: 42,
-        provider: 'LightCorp', amount: 500, days: 3, suggestion: 'Aprobar o rechazar la orden.',
+        provider: 'Proveedor Demo A', amount: 500, days: 3, suggestion: 'Aprobar o rechazar la orden.',
       }],
     }))
     renderPage()
@@ -137,7 +137,7 @@ describe('ComprasHomePage', () => {
   it('SCRUM-871 — con más de 5 pendientes muestra "Ver más" y el modal lista todos', async () => {
     const pendientes = Array.from({ length: 7 }, (_, i) => ({
       type: 'orden_sin_aprobar' as const, priority: 'media' as const, order_id: i + 1,
-      provider: 'LightCorp', amount: 100, days: 1, suggestion: `Sugerencia ${i + 1}`,
+      provider: 'Proveedor Demo A', amount: 100, days: 1, suggestion: `Sugerencia ${i + 1}`,
     }))
     mockedApi.home.summary.mockResolvedValue(makeSummary({ pendientes }))
     renderPage()
@@ -153,7 +153,7 @@ describe('ComprasHomePage', () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       pendientes: [{
         type: 'orden_sin_aprobar', priority: 'media', order_id: 1,
-        provider: 'LightCorp', amount: 100, days: 1, suggestion: 'x',
+        provider: 'Proveedor Demo A', amount: 100, days: 1, suggestion: 'x',
       }],
     }))
     renderPage()
@@ -164,7 +164,7 @@ describe('ComprasHomePage', () => {
 
   it('lista órdenes críticas y abre el detalle al hacer clic', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
-      ordenes_criticas: [{ order_id: 7, motivo: '9 días sobre el lead time', provider: 'LightCorp', amount: 1200 }],
+      ordenes_criticas: [{ order_id: 7, motivo: '9 días sobre el lead time', provider: 'Proveedor Demo A', amount: 1200 }],
     }))
     renderPage()
 
@@ -194,9 +194,9 @@ describe('ComprasHomePage', () => {
   it('Generar orden desde Por reordenar navega a Nueva Orden con el mismo formulario completo (REQ-118)', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       por_reordenar: [{
-        catalog_product_id: 9, reference: 'REORDER-9', description: 'Reflector LED 50W',
+        catalog_product_id: 9, reference: 'REORDER-9', description: 'Reflector XL 50W',
         stock_quantity: 2, disponible: 2, reorder_point: 5,
-        provider_id: 3, provider_name: 'LightCorp', suggested_quantity: 3, unit_cost: 15,
+        provider_id: 3, provider_name: 'Proveedor Demo A', suggested_quantity: 3, unit_cost: 15,
       }],
     }))
     renderPage()
@@ -206,7 +206,7 @@ describe('ComprasHomePage', () => {
     expect(navigateMock).toHaveBeenCalledWith('/compras/ordenes/nueva', {
       state: {
         providerId: 3,
-        product: { id: 9, reference: 'REORDER-9', description: 'Reflector LED 50W', unitCost: 15, quantity: 3 },
+        product: { id: 9, reference: 'REORDER-9', description: 'Reflector XL 50W', unitCost: 15, quantity: 3 },
       },
     })
   })
@@ -214,7 +214,7 @@ describe('ComprasHomePage', () => {
   it('Generar orden deshabilitado cuando no hay proveedor sugerido', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       por_reordenar: [{
-        catalog_product_id: 9, reference: 'REORDER-9', description: 'Reflector LED 50W',
+        catalog_product_id: 9, reference: 'REORDER-9', description: 'Reflector XL 50W',
         stock_quantity: 2, disponible: 2, reorder_point: 5,
         provider_id: null, provider_name: null, suggested_quantity: 3, unit_cost: 15,
       }],

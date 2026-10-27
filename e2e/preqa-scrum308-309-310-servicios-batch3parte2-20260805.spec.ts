@@ -53,7 +53,7 @@ test('SCRUM-308/309/310 — Nuevo ticket completo', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Buscar Subcliente' })).toBeVisible()
     await page.getByRole('button', { name: '[PREQA] Pacífico Norte SA' }).click()
 
-    await page.getByRole('combobox').filter({ hasText: 'Elegir proyecto' }).selectOption({ label: '[PREQA] Torre Pacífico' })
+    await page.getByRole('combobox').filter({ hasText: 'Elegir proyecto' }).selectOption({ label: '[PREQA] Proyecto Demo 01' })
     await page.screenshot({ path: 'test-results/scrum308-309-310-03-cliente-elegido.png' })
   })
 
@@ -67,7 +67,7 @@ test('SCRUM-308/309/310 — Nuevo ticket completo', async ({ page }) => {
     await page.getByText('Buscar producto en inventario').click()
     await expect(page.getByRole('heading', { name: 'Buscar producto en inventario' })).toBeVisible()
     await page.locator('input[type="text"]').last().fill('PREQA-LUM')
-    const productBtn = page.getByRole('button', { name: /PREQA-LUM-001 — \[PREQA\] Colgante LED/ })
+    const productBtn = page.getByRole('button', { name: /PREQA-LUM-001 — \[PREQA\] Colgante XL/ })
     await expect(productBtn).toBeVisible()
     await productBtn.click()
     await expect(page.getByText('PREQA-LUM-001')).toBeVisible()

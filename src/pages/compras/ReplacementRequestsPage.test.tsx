@@ -37,8 +37,8 @@ const mockedVentasDisenoApi = vi.mocked(ventasDisenoApi, true)
 // Lote 4 (SCRUM-246) — `name` y `description` deliberadamente distintos: el rebote de Gerencia
 // (2026-08-16) era justo que la pantalla mostraba `description` en vez de `name` en estos 2
 // lugares — un test que los deja iguales no puede detectar esa regresión si vuelve a aparecer.
-const ORIGINAL = { id: 1, reference: 'REF-ORIG', factory_reference: null, name: 'Bombillo decorativo E27 Ámbar', description: 'Descripción larga del original, no debe mostrarse', brand: null, photo_url: null, price_full: 20, cost: 12, stock_quantity: 3, reorder_point: null }
-const CANDIDATE = { id: 2, reference: 'REF-CAND', factory_reference: null, name: 'Bombillo genérico E27', description: 'Descripción larga del candidato, no debe mostrarse', brand: null, photo_url: null, price_full: 18, cost: 10, stock_quantity: 7, reorder_point: null }
+const ORIGINAL = { id: 1, reference: 'REF-ORIG', factory_reference: null, name: 'Artículo decorativo E27 Ámbar', description: 'Descripción larga del original, no debe mostrarse', brand: null, photo_url: null, price_full: 20, cost: 12, stock_quantity: 3, reorder_point: null }
+const CANDIDATE = { id: 2, reference: 'REF-CAND', factory_reference: null, name: 'Artículo genérico E27', description: 'Descripción larga del candidato, no debe mostrarse', brand: null, photo_url: null, price_full: 18, cost: 10, stock_quantity: 7, reorder_point: null }
 
 function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -66,8 +66,8 @@ async function goToSearchTab() {
 
 async function pickOriginal() {
   mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [ORIGINAL] })
-  fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.originalPlaceholder'), { target: { value: 'bombillo' } })
-  await waitFor(() => expect(screen.getByText('Bombillo decorativo E27 Ámbar')).toBeInTheDocument())
+  fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.originalPlaceholder'), { target: { value: 'artículo' } })
+  await waitFor(() => expect(screen.getByText('Artículo decorativo E27 Ámbar')).toBeInTheDocument())
   expect(screen.queryByText(ORIGINAL.description)).not.toBeInTheDocument()
   fireEvent.click(screen.getByText('common:actions.select'))
   await waitFor(() => expect(screen.getByText('compras:replacements.search.methodLabel')).toBeInTheDocument())
@@ -93,7 +93,7 @@ describe('ReplacementRequestsPage', () => {
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [CANDIDATE] })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
 
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
     expect(screen.getByText('7')).toBeInTheDocument() // stock_quantity
     expect(screen.getByText('$18.00')).toBeInTheDocument()
   })
@@ -108,7 +108,7 @@ describe('ReplacementRequestsPage', () => {
     })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
 
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
 
     // Encabezados: Categoría y % de similitud siempre presentes (no condicionados a method !== 'catalog').
     expect(screen.getByText('compras:replacements.search.resultsTable.category')).toBeInTheDocument()
@@ -134,7 +134,7 @@ describe('ReplacementRequestsPage', () => {
     })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
 
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
     expect(screen.getByText('92.1%')).toBeInTheDocument()
   })
 
@@ -144,12 +144,12 @@ describe('ReplacementRequestsPage', () => {
     await pickOriginal()
 
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [ORIGINAL, CANDIDATE] })
-    fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'bombillo' } })
+    fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'artículo' } })
 
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
     // Aparece 1 sola vez: el header "Producto a reemplazar" ya seleccionado — nunca en la
     // tabla de resultados (se excluye a sí mismo como candidato de su propio reemplazo).
-    expect(screen.getAllByText('Bombillo decorativo E27 Ámbar')).toHaveLength(1)
+    expect(screen.getAllByText('Artículo decorativo E27 Ámbar')).toHaveLength(1)
   })
 
   it('SCRUM-245 (hallazgo QA 2026-07-20) — muestra "Buscando…" en vez de una tabla en blanco mientras la búsqueda está en curso', async () => {
@@ -192,7 +192,7 @@ describe('ReplacementRequestsPage', () => {
     mockedComprasApi.replacementRequests.getSearch.mockResolvedValue({
       id: 'job-1', status: 'completed', error: null,
       results: [{
-        catalog_product_id: 2, reference: 'REF-CAND', name: 'Bombillo genérico E27', description: 'Descripción larga, no debe mostrarse',
+        catalog_product_id: 2, reference: 'REF-CAND', name: 'Artículo genérico E27', description: 'Descripción larga, no debe mostrarse',
         photo_url: null, price_full: 18, cost: 10, stock_quantity: 7,
         similarity_percent: 87.5, reasoning: 'Mismo tipo de rosca.',
       }],
@@ -213,7 +213,7 @@ describe('ReplacementRequestsPage', () => {
     fireEvent.click(screen.getByText('compras:replacements.search.searchButton'))
 
     await waitFor(() => expect(mockedComprasApi.replacementRequests.search).toHaveBeenCalledWith(1, 5, file))
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
     expect(screen.getByText('87.5%')).toBeInTheDocument()
   })
 
@@ -224,7 +224,7 @@ describe('ReplacementRequestsPage', () => {
 
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [CANDIDATE] })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
@@ -243,7 +243,7 @@ describe('ReplacementRequestsPage', () => {
 
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [CANDIDATE] })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
@@ -267,7 +267,7 @@ describe('ReplacementRequestsPage', () => {
 
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [{ ...CANDIDATE, margin_percent: 30 }] })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
@@ -292,7 +292,7 @@ describe('ReplacementRequestsPage', () => {
 
     mockedComprasApi.products.search.mockResolvedValueOnce({ fuzzy: false, data: [CANDIDATE] })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
-    await waitFor(() => expect(screen.getByText('Bombillo genérico E27')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo genérico E27')).toBeInTheDocument())
 
     fireEvent.click(screen.getByText('compras:replacements.actions.generateRequest'))
     await waitFor(() => expect(screen.getByText('compras:replacements.generateModal.title')).toBeInTheDocument())
@@ -312,8 +312,8 @@ describe('ReplacementRequestsPage', () => {
   // SCRUM-818 — Aprobar/Rechazar en la pestaña Solicitudes (default), gateado por can_decide
   // (calculado server-side, nunca reimplementado acá).
   const REQUEST = {
-    id: 10, original_product_id: 1, original_product_name: 'Bombillo decorativo E27 Ámbar',
-    proposed_product_id: 2, proposed_product_name: 'Bombillo genérico E27',
+    id: 10, original_product_id: 1, original_product_name: 'Artículo decorativo E27 Ámbar',
+    proposed_product_id: 2, proposed_product_name: 'Artículo genérico E27',
     sales_project_id: 9, sales_project_name: 'Proyecto Norte',
     margin_percent: 20, status: 'pendiente' as const, requested_by_name: 'Designer',
     generated_order_id: null, created_at: '2026-08-31T00:00:00Z', can_decide: true,
@@ -336,7 +336,7 @@ describe('ReplacementRequestsPage', () => {
     })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Bombillo decorativo E27 Ámbar')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo decorativo E27 Ámbar')).toBeInTheDocument())
     expect(screen.queryByText('compras:replacements.actions.approve')).not.toBeInTheDocument()
     expect(screen.queryByText('compras:replacements.actions.reject')).not.toBeInTheDocument()
   })
@@ -387,7 +387,7 @@ describe('ReplacementRequestsPage', () => {
     })
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Bombillo decorativo E27 Ámbar')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Artículo decorativo E27 Ámbar')).toBeInTheDocument())
     expect(screen.queryByText('compras:replacements.actions.generateOrder')).not.toBeInTheDocument()
   })
 })

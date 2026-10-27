@@ -31,14 +31,14 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeAccounts(): BankAccount[] {
   return [
-    { id: 1, banco: 'Banistmo', tipo_cuenta: 'corriente', ultimos_4_digitos: '9034', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 3 },
-    { id: 2, banco: 'Banco General', tipo_cuenta: 'ahorro', ultimos_4_digitos: '1122', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
+    { id: 1, banco: 'Banco Demo B', tipo_cuenta: 'corriente', ultimos_4_digitos: '9034', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 3 },
+    { id: 2, banco: 'Banco Demo A', tipo_cuenta: 'ahorro', ultimos_4_digitos: '1122', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
   ]
 }
 
 function makeMovements(): BankMovement[] {
   return [
-    { id: 10, fecha: '2026-08-01', tipo: 'cobro', concepto: 'Cobro factura F-100', monto: 500, direccion: 'entrada', bank_account_id: 1, bank_account_label: 'Banistmo — Cuenta Corriente ****9034' },
+    { id: 10, fecha: '2026-08-01', tipo: 'cobro', concepto: 'Cobro factura F-100', monto: 500, direccion: 'entrada', bank_account_id: 1, bank_account_label: 'Banco Demo B — Cuenta Corriente ****9034' },
     { id: 11, fecha: '2026-08-02', tipo: 'comision', concepto: 'Comisión Vendedor Disenador', monto: 80, direccion: 'salida', bank_account_id: null, bank_account_label: null },
     { id: 12, fecha: '2026-08-03', tipo: 'devolucion', concepto: 'Devolución NC-5', monto: 40, direccion: 'salida', bank_account_id: null, bank_account_label: null },
   ]
@@ -68,7 +68,7 @@ describe('BankAccountsPage', () => {
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.addButton'))
 
-    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.banco'), { target: { value: 'Banistmo' } })
+    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.banco'), { target: { value: 'Banco Demo B' } })
     fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.ultimos4'), { target: { value: '90' } })
     fireEvent.click(screen.getByText('adminContab:cuentasBancarias.saveButton'))
 
@@ -78,17 +78,17 @@ describe('BankAccountsPage', () => {
 
   it('al crear una cuenta, la pantalla cambia automáticamente a su tab (RN3 REQ-530)', async () => {
     mockedApi.bankAccounts.create.mockResolvedValue(
-      { id: 3, banco: 'Global Bank', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
+      { id: 3, banco: 'Banco Demo C', tipo_cuenta: 'corriente', ultimos_4_digitos: '4455', numero_cuenta_completo: null, moneda: 'USD', activa: true, movimientos_count: 0 },
     )
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.addButton'))
 
-    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.banco'), { target: { value: 'Global Bank' } })
+    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.banco'), { target: { value: 'Banco Demo C' } })
     fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.fields.ultimos4'), { target: { value: '4455' } })
     fireEvent.click(screen.getByText('adminContab:cuentasBancarias.saveButton'))
 
     await waitFor(() => expect(mockedApi.bankAccounts.create).toHaveBeenCalledWith({
-      banco: 'Global Bank', ultimos_4_digitos: '4455', tipo_cuenta: 'corriente', moneda: 'USD',
+      banco: 'Banco Demo C', ultimos_4_digitos: '4455', tipo_cuenta: 'corriente', moneda: 'USD',
     }))
     // Tras crear, la nueva cuenta (id=3) queda seleccionada como tab activa — dispara el fetch de
     // movimientos filtrado a esa cuenta.
@@ -124,14 +124,14 @@ describe('BankAccountsPage', () => {
 
   it('la tab "Eliminadas" no aparece si no hay cuentas inactivas', async () => {
     renderPage()
-    await screen.findByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD')
+    await screen.findByText('Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD')
     expect(screen.queryByText(/adminContab:cuentasBancarias.tabs.deleted/)).not.toBeInTheDocument()
   })
 
   it('la tab "Eliminadas" aparece con el conteo cuando hay cuentas inactivas', async () => {
     mockedApi.bankAccounts.list.mockResolvedValue([
       ...makeAccounts(),
-      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 2 },
+      { id: 9, banco: 'Banco Demo D', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 2 },
     ])
     renderPage()
     expect(await screen.findByText('adminContab:cuentasBancarias.tabs.deleted (1)')).toBeInTheDocument()
@@ -139,7 +139,7 @@ describe('BankAccountsPage', () => {
 
   it('la tab de una cuenta activa muestra la moneda, además de banco/tipo/dígitos (RN3 REQ-531)', async () => {
     renderPage()
-    await screen.findByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD')
+    await screen.findByText('Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD')
   })
 
   it('eliminar una cuenta exige confirmación explícita antes de aplicar (RN2 REQ-532)', async () => {
@@ -159,7 +159,7 @@ describe('BankAccountsPage', () => {
     await screen.findByText('adminContab:cuentasBancarias.movimientos.fecha')
     expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(undefined, 1, 20)
 
-    fireEvent.click(screen.getByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
+    fireEvent.click(screen.getByText('Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
     await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenCalledWith(1, 1, 20))
   })
 
@@ -186,7 +186,7 @@ describe('BankAccountsPage', () => {
   it('el selector de "Seleccionar cuenta" solo ofrece cuentas activas (RN2 REQ-534)', async () => {
     mockedApi.bankAccounts.list.mockResolvedValue([
       ...makeAccounts(),
-      { id: 9, banco: 'Multibank', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 0 },
+      { id: 9, banco: 'Banco Demo D', tipo_cuenta: 'ahorro', ultimos_4_digitos: '7777', numero_cuenta_completo: null, moneda: 'USD', activa: false, movimientos_count: 0 },
     ])
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.seleccionarCuenta'))
@@ -195,8 +195,8 @@ describe('BankAccountsPage', () => {
     const options = within(select.closest('select')!).getAllByRole('option').map(o => o.textContent)
     expect(options).toEqual([
       'adminContab:cuentasBancarias.selectAccountPlaceholder',
-      'Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034',
-      'Banco General — adminContab:cuentasBancarias.tipos.ahorro ****1122',
+      'Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034',
+      'Banco Demo A — adminContab:cuentasBancarias.tipos.ahorro ****1122',
     ])
 
     fireEvent.change(select.closest('select')!, { target: { value: '2' } })
@@ -215,7 +215,7 @@ describe('BankAccountsPage', () => {
     fireEvent.click(screen.getByText('2')) // página 2
     await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(undefined, 2, 20))
 
-    fireEvent.click(screen.getByText('Banistmo — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
+    fireEvent.click(screen.getByText('Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
     await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(1, 1, 20))
   })
 })

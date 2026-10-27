@@ -530,7 +530,7 @@ describe('FacturacionPage', () => {
   it('RN1 REQ-444 (bug corregido): el selector de cliente del wizard ve TODOS los clientes, aunque la tabla tenga un filtro de búsqueda activo', async () => {
     installFilteringListMock([
       makeEntry({ order_id: 301, order_number: 'PED-301', master_client_id: 9, cliente: 'Torres Pacífico', sales_project_id: 40, proyecto: 'Torres Norte', cotizacion_folio: 'COT-301', monto: 1000, estado: 'pendiente-facturar', numero_factura: null, es_incobrable: false, incobrable_pendiente: false }),
-      makeEntry({ order_id: 401, order_number: 'PED-401', master_client_id: 11, cliente: 'Hotel Riu', sales_project_id: 50, proyecto: 'Lobby y piscina', cotizacion_folio: 'COT-401', monto: 500, estado: 'pendiente-facturar', numero_factura: null, es_incobrable: false, incobrable_pendiente: false }),
+      makeEntry({ order_id: 401, order_number: 'PED-401', master_client_id: 11, cliente: 'Sitio Demo 02', sales_project_id: 50, proyecto: 'Lobby y piscina', cotizacion_folio: 'COT-401', monto: 500, estado: 'pendiente-facturar', numero_factura: null, es_incobrable: false, incobrable_pendiente: false }),
     ])
 
     renderPage()
@@ -543,7 +543,7 @@ describe('FacturacionPage', () => {
     // El wizard, sin embargo, debe seguir ofreciendo AMBOS clientes.
     fireEvent.click(screen.getByText('adminContab:facturacion.crearFactura'))
     const clienteSelect = await screen.findByLabelText('adminContab:facturacion.crear.clienteLabel')
-    expect(within(clienteSelect).getByText('Hotel Riu')).toBeInTheDocument()
+    expect(within(clienteSelect).getByText('Sitio Demo 02')).toBeInTheDocument()
     expect(within(clienteSelect).getByText('Torres Pacífico')).toBeInTheDocument()
   })
 
@@ -740,12 +740,12 @@ describe('FacturacionPage', () => {
   it('REQ-449 RN1: muestra el bloque de datos de pago (cuenta número + responsable) cuando el backend lo trae', async () => {
     mockedApi.invoices.detail.mockResolvedValueOnce(makeDetail({
       estado: 'facturada', numero_factura: 'F-2201', total: 5650,
-      cuenta_pago: 'Banco General ****4321', responsable: 'Contabilidad Test',
+      cuenta_pago: 'Banco Demo A ****4321', responsable: 'Contabilidad Test',
     }))
     renderPage()
     fireEvent.click(await screen.findByText('adminContab:facturacion.vista.plano'))
     fireEvent.click(await screen.findByText('PED-2026-000102'))
-    expect(await screen.findByText(/Banco General \*\*\*\*4321/)).toBeInTheDocument()
+    expect(await screen.findByText(/Banco Demo A \*\*\*\*4321/)).toBeInTheDocument()
     expect(screen.getByText(/Contabilidad Test/)).toBeInTheDocument()
   })
 

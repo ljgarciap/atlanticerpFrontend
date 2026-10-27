@@ -56,7 +56,7 @@ function previewDe(receptor: Receptor) {
       order_id: ORDER_ID, ok: true, order_number: 'PED-SINT-1140', cotizacion_folio: 'COT-SINT-1140', cliente: CLIENTE, monto: 321, modo: 'completo', tipo: 'completo',
       cierra_pedido: true, restante_despues: 0, advertencias: [], entregas_del_pedido: filaPendiente.entregas_del_pedido,
       subtotal: 300, descuentos: 0, itbms: 21, total: 321,
-      items: [{ descripcion: 'Panel LED sintetico', referencia_publica: 'REF-SINT', cantidad: 3, precio_unitario: 100, subtotal: 300 }],
+      items: [{ descripcion: 'Panel XL sintetico', referencia_publica: 'REF-SINT', cantidad: 3, precio_unitario: 100, subtotal: 300 }],
       receptor_validacion: receptor,
     }],
   }

@@ -68,7 +68,7 @@ function makeHeader(overrides: Partial<CashPositionHeader> = {}): CashPositionHe
 function makeProjected(overrides: Partial<CashPositionProjected> = {}): CashPositionProjected {
   return {
     window_days: 30,
-    entradas: [{ nombre: 'Hotel Riu — Lobby y piscina', referencia: 'F-4421', monto: 9800, dias: 3, vencimiento: 'proximo' }],
+    entradas: [{ nombre: 'Sitio Demo 02 — Lobby y piscina', referencia: 'F-4421', monto: 9800, dias: 3, vencimiento: 'proximo' }],
     salidas: [{ nombre: 'Comisión externa — Arq. Elena Duarte', referencia: 'Casa Herrera', monto: 1500, dias: null, vencimiento: null, tipo: 'comision_externa' }],
     total_entradas: 9800, total_salidas: 1500, neto: 8300,
     ...overrides,
@@ -149,7 +149,7 @@ describe('ArqueoCajaPage — REQ-520 encabezado y tarjetas', () => {
     renderPage()
     await screen.findByText(/28,740\.00/)
     expect(mockedApi.cashPosition.projected).toHaveBeenCalledWith(30)
-    await screen.findByText('Hotel Riu — Lobby y piscina') // confirma que la vista proyectada renderizó
+    await screen.findByText('Sitio Demo 02 — Lobby y piscina') // confirma que la vista proyectada renderizó
   })
 
   it('oculta el menú de exportar cuando la vista activa es Real + Hoy (RN3 REQ-520)', async () => {
@@ -168,7 +168,7 @@ describe('ArqueoCajaPage — REQ-520 encabezado y tarjetas', () => {
 describe('ArqueoCajaPage — REQ-521 vista proyectada', () => {
   it('muestra entradas y salidas en 2 columnas con el flujo neto', async () => {
     renderPage()
-    await screen.findByText('Hotel Riu — Lobby y piscina')
+    await screen.findByText('Sitio Demo 02 — Lobby y piscina')
     expect(screen.getByText('Comisión externa — Arq. Elena Duarte')).toBeInTheDocument()
     expect(screen.getByText(/\+.*8,300\.00/)).toBeInTheDocument()
   })

@@ -18,7 +18,7 @@ const SOLO_ORDER_ID = 16
 const FAMILY_ROOT_ID = 17
 const FAMILY_SIBLING_ID = 18
 const PACKING_ORDER_ID = 5 // [QA-BOD] Residencial Vista Hermosa, items 10 (qty_picked=2) y 11 (qty_picked=4)
-const DESPACHADO_ORDER_ID = 8 // [QA-BOD] Restaurante Costa del Este, courier=Transporte, invoice_ready=true
+const DESPACHADO_ORDER_ID = 8 // [QA-BOD] Restaurante Demo, courier=Transporte, invoice_ready=true
 const INVOICE_READY_ORDER_ID = 19 // fixture dedicado, por_despachar + invoice_ready=true, no lo toca ningun otro test
 
 async function login(page, email: string) {

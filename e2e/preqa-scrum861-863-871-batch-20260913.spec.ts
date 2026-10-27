@@ -45,18 +45,18 @@ test('SCRUM-861.1 — Nueva Orden: producto agregado desaparece de la búsqueda 
   }
   await page.waitForTimeout(500)
   const productSearch = page.locator('input[placeholder*="roducto" i]').first()
-  await productSearch.fill('BOMBILLA TIPO GLOBO')
+  await productSearch.fill('ARTICULO TIPO GLOBO')
   await page.waitForTimeout(1200)
-  const firstResult = page.getByText(/BOMBILLA TIPO GLOBO/i).first()
+  const firstResult = page.getByText(/ARTICULO TIPO GLOBO/i).first()
   const wasVisible = await firstResult.isVisible().catch(() => false)
   if (wasVisible) {
     await firstResult.click()
     await page.waitForTimeout(800)
     // Re-buscar el mismo texto — el producto ya agregado no debe reaparecer en la lista.
     await productSearch.fill('')
-    await productSearch.fill('BOMBILLA TIPO GLOBO')
+    await productSearch.fill('ARTICULO TIPO GLOBO')
     await page.waitForTimeout(1000)
-    const stillInResults = await page.getByText(/BOMBILLA TIPO GLOBO/i).count()
+    const stillInResults = await page.getByText(/ARTICULO TIPO GLOBO/i).count()
     // Debe quedar SOLO la línea ya agregada en la orden (1), no en la lista de resultados de búsqueda.
     expect(stillInResults, 'el producto ya agregado no debe reaparecer en la lista de búsqueda').toBeLessThanOrEqual(1)
   }

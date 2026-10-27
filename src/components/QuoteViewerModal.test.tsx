@@ -40,7 +40,7 @@ function makeQuote(overrides: Partial<QuoteDetail> = {}): QuoteDetail {
     id: 1, status: 'draft', folio: 'COT-2026-0001', generated_at: '2026-07-01T00:00:00Z', confirmed_at: null,
     pipeline_card_id: null, document_status: 'sent',
     master_client: { id: 1, name: 'Grupo Delta' }, sub_client: { id: 1, business_name: 'Delta Residencial' },
-    sales_project: { id: 1, name: 'Torre Delta', tag: null },
+    sales_project: { id: 1, name: 'Proyecto Alfa', tag: null },
     ruc: '155-0000-1-2026', description: 'Sala Principal', owner: { id: 1, name: 'Designer Demo' },
     architect: null, delivery_type: 'single', delivery_dates: ['2026-09-01'],
     contacts: [{ pivot_id: 1, id: 1, name: 'Contacto Demo', role: 'client', phone: '6000-0000', email: null }],

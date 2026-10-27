@@ -25,7 +25,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
  * `productWarehouseStock.por_servir` — el concepto de reserva de VENTAS & DISEÑO
  * (`InventoryKpiService::porServirMap()`), SIEMPRE 0 para productos sin cotización activa —, en
  * vez del comprometido REAL de Bodega (mismo dato que expone `PorServirModal`,
- * `commitment-detail`). Confirmado en vivo: LAMP-COL-001 tiene por_servir=6 (comprometido real,
+ * `commitment-detail`). Confirmado en vivo: ITEM-COL-001 tiene por_servir=6 (comprometido real,
  * `/bodega/inventory`) pero devolvía 0 en `warehouse-stock` — la advertencia de RN5 nunca se
  * disparaba para el caso real que el ticket pide cubrir. Corregido en este mismo pase
  * (`SolicitudAjustePage.tsx`, ahora usa `useBodegaPorServir`) — ver commit de este batch.
@@ -368,12 +368,12 @@ test.describe('SCRUM-428 — modal Solicitar ajuste (fix c2eb8f9 + RN5 hallazgo 
   test('RN5 (hallazgo de este re-check, corregido en el mismo pase) — Restar + comprometido real de Bodega muestra la advertencia', async ({ page }) => {
     await login(page)
     await goToInventario(page)
-    // LAMP-COL-001: disponible=18, por_servir=6 (comprometido REAL de Bodega, confirmado en vivo
+    // ITEM-COL-001: disponible=18, por_servir=6 (comprometido REAL de Bodega, confirmado en vivo
     // contra /bodega/inventory). Antes del fix, la advertencia usaba el por_servir de
     // /adjustment-requests/products/{id}/warehouse-stock (concepto de Ventas & Diseño, 0 para
     // este producto) y NUNCA se disparaba pese al comprometido real.
-    await searchProduct(page, 'LAMP-COL-001')
-    const row = page.locator('tbody tr', { hasText: 'LAMP-COL-001' }).first()
+    await searchProduct(page, 'ITEM-COL-001')
+    const row = page.locator('tbody tr', { hasText: 'ITEM-COL-001' }).first()
     await row.getByRole('button', { name: /solicitar ajuste/i }).click()
     await page.waitForTimeout(800)
     const modal = adjustmentModal(page)

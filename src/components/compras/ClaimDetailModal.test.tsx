@@ -36,13 +36,13 @@ const mockedComprasApi = vi.mocked(comprasApi, true)
 
 function makeClaim(overrides: Partial<PurchaseOrderClaimDetail> = {}): PurchaseOrderClaimDetail {
   return {
-    id: 1, code: 'R-1001', purchase_order_id: 13, provider_name: 'LightCorp', provider_id: 1,
-    product: 'Candelabro Cristal Imperial', service_ticket: null,
+    id: 1, code: 'R-1001', purchase_order_id: 13, provider_name: 'Proveedor Demo A', provider_id: 1,
+    product: 'Modelo Cristal Imperial', service_ticket: null,
     status: 'en_revision', status_changed_at: '2026-08-01T00:00:00Z', needs_attention: false,
     total_amount: 90, created_at: '2026-08-01T00:00:00Z',
     description: '3 unidades llegaron con el vidrio roto.', expected_resolution: 'reposicion',
     resolved_at: null, service_tickets: [], status_history: [],
-    lines: [{ id: 1, purchase_order_line_id: 501, description: 'Candelabro Cristal Imperial', affected_quantity: 2, unit_cost: 45, subtotal: 90 }],
+    lines: [{ id: 1, purchase_order_line_id: 501, description: 'Modelo Cristal Imperial', affected_quantity: 2, unit_cost: 45, subtotal: 90 }],
     photos: [],
     ...overrides,
   }
@@ -68,7 +68,7 @@ describe('ClaimDetailModal (SCRUM-259 real — REQ-196)', () => {
     mockedComprasApi.claims.get.mockResolvedValue(makeClaim())
     renderModal()
 
-    await waitFor(() => expect(screen.getByText(/Candelabro Cristal Imperial/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Modelo Cristal Imperial/)).toBeInTheDocument())
     expect(screen.getByText('compras:claims.detail.unitsCount qty=2')).toBeInTheDocument()
     expect(screen.getByText('$90.00')).toBeInTheDocument()
   })
@@ -98,7 +98,7 @@ describe('ClaimDetailModal (SCRUM-259 real — REQ-196)', () => {
     mockedComprasApi.claims.updateResolution.mockResolvedValue(makeClaim({ expected_resolution: 'negado' }))
     renderModal()
 
-    await waitFor(() => expect(screen.getByText(/Candelabro Cristal Imperial/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Modelo Cristal Imperial/)).toBeInTheDocument())
 
     const selects = screen.getAllByRole('combobox')
     // El primer <select> es "Tipo de resolución" (antes que "Estado" en la fila 2).
@@ -111,7 +111,7 @@ describe('ClaimDetailModal (SCRUM-259 real — REQ-196)', () => {
     mockedComprasApi.claims.get.mockResolvedValue(makeClaim())
     renderModal()
 
-    await waitFor(() => expect(screen.getByText(/Candelabro Cristal Imperial/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Modelo Cristal Imperial/)).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:claims.detail.viewOrder'))
     expect(navigateMock).toHaveBeenCalledWith('/compras/ordenes/13')
   })
@@ -121,7 +121,7 @@ describe('ClaimDetailModal (SCRUM-259 real — REQ-196)', () => {
     mockedComprasApi.claims.pdf.mockResolvedValue(new Blob(['%PDF-1.4'], { type: 'application/pdf' }))
     renderModal()
 
-    await waitFor(() => expect(screen.getByText(/Candelabro Cristal Imperial/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Modelo Cristal Imperial/)).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:claims.detail.downloadPdf'))
 
     await waitFor(() => expect(mockedComprasApi.claims.pdf).toHaveBeenCalledWith(1))

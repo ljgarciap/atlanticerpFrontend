@@ -58,14 +58,14 @@ function serveProducts(all: unknown[]) {
 
 const PROVIDER = { id: 5, name: 'Zona Libre de Colón' }
 const PRODUCT = {
-  id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', name: 'Lámpara colgante Nordic 40cm', description: 'Lámpara colgante Nordic 40cm',
+  id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', name: 'Producto colgante Nordic 40cm', description: 'Producto colgante Nordic 40cm',
   brand: null, photo_url: null, price_full: 90, cost: 45, stock_quantity: 2, reorder_point: null,
 }
 
 function createdOrder(overrides: Partial<ZonaLibreRequestDetail> = {}): ZonaLibreRequestDetail {
   return {
     id: 1, order_number: '1162', provider_name: 'Zona Libre de Colón', created_at: '2026-07-24T10:00:00Z',
-    products_summary: 'Lámpara colgante Nordic 40cm', total_amount: 135, estimated_arrival_date: null,
+    products_summary: 'Producto colgante Nordic 40cm', total_amount: 135, estimated_arrival_date: null,
     shipping_type: 'terrestre', status: 'pendiente', requested_by_name: 'Jorge P.', generated_order_id: null,
     notes: null, rejection_reason: null, approved_by_name: null, rejected_by_name: null, lines: [],
     ...overrides,
@@ -119,13 +119,13 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
     serveProducts([PRODUCT])
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.change(screen.getByPlaceholderText('bodega:zonaLibre.newOrder.products.searchPlaceholder'), { target: { value: 'zzzz-no-existe' } })
     expect(await screen.findByText('bodega:zonaLibre.newOrder.products.noResults')).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('bodega:zonaLibre.newOrder.products.searchPlaceholder'), { target: { value: '' } })
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '2' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
     expect(await screen.findByText('bodega:zonaLibre.newOrder.products.allAdded')).toBeInTheDocument()
@@ -135,7 +135,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('conserva el carrito y el envío al recargar (SCRUM-1172)', async () => {
     useAuthStore.setState({ user: { id: 7 } as never })
     const { unmount } = renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
     expect(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')).toBeInTheDocument()
@@ -151,7 +151,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
     useAuthStore.setState({ user: { id: 7 } as never })
     window.sessionStorage.setItem('atlanticerp:draft:zona-libre-nueva-orden:7', JSON.stringify({ cart, shippingType: 'terrestre', estimatedArrival: '' }))
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     expect(screen.queryByText('bodega:zonaLibre.newOrder.actions.submit')).not.toBeInTheDocument()
   })
 
@@ -159,7 +159,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
     window.sessionStorage.setItem('atlanticerp:draft:zona-libre-nueva-orden:7', '{no es json')
     useAuthStore.setState({ user: { id: 7 } as never })
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     expect(screen.queryByText('bodega:zonaLibre.newOrder.actions.submit')).not.toBeInTheDocument()
   })
 
@@ -174,7 +174,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('agregar con cantidad 0 no agrega la línea y muestra error inline (REQ-364 RN1/Escenario 1)', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
 
@@ -185,7 +185,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('agregar con cantidad fraccionaria (1.5) no agrega la línea y muestra error inline (Pre-QA 2026-07-24)', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '1.5' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
@@ -197,7 +197,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('agregar con cantidad válida mueve el producto al carrito, ya no aparece disponible (REQ-365)', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
@@ -211,7 +211,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('editar una línea del carrito a 0 es rechazado y mantiene la cantidad anterior (REQ-366 RN1)', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
 
@@ -225,7 +225,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('editar una línea del carrito a una cantidad fraccionaria (1.5) es rechazado (Pre-QA 2026-07-24)', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
 
@@ -240,9 +240,9 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   // SCRUM-436 (rebote de Gerencia Test 2026-08-13) — Cantidad/Costo/Subtotal/Monto total deben
   // llevar separador de miles (formatMoney/formatInt de src/lib/money.ts), no solo decimales.
   it('rebote 2026-08-13 — Cantidad/Costo/Subtotal/Monto total del carrito usan separador de miles', async () => {
-    serveProducts([{ ...PRODUCT, id: 11, description: 'Candelabro Cristal Imperial', cost: 1200.5 }])
+    serveProducts([{ ...PRODUCT, id: 11, description: 'Modelo Cristal Imperial', cost: 1200.5 }])
     renderPage()
-    await screen.findByText('Candelabro Cristal Imperial')
+    await screen.findByText('Modelo Cristal Imperial')
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '2000' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
@@ -263,7 +263,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
 
   it('quitar una línea del carrito la devuelve a la tabla de disponibles', async () => {
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '2' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
     await screen.findByText('bodega:zonaLibre.newOrder.actions.submit')
@@ -277,7 +277,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('guardar la orden muestra el panel de confirmación con el estado pendiente (REQ-369/REQ-441)', async () => {
     mockedBodegaApi.zonaLibre.requests.create.mockResolvedValue(createdOrder())
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
@@ -293,7 +293,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('"Ir a Ver Órdenes" navega a la bandeja 3D', async () => {
     mockedBodegaApi.zonaLibre.requests.create.mockResolvedValue(createdOrder())
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '1' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
     fireEvent.click(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit'))
@@ -307,7 +307,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('"Crear una nueva" reinicia el formulario sin navegar (RN1 REQ-371)', async () => {
     mockedBodegaApi.zonaLibre.requests.create.mockResolvedValue(createdOrder())
     renderPage()
-    await screen.findByText('Lámpara colgante Nordic 40cm')
+    await screen.findByText('Producto colgante Nordic 40cm')
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('bodega:zonaLibre.newOrder.products.add'))
     fireEvent.click(await screen.findByText('bodega:zonaLibre.newOrder.actions.submit'))
@@ -335,13 +335,13 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('SCRUM-797 — modo edición precarga el carrito y los datos de envío desde la solicitud existente', async () => {
     mockedBodegaApi.zonaLibre.requests.get.mockResolvedValue(createdOrder({
       id: 7, order_number: '1170', status: 'pendiente', shipping_type: 'aereo', estimated_arrival_date: '2026-09-01',
-      lines: [{ id: 1, catalog_product_id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', description: 'Lámpara colgante Nordic 40cm', quantity: 4, unit_cost_snapshot: 45, subtotal: 180 }],
+      lines: [{ id: 1, catalog_product_id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', description: 'Producto colgante Nordic 40cm', quantity: 4, unit_cost_snapshot: 45, subtotal: 180 }],
     }))
     renderPage('/bodega/ordenes-zona-libre/7/editar')
 
     // La línea precargada aparece en la tabla de "Productos en esta orden", con su cantidad real.
     expect(await screen.findByText('bodega:zonaLibre.newOrder.actions.submitEdit')).toBeInTheDocument()
-    expect(screen.getAllByText('Lámpara colgante Nordic 40cm').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Producto colgante Nordic 40cm').length).toBeGreaterThan(0)
     expect(screen.getByText('4')).toBeInTheDocument()
     expect(mockedBodegaApi.zonaLibre.requests.get).toHaveBeenCalledWith(7)
   })
@@ -349,7 +349,7 @@ describe('BodegaNuevaOrdenZonaLibrePage', () => {
   it('SCRUM-797 CA7 — guardar en modo edición llama a update() con el id y navega a la bandeja (sin pantalla de éxito)', async () => {
     mockedBodegaApi.zonaLibre.requests.get.mockResolvedValue(createdOrder({
       id: 7, order_number: '1170', status: 'pendiente',
-      lines: [{ id: 1, catalog_product_id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', description: 'Lámpara colgante Nordic 40cm', quantity: 4, unit_cost_snapshot: 45, subtotal: 180 }],
+      lines: [{ id: 1, catalog_product_id: 10, reference: 'NORDIC-40', factory_reference: 'NRD-40-BLK', description: 'Producto colgante Nordic 40cm', quantity: 4, unit_cost_snapshot: 45, subtotal: 180 }],
     }))
     mockedBodegaApi.zonaLibre.requests.update.mockResolvedValue(createdOrder({ id: 7, status: 'pendiente' }))
     renderPage('/bodega/ordenes-zona-libre/7/editar')

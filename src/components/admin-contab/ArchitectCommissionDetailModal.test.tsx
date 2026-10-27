@@ -169,11 +169,11 @@ describe('ArchitectCommissionDetailModal', () => {
   })
 
   it('REQ-517 — cambia la cuenta de pago', async () => {
-    mockedApi.commissionsExternal.bankAccountOptions.mockResolvedValue([{ id: 5, label: 'Banco General — Cuenta Corriente ****1234' }])
+    mockedApi.commissionsExternal.bankAccountOptions.mockResolvedValue([{ id: 5, label: 'Banco Demo A — Cuenta Corriente ****1234' }])
     mockedApi.commissionsExternal.updateCuentaPago.mockResolvedValue({ bank_account_id: 5 })
     renderModal()
 
-    const select = await screen.findByText('Banco General — Cuenta Corriente ****1234')
+    const select = await screen.findByText('Banco Demo A — Cuenta Corriente ****1234')
     fireEvent.change(select.closest('select')!, { target: { value: '5' } })
 
     await waitFor(() => expect(mockedApi.commissionsExternal.updateCuentaPago).toHaveBeenCalledWith(1, { bank_account_id: 5 }))

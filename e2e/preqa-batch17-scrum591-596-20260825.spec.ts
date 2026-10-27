@@ -63,7 +63,7 @@ test('REQ-519 — modal de detalle: campos de Batch 17 presentes, comprobante de
 
   await expect(page.getByText('% de comisión')).toBeVisible()
   await expect(page.getByText('Cuenta de pago')).toBeVisible()
-  await expect(page.getByText('Banco General')).toBeVisible()
+  await expect(page.getByText('Banco Demo A')).toBeVisible()
   // RN1 REQ-514 — régimen con_itbms, la sección de comprobante de retención no debe aparecer.
   await expect(page.getByText('Comprobante de retención')).toHaveCount(0)
 
@@ -104,5 +104,5 @@ test('REQ-515 RN3 — proyecto pagado: cuenta de pago ya no editable, Marcar pag
   // RN3 REQ-517 — cuenta de pago pasa a texto estático una vez pagada: solo quedan los 3
   // <select> de filtros de la pantalla base (mes/arquitecto/estado), ninguno nuevo del modal.
   await expect(page.locator('select')).toHaveCount(3)
-  await expect(page.getByText('Banco General — corriente ****0000')).toBeVisible()
+  await expect(page.getByText('Banco Demo A — corriente ****0000')).toBeVisible()
 })

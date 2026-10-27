@@ -61,8 +61,8 @@ function sheet(overrides: Partial<OrderPickingSheetResponse> = {}): OrderPicking
     order_id: 7,
     editable: true,
     items: [
-      { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 0, picking_notes: null },
-      { id: 101, reference: 'REF-PUB-002', factory_reference: null, description: 'Foco LED', location: 'B-02', found_at: null, found_location: null, found_note: null, qty_requested: 2, qty_picked: 0, picking_notes: null },
+      { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 0, picking_notes: null },
+      { id: 101, reference: 'REF-PUB-002', factory_reference: null, description: 'Foco XL', location: 'B-02', found_at: null, found_location: null, found_note: null, qty_requested: 2, qty_picked: 0, picking_notes: null },
     ],
     ...overrides,
   }
@@ -88,8 +88,8 @@ describe('PickingSheetModal', () => {
   it('REQ-315 — renderiza los artículos ya ordenados por el backend, sin reordenar en frontend', () => {
     render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
     const table = screen.getByTestId('picking-sheet-table')
-    expect(table).toHaveTextContent('Lampara colgante')
-    expect(table).toHaveTextContent('Foco LED')
+    expect(table).toHaveTextContent('Producto colgante')
+    expect(table).toHaveTextContent('Foco XL')
     expect(screen.getByTestId('picking-row-100')).toBeInTheDocument()
     expect(screen.getByTestId('picking-row-101')).toBeInTheDocument()
   })
@@ -137,7 +137,7 @@ describe('PickingSheetModal', () => {
   it('SCRUM-388 (corrección 2026-08-11) — columna "Encontrado en" muestra la nota armada por el backend, no un booleano crudo', () => {
     mockedUseOrderPickingSheet.mockReturnValue({
       data: sheet({ items: [
-        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: true, found_location: 'B-02', found_note: 'Nueva ubicación: B-02 — Confirmado por Lider Bodega', qty_requested: 4, qty_picked: 0, picking_notes: null },
+        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: true, found_location: 'B-02', found_note: 'Nueva ubicación: B-02 — Confirmado por Lider Bodega', qty_requested: 4, qty_picked: 0, picking_notes: null },
       ] }),
       isLoading: false,
     } as unknown as ReturnType<typeof useOrderPickingSheet>)
@@ -192,7 +192,7 @@ describe('PickingSheetModal', () => {
   it('RN3 (REQ-315) — con editable=false, "Observación" es de solo lectura (sin input)', () => {
     mockedUseOrderPickingSheet.mockReturnValue({
       data: sheet({ editable: false, items: [
-        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 3, picking_notes: 'Nota guardada' },
+        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 3, picking_notes: 'Nota guardada' },
       ] }),
       isLoading: false,
     } as unknown as ReturnType<typeof useOrderPickingSheet>)
@@ -276,7 +276,7 @@ describe('PickingSheetModal', () => {
   it('RN3 (REQ-315) — cuando editable=false, la hoja es de solo consulta: sin checkboxes ni "Editar", muestra qty_picked real', () => {
     mockedUseOrderPickingSheet.mockReturnValue({
       data: sheet({ editable: false, items: [
-        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 3, picking_notes: null },
+        { id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 4, qty_picked: 3, picking_notes: null },
       ] }),
       isLoading: false,
     } as unknown as ReturnType<typeof useOrderPickingSheet>)
@@ -328,7 +328,7 @@ describe('PickingSheetModal', () => {
     return sheet({
       sale_warehouses: SALE,
       items: [{
-        id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null,
+        id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null,
         found_note: null, qty_requested: 11, qty_picked: 0, qty_reserved: 10, picking_notes: null, allocations: [], warehouse_options: [CENTRAL, OBARRIO], ...item,
       }],
     })

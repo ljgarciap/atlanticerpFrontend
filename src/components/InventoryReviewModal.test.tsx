@@ -55,8 +55,8 @@ function sheet(overrides: Partial<OrderPickingSheetResponse> = {}): OrderPicking
     order_id: 55,
     editable: false,
     items: [
-      { id: 200, reference: 'REF-001', factory_reference: null, description: 'Lampara colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 2, qty_picked: 0, picking_notes: null },
-      { id: 201, reference: 'REF-002', factory_reference: null, description: 'Foco LED', location: 'B-02', found_at: null, found_location: null, found_note: null, qty_requested: 1, qty_picked: 0, picking_notes: null },
+      { id: 200, reference: 'REF-001', factory_reference: null, description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null, found_note: null, qty_requested: 2, qty_picked: 0, picking_notes: null },
+      { id: 201, reference: 'REF-002', factory_reference: null, description: 'Foco XL', location: 'B-02', found_at: null, found_location: null, found_note: null, qty_requested: 1, qty_picked: 0, picking_notes: null },
     ],
     ...overrides,
   }
@@ -76,8 +76,8 @@ describe('InventoryReviewModal', () => {
   it('REQ-317/318 — renderiza los artículos de la hoja, cada fila arranca en "Pendiente"', () => {
     render(<InventoryReviewModal orderId={55} onClose={vi.fn()} />)
     const table = screen.getByTestId('inventory-review-table')
-    expect(table).toHaveTextContent('Lampara colgante')
-    expect(table).toHaveTextContent('Foco LED')
+    expect(table).toHaveTextContent('Producto colgante')
+    expect(table).toHaveTextContent('Foco XL')
     expect(screen.getByTestId('inventory-review-status-200')).toHaveValue('pendiente')
     expect(screen.getByTestId('inventory-review-status-201')).toHaveValue('pendiente')
   })
