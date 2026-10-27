@@ -22,7 +22,7 @@
   },
   "fiscal": {
     "title": "Fiscal Configuration",
-    "subtitle": "Fiscal data, electronic invoicing and ITBMS rates — critical configuration, exclusive to the configured approver",
+    "subtitle": "Fiscal data, electronic invoicing and {{tax}} rates — critical configuration, exclusive to the configured approver",
     "saveChanges": "Save changes",
     "confirmSave": "Confirm applying these changes? The screen returns to read-only mode.",
     "saveError": "Could not save the fiscal configuration",
@@ -78,7 +78,7 @@
       "sinProveedor": "This company has no electronic invoicing: the documents it generates are internal (non-fiscal) and are not sent to any authority."
     },
     "itbms": {
-      "title": "ITBMS rates",
+      "title": "{{tax}} rates",
       "addRate": "+ Add rate",
       "detailTitle": "Rate detail",
       "toggleActive": "Toggle rate active",
@@ -323,7 +323,7 @@
       "totalAPagar": "Total due",
       "subtotal": "Subtotal",
       "descuentos": "Discounts",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "saldoAplicado": "Credit balance applied",
       "aplicarSaldo": "Apply available credit balance ({{monto}})",
       "avisoSaldoSoloPrimera": "The credit balance will only be applied to the first invoice of this batch.",
@@ -722,8 +722,8 @@
       }
     },
     "regimen": {
-      "con_itbms": "With ITBMS",
-      "sin_itbms": "Without ITBMS"
+      "con_itbms": "With {{tax}}",
+      "sin_itbms": "Without {{tax}}"
     }
   },
   "notasCredito": {
@@ -747,7 +747,7 @@
       "correccion": "Data correction — the work was delivered, needs re-invoicing"
     },
     "motivosCorreccion": {
-      "itbms": "Incorrect ITBMS treatment",
+      "itbms": "Incorrect {{tax}} treatment",
       "fecha": "Incorrect invoice date",
       "ambos": "Both"
     },
@@ -765,7 +765,7 @@
       "correccionAviso": "The quote, order, and Warehouse delivery note are not touched — the work was already delivered correctly, only the paperwork is being corrected.",
       "motivoCorreccionLabel": "What was wrong?",
       "motivoCorreccionPlaceholder": "Select a reason...",
-      "tratamientoActualLabel": "Current ITBMS treatment (what the invoice has today)",
+      "tratamientoActualLabel": "Current {{tax}} treatment (what the invoice has today)",
       "tratamientoCorrectoLabel": "Correct treatment",
       "tratamientoCorrectoPlaceholder": "Select...",
       "nuevaFechaLabel": "New invoice date",
@@ -773,7 +773,7 @@
       "correccionRevisarButton": "Review and continue",
       "referenciaLabel": "Reference (Delivery Note / Quote)",
       "productosDevueltosLabel": "Returned products",
-      "productosSinItbmsHint": "Prices exclude ITBMS. The suggested amount already includes the source invoice's ITBMS ({{pct}}%).",
+      "productosSinItbmsHint": "Prices exclude {{tax}}. The suggested amount already includes the source invoice's {{tax}} ({{pct}}%).",
       "facturaTotalReferencia": "Invoice {{numero}} total: {{monto}} · Outstanding balance: {{saldo}}",
       "personaDevuelveLabel": "Person returning",
       "proyectoLabel": "Project",
@@ -791,9 +791,9 @@
       "sinValorAcreditable": "Invoice {{numero}} is already fully credited by previous notes: there is nothing left to cancel.",
       "montoSuperaAcreditable": "The amount exceeds the value that can still be credited on the invoice ({{acreditable}}).",
       "facturaSaldoPendiente": "outstanding balance",
-      "montoLabel": "Total amount (incl. ITBMS)",
+      "montoLabel": "Total amount (incl. {{tax}})",
       "subtotalLabel": "Subtotal",
-      "itbmsLabel": "ITBMS",
+      "itbmsLabel": "{{tax}}",
       "motivoLabel": "Reason",
       "fechaLabel": "Date",
       "excedenteAviso": "The amount exceeds the invoice's outstanding balance — the surplus",
@@ -847,7 +847,7 @@
       "title": "Note detail",
       "monto": "Amount",
       "subtotal": "Subtotal",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "estado": "Status",
       "cotizacion": "Quote",
       "guiaEntrega": "Delivery Guide",
@@ -1175,7 +1175,7 @@
     },
     "regimenes": {
       "exento": "Exempt",
-      "con_itbms": "With ITBMS (7%)",
+      "con_itbms": "With {{tax}} (7%)",
       "retencion_50": "50% withholding (3.5%)"
     },
     "datosFiscales": {
@@ -1366,7 +1366,7 @@
         "proveedor": "Provider",
         "descripcion": "Description",
         "montoBruto": "Gross amount",
-        "itbms": "ITBMS",
+        "itbms": "{{tax}}",
         "total": "Total",
         "estado": "Status",
         "soporte": "Receipt"
@@ -1374,7 +1374,7 @@
       "subtotal": "Subtotal — {{solicitante}}",
       "totalGeneral": "Grand total",
       "verSoportes": "View ({{count}})",
-      "footnote": "The Gross Amount and ITBMS are entered exactly as they appear on the receipt or invoice — they are not calculated, they are third-party amounts. The Total is calculated automatically (Gross + ITBMS)."
+      "footnote": "The Gross Amount and {{tax}} are entered exactly as they appear on the receipt or invoice — they are not calculated, they are third-party amounts. The Total is calculated automatically (Gross + {{tax}})."
     },
     "nuevoGastoModal": {
       "title": "Register new expense(s)",
@@ -1388,7 +1388,7 @@
       "proveedor": "Provider",
       "descripcion": "Description",
       "montoBruto": "Gross amount",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "itbmsHint": "Enter 0 if not applicable",
       "foto": "Receipt photo",
       "fotoRequerida": "This line is missing the receipt photo.",
@@ -1461,7 +1461,7 @@
       "editarError": "Could not save the changes.",
       "reabrirError": "Could not reopen this expense.",
       "agregarSoporteError": "Could not add the receipt. Please try again.",
-      "montos": "Gross Amount / ITBMS / Total",
+      "montos": "Gross Amount / {{tax}} / Total",
       "soportes": "Receipts",
       "sinSoportes": "No receipts attached.",
       "agregarSoporte": "Add receipt",
@@ -1602,7 +1602,7 @@
       "facturas": "Invoices",
       "notasCredito": "Credit notes",
       "baseImponible": "Taxable base",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Period total",
       "columnas": {
@@ -1614,7 +1614,7 @@
         "documento": "Document No.",
         "baseImponible": "Taxable Base",
         "porcentaje": "%",
-        "itbms": "ITBMS Amount",
+        "itbms": "{{tax}} Amount",
         "total": "Total",
         "vendedor": "Seller"
       }
@@ -1635,7 +1635,7 @@
       "sinFacturas": "There are no invoices in the selected range/client.",
       "facturasCobradas": "Collected invoices",
       "baseImponible": "Taxable base",
-      "itbms": "ITBMS",
+      "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Period total",
       "pendientesTitle": "Pending collection (no payment method yet)",
@@ -1644,7 +1644,7 @@
         "cliente": "Client",
         "documento": "Document No.",
         "baseImponible": "Taxable Base",
-        "itbms": "ITBMS",
+        "itbms": "{{tax}}",
         "total": "Total"
       },
       "metodos": {
@@ -1783,7 +1783,7 @@
       "cliente": "Client",
       "ruc": "Tax ID",
       "dv": "Check digit",
-      "itbms": "VAT (ITBMS)"
+      "itbms": "VAT ({{tax}})"
     },
     "editar": "Edit tax data",
     "bloqueado": "Locked",
@@ -1794,10 +1794,10 @@
     "exento": "Exempt",
     "noExento": "—",
     "exencion": {
-      "titulo": "Gerencia client as ITBMS-exempt",
-      "tituloQuitar": "Remove the ITBMS exemption",
-      "ayuda": "From now on, new quotes and drafts for this client carry no ITBMS and are invoiced at 0%. Confirmed quotes and issued invoices do not change.",
-      "ayudaQuitar": "New quotes and drafts for this client include ITBMS again. Confirmed quotes and issued invoices do not change.",
+      "titulo": "Gerencia client as {{tax}}-exempt",
+      "tituloQuitar": "Remove the {{tax}} exemption",
+      "ayuda": "From now on, new quotes and drafts for this client carry no {{tax}} and are invoiced at 0%. Confirmed quotes and issued invoices do not change.",
+      "ayudaQuitar": "New quotes and drafts for this client include {{tax}} again. Confirmed quotes and issued invoices do not change.",
       "documento": "Document backing the exemption",
       "documentoPlaceholder": "E.g. Resolution 201-1234 or Law 8 of 2010",
       "documentoActual": "Current document",
@@ -1807,15 +1807,15 @@
       "quitarAccion": "Remove exemption",
       "cancelar": "Cancel",
       "cerrar": "Close",
-      "marcada": "The client is now ITBMS-exempt.",
-      "quitada": "The client's ITBMS exemption was removed.",
+      "marcada": "The client is now {{tax}}-exempt.",
+      "quitada": "The client's {{tax}} exemption was removed.",
       "borradores": "{{count}} draft quote updated.",
       "borradores_other": "{{count}} draft quotes updated.",
       "error": "Could not save the change.",
-      "avisoConfirmadas": "{{count}} confirmed quote not yet invoiced keeps its ITBMS and will be invoiced with it. If that is wrong, fix it with the correction credit note after invoicing.",
-      "avisoConfirmadas_other": "{{count}} confirmed quotes not yet invoiced keep their ITBMS and will be invoiced with it. If that is wrong, fix them with the correction credit note after invoicing.",
-      "avisoConfirmadasQuitar": "{{count}} confirmed quote not yet invoiced keeps its exemption and will be invoiced without ITBMS.",
-      "avisoConfirmadasQuitar_other": "{{count}} confirmed quotes not yet invoiced keep their exemption and will be invoiced without ITBMS."
+      "avisoConfirmadas": "{{count}} confirmed quote not yet invoiced keeps its {{tax}} and will be invoiced with it. If that is wrong, fix it with the correction credit note after invoicing.",
+      "avisoConfirmadas_other": "{{count}} confirmed quotes not yet invoiced keep their {{tax}} and will be invoiced with it. If that is wrong, fix them with the correction credit note after invoicing.",
+      "avisoConfirmadasQuitar": "{{count}} confirmed quote not yet invoiced keeps its exemption and will be invoiced without {{tax}}.",
+      "avisoConfirmadasQuitar_other": "{{count}} confirmed quotes not yet invoiced keep their exemption and will be invoiced without {{tax}}."
     }
   },
   "compensaciones": {
