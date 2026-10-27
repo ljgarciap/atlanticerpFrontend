@@ -81,7 +81,8 @@
         "prefijo": "Prefijo del folio",
         "sla_dias": "SLA (días hábiles)",
         "color": "Color (hex)",
-        "subtipos": "Subtipos (separados por coma)"
+        "subtipos": "Subtipos (separados por coma)",
+        "categoria": "Categoría de la etapa"
       }
     },
     "globalTab": {

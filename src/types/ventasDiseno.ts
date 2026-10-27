@@ -1,6 +1,12 @@
 import type { CatalogProductCategory } from '@/types/compras'
 
-export type PipelineStage = 'lead' | 'design' | 'quote' | 'proposal' | 'approved' | 'lost'
+/**
+ * Clave de una etapa del pipeline. Desde la Fase 7c las etapas son un catálogo por empresa (`pipeline_stage`): además de las 6 de sistema
+ * (`KnownPipelineStage`) una empresa puede intercalar las suyas entre Lead y Aprobado, así que la clave es un texto. Qué hace una etapa
+ * lo dice su categoría y su posición en el flujo (`usePipelineStages`), no su clave.
+ */
+export type PipelineStage = string
+export type KnownPipelineStage = 'lead' | 'design' | 'quote' | 'proposal' | 'approved' | 'lost'
 
 export type OrderApprovalStatus = 'pending' | 'approved'
 
@@ -207,7 +213,8 @@ export interface SubClientRef {
 // esquema de color ya establecido en la app en vez de introducir uno nuevo (ver
 // regla de color en memory/project_backlog_ventas_diseno_req.md: el mock del
 // cliente es solo referencia funcional, no visual).
-export const PIPELINE_STAGES: { id: PipelineStage; color: string }[] = [
+/** Las 6 etapas de sistema con su color: respaldo mientras el catálogo carga o si falla (los valores de siempre). */
+export const PIPELINE_STAGES: { id: KnownPipelineStage; color: string }[] = [
   { id: 'lead',     color: '#eab308' },
   { id: 'design',   color: '#3b82f6' },
   { id: 'quote',    color: '#a855f7' },
@@ -439,7 +446,7 @@ export interface DashboardAlerts {
   cold_clients:      DashboardColdClientsAlert | null
 }
 
-export type DashboardStageCounts = Record<PipelineStage, number>
+export type DashboardStageCounts = Record<string, number>
 
 export interface DashboardTotals {
   active_pipeline: number

@@ -81,7 +81,8 @@
         "prefijo": "Folio prefix",
         "sla_dias": "SLA (business days)",
         "color": "Color (hex)",
-        "subtipos": "Subtypes (comma-separated)"
+        "subtipos": "Subtypes (comma-separated)",
+        "categoria": "Stage category"
       }
     },
     "globalTab": {
