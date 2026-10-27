@@ -53,7 +53,8 @@ export default function EstadoTicketsPanel() {
             variant="secondary" active={chip === value} className="!rounded-none !border-0"
             onClick={() => setChip(value)}
           >
-            {value === '' ? t('home.estadoTickets.chips.all') : ticketTypes.label(value)}
+            {/* Los 4 tipos de sistema conservan su texto en plural del i18n; un tipo propio de la empresa usa su etiqueta del catálogo. */}
+            {t(`home.estadoTickets.chips.${value || 'all'}`, { defaultValue: ticketTypes.label(value) })}
           </Button>
         ))}
       </div>

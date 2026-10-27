@@ -312,8 +312,7 @@ describe('ServiciosHomePage', () => {
 
     await waitFor(() => expect(screen.getByText('Torre Azul')).toBeInTheDocument())
     expect(screen.getByText('Luces parpadean')).toBeInTheDocument()
-    // Fase 7b: «Garantía» sale dos veces — el chip de tipo del panel de estado y el badge del servicio sin responder.
-    expect(screen.getAllByText('Garantía')).toHaveLength(2)
+    expect(screen.getByText('Garantía')).toBeInTheDocument()
   })
 
   // REQ-213 (Grupo C, SCRUM-276) — panel "Insumos y herramientas pendientes".
@@ -380,7 +379,7 @@ describe('ServiciosHomePage', () => {
     renderPage()
 
     await waitFor(() => expect(mockedApi.home.estadoTickets).toHaveBeenCalledWith(''))
-    fireEvent.click(screen.getByRole('button', { name: 'Instalación' }))
+    fireEvent.click(screen.getByText('home.estadoTickets.chips.installation'))
 
     await waitFor(() => expect(mockedApi.home.estadoTickets).toHaveBeenCalledWith('installation'))
   })
