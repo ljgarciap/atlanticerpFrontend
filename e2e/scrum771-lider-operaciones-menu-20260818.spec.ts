@@ -33,21 +33,29 @@ test('SCRUM-771 — sidebar de Compras para Líder de Operaciones muestra solo l
   const expandBtn = page.getByRole('button', { name: /expandir menú/i })
   if (await expandBtn.count() > 0) await expandBtn.click()
 
-  // La sección "Compras · Inventario" (SCRUM-747) también es colapsable — expandirla primero.
-  const sectionBtn = page.getByRole('button', { name: /compras.*inventario/i })
-  if (await sectionBtn.count() > 0) await sectionBtn.click()
-
   const nav = page.locator('nav')
 
+  // Un NavDropdown llega abierto cuando la ruta activa es suya: un clic de más lo cerraría.
+  const openDropdown = async (label: string, firstChild: string) => {
+    if (!(await nav.getByRole('button', { name: firstChild, exact: true }).isVisible())) {
+      await nav.getByRole('button', { name: label, exact: true }).click()
+    }
+  }
+
+  // La sección "Compras · Inventario" (SCRUM-747) es colapsable y ya llega expandida si la ruta de aterrizaje es de Compras:
+  // solo se abre si "Órdenes" no está a la vista (un clic de más la colapsaría).
+  const sectionBtn = page.getByRole('button', { name: /compras.*inventario/i })
+  if (await nav.getByRole('button', { name: 'Órdenes', exact: true }).count() === 0 && await sectionBtn.count() > 0) await sectionBtn.click()
+
   // Dropdown "Órdenes" — Ver Órdenes/Logística visibles, Nueva Orden oculta.
-  await nav.getByRole('button', { name: 'Órdenes', exact: true }).click()
+  await openDropdown('Órdenes', 'Ver Órdenes')
   await expect(nav.getByRole('button', { name: 'Ver Órdenes', exact: true })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Logística & Envío', exact: true })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Nueva Orden', exact: true })).toHaveCount(0)
 
   // Dropdown "Catálogo y Stock" — Inventario/Ver registros de ingreso/Comparación de
   // Referencias, los 3 visibles.
-  await nav.getByRole('button', { name: 'Catálogo y Stock', exact: true }).click()
+  await openDropdown('Catálogo y Stock', 'Inventario')
   await expect(nav.getByRole('button', { name: 'Inventario', exact: true })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Ver registros de ingreso', exact: true })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Comparación de Referencias', exact: true })).toBeVisible()

@@ -17,7 +17,7 @@ import { test, expect, type Page } from '@playwright/test'
  * alcanzable — si alguien vuelve a envolver la tabla en un contenedor que recorte el overflow,
  * este test lo agarra antes de que llegue a QA.
  */
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const EMAIL = 'management@atlantic.test'
 const PASS  = 'Password123!'
 

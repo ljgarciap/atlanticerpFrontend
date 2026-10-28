@@ -19,7 +19,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
 //
 // BASE explícito: PREQA_BASE_URL (default localhost). Se niega a correr contra producción.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const MARK = process.env.E2E_FE_MARK_EMAIL ?? 'gerencia3@test.com'
 const CONTABILIDAD = process.env.E2E_FE_NOMARK_EMAIL ?? 'contabilidad@test.com'
 // En los entornos con roster real la contraseña de las cuentas de prueba es su propio email.

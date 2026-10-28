@@ -28,7 +28,7 @@ import { execSync } from 'node:child_process'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const TECH_NAME = `E2E PreQA Interno ${Date.now()}`
 
 interface Fixture {

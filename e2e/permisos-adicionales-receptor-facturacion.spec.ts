@@ -9,7 +9,7 @@ import { test, expect, type Page, type Route } from '@playwright/test'
 // Cuentas (por defecto las del entorno local/dev): superadmin demo y un usuario de rol `management` que NO es superadmin.
 // BASE explícito: PREQA_BASE_URL (default localhost). Solo corre contra local, dev o test.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const SUPERADMIN = process.env.E2E_SUPERADMIN_EMAIL ?? 'superadmin@atlantic.test'
 const SUPERADMIN_PASSWORD = process.env.E2E_SUPERADMIN_PASSWORD ?? 'Password123!'
 const NO_SUPERADMIN = process.env.E2E_MANAGEMENT_EMAIL ?? 'gerencia@test.com'
