@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test'
 // una línea de cotización real que referencia el producto original, para que el picker de
 // proyectos filtrado por producto lo encuentre), 1 solicitud Pendiente Gerencia (Hallazgo 1), 1
 // solicitud Rechazada "global" sin proyecto (Hallazgo 3) y 1 solicitud Rechazada propia de
-// designer@atlantic.test, atada a PQ818-COT-1 (Hallazgo 3b).
+// vendedor@atlantic.test, atada a PQ818-COT-1 (Hallazgo 3b).
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:8090'
@@ -88,7 +88,7 @@ test('Hallazgo 3 — Lider Compras (Compras, acceso solo vía rol) VE la lista y
 })
 
 test('Hallazgo 3(b) — un Vendedor VE su propia solicitud Rechazada, pero NUNCA el botón "Generar orden"', async ({ page }) => {
-  await login(page, 'designer@atlantic.test', 'Password123!')
+  await login(page, 'vendedor@atlantic.test', 'Password123!')
   await page.goto(`${BASE}/compras/sustitutos`)
   await page.waitForTimeout(600)
 

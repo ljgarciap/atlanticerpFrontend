@@ -123,7 +123,7 @@ test('SCRUM-884 — Gerencia puede quitarse del campo Responsable dejando otro a
   await chipCloseBtn.click()
   await page.waitForTimeout(300)
 
-  // Debe seguir habiendo al menos 1 responsable (validación min:1) — si Vendedor Disenador u otro vendedor
+  // Debe seguir habiendo al menos 1 responsable (validación min:1) — si Vendedor u otro vendedor
   // no quedó seleccionado, agregarla para poder guardar (el criterio dice "dejando otros
   // responsables asignados", no dejar la tarjeta sin nadie).
   // El resumen del botón toggle dice "N seleccionados" cuando hay al menos 1, o el placeholder
@@ -206,7 +206,7 @@ test('SCRUM-884 — Gerencia puede optar por QUEDARSE como responsable si quiere
 })
 
 test('SCRUM-884 — hallazgo NO bloqueante: una vez removido, Gerencia no puede re-agregarse a sí misma desde este selector (fuera de teamVendors)', async ({ page }) => {
-  // Sobre la tarjeta del test 3 (Gerencia ya removido, Vendedor Disenador quedó como responsable): el selector
+  // Sobre la tarjeta del test 3 (Gerencia ya removido, Vendedor quedó como responsable): el selector
   // de Responsable solo ofrece teamVendors ∪ asignados ACTUALES — Gerencia, al no ser vendedor/
   // diseñador y ya no estar entre los asignados actuales, desaparece de las opciones. No es parte
   // del criterio de aceptación de SCRUM-884 (que solo exige poder QUITARLO, no volver a
@@ -241,9 +241,9 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   // Nota de diseño: solo Gerencia/superadmin ve el selector editable de Responsable
   // (`canSeeTeam` en PipelineCardModal/NewProjectModal) — un vendedor nunca lo edita él mismo.
   // El contraste real del ticket es "Gerencia SÍ podía quitar a un creador vendedor (ya estaba en
-  // teamVendors) pero NO a un creador Gerencia (no estaba)" — se prueba así: Vendedor Disenador (vendedora)
+  // teamVendors) pero NO a un creador Gerencia (no estaba)" — se prueba así: Vendedor (vendedora)
   // crea el proyecto, Gerencia (Gerencia) la remueve del campo Responsable.
-  const VENDOR = 'vendedordisenador6@test.com'
+  const VENDOR = 'vendedor6@test.com'
   await login(page, VENDOR, VENDOR)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1500)
@@ -265,7 +265,7 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   expect(card).toBeTruthy()
   const vendorCardId = card.id
 
-  // Ahora como Gerencia (Gerencia) — abrir la misma tarjeta y confirmar que el chip de Vendedor Disenador
+  // Ahora como Gerencia (Gerencia) — abrir la misma tarjeta y confirmar que el chip de Vendedor
   // (vendedora, creadora) es removible, igual que antes del fix (regresión, no algo nuevo).
   await login(page, MARK, MARK)
   await page.goto('/ventas-diseno/pipeline', { waitUntil: 'domcontentloaded' })
@@ -285,8 +285,8 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   const annieChip = page.locator('span', { hasText: /annie|anelhys/i }).first()
   await expect(annieChip, 'el chip de un creador vendedor/diseñador debe seguir siendo removible (regresión)').toBeVisible({ timeout: 5000 })
 
-  // Agregar a otro vendedor (Vendedor Disenador, sí está en teamVendors) ANTES de quitar a Vendedor Disenador, para poder
-  // guardar sin violar min:1 — a diferencia de Gerencia (Gerencia), Vendedor Disenador sí es una opción válida acá.
+  // Agregar a otro vendedor (Vendedor, sí está en teamVendors) ANTES de quitar a Vendedor, para poder
+  // guardar sin violar min:1 — a diferencia de Gerencia (Gerencia), Vendedor sí es una opción válida acá.
   const neilRow = page.locator('li', { hasText: /neil/i }).first()
   await neilRow.locator('input[type="checkbox"]').check()
   await page.waitForTimeout(200)
@@ -302,5 +302,5 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   expect(putResponse3.status(), 'quitar a un creador vendedor del campo Responsable debe seguir funcionando (200)').toBe(200)
 
   const detailAfter = await apiGet(page, `/api/ventas-diseno/pipeline/${vendorCardId}`)
-  expect((detailAfter.body.assignees ?? []).some((a: any) => /anelhys|annie/i.test(a.name)), 'Vendedor Disenador ya no debe estar en assignees').toBe(false)
+  expect((detailAfter.body.assignees ?? []).some((a: any) => /anelhys|annie/i.test(a.name)), 'Vendedor ya no debe estar en assignees').toBe(false)
 })

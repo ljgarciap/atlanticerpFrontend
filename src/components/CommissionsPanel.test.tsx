@@ -72,13 +72,13 @@ describe('CommissionsPanel', () => {
   it('sin el permiso mark_paid no muestra el botón de marcar pagada', async () => {
     mockedApi.reports.commissions.summary.mockResolvedValue(makeSummary({
       cohorts: [{
-        id: 5, owner_id: 1, owner_name: 'Designer Demo', month: '2026-05',
+        id: 5, owner_id: 1, owner_name: 'Vendedor Demo', month: '2026-05',
         total_amount: 25000, commission_percent: 2, commission_amount: 500, paid_at: null,
       }],
     }))
     renderPanel()
 
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     expect(screen.queryByText('ventasDiseno:reports.commissions.markPaid')).not.toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:reports.commissions.statusPending')).toBeInTheDocument()
   })
@@ -87,7 +87,7 @@ describe('CommissionsPanel', () => {
     mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.commissions.mark_paid'] })
     mockedApi.reports.commissions.summary.mockResolvedValue(makeSummary({
       cohorts: [{
-        id: 5, owner_id: 1, owner_name: 'Designer Demo', month: '2026-05',
+        id: 5, owner_id: 1, owner_name: 'Vendedor Demo', month: '2026-05',
         total_amount: 25000, commission_percent: 2, commission_amount: 500, paid_at: null,
       }],
     }))
@@ -103,13 +103,13 @@ describe('CommissionsPanel', () => {
     mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.commissions.mark_paid'] })
     mockedApi.reports.commissions.summary.mockResolvedValue(makeSummary({
       cohorts: [{
-        id: 5, owner_id: 1, owner_name: 'Designer Demo', month: '2026-05',
+        id: 5, owner_id: 1, owner_name: 'Vendedor Demo', month: '2026-05',
         total_amount: 25000, commission_percent: 2, commission_amount: 500, paid_at: '2026-06-01T00:00:00Z',
       }],
     }))
     renderPanel()
 
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     expect(screen.queryByText('ventasDiseno:reports.commissions.markPaid')).not.toBeInTheDocument()
     expect(screen.getByText('ventasDiseno:reports.commissions.statusPaid')).toBeInTheDocument()
   })

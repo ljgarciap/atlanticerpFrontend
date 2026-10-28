@@ -44,7 +44,7 @@ test.describe.configure({ mode: 'serial' })
 
 const FELIX = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
-const NEIL = 'vendedordisenador2@test.com'
+const NEIL = 'vendedor2@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()

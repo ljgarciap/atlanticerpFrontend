@@ -22,7 +22,7 @@ import { test, expect, type Page } from '@playwright/test'
  * heights differed — switched to a single full-width column, visual-only (no
  * data/logic/filter/calc change).
  *
- * Real account (vendedordisenador2@test.com / same as email password, per
+ * Real account (vendedor2@test.com / same as email password, per
  * CoreUserSeeder default) — *@atlantic.test demo accounts are gone from the
  * roster (project rule, 2026-07-30). Serial — same CrowdSec/ModSecurity false
  * timeout rationale as other Pre-QA specs in this repo, even though this run
@@ -36,8 +36,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:5173'
-const EMAIL = 'vendedordisenador2@test.com'
-const PASS  = 'vendedordisenador2@test.com'
+const EMAIL = 'vendedor2@test.com'
+const PASS  = 'vendedor2@test.com'
 
 async function login(page: Page) {
   await page.goto(`${BASE}/login`)

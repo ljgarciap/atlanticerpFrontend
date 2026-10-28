@@ -15,7 +15,7 @@ import { resolve } from 'node:path'
 const BACKEND_DIR = '/Users/lgarcia/Documents/GitHub/Softclass/Illumination/atlanticerp/atlanticerp-backend'
 const TMP_DIR = 'e2e/.tmp'
 const CONTA = 'contabilidad@test.com'
-const DESIGNER = 'designer@atlantic.test'
+const DESIGNER = 'vendedor@atlantic.test'
 const DESIGNER_PASSWORD = 'Password123!'
 
 function runTinker(scriptPath: string): string {
@@ -290,7 +290,7 @@ test('un usuario sin permiso de facturación (rol designer) no puede acceder ni 
   const token = await page.evaluate(async () => {
     const r = await fetch('/api/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'designer@atlantic.test', password: 'Password123!', tenant: 'atlantic' }),
+      body: JSON.stringify({ email: 'vendedor@atlantic.test', password: 'Password123!', tenant: 'atlantic' }),
     })
     const j = await r.json()
     return j.token as string

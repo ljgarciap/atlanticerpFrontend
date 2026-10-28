@@ -31,7 +31,7 @@ test('SCRUM-407 — botón desde Pedidos navega a Status y "Volver a Pedidos" re
 })
 
 test('SCRUM-412 — botón desde Pipeline (Ventas & Diseño) navega al MISMO lugar', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com')
   await page.goto('/ventas-diseno/pipeline')
   await page.waitForTimeout(1000)
 
@@ -88,7 +88,7 @@ test('SCRUM-409/410 — modal detalle: datos generales, Fecha de Estatus = hoy, 
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'e2e/.tmp/scrum409-410-detail-modal.png', fullPage: true })
 
-  await expect(page.locator('body')).toContainText('Vendedor Disenador Test 2') // Diseñador
+  await expect(page.locator('body')).toContainText('Vendedor Test 2') // Diseñador
   await expect(page.locator('body')).toContainText('PreQA Familia 2 Tarjetas') // Proyecto
   await expect(page.locator('body')).toContainText('Contacto PreQA')
   await expect(page.locator('body')).toContainText('6000-1234')
@@ -149,7 +149,7 @@ test('SCRUM-411 — Ver/Descargar dispara la generación real del documento (200
 })
 
 test('SCRUM-412 RN2 — vendedor ve SOLO sus propios pedidos, no los de otro vendedor', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/scrum412-neil-own-orders.png', fullPage: true })
@@ -160,7 +160,7 @@ test('SCRUM-412 RN2 — vendedor ve SOLO sus propios pedidos, no los de otro ven
 })
 
 test('SCRUM-412 RN3 — solo consulta, sin ningún control de edición visible para Ventas & Diseño', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
   await page.locator('tbody tr').first().click()
@@ -175,7 +175,7 @@ test('Foco de ruptura — rol sin bodega.read ni ventas_diseno.read es redirigid
   // Demo users (AuthUserSeeder) usan password fijo "Password123!", NO el email como password
   // (a diferencia de los usuarios reales de negocio de BusinessRoleUserSeeder) — usar el password
   // real acá, si no el login falla en silencio y el redirect a /login se confunde con el gate real.
-  await login(page, 'supervisor@atlantic.test', 'Password123!')
+  await login(page, 'nivel5@atlantic.test', 'Password123!')
   await expect(page.locator('body')).not.toContainText(/iniciar sesión/i) // confirma que el login sí funcionó
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)

@@ -1,7 +1,7 @@
 /**
  * SCRUM-863 (rebote QA — Gerencia, 2026-09-14) — el mensaje de bienvenida de cada módulo debe
  * mostrar únicamente el PRIMER nombre del usuario, nunca `first_name` completo. `first_name`
- * puede traer 2+ palabras ("Vendedor Disenador", "Vendedor Disenador", "Luis J") porque el campo almacena el
+ * puede traer 2+ palabras ("Vendedor", "Vendedor", "Luis J") porque el campo almacena el
  * nombre de pila completo tal cual se registró, no un token único — ni backend ni frontend
  * recortaban esto antes de este fix, así que el saludo mostraba el nombre compuesto entero.
  *

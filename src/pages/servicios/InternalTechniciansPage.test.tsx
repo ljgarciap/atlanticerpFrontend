@@ -62,7 +62,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
 
 function makeTechnician(overrides: Partial<InternalTechnician> = {}): InternalTechnician {
   return {
-    id: 1, user_id: 1, nombre: 'Tecnico Servicios Test', telefono: '6000-0000', email: 'tecnicoservicios@test.com',
+    id: 1, user_id: 1, nombre: 'Tecnico Test', telefono: '6000-0000', email: 'tecnico@test.com',
     especialidad: 'general', color: '#3B82F6', has_bonus_plan: false, estado: 'available', visitas_hoy: 0,
     herramientas_asignadas: 0, pct_resuelto_primera_visita: null, tiempo_promedio_minutos: null,
     ...overrides,
@@ -94,7 +94,7 @@ describe('InternalTechniciansPage — REQ-255 vista Equipo', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     renderPage()
 
-    expect(await screen.findByText('Tecnico Servicios Test')).toBeInTheDocument();
+    expect(await screen.findByText('Tecnico Test')).toBeInTheDocument();
     expect(screen.getByText(/available/)).toBeInTheDocument()
     expect(screen.getByText(/general/)).toBeInTheDocument()
   })
@@ -103,7 +103,7 @@ describe('InternalTechniciansPage — REQ-255 vista Equipo', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     // Hay 2 "—" en pantalla con estos datos: el de esta tarjeta y el de la tarjeta de
     // estadísticas del equipo (REQ-261, promedio_primera_visita=null por default en el mock).
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
@@ -135,7 +135,7 @@ describe('InternalTechniciansPage — REQ-257 Visitas hoy', () => {
     ])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('2'))
 
     const modal = within(await screen.findByTestId('internal-technician-visits-modal'))
@@ -152,7 +152,7 @@ describe('InternalTechniciansPage — REQ-257 Visitas hoy', () => {
     ])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('1'))
 
     const modal = within(await screen.findByTestId('internal-technician-visits-modal'))
@@ -167,7 +167,7 @@ describe('InternalTechniciansPage — REQ-257 Visitas hoy', () => {
     mockedApi.internalTechnicians.visitsToday.mockResolvedValue([])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByRole('button', { name: /visitsToday/ }))
 
     const modal = within(await screen.findByTestId('internal-technician-visits-modal'))
@@ -180,11 +180,11 @@ describe('InternalTechniciansPage — REQ-255 RN5 detalle del técnico', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     renderPage()
 
-    fireEvent.click(await screen.findByText('Tecnico Servicios Test'))
+    fireEvent.click(await screen.findByText('Tecnico Test'))
 
     const modal = within(await screen.findByTestId('internal-technician-detail-modal'))
     expect(modal.getByText('6000-0000')).toBeInTheDocument()
-    expect(modal.getByText('tecnicoservicios@test.com')).toBeInTheDocument()
+    expect(modal.getByText('tecnico@test.com')).toBeInTheDocument()
   })
 })
 
@@ -212,12 +212,12 @@ describe('InternalTechniciansPage — REQ-260 Agenda equipo', () => {
   it('cambia a la vista Agenda equipo y muestra los bloques por técnico', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     const agenda: InternalTechnicianAgendaEntry[] = [
-      { id: 1, nombre: 'Tecnico Servicios Test', color: '#3B82F6', visitas: [] },
+      { id: 1, nombre: 'Tecnico Test', color: '#3B82F6', visitas: [] },
     ]
     mockedApi.internalTechnicians.agenda.mockResolvedValue(agenda)
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('technicians.internal.views.agenda'))
 
     expect(await screen.findByText('technicians.internal.agenda.noVisits')).toBeInTheDocument()
@@ -228,11 +228,11 @@ describe('InternalTechniciansPage — SCRUM-803 selector Día/Semana/Mes en Agen
   it('clic en Semana pide la agenda con view=week', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     mockedApi.internalTechnicians.agenda.mockResolvedValue([
-      { id: 1, nombre: 'Tecnico Servicios Test', color: '#3B82F6', visitas: [] },
+      { id: 1, nombre: 'Tecnico Test', color: '#3B82F6', visitas: [] },
     ])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('technicians.internal.views.agenda'))
     await screen.findByText('technicians.internal.agenda.noVisits')
 
@@ -244,11 +244,11 @@ describe('InternalTechniciansPage — SCRUM-803 selector Día/Semana/Mes en Agen
   it('clic en "periodo siguiente" navega a otra fecha sin cambiar de vista', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     mockedApi.internalTechnicians.agenda.mockResolvedValue([
-      { id: 1, nombre: 'Tecnico Servicios Test', color: '#3B82F6', visitas: [] },
+      { id: 1, nombre: 'Tecnico Test', color: '#3B82F6', visitas: [] },
     ])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('technicians.internal.views.agenda'))
     await screen.findByText('technicians.internal.agenda.noVisits')
 
@@ -266,7 +266,7 @@ describe('InternalTechniciansPage — SCRUM-803 selector Día/Semana/Mes en Agen
 describe('InternalTechniciansPage — REQ-207/208 (Batch 15) deep-link a Agenda equipo', () => {
   it('?view=agenda arranca directo en Agenda equipo, sin pasar por Equipo', async () => {
     const agenda: InternalTechnicianAgendaEntry[] = [
-      { id: 1, nombre: 'Tecnico Servicios Test', color: '#3B82F6', visitas: [] },
+      { id: 1, nombre: 'Tecnico Test', color: '#3B82F6', visitas: [] },
     ]
     mockedApi.internalTechnicians.agenda.mockResolvedValue(agenda)
     // Poblado por InternalTechnicianAgendaView para el <select> de filtro, no por la vista Equipo
@@ -291,14 +291,14 @@ describe('InternalTechniciansPage — REQ-262 alternancia Equipo/Agenda', () => 
     mockedApi.internalTechnicians.agenda.mockResolvedValue([])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     fireEvent.click(screen.getByText('technicians.internal.views.agenda'))
     await waitFor(() => expect(mockedApi.internalTechnicians.agenda).toHaveBeenCalled())
 
     fireEvent.click(screen.getByText('technicians.internal.views.team'))
     // Sin `find`/`waitFor`: si los datos se hubieran perdido, esto fallaría porque el primer
     // render tras el toggle mostraría el estado de "Cargando...", no la tarjeta ya poblada.
-    expect(screen.getByText('Tecnico Servicios Test')).toBeInTheDocument()
+    expect(screen.getByText('Tecnico Test')).toBeInTheDocument()
   })
 })
 
@@ -323,7 +323,7 @@ describe('InternalTechniciansPage — REQ-261 estadísticas generales', () => {
     })
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     const label = screen.getByText('technicians.internal.stats.firstVisitAvg')
     expect(within(label.parentElement!).getByText('—')).toBeInTheDocument()
   })
@@ -334,7 +334,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ has_bonus_plan: false })])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     expect(screen.queryByText('technicians.internal.card.commission')).not.toBeInTheDocument()
   })
 
@@ -343,7 +343,7 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician({ has_bonus_plan: true })])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     expect(screen.queryByText('technicians.internal.card.commission')).not.toBeInTheDocument()
   })
 
@@ -456,20 +456,20 @@ describe('InternalTechniciansPage — REQ-292 comisión mensual', () => {
 describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
   it('"Editar" abre el mismo formulario con los datos precargados y guarda con update()', async () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
-    mockedApi.internalTechnicians.update.mockResolvedValue(makeTechnician({ nombre: 'Tecnico Servicios V.' }))
+    mockedApi.internalTechnicians.update.mockResolvedValue(makeTechnician({ nombre: 'Tecnico V.' }))
     renderPage()
 
     fireEvent.click(await screen.findByText('technicians.internal.card.edit'))
     const modal = await screen.findByTestId('internal-technician-create-modal')
     expect(within(modal).getByText('technicians.internal.createModal.editTitle')).toBeInTheDocument()
-    expect(within(modal).getByDisplayValue('Tecnico Servicios Test')).toBeInTheDocument()
+    expect(within(modal).getByDisplayValue('Tecnico Test')).toBeInTheDocument()
     expect(within(modal).getByDisplayValue('6000-0000')).toBeInTheDocument()
 
-    fireEvent.change(within(modal).getByDisplayValue('Tecnico Servicios Test'), { target: { value: 'Tecnico Servicios V.' } })
+    fireEvent.change(within(modal).getByDisplayValue('Tecnico Test'), { target: { value: 'Tecnico V.' } })
     fireEvent.click(within(modal).getByText('technicians.internal.createModal.save'))
 
     await waitFor(() => expect(mockedApi.internalTechnicians.update).toHaveBeenCalledWith(
-      1, expect.objectContaining({ nombre: 'Tecnico Servicios V.', telefono: '6000-0000', especialidad: 'general' }),
+      1, expect.objectContaining({ nombre: 'Tecnico V.', telefono: '6000-0000', especialidad: 'general' }),
     ))
     expect(mockedApi.internalTechnicians.create).not.toHaveBeenCalled()
   })
@@ -517,7 +517,7 @@ describe('InternalTechniciansPage — SCRUM-1015 editar y eliminar', () => {
     mockedApi.internalTechnicians.list.mockResolvedValue([makeTechnician()])
     renderPage()
 
-    await screen.findByText('Tecnico Servicios Test')
+    await screen.findByText('Tecnico Test')
     expect(screen.queryByText('technicians.internal.card.edit')).toBeNull()
     expect(screen.queryByText('technicians.internal.card.delete')).toBeNull()
   })

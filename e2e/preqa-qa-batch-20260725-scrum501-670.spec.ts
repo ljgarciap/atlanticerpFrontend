@@ -31,7 +31,7 @@ test('SCRUM-501 — Kanban Pedidos muestra los pedidos sembrados en sus etapas r
 })
 
 test('SCRUM-501 — pedido En picking abre con picking parcial (3 ramas)', async ({ page }) => {
-  await login(page, 'ayudantegeneralbodega@test.com')
+  await login(page, 'auxiliarbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1500)
 

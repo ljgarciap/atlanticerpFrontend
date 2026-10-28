@@ -55,8 +55,8 @@ test.beforeAll(() => {
   console.log('SCRUM-849 fixture sembrado en dev.atlanticerp.ai:', JSON.stringify(fx))
 })
 
-const NEIL    = 'vendedordisenador2@test.com'
-const FEFI    = 'vendedordisenador3@test.com'
+const NEIL    = 'vendedor2@test.com'
+const FEFI    = 'vendedor3@test.com'
 const DANIELA = 'gerencia@test.com'
 
 // ⚠️ Hallazgo de credenciales (no es del código de SCRUM-849, documentado aparte en el reporte):
@@ -99,27 +99,27 @@ async function login(page: Page, email: string): Promise<void> {
 // ---------------------------------------------------------------------------
 test('SCRUM-849.5 — CRITICO: Gerencia abre la cotización de otro diseñador y ve SU PROPIO nombre/teléfono, no el del dueño real', async ({ page }) => {
   await login(page, DANIELA)
-  await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`) // owned by neil (Vendedor Disenador Test 2)
+  await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`) // owned by neil (Vendedor Test 2)
   await page.waitForTimeout(1500)
 
   const designerLabel = page.locator('label:has-text("Diseñador a cargo"), label:has-text("Designer in charge")').locator('xpath=following-sibling::p[1]')
   await expect(designerLabel).toBeVisible({ timeout: 10000 })
   const text = await designerLabel.textContent()
-  console.log('SCRUM-849.5 — texto mostrado en "Diseñador a cargo" mientras Gerencia ve la cotización de Vendedor Disenador:', text)
+  console.log('SCRUM-849.5 — texto mostrado en "Diseñador a cargo" mientras Gerencia ve la cotización de Vendedor:', text)
 
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-5-wrong-designer-shown.png', fullPage: true })
 
-  // Comportamiento esperado (RN del ticket): debe mostrar "Vendedor Disenador Test 2" (el dueño real de la
+  // Comportamiento esperado (RN del ticket): debe mostrar "Vendedor Test 2" (el dueño real de la
   // cotización, que es a quien pertenece el WhatsApp relevante para el cliente) — no se asserta
-  // un teléfono fijo porque es el dato REAL de la cuenta de Vendedor Disenador, mutable fuera de este test.
-  expect(text).toContain('Vendedor Disenador')
+  // un teléfono fijo porque es el dato REAL de la cuenta de Vendedor, mutable fuera de este test.
+  expect(text).toContain('Vendedor')
   expect(text).not.toContain('Gerencia')
 })
 
 // ---------------------------------------------------------------------------
 // 849.5 (control) — el propio dueño SÍ ve su nombre correctamente (por eso el bug de arriba no
 // se detectó en el self-QA del dev: nunca se probó desde el punto de vista de otro rol). No
-// asertamos un teléfono fijo: es el dato REAL de la cuenta de Vendedor Disenador (no un fixture de test), y el
+// asertamos un teléfono fijo: es el dato REAL de la cuenta de Vendedor (no un fixture de test), y el
 // pase anterior de Pre-QA ya lo dejó en null al limpiar — asertar un valor fijo acá volvería a
 // depender de mutar el dato real de una persona solo para satisfacer el test.
 // ---------------------------------------------------------------------------
@@ -128,7 +128,7 @@ test('SCRUM-849.5 (control) — el propio diseñador ve su nombre correcto en su
   await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`)
   await page.waitForTimeout(1500)
   const designerLabel = page.locator('label:has-text("Diseñador a cargo")').locator('xpath=following-sibling::p[1]')
-  await expect(designerLabel).toContainText('Vendedor Disenador')
+  await expect(designerLabel).toContainText('Vendedor')
 })
 
 // ---------------------------------------------------------------------------
@@ -233,7 +233,7 @@ test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve tex
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-4-gerencia-multiselect.png', fullPage: true })
 
   // Como neil (dueño, no Gerencia): el mismo campo debe ser de solo lectura, listando a AMBOS
-  // asignados (Vendedor Disenador + Vendedor Disenador Test 3/fefi), sin ningún control interactivo.
+  // asignados (Vendedor + Vendedor Test 3/fefi), sin ningún control interactivo.
   await login(page, NEIL)
   await page.goto(`${BASE}/ventas-diseno/pipeline${cardParam}`)
   await page.waitForTimeout(1500)
@@ -241,8 +241,8 @@ test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve tex
   await expect(modalAsNeil).toBeVisible({ timeout: 8000 })
   const readonlyOwner = modalAsNeil.locator('label:has-text("Responsable"), label:has-text("Owner")').first().locator('xpath=following-sibling::p[1]')
   await expect(readonlyOwner).toBeVisible({ timeout: 8000 })
-  await expect(readonlyOwner).toContainText('Vendedor Disenador')
-  await expect(readonlyOwner).toContainText('Vendedor Disenador')
+  await expect(readonlyOwner).toContainText('Vendedor')
+  await expect(readonlyOwner).toContainText('Vendedor')
   await expect(modalAsNeil.locator('[aria-haspopup="listbox"]')).toHaveCount(0)
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-4-neil-readonly-both-assignees.png', fullPage: true })
 })

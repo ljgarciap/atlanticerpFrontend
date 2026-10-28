@@ -12,8 +12,8 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const VENDEDOR_SIN_PERMISO = 'vendedordisenador@test.com'
-const OTRO_VENDEDOR_SIN_PERMISO = 'vendedordisenador2@test.com'
+const VENDEDOR_SIN_PERMISO = 'vendedor@test.com'
+const OTRO_VENDEDOR_SIN_PERMISO = 'vendedor2@test.com'
 const MARK = 'gerencia3@test.com'
 const MANAGEMENT = 'gerencia@test.com'
 

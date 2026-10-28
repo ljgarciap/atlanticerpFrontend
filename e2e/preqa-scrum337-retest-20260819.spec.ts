@@ -9,7 +9,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * el permiso intacto, y un smoke de edición.
  *
  * Cuentas reales (password = email): liderservicios@test.com (Lider Servicios, lider_servicios,
- * puede_ver_costos=true), tecnicoservicios@test.com (Tecnico Servicios Test, tecnico,
+ * puede_ver_costos=true), tecnico@test.com (Tecnico Test, tecnico,
  * puede_ver_costos=false). Técnico externo id 2 "QA Luis Vargas" tiene rate_history real (1 fila,
  * $25.00) y tarifa_visible=true — el mismo que crasheaba en el pase anterior.
  */
@@ -35,12 +35,12 @@ async function apiToken(request: APIRequestContext, email: string): Promise<stri
   return token as string
 }
 
-// ---------- 1 y 2: Tecnico Servicios (sin puede_ver_costos) — ficha no crashea, no hay leak en ficha ni listado ----------
+// ---------- 1 y 2: Tecnico (sin puede_ver_costos) — ficha no crashea, no hay leak en ficha ni listado ----------
 
-test('1. Tecnico Servicios (tecnico) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
+test('1. Tecnico (tecnico) — listado de Técnicos externos NO muestra tarifa real en la columna TARIFA', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/01-carlos-listado.png`, fullPage: true })
@@ -52,11 +52,11 @@ test('1. Tecnico Servicios (tecnico) — listado de Técnicos externos NO muestr
   expect(errors, `Errores de página en el listado: ${errors.join(' | ')}`).toEqual([])
 })
 
-test('2. Tecnico Servicios — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history real) NO crashea, carga datos sin costo/tarifa/historial', async ({ page }) => {
+test('2. Tecnico — abrir la ficha de "QA Luis Vargas" (id 2, con rate_history real) NO crashea, carga datos sin costo/tarifa/historial', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
-  await login(page, 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com')
   await page.goto(`${BASE}/servicios/tickets/externos`)
   await page.waitForTimeout(1200)
 
@@ -68,7 +68,7 @@ test('2. Tecnico Servicios — abrir la ficha de "QA Luis Vargas" (id 2, con rat
   // No debe crashear: la app sigue teniendo contenido real, no una pantalla en blanco.
   const bodyText = await page.locator('body').innerText()
   expect(bodyText.trim().length, 'La app quedó en blanco (crash) al abrir la ficha').toBeGreaterThan(0)
-  expect(errors, `Errores de página/consola al abrir la ficha como Tecnico Servicios: ${errors.join(' | ')}`).toEqual([])
+  expect(errors, `Errores de página/consola al abrir la ficha como Tecnico: ${errors.join(' | ')}`).toEqual([])
 
   // Datos sin costo que SÍ deben verse.
   await expect(page.getByText('QA Luis Vargas').first()).toBeVisible()

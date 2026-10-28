@@ -38,7 +38,7 @@ function makeRow(overrides: Partial<QuoteListRow> = {}): QuoteListRow {
     id: 1, folio: 'COT-2026-0001',
     master_client: { id: 1, name: 'Grupo Delta' }, sub_client: { id: 1, business_name: 'Delta Residencial' },
     sales_project: { id: 1, name: 'Proyecto Alfa', tag: null }, amount: 1070, stage: 'quote', price_type: 'public',
-    owner: { id: 1, name: 'Designer Demo' }, quote_date: '2026-07-01T00:00:00Z', document_status: 'sent',
+    owner: { id: 1, name: 'Vendedor Demo' }, quote_date: '2026-07-01T00:00:00Z', document_status: 'sent',
     ...overrides,
   }
 }
@@ -93,18 +93,18 @@ describe('VentasDisenoQuotesListPage', () => {
 
   it('SCRUM-1195 — la columna Responsable muestra al dueño de la tarjeta, no a Gerencia que generó la versión', async () => {
     mockedApi.quotes.list.mockResolvedValue(makeResult({
-      data: [makeRow({ owner: { id: 9, name: 'Gerencia Test 3' }, designer: { id: 1, name: 'Vendedor Disenador Vendedora' } })],
+      data: [makeRow({ owner: { id: 9, name: 'Gerencia Test 3' }, designer: { id: 1, name: 'Vendedor Vendedora' } })],
     }))
     renderPage()
 
-    expect(await screen.findByText('Vendedor Disenador Vendedora')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Vendedora')).toBeInTheDocument()
     expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
   })
 
   it('SCRUM-1195 — sin Responsable (borrador) la columna cae a quien generó la cotización', async () => {
     mockedApi.quotes.list.mockResolvedValue(makeResult({ data: [makeRow({ designer: null })] }))
     renderPage()
-    expect(await screen.findByText('Designer Demo')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Demo')).toBeInTheDocument()
   })
 
   it('muestra las filas de la tabla', async () => {
@@ -113,7 +113,7 @@ describe('VentasDisenoQuotesListPage', () => {
 
     expect(await screen.findByText('COT-2026-0001')).toBeInTheDocument()
     expect(screen.getByText('Grupo Delta')).toBeInTheDocument()
-    expect(screen.getByText('Designer Demo')).toBeInTheDocument()
+    expect(screen.getByText('Vendedor Demo')).toBeInTheDocument()
   })
 
   it('sin cotizaciones muestra el mensaje vacío', async () => {
@@ -180,15 +180,15 @@ describe('VentasDisenoQuotesListPage', () => {
     it('mientras llega la búsqueda nueva se siguen viendo los resultados anteriores, atenuados', async () => {
       mockedApi.quotes.list.mockResolvedValueOnce(makeResult({ data: [makeRow()] }))
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
 
       let resolver: (v: ReturnType<typeof makeResult>) => void = () => {}
       mockedApi.quotes.list.mockReturnValueOnce(new Promise(r => { resolver = r }) as never)
       buscar('Delta')
 
       await waitFor(() => expect(llamadasConBusqueda()).toHaveLength(1))
-      expect(screen.getByText('Designer Demo')).toBeInTheDocument()                 // la tabla no se vació
-      expect(screen.getByText('Designer Demo').closest('[aria-busy="true"]')).not.toBeNull()
+      expect(screen.getByText('Vendedor Demo')).toBeInTheDocument()                 // la tabla no se vació
+      expect(screen.getByText('Vendedor Demo').closest('[aria-busy="true"]')).not.toBeNull()
 
       resolver(makeResult({ data: [] }))
       await screen.findByText('ventasDiseno:quotesList.table.empty')

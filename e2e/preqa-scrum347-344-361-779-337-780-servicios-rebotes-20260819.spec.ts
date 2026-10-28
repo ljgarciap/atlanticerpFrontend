@@ -12,7 +12,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  *
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
  * (password = email): liderservicios@test.com (Lider Servicios, lider_servicios),
- * tecnicoservicios@test.com (Tecnico Servicios Test, tecnico), lidercompras@test.com
+ * tecnico@test.com (Tecnico Test, tecnico), lidercompras@test.com
  * (Lider Compras, lider_compras), gerencia5@test.com (Gerencia, management — mbekhar/daniela/
  * luis.garcia NO loguean con password=email en este entorno, ver hallazgo de proceso en el reporte).
  *
@@ -24,7 +24,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * (`ExternalTechnicianController::summary()`, usado por GET /servicios/external-technicians)
  * nunca fue tocado por el fix — sigue exponiendo `tarifa_dia` a cualquier rol basado solo en
  * `tarifa_visible`, ignorando `puede_ver_costos` — la columna TARIFA de la tabla "Técnicos
- * externos" le muestra $25.00 a Tecnico Servicios.
+ * externos" le muestra $25.00 a Tecnico.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -194,11 +194,11 @@ test('8. Lider Servicios (puede_ver_costos) — ficha de técnico externo id 2: 
   await expect(page.getByText('$25.00').first()).toBeVisible()
 })
 
-test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
+test('9. HALLAZGO CRÍTICO — Tecnico (tecnico, sin puede_ver_costos): abrir la ficha del mismo técnico CRASHEA (pantalla en blanco)', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
-  await login(page, 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com')
 
   // 9a. La tabla de LISTADO ya leakea tarifa_dia (ExternalTechnicianController::summary() nunca
   // se tocó en el fix de SCRUM-337, sigue exponiendo tarifa_dia basado solo en tarifa_visible,
@@ -207,7 +207,7 @@ test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico, sin puede_ver_costos)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/09-scrum337-carlos-listado-leak-tarifa.png`, fullPage: true })
   const listLeak = await page.locator('tbody tr', { hasText: 'QA Luis Vargas' }).getByText('$25.00').count()
-  console.log('[SCRUM-337 CRÍTICO 1/2] "$25.00" visible para Tecnico Servicios en la tabla de listado:', listLeak > 0)
+  console.log('[SCRUM-337 CRÍTICO 1/2] "$25.00" visible para Tecnico en la tabla de listado:', listLeak > 0)
 
   // 9b. Abrir la ficha detalle crashea la app entera (pantalla en blanco) — regresión introducida
   // por el propio fix del backend (8e162f8), que dejó de mandar la key `rate_history` para este
@@ -217,7 +217,7 @@ test('9. HALLAZGO CRÍTICO — Tecnico Servicios (tecnico, sin puede_ver_costos)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `${DL_DIR}/10-scrum337-carlos-ficha-crash.png`, fullPage: true })
 
-  console.log('[SCRUM-337 CRÍTICO 2/2] errores de página al abrir la ficha como Tecnico Servicios:', JSON.stringify(errors))
+  console.log('[SCRUM-337 CRÍTICO 2/2] errores de página al abrir la ficha como Tecnico:', JSON.stringify(errors))
   const bodyText = await page.locator('body').innerText()
   console.log('[SCRUM-337] body text tras el intento de apertura (esperado: vacío = crash):', JSON.stringify(bodyText.slice(0, 200)))
 

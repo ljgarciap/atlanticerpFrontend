@@ -41,7 +41,7 @@ function makeQuote(overrides: Partial<QuoteDetail> = {}): QuoteDetail {
     pipeline_card_id: null, document_status: 'sent',
     master_client: { id: 1, name: 'Grupo Delta' }, sub_client: { id: 1, business_name: 'Delta Residencial' },
     sales_project: { id: 1, name: 'Proyecto Alfa', tag: null },
-    ruc: '155-0000-1-2026', description: 'Sala Principal', owner: { id: 1, name: 'Designer Demo' },
+    ruc: '155-0000-1-2026', description: 'Sala Principal', owner: { id: 1, name: 'Vendedor Demo' },
     architect: null, delivery_type: 'single', delivery_dates: ['2026-09-01'],
     contacts: [{ pivot_id: 1, id: 1, name: 'Contacto Demo', role: 'client', phone: '6000-0000', email: null }],
     can_edit: true,
@@ -61,8 +61,8 @@ function makeVersions(overrides: Partial<QuoteVersionsResult> = {}): QuoteVersio
   return {
     card_stage: 'quote',
     versions: [
-      { id: 1, version: 1, folio: 'COT-2026-0001', confirmed_at: '2026-07-01T00:00:00Z', generated_by: 'Designer Demo', grand_total: 100 },
-      { id: 2, version: 2, folio: 'COT-2026-0002', confirmed_at: '2026-08-01T00:00:00Z', generated_by: 'Designer Demo', grand_total: 214 },
+      { id: 1, version: 1, folio: 'COT-2026-0001', confirmed_at: '2026-07-01T00:00:00Z', generated_by: 'Vendedor Demo', grand_total: 100 },
+      { id: 2, version: 2, folio: 'COT-2026-0002', confirmed_at: '2026-08-01T00:00:00Z', generated_by: 'Vendedor Demo', grand_total: 214 },
     ],
     ...overrides,
   }

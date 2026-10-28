@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import type { UserInfo } from '@/types/auth'
 
 const user = (overrides: Partial<UserInfo> = {}): UserInfo => ({
-  id: 1, first_name: 'Vendedor Disenador', last_name: 'Q', email: 'n@q.c', role: 'vendedor',
+  id: 1, first_name: 'Vendedor', last_name: 'Q', email: 'n@q.c', role: 'vendedor',
   permissions: ['ventas_diseno.read'], modules: { ventas_diseno: { view: true, view_team: false, edit: false, approve: false } }, ...overrides,
 })
 
@@ -44,7 +44,7 @@ describe('GuestOnly', () => {
     expect(screen.getByTestId('destino')).toHaveTextContent('/bodega/pedidos/status?search=PED-2026-0009')
   })
 
-  // Pre-QA N-1: Vendedor Disenador cierra sesión en Status con una búsqueda y entra otra persona en el mismo equipo.
+  // Pre-QA N-1: Vendedor cierra sesión en Status con una búsqueda y entra otra persona en el mismo equipo.
   it('con destino ligado a OTRA persona va a su inicio: no hereda la ruta ni la búsqueda de la anterior', () => {
     useAuthStore.setState({ user: user({ id: 6 }) })
     renderGuest({ from: '/bodega/pedidos/status?search=PED-2026-0009', fromUserId: 35 })

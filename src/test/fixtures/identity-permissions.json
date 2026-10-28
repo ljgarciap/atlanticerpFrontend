@@ -427,7 +427,7 @@
    ]
   },
   {
-   "email": "ayudantegeneralbodega@test.com",
+   "email": "auxiliarbodega@test.com",
    "role": "auxiliar_bodega",
    "permissions": [
     "bodega.edit",
@@ -481,7 +481,7 @@
    ]
   },
   {
-   "email": "tecnicoservicios@test.com",
+   "email": "tecnico@test.com",
    "role": "tecnico",
    "permissions": [
     "ai.use",
@@ -503,7 +503,7 @@
    ]
   },
   {
-   "email": "tecnicoservicios2@test.com",
+   "email": "tecnico2@test.com",
    "role": "tecnico",
    "permissions": [
     "ai.use",
@@ -525,7 +525,7 @@
    ]
   },
   {
-   "email": "tecnicoservicios3@test.com",
+   "email": "tecnico3@test.com",
    "role": "tecnico",
    "permissions": [
     "ai.use",
@@ -547,7 +547,7 @@
    ]
   },
   {
-   "email": "garantiasservicios@test.com",
+   "email": "tecnicogarantias@test.com",
    "role": "tecnico_garantias",
    "permissions": [
     "ai.use",
@@ -568,7 +568,7 @@
    ]
   },
   {
-   "email": "vendedordisenador@test.com",
+   "email": "vendedor@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -592,7 +592,7 @@
    ]
   },
   {
-   "email": "vendedordisenador2@test.com",
+   "email": "vendedor2@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -616,7 +616,7 @@
    ]
   },
   {
-   "email": "vendedordisenador3@test.com",
+   "email": "vendedor3@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -640,7 +640,7 @@
    ]
   },
   {
-   "email": "vendedordisenador4@test.com",
+   "email": "vendedor4@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -664,7 +664,7 @@
    ]
   },
   {
-   "email": "vendedordisenador5@test.com",
+   "email": "vendedor5@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -688,7 +688,7 @@
    ]
   },
   {
-   "email": "vendedordisenador6@test.com",
+   "email": "vendedor6@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -712,7 +712,7 @@
    ]
   },
   {
-   "email": "vendedordisenador7@test.com",
+   "email": "vendedor7@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -736,7 +736,7 @@
    ]
   },
   {
-   "email": "vendedordisenador8@test.com",
+   "email": "vendedor8@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -760,7 +760,7 @@
    ]
   },
   {
-   "email": "vendedordisenador9@test.com",
+   "email": "vendedor9@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -784,7 +784,7 @@
    ]
   },
   {
-   "email": "vendedordisenador10@test.com",
+   "email": "vendedor10@test.com",
    "role": "vendedor",
    "permissions": [
     "admin_contab.commissions_internal.view",
@@ -953,7 +953,7 @@
    ]
   },
   {
-   "email": "designer@atlantic.test",
+   "email": "vendedor@atlantic.test",
    "role": "vendedor",
    "permissions": [
     "admin_contab.view",
@@ -975,7 +975,7 @@
    ]
   },
   {
-   "email": "supervisor@atlantic.test",
+   "email": "nivel5@atlantic.test",
    "role": "",
    "permissions": [
     "ai.use",
@@ -992,7 +992,7 @@
    ]
   },
   {
-   "email": "electrician@atlantic.test",
+   "email": "nivel2@atlantic.test",
    "role": "",
    "permissions": [
     "crm.read",
@@ -1000,7 +1000,7 @@
    ]
   },
   {
-   "email": "multi@atlantic.test",
+   "email": "nivel8@atlantic.test",
    "role": "management",
    "permissions": [
     "admin_contab.edit",
@@ -1052,7 +1052,7 @@
    ]
   },
   {
-   "email": "readonly@atlantic.test",
+   "email": "nivel1@atlantic.test",
    "role": "",
    "permissions": [
     "admin_contab.operations.manage",

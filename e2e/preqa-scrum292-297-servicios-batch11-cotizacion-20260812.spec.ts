@@ -10,12 +10,12 @@ import { test, expect, Page, Locator } from '@playwright/test'
  *   - INS-2026-0005 — Instalación subcontratada, informe No aplica (gate abierto), sin técnico interno,
  *     quote_status corregido a PENDING (no NOT_APPLICABLE) tras revisar el primer screenshot.
  *   - GAR-2026-0005 — Garantía, informe pendiente (gate debe bloquear).
- *   - Técnico externo activo #1 "Luis Vargas" ($25/día), inactivo #2 "Tecnico Servicios Inactivo".
+ *   - Técnico externo activo #1 "Luis Vargas" ($25/día), inactivo #2 "Tecnico Inactivo".
  */
 
 const LIDER_SERVICIOS  = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, tiene view_cost_breakdown
-const TECNICO_ASIGNADO = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico, asignado a RET-2026-0004
-const TECNICO_AJENO    = 'tecnicoservicios2@test.com'       // Tecnico Servicios Test 2 — tecnico, NO asignado a ningún ticket de este batch
+const TECNICO_ASIGNADO = 'tecnico@test.com'      // Tecnico — tecnico, asignado a RET-2026-0004
+const TECNICO_AJENO    = 'tecnico2@test.com'       // Tecnico Test 2 — tecnico, NO asignado a ningún ticket de este batch
 const GERENCIA_SIN_PERM = 'gerencia@test.com'    // Management, NO tiene servicios.quotes.view_cost_breakdown
 
 async function login(page: Page, email: string) {
@@ -329,7 +329,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
   })
 
   test('Pre-QA adversarial — Escenario 3/4 REQ-234: técnico interno no puede decidir + rechazo habilita regenerar', async ({ page }) => {
-    // Ticket dedicado GAR-2026-0006, técnico asignado = Tecnico Servicios.
+    // Ticket dedicado GAR-2026-0006, técnico asignado = Tecnico.
     await test.step('Setup — Lider Servicios genera, agrega ítem y envía la cotización', async () => {
       await login(page, LIDER_SERVICIOS)
       const detail = await openTicketByNumero(page, 'GAR-2026-0006')
@@ -361,7 +361,7 @@ test.describe('Batch 11 — Cotización de Servicio', () => {
       await expect(quote.getByRole('button', { name: /^aprobar$/i })).toHaveCount(0)
       await expect(quote.getByRole('button', { name: /^rechazar$/i })).toHaveCount(0)
 
-      // Defensa en profundidad — intento directo por API con el token de Tecnico Servicios.
+      // Defensa en profundidad — intento directo por API con el token de Tecnico.
       const token = await page.evaluate(() => localStorage.getItem('accessToken'))
       const res = await page.request.patch('http://localhost:8094/api/servicios/tickets/19/quote/decidir', {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },

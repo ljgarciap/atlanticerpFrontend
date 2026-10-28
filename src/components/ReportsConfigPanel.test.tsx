@@ -25,7 +25,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
 const mockedApi = vi.mocked(ventasDisenoApi, true)
 
 function makeGoal(overrides: Partial<SalesGoalRow> = {}): SalesGoalRow {
-  return { user_id: 1, user_name: 'Designer Demo', goal_amount: null, goal_plus_amount: null, ...overrides }
+  return { user_id: 1, user_name: 'Vendedor Demo', goal_amount: null, goal_plus_amount: null, ...overrides }
 }
 
 function makeSettings(overrides: Partial<ReportSettingsValue> = {}): ReportSettingsValue {
@@ -52,7 +52,7 @@ describe('ReportsConfigPanel', () => {
     mockedApi.reports.goals.upsert.mockResolvedValue(makeGoal({ goal_amount: 15000 }))
     renderPanel()
 
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     const goalInput = document.querySelectorAll('input[inputmode="decimal"]')[0] as HTMLInputElement
     fireEvent.change(goalInput, { target: { value: '15000' } })
 
@@ -67,8 +67,8 @@ describe('ReportsConfigPanel', () => {
     mockedApi.reports.settings.update.mockResolvedValue(makeSettings({ low_sales_months: 4 }))
     renderPanel()
 
-    await screen.findByText('Designer Demo')
-    // `findByDisplayValue` (async): `findByText('Designer Demo')` solo garantiza que resolvió el
+    await screen.findByText('Vendedor Demo')
+    // `findByDisplayValue` (async): `findByText('Vendedor Demo')` solo garantiza que resolvió el
     // query de goals; el de settings (que trae el "3") puede llegar después — un `getByDisplayValue`
     // síncrono acá era flaky en CI (ver feedback_flaky_controlled_value_assertions).
     const monthsInput = await screen.findByDisplayValue('3')
@@ -83,7 +83,7 @@ describe('ReportsConfigPanel', () => {
 
   it('acepta coma decimal al tipear una Meta, en vez de descartarla (SCRUM-146)', async () => {
     renderPanel()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     const goalInput = document.querySelectorAll('input[inputmode="decimal"]')[0] as HTMLInputElement
     fireEvent.change(goalInput, { target: { value: '1,5' } })
     expect(goalInput.value).toBe('1.5')
@@ -96,7 +96,7 @@ describe('ReportsConfigPanel', () => {
     })
     renderPanel()
 
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     const goalInput = document.querySelectorAll('input[inputmode="decimal"]')[0] as HTMLInputElement
     fireEvent.change(goalInput, { target: { value: '999999999999999' } })
     fireEvent.click(screen.getByText('ventasDiseno:reports.config.save'))

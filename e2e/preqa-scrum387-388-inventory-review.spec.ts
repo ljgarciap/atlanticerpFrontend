@@ -50,7 +50,7 @@ async function driveToInventoryReview(page, orderId: number, orderNumber: string
   const card = page.getByTestId(`order-card-${orderId}`)
   await expect(card).toBeVisible()
   await card.getByRole('button', { name: /asignar picker/i }).click()
-  await page.getByTestId(`assign-picker-select-${orderId}`).selectOption({ label: 'Ayudante General Bodega Test' })
+  await page.getByTestId(`assign-picker-select-${orderId}`).selectOption({ label: 'Auxiliar Bodega Test' })
   await page.getByTestId(`assign-picker-confirm-${orderId}`).click()
   await page.waitForTimeout(900)
 
@@ -116,7 +116,7 @@ test.describe('SCRUM-387/388 — Revisión de Inventario', () => {
   })
 
   test('rol Picker (auxiliar_bodega) — el botón "Revisar Inventario" no aparece nunca, y el endpoint responde 403 directo', async ({ page }) => {
-    await login(page, 'ayudantegeneralbodega@test.com')
+    await login(page, 'auxiliarbodega@test.com')
     await page.goto('/bodega/pedidos')
     await page.waitForTimeout(1200)
 

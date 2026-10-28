@@ -39,7 +39,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
     await expect(page.getByRole('button', { name: 'Asistente Bodega Test 2', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Asistente Bodega Test', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Lider Bodega Test', exact: true })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: 'Ayudante General Bodega Test', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Auxiliar Bodega Test', exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Transporte Test', exact: true })).toHaveCount(0)
   })
 

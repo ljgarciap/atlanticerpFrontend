@@ -26,7 +26,7 @@ test('SCRUM-391 — picker deja de tener en_picking mientras se usa el modal', a
 
   await page.getByRole('button', { name: /imprimir picking del día/i }).click()
   await page.waitForTimeout(500)
-  await page.getByRole('button', { name: 'Ayudante General Bodega Test' }).click()
+  await page.getByRole('button', { name: 'Auxiliar Bodega Test' }).click()
   await page.waitForTimeout(800)
   await expect(page.getByTestId('picking-orders-count')).toContainText('2')
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click()
@@ -44,9 +44,9 @@ test('SCRUM-391 — picker deja de tener en_picking mientras se usa el modal', a
   await page.waitForTimeout(500)
   await page.screenshot({ path: 'e2e/.tmp/scrum391-stale-chip-reopened.png' })
 
-  const chip = page.getByRole('button', { name: 'Ayudante General Bodega Test' })
+  const chip = page.getByRole('button', { name: 'Auxiliar Bodega Test' })
   const chipStillThere = await chip.count()
-  console.log('SCRUM-391 stale-chip: sigue apareciendo Ayudante General Bodega como chip?', chipStillThere > 0)
+  console.log('SCRUM-391 stale-chip: sigue apareciendo Auxiliar Bodega como chip?', chipStillThere > 0)
 
   if (chipStillThere > 0) {
     await chip.click()

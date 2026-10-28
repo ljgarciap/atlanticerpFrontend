@@ -14,7 +14,7 @@ test.describe.configure({ mode: 'serial' })
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:8090'
 const MGMT_EMAIL = 'management@atlantic.test'
 const MGMT_PASS  = 'Password123!'
-const DESIGNER_EMAIL = 'designer@atlantic.test'
+const DESIGNER_EMAIL = 'vendedor@atlantic.test'
 const DESIGNER_PASS  = 'Password123!'
 
 async function login(page: Page, email: string, pass: string) {
@@ -74,7 +74,7 @@ test.describe('SCRUM-112 — Top de vendedores (badge siempre visible)', () => {
     // Sin hover: getByText ya exige que el texto esté en el DOM visible, no solo en title=
     await expect(badges.first()).toBeVisible()
 
-    // layout: nombre largo (Vendedor Disenador Test / Vendedor Disenador Test 8) no debe desbordar la card
+    // layout: nombre largo (Vendedor Test / Vendedor Test 8) no debe desbordar la card
     const panel = page.locator('text=Top de vendedores').locator('..').locator('..')
     await page.screenshot({ path: 'e2e/.tmp/preqa-b4/112-3-badges-visible.png', fullPage: true })
 
@@ -324,13 +324,13 @@ test.describe('SCRUM-122 — Arquitecto: buscar y crear (mini-form Teléfono/Cor
 
 // ============================= SCRUM-146 =============================
 test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, complementa tinker)', () => {
-  test('1. Reportes > Configuración muestra los 9 vendedores con Meta real + Vendedor Disenador sin Meta', async ({ page }) => {
+  test('1. Reportes > Configuración muestra los 9 vendedores con Meta real + Vendedor sin Meta', async ({ page }) => {
     await login(page, MGMT_EMAIL, MGMT_PASS)
     await gotoReports(page)
     await page.getByRole('main').getByRole('button', { name: 'Configuración' }).click()
     await page.waitForTimeout(700)
-    await expect(page.getByText('Vendedor Disenador Test 8')).toBeVisible()
-    await expect(page.getByText('Vendedor Disenador Test 6')).toBeVisible()
+    await expect(page.getByText('Vendedor Test 8')).toBeVisible()
+    await expect(page.getByText('Vendedor Test 6')).toBeVisible()
     await page.screenshot({ path: 'e2e/.tmp/preqa-b4/146-1-config-roster.png', fullPage: true })
   })
 
@@ -340,13 +340,13 @@ test.describe('SCRUM-146 — Metas reales de vendedores (verificación UI, compl
     await page.getByRole('main').getByRole('button', { name: 'Configuración' }).click()
     await page.waitForTimeout(700)
     const roster = [
-      'Vendedor Disenador Test 8', 'Vendedor Disenador Test 9', 'Vendedor Disenador Test 5', 'Vendedor Disenador Test 10',
-      'Vendedor Disenador Test 2', 'Vendedor Disenador Test', 'Vendedor Disenador Test 3', 'Vendedor Disenador Test 7', 'Vendedor Disenador Test 4',
+      'Vendedor Test 8', 'Vendedor Test 9', 'Vendedor Test 5', 'Vendedor Test 10',
+      'Vendedor Test 2', 'Vendedor Test', 'Vendedor Test 3', 'Vendedor Test 7', 'Vendedor Test 4',
     ]
     for (const name of roster) {
       await expect(page.getByText(name)).toBeVisible()
     }
-    // Vendedor Disenador sin meta -> no debe romper el render (fila vacía, sin error de consola)
+    // Vendedor sin meta -> no debe romper el render (fila vacía, sin error de consola)
     const consoleErrors: string[] = []
     page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()) })
     await page.reload()

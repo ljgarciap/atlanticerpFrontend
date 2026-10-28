@@ -16,7 +16,7 @@ import { test, expect, Page } from '@playwright/test'
 // RequirePermission en App.tsx, mismo patron ya usado en /crm/dashboard (SCRUM-674, 2026-07-31).
 
 const FELIX = 'contabilidad@test.com'
-const DESIGNER = 'vendedordisenador2@test.com'
+const DESIGNER = 'vendedor2@test.com'
 
 async function login(page: Page, email: string): Promise<boolean> {
   await page.context().clearCookies()

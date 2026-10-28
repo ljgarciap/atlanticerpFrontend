@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
  * PDF / SCRUM-291). Password default = email (BusinessRoleUserSeeder).
  */
 const LIDER_SERVICIOS = 'liderservicios@test.com'
-const TECNICO_SERVICIOS = 'tecnicoservicios@test.com'
+const TECNICO_SERVICIOS = 'tecnico@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

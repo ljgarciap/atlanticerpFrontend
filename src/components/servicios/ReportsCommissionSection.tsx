@@ -25,15 +25,15 @@ function periodLabel(period: { year: number; month: number }, locale: string): s
 }
 
 /**
- * REQ-286 — sección "Comisión — Tecnico Servicios Test" en Reportes, SOLO LECTURA. UI de total+desglose y
+ * REQ-286 — sección "Comisión — Tecnico Test" en Reportes, SOLO LECTURA. UI de total+desglose y
  * navegación de período calcadas de InternalTechnicianCommissionResultModal.tsx (Batch 10), pero
- * sin id de técnico en la URL — el backend resuelve "Tecnico Servicios Test" del lado servidor (único con
+ * sin id de técnico en la URL — el backend resuelve "Tecnico Test" del lado servidor (único con
  * plan de comisión activo hoy).
  *
  * Gate en 2 pasos porque este panel no tiene el id del técnico a mano como sí lo tiene
  * InternalTechniciansPage (`canViewCommissionResultFor`): Gerencia/superadmin siempre califican;
  * cualquier otro usuario califica solo si su cuenta está linkeada (`user_id`) al perfil de
- * "Tecnico Servicios Test" en internal_technicians — mismo query key ya cacheado por TanStack Query en
+ * "Tecnico Test" en internal_technicians — mismo query key ya cacheado por TanStack Query en
  * InternalTechniciansPage (`servicios-internal-technicians`), no se duplica la llamada de red.
  * Si no califica: no se renderiza nada Y la query de comisión nunca se dispara (`enabled: false`).
  *
@@ -60,8 +60,8 @@ export default function ReportsCommissionSection({ globalPeriod }: Props) {
   const isManagement = usePermission('platform.management')
   // El técnico con plan de bonificación se resuelve por `has_bonus_plan`, el MISMO flag que usa el
   // backend (`ReportsController::comisionTecnico()`), nunca por su nombre: el nombre es
-  // editable en Técnicos Internos, y con el match por string un simple renombre ("Tecnico Servicios A.
-  // Tecnico Servicios") le ocultaba a Tecnico Servicios su propia sección aunque el backend siguiera autorizándolo
+  // editable en Técnicos Internos, y con el match por string un simple renombre ("Tecnico A.
+  // Tecnico") le ocultaba a Tecnico su propia sección aunque el backend siguiera autorizándolo
   // (hallazgo de Pre-QA 2026-08-12, reproducido en vivo).
   const bonusTechnician = technicians?.find(tech => tech.has_bonus_plan)
   const isBonusTechnician = !!user && !!bonusTechnician && bonusTechnician.user_id === user.id

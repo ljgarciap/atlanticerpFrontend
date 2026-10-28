@@ -37,7 +37,7 @@ import { execSync } from 'node:child_process'
  *  - liderservicios@test.com (lider_servicios) — genera/envía/decide cotizaciones, Ajustes
  *    de Servicios visible pero NO editable.
  *  - gerencia@test.com  (management) — Ajustes de Servicios editable (REQ-237 RN1).
- *  - tecnicoservicios2@test.com    (tecnico) — NO asignado a los tickets de este
+ *  - tecnico2@test.com    (tecnico) — NO asignado a los tickets de este
  *    fixture, usado para confirmar visibilidad transversal del historial global (REQ-250 RN2).
  */
 test.describe.configure({ mode: 'serial' })
@@ -45,7 +45,7 @@ test.describe.configure({ mode: 'serial' })
 const BASE             = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 const LIDER_SERVICIOS  = 'liderservicios@test.com'
 const MANAGEMENT       = 'gerencia@test.com'
-const TECNICO_AJENO    = 'tecnicoservicios2@test.com'
+const TECNICO_AJENO    = 'tecnico2@test.com'
 
 interface Fixture {
   masterClientId: number
@@ -285,7 +285,7 @@ test.describe('Batch 12 — Cotización: documento, historial, condiciones', () 
     await page.waitForTimeout(800)
     await page.screenshot({ path: 'test-results/b12-250-01-global-history-tecnico-ajeno.png', fullPage: true })
 
-    // Escenario 2 (RN2) — visibilidad transversal: Tecnico Servicios no está asignado a ningún ticket de este
+    // Escenario 2 (RN2) — visibilidad transversal: Tecnico no está asignado a ningún ticket de este
     // fixture, pero debe ver AMBAS versiones (incluida la Rechazada, RN1) igual.
     await page.getByPlaceholder(/buscar/i).fill(fx.ticketMultiNumero)
     await page.waitForTimeout(500)

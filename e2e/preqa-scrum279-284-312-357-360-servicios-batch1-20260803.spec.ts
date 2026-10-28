@@ -7,10 +7,10 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com    (lider_servicios) — Lider Servicios, único que cambia estado.
- *  - tecnicoservicios@test.com      (tecnico) — solo lectura del estado.
- *  - garantiasservicios@test.com   (tecnico_garantias) — solo lectura del estado.
+ *  - tecnico@test.com      (tecnico) — solo lectura del estado.
+ *  - tecnicogarantias@test.com   (tecnico_garantias) — solo lectura del estado.
  *  - gerencia@test.com     (management) — solo lectura del estado.
- *  - vendedordisenador2@test.com  (vendedor) — menú reducido a 3 tabs.
+ *  - vendedor2@test.com  (vendedor) — menú reducido a 3 tabs.
  *  - contabilidad@test.com       (lider_admin_contab) — sin acceso al módulo.
  *  - lidercompras@test.com   (lider_compras) — sin acceso al módulo.
  */
@@ -94,14 +94,14 @@ test('2. Lider Servicios — REQ-221: Tablero renderiza las 6 columnas (Reportad
   expect(columnHeaders).toBe(6)
 })
 
-test('3. Tecnico Servicios (tecnico) — select de estado DESHABILITADO pero visible, no oculto', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+test('3. Tecnico (tecnico) — select de estado DESHABILITADO pero visible, no oculto', async ({ page }) => {
+  await login(page, 'tecnico@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/04-tabla-carlos.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-281] Tecnico Servicios — selects visibles:', count)
+  console.log('[SCRUM-281] Tecnico — selects visibles:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 })
@@ -118,14 +118,14 @@ test('4. Gerencia (management) — select de estado DESHABILITADO pero visible',
   await expect(selects.first()).toBeDisabled()
 })
 
-test('5. Vendedor Disenador (vendedor) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('5. Vendedor (vendedor) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/06-tabla-neil.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-281] Vendedor Disenador — selects visibles:', count)
+  console.log('[SCRUM-281] Vendedor — selects visibles:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 
@@ -133,7 +133,7 @@ test('5. Vendedor Disenador (vendedor) — solo lectura + menú reducido a 3 tab
   const nav = page.locator('nav[aria-label]').first()
   await expect(nav).toBeVisible()
   const navText = await nav.textContent()
-  console.log('[SCRUM-358] Menú de Vendedor Disenador:', navText)
+  console.log('[SCRUM-358] Menú de Vendedor:', navText)
   await expect(nav.getByText(/insumos/i)).toHaveCount(0)
   await expect(nav.getByText(/reportes/i)).toHaveCount(0)
 
@@ -411,9 +411,9 @@ test('14. REQ-218 Escenario 4 — cotización Rechazada sin reemplazo bloquea (r
   console.log('TICKET_ID_FOR_TINKER=' + ticket.id)
 })
 
-test('15. Tecnico Servicios (tecnico) — API directa: 403 al intentar cambiar estado aunque tenga servicios.edit', async ({ request }) => {
+test('15. Tecnico (tecnico) — API directa: 403 al intentar cambiar estado aunque tenga servicios.edit', async ({ request }) => {
   const loginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: 'tecnicoservicios@test.com', password: 'tecnicoservicios@test.com' },
+    data: { email: 'tecnico@test.com', password: 'tecnico@test.com' },
   })
   const { token } = await loginRes.json()
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -425,7 +425,7 @@ test('15. Tecnico Servicios (tecnico) — API directa: 403 al intentar cambiar e
   const r = await request.patch(`${BASE}/api/servicios/tickets/${anyTicket.id}/estado`, {
     headers, data: { estado: 'scheduled' },
   })
-  console.log('[REQ-218 RN7 backend] Tecnico Servicios (tecnico) intenta cambiar estado vía API directa -> HTTP', r.status())
+  console.log('[REQ-218 RN7 backend] Tecnico (tecnico) intenta cambiar estado vía API directa -> HTTP', r.status())
   expect(r.status()).toBe(403)
 })
 

@@ -126,7 +126,7 @@ test('SCRUM-861.3 — "Ajustes de Compras" NO está embebido en Proveedores, viv
 // ---------- SCRUM-863 ----------
 
 const greetingCases: { email: string; label: string; path: string; firstNameOnly: string; fullName: string }[] = [
-  { email: 'vendedordisenador2@test.com', label: 'Ventas & Diseño (Vendedor Disenador Test 2)', path: '/ventas-diseno/home', firstNameOnly: 'NEIL', fullName: 'NEIL QUIEL' },
+  { email: 'vendedor2@test.com', label: 'Ventas & Diseño (Vendedor Test 2)', path: '/ventas-diseno/home', firstNameOnly: 'NEIL', fullName: 'NEIL QUIEL' },
   { email: 'lidercompras@test.com', label: 'Compras (Lider Compras Test)', path: '/compras/home', firstNameOnly: 'YIRENA', fullName: 'YIRENA TENG' },
   { email: 'liderbodega@test.com', label: 'Bodega (Lider Bodega Test)', path: '/bodega/home', firstNameOnly: 'ESTEBAN', fullName: 'ESTEBAN CARDENAS' },
   // NOTA 2026-09-13: el CLAUDE.md del proyecto (batch SCRUM-800, 2026-08-28) documenta que el
@@ -302,8 +302,8 @@ test('SCRUM-871 — Bodega vista Equipo (Lider Bodega, view_team=true): mismo ca
   expect(totalListItemsOnPage).toBeLessThan(200)
 })
 
-test('SCRUM-871 — Ventas & Diseño Home (Vendedor Disenador): Final Stage (2, <=5) NO muestra "Ver más"; Pendientes (15) sí', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+test('SCRUM-871 — Ventas & Diseño Home (Vendedor): Final Stage (2, <=5) NO muestra "Ver más"; Pendientes (15) sí', async ({ page }) => {
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
   const verMasCount = await page.getByRole('button', { name: /ver más/i }).count()

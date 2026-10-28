@@ -24,7 +24,7 @@ async function login(page: Page, email: string, password: string): Promise<void>
 // SCRUM-908 — fix del CRÍTICO: RequirePermission de /compras/inicio ampliado (re-check 2026-09-21)
 // ============================================================
 test('FIX VERIFICADO — designer (ventas_diseno.edit) ahora llega a /compras/inicio y ve su aprobación real', async ({ page }) => {
-  await login(page, 'designer@atlantic.test', 'Password123!')
+  await login(page, 'vendedor@atlantic.test', 'Password123!')
   await page.goto('/compras/inicio')
   await page.waitForTimeout(1000)
   await expect(page).toHaveURL(/\/compras\/inicio/)
@@ -118,7 +118,7 @@ test('la card de Aprobaciones Pendientes no usa emoji', async ({ page }) => {
 // SCRUM-938 — ClientPicker en el navegador real: DV field + búsqueda no se cae con tipeo rápido
 // ============================================================
 test('DV field (Subcliente, modal Nuevo Proyecto): solo dígitos, trunca a 2, sin maxlength', async ({ page }) => {
-  await login(page, 'designer@atlantic.test', 'Password123!')
+  await login(page, 'vendedor@atlantic.test', 'Password123!')
   await page.goto('/ventas-diseno/pipeline')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /nuevo proyecto/i }).first().click()

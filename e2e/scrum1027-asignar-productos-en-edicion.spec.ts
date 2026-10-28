@@ -215,7 +215,7 @@ for (const [stageName, envKey] of stages) {
       await page.context().clearCookies()
       await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
       await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() }).catch(() => {})
-      await page.locator('input[type="email"]').fill('readonly@atlantic.test')
+      await page.locator('input[type="email"]').fill('nivel1@atlantic.test')
       await page.locator('input[type="password"]').fill(PASS)
       await page.getByRole('button', { name: /iniciar sesión|login|ingresar/i }).click()
       await page.waitForURL(u => !u.pathname.includes('/login'), { timeout: 20000 })

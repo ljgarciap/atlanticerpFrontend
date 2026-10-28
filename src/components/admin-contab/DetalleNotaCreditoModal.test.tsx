@@ -110,12 +110,12 @@ describe('DetalleNotaCreditoModal — REQ-493', () => {
       devolucion_bodega_id: 42,
       bodega_trazabilidad: {
         return_number: 'HS-3402',
-        historial: [{ step: 'finalized', label: 'Devolución finalizada', at: '2026-08-20', by: 'Tecnico Servicios Test' }],
+        historial: [{ step: 'finalized', label: 'Devolución finalizada', at: '2026-08-20', by: 'Tecnico Test' }],
       },
     }))
     renderModal()
     expect(await screen.findByText(/notasCredito\.detalle\.trazabilidadBodegaTitle/)).toBeInTheDocument()
-    expect(screen.getByText(/Tecnico Servicios Test/)).toBeInTheDocument()
+    expect(screen.getByText(/Tecnico Test/)).toBeInTheDocument()
   })
 
   // SCRUM-943 — el badge de Facturación Electrónica solo tiene sentido una vez aplicada la nota.

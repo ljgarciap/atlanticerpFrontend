@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Cuentas reales (password = email, roster CoreUserSeeder):
  *  - Contabilidad (lider_admin_contab): contabilidad@test.com
  *  - Asistente Administrativa (asistente_administrativa): asistenteadministrativa@test.com
- *  - Vendedor Disenador Test 2 (vendedor): vendedordisenador2@test.com
+ *  - Vendedor Test 2 (vendedor): vendedor2@test.com
  *  - almacen (Bodega): liderbodega@test.com
  */
 test.describe.configure({ mode: 'serial' })
@@ -152,10 +152,10 @@ test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Contabilidad', asy
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-882 — vendedor (Vendedor Disenador) no ve Admin&Cont salvo Comisiones Internas
+// SCRUM-882 — vendedor (Vendedor) no ve Admin&Cont salvo Comisiones Internas
 // ---------------------------------------------------------------------------
-test('SCRUM-882.1 — Vendedor Disenador: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('SCRUM-882.1 — Vendedor: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/preqa-882-01-sidebar-neil-inicial.png', fullPage: true })
 
@@ -175,12 +175,12 @@ test('SCRUM-882.1 — Vendedor Disenador: sidebar NO muestra Inicio/Facturación
 
   const bodyText = await page.locator('body').innerText()
   for (const label of ['Facturación', 'Movimientos', 'Comisiones Externas', 'Arqueo de Caja', 'Cuentas Bancarias', 'Caja chica', 'Reportes']) {
-    expect(bodyText.includes(label), `no debería verse "${label}" en el sidebar de Vendedor Disenador`).toBeFalsy()
+    expect(bodyText.includes(label), `no debería verse "${label}" en el sidebar de Vendedor`).toBeFalsy()
   }
 })
 
-test('SCRUM-882.2 — Vendedor Disenador SIGUE viendo Comisiones Internas (solo su fila)', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('SCRUM-882.2 — Vendedor SIGUE viendo Comisiones Internas (solo su fila)', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1200)
   await page.screenshot({ path: 'e2e/.tmp/preqa-882-03-comisiones-internas-neil.png', fullPage: true })
@@ -203,8 +203,8 @@ const HIDDEN_ROUTES = [
 ]
 
 for (const route of HIDDEN_ROUTES) {
-  test(`SCRUM-882.3 — Vendedor Disenador por URL directa a ${route} queda bloqueado (no shell vacío)`, async ({ page }) => {
-    await login(page, 'vendedordisenador2@test.com')
+  test(`SCRUM-882.3 — Vendedor por URL directa a ${route} queda bloqueado (no shell vacío)`, async ({ page }) => {
+    await login(page, 'vendedor2@test.com')
     await page.goto(route)
     await page.waitForTimeout(1000)
     await page.screenshot({ path: `e2e/.tmp/preqa-882-04-blocked-${route.replace(/\//g, '_')}.png`, fullPage: true })
@@ -216,7 +216,7 @@ for (const route of HIDDEN_ROUTES) {
     // "sin acceso". Falla si el body está prácticamente vacío (shell roto).
     expect(bodyText.trim().length, `shell vacío en ${route}`).toBeGreaterThan(20)
     expect(page.url().includes(route) && bodyText.match(/acceso restringido|no autorizado|no tienes permiso/i) === null,
-      `Vendedor Disenador llegó al contenido real de ${route} sin bloqueo`
+      `Vendedor llegó al contenido real de ${route} sin bloqueo`
     ).toBeFalsy()
   })
 }

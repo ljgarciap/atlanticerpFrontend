@@ -18,11 +18,11 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const VENDEDOR_SIN_PERMISO = 'vendedordisenador@test.com'
+const VENDEDOR_SIN_PERMISO = 'vendedor@test.com'
 const MARK = 'gerencia3@test.com'
 const DAVID = 'gerencia2@test.com'
 const LIDER_COMPRAS = 'lidercompras@test.com'
-const TECNICO_SIN_VENTAS = 'tecnicoservicios@test.com' // solo-lectura, servicios — sin ventas_diseno.read
+const TECNICO_SIN_VENTAS = 'tecnico@test.com' // solo-lectura, servicios — sin ventas_diseno.read
 
 const STAMP = Date.now()
 const MASTER_CLIENT = `PreQA Master ${STAMP}`

@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
 //
 // Corre contra dev.atlanticerp.ai (BASE_URL), no contra un stack local — mismos datos que usará
 // marly.rangel al validar. `liderbodega@test.com` (Lider Bodega Test, lider_bodega) es el
-// usuario real con bodega.read; `designer@atlantic.test` es el usuario demo SIN bodega.read
+// usuario real con bodega.read; `vendedor@atlantic.test` es el usuario demo SIN bodega.read
 // usado también por `BodegaReportsControllerTest::test_reportes_requieren_bodega_read` (403 a
 // nivel API) — acá se verifica el mismo gate a nivel de ruta de React Router.
 
@@ -147,7 +147,7 @@ test('SCRUM-490 — recargar a mitad de un cambio de período no rompe la pantal
 })
 
 test('Gate de permiso — usuario sin bodega.read no accede a /bodega/reportes por URL directa', async ({ page }) => {
-  await login(page, 'designer@atlantic.test', 'Password123!')
+  await login(page, 'vendedor@atlantic.test', 'Password123!')
   await page.goto('/bodega/reportes')
   await page.waitForTimeout(1500)
 

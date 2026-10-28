@@ -10,14 +10,14 @@ import { test, expect, Page } from '@playwright/test'
  *
  * Cuentas reales (NUNCA *@atlantic.test, no existen en esta BD):
  *   superadmin: superadmin3@test.com (password = mismo email)
- *   Vendedor/Diseñador: vendedordisenador@test.com (password = mismo email)
+ *   Vendedor/Diseñador: vendedor@test.com (password = mismo email)
  *
  * Nota: el hallazgo de "restore borra override individual preexistente" ya se confirmó por
  * separado vía tinker directo (ver comentario de Jira / docs/pre-qa/scrum739-...) — este spec
  * cubre la superficie de UI (Sidebar/CatalogPage reales, botón "Visibilidad de módulos (UAT)").
  */
 const SUPERADMIN = 'superadmin3@test.com'
-const VENDEDOR = 'vendedordisenador@test.com'
+const VENDEDOR = 'vendedor@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()

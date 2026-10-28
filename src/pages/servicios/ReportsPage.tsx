@@ -22,7 +22,7 @@ import type { ReportsPeriodParams } from '@/types/servicios'
  * `period` es un único estado compartido por los primeros 5 paneles (Panorama del mes,
  * Instalaciones cotizadas vs. realizadas, Distribución por tipo, Distribución por técnico,
  * Servicios completados en el año — este último usa solo `period.year`). La sección de comisión
- * de Tecnico Servicios Test (REQ-286) recibe ese mismo `period` como `globalPeriod` (SCRUM-911, antes no
+ * de Tecnico Test (REQ-286) recibe ese mismo `period` como `globalPeriod` (SCRUM-911, antes no
  * lo recibía y quedaba anclada en su propio mes para siempre) — internamente conserva su propia
  * navegación de período (calcada del modal de resultado de comisión de Batch 10) para revisar
  * meses puntuales SOLO de esa tarjeta, pero cada cambio del filtro general la resincroniza. La

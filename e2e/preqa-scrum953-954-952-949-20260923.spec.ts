@@ -222,7 +222,7 @@ test('SCRUM-949 — Compras (Proveedores) no fue tocado: autocompletado y layout
 // ============================================================
 
 test('SCRUM-953 — Cotización: las partidas se muestran en el navegador en el mismo orden que la API', async ({ page }) => {
-  await login(page, 'vendedordisenador@test.com', 'vendedordisenador@test.com')
+  await login(page, 'vendedor@test.com', 'vendedor@test.com')
   // Cotización [PREQA-SCRUM953] creada por API en esta misma sesión de Pre-QA, id 269.
   await page.goto(`${DEV}/ventas-diseno/quotes/269`)
   await page.waitForTimeout(1500)

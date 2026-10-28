@@ -54,7 +54,7 @@ async function login(page, email: string, password = 'Password123!') {
 }
 
 test('SCRUM-829 — editar campos sin guardar + subir archivo no revierte el formulario', async ({ page }) => {
-  await login(page, 'designer@atlantic.test')
+  await login(page, 'vendedor@atlantic.test')
   await page.goto(`${BASE}/ventas-diseno/pipeline?card=585`)
   await page.waitForTimeout(1200)
   await page.screenshot({ path: 'e2e/.tmp/preqa829-01-modal-abierto.png' })

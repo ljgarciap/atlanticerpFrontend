@@ -345,7 +345,7 @@ test('Visual — chips y tabla sin iconografía de emoji (SCRUM-56)', async ({ p
 })
 
 test('Permisos — rol SIN bodega.read no accede (ni por UI ni por API directa)', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com')
   await page.goto('/bodega/inventario')
   await page.waitForTimeout(1000)
   const bodyText = await page.locator('body').innerText()

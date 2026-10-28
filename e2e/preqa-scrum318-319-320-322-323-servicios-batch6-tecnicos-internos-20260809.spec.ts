@@ -3,7 +3,7 @@ import { execSync } from 'node:child_process'
 
 /**
  * Pre-QA — Fase 4 Servicios, Batch 6 (SCRUM-318/319/320/322/323, REQ-255/256/257/259/260) —
- * Técnicos internos. SCRUM-321 (REQ-258, comisión Tecnico Servicios Test) queda deliberadamente fuera —
+ * Técnicos internos. SCRUM-321 (REQ-258, comisión Tecnico Test) queda deliberadamente fuera —
  * depende de REQ-292/Batch 7, sin construir todavía (ver comentario en el ticket).
  *
  * Corre contra el stack local (Vite dev server proxy a nginx:8090, ver vite.config.ts), no
@@ -23,8 +23,8 @@ import { execSync } from 'node:child_process'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com (lider_servicios) — alta completa, vista Equipo/Agenda.
- *  - tecnicoservicios@test.com   (tecnico) — solo consulta, sin alta.
- *  - vendedordisenador@test.com   (vendedor) — solo vista de Agenda equipo (RN5).
+ *  - tecnico@test.com   (tecnico) — solo consulta, sin alta.
+ *  - vendedor@test.com   (vendedor) — solo vista de Agenda equipo (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -45,10 +45,10 @@ $tenant->makeCurrent();
 $now = \\Carbon\\Carbon::now('America/Panama');
 $stamp = ${Date.now()};
 
-$carlos = \\App\\Models\\User::where('email', 'tecnicoservicios@test.com')->first();
-$pedro = \\App\\Models\\User::where('email', 'tecnicoservicios2@test.com')->first();
-$agustin = \\App\\Models\\User::where('email', 'tecnicoservicios3@test.com')->first();
-$miguel = \\App\\Models\\User::where('email', 'garantiasservicios@test.com')->first();
+$carlos = \\App\\Models\\User::where('email', 'tecnico@test.com')->first();
+$pedro = \\App\\Models\\User::where('email', 'tecnico2@test.com')->first();
+$agustin = \\App\\Models\\User::where('email', 'tecnico3@test.com')->first();
+$miguel = \\App\\Models\\User::where('email', 'tecnicogarantias@test.com')->first();
 
 function mk($numero, $tech, $estado, $start, $end) {
   return \\App\\Modules\\Servicios\\Models\\Ticket::create([
@@ -59,18 +59,18 @@ function mk($numero, $tech, $estado, $start, $end) {
   ]);
 }
 
-// Tecnico Servicios: 2 visitas hoy -- una más temprana (ya pasada) y una EN CURSO ahora (Ocupado/on_site).
+// Tecnico: 2 visitas hoy -- una más temprana (ya pasada) y una EN CURSO ahora (Ocupado/on_site).
 $early = $now->copy()->subHours(3);
 $tCarlosEarly = mk("E2E-{$stamp}-1", $carlos, 'resolved', $early->copy(), $early->copy()->addHour());
 $tCarlosOnSite = mk("E2E-{$stamp}-2", $carlos, 'scheduled', $now->copy()->subMinutes(15), $now->copy()->addMinutes(45));
 
-// Tecnico Servicios: próxima visita en 30 min -- En ruta.
+// Tecnico: próxima visita en 30 min -- En ruta.
 $tPedro = mk("E2E-{$stamp}-3", $pedro, 'scheduled', $now->copy()->addMinutes(30), $now->copy()->addMinutes(90));
 
 // Agustín: única visita de hoy ya terminada, sin más agendadas -- Fuera.
 $tAgustin = mk("E2E-{$stamp}-4", $agustin, 'resolved', $now->copy()->subHours(2), $now->copy()->subHour());
 
-// Garantias Servicios: visita CANCELADA hoy -- no debe contar ni afectar su estado (sigue Disponible, 0 visitas).
+// Tecnico Garantias: visita CANCELADA hoy -- no debe contar ni afectar su estado (sigue Disponible, 0 visitas).
 $tMiguelCancelled = mk("E2E-{$stamp}-5", $miguel, 'cancelled', $now->copy()->subMinutes(5), $now->copy()->addMinutes(55));
 
 echo "FIXTURE_JSON:" . json_encode([
@@ -139,12 +139,12 @@ test('REQ-255/256 — Vista Equipo refleja estado, especialidad y visitas de hoy
   await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await expect(page.getByText('Tecnico Servicios Test')).toBeVisible()
-  await expect(techCard(page, 'Tecnico Servicios Test').getByText('Ocupado')).toBeVisible()
-  await expect(techCard(page, 'Tecnico Servicios Test 2').getByText('En ruta')).toBeVisible()
-  await expect(techCard(page, 'Tecnico Servicios Test 3').getByText('Fuera')).toBeVisible()
-  await expect(techCard(page, 'Garantias Servicios Test').getByText('Disponible')).toBeVisible()
-  await expect(techCard(page, 'Garantias Servicios Test').getByText('Garantías')).toBeVisible()
+  await expect(page.getByText('Tecnico Test')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Test').getByText('Ocupado')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Test 2').getByText('En ruta')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Test 3').getByText('Fuera')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Garantias Test').getByText('Disponible')).toBeVisible()
+  await expect(techCard(page, 'Tecnico Garantias Test').getByText('Garantías')).toBeVisible()
 
   // Placeholders documentados (Herramientas/Batch 13, %1ra visita/REQ-211) — deben verse
   // sensatos ("0"/"—"), no crashear ni mostrar "null"/"undefined".
@@ -156,7 +156,7 @@ test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visi
   await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await techCard(page, 'Tecnico Servicios Test').getByRole('button', { name: /visitas hoy/i }).click()
+  await techCard(page, 'Tecnico Test').getByRole('button', { name: /visitas hoy/i }).click()
 
   const modal = page.getByTestId('internal-technician-visits-modal')
   await expect(modal).toBeVisible()
@@ -167,7 +167,7 @@ test('REQ-257 — "Visitas hoy" lista el detalle en orden cronológico; sin visi
   await modal.getByRole('button').first().click()
   await expect(modal).not.toBeVisible()
 
-  await techCard(page, 'Garantias Servicios Test').getByRole('button', { name: /visitas hoy/i }).click()
+  await techCard(page, 'Tecnico Garantias Test').getByRole('button', { name: /visitas hoy/i }).click()
   const modal2 = page.getByTestId('internal-technician-visits-modal')
   await expect(modal2).toBeVisible()
   await expect(modal2.getByText('Sin visitas hoy')).toBeVisible()
@@ -177,15 +177,15 @@ test('REQ-255 RN5 — clic en nombre/avatar abre el detalle con teléfono/correo
   await login(page, 'liderservicios@test.com')
   await gotoInternalTechnicians(page)
 
-  await page.getByText('Garantias Servicios Test').click()
+  await page.getByText('Tecnico Garantias Test').click()
   const detail = page.getByTestId('internal-technician-detail-modal')
   await expect(detail).toBeVisible()
   await expect(detail.getByText('Garantías')).toBeVisible()
-  await expect(detail.getByText('garantiasservicios@test.com')).toBeVisible()
+  await expect(detail.getByText('tecnicogarantias@test.com')).toBeVisible()
 })
 
 test('REQ-259 RN5 — técnico interno (tecnico) NO ve el botón de alta', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('+ Nuevo técnico')).not.toBeVisible()
@@ -194,7 +194,7 @@ test('REQ-259 RN5 — técnico interno (tecnico) NO ve el botón de alta', async
 })
 
 test('REQ-260 RN5 — Vendedor/Diseñador tiene acceso de solo vista a Agenda equipo, sin botón de alta', async ({ page }) => {
-  await login(page, 'vendedordisenador@test.com')
+  await login(page, 'vendedor@test.com')
   await gotoInternalTechnicians(page)
 
   await expect(page.getByText('+ Nuevo técnico')).not.toBeVisible()
@@ -210,13 +210,13 @@ test('REQ-260 — Agenda equipo agrupa por técnico y filtra a uno solo', async 
   await page.getByText('Agenda equipo').click()
   await page.waitForTimeout(1000)
 
-  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test 2' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Test' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Test 2' })).toBeVisible()
 
-  await page.getByLabel('Filtrar por técnico').selectOption({ label: 'Tecnico Servicios Test 2' })
+  await page.getByLabel('Filtrar por técnico').selectOption({ label: 'Tecnico Test 2' })
   await page.waitForTimeout(1000)
-  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test' })).not.toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Tecnico Servicios Test 2' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Test' })).not.toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tecnico Test 2' })).toBeVisible()
   await expect(page.getByText(fx.pedroEnRouteHora)).toBeVisible()
 })
 
