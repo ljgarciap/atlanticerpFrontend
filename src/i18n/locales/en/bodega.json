@@ -804,6 +804,44 @@
       },
       "saveError": "The change could not be saved.",
       "saved": "Saved."
+    },
+    "warehousesAdmin": {
+      "title": "Warehouses",
+      "help": "Create, rename or deactivate the company's warehouses. A warehouse with stock or history is not deleted: it is deactivated (it leaves the selectors and sales, and keeps its movements). System warehouses cannot be deactivated.",
+      "loading": "Loading warehouses…",
+      "new": {
+        "name": "New warehouse name",
+        "tipo": "Type",
+        "add": "Add warehouse"
+      },
+      "tipos": {
+        "bodega": "Warehouse",
+        "exhibicion": "Display room"
+      },
+      "columns": {
+        "name": "Name",
+        "tipo": "Type",
+        "state": "Status",
+        "actions": "Actions"
+      },
+      "state": {
+        "active": "Active",
+        "inactive": "Deactivated",
+        "system": "System"
+      },
+      "actions": {
+        "save": "Save name",
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "delete": "Delete",
+        "confirmDelete": "Delete “{{name}}”? It is only deleted if it is empty and has no history."
+      },
+      "aria": {
+        "name": "Name of {{name}}",
+        "tipo": "Type of {{name}}"
+      },
+      "saveError": "The change could not be saved.",
+      "saved": "Saved."
     }
   },
   "inventory": {

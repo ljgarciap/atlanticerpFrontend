@@ -53,7 +53,7 @@ export default function WarehouseSaleRulesPanel() {
                     <input
                       type="checkbox" checked={rule.permite_venta}
                       // la de por defecto no puede dejar de vender: primero se elige otra como por defecto
-                      disabled={mutation.isPending || rule.despacho_por_defecto}
+                      disabled={mutation.isPending || rule.despacho_por_defecto || rule.is_active === false}
                       onChange={e => change(rule, 'permite_venta', e.target.checked)}
                       aria-label={t('bodega:settings.warehouseRules.aria.sale', { name: rule.name })}
                       data-testid={`rule-sale-${rule.id}`}
