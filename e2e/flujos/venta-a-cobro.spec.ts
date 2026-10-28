@@ -251,6 +251,7 @@ test.describe('Flujo venta a cobro', () => {
     expect(guia.status).toBe(200)
     expect(await stage()).toBe('entregado')
     ctx.entregado = cantidad
+    ctx.itemCatalogo = conCatalogo.id
   })
 
   test('6. factura interna: completa o solo lo entregado', async ({ request }) => {
@@ -313,6 +314,50 @@ test.describe('Flujo venta a cobro', () => {
     expect(fila, 'el excedente aparece como saldo a favor del cliente').toBeTruthy()
   })
 
+  test('7b. devolución de un cliente: recepción en bodega acotada a lo entregado y nota de crédito vinculada', async ({ request }) => {
+    const lineaDev = [{ order_item_id: ctx.itemCatalogo, qty_requested: 1, reason: 'danado_defectuoso' }]
+    const base = { order_id: ctx.pedido, contact_name: 'Contacto Flujo', contact_phone: '6000-0000', items: lineaDev }
+
+    expect((await api(request, 'vendedor', 'POST', '/bodega/returns', base)).status, 'el vendedor no registra devoluciones').toBe(403)
+    expect((await api(request, 'asistentebodega', 'POST', '/bodega/returns', { ...base, items: [{ ...lineaDev[0], qty_requested: Number(ctx.entregado) + 1 }] })).status, 'no más de lo entregado').toBe(422)
+    expect((await api(request, 'asistentebodega', 'POST', '/bodega/returns', { ...base, items: [{ ...lineaDev[0], reason: 'otro' }] })).status, 'motivo del catálogo').toBe(422)
+    const dev = await api(request, 'asistentebodega', 'POST', '/bodega/returns', base)
+    expect(dev.status).toBe(201)
+    expect(dev.body.return_number).toMatch(/^DEV-\d{4}-\d{4}$/)
+    const id = dev.body.id as number
+    const lineaId = (await api(request, 'asistentebodega', 'GET', `/bodega/returns/${id}`)).body.products[0].id as number
+
+    const enCentral = async () => {
+      const r = (await api(request, 'asistentebodega', 'GET', `/bodega/adjustment-requests/products/${ctx.prod}/warehouse-stock`)).body
+      return (r.warehouses as { warehouse_id: number; quantity: number }[]).find(w => w.warehouse_id === ctx.central)!.quantity
+    }
+    const recibir = (qty: number) => api(request, 'asistentebodega', 'POST', `/bodega/returns/${id}/confirm-reception`, { destination_warehouse_id: ctx.central, lines: [{ customer_return_line_id: lineaId, qty_received: qty }] })
+
+    expect((await recibir(1)).status, 'sin documento firmado no se recibe').toBe(422)
+    expect((await subir(request, 'asistentebodega', `/bodega/returns/${id}/signed-document`, {})).status).toBe(200)
+    const antes = await enCentral()
+    expect((await recibir(Number(ctx.entregado) + 1)).status, 'no se recibe más de lo entregado').toBe(422)
+    expect(await enCentral(), 'el stock no cambió').toBe(antes)
+    expect((await api(request, 'asistentebodega', 'GET', `/bodega/returns/${id}`)).body.status).toBe('pendiente')
+
+    const ok = await recibir(1)
+    expect(ok.status).toBe(200)
+    expect(ok.body.status).toBe('esperando_nota_credito')
+    expect(await enCentral(), 'la mercancía devuelta vuelve al almacén').toBe(antes + 1)
+    expect((await recibir(1)).status, 'una devolución se resuelve una sola vez').toBe(422)
+
+    // la nota de crédito de devolución de mercancía se vincula a la devolución y la finaliza
+    const nota = await subir(request, 'contabilidad', '/admin-contab/notas-credito', {
+      master_client_id: String(ctx.mc), cliente: `[FLUJO] Cliente ${STAMP}`, factura_origen_id: String(ctx.factura), motivo: 'Devolución de mercancía',
+      tipo: 'devolucion_mercancia', monto: '10', resultado: 'saldo_favor', mercancia_regresa_bodega: '1', devolucion_bodega_id: String(id),
+    }, 'comprobante')
+    expect(nota.status, JSON.stringify(nota.body).slice(0, 200)).toBe(201)
+    const final = (await api(request, 'asistentebodega', 'GET', `/bodega/returns/${id}`)).body
+    expect(final.status).toBe('finalizado')
+    expect(final.credit_note_id).toBe(nota.body.id)
+    ctx.acreditadoPorDevolucion = 10
+  })
+
   test('8. notas de crédito: reglas de captura y aplicación inmediata bajo el umbral', async ({ request }) => {
     const nota = (campos: Record<string, string>) => subir(request, 'contabilidad', '/admin-contab/notas-credito', {
       master_client_id: String(ctx.mc), cliente: `[FLUJO] Cliente ${STAMP}`, factura_origen_id: String(ctx.factura), motivo: 'Nota de flujo', ...campos,
@@ -340,7 +385,7 @@ test.describe('Flujo venta a cobro', () => {
     }, 'comprobante')
     expect(anulacion.status).toBe(201)
     expect(anulacion.body.estado, 'cualquier anulación completa espera la decisión del aprobador').toBe('pendiente_aprobacion')
-    expect(Number(anulacion.body.monto), 'el monto enviado se ignora: se acredita lo que falta').toBeCloseTo(Number(ctx.montoFactura) - 10, 2)
+    expect(Number(anulacion.body.monto), 'el monto enviado se ignora: se acredita lo que falta').toBeCloseTo(Number(ctx.montoFactura) - 10 - Number(ctx.acreditadoPorDevolucion), 2)
     const id = anulacion.body.id as number
 
     for (const rol of ['contabilidad', 'gerencia'] as const) {
