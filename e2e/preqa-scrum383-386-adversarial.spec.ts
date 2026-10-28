@@ -20,9 +20,9 @@ import { test, expect } from '@playwright/test'
  * `feedback_local_test_db_no_es_fresh.md` — sembrados DESPUÉS del último `infra/test.sh` de la
  * sesión):
  *  - Order #34 "PED-PREQA2-A" — asignado, sin picker — RN3 (botón "Asignar Picker" oculto/visible)
- *  - Order #37 "PED-PREQA2-D" — en_picking, picker=Ayudante General Bodega, 3 ítems (3/A-01, 2/B-02, 4/C-03) —
+ *  - Order #37 "PED-PREQA2-D" — en_picking, picker=Auxiliar Bodega, 3 ítems (3/A-01, 2/B-02, 4/C-03) —
  *    picking parcial + edición de "Alistada"
- *  - Order #40 "PED-PREQA2-G" — packing, picker=Ayudante General Bodega, 1 ítem ya completo — modo solo consulta
+ *  - Order #40 "PED-PREQA2-G" — packing, picker=Auxiliar Bodega, 1 ítem ya completo — modo solo consulta
  *  - Order #41 "PED-PREQA2-H" — packing, SIN picker (sintético, forzado en BD) — botón ausente
  *
  * Igual que el resto de specs `preqa-*`: si el fixture no existe en el entorno, el test se salta
@@ -47,7 +47,7 @@ async function login(page, email: string) {
  * sigue rechazando con 403 vía API directa (defensa en profundidad).
  */
 test('SCRUM-383 RN3 (corregido) — el botón "Asignar Picker" no se muestra para un Picker, y el backend igual responde 403 vía API directa', async ({ page }) => {
-  await login(page, 'ayudantegeneralbodega@test.com')
+  await login(page, 'auxiliarbodega@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
 

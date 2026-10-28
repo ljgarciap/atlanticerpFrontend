@@ -78,7 +78,7 @@ beforeEach(() => {
   // de "Asignar Repartidor" SCRUM-396) — este test no necesita distinguir el `role` pedido, solo
   // que `useTeamMembersByRole` resuelva la lista.
   mockedUseTeamMembersByRole.mockReturnValue({
-    data: { data: [{ id: 10, name: 'Ayudante General Bodega Test' }, { id: 20, name: 'Otro Miembro' }] },
+    data: { data: [{ id: 10, name: 'Auxiliar Bodega Test' }, { id: 20, name: 'Otro Miembro' }] },
   } as unknown as ReturnType<typeof useTeamMembersByRole>)
   mockedUseAssignCourier.mockReturnValue({ mutate: assignCourierMutateMock, isPending: false } as unknown as ReturnType<typeof useAssignCourier>)
   mockedUseDispatchOrder.mockReturnValue({ mutate: dispatchOrderMutateMock, isPending: false } as unknown as ReturnType<typeof useDispatchOrder>)

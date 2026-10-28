@@ -5,14 +5,14 @@ import { test, expect, Page } from '@playwright/test'
  * Password default = email (BusinessRoleUserSeeder). Fixtures locales usadas (ver
  * memory/project_sesion_20260810_batch8_informe_inspeccion.md y docs/pre-qa/ de esta sesión):
  *   T82 = INS-2026-0001 (installation, SIN técnico asignado)
- *   T84 = INS-2026-0003 (installation/inspection, técnico=Tecnico Servicios Test)
- *   T86 = GAR-2026-0001 (warranty_generic, técnico=Garantias Servicios Test, 1 producto asociado)
- *   T93 = RET-2026-0001 (retrofit, técnico=Tecnico Servicios Test 2, 1 producto asociado)
- *   T94 = RET-2026-0002 (retrofit, técnico=Tecnico Servicios Test, SIN producto)
+ *   T84 = INS-2026-0003 (installation/inspection, técnico=Tecnico Test)
+ *   T86 = GAR-2026-0001 (warranty_generic, técnico=Tecnico Garantias Test, 1 producto asociado)
+ *   T93 = RET-2026-0001 (retrofit, técnico=Tecnico Test 2, 1 producto asociado)
+ *   T94 = RET-2026-0002 (retrofit, técnico=Tecnico Test, SIN producto)
  */
 const AARON   = 'liderservicios@test.com'
-const MIGUEL  = 'garantiasservicios@test.com'
-const CARLOS  = 'tecnicoservicios@test.com'
+const MIGUEL  = 'tecnicogarantias@test.com'
+const CARLOS  = 'tecnico@test.com'
 const DANIELA = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
@@ -41,14 +41,14 @@ async function openInspectionReport(page: Page) {
 
 test('SCRUM-301 — RN4 precarga de técnico responsable en informe NUEVO', async ({ page }) => {
   await login(page, AARON)
-  await openTicketByNumero(page, 'GAR-2026-0001') // T86, técnico ya asignado = Garantias Servicios Test
+  await openTicketByNumero(page, 'GAR-2026-0001') // T86, técnico ya asignado = Tecnico Garantias Test
   await openInspectionReport(page)
   await page.screenshot({ path: 'test-results/scrum301-precarga-tecnico.png' })
 
   const tecnicoSelect = page.getByRole('combobox', { name: 'Técnico responsable' })
   await expect(tecnicoSelect).toHaveValue(/.+/)
   const selectedLabel = await tecnicoSelect.locator('option:checked').textContent()
-  expect(selectedLabel).toContain('Garantias Servicios Test')
+  expect(selectedLabel).toContain('Tecnico Garantias Test')
 
   // RN1/RN2 SCRUM-302 — con producto asociado en Garantías (no Retrofit): Diagnóstico + Observación específica.
   await expect(page.getByText('Diagnóstico', { exact: true })).toBeVisible()
@@ -75,7 +75,7 @@ test('SCRUM-302 — campos dinámicos cambian correctamente entre tickets sin qu
 
 test('SCRUM-304 — conclusión vacía bloquea el guardado', async ({ page }) => {
   await login(page, CARLOS)
-  await openTicketByNumero(page, 'RET-2026-0002') // T94, técnico=Tecnico Servicios, sin informe todavía
+  await openTicketByNumero(page, 'RET-2026-0002') // T94, técnico=Tecnico, sin informe todavía
   await openInspectionReport(page)
 
   const saveBtn = page.getByRole('button', { name: 'Guardar informe' })
@@ -84,7 +84,7 @@ test('SCRUM-304 — conclusión vacía bloquea el guardado', async ({ page }) =>
   await page.getByLabel('Conclusión').fill('   ') // solo espacios
   await expect(saveBtn).toBeDisabled()
 
-  await page.getByLabel('Conclusión').fill('Conclusión real de Tecnico Servicios para T94')
+  await page.getByLabel('Conclusión').fill('Conclusión real de Tecnico para T94')
   await expect(saveBtn).toBeEnabled()
   await page.screenshot({ path: 'test-results/scrum304-conclusion-required.png' })
 })
@@ -128,7 +128,7 @@ test('SCRUM-241/242 — Fotos Antes/Después separadas y firma Pendiente de firm
   await page.screenshot({ path: 'test-results/scrum241-242-readonly-gerencia.png' })
 })
 
-test('SCRUM-301 RN5 — Tecnico Servicios no puede editar el informe de un ticket sin asignar (ownership UI)', async ({ page }) => {
+test('SCRUM-301 RN5 — Tecnico no puede editar el informe de un ticket sin asignar (ownership UI)', async ({ page }) => {
   await login(page, CARLOS)
   await openTicketByNumero(page, 'INS-2026-0001') // T82, sin técnico asignado
   await openInspectionReport(page)

@@ -80,7 +80,7 @@ function makeOrder(overrides: Partial<CommissionOrder> = {}): CommissionOrder {
 
 function makeVendorSummary(overrides: Partial<CommissionVendorSummary> = {}): CommissionVendorSummary {
   return {
-    vendedor_id: 1, vendedor_nombre: 'Vendedor Disenador', total_pedidos_mes: 6600,
+    vendedor_id: 1, vendedor_nombre: 'Vendedor', total_pedidos_mes: 6600,
     porcentaje: 1.5, porcentaje_fijo: true, pagada: 132, por_pagar: 0, pendiente_cobro: 0,
     total_nota_credito: 0, groups: [],
     ...overrides,
@@ -104,7 +104,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   } as UserInfo
 }
 
-// "Vendedor Disenador" aparece tanto en el <option> del selector de vendedor como en la fila de la
+// "Vendedor" aparece tanto en el <option> del selector de vendedor como en la fila de la
 // tabla — acá se apunta siempre a la celda de la tabla (el <option> no dispara onToggle).
 async function clickVendorRow(nombre: string) {
   const matches = await screen.findAllByText(nombre)
@@ -127,7 +127,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary())
-  mockedApi.commissionsInternal.vendorOptions.mockResolvedValue([{ id: 1, nombre: 'Vendedor Disenador' } as CommissionVendorOption])
+  mockedApi.commissionsInternal.vendorOptions.mockResolvedValue([{ id: 1, nombre: 'Vendedor' } as CommissionVendorOption])
   mockedApi.commissionsInternal.tiers.list.mockResolvedValue(makeTiers())
   mockedStore.mockReturnValue({ user: makeUser() } as ReturnType<typeof useAuthStore>)
 })
@@ -213,7 +213,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-503 notas de crédito', () =>
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
+    await clickVendorRow('Vendedor')
     expect(await screen.findByText(/-.*200\.00 \(NC-0071\)/)).toBeInTheDocument()
   })
 
@@ -223,7 +223,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-503 notas de crédito', () =>
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
+    await clickVendorRow('Vendedor')
     await screen.findByText('PED-0001')
     // La columna "sin dato" (—) aparece más de una vez en la fila (factura/fecha ya usan el
     // mismo placeholder) — solo confirmamos que la referencia de NC nunca se renderiza.
@@ -241,7 +241,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-504/505 arrastre agrupado por
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
+    await clickVendorRow('Vendedor')
     await screen.findByText('PED-0001')
     await screen.findByText('PED-0002')
     // Solo el grupo arrastrado lleva la nota "arrastrado de un mes ya cerrado...".
@@ -255,14 +255,14 @@ describe('ComisionesInternasPage — Batch 15: REQ-506 proyectos compartidos', (
       groups: [{
         mes: '2026-08', porcentaje: 1.5, porcentaje_fijo: true, arrastrado: false,
         pedidos: [makeOrder({
-          total_pedido: 10000, compartido_con: ['Vendedor Disenador Test 2'], total_pedido_completo: 20000,
+          total_pedido: 10000, compartido_con: ['Vendedor Test 2'], total_pedido_completo: 20000,
         })],
       }],
     })
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
-    expect(await screen.findByText(/Vendedor Disenador Test 2/)).toBeInTheDocument()
+    await clickVendorRow('Vendedor')
+    expect(await screen.findByText(/Vendedor Test 2/)).toBeInTheDocument()
     expect(screen.getByText(/20,000\.00/)).toBeInTheDocument()
   })
 })
@@ -270,7 +270,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-506 proyectos compartidos', (
 describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => {
   function makeStatement(overrides: Partial<CommissionAccountStatement> = {}): CommissionAccountStatement {
     return {
-      vendedor_id: 1, vendedor_nombre: 'Vendedor Disenador', mes: '2026-08', mes_cerrado: false,
+      vendedor_id: 1, vendedor_nombre: 'Vendedor', mes: '2026-08', mes_cerrado: false,
       porcentaje: 1.5, porcentaje_fijo: false, total_pedidos_mes: 6600,
       descuento_nota_credito: 0, pagada: 132, por_pagar: 0, pendiente_cobro: 0,
       groups: [{ mes: '2026-08', porcentaje: 1.5, porcentaje_fijo: false, pedidos: [makeOrder()] }],
@@ -286,7 +286,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => 
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     mockedApi.commissionsInternal.accountStatement.mockResolvedValue(makeStatement())
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
+    await clickVendorRow('Vendedor')
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verEstadoCuenta'))
     await screen.findByText('adminContab:comisionesInternas.estadoCuenta.title')
     expect(mockedApi.commissionsInternal.accountStatement).toHaveBeenCalledWith(1, currentMonthKey())
@@ -299,7 +299,7 @@ describe('ComisionesInternasPage — Batch 15: REQ-507 estado de cuenta', () => 
     mockedApi.commissionsInternal.summary.mockResolvedValue(makeSummary({ vendedores: [vendor] }))
     mockedApi.commissionsInternal.accountStatement.mockResolvedValue(makeStatement({ mes_cerrado: true }))
     renderPage()
-    await clickVendorRow('Vendedor Disenador')
+    await clickVendorRow('Vendedor')
     fireEvent.click(await screen.findByText('adminContab:comisionesInternas.verEstadoCuenta'))
     await screen.findByText('adminContab:comisionesInternas.estadoCuenta.title')
     const modal = within(screen.getByTestId('account-statement-modal'))

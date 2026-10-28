@@ -19,7 +19,7 @@ test('SCRUM-391 — seleccionar picker, verificar consolidado sumado + doble cli
 
   await page.getByRole('button', { name: /imprimir picking del día/i }).click()
   await page.waitForTimeout(500)
-  await page.getByRole('button', { name: 'Ayudante General Bodega Test' }).click()
+  await page.getByRole('button', { name: 'Auxiliar Bodega Test' }).click()
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'e2e/.tmp/scrum391-consolidated-loaded.png', fullPage: true })
 

@@ -8,9 +8,9 @@ import { test, expect, type Page } from '@playwright/test'
  * esta pusheado a dev.atlanticerp.ai todavia.
  *
  * Cuentas reales usadas (password = email, ver memoria project_roster_usuarios_reales_atlanticerp.md):
- *  - vendedordisenador2@test.com (Vendedor/Diseñador) — Meta $603.28, $0 vendido, mas un
+ *  - vendedor2@test.com (Vendedor/Diseñador) — Meta $603.28, $0 vendido, mas un
  *    approved card sembrado a mano en el mes en curso para el caso de valor grande (ver sesion).
- *  - vendedordisenador6@test.com (Vendedor/Diseñador) — SIN fila en sales_goals (goal_amount null).
+ *  - vendedor6@test.com (Vendedor/Diseñador) — SIN fila en sales_goals (goal_amount null).
  *  - gerencia@test.com (management) — unica con el toggle Resumen personal/Equipo.
  */
 test.describe.configure({ mode: 'serial' })
@@ -30,8 +30,8 @@ async function gotoReports(page: Page) {
   await page.waitForTimeout(1500)
 }
 
-test('1. Vendedor Disenador (con Meta, $0 vendido) — barras + labels $ visibles, mes en curso ambar', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('1. Vendedor (con Meta, $0 vendido) — barras + labels $ visibles, mes en curso ambar', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-neil-meta-configurada.png', fullPage: true })
 
@@ -41,8 +41,8 @@ test('1. Vendedor Disenador (con Meta, $0 vendido) — barras + labels $ visible
   await expect(page.getByText(/mes en curso/i)).toBeVisible()
 })
 
-test('2. Vendedor Disenador (SIN Meta configurada) — resto del grafico sigue funcionando', async ({ page }) => {
-  await login(page, 'vendedordisenador6@test.com')
+test('2. Vendedor (SIN Meta configurada) — resto del grafico sigue funcionando', async ({ page }) => {
+  await login(page, 'vendedor6@test.com')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/02-annie-sin-meta.png', fullPage: true })
 
@@ -76,8 +76,8 @@ test('3. Gerencia (management) — toggle Inicio(personal) / Equipo re-renderiza
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03c-daniela-vuelta-personal.png', fullPage: true })
 })
 
-test('4. Vendedor Disenador — selector de periodo (Mes/Trimestre/Año) no rompe el panel Metas', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('4. Vendedor — selector de periodo (Mes/Trimestre/Año) no rompe el panel Metas', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
 
   await page.getByRole('button', { name: /trimestre/i }).click()
@@ -89,8 +89,8 @@ test('4. Vendedor Disenador — selector de periodo (Mes/Trimestre/Año) no romp
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/04b-neil-anio.png', fullPage: true })
 })
 
-test('5. Vendedor Disenador — modo oscuro, labels $ (#475569 fijo) siguen legibles', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('5. Vendedor — modo oscuro, labels $ (#475569 fijo) siguen legibles', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
 
   // El theme es una preferencia persistida por cuenta (no solo localStorage) — no
@@ -103,20 +103,20 @@ test('5. Vendedor Disenador — modo oscuro, labels $ (#475569 fijo) siguen legi
   await expect(page.evaluate(() => document.documentElement.classList.contains('dark'))).resolves.toBe(true)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/05-neil-dark-mode.png', fullPage: true })
 
-  // Dejar la cuenta de Vendedor Disenador como estaba (claro) al terminar, para no dejar un
+  // Dejar la cuenta de Vendedor como estaba (claro) al terminar, para no dejar un
   // side-effect de testing en un usuario real.
   await page.locator('button[title*="modo" i]').first().click()
   await page.waitForTimeout(500)
 })
 
-test('6. Vendedor Disenador — valor grande (sembrado a mano) no corta ni superpone el label', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('6. Vendedor — valor grande (sembrado a mano) no corta ni superpone el label', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
   await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/06-neil-valor-grande.png', fullPage: true })
 })
 
-test('7. Vendedor Disenador — reload (F5) hidrata el chart sin parpadeo/plugin roto en el primer render', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('7. Vendedor — reload (F5) hidrata el chart sin parpadeo/plugin roto en el primer render', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
   await page.reload()
   await page.waitForTimeout(1800)
@@ -124,8 +124,8 @@ test('7. Vendedor Disenador — reload (F5) hidrata el chart sin parpadeo/plugin
   await expect(page.locator('canvas').first()).toBeVisible()
 })
 
-test('8. Vendedor Disenador — tooltip on hover no choca visualmente con el label fijo de arriba', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com')
+test('8. Vendedor — tooltip on hover no choca visualmente con el label fijo de arriba', async ({ page }) => {
+  await login(page, 'vendedor2@test.com')
   await gotoReports(page)
   const canvas = page.locator('canvas').first()
   const box = await canvas.boundingBox()

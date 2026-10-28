@@ -14,8 +14,8 @@ import { test, expect, Page } from '@playwright/test'
  */
 
 const LIDER_SERVICIOS = 'liderservicios@test.com'   // Lider Servicios — lider_servicios, puede Agendar
-const TECNICO         = 'tecnicoservicios@test.com'      // Tecnico Servicios — tecnico, NO puede Agendar
-const GERENCIA         = 'gerencia@test.com'    // Management, ve la comisión de Tecnico Servicios
+const TECNICO         = 'tecnico@test.com'      // Tecnico — tecnico, NO puede Agendar
+const GERENCIA         = 'gerencia@test.com'    // Management, ve la comisión de Tecnico
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -92,12 +92,12 @@ test.describe('Grupo C — Home de Servicios', () => {
   })
 })
 
-test.describe('SCRUM-321 — capitalización del período en el modal de comisión de Tecnico Servicios Test', () => {
+test.describe('SCRUM-321 — capitalización del período en el modal de comisión de Tecnico Test', () => {
   test('el texto del período se muestra "agosto de 2026", no "Agosto De 2026"', async ({ page }) => {
     await login(page, GERENCIA)
     await page.goto('/servicios/tecnicos')
 
-    const carlosCard = page.locator('div', { hasText: 'Tecnico Servicios Test' }).first()
+    const carlosCard = page.locator('div', { hasText: 'Tecnico Test' }).first()
     await expect(carlosCard).toBeVisible({ timeout: 10000 })
 
     // Mini-indicador de comisión — abre el modal de detalle.

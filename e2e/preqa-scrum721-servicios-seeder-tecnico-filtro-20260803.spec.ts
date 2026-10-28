@@ -8,8 +8,8 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com      (lider_servicios) — puede cambiar estado.
- *  - tecnicoservicios@test.com        (tecnico) — NO puede cambiar estado.
- *  - vendedordisenador@test.com        (vendedor) — solo lectura en Servicios.
+ *  - tecnico@test.com        (tecnico) — NO puede cambiar estado.
+ *  - vendedor@test.com        (vendedor) — solo lectura en Servicios.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -59,9 +59,9 @@ test('2. Select "Técnico" tiene 4 opciones reales (no vacío)', async ({ page }
   console.log('[SCRUM-721] Opciones del select Técnico:', JSON.stringify(optionsText))
   await page.screenshot({ path: `${DL_DIR}/02-select-tecnico-opciones.png`, fullPage: true })
 
-  // NOTA Pre-QA: el nombre real en BD es "Tecnico Servicios Test 3" sin tildes (confirmado vía API cruda),
+  // NOTA Pre-QA: el nombre real en BD es "Tecnico Test 3" sin tildes (confirmado vía API cruda),
   // pese a que el ticket/spec lo nombra "Agustín Rodríguez" — hallazgo menor de datos, no bloqueante.
-  const expected = ['Tecnico Servicios Test', 'Tecnico Servicios Test 2', 'Tecnico Servicios Test 3', 'Garantias Servicios Test']
+  const expected = ['Tecnico Test', 'Tecnico Test 2', 'Tecnico Test 3', 'Tecnico Garantias Test']
   for (const name of expected) {
     expect(optionsText.some((o) => o.includes(name)), `falta "${name}" en el select`).toBe(true)
   }
@@ -84,7 +84,7 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
 
   const tecnicoSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /técnico/i } ) })
   const optionsText = await tecnicoSelect.locator('option').allTextContents()
-  const targetOption = optionsText.find((o) => o.includes('Tecnico Servicios Test'))
+  const targetOption = optionsText.find((o) => o.includes('Tecnico Test'))
   console.log('[SCRUM-721] Filtrando por:', targetOption)
   await tecnicoSelect.selectOption({ label: targetOption! })
   await page.waitForTimeout(1200)
@@ -101,7 +101,7 @@ test('3. Filtro de técnico DE VERDAD filtra la tabla (regresión del bug intern
   expect(lastCall.url, 'debe mandar tecnico_id (nombre que el backend espera)').toContain('tecnico_id=')
   expect(lastCall.url).not.toContain('internal_technician_id')
   expect(lastCall.status).toBe(200)
-  // Debe reducir el set (no ser un no-op) — a menos que Tecnico Servicios tenga TODOS los tickets, que no es el caso del seeder.
+  // Debe reducir el set (no ser un no-op) — a menos que Tecnico tenga TODOS los tickets, que no es el caso del seeder.
   expect(rowsAfter).toBeLessThan(rowsBefore)
   expect(rowsAfter).toBeGreaterThan(0)
 })
@@ -192,8 +192,8 @@ test('6. Tablero — las 6 columnas tienen tarjetas (antes vacías)', async ({ p
   expect(emptyColumns).toBeLessThan(6)
 })
 
-test('7. Tecnico Servicios (técnico interno) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
-  const token = await apiLogin(request, 'tecnicoservicios@test.com')
+test('7. Tecnico (técnico interno) — API directa: 403 al intentar cambiar estado', async ({ request }) => {
+  const token = await apiLogin(request, 'tecnico@test.com')
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' }
 
   const list = await request.get(`${BASE}/api/servicios/tickets`, { headers })
@@ -203,35 +203,35 @@ test('7. Tecnico Servicios (técnico interno) — API directa: 403 al intentar c
   const r = await request.patch(`${BASE}/api/servicios/tickets/${anyTicket.id}/estado`, {
     headers, data: { estado: 'scheduled' },
   })
-  console.log('[SCRUM-721] Tecnico Servicios (tecnico) intenta cambiar estado vía API directa -> HTTP', r.status())
+  console.log('[SCRUM-721] Tecnico (tecnico) intenta cambiar estado vía API directa -> HTTP', r.status())
   expect(r.status()).toBe(403)
 })
 
-test('8. Tecnico Servicios (técnico interno) — UI: select de estado deshabilitado', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+test('8. Tecnico (técnico interno) — UI: select de estado deshabilitado', async ({ page }) => {
+  await login(page, 'tecnico@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/09-carlos-tabla.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
-  console.log('[SCRUM-721] Tecnico Servicios — selects visibles en tabla:', count)
+  console.log('[SCRUM-721] Tecnico — selects visibles en tabla:', count)
   expect(count).toBeGreaterThan(0)
   await expect(selects.first()).toBeDisabled()
 })
 
-test('9. Vendedor Disenador (vendedor) — puede VER tabla + filtro técnico (4 opciones), NO puede editar', async ({ page }) => {
-  await login(page, 'vendedordisenador@test.com')
+test('9. Vendedor (vendedor) — puede VER tabla + filtro técnico (4 opciones), NO puede editar', async ({ page }) => {
+  await login(page, 'vendedor@test.com')
   await gotoTickets(page)
   await page.screenshot({ path: `${DL_DIR}/10-milena-tabla.png`, fullPage: true })
 
   const rows = await page.locator('table tbody tr').count()
-  console.log('[SCRUM-721] Vendedor Disenador — filas visibles:', rows)
+  console.log('[SCRUM-721] Vendedor — filas visibles:', rows)
   expect(rows).toBeGreaterThan(0)
 
   const tecnicoSelect = page.locator('select').filter({ has: page.locator('option', { hasText: /técnico/i } ) })
   await expect(tecnicoSelect).toBeVisible()
   const optionsText = await tecnicoSelect.locator('option').allTextContents()
-  console.log('[SCRUM-721] Vendedor Disenador — opciones select técnico:', JSON.stringify(optionsText))
+  console.log('[SCRUM-721] Vendedor — opciones select técnico:', JSON.stringify(optionsText))
   expect(optionsText.length).toBeGreaterThanOrEqual(5)
 
   const stateSelects = page.locator('table tbody select')
@@ -239,7 +239,7 @@ test('9. Vendedor Disenador (vendedor) — puede VER tabla + filtro técnico (4 
   if (stateCount > 0) {
     await expect(stateSelects.first()).toBeDisabled()
   }
-  console.log('[SCRUM-721] Vendedor Disenador — selects de estado en tabla (debe ser 0 o deshabilitado):', stateCount)
+  console.log('[SCRUM-721] Vendedor — selects de estado en tabla (debe ser 0 o deshabilitado):', stateCount)
 })
 
 test('10. Endpoint /servicios/technicians/internal SIN token -> 401', async ({ request }) => {
@@ -249,10 +249,10 @@ test('10. Endpoint /servicios/technicians/internal SIN token -> 401', async ({ r
 })
 
 test('11. Endpoint /servicios/technicians/internal CON token servicios.read -> 200 + 4 técnicos', async ({ request }) => {
-  const token = await apiLogin(request, 'vendedordisenador@test.com')
+  const token = await apiLogin(request, 'vendedor@test.com')
   const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
   const r = await request.get(`${BASE}/api/servicios/technicians/internal?fields=options`, { headers })
-  console.log('[SCRUM-721] GET technicians/internal con Vendedor Disenador (servicios.read) -> HTTP', r.status())
+  console.log('[SCRUM-721] GET technicians/internal con Vendedor (servicios.read) -> HTTP', r.status())
   expect(r.status()).toBe(200)
   const body = await r.json()
   console.log('[SCRUM-721] Body:', JSON.stringify(body))

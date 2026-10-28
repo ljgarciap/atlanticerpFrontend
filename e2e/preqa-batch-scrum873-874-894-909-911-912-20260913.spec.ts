@@ -35,7 +35,7 @@ async function apiGet(page: Page, path: string) {
 // ============================================================
 
 test('SCRUM-912.a — abrir Nueva cotizacion, no tocar nada, navegar afuera: no debe crear registro', async ({ page }) => {
-  await login(page, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+  await login(page, 'vendedor5@test.com', 'vendedor5@test.com')
 
   const before = await apiGet(page, '/api/ventas-diseno/quotes?per_page=1')
   const totalBefore = before.body?.meta?.total ?? before.body?.total ?? null
@@ -65,7 +65,7 @@ test('SCRUM-912.a — abrir Nueva cotizacion, no tocar nada, navegar afuera: no 
 })
 
 test('SCRUM-912.b — tipear 1 caracter y borrar rapido, salir: verificar si queda huerfano semi-vacio', async ({ page }) => {
-  await login(page, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+  await login(page, 'vendedor5@test.com', 'vendedor5@test.com')
 
   const before = await apiGet(page, '/api/ventas-diseno/quotes?per_page=1')
   const totalBefore = before.body?.meta?.total ?? before.body?.total ?? null
@@ -92,7 +92,7 @@ test('SCRUM-912.b — tipear 1 caracter y borrar rapido, salir: verificar si que
 })
 
 test('SCRUM-912.c — vista Solo Borradores existe y responde', async ({ page }) => {
-  await login(page, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+  await login(page, 'vendedor5@test.com', 'vendedor5@test.com')
   await page.goto(`${DEV}/ventas-diseno/quotes-list`)
   await page.waitForTimeout(2000)
   await page.screenshot({ path: 'test-results/scrum912c-list-all.png', fullPage: true }).catch(() => {})
@@ -112,7 +112,7 @@ test('SCRUM-912.c — vista Solo Borradores existe y responde', async ({ page })
 // ============================================================
 
 test('SCRUM-873.1/2 — crear Cliente Master+Subcliente nuevos desde Cotizacion: sin Lead duplicado, contacto sin error prematuro', async ({ page }) => {
-  await login(page, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+  await login(page, 'vendedor5@test.com', 'vendedor5@test.com')
 
   const suffix = Date.now().toString().slice(-6)
   const masterName = `PREQA MASTER ${suffix}`
@@ -582,7 +582,7 @@ test('SCRUM-894.b — Guia de Entrega: layout general con un pedido real en Por 
 })
 
 // ============================================================
-// SCRUM-911 — Reportes Servicios: filtro general sincroniza panel Tecnico Servicios Test
+// SCRUM-911 — Reportes Servicios: filtro general sincroniza panel Tecnico Test
 // ============================================================
 
 test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del panel no afecta al general', async ({ page }) => {
@@ -592,7 +592,7 @@ test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del pan
 
   const commissionHeading = page.getByText(/comisión.*carlos vergara/i).first()
   const visible = await commissionHeading.isVisible().catch(() => false)
-  test.skip(!visible, 'panel Comision Tecnico Servicios Test no visible para este usuario/entorno')
+  test.skip(!visible, 'panel Comision Tecnico Test no visible para este usuario/entorno')
   if (!visible) return
 
   // Selector general de la pagina — 1er <select> visible en la pantalla.
@@ -604,7 +604,7 @@ test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del pan
   // a las flechas de navegacion local, unico en toda la pagina).
   const monthLabel = page.locator('span.min-w-\\[130px\\]').first()
   const panelMonthBefore = await monthLabel.innerText().catch(() => '')
-  console.log('SCRUM-911 — mes mostrado en panel Tecnico Servicios Test ANTES:', panelMonthBefore)
+  console.log('SCRUM-911 — mes mostrado en panel Tecnico Test ANTES:', panelMonthBefore)
 
   // Cambiar el selector GENERAL a una opcion distinta.
   const options = await generalSelect.locator('option').all()
@@ -617,7 +617,7 @@ test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del pan
   await page.waitForTimeout(2000)
 
   const panelMonthAfterGeneralChange = await monthLabel.innerText().catch(() => '')
-  console.log('SCRUM-911 — selector general cambiado a:', targetValue, '| mes en panel Tecnico Servicios Test DESPUES:', panelMonthAfterGeneralChange)
+  console.log('SCRUM-911 — selector general cambiado a:', targetValue, '| mes en panel Tecnico Test DESPUES:', panelMonthAfterGeneralChange)
   expect(panelMonthAfterGeneralChange, 'el panel debe sincronizarse con el filtro general al cambiarlo (criterio central de SCRUM-911 / UAT-046)').not.toBe(panelMonthBefore)
 
   // Ahora usar la navegacion LOCAL del panel (flecha "<-") y confirmar que el selector
@@ -635,7 +635,7 @@ test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del pan
   await page.screenshot({ path: 'test-results/scrum911-final.png', fullPage: true }).catch(() => {})
 })
 
-test('CLEANUP — resetear card 164 (Vendedor Disenador Test 6, fixture QA) a su estado sin delivery_type', async ({ page }) => {
+test('CLEANUP — resetear card 164 (Vendedor Test 6, fixture QA) a su estado sin delivery_type', async ({ page }) => {
   await login(page, 'superadmin2@test.com', 'superadmin2@test.com')
   const result = await page.evaluate(async () => {
     const token = localStorage.getItem('accessToken')

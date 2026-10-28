@@ -11,10 +11,10 @@ import { test, expect, type Page, request as playwrightRequest } from '@playwrig
  *
  * Self-seeding real (regla del proyecto — ver feedback_e2e_permanent_tests_must_self_seed.md):
  * SCRUM-849.6 crea su propia Quote/QuotePart/QuoteItem vía API en beforeAll, con
- * designer@atlantic.test — nunca depende de un ID hardcodeado.
+ * vendedor@atlantic.test — nunca depende de un ID hardcodeado.
  *
  * Cuentas:
- *  - designer@atlantic.test / Password123! (vendedor, demo .test)
+ *  - vendedor@atlantic.test / Password123! (vendedor, demo .test)
  *  - management@atlantic.test / Password123! (Gerencia, demo .test)
  *  - liderbodega@test.com / liderbodega@test.com (Líder de Bodega, roster real)
  */
@@ -26,7 +26,7 @@ let seededQuoteId: number
 test.beforeAll(async () => {
   const api = await playwrightRequest.newContext({ baseURL: API_BASE })
   const loginResp = await api.post('/api/auth/login', {
-    data: { email: 'designer@atlantic.test', password: 'Password123!' },
+    data: { email: 'vendedor@atlantic.test', password: 'Password123!' },
   })
   const { token } = await loginResp.json()
   const auth = { Authorization: `Bearer ${token}` }
@@ -74,7 +74,7 @@ async function loginReal(page: Page, email: string) {
 // SCRUM-847 — miniaturas cuadradas/consistentes (selector de producto, sin diff nuevo)
 // ---------------------------------------------------------------------------
 test('SCRUM-847 — selector de producto de Catálogo muestra la miniatura sin recorte (object-contain)', async ({ page }) => {
-  await loginDemo(page, 'designer@atlantic.test')
+  await loginDemo(page, 'vendedor@atlantic.test')
   await page.goto(`/ventas-diseno/quotes/${seededQuoteId}`)
   await page.waitForTimeout(1500)
 
@@ -105,7 +105,7 @@ test('SCRUM-847 — selector de producto de Catálogo muestra la miniatura sin r
 // SCRUM-849.6 — foto ad-hoc: spinner + error visible + persistencia en PDF
 // ---------------------------------------------------------------------------
 test('SCRUM-849.6.a — subir foto válida a ítem personalizado muestra spinner y luego thumbnail sin recargar', async ({ page }) => {
-  await loginDemo(page, 'designer@atlantic.test')
+  await loginDemo(page, 'vendedor@atlantic.test')
   await page.goto(`/ventas-diseno/quotes/${seededQuoteId}`)
   await page.waitForTimeout(1500)
 
@@ -135,7 +135,7 @@ test('SCRUM-849.6.a — subir foto válida a ítem personalizado muestra spinner
 })
 
 test('SCRUM-849.6.b — archivo inválido (bytes que GD no puede decodificar) muestra error visible, no falla en silencio (regresión: era 500 sin manejar, Pre-QA lo corrigió a 422)', async ({ page }) => {
-  await loginDemo(page, 'designer@atlantic.test')
+  await loginDemo(page, 'vendedor@atlantic.test')
   await page.goto(`/ventas-diseno/quotes/${seededQuoteId}`)
   await page.waitForTimeout(1500)
 
@@ -171,7 +171,7 @@ test('SCRUM-849.6.b — archivo inválido (bytes que GD no puede decodificar) mu
 })
 
 test('SCRUM-849.6.c — el PDF de la cotización muestra la foto ad-hoc igual que en pantalla', async ({ page, request }) => {
-  await loginDemo(page, 'designer@atlantic.test')
+  await loginDemo(page, 'vendedor@atlantic.test')
   const token = await page.evaluate(() => localStorage.getItem('accessToken'))
   expect(token, 'debe haber un accessToken en localStorage tras login').toBeTruthy()
 
@@ -202,7 +202,7 @@ test('SCRUM-854.a — management ve el filtro Vendedor/Diseñador en Pedidos de 
 })
 
 test('SCRUM-854.b — designer (vendedor) NO ve el filtro, sigue viendo solo lo suyo', async ({ page }) => {
-  await loginDemo(page, 'designer@atlantic.test')
+  await loginDemo(page, 'vendedor@atlantic.test')
   await page.goto('/ventas-diseno/pedidos')
   await page.waitForTimeout(1500)
   await page.screenshot({ path: 'e2e/.tmp/preqa-854-designer-pedidos.png', fullPage: true })

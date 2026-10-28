@@ -128,7 +128,7 @@ test('SCRUM-171 — CONFIRMADO ARREGLADO: "Ver detalle" de Bodega ahora navega a
 })
 
 test('MEDIO#9 — CONFIRMADO ARREGLADO: un rol sin acceso ahora es redirigido fuera de /gerencia (antes se quedaba con pantalla de error)', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com') // Vendedor/Diseñador, sin permiso gerencia.view
+  await login(page, 'vendedor2@test.com') // Vendedor/Diseñador, sin permiso gerencia.view
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   expect(page.url()).not.toContain('/gerencia') // RequirePermission ahora sí redirige

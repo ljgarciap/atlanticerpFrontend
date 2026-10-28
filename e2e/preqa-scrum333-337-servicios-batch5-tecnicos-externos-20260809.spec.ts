@@ -18,7 +18,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com (lider_servicios) — alta completa.
- *  - tecnicoservicios@test.com   (tecnico) — solo consulta (RN5).
+ *  - tecnico@test.com   (tecnico) — solo consulta (RN5).
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -122,7 +122,7 @@ test('REQ-265 Escenario 2 — inactivar sin proyectos activos aplica directo, si
 })
 
 test('RN5 (REQ-263/264/265/266) — técnico interno tiene acceso de solo consulta, sin controles de escritura', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com')
   await gotoExternalTechnicians(page)
 
   await expect(page.getByText('+ Agregar técnico externo')).not.toBeVisible()

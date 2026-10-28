@@ -138,7 +138,7 @@ test('SCRUM-994 — orden y paginación con filtro calculado; recarga a mitad de
 
 test('SCRUM-994 — rol sin bodega.read no accede (API 403, no solo botón oculto)', async ({ page }) => {
   const t = trackInventory(page)
-  await login(page, 'vendedordisenador3@test.com')
+  await login(page, 'vendedor3@test.com')
   await page.goto('/bodega/inventario?filter=criticos')
   await page.waitForTimeout(3000)
   expect(t.calls.filter(c => c.status === 200)).toEqual([])

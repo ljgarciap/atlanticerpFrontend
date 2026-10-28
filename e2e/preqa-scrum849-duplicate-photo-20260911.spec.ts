@@ -24,7 +24,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
  * `e2e/fixtures/preqa849-real-64x64.png`.
  *
  * Self-seeding real (ver feedback_e2e_permanent_tests_must_self_seed.md): crea su propia
- * Quote/QuotePart/QuoteItem vía API en beforeAll con designer@atlantic.test.
+ * Quote/QuotePart/QuoteItem vía API en beforeAll con vendedor@atlantic.test.
  */
 test.describe.configure({ mode: 'serial' })
 
@@ -39,7 +39,7 @@ let authToken: string
 test.beforeAll(async () => {
   const api = await playwrightRequest.newContext({ baseURL: API_BASE })
   const loginResp = await api.post('/api/auth/login', {
-    data: { email: 'designer@atlantic.test', password: 'Password123!' },
+    data: { email: 'vendedor@atlantic.test', password: 'Password123!' },
   })
   const { token } = await loginResp.json()
   authToken = token
@@ -131,7 +131,7 @@ test('SCRUM-849.6/849.7 — duplicar la partida copia la foto REAL a una key pro
   await page.goto('/login')
   await page.evaluate(() => localStorage.clear()).catch(() => {})
   await page.goto('/login')
-  await page.locator('input[type="email"]').fill('designer@atlantic.test')
+  await page.locator('input[type="email"]').fill('vendedor@atlantic.test')
   await page.locator('input[type="password"]').fill('Password123!')
   await page.getByRole('button', { name: /iniciar sesión|login/i }).click()
   await page.waitForTimeout(1800)

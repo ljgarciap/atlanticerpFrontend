@@ -26,8 +26,8 @@ async function login(page: Page, base: string, email: string, password: string):
 
 // ---------- SCRUM-910 ----------
 
-test('SCRUM-910 — Vendedor Disenador (current_amount=0, pendiente_cobro>0) NO muestra $0 en Comisión generada', async ({ page }) => {
-  await login(page, DEV, 'vendedordisenador3@test.com', 'vendedordisenador3@test.com')
+test('SCRUM-910 — Vendedor (current_amount=0, pendiente_cobro>0) NO muestra $0 en Comisión generada', async ({ page }) => {
+  await login(page, DEV, 'vendedor3@test.com', 'vendedor3@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
   const body = page.locator('body')
@@ -35,7 +35,7 @@ test('SCRUM-910 — Vendedor Disenador (current_amount=0, pendiente_cobro>0) NO 
   await expect(body).toContainText('$1,350')
 })
 
-test('SCRUM-910 — Gerencia (Gerencia) viendo a Vendedor Disenador en modo Equipo ve el mismo monto ($1,350)', async ({ page }) => {
+test('SCRUM-910 — Gerencia (Gerencia) viendo a Vendedor en modo Equipo ve el mismo monto ($1,350)', async ({ page }) => {
   // NOTA 2026-09-13: password real ya NO es B1n4X_2026? (memoria stale de 2026-08-24) — confirmado
   // 401 con esa clave y 200 con el default (email) vía curl directo antes de correr este spec.
   await login(page, DEV, 'gerencia@test.com', 'gerencia@test.com')
@@ -49,23 +49,23 @@ test('SCRUM-910 — Gerencia (Gerencia) viendo a Vendedor Disenador en modo Equi
   const select = page.locator('select').filter({ has: page.locator('option', { hasText: /whole team|todo el equipo/i }) })
   const options = await select.locator('option').allTextContents()
   const idx = options.findIndex(o => /bonvini|fefi/i.test(o))
-  expect(idx, `no se encontró a Vendedor Disenador/Maria Vendedor Disenador entre las opciones: ${options.join(', ')}`).toBeGreaterThanOrEqual(0)
+  expect(idx, `no se encontró a Vendedor/Maria Vendedor entre las opciones: ${options.join(', ')}`).toBeGreaterThanOrEqual(0)
   await select.selectOption({ index: idx })
   await page.waitForTimeout(2500)
   const body = page.locator('body')
   await expect(body).toContainText('$1,350')
 })
 
-test('SCRUM-910 — Vendedor Disenador (vendedor con proyecto compartido con Vendedor Disenador) ve su propia mitad, no duplicada', async ({ page }) => {
-  await login(page, DEV, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+test('SCRUM-910 — Vendedor (vendedor con proyecto compartido con Vendedor) ve su propia mitad, no duplicada', async ({ page }) => {
+  await login(page, DEV, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
   const body = page.locator('body')
   await expect(body).toContainText('$1,180')
 })
 
-test('SCRUM-910 — Comisión generada en Home coincide con Comisiones Internas (Vendedor Disenador, con NC aplicada)', async ({ page }) => {
-  await login(page, DEV, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+test('SCRUM-910 — Comisión generada en Home coincide con Comisiones Internas (Vendedor, con NC aplicada)', async ({ page }) => {
+  await login(page, DEV, 'vendedor5@test.com', 'vendedor5@test.com')
   await page.goto(`${DEV}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
   await expect(page.locator('body')).toContainText('$331')
@@ -89,8 +89,8 @@ test('SCRUM-883 — timestamp real (visor de Logs, superadmin.all) se muestra en
 
 // ---------- SCRUM-901 ----------
 
-test('SCRUM-901 — Vendedor Disenador: pipeline propio carga sin error tras el cleanup', async ({ page }) => {
-  await login(page, TEST, 'vendedordisenador5@test.com', 'vendedordisenador5@test.com')
+test('SCRUM-901 — Vendedor: pipeline propio carga sin error tras el cleanup', async ({ page }) => {
+  await login(page, TEST, 'vendedor5@test.com', 'vendedor5@test.com')
   await page.goto(`${TEST}/ventas-diseno/home`)
   await page.waitForTimeout(3000)
   await expect(page.locator('body')).not.toContainText(/error 500|internal server error/i)

@@ -54,15 +54,15 @@ test('SCRUM-383→386 — asignar picker, iniciar picking, completar la Hoja de 
   await expect(page.getByTestId('assign-picker-required-error-42')).toBeVisible()
   await page.screenshot({ path: 'e2e/.tmp/scrum383-02-picker-required.png' })
 
-  // Elige a Ayudante General Bodega González (único Picker real sembrado, `auxiliar_bodega`) y confirma.
-  await page.getByTestId('assign-picker-select-42').selectOption({ label: 'Ayudante General Bodega Test' })
+  // Elige a Auxiliar Bodega González (único Picker real sembrado, `auxiliar_bodega`) y confirma.
+  await page.getByTestId('assign-picker-select-42').selectOption({ label: 'Auxiliar Bodega Test' })
   await page.getByTestId('assign-picker-confirm-42').click()
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/scrum383-03-picking-pendiente.png', fullPage: true })
 
-  // La tarjeta se movió a "Picking pendiente" — REQ-313 RN2, la etiqueta "Picking: Ayudante General Bodega..."
+  // La tarjeta se movió a "Picking pendiente" — REQ-313 RN2, la etiqueta "Picking: Auxiliar Bodega..."
   // ya la pinta `OrderCardTile` (código no tocado por este batch).
-  await expect(page.getByTestId('order-card-42')).toContainText('Ayudante General Bodega')
+  await expect(page.getByTestId('order-card-42')).toContainText('Auxiliar Bodega')
 
   // SCRUM-384 (REQ-314) — "Iniciar Picking" mueve a "En picking" y abre la Hoja de Picking.
   await page.getByTestId('start-picking-button-42').click()

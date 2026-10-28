@@ -18,9 +18,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  *
  * Nota de entorno (doc obligatoria — ver instrucción del ticket "si falla, documentá qué
  * funcionó"): el login sugerido para este ticket en la memoria del proyecto era
- * vendedordisenador10@test.com ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
+ * vendedor10@test.com ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
  * Postgres LOCAL de esta sesión, VentasDisenoDemoSeeder resuelve el rol "designer" seedeado a
- * vendedordisenador2@test.com (no a idmar, que localmente no tiene ninguna tarjeta propia
+ * vendedor2@test.com (no a idmar, que localmente no tiene ninguna tarjeta propia
  * tras `tenants:artisan db:seed`). Se usó neil.quiel (Vendedor/Diseñador real) y
  * gerencia@test.com (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
  * ambas cuentas reales, no demo, password = mismo email, mismo patrón que el resto de
@@ -50,7 +50,7 @@ const errBanner = (page: Page) =>
 test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER vía que resuelva el dato', () => {
   test('Diseño → Crear cotización: falta superficie, se resuelve vía Editar/Guardar (escenario EXACTO de Gerencia)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'vendedordisenador2@test.com')
+    await login(page, 'vendedor2@test.com')
     await openCard(page, 'PreQA Lead 677')
 
     // Gate 1: falta superficie trabajada.
@@ -139,7 +139,7 @@ test.describe('SCRUM-677 — banner de dato faltante se limpia por CUALQUIER ví
 
   test('Lead → Crear cotización: falta contacto, se resuelve agregando un contacto (no reintentando el botón)', async ({ page }) => {
     test.setTimeout(60000)
-    await login(page, 'vendedordisenador2@test.com')
+    await login(page, 'vendedor2@test.com')
     await openCard(page, 'PreQA SubClient 677')
 
     await page.getByRole('button', { name: 'Crear cotización' }).click()

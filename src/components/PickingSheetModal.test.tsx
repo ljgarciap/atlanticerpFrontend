@@ -34,7 +34,7 @@ function detail(overrides: Partial<OrderDetail> = {}): OrderDetail {
     cliente: 'Constructora Pacífico',
     vendedor: 'Gerencia',
     asistente: 'Asistente Bodega Test 2',
-    picker: 'Ayudante General Bodega Test',
+    picker: 'Auxiliar Bodega Test',
     repartidor: null,
     fecha_entrega_comprometida: '2026-08-01',
     is_atrasado: false,
@@ -103,7 +103,7 @@ describe('PickingSheetModal', () => {
     expect(left).toHaveTextContent('Torre Azul')
 
     const right = screen.getByTestId('picking-sheet-meta-right')
-    expect(right).toHaveTextContent('Ayudante General Bodega Test')
+    expect(right).toHaveTextContent('Auxiliar Bodega Test')
     expect(right).toHaveTextContent('Asistente Bodega Test 2')
     expect(right).toHaveTextContent('Gerencia')
     // El campo combinado "Cliente / Proyecto" ya no existe como tal.

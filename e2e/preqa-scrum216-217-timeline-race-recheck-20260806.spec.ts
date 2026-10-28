@@ -17,7 +17,7 @@ import { execSync } from 'node:child_process'
  * nunca IDs hardcodeados, capturados del stdout de tinker.
  */
 const LIDER_COMPRAS = 'lidercompras@test.com'
-const SIN_COMPRAS = 'vendedordisenador2@test.com' // vendedor — sin compras.view/edit
+const SIN_COMPRAS = 'vendedor2@test.com' // vendedor — sin compras.view/edit
 const STAMP = Date.now()
 
 interface Fixture {

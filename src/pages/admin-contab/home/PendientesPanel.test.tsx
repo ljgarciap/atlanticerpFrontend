@@ -55,7 +55,7 @@ describe('PendientesPanel', () => {
           tipo: 'comision_pendiente',
           severidad: 'media',
           titulo: 'Comisión pendiente de pago',
-          detalle: 'Vendedor Disenador — 12 días pendiente',
+          detalle: 'Vendedor — 12 días pendiente',
           monto: 340,
           fecha_referencia: '2026-08-15',
         },

@@ -10,13 +10,13 @@ async function login(page, email: string, password: string) {
   await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 15000 })
 }
 
-test('Tecnico Servicios Test (tecnico) — Mi calendario muestra solo lo propio, red sin scope/owner_id', async ({ page }) => {
+test('Tecnico Test (tecnico) — Mi calendario muestra solo lo propio, red sin scope/owner_id', async ({ page }) => {
   const calendarRequests: string[] = []
   page.on('request', req => {
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())
   })
 
-  await login(page, 'tecnicoservicios@test.com', 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com', 'tecnico@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(3000)
 
@@ -55,7 +55,7 @@ test('Toggle Día/Semana/Mes cambia el rango pedido al backend (RN4)', async ({ 
     if (req.url().includes('/api/servicios/calendar')) calendarRequests.push(req.url())
   })
 
-  await login(page, 'tecnicoservicios@test.com', 'tecnicoservicios@test.com')
+  await login(page, 'tecnico@test.com', 'tecnico@test.com')
   await page.goto(`${BASE}/servicios/inicio`)
   await page.waitForTimeout(2000)
   calendarRequests.length = 0

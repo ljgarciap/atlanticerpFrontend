@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test'
 //
 // Datos sembrados vía tinker antes de esta corrida (después del último `infra/test.sh` de la
 // sesión): 1 Provider + 12 PurchaseOrder en estado "ordenado" (entra en active_shipments), y
-// `extra_permissions: ["compras.limited.view"]` en designer@atlantic.test (sin compras.read).
+// `extra_permissions: ["compras.limited.view"]` en vendedor@atlantic.test (sin compras.read).
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:8090'
@@ -34,7 +34,7 @@ test('compras.limited.view (sin compras.read) carga Logística con 12 órdenes s
     }
   })
 
-  await login(page, 'designer@atlantic.test')
+  await login(page, 'vendedor@atlantic.test')
   await page.goto(`${BASE}/compras/logistica`)
   await page.waitForTimeout(2000)
 

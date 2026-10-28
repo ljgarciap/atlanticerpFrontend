@@ -37,9 +37,9 @@ const EXPECTED_DIVERGENCES = new Set([
   'ADMIN_CONTAB@gerencia5@test.com', 'GERENCIA@gerencia5@test.com', 'GERENCIA_O_ALCANCE@gerencia5@test.com',
   'PEDIDOS@gerencia5@test.com', 'TOOL_KARDEX@gerencia5@test.com',
   // Usuarios demo con `records.manage` o `superadmin.all` concedidos sin tener el rol correspondiente.
-  'ADMIN_CONTAB@readonly@atlantic.test', 'SUPERADMIN@management@atlantic.test', 'SUPERADMIN@gerencia@atlantic.test',
-  // multi@atlantic.test: rol `management` pero nivel 8 (sin `platform.management`): un demo con rol y permisos que no concuerdan.
-  'ADMIN_CONTAB@multi@atlantic.test', 'GERENCIA@multi@atlantic.test', 'GERENCIA_O_ALCANCE@multi@atlantic.test', 'PEDIDOS@multi@atlantic.test', 'TOOL_KARDEX@multi@atlantic.test',
+  'ADMIN_CONTAB@nivel1@atlantic.test', 'SUPERADMIN@management@atlantic.test', 'SUPERADMIN@gerencia@atlantic.test',
+  // nivel8@atlantic.test: rol `management` pero nivel 8 (sin `platform.management`): un demo con rol y permisos que no concuerdan.
+  'ADMIN_CONTAB@nivel8@atlantic.test', 'GERENCIA@nivel8@atlantic.test', 'GERENCIA_O_ALCANCE@nivel8@atlantic.test', 'PEDIDOS@nivel8@atlantic.test', 'TOOL_KARDEX@nivel8@atlantic.test',
 ])
 
 describe('GUARD por permiso ≡ regla legada por rol (Fase 1b)', () => {
@@ -85,8 +85,8 @@ describe('Sidebar: «Servicios limitado» por permiso ≡ por rol vendedor', () 
     const dif = conServicios
       .filter(i => (i.role === 'vendedor') !== !hasAnyPermission(i.permissions, ['servicios.external_technicians.view']))
       .map(i => i.email)
-    // gerencia5 (nivel restringido) y multi@ (sin rol): su permiso real no incluye el directorio de externos.
-    expect(dif.sort()).toEqual(['gerencia5@test.com', 'multi@atlantic.test'])
+    // gerencia5 (nivel restringido) y nivel8@ (sin rol): su permiso real no incluye el directorio de externos.
+    expect(dif.sort()).toEqual(['gerencia5@test.com', 'nivel8@atlantic.test'])
   })
 })
 
@@ -114,24 +114,24 @@ const EXPECTED_CAPABILITY_DIVERGENCES = new Set<string>([
   // concuerdan con su rol (p. ej. `superadmin.all` o un nivel recortado).
   'admin_contab.operations.manage@gerencia@atlantic.test',
   'admin_contab.operations.manage@management@atlantic.test',
-  'admin_contab.operations.manage@readonly@atlantic.test',
+  'admin_contab.operations.manage@nivel1@atlantic.test',
   'admin_contab.oversight.manage@gerencia5@test.com',
   'admin_contab.records.manage@gerencia5@test.com',
-  'admin_contab.records.manage@readonly@atlantic.test',
+  'admin_contab.records.manage@nivel1@atlantic.test',
   'servicios.claim_sheets.manage@gerencia@atlantic.test',
   'servicios.claim_sheets.manage@management@atlantic.test',
-  'servicios.claim_sheets.manage@supervisor@atlantic.test',
+  'servicios.claim_sheets.manage@nivel5@atlantic.test',
   'servicios.field_ops.admin@gerencia5@test.com',
   'servicios.settings.configure@gerencia5@test.com',
-  'servicios.tickets.create@designer@atlantic.test',
+  'servicios.tickets.create@vendedor@atlantic.test',
   'servicios.tickets.create@gerencia5@test.com',
   'servicios.tickets.manage@gerencia@atlantic.test',
   'servicios.tickets.manage@management@atlantic.test',
   'servicios.tools.kardex.view@gerencia5@test.com',
   'ventas_diseno.orders.access@gerencia5@test.com',
-  'admin_contab.oversight.manage@multi@atlantic.test', 'admin_contab.records.manage@multi@atlantic.test', 'servicios.field_ops.admin@multi@atlantic.test',
-  'servicios.settings.configure@multi@atlantic.test', 'servicios.tickets.create@multi@atlantic.test', 'servicios.tools.kardex.view@multi@atlantic.test',
-  'ventas_diseno.orders.access@multi@atlantic.test',
+  'admin_contab.oversight.manage@nivel8@atlantic.test', 'admin_contab.records.manage@nivel8@atlantic.test', 'servicios.field_ops.admin@nivel8@atlantic.test',
+  'servicios.settings.configure@nivel8@atlantic.test', 'servicios.tickets.create@nivel8@atlantic.test', 'servicios.tools.kardex.view@nivel8@atlantic.test',
+  'ventas_diseno.orders.access@nivel8@atlantic.test',
 ])
 
 describe('Capacidades por permiso ≡ roster legado por rol (helpers sueltos de la 1b)', () => {

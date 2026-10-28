@@ -39,7 +39,7 @@ function makeAccounts(): BankAccount[] {
 function makeMovements(): BankMovement[] {
   return [
     { id: 10, fecha: '2026-08-01', tipo: 'cobro', concepto: 'Cobro factura F-100', monto: 500, direccion: 'entrada', bank_account_id: 1, bank_account_label: 'Banco Demo B — Cuenta Corriente ****9034' },
-    { id: 11, fecha: '2026-08-02', tipo: 'comision', concepto: 'Comisión Vendedor Disenador', monto: 80, direccion: 'salida', bank_account_id: null, bank_account_label: null },
+    { id: 11, fecha: '2026-08-02', tipo: 'comision', concepto: 'Comisión Vendedor', monto: 80, direccion: 'salida', bank_account_id: null, bank_account_label: null },
     { id: 12, fecha: '2026-08-03', tipo: 'devolucion', concepto: 'Devolución NC-5', monto: 40, direccion: 'salida', bank_account_id: null, bank_account_label: null },
   ]
 }
@@ -171,11 +171,11 @@ describe('BankAccountsPage', () => {
 
   it('el botón "Seleccionar cuenta" solo aparece en comisiones sin cuenta, nunca en cobros/devoluciones (RN1 REQ-534)', async () => {
     renderPage()
-    await screen.findByText('Comisión Vendedor Disenador')
+    await screen.findByText('Comisión Vendedor')
 
     const rows = screen.getAllByRole('row').slice(1) // sin el header
     const cobroRow       = rows.find(r => within(r).queryByText('Cobro factura F-100'))!
-    const comisionRow    = rows.find(r => within(r).queryByText('Comisión Vendedor Disenador'))!
+    const comisionRow    = rows.find(r => within(r).queryByText('Comisión Vendedor'))!
     const devolucionRow  = rows.find(r => within(r).queryByText('Devolución NC-5'))!
 
     expect(within(cobroRow).queryByText('adminContab:cuentasBancarias.seleccionarCuenta')).not.toBeInTheDocument()

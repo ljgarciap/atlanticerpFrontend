@@ -28,7 +28,7 @@ function track(page: Page) {
 
 test('SCRUM-998 — el enlace del aviso abre el Catálogo con el banner y el botón descarga el ZIP real de S3', async ({ page }) => {
   const bad = track(page)
-  await login(page, 'vendedordisenador3@test.com')
+  await login(page, 'vendedor3@test.com')
 
   await page.goto(`/ventas-diseno/catalog?export=${EXPORT_ID}`)
   await expect(page.getByText(/Tu catálogo está listo/)).toBeVisible({ timeout: 30_000 })
@@ -55,7 +55,7 @@ test('SCRUM-998 — pedir el catálogo completo con más productos que el máxim
   let pdfDownloads = 0
   page.on('download', () => { pdfDownloads++ })
 
-  await login(page, 'vendedordisenador3@test.com')
+  await login(page, 'vendedor3@test.com')
   await page.goto('/ventas-diseno/catalog')
   await expect(page.locator('h1')).toBeVisible()
   await page.getByRole('button', { name: /Enviar catálogo completo/i }).click()
@@ -70,7 +70,7 @@ test('SCRUM-998 — pedir el catálogo completo con más productos que el máxim
 
 test('SCRUM-998 — el aviso in-app de la exportación terminada está en la campana y su enlace abre la descarga', async ({ page }) => {
   const bad = track(page)
-  await login(page, 'vendedordisenador3@test.com')
+  await login(page, 'vendedor3@test.com')
   await page.goto('/ventas-diseno/catalog')
 
   await page.getByTitle(/Notificaciones/i).click()

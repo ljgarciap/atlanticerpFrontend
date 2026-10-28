@@ -10,8 +10,8 @@ import { test, expect, Page } from '@playwright/test'
  * DemoCleanupController o a mano después de esta sesión.
  */
 const LIDER_SERVICIOS   = 'liderservicios@test.com'
-const VENDEDOR_DISENADOR = 'vendedordisenador@test.com'
-const TECNICO_SERVICIOS  = 'tecnicoservicios@test.com'
+const VENDEDOR_DISENADOR = 'vendedor@test.com'
+const TECNICO_SERVICIOS  = 'tecnico@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')

@@ -67,7 +67,7 @@ function makePending(overrides: Partial<PettyCashPendingResult> = {}): PettyCash
 
 function makeRejectedLine(overrides: Partial<PettyCashRejectedLine> = {}): PettyCashRejectedLine {
   return {
-    id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Disenador Test 2', proveedor: 'Copy Centro El Dorado',
+    id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Test 2', proveedor: 'Copy Centro El Dorado',
     descripcion: 'Impresión de brochures', monto_bruto: 12.0, itbms: 0.84, total: 12.84,
     estado: 'rechazado_temporal', intentos_rechazo: 2, attachments: [],
     ...overrides,
@@ -190,7 +190,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
     mockedApi.pettyCash.rejected.mockResolvedValue(makeRejectedResult([makeRejectedLine()]))
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
-    expect(await screen.findByText('Vendedor Disenador Test 2')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Test 2')).toBeInTheDocument()
     expect(screen.getByText('Copy Centro El Dorado')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
   })
@@ -198,7 +198,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
   it('al hacer clic en una fila abre el modal unificado de detalle', async () => {
     mockedApi.pettyCash.rejected.mockResolvedValue(makeRejectedResult([makeRejectedLine()]))
     mockedApi.pettyCash.expenseDetail.mockResolvedValue({
-      id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Disenador Test 2',
+      id: 9, fecha: '25 jun 2026', solicitante_id: 14, solicitante_nombre: 'Vendedor Test 2',
       proveedor: 'Copy Centro El Dorado', descripcion: 'Impresión de brochures',
       monto_bruto: 12.0, itbms: 0.84, total: 12.84, estado: 'rechazado_temporal', intentos_rechazo: 2,
       ubicacion: 'rechazados', reporte_numero: null, reporte_estado: null,
@@ -210,7 +210,7 @@ describe('PettyCashPage — REQ-543 panel Rechazados', () => {
     })
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
-    fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
+    fireEvent.click(await screen.findByText('Vendedor Test 2'))
     expect(await screen.findByText('cajaChica.detalleLineaModal.reabrir')).toBeInTheDocument()
   })
 })
@@ -241,7 +241,7 @@ describe('PettyCashPage — SCRUM-947 paginación', () => {
     })
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.rechazados'))
-    await screen.findByText('Vendedor Disenador Test 2')
+    await screen.findByText('Vendedor Test 2')
 
     fireEvent.click(screen.getByRole('button', { name: '2' }))
     await waitFor(() => expect(mockedApi.pettyCash.rejected).toHaveBeenLastCalledWith(2, 20))

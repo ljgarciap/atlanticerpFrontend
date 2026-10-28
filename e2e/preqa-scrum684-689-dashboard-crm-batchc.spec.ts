@@ -22,8 +22,8 @@ test.describe.configure({ mode: 'serial' })
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 const MGMT_EMAIL = 'gerencia5@test.com'
 const MGMT_PASS = 'gerencia5@test.com'
-const VENDOR_EMAIL = 'vendedordisenador@test.com'
-const VENDOR_PASS = 'vendedordisenador@test.com'
+const VENDOR_EMAIL = 'vendedor@test.com'
+const VENDOR_PASS = 'vendedor@test.com'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)
@@ -47,11 +47,11 @@ test.describe('REQ-609 — acceso restringido a Gerencia', () => {
     await page.screenshot({ path: 'e2e/.tmp/preqa-dashboard-batchc/1-gerencia-dashboard.png', fullPage: true })
   })
 
-  test('Vendedor/Diseñador (Vendedor Disenador) NO puede acceder por URL directa — sin flash de datos reales', async ({ page }) => {
+  test('Vendedor/Diseñador (Vendedor) NO puede acceder por URL directa — sin flash de datos reales', async ({ page }) => {
     await login(page, VENDOR_EMAIL, VENDOR_PASS)
 
     // Escucha respuestas de red: si el frontend alguna vez llega a pedir el summary real
-    // como Vendedor Disenador, es un hallazgo (aunque redirija después) porque implica que la data
+    // como Vendedor, es un hallazgo (aunque redirija después) porque implica que la data
     // viajó al cliente antes del gate.
     const summaryRequests: number[] = []
     page.on('response', res => {
@@ -73,11 +73,11 @@ test.describe('REQ-609 — acceso restringido a Gerencia', () => {
     }
   })
 
-  test('Vendedor/Diseñador (Vendedor Disenador) — el ítem "Dashboard CRM" no existe en su menú lateral (gate más fuerte que redirect)', async ({ page }) => {
+  test('Vendedor/Diseñador (Vendedor) — el ítem "Dashboard CRM" no existe en su menú lateral (gate más fuerte que redirect)', async ({ page }) => {
     await login(page, VENDOR_EMAIL, VENDOR_PASS)
     await page.goto(`${BASE}/ventas-diseno/pipeline`)
     await page.waitForTimeout(1000)
-    // Sidebar.tsx oculta el ítem completo para no-Gerencia (isGerencia gate) — Vendedor Disenador nunca
+    // Sidebar.tsx oculta el ítem completo para no-Gerencia (isGerencia gate) — Vendedor nunca
     // ve el link, en vez de verlo y ser redirigida al hacer clic. Confirmar que el ítem de
     // Pipeline sí está (para descartar que el sidebar entero no cargó) y que Dashboard CRM no.
     await expect(page.getByRole('button', { name: /^pipeline$/i })).toBeVisible()
@@ -85,7 +85,7 @@ test.describe('REQ-609 — acceso restringido a Gerencia', () => {
     await page.screenshot({ path: 'e2e/.tmp/preqa-dashboard-batchc/3-milena-sin-item-dashboard.png', fullPage: true })
   })
 
-  test('API — GET /dashboard/summary con token de Vendedor Disenador 403 a nivel de backend (no solo gate de frontend)', async ({ page, request }) => {
+  test('API — GET /dashboard/summary con token de Vendedor 403 a nivel de backend (no solo gate de frontend)', async ({ page, request }) => {
     await login(page, VENDOR_EMAIL, VENDOR_PASS)
     const token = await page.evaluate(() => localStorage.getItem('accessToken'))
     expect(token).toBeTruthy()
@@ -96,7 +96,7 @@ test.describe('REQ-609 — acceso restringido a Gerencia', () => {
     expect(res.status()).toBe(403)
   })
 
-  test('API — POST /dashboard/remind con token de Vendedor Disenador también 403', async ({ page, request }) => {
+  test('API — POST /dashboard/remind con token de Vendedor también 403', async ({ page, request }) => {
     await login(page, VENDOR_EMAIL, VENDOR_PASS)
     const token = await page.evaluate(() => localStorage.getItem('accessToken'))
 

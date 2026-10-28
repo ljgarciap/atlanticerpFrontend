@@ -9,7 +9,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com  (lider_servicios) — Lider Servicios, escritura completa de Insumos
- *  - tecnicoservicios@test.com    (tecnico) — Tecnico Servicios Test, solo lectura del módulo
+ *  - tecnico@test.com    (tecnico) — Tecnico Test, solo lectura del módulo
  *  - gerencia@test.com   (management) — Gerencia, ve el Kardex de herramientas
  *  - lidercompras@test.com (lider_compras) — Lider Compras, avanza la orden real en Compras
  *
@@ -62,8 +62,8 @@ test('1. Lider Servicios — REQ-273: panel Insumos vacío al arrancar, botón "
   await expect(page.getByRole('button', { name: /Agregar insumo/i })).toBeVisible()
 })
 
-test('2. Tecnico Servicios (tecnico) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+test('2. Tecnico (tecnico) — modo lectura: sin botón "Agregar insumo" ni "Solicitar"', async ({ page }) => {
+  await login(page, 'tecnico@test.com')
   await gotoInsumos(page)
   await page.screenshot({ path: `${DL_DIR}/02-carlos-solo-lectura.png`, fullPage: true })
 
@@ -73,8 +73,8 @@ test('2. Tecnico Servicios (tecnico) — modo lectura: sin botón "Agregar insum
   await expect(page.getByRole('button', { name: /Movimiento de herramientas/i })).toHaveCount(0)
 })
 
-test('3. Ruptura — Tecnico Servicios vía API directa: POST /servicios/insumos debe dar 403', async ({ request }) => {
-  const token = await apiToken(request, 'tecnicoservicios@test.com')
+test('3. Ruptura — Tecnico vía API directa: POST /servicios/insumos debe dar 403', async ({ request }) => {
+  const token = await apiToken(request, 'tecnico@test.com')
   const res = await request.post(`${API_BASE}/api/servicios/insumos`, {
     headers: { Authorization: `Bearer ${token}` },
     data: { catalog_product_id: 1, minimo: 1, cantidad_inicial: 1 },
@@ -278,8 +278,8 @@ test('10. REQ-291 RN5 — Bodega ve exactamente el mismo disponible en "Reserva 
 
 // ---------- REQ-276 — Kardex de herramientas: gate + filtros combinados ----------
 
-test('11. Tecnico Servicios (tecnico) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
-  await login(page, 'tecnicoservicios@test.com')
+test('11. Tecnico (tecnico) — URL directa a /servicios/tools/kardex lo redirige (bloqueo real, no solo botón oculto)', async ({ page }) => {
+  await login(page, 'tecnico@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1500)
   await page.screenshot({ path: `${DL_DIR}/13-carlos-kardex-bloqueado.png`, fullPage: true })
@@ -287,8 +287,8 @@ test('11. Tecnico Servicios (tecnico) — URL directa a /servicios/tools/kardex 
   expect(page.url()).not.toContain('/servicios/tools/kardex')
 })
 
-test('12. Ruptura — Tecnico Servicios vía API directa: GET /servicios/tools/movements debe dar 403', async ({ request }) => {
-  const token = await apiToken(request, 'tecnicoservicios@test.com')
+test('12. Ruptura — Tecnico vía API directa: GET /servicios/tools/movements debe dar 403', async ({ request }) => {
+  const token = await apiToken(request, 'tecnico@test.com')
   const res = await request.get(`${API_BASE}/api/servicios/tools/movements`, {
     headers: { Authorization: `Bearer ${token}` },
   })

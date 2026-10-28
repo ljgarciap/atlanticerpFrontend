@@ -282,7 +282,7 @@ test('6. Sin iconografía de emoji en el modal de ficha técnica (SCRUM-56)', as
 })
 
 test('7. Modo restringido (Ventas & Diseño) — visibilidad del botón + no leak de costo/margen', async ({ page }) => {
-  await login(page, 'designer@atlantic.test')
+  await login(page, 'vendedor@atlantic.test')
   await page.goto(`${BASE}/inventario`)
   await page.waitForTimeout(1000)
   await page.locator('input[placeholder="Buscar producto…"]').fill('PREQA-LEGACY-001')

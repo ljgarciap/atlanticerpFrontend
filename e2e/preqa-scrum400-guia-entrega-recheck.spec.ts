@@ -74,7 +74,7 @@ test('Adversarial — Order 127 con 3 documentos guia_entrega, el de mayor id SI
   await page.screenshot({ path: 'e2e/.tmp/scrum400-recheck-order105-adversarial.png', fullPage: true })
 
   const bodyText = await page.locator('body').innerText()
-  console.log('ORDER127_CONTAINS_RECEIVER_NAME=', bodyText.includes('Tecnico Servicios Receptor Real'))
+  console.log('ORDER127_CONTAINS_RECEIVER_NAME=', bodyText.includes('Tecnico Receptor Real'))
 
   expect(errors).toEqual([])
 })
@@ -106,7 +106,7 @@ test('Rol sin permiso bodega.read no puede ver el board de Pedidos', async ({ pa
   page.on('response', res => {
     if (res.url().includes('/api/bodega/orders') && !res.url().includes('assistant-load')) ordersApiStatus = res.status()
   })
-  await login(page, 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com')
   await page.goto('/bodega/pedidos')
   await page.waitForTimeout(1200)
   await page.screenshot({ path: 'e2e/.tmp/scrum400-recheck-role-sin-permiso.png', fullPage: true })

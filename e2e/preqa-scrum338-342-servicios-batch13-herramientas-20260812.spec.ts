@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Cuentas reales (password = email):
  *  - liderservicios@test.com   (lider_servicios) — Lider Servicios, escritura completa
- *  - garantiasservicios@test.com  (tecnico_garantias) — Garantias Servicios Test, solo lectura
+ *  - tecnicogarantias@test.com  (tecnico_garantias) — Tecnico Garantias Test, solo lectura
  *
  * TOOL_NAME lleva un sufijo único por corrida (Date.now()) para que re-correr la suite no colisione
  * con datos reales dejados por una corrida anterior (no hay borrado de fixtures entre corridas).
@@ -262,8 +262,8 @@ test('10. Lider Servicios — REQ-268 RN3: filtros combinados (búsqueda + estad
 
 // ---------- Modo lectura — técnico interno ----------
 
-test('11. Garantias Servicios (tecnico_garantias) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
-  await login(page, 'garantiasservicios@test.com')
+test('11. Tecnico Garantias (tecnico_garantias) — modo lectura: sin selects de edición ni botones de escritura', async ({ page }) => {
+  await login(page, 'tecnicogarantias@test.com')
   await gotoTools(page)
   await page.waitForTimeout(1000)
   await page.screenshot({ path: `${DL_DIR}/17-modo-lectura-miguel.png`, fullPage: true })
@@ -282,7 +282,7 @@ test('11. Garantias Servicios (tecnico_garantias) — modo lectura: sin selects 
 
 test('12. Ruptura — rol de escritura vía API directa: PATCH estado con tecnico_garantias debe dar 403', async ({ request }) => {
   const loginRes = await request.post(`${API_BASE}/api/auth/login`, {
-    data: { email: 'garantiasservicios@test.com', password: 'garantiasservicios@test.com' },
+    data: { email: 'tecnicogarantias@test.com', password: 'tecnicogarantias@test.com' },
   })
   const { token } = await loginRes.json()
 

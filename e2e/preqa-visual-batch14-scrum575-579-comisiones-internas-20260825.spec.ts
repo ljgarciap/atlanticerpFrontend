@@ -7,7 +7,7 @@ import { test, expect, Page } from '@playwright/test'
 const FELIX = 'contabilidad@test.com' // Lider Admin&Cont
 const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
-const VENDEDOR = 'vendedordisenador@test.com'
+const VENDEDOR = 'vendedor@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -107,7 +107,7 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
 
   // Expandir la primera fila de vendedor con datos reales (columna "Total pedidos" != USD 0.00)
   // y confirmar el detalle a nivel de pedido
-  const idmarRow = page.getByRole('cell', { name: 'Vendedor Disenador Test 10' })
+  const idmarRow = page.getByRole('cell', { name: 'Vendedor Test 10' })
   await idmarRow.scrollIntoViewIfNeeded()
   await page.waitForTimeout(300)
   await idmarRow.click({ timeout: 8000 })

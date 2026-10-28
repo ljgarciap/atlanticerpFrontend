@@ -4,24 +4,24 @@ import { test, expect, Page, Locator } from '@playwright/test'
  * Fase 4 — Servicios, Batch 9 (REQ-244/278/279, SCRUM-307/348/349, 2026-08-11).
  * Password default = email. Fixtures locales creadas por Pre-QA en esta sesión (ver
  * docs/pre-qa/ de esta fecha):
- *   T95 = REC-2026-0001 (claim, técnico=Tecnico Servicios Test 2, COMPLETADA por este mismo Pre-QA)
- *   T96 = REC-2026-0002 (claim, técnico=Tecnico Servicios Test, COMPLETADA — sesión anterior)
+ *   T95 = REC-2026-0001 (claim, técnico=Tecnico Test 2, COMPLETADA por este mismo Pre-QA)
+ *   T96 = REC-2026-0002 (claim, técnico=Tecnico Test, COMPLETADA — sesión anterior)
  *   T97 = REC-2026-0003 (claim, cancelled, COMPLETADA, CON 1 producto — usar para precarga)
  *   T101 = REC-2026-0004 (claim, SIN técnico asignado — usado por Pre-QA para el test de doble
  *          submit concurrente por API, terminó COMPLETADO — no usar para "sin hoja")
  *   T102 = REC-2026-0005 (claim, técnico=Agustín — YA completado por una corrida anterior de este
  *          mismo archivo, no reusar)
  *   T103 = REC-2026-0006 (claim, SIN técnico asignado, SIN hoja — usar para RN4 con Lider Servicios)
- *   T104 = REC-2026-0007 (claim, técnico=Agustín Rodríguez, SIN hoja — solo lectura, RN6 caso Tecnico Servicios
- *          NO asignado; nunca se completa porque Tecnico Servicios siempre es rechazado, seguro de reusar)
+ *   T104 = REC-2026-0007 (claim, técnico=Agustín Rodríguez, SIN hoja — solo lectura, RN6 caso Tecnico
+ *          NO asignado; nunca se completa porque Tecnico siempre es rechazado, seguro de reusar)
  *   El caso "RN6 técnico SÍ asignado" se autosiembra un ticket nuevo en cada corrida (ver el test) —
  *   ese sí completa la hoja como efecto secundario permanente, no puede reusar un ID fijo.
  *   T88  = INS-2026-0002 (installation/inspection, técnico=Agustín, informe NO completado — botón blanco)
- *   T89  = INS-2026-0003 (installation/inspection, técnico=Tecnico Servicios, informe COMPLETADO — botón lleno)
+ *   T89  = INS-2026-0003 (installation/inspection, técnico=Tecnico, informe COMPLETADO — botón lleno)
  */
 const AARON    = 'liderservicios@test.com'
-const PEDRO    = 'tecnicoservicios2@test.com'
-const AGUSTIN  = 'tecnicoservicios3@test.com'
+const PEDRO    = 'tecnico2@test.com'
+const AGUSTIN  = 'tecnico3@test.com'
 const DANIELA  = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
@@ -101,7 +101,7 @@ test('SCRUM-348 RN4 — diagnóstico y firma ambos obligatorios, botón Guardar 
 })
 
 test('SCRUM-348 RN6 — técnico NO asignado ve el form bloqueado (no solo el botón escondido)', async ({ page }) => {
-  await login(page, PEDRO) // Tecnico Servicios NO está asignado a T104 (asignado a Agustín)
+  await login(page, PEDRO) // Tecnico NO está asignado a T104 (asignado a Agustín)
   await openTicketByNumero(page, 'REC-2026-0007')
   await page.getByRole('button', { name: 'Generar Hoja de Reclamo' }).last().click()
   const modal = activeModal(page)
@@ -157,7 +157,7 @@ test('SCRUM-348 RN6 — técnico SÍ asignado puede editar y completar', async (
 test('SCRUM-349 RN3 — hoja completada: cualquier rol con acceso puede Ver/Imprimir aunque no pueda editar', async ({ page }) => {
   // Gerencia (management) no puede editar Hoja de Reclamo (route role gate la bloquea), pero
   // servicios.read sí le da acceso de lectura/impresión — confirmar que el botón Ver/Imprimir
-  // aparece y funciona una vez la hoja (T96, Tecnico Servicios) ya está completada.
+  // aparece y funciona una vez la hoja (T96, Tecnico) ya está completada.
   await login(page, DANIELA)
   await openTicketByNumero(page, 'REC-2026-0002') // T96, completada
   await page.getByRole('button', { name: /Completada/ }).last().click()

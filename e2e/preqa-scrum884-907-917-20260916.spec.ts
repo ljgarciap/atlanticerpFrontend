@@ -31,15 +31,15 @@ async function login(page: Page, email: string, password: string): Promise<void>
 
 // ---------- SCRUM-884 — campo Creador ----------
 
-test('SCRUM-884 — Vendedor Disenador crea un Lead solo; Creador y Responsable coinciden (caso simple)', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+test('SCRUM-884 — Vendedor crea un Lead solo; Creador y Responsable coinciden (caso simple)', async ({ page }) => {
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
   await page.getByText('+ Nuevo Proyecto').click()
   await page.waitForTimeout(500)
   // El input de Nombre tiene autoFocus — más confiable que "primer input[type=text] de la
   // página" (el resto de la app sigue montado detrás del modal).
-  await page.locator(':focus').fill('PreQA SCRUM-884 Vendedor Disenador Solo')
+  await page.locator(':focus').fill('PreQA SCRUM-884 Vendedor Solo')
   await page.getByRole('button', { name: /^Guardar$/i }).click()
   await page.waitForTimeout(2000)
 
@@ -70,7 +70,7 @@ test('SCRUM-884 — Camino de ruptura: proyecto ya existente (pre-backfill) mues
 // ---------- SCRUM-907 — pantalla Arquitectos ----------
 
 test('SCRUM-907 — el menú CRM muestra "Arquitectos" debajo de "Clientes"', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
   const clientesLink = page.getByRole('button', { name: /^Clientes$/i })
@@ -83,7 +83,7 @@ test('SCRUM-907 — el menú CRM muestra "Arquitectos" debajo de "Clientes"', as
 })
 
 test('SCRUM-907 — listado, ver detalle con proyectos, editar Teléfono y revertir', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/architects`)
   await page.waitForTimeout(2000)
   const rows = page.locator('table tbody tr')
@@ -116,7 +116,7 @@ test('SCRUM-907 — listado, ver detalle con proyectos, editar Teléfono y rever
 })
 
 test('SCRUM-907 — Camino de ruptura: borrar Teléfono Y Correo muestra un error específico, no crashea', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   await page.goto(`${DEV}/ventas-diseno/architects`)
   await page.waitForTimeout(2000)
   await page.locator('table tbody tr').first().click()
@@ -156,9 +156,9 @@ async function openClienteMasterPicker(page: Page): Promise<boolean> {
 }
 
 test('SCRUM-917 — buscar un Cliente Master real fuera del top 200 alfabético SÍ aparece', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   const opened = await openClienteMasterPicker(page)
-  test.skip(!opened, 'Vendedor Disenador no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
+  test.skip(!opened, 'Vendedor no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
 
   const searchInput = page.locator('input:focus')
   await searchInput.fill('GRUPO MJE')
@@ -171,9 +171,9 @@ test('SCRUM-917 — buscar un Cliente Master real fuera del top 200 alfabético 
 })
 
 test('SCRUM-917 — Camino de ruptura: buscar un nombre que NO existe sigue mostrando "Sin resultados" (negativo intacto)', async ({ page }) => {
-  await login(page, 'vendedordisenador2@test.com', 'vendedordisenador2@test.com')
+  await login(page, 'vendedor2@test.com', 'vendedor2@test.com')
   const opened = await openClienteMasterPicker(page)
-  test.skip(!opened, 'Vendedor Disenador no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
+  test.skip(!opened, 'Vendedor no tiene acceso directo a Nuevo Ticket de Servicios (o al picker) en este entorno')
 
   const searchInput = page.locator('input:focus')
   await searchInput.fill('ZZZZZZ Cliente Que Definitivamente No Existe 999')

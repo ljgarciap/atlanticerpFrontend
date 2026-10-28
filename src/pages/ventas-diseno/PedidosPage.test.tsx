@@ -36,7 +36,7 @@ function makeRow(overrides: Partial<OrderRow> = {}): OrderRow {
     sales_project: { id: 1, name: 'Residencia Demo 14B' },
     amount: 22000, approved_at: '2026-02-10T00:00:00Z',
     quoted_margin: 40, invoiced_margin: 40, invoiced_partial: false, estado: 'igual',
-    owner: { id: 1, name: 'Tecnico Servicios Ruiz' },
+    owner: { id: 1, name: 'Tecnico Ruiz' },
     ...overrides,
   }
 }
@@ -213,13 +213,13 @@ describe('VentasDisenoPedidosPage', () => {
     it('gerencia puede filtrar pedidos por vendedores seleccionados', async () => {
       mockAuthState({ id: 9, role: 'management', permissions: ['platform.management', 'ventas_diseno.orders.access'] })
       mockedApi.home.vendors.mockResolvedValue([
-        { id: 5, name: 'Vendedor Disenador Test 2' }, { id: 6, name: 'Vendedor Disenador Test 3' },
+        { id: 5, name: 'Vendedor Test 2' }, { id: 6, name: 'Vendedor Test 3' },
       ])
       renderPage()
       await screen.findByText('ventasDiseno:orders.table.empty')
 
       fireEvent.click(await screen.findByRole('button', { name: /userFilter/ }))
-      fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
+      fireEvent.click(await screen.findByText('Vendedor Test 2'))
 
       await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(
         expect.objectContaining({ owner_ids: [5] }),
@@ -228,12 +228,12 @@ describe('VentasDisenoPedidosPage', () => {
 
     it('Borrar filtros también limpia la selección de vendedores', async () => {
       mockAuthState({ id: 9, role: 'management', permissions: ['platform.management', 'ventas_diseno.orders.access'] })
-      mockedApi.home.vendors.mockResolvedValue([{ id: 5, name: 'Vendedor Disenador Test 2' }])
+      mockedApi.home.vendors.mockResolvedValue([{ id: 5, name: 'Vendedor Test 2' }])
       renderPage()
       await screen.findByText('ventasDiseno:orders.table.empty')
 
       fireEvent.click(await screen.findByRole('button', { name: /userFilter/ }))
-      fireEvent.click(await screen.findByText('Vendedor Disenador Test 2'))
+      fireEvent.click(await screen.findByText('Vendedor Test 2'))
       await waitFor(() => expect(mockedApi.orders.list).toHaveBeenCalledWith(expect.objectContaining({ owner_ids: [5] })))
 
       fireEvent.click(screen.getByText('ventasDiseno:orders.filters.clear'))

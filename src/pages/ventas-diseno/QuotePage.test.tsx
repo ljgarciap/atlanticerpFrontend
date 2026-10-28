@@ -1761,11 +1761,11 @@ describe('QuotePage', () => {
   it('SCRUM-849.5 — muestra el nombre/teléfono del DUEÑO real de la cotización, no del usuario logueado', async () => {
     mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Test', permissions: [] })
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({
-      owner: { id: 1, name: 'Vendedor Disenador Test 2', phone: '6123-4567' },
+      owner: { id: 1, name: 'Vendedor Test 2', phone: '6123-4567' },
     }))
     renderPage()
 
-    expect(await screen.findByText('Vendedor Disenador Test 2')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Test 2')).toBeInTheDocument()
     expect(screen.getByText('6123-4567', { exact: false })).toBeInTheDocument()
     expect(screen.queryByText('Gerencia Test')).not.toBeInTheDocument()
   })
@@ -1774,11 +1774,11 @@ describe('QuotePage', () => {
     mockAuthState({ id: 9, first_name: 'Gerencia', last_name: 'Gerencia', permissions: [] })
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({
       owner:    { id: 9, name: 'Gerencia Test 3', phone: '6000-0000' },
-      designer: { id: 1, name: 'Vendedor Disenador Vendedora', phone: '6123-4567' },
+      designer: { id: 1, name: 'Vendedor Vendedora', phone: '6123-4567' },
     }))
     renderPage()
 
-    expect(await screen.findByText('Vendedor Disenador Vendedora')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Vendedora')).toBeInTheDocument()
     expect(screen.getByText('6123-4567', { exact: false })).toBeInTheDocument()
     expect(screen.queryByText('Gerencia Test 3')).not.toBeInTheDocument()
   })
