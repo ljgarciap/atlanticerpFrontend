@@ -451,8 +451,9 @@ export const comprasApi = {
     approve: (id: number): Promise<ReplacementRequest> =>
       api.post<ReplacementRequest>(`/compras/replacement-requests/${id}/approve`).then(r => r.data),
 
-    reject: (id: number): Promise<ReplacementRequest> =>
-      api.post<ReplacementRequest>(`/compras/replacement-requests/${id}/reject`).then(r => r.data),
+    // Fase 12a — rechazar exige un motivo.
+    reject: (id: number, motivo: string): Promise<ReplacementRequest> =>
+      api.post<ReplacementRequest>(`/compras/replacement-requests/${id}/reject`, { motivo_rechazo: motivo }).then(r => r.data),
 
     // SCRUM-245 (REQ-182/183, ADR-SCRUM245) — búsqueda por foto/ficha técnica con IA.
     search: (originalCatalogProductId: number, familyId: number, file: File): Promise<{ job_id: string }> => {

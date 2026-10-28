@@ -10,6 +10,7 @@ import {
 import { comprasApi } from '@/api/comprasApi'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import SalesProjectPicker from '@/components/compras/SalesProjectPicker'
+import ReplacementRejectModal from '@/components/compras/ReplacementRejectModal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
@@ -73,6 +74,8 @@ function RequestsTab() {
   const { data, isFetching } = useReplacementRequests(chip === 'all' ? undefined : chip, page, perPage)
   const generateOrder = useGenerateReplacementOrder()
   const decide = useDecideReplacementRequest()
+  // Fase 12a — rechazar abre un modal que pide el motivo.
+  const [rejectingId, setRejectingId] = useState<number | null>(null)
   const requests = data?.data ?? []
   const meta = data?.meta
 
@@ -86,10 +89,14 @@ function RequestsTab() {
 
   // SCRUM-818 — habilitado solo cuando el backend informa can_decide=true (matriz de aprobación
   // por margen + responsable del proyecto, calculada server-side, nunca reimplementada acá).
-  const handleDecide = (id: number, decision: 'approve' | 'reject') => {
+  const handleDecide = (id: number, decision: 'approve' | 'reject', motivo?: string) => {
     setErrorById(prev => { const next = { ...prev }; delete next[id]; return next })
-    decide.mutate({ id, decision }, {
-      onError: err => setErrorById(prev => ({ ...prev, [id]: apiErrorMessage(err, t('compras:replacements.errors.decideGeneric')) })),
+    decide.mutate({ id, decision, motivo }, {
+      onSuccess: () => setRejectingId(null),
+      onError: err => {
+        setRejectingId(null)
+        setErrorById(prev => ({ ...prev, [id]: apiErrorMessage(err, t('compras:replacements.errors.decideGeneric')) }))
+      },
     })
   }
 
@@ -145,7 +152,7 @@ function RequestsTab() {
                       <Button
                         variant="outline" className="!px-3 !py-1.5 !text-xs !text-red-600 !border-red-200 hover:!bg-red-50"
                         loading={decide.isPending}
-                        onClick={() => handleDecide(r.id, 'reject')}
+                        onClick={() => setRejectingId(r.id)}
                       >
                         {t('compras:replacements.actions.reject')}
                       </Button>
@@ -191,6 +198,13 @@ function RequestsTab() {
           perPage={perPage}
           onPageChange={setPage}
           onPerPageChange={p => { setPerPage(p); setPage(1) }}
+        />
+      )}
+      {rejectingId !== null && (
+        <ReplacementRejectModal
+          loading={decide.isPending}
+          onClose={() => setRejectingId(null)}
+          onConfirm={motivo => handleDecide(rejectingId, 'reject', motivo)}
         />
       )}
     </>

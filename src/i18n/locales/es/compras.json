@@ -1165,6 +1165,14 @@
       "submit": "Generar solicitud",
       "cancel": "Cancelar",
       "success": "Solicitud generada correctamente."
+    },
+    "rejectModal": {
+      "title": "Rechazar solicitud de sustitución",
+      "motivoLabel": "Motivo del rechazo",
+      "motivoPlaceholder": "Explica por qué se rechaza la sustitución",
+      "motivoRequired": "El motivo es obligatorio (mínimo 5 caracteres).",
+      "cancel": "Cancelar",
+      "confirm": "Rechazar"
     }
   },
   "reports": {

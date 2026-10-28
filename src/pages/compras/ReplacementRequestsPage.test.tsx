@@ -354,7 +354,7 @@ describe('ReplacementRequestsPage', () => {
     await waitFor(() => expect(mockedComprasApi.replacementRequests.approve).toHaveBeenCalledWith(10))
   })
 
-  it('SCRUM-818 — clic en Rechazar llama a la API con el id de la solicitud', async () => {
+  it('Fase 12a — Rechazar abre un modal que exige el motivo y lo envía a la API junto al id', async () => {
     mockedComprasApi.replacementRequests.list.mockResolvedValue({
       data: [REQUEST], meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
     })
@@ -364,7 +364,18 @@ describe('ReplacementRequestsPage', () => {
     await waitFor(() => expect(screen.getByText('compras:replacements.actions.reject')).toBeInTheDocument())
     fireEvent.click(screen.getByText('compras:replacements.actions.reject'))
 
-    await waitFor(() => expect(mockedComprasApi.replacementRequests.reject).toHaveBeenCalledWith(10))
+    // el clic solo abre el modal: nada se llama todavía
+    expect(mockedComprasApi.replacementRequests.reject).not.toHaveBeenCalled()
+    const confirmar = await screen.findByText('replacements.rejectModal.confirm')
+    expect(confirmar.closest('button')).toBeDisabled()
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'ok' } })
+    expect(confirmar.closest('button')).toBeDisabled()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '  El cliente prefiere el original  ' } })
+    expect(confirmar.closest('button')).not.toBeDisabled()
+    fireEvent.click(confirmar)
+
+    await waitFor(() => expect(mockedComprasApi.replacementRequests.reject).toHaveBeenCalledWith(10, 'El cliente prefiere el original'))
   })
 
   // SCRUM-818 (rebote 2026-09-03, Hallazgo 3) — "Generar orden" gateado por can_generate_order

@@ -1165,6 +1165,14 @@
       "submit": "Generate request",
       "cancel": "Cancel",
       "success": "Request generated successfully."
+    },
+    "rejectModal": {
+      "title": "Reject substitution request",
+      "motivoLabel": "Reason for rejection",
+      "motivoPlaceholder": "Explain why the substitution is rejected",
+      "motivoRequired": "A reason is required (at least 5 characters).",
+      "cancel": "Cancel",
+      "confirm": "Reject"
     }
   },
   "reports": {
