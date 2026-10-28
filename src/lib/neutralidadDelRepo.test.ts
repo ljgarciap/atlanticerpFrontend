@@ -18,6 +18,8 @@ const ENTIDADES = [
 ]
 const SECTOR_CI = [
   'iluminaci', 'iluminacon', 'luminaria', 'l[aá]mpara', 'lamparas', 'downlight', 'candelabro', 'bombill', 'chandelier', 'luminaire', 'dialux',
+  // Fase 9c — campos de la ficha técnica de iluminación (ahora un catálogo por empresa).
+  'luminous', 'lum[ií]nic', 'flujo luminoso', 'casquillo', 'color_temperature', 'temperatura de color', 'ip_rating', 'socket_type',
 ]
 // siglas: distinguen mayúsculas
 const SECTOR_CS = ['\\bLED\\b', '(?<![A-Za-z])LAMP(?![A-Za-z])']

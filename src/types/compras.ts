@@ -751,26 +751,8 @@ interface InventoryProductBase {
   technical_sheet_uploaded_at?: string | null
 }
 
-/**
- * SCRUM-425/426 (REQ-355/356) — ficha técnica: 12 campos de texto libre, mismo set del mockup
- * del cliente (`3B__Bodega_Inventario.html#modal-ficha-tecnica`) tal cual, aprobado por Luis
- * pese a la nota de "pendientes de validar" del mockup. Solo de lectura para Bodega (RN1
- * SCRUM-425); obligatorios los 12 al crear un producto nuevo (SCRUM-426).
- */
-export interface TechnicalSpec {
-  voltage:             string
-  power:               string
-  socket_type:         string
-  color_temperature:   string
-  luminous_flux:       string
-  dimensions:          string
-  weight:              string
-  material_finish:     string
-  ip_rating:           string
-  estimated_lifespan:  string
-  warranty:            string
-  certifications:      string
-}
+/** Fase 9c — clave del catálogo `technical_spec_field` → valor. */
+export type TechnicalSpec = Record<string, string>
 
 /**
  * Solo presentes en modo completo (Compras/Gerencia) — nunca llegan en modo restringido.

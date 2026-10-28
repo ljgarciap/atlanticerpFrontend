@@ -521,9 +521,7 @@ describe('BodegaInventarioPage — Ver ficha técnica (SCRUM-425)', () => {
     mockedApi.inventory.get.mockResolvedValue({
       ...makeRow(),
       technical_spec: {
-        voltage: '120V', power: '8W', socket_type: 'E27', color_temperature: '3000K',
-        luminous_flux: '800lm', dimensions: '10x10x5cm', weight: '0.2kg', material_finish: 'Aluminio',
-        ip_rating: 'IP44', estimated_lifespan: '25000h', warranty: '2 años', certifications: 'CE/RoHS',
+        dimensions: '10x10x5cm', weight: '0.2kg', material_finish: 'Aluminio', warranty: '2 años', certifications: 'CE/RoHS',
       },
     })
     renderPage()
@@ -536,8 +534,8 @@ describe('BodegaInventarioPage — Ver ficha técnica (SCRUM-425)', () => {
     fireEvent.click(screen.getByText('bodega:inventory.technicalSpec.button'))
 
     await waitFor(() => expect(mockedApi.inventory.get).toHaveBeenCalledWith(1))
-    expect(await screen.findByText('120V')).toBeInTheDocument()
-    expect(screen.getByText('bodega:inventory.technicalSpec.fields.voltage')).toBeInTheDocument()
+    expect(await screen.findByText('10x10x5cm')).toBeInTheDocument()
+    expect(screen.getByText('Dimensiones')).toBeInTheDocument()
   })
 
   it('muestra el estado vacío cuando el producto no tiene ficha técnica (o el backend todavía no la expone)', async () => {

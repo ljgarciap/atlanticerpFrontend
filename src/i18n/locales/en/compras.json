@@ -856,21 +856,7 @@
     "technicalSpec": {
       "title": "Technical spec sheet",
       "button": "View technical spec sheet",
-      "empty": "Technical spec sheet not available for this product.",
-      "fields": {
-        "voltage": "Voltage",
-        "power": "Power",
-        "socket_type": "Socket type",
-        "color_temperature": "Color temperature",
-        "luminous_flux": "Luminous flux",
-        "dimensions": "Dimensions",
-        "weight": "Weight",
-        "material_finish": "Material / finish",
-        "ip_rating": "Ingress protection (IP) rating",
-        "estimated_lifespan": "Estimated lifespan",
-        "warranty": "Warranty",
-        "certifications": "Certifications"
-      }
+      "empty": "Technical spec sheet not available for this product."
     },
     "errors": {
       "generic": "Could not save the product. Check the data and try again.",
