@@ -96,7 +96,7 @@ export const bodegaApi = {
 
   // SCRUM-457/458/459 (REQ-387/388/389, Bloque B4 "Reubicación entre bodegas") — Bodega solicita
   // reubicar un producto de una bodega a otra, Gerencia aprueba/rechaza (mismo gate "exclusivo de
-  // Gerencia" que `adjustmentRequests`, ver `RelocationRequestController::resolveMarkAccess()`).
+  // Gerencia" que `adjustmentRequests`, ver `RelocationRequestController::resolveApproverAccess()`).
   relocations: {
     list: (params?: { estado?: RelocationEstadoFilter; page?: number; per_page?: number | 'all' }): Promise<RelocationRequestListResponse> =>
       api.get<RelocationRequestListResponse>('/bodega/relocations', { params }).then(r => r.data),

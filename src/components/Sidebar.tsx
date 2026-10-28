@@ -222,7 +222,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // el flag viene explícitamente en `false`: una sesión abierta antes de este cambio no trae el campo y conserva el menú hasta renovarla
   // (el backend sigue cortando el acceso de todos modos).
   const isSuperadmin = usePermission('superadmin.all')
-  const canSeeMarkOnlyConfig = isSuperadmin || user?.flags?.mark_approver !== false
+  const canSeeApproverOnlyConfig = isSuperadmin || user?.flags?.primary_approver !== false
 
   // SCRUM-711, 3ra vuelta — causa raíz real del bug reportado por Gerencia Test 3 (video
   // 2026-07-31, login fresco): esto NO tiene relación con `sidebar-collapsed` (el ancho del
@@ -532,13 +532,13 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // SCRUM-1012 — Empresa/Fiscal solo para el roster completo de Admin&Cont (no basta `admin_contab.view`,
   // que Vendedor/Diseñador tienen por Comisiones): ver también RequirePermission en /admin-contab/empresa y /fiscal.
   const adminContabConfigItems: NavEntry[] = [
-    ...(canSeeFullAdminContab && canSeeMarkOnlyConfig
+    ...(canSeeFullAdminContab && canSeeApproverOnlyConfig
       ? [{ id: 'admin-contab-empresa', label: tAdminContab('nav.empresa'), href: '/admin-contab/empresa', icon: <IcoUsers /> }]
       : []),
     ...(canSeeFullAdminContab && canEditClientTaxData
       ? [{ id: 'admin-contab-clientes-fiscal', label: tAdminContab('nav.clientesFiscal'), href: '/admin-contab/datos-fiscales-clientes', icon: <IcoUsers /> }]
       : []),
-    ...(canSeeFullAdminContab && canSeeMarkOnlyConfig
+    ...(canSeeFullAdminContab && canSeeApproverOnlyConfig
       ? [{ id: 'admin-contab-fiscal',  label: tAdminContab('nav.fiscal'),  href: '/admin-contab/fiscal',  icon: <IcoSettings /> }]
       : []),
     ...(canSeeBodegaSettings

@@ -1912,7 +1912,7 @@
   },
   "solicitudesReverso": {
     "titulo": "Payment voiding requests",
-    "ayudaMark": "Approve or reject. Approving reverses the payment's applications, takes the money out of the cash position today and, if an order's commission was already settled, records a deduction for the seller's next settlement.",
+    "ayudaAprobador": "Approve or reject. Approving reverses the payment's applications, takes the money out of the cash position today and, if an order's commission was already settled, records a deduction for the seller's next settlement.",
     "ayudaOtros": "Pending Gerencia's decision.",
     "anular": "Void payment {{recibo}}",
     "detalle": "Requested by {{quien}} on {{fecha}}",

@@ -54,7 +54,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   // Mientras no se sepa con certeza quién es Gerencia (settings todavía cargando), el botón
   // sensible queda OCULTO por defecto en vez de mostrarse de más un instante — más seguro que
   // arriesgar un falso "sí sos Gerencia" mientras la respuesta no llegó.
-  const isMark = settings !== undefined
+  const isApprover = settings !== undefined
     && (settings.primary_approver_user_id == null || settings.primary_approver_user_id === currentUserId)
 
   // SCRUM-252 — validación en vivo mientras se escribe el monto a registrar.
@@ -106,7 +106,7 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
             <span>{t('compras:orders.detail.payments.pendingAmountChange', { amount: formatMoney(order.pending_amount_change as number) })}</span>
             {/* SCRUM-252 (hallazgo de Gerencia Test) — "Aprobar/Rechazar cambio" SOLO para Gerencia;
                 Lider Compras (quien pidió el cambio) nunca debe poder aprobar su propio pedido. */}
-            {isMark && (
+            {isApprover && (
               <div className="flex gap-2">
                 <Button
                   variant="outline" className="!text-xs !px-2 !py-1"

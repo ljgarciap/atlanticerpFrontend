@@ -555,7 +555,7 @@ function RelocationRequestsModal({ onClose, initialChip = 'todas', highlightId =
 
   const { data: settings } = useComprasSettings()
   const currentUserId = useAuthStore(s => s.user?.id)
-  const isMark = settings !== undefined
+  const isApprover = settings !== undefined
     && (settings.primary_approver_user_id == null || settings.primary_approver_user_id === currentUserId)
 
   return (
@@ -636,7 +636,7 @@ function RelocationRequestsModal({ onClose, initialChip = 'todas', highlightId =
                       >
                         {t('bodega:warehouses.relocationRequests.actions.viewDetail')}
                       </Button>
-                      {r.estado === 'pendiente' && isMark && (
+                      {r.estado === 'pendiente' && isApprover && (
                         <>
                           <Button
                             variant="outline"
