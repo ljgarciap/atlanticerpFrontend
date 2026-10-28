@@ -735,8 +735,8 @@
       "estado": "Status",
       "actions": "Actions",
       "empty": "No products registered",
-      "showroom": "In Showroom Obarrio: {{count}}",
-      "showroomLabel": "In Showroom Obarrio (separate)"
+      "aparte": "On display (separate): {{count}}",
+      "aparteLabel": "On display (separate)"
     },
     "estado": {
       "disponible": "Available",

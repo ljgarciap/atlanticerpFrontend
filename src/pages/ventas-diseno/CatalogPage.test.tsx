@@ -100,15 +100,15 @@ describe('VentasDisenoCatalogPage', () => {
   })
 
   // Criterio duro REQ-615 Escenario 1 — nunca debe verse costo/margen en ningún lado del render.
-  it('SCRUM-1196 — muestra aparte lo que hay en Showroom Obarrio sin sumarlo al disponible, y no lo muestra si es 0', async () => {
+  it('SCRUM-1196 — muestra aparte lo que hay en Sala de exhibición 1 sin sumarlo al disponible, y no lo muestra si es 0', async () => {
     mockedApi.catalog.list.mockResolvedValue(makeResult({ data: [
-      makeItem({ id: 1, reference: 'CON-SHOW', disponible: 10, stock_showroom: 3 }),
-      makeItem({ id: 2, reference: 'SIN-SHOW', disponible: 5, stock_showroom: 0 }),
+      makeItem({ id: 1, reference: 'CON-SHOW', disponible: 10, stock_aparte: 3 }),
+      makeItem({ id: 2, reference: 'SIN-SHOW', disponible: 5, stock_aparte: 0 }),
     ] }))
     renderPage()
 
-    expect(await screen.findByTestId('catalog-showroom-1')).toHaveTextContent('ventasDiseno:catalogScreen.stock.showroom:3')
-    expect(screen.queryByTestId('catalog-showroom-2')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('catalog-aparte-1')).toHaveTextContent('ventasDiseno:catalogScreen.stock.aparte:3')
+    expect(screen.queryByTestId('catalog-aparte-2')).not.toBeInTheDocument()
   })
 
   it('nunca renderiza costo ni margen', async () => {

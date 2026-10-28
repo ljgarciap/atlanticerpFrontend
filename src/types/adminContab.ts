@@ -167,7 +167,7 @@ export type CompanyProfilePayload = Pick<
   CompanyProfile, 'descripcion_corta' | 'sitio_web' | 'redes_sociales' | 'zona_horaria' | 'pais' | 'moneda' | 'locale'
 >
 
-export type LocationType = 'Bodega' | 'Showroom' | 'Oficina' | 'Otra'
+export type LocationType = 'Bodega' | 'Exhibicion' | 'Oficina' | 'Otra'
 
 export interface Location {
   id: number
@@ -175,14 +175,14 @@ export interface Location {
   tipo: LocationType
   direccion: string | null
   activa: boolean
-  /** false para las 7 bodegas/showrooms oficiales — vienen en vivo del módulo Bodega, solo lectura acá (RN1 REQ-563). */
+  /** false para las 7 bodegas/exhibiciones oficiales — vienen en vivo del módulo Bodega, solo lectura acá (RN1 REQ-563). */
   editable: boolean
   source: 'bodega' | 'admin_contab'
 }
 
 export interface CreateLocationPayload {
   nombre: string
-  /** Solo estos 2 — "Bodega"/"Showroom" son de solo lectura, sourced del módulo Bodega (RN1 REQ-563). */
+  /** Solo estos 2 — "Bodega"/"Exhibición" son de solo lectura, sourced del módulo Bodega (RN1 REQ-563). */
   tipo: 'oficina' | 'otra'
   direccion: string
 }

@@ -103,8 +103,8 @@ export function InventoryProductsTable({
               </td>
               <td className="px-4 py-3 text-slate-600">
                 {p.disponible}
-                {(p.stock_showroom ?? 0) > 0 && (
-                  <div className="text-[11px] text-slate-400" data-testid={`showroom-${p.id}`}>{t('compras:inventory.table.showroom', { count: p.stock_showroom })}</div>
+                {(p.stock_aparte ?? 0) > 0 && (
+                  <div className="text-[11px] text-slate-400" data-testid={`aparte-${p.id}`}>{t('compras:inventory.table.aparte', { count: p.stock_aparte })}</div>
                 )}
               </td>
               <td className="px-4 py-3 text-slate-600">{p.por_servir > 0 ? p.por_servir : '—'}</td>

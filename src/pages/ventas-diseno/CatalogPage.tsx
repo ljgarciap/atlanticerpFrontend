@@ -437,8 +437,8 @@ function StockLabel({ item, compact }: { item: CatalogItem; compact?: boolean })
       {item.en_camino > 0 && (
         <span className="text-slate-400"> · {t('ventasDiseno:catalogScreen.stock.incoming', { count: item.en_camino })}</span>
       )}
-      {(item.stock_showroom ?? 0) > 0 && (
-        <span className="text-slate-400" data-testid={`catalog-showroom-${item.id}`}> · {t('ventasDiseno:catalogScreen.stock.showroom', { count: item.stock_showroom })}</span>
+      {(item.stock_aparte ?? 0) > 0 && (
+        <span className="text-slate-400" data-testid={`catalog-aparte-${item.id}`}> · {t('ventasDiseno:catalogScreen.stock.aparte', { count: item.stock_aparte })}</span>
       )}
     </span>
   )

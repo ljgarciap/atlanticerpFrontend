@@ -613,8 +613,8 @@ export interface CatalogProductRef {
   photo_url:          string | null
   price_full:         number
   stock_quantity:     number | null
-  /** SCRUM-1196 — unidades en Showroom Obarrio, aparte del disponible (no suman). */
-  stock_showroom?:    number
+  /** SCRUM-1196 — unidades en Sala de exhibición 1, aparte del disponible (no suman). */
+  stock_aparte?:    number
 }
 
 // REQ-037 (2026-07-13): tab "Familias" del buscador de Catálogo.
@@ -664,8 +664,8 @@ export interface CatalogItem {
   family_id:                      number | null
   family_name:                    string | null
   disponible:                     number
-  /** SCRUM-1196 — unidades en Showroom Obarrio, aparte del disponible (no suman). */
-  stock_showroom?:                number
+  /** SCRUM-1196 — unidades en Sala de exhibición 1, aparte del disponible (no suman). */
+  stock_aparte?:                number
   en_camino:                      number
   has_technical_sheet:            boolean
   technical_sheet_filename:       string | null

@@ -187,7 +187,7 @@
     "familyProductsCount": "{{count}} productos",
     "familiesEmpty": "No hay familias configuradas",
     "selectAllProducts": "Seleccionar productos",
-    "showroom": "Showroom Obarrio: {{count}}"
+    "aparte": "Exhibición (aparte): {{count}}"
   },
   "catalogScreen": {
     "resultsCount_one": "{{count}} producto",
@@ -231,7 +231,7 @@
       "availableCompact": "{{count}} unid.",
       "unavailableCompact": "Sin stock",
       "incoming": "+{{count}} en camino",
-      "showroom": "En Showroom Obarrio: {{count}}"
+      "aparte": "En exhibición (aparte): {{count}}"
     },
     "badge": {
       "ok": "Ficha",

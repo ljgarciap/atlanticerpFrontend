@@ -670,7 +670,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
           <Field label={t('compras:inventory.table.provider')} value={productProviders(product).map(p => p.name).join(', ') || (product.provider_name ?? '—')} />
           <Field label={t('compras:inventory.detail.reorderPoint')} value={product.reorder_point ?? '—'} />
           <Field label={t('compras:inventory.table.disponible')} value={product.disponible} />
-          {(product.stock_showroom ?? 0) > 0 && <Field label={t('compras:inventory.table.showroomLabel')} value={product.stock_showroom ?? 0} />}
+          {(product.stock_aparte ?? 0) > 0 && <Field label={t('compras:inventory.table.aparteLabel')} value={product.stock_aparte ?? 0} />}
           <Field label={t('compras:inventory.table.porServir')} value={product.por_servir} />
           <Field label={t('compras:inventory.table.stock')} value={product.stock_quantity ?? '—'} />
           <Field label={t('compras:inventory.table.porIngresar')} value={product.por_ingresar ?? 0} />
@@ -1176,8 +1176,8 @@ const PRODUCT_ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica'
  *    // TODO: backend batch4 — mismo endpoint, ver nota de FamilyCombobox.
  * 3. "Stock inicial" — el mockup hardcodea 5 bodegas por nombre (Atlantic/Mermas/Préstamo
  *    Zona Libre/Reserva/Llano Bonito), pero esos nombres NO existen en las bodegas reales del
- *    sistema (`useWarehouses()` día de hoy: Bodega Central/Bodega Zona Libre/Showroom
- *    Cliente/Obarrio/SM/Merma/Reclamos y Devoluciones) — hardcodear los nombres del mockup
+ *    sistema (`useWarehouses()` día de hoy: Bodega Central/Bodega Zona Libre/Exhibición
+ *    Cliente/Sala de exhibición 1/SM/Merma/Reclamos y Devoluciones) — hardcodear los nombres del mockup
  *    literalmente dejaría el formulario escribiendo contra bodegas que no existen. Se implementa
  *    dinámico: un campo por cada bodega real (`useWarehouses()`), nunca una lista fija (regla
  *    global del CLAUDE.md raíz: no hardcodear valores de negocio que deberían salir de una tabla

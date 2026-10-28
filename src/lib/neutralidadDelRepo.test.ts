@@ -4,8 +4,7 @@ import { describe, expect, it } from 'vitest'
  * Fase 4b (docs/specs/fase4b-dataset-demo-generico.md §6.1) — contrato de neutralidad del frontend: ni organizaciones, marcas, bancos y lugares del cliente
  * anterior ni el vocabulario de su sector en `src` y `e2e`. Misma lista que `Tests\Support\TerminosDelClienteAnterior` del backend.
  *
- * Excepciones TEMPORALES con dueño (`ALLOWED`): son términos del MODELO (claves y etiquetas de categoría del catálogo de productos, campo `dialux`, `showroom` de
- * Bodega) y salen cuando su fase termine. Solo pueden encogerse: el contrato falla si un dueño ya no tiene ningún uso.
+ * Excepciones TEMPORALES con dueño (`ALLOWED`): son términos del MODELO (claves y etiquetas de categoría del catálogo de productos, campo `dialux`) y salen cuando su fase termine. Solo pueden encogerse: el contrato falla si un dueño ya no tiene ningún uso.
  */
 const ENTIDADES = [
   'decameron', 'westland', 'costa bella', 'torre delta', 'torre pac[ií]fic', 'torre business park', 'hotel riu', 'grupo constructor delta',
@@ -14,6 +13,8 @@ const ENTIDADES = [
   'atlantic home', 'signature lighting', 'nordic glow', 'proline comercial', 'banco general', 'banistmo', 'global bank', 'multibank', 'multiplaza',
   'super 99', 'paitilla', 'albrook', 'tocumen', 'bethania', 'costa del este', 'punta pac[ií]fica', 'condado del rey', 'farmacias transporte',
   'automotriz rey', 'ocean view', 'grupo melo', 'gelabert', 'farallon', 'illuminations',
+  // Fase 8 — nombres de almacén del cliente anterior (los almacenes son configurables).
+  'showrooms?', 'obarrio',
 ]
 const SECTOR_CI = [
   'iluminaci', 'iluminacon', 'luminaria', 'l[aá]mpara', 'lamparas', 'downlight', 'candelabro', 'bombill', 'chandelier', 'luminaire',
@@ -38,8 +39,6 @@ const ALLOWED: Record<string, string> = {
   '(?:Ceiling|Bathroom|Outdoor|Recessed) Lighting': 'catálogo de productos genérico',
   'Floor (?:and|&) Table Lamps': 'catálogo de productos genérico',
   'dialux': 'catálogo de productos genérico',
-  '\\w*showrooms?\\w*': 'almacenes configurables',
-  'obarrio': 'almacenes configurables',
 }
 
 const files = {

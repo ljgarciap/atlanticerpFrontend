@@ -745,8 +745,8 @@ interface InventoryProductBase {
   stock_quantity:  number | null
   por_servir:      number
   disponible:      number
-  /** SCRUM-1196 — unidades en Showroom Obarrio: se pueden vender pero NO suman al disponible (dato aparte para el vendedor). */
-  stock_showroom?: number
+  /** SCRUM-1196 — unidades en Sala de exhibición 1: se pueden vender pero NO suman al disponible (dato aparte para el vendedor). */
+  stock_aparte?: number
   estado:          InventoryEstado
   is_active:       boolean
   has_technical_sheet?:         boolean

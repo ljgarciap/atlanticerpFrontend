@@ -27,7 +27,7 @@ interface RowState {
   editing:    boolean
   notes:      string
   notesError: string | null
-  /** SCRUM-1196 — parte de la línea que Bodega toma de OTRA bodega de venta (p. ej. 1 pieza de Showroom Obarrio); el resto sale de la de por defecto. */
+  /** SCRUM-1196 — parte de la línea que Bodega toma de OTRA bodega de venta (p. ej. 1 pieza de Sala de exhibición 1); el resto sale de la de por defecto. */
   extraWarehouseId: number | null
   extraQty:         number
   qtyError:         string | null
@@ -490,7 +490,7 @@ export default function PickingSheetModal({ orderId, onClose }: Props) {
 
 /**
  * SCRUM-1196 — columna «Bodega» de la hoja de picking. Por defecto la línea sale de la bodega de despacho por defecto (Bodega Central), con su saldo; si
- * la cantidad alistada pasa de lo que hay allí se avisa, y Bodega puede tomar parte de OTRA bodega de venta (1 pieza de Showroom Obarrio). El servidor valida
+ * la cantidad alistada pasa de lo que hay allí se avisa, y Bodega puede tomar parte de OTRA bodega de venta (1 pieza de Sala de exhibición 1). El servidor valida
  * y rechaza lo que pase del saldo; esto solo guía. Las líneas sin producto de catálogo no usan bodegas.
  */
 function WarehouseCell({ item, row, editable, onToggleExtra, onExtraWarehouse, onExtraQty, onExtraBlur, names }: {

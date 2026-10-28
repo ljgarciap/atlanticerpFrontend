@@ -74,7 +74,7 @@ function makeCapacity(overrides: Partial<BodegaWarehouseCapacityReport> = {}): B
     period: { key: 'month', from: '2026-07-01', to: '2026-07-27' },
     warehouses: [
       { warehouse_id: 1, name: 'Bodega Central', products_count: 10, units_count: 96, percent_of_total: 90 },
-      { warehouse_id: 2, name: 'Showroom Obarrio', products_count: 1, units_count: 2, percent_of_total: 2 },
+      { warehouse_id: 2, name: 'Sala de exhibición 1', products_count: 1, units_count: 2, percent_of_total: 2 },
     ],
     total_units: 100,
     concentration_alert: null,
@@ -149,7 +149,7 @@ describe('BodegaReportesPage', () => {
     mockedApi.reports.warehouseCapacity.mockResolvedValue(makeCapacity({
       concentration_alert: {
         warehouse_id: 1, warehouse_name: 'Bodega Central', percent: 90,
-        threshold_pct: 75, suggested_targets: ['Showroom Obarrio', 'Showroom SM'],
+        threshold_pct: 75, suggested_targets: ['Sala de exhibición 1', 'Sala de exhibición 2'],
       },
     }))
     renderPage()

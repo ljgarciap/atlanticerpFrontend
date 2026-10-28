@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // que proxea /api a http://localhost:8090 — ver vite.config.ts).
 // Fixtures sembradas manualmente vía tinker en la sesión original (producto PREQA-B4-001, id 346):
 //   - Bodega Central (id 6): stock, ubicacion PREQA-A1 (ocupada) + PREQA-A2-LIBRE (vacia)
-//   - Showroom Obarrio (id 8): stock, ubicacion PREQA-B1-OCC (ocupada, = todas las locations)
+//   - Sala de exhibición 1 (id 8): stock, ubicacion PREQA-B1-OCC (ocupada, = todas las locations)
 //   - Merma (id 11): sin ninguna WarehouseLocation (empty-state genuino)
 // Si estos IDs/ubicaciones no existen en el entorno donde se re-corre este test, hay que
 // re-sembrarlos (ver docs/pre-qa/bloque-b4-reubicacion-2026-07-24.md en atlanticerp-backend).
@@ -53,7 +53,7 @@ test.describe('Bloque B4 — chip Espacio libre (REQ-384)', () => {
 
   test('bodega con TODAS las ubicaciones ocupadas: lista vacia con estado claro, no rota', async ({ page }) => {
     await login(page, 'liderbodega@test.com')
-    await openWarehouse(page, 'Showroom Obarrio')
+    await openWarehouse(page, 'Sala de exhibición 1')
 
     await page.getByRole('button', { name: 'Espacio libre', exact: true }).click()
     await page.waitForTimeout(800)
@@ -136,7 +136,7 @@ test.describe('Bloque B4 — modal Reubicar (SCRUM-457)', () => {
 
     const motivoUnico = `doble-clic-${Date.now()}`
     const modal = page.locator('.fixed.inset-0.z-50')
-    await modal.locator('select').selectOption({ label: 'Showroom SM' })
+    await modal.locator('select').selectOption({ label: 'Sala de exhibición 2' })
     await modal.locator('input[type="number"]').first().fill('1')
     await modal.locator('textarea').fill(motivoUnico)
 
