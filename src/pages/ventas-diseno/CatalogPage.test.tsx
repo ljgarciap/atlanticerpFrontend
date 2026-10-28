@@ -52,7 +52,7 @@ function mockToast(showSpy: (msg: string, type?: 'success' | 'error') => void = 
 function makeItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
   return {
     id: 1, reference: 'IL-DEC-1410A', factory_reference: null, name: 'Producto Colgante Decorativa', description: 'Producto colgante XL', brand: '770 Lights',
-    photo_url: null, price_full: 522, category: 'candelabros_colgantes', family_id: null, family_name: null,
+    photo_url: null, price_full: 522, category: 'general', family_id: null, family_name: null,
     disponible: 14, en_camino: 0, has_technical_sheet: false, technical_sheet_filename: null,
     technical_sheet_uploaded_at: null,
     ...overrides,
@@ -63,7 +63,7 @@ function makeResult(overrides: Partial<CatalogListResult> = {}): CatalogListResu
   return {
     data: [makeItem()],
     meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
-    categories: [{ value: 'candelabros_colgantes', count: 1 }],
+    categories: [{ value: 'general', count: 1 }],
     families: [],
     ...overrides,
   }

@@ -214,16 +214,6 @@
       "cost": "Costo",
       "reorderPoint": "Punto de reorden",
       "category": "Categoría",
-      "categories": {
-        "candelabros_colgantes": "Candelabros y Colgantes",
-        "iluminacion_techo": "Iluminación de Techo",
-        "apliques_pared": "Apliques de Pared",
-        "iluminacion_bano": "Iluminación de Baño",
-        "iluminacion_exterior": "Iluminación Exterior",
-        "lamparas_piso_mesa": "Lámparas de Piso y Mesa",
-        "iluminacion_empotrada": "Iluminación Empotrada",
-        "bombillos": "Bombillos"
-      },
       "rotation": "Rotación esperada",
       "rotations": {
         "alta": "Alta",

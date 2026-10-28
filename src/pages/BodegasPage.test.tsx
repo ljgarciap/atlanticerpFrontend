@@ -88,7 +88,7 @@ function detailResponse(overrides: Partial<WarehouseDetailResponse> = {}): Wareh
     ubicaciones: ['A-1-03'],
     data: [{
       stock_id: 1, catalog_product_id: 99, factory_reference: 'CAND-CRIS-IMP', reference: 'CRISTAL-IMPERIAL',
-      ubicacion: 'A-1-03', description: 'Modelo Cristal Imperial', categoria: 'Candelabros y Colgantes',
+      ubicacion: 'A-1-03', description: 'Modelo Cristal Imperial', categoria: 'General',
       unidades_en_bodega: 8,
       disponible: 12, por_servir: 3, stock_total: 15, por_ingresar: 0, en_camino: 0,
       stock_minimo: 10, estado: 'disponible', proveedor: 'Proveedor Demo A',

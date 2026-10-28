@@ -445,12 +445,9 @@ export interface PaymentKpis {
   completo:                 number
 }
 
-// SCRUM-194 (REQ-131, mockup 2H__Compras_NuevaOrden.html) — 8 valores fijos de Categoría de
-// producto, distinto de `ProviderCategory` (proveedores) y de `catalog_product_families`
-// (combos que se cotizan juntos, REQ-037 — concepto no relacionado).
-export type CatalogProductCategory =
-  | 'candelabros_colgantes' | 'iluminacion_techo' | 'apliques_pared' | 'iluminacion_bano'
-  | 'iluminacion_exterior' | 'lamparas_piso_mesa' | 'iluminacion_empotrada' | 'bombillos'
+// Fase 9a — la categoría de producto es la CLAVE de una entrada del catálogo `product_category` (vocabulario de la empresa), no una lista fija.
+// Distinto de `ProviderCategory` (proveedores) y de `catalog_product_families` (combos que se cotizan juntos, REQ-037).
+export type CatalogProductCategory = string
 
 export type CatalogProductRotation = 'alta' | 'media' | 'baja' | 'unica'
 

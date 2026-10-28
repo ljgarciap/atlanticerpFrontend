@@ -23,21 +23,6 @@ const SECTOR_CI = [
 const SECTOR_CS = ['\\bLED\\b', '(?<![A-Za-z])LAMP(?![A-Za-z])']
 
 const ALLOWED: Record<string, string> = {
-  'candelabros_colgantes': 'catálogo de productos genérico',
-  'iluminacion_(?:techo|bano|exterior|empotrada)': 'catálogo de productos genérico',
-  'apliques_pared': 'catálogo de productos genérico',
-  'lamparas_piso_mesa': 'catálogo de productos genérico',
-  '(?<=[\'"])bombillos(?=[\'"])': 'catálogo de productos genérico',
-  '(?<=categories\\.)bombillos': 'catálogo de productos genérico',
-  '(?<=categor[ií]a[:=] [\'"])bombillos': 'catálogo de productos genérico',
-  '(?<=category[:=] [\'"])bombillos': 'catálogo de productos genérico',
-  'Candelabros y Colgantes': 'catálogo de productos genérico',
-  'Iluminaci[oó]n de (?:Techo|Ba[ñn]o)': 'catálogo de productos genérico',
-  'Iluminaci[oó]n (?:Exterior|Empotrada)': 'catálogo de productos genérico',
-  'L[aá]mparas de Piso y Mesa': 'catálogo de productos genérico',
-  'Chandeliers? (?:and|&) Pendants?': 'catálogo de productos genérico',
-  '(?:Ceiling|Bathroom|Outdoor|Recessed) Lighting': 'catálogo de productos genérico',
-  'Floor (?:and|&) Table Lamps': 'catálogo de productos genérico',
   'dialux': 'catálogo de productos genérico',
 }
 

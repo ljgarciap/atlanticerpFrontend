@@ -214,16 +214,6 @@
       "cost": "Cost",
       "reorderPoint": "Reorder point",
       "category": "Category",
-      "categories": {
-        "candelabros_colgantes": "Chandeliers and Pendants",
-        "iluminacion_techo": "Ceiling Lighting",
-        "apliques_pared": "Wall Sconces",
-        "iluminacion_bano": "Bathroom Lighting",
-        "iluminacion_exterior": "Outdoor Lighting",
-        "lamparas_piso_mesa": "Floor and Table Lamps",
-        "iluminacion_empotrada": "Recessed Lighting",
-        "bombillos": "Bulbs"
-      },
       "rotation": "Expected rotation",
       "rotations": {
         "alta": "High",

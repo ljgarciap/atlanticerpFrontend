@@ -29,6 +29,7 @@ import type {
   InventoryChip, InventoryProductPayload, InventoryRotation,
 } from '@/types/compras'
 import type { NewOrderPrefillState } from '@/pages/compras/NewPurchaseOrderPage'
+import { useProductCategories } from '@/hooks/useProductCategories'
 
 /**
  * SCRUM-241 (REQ-178) — hallazgo de QA 2026-07-18: el mensaje de error solo mostraba el genérico
@@ -59,14 +60,6 @@ const LINKABLE_CHIPS: InventoryChip[] = [...CHIPS, 'bajo_stock', 'sin_stock', 'b
 // el gap. El modal nuevo SÍ permite elegirla — sin este 4to valor acá, editar un producto creado
 // con rotación "unica" mostraba el select vacío ("—") y lo perdía silenciosamente al guardar.
 const ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica']
-// SCRUM-234/237/238/240 — mismo catálogo fijo de 8 categorías que CatalogProduct::CATEGORIES
-// (backend), duplicado localmente igual que NewProductModal.tsx (sin dependencia compartida
-// hoy entre esos 2 modales, mismo patrón ya usado en el resto del módulo).
-const CATEGORIES: string[] = [
-  'candelabros_colgantes', 'iluminacion_techo', 'apliques_pared', 'iluminacion_bano',
-  'iluminacion_exterior', 'lamparas_piso_mesa', 'iluminacion_empotrada', 'bombillos',
-]
-
 export default function InventarioPage() {
   const { t } = useTranslation(['common', 'compras'])
   const navigate = useNavigate()
@@ -391,6 +384,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
   onClose: () => void
 }) {
   const { t } = useTranslation(['common', 'compras'])
+  const { options: categoryOptions, label: labelOfCategory } = useProductCategories()
   const navigate = useNavigate()
   const { data: product } = useInventoryProduct(id)
   const update = useUpdateInventoryProduct()
@@ -628,7 +622,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
 
   if (!product) return null
 
-  const categoryLabel = product.category ? t(`compras:newOrder.newProduct.categories.${product.category}`) : null
+  const categoryLabel = product.category ? labelOfCategory(product.category) : null
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -846,7 +840,7 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
               <select value={category} onChange={e => setCategory(e.target.value)}
                 className="px-2 py-1.5 border border-slate-200 rounded text-sm bg-white">
                 <option value="">—</option>
-                {CATEGORIES.map(c => <option key={c} value={c}>{t(`compras:newOrder.newProduct.categories.${c}`)}</option>)}
+                {categoryOptions.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
               </select>
             </label>
             <label className="flex flex-col gap-1">
@@ -1185,6 +1179,7 @@ const PRODUCT_ROTATIONS: InventoryRotation[] = ['alta', 'media', 'baja', 'unica'
  */
 function CreateProductModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation(['common', 'compras'])
+  const { options: categoryOptions } = useProductCategories()
   const create = useCreateInventoryProduct()
   const { data: warehousesData } = useWarehouses()
 
@@ -1376,7 +1371,7 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
             <label htmlFor="cp-category" className="block text-xs font-semibold text-slate-600 mb-1">{t('compras:inventory.detail.category')} *</label>
             <select id="cp-category" value={category} onChange={e => setCategory(e.target.value)} className={inputCls + ' bg-white'}>
               <option value="">—</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{t(`compras:newOrder.newProduct.categories.${c}`)}</option>)}
+              {categoryOptions.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
           </div>
         </div>

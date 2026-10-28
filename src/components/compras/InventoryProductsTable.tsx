@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { InventoryProduct } from '@/types/compras'
 import { formatMoney } from '@/lib/money'
 import { productDisplayName } from '@/lib/catalogProduct'
+import { useProductCategories } from '@/hooks/useProductCategories'
 
 /**
  * Lote 4 (SCRUM-243, 2026-08-17) — tabla de 21 columnas extraída de `ProductsTab`
@@ -28,6 +29,7 @@ export function InventoryProductsTable({
   onViewWarehouses?: (id: number) => void
 }) {
   const { t } = useTranslation(['common', 'compras'])
+  const { label: categoryLabel } = useProductCategories()
   const showFinancial = !restricted && !previewVentas
   const showManageActions = canManage && !previewVentas
 
@@ -85,7 +87,7 @@ export function InventoryProductsTable({
               <td className="px-4 py-3 font-semibold text-slate-800">{p.reference}</td>
               <td className="px-4 py-3 text-slate-600">{productDisplayName(p)}</td>
               <td className="px-4 py-3 text-slate-600">
-                {p.category ? t(`compras:newOrder.newProduct.categories.${p.category}`) : '—'}
+                {p.category ? categoryLabel(p.category) : '—'}
               </td>
               <td className="px-4 py-3 text-slate-600">
                 {p.rotation ? t(`compras:inventory.rotation.${p.rotation}`) : '—'}
