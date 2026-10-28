@@ -43,11 +43,11 @@ Pasada **LIMPIA** tras 2 rondas — 2 hallazgos CRÍTICOS reales encontrados en 
 
 ### MEDIO — RN4 (REQ-238, Escenario 1): "Técnico responsable" no se precargaba en un informe NUEVO
 
-**Criterio:** "Dado un ticket de Garantías con Miguel Castillo asignado, cuando se genera su informe, entonces el campo Técnico responsable se precarga con Miguel Castillo."
+**Criterio:** "Dado un ticket de Garantías con Miguel [persona] asignado, cuando se genera su informe, entonces el campo Técnico responsable se precarga con Miguel [persona]."
 
 `InspectionReportModal` solo hidrataba `tecnicoId` desde `existing.internal_technician_id` — para un informe que **todavía no existe**, `existing` es `undefined` y el select quedaba en blanco pese a que el ticket ya tenía un técnico asignado (`Ticket.internal_technician_id`, seteado vía Agendar/Reagendar). `TicketDetailModal` tampoco pasaba ese dato como prop al modal.
 
-**Fix:** se agregó la prop `ticketTechnicianId` (desde `ticket.internal_technician?.id`) y se precarga `tecnicoId` con ese valor cuando no hay informe existente. Verificado en navegador (Playwright): abrir el informe nuevo de GAR-2026-0001 (técnico ya asignado = Miguel Castillo) muestra el select ya en "Miguel Castillo".
+**Fix:** se agregó la prop `ticketTechnicianId` (desde `ticket.internal_technician?.id`) y se precarga `tecnicoId` con ese valor cuando no hay informe existente. Verificado en navegador (Playwright): abrir el informe nuevo de GAR-2026-0001 (técnico ya asignado = Miguel [persona]) muestra el select ya en "Miguel [persona]".
 
 **Archivos:** `src/components/servicios/InspectionReportModal.tsx`, `src/components/servicios/TicketDetailModal.tsx`
 
@@ -56,8 +56,8 @@ Pasada **LIMPIA** tras 2 rondas — 2 hallazgos CRÍTICOS reales encontrados en 
 | # | Escenario de ruptura | Resultado |
 |---|---|---|
 | 1 | Técnico sin ticket asignado (Carlos, ticket sin técnico) intenta `PUT` vía curl directo | 403, mensaje claro. Confirmado también en UI: sin botón Guardar, campos deshabilitados |
-| 2 | Técnico owner de OTRO ticket (Carlos en ticket de Agustín) intenta `PUT` | 403 |
-| 3 | Gerencia (Daniela) intenta `PUT` sobre cualquier ticket | 403 a nivel de `role:` middleware (ni siquiera llega a `assertCanEdit`) |
+| 2 | Técnico owner de OTRO ticket (Carlos en ticket de [persona]) intenta `PUT` | 403 |
+| 3 | Gerencia (Gerencia1) intenta `PUT` sobre cualquier ticket | 403 a nivel de `role:` middleware (ni siquiera llega a `assertCanEdit`) |
 | 4 | Gerencia `GET` del informe (lectura) | 200/404 normal, nunca 403 — confirmado además en UI: sin botón Guardar, placeholders "Pendiente de firma" en campos vacíos |
 | 5 | Técnico owner (Carlos, ticket propio) `PUT` válido | 200, folio asignado |
 | 6 | Conclusión vacía / solo espacios / campo ausente | 422 con mensaje claro (nota: curl sin `Accept: application/json` cae en el redirect 302 default de Laravel — no es un bug real, Axios manda ese header por defecto) |
@@ -66,7 +66,7 @@ Pasada **LIMPIA** tras 2 rondas — 2 hallazgos CRÍTICOS reales encontrados en 
 | 9 | Doble submit concurrente (2 PUT simultáneos, ticket sin informe) | **CRÍTICO encontrado y corregido** — ver arriba |
 | 10 | Modo archivo, primer guardado sin archivo | 422 "Adjunta un archivo..." |
 | 11 | 5 combinaciones de campos dinámicos (Garantías+producto, Retrofit+producto, Instalación/inspección sin producto, Garantías/reposición sin producto, Retrofit sin producto) | Cada una devuelve exactamente el catálogo de RN1/RN2/RN3, con `is_quote_recommendation` correcto en el campo que corresponde |
-| 12 | Filtro de especialidad del select de técnico (`/technicians/internal?tipo=`) | `warranty` → solo Miguel Castillo; `installation` → solo `tecnico_servicios` (sin Miguel) |
+| 12 | Filtro de especialidad del select de técnico (`/technicians/internal?tipo=`) | `warranty` → solo Miguel [persona]; `installation` → solo `tecnico_servicios` (sin Miguel) |
 | 13 | Materiales/hallazgos con líneas vacías mezcladas con válidas | **CRÍTICO encontrado y corregido** — ver arriba. Tras el fix: solo persisten las líneas/hallazgos con contenido real |
 | 14 | `proximos_pasos` enviado con `requiere_seguimiento=false` | Se ignora, queda `null` en BD (RN3 REQ-241) |
 | 15 | Materiales con claves ausentes (`[{}]`) | No rompe, se omite silenciosamente |

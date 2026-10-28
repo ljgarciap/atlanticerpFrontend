@@ -21,7 +21,7 @@ La primera implementación reusaba `UserModuleVisibility`/`updateModuleVisibilit
 (override individual por usuario) para el bulk, escribiendo una fila por usuario. **Hallazgo real**
 (clasificado MEDIO en su momento): un `restore` masivo no podía distinguir "override creado por el
 bulk-hide" de "override individual preexistente sin relación con UAT" — reproducido en runtime
-(tinker, usuario real `milena.e@grupolafayette.com`): un override manual de `servicios=NONE`
+(tinker, usuario real `usuario@example.test`): un override manual de `servicios=NONE`
 (puesto por una razón ajena a UAT) sobrevivía a un `hide` pero se BORRABA en el `restore` posterior
 del mismo módulo, devolviéndole al usuario un acceso que el admin explícitamente no quería para él.
 
@@ -49,9 +49,9 @@ individual, sin importar cuándo se haya creado ese override ni qué valor tenga
 
 ### Camino feliz — confirmado en navegador real (Playwright, cuentas reales del roster)
 - Hide de Compras/Bodega/Servicios/Configuración + 2 botones de Catálogo → confirmado oculto para
-  `milena.e@grupolafayette.com` (Vendedor/Diseñador, Catálogo) y `daniela@atlantic.com.pa`
+  `usuario@example.test` (Vendedor/Diseñador, Catálogo) y `gerencia1@atlantic.com.pa`
   (Gerencia, Configuración/Seguridad — cuenta elegida a propósito porque SÍ tiene el permiso
-  `security.users`, a diferencia de Milena, que nunca lo tiene y hubiera dado un falso negativo).
+  `security.users`, a diferencia de [persona], que nunca lo tiene y hubiera dado un falso negativo).
 - Restore → todo vuelve, confirmado con las mismas 2 cuentas.
 - Superadmin (`lujogarpin78@gmail.com`) nunca se ve afectado en ningún punto del ciclo.
 

@@ -6,10 +6,10 @@ nueva exclusiva de Gerencia, sobre datos reales de `PipelineCard` (no una copia)
 
 Entorno: `dev.atlanticerp.ai` real (no Docker local), vía Playwright CLI + llamadas API directas
 (`curl`/`request` de Playwright con tokens reales extraídos de `localStorage`). Cuentas usadas:
-Whileyner Contreras (`whil@atlantic.com.pa`, Gerencia Restringida, rol `management`) — Daniela
-Amaya (`daniela@atlantic.com.pa`, reportera del ticket) no autenticó con la convención
+Gerencia5 [persona] (`gerencia5@atlantic.com.pa`, Gerencia Restringida, rol `management`) — Gerencia1
+Gerencia1 (`gerencia1@atlantic.com.pa`, reportera del ticket) no autenticó con la convención
 password=email, probablemente cambiada a mano; se usó otra cuenta Gerencia real en su lugar, mismo
-nivel de acceso al Dashboard. Milena Estrada (`milena.e@grupolafayette.com`, Vendedor/Diseñador)
+nivel de acceso al Dashboard. [persona] Estrada (`usuario@example.test`, Vendedor/Diseñador)
 para el camino de ruptura de REQ-609.
 
 Gate permanente creado: `atlanticerp-frontend/e2e/preqa-scrum684-689-dashboard-crm-batchc.spec.ts`
@@ -30,10 +30,10 @@ el ticket pida hacer configurable.
 | Escenario | Resultado |
 |---|---|
 | Gerencia entra por el menú lateral (botón "Dashboard CRM") | Llega a `/crm/dashboard`, título+subtítulo fijo visibles |
-| Vendedor/Diseñador (Milena) por URL directa `/crm/dashboard` | Redirigida, nunca queda en esa URL, título nunca visible — **sin flash de datos reales** confirmado escuchando la respuesta de red: si el frontend llegara a pedir `/dashboard/summary` como Milena, no puede haber sido un 200 (se afirma explícitamente en el test) |
+| Vendedor/Diseñador ([persona]) por URL directa `/crm/dashboard` | Redirigida, nunca queda en esa URL, título nunca visible — **sin flash de datos reales** confirmado escuchando la respuesta de red: si el frontend llegara a pedir `/dashboard/summary` como [persona], no puede haber sido un 200 (se afirma explícitamente en el test) |
 | Vendedor/Diseñador — ítem "Dashboard CRM" en el sidebar | **No existe en el DOM en absoluto** para su rol (gate más fuerte que "mostrar y redirigir") — hallazgo de una sesión anterior de Pre-QA el mismo día (ver comentario en `Sidebar.tsx`, SCRUM-674), confirmado aún vigente |
-| `GET /api/ventas-diseno/dashboard/summary` con token real de Milena | **403** — el gate existe a nivel de backend (`role:superadmin,management` en la ruta), no solo en el frontend |
-| `POST /api/ventas-diseno/dashboard/remind` con token real de Milena | **403** |
+| `GET /api/ventas-diseno/dashboard/summary` con token real de [persona] | **403** — el gate existe a nivel de backend (`role:superadmin,management` en la ruta), no solo en el frontend |
+| `POST /api/ventas-diseno/dashboard/remind` con token real de [persona] | **403** |
 | Gerencia — selector Mío/Equipo | Ausente, confirmado por selector de rol "Mío"/"Equipo" no encontrado en el DOM |
 
 **Camino de ruptura ejercitado explícitamente:** intento de bypass del gate de frontend pegando
@@ -89,7 +89,7 @@ como limitación de datos explícita, no una verificación silenciosamente omiti
 
 | Escenario | Resultado |
 |---|---|
-| Aviso "propuesta vencida" con datos reales | Visible, lista proyectos reales (`[DEMO-711] Proyecto Fefi 2`, `[DEMO-711] Proyecto Idmar 4`) |
+| Aviso "propuesta vencida" con datos reales | Visible, lista proyectos reales (`[DEMO-711] Proyecto [persona] 2`, `[DEMO-711] Proyecto [persona] 4`) |
 | Aviso "clientes sin contacto reciente" con datos reales | Visible, 5 clientes agrupados |
 | Ausencia total del aviso cuando no aplica | **No ejercitable de forma aislada con datos reales** — dev tiene ambas condiciones simultáneamente activas; no se fuerza un estado "0 vencidas" borrando datos reales de producción-adjacente. Cubierto en cambio por 2 tests unitarios permanentes ya existentes (`DashboardPage.test.tsx`) que sí controlan el fixture para cada aviso por separado — no es una laguna sin cubrir, es cobertura repartida entre unitario (estado aislado) y e2e (datos reales combinados) |
 | Clic en "Enviar recordatorios" | Toast real visible (`Toaster.tsx`, primer uso real del componente en `App.tsx` — confirmado que sí renderiza) |

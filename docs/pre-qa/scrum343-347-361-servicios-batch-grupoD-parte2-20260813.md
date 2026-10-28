@@ -39,7 +39,7 @@ lo incluían en la respuesta JSON de `GET /api/compras/orders` ni `GET /api/comp
 ni la tabla "Ver Órdenes" (`OrdersPage.tsx`) ni el detalle (`OrderDetailPage.tsx`) lo pintaban en
 ningún lado — tampoco vía el campo `notes` (que sí lo describe en texto: "Solicitud de Reserva
 Servicios — …"), porque `notes` tampoco se renderiza en esas pantallas. Confirmado en vivo:
-Yirena (`gerencia2@atlantic.com.pa`, `lider_compras`) no tenía NINGUNA forma de distinguir
+Lidercompras (`gerencia2@atlantic.com.pa`, `lider_compras`) no tenía NINGUNA forma de distinguir
 una orden de Servicios del resto — ni badge, ni columna, ni tooltip.
 
 **Fix aplicado (mismo dispatch):**
@@ -69,7 +69,7 @@ limpio (ver "Verificación propia" abajo).
 - Insumo con `disponible < mínimo` → "Bajo mínimo"; `disponible ≥ mínimo` → "OK". Verificado en
   vivo con el mismo insumo en ambos estados (antes/después de recibir la orden).
 - Botón "Solicitar" visible/habilitado solo para Aaron/Líder de Servicios y superadmin — Carlos
-  Vergara (`tecnico_servicios`) no ve ni "+ Agregar insumo" ni "Solicitar" ni "Movimiento de
+  Tecnico (`tecnico_servicios`) no ve ni "+ Agregar insumo" ni "Solicitar" ni "Movimiento de
   herramientas". Ruptura API: `POST /servicios/insumos` como `tecnico_servicios` → 403.
 
 **REQ-274/REQ-277 — Ciclo completo real hasta "Recibido":**
@@ -102,7 +102,7 @@ limpio (ver "Verificación propia" abajo).
   redirigido (bloqueo real de `RequireRole` en `App.tsx`, no solo botón oculto). Ruptura API:
   `GET /servicios/tools/movements` como `tecnico_servicios` → 403 (gate ya corregido por Senior
   Review de esta misma sesión, restringido a `superadmin,lider_servicios,management`).
-- Daniela (`management`) sí entra, ve los 3 filtros combinables (herramienta/tipo/responsable).
+- Gerencia1 (`management`) sí entra, ve los 3 filtros combinables (herramienta/tipo/responsable).
 - Decisión de producto ya confirmada con Luis (comentario en SCRUM-346, verificado en Jira): el
   kardex NO tiene columnas de saldo inicial/resultante pese a que RN1 originalmente las pedía —
   cada herramienta es una unidad física con código único propio, sin "saldo" natural. No se marca

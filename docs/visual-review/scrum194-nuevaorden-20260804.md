@@ -28,7 +28,7 @@ evalúa contra el criterio de aceptación de Jira (ver `docs/pre-qa/scrum194-nue
 ## CRÍTICO — encontrado y CORREGIDO en esta misma sesión
 
 **Campo "Costo adicional estimado" — input de monto renderizaba a ~26px de ancho, ilegible/no
-usable para escribir o leer el valor.** Reportado por Daniela Amaya en comentario de Jira hoy
+usable para escribir o leer el valor.** Reportado por Gerencia1 Test en comentario de Jira hoy
 (2026-08-04, 17:01): "el campo quedó muy pequeño". No estaba corregido por el fix del precheck
 (Senior Review 19:12 del mismo día no lo menciona).
 
@@ -62,20 +62,20 @@ Confirmado contra `src/components/compras/OrderLinesEditor.tsx` (tabla de línea
 Cantidad | Costo | Subtotal | Proyecto`) define 7 columnas con Ref. fábrica y Referencia pública
 como columnas propias; el desarrollo tiene 5 columnas, con ambas referencias concatenadas como
 texto gris sin etiqueta bajo la descripción (`{line.reference} · {line.factoryReference}`).
-Daniela Amaya reportó esto mismo hoy (2026-08-04, 17:01): "AQUI NO ES CLARO QUE ES REFERENCIA
+Gerencia1 Test reportó esto mismo hoy (2026-08-04, 17:01): "AQUI NO ES CLARO QUE ES REFERENCIA
 PUBLICA QUE ES REFERENCIA DE FABRICA". Sigue sin corregirse.
 
 **Clasificación: CRÍTICO por la regla de "ante la duda", no ACEPTABLE.** La información está
 presente (no hay pérdida de dato), pero sin las dos columnas separadas y etiquetadas el usuario no
 puede distinguir cuál referencia es cuál a simple vista en una tabla con varias líneas — es
-exactamente lo que Daniela reportó como problema de uso, no solo un cambio estético de layout.
+exactamente lo que Gerencia1 reportó como problema de uso, no solo un cambio estético de layout.
 
 **Esto queda FUERA del alcance de SCRUM-194 tal como fue instruido este Pre-QA/Visual Review**
 (el ticket, el Senior Review de hoy y el fix revisado son específicamente sobre el precheck de
 duplicados en el modal). No se corrige en esta sesión. Se notifica a PM/Luis como hallazgo
-pendiente del mismo ticket (mismo comentario de Daniela de hoy trae ambos temas) — no bloquea el
+pendiente del mismo ticket (mismo comentario de Gerencia1 de hoy trae ambos temas) — no bloquea el
 veredicto de ESTE Visual Review sobre el modal, pero si el criterio real de "cierre de SCRUM-194"
-incluye la tabla de líneas (el reporte de Daniela no distingue ticket), este gap sigue abierto y
+incluye la tabla de líneas (el reporte de Gerencia1 no distingue ticket), este gap sigue abierto y
 debería tener su propio ticket o ampliar el alcance de este antes de dar el ticket por cerrado.
 
 ## Veredicto

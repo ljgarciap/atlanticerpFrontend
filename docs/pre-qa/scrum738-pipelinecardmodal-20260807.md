@@ -29,7 +29,7 @@ negocio nuevos involucrados en este ticket.
 | Valores vacíos | `lead` | Sin Cliente Master, sin Subcliente, sin superficie, sin tipo de entrega, sin observaciones, sin contactos |
 | Una tarjeta por etapa | `lead`, `design`, `quote`, `proposal`, `approved`, `lost` | Valores normales; `proposal`/`approved` con `delivery_type='partial'` + 2 `PipelineCardDeliveryDate` para ejercitar el bloque condicional de fechas |
 
-Login real: `milena.e@grupolafayette.com` (Vendedor/Diseñador, password = email).
+Login real: `usuario@example.test` (Vendedor/Diseñador, password = email).
 
 ## Escenarios de ruptura intentados
 

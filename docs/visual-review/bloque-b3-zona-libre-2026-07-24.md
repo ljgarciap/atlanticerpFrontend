@@ -31,7 +31,7 @@ estados posibles) — la DB local no traía data de Zona Libre antes de esta ses
 | Tipo de envío (Terrestre/Aéreo/Marítimo, default Terrestre) | Sí | Sí |
 | Llegada estimada (date input) | Sí | Sí |
 | Botón "Guardar orden de compra" solo con carrito no vacío | Sí (el panel completo, botón incluido, está condicionado a `cart.length > 0`) | Sí |
-| Panel "Orden guardada": número, estado "Pendiente por aprobar de Yirena (Compras)", nota, botón "Ir a Ver Órdenes", link "Crear una nueva" | Sí | Sí — "Crear una nueva" resetea el formulario en el mismo lugar (mockup usa `location.reload()`, mismo resultado funcional) |
+| Panel "Orden guardada": número, estado "Pendiente por aprobar de Lidercompras (Compras)", nota, botón "Ir a Ver Órdenes", link "Crear una nueva" | Sí | Sí — "Crear una nueva" resetea el formulario en el mismo lugar (mockup usa `location.reload()`, mismo resultado funcional) |
 
 ## Checklist funcional — 3D: Bandeja Órdenes Zona Libre
 

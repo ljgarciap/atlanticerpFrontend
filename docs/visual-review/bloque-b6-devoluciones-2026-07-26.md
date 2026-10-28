@@ -8,7 +8,7 @@
 `npm run dev` (Vite, puerto 5173) vía `webServer` de `playwright.config.ts`.
 **Herramienta:** Playwright CLI (`npx playwright test`) — specs temporales dentro de
 `atlanticerp-frontend/e2e/_vr_b6_*.spec.ts`, borrados al cierre de la revisión, nunca commiteados.
-**Usuario de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, Jefe de Bodega,
+**Usuario de prueba:** `almacen@atlantic.com.pa` (Lider Bodega Test, Jefe de Bodega,
 password = email).
 
 **Estado del código revisado:** implementación local en `dev` (ambos repos), sin push a origin
@@ -133,7 +133,7 @@ devolución con motivo "El producto llego en perfecto estado, no corresponde dev
 VR).", el historial en "Ver detalle" muestra únicamente:
 
 ```
-Rechazada — 7/26/2026, 8:52:33 AM (Esteban Cardenas)
+Rechazada — 7/26/2026, 8:52:33 AM (Lider Bodega Test)
 ```
 
 Sin rastro del motivo — el mockup muestra explícitamente `'✕ Rechazada — ' + fecha + ': ' +

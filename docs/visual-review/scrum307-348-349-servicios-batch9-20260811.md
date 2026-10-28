@@ -21,7 +21,7 @@ mostraba 4. `Responsable` = técnico interno asignado al ticket (`t.tecnico` en 
 `reclamante` (ambos ya venían disponibles vía `TicketService::detail()`/`Ticket::
 internalTechnician`, solo no se propagaban); `ClaimSheetModal.tsx` y `claim-sheet-pdf.blade.php`
 los renderizan. Verificado con `pdftotext` sobre el PDF real y en el modal (ticket 96, técnico
-Carlos Vergara → "Responsable: Carlos Vergara").
+Tecnico Test → "Responsable: Tecnico Test").
 
 ## CRÍTICO 2 — Sección 2: faltaban "Cant. recibida" y "Cant. pendiente"
 

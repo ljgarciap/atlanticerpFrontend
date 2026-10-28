@@ -1,4 +1,4 @@
-# Visual Review — Batch 10: Informe móvil (SCRUM-314/315/316/317) + Comisión Carlos Vergara (SCRUM-321)
+# Visual Review — Batch 10: Informe móvil (SCRUM-314/315/316/317) + Comisión Tecnico Test (SCRUM-321)
 
 **Fecha:** 2026-08-11
 **Alcance:** 5 tickets fusionados en un solo pase (Visual Review + Pre-QA), a pedido de Luis
@@ -12,7 +12,7 @@ ver documento hermano).
 `docker compose -f infra/docker-compose.yml`, `npm run dev` en :5173, proxy `/api` -> :8090).
 Cambios sin commitear en el working tree de `atlanticerp-frontend`/`atlanticerp-backend`. Fixture real usada:
 ticket `INS-2026-0003` (Instalación, subtipo Inspección, sin productos), técnico asignado Carlos
-Vergara — ya existía en `ServiciosDemoSeeder` tras correr `db:seed --force` (DB local estaba
+Tecnico — ya existía en `ServiciosDemoSeeder` tras correr `db:seed --force` (DB local estaba
 vacía al arrancar la sesión, 0 tickets — se sembró antes de cualquier prueba, ver Paso 0 de
 Pre-QA).
 
@@ -24,7 +24,7 @@ Pre-QA).
 - `5B__Servicios_Tecnicos_Internos.html` (SCRUM-321) — mockup de la tarjeta+modal de comisión de
   Carlos, con nota inline del propio autor (`NOTA PARA TECNOLOGÍA`) sobre el cálculo semi-
   automático de estado del técnico (no aplica a Batch 10, es de Batch 6).
-- `Plan_Bonificacion_Carlos_Vergara.docx` — fuente de verdad de la fórmula real (25/25/25/15/10,
+- `Plan_Bonificacion_Carlos_Tecnico.docx` — fuente de verdad de la fórmula real (25/25/25/15/10,
   $100/$100/$100/$60/$40, ejemplo práctico $352.00) — RN1/RN9 se verifican contra este documento,
   no solo contra el mockup HTML.
 
@@ -38,7 +38,7 @@ Pre-QA).
 |---|---|---|---|
 | 1 | Botón "Ver en móvil" solo dentro del modal de Informe de Inspección (escritorio) | Confirmado — botón en el header de `InspectionReportModal`, no existe acceso independiente en ningún menú | Cumple (RN1) |
 | 2 | Header con N° de ticket, cliente, dirección | Card superior "TICKET / CLIENTE / PROYECTO / DIRECCIÓN" con datos reales (`INS-2026-0003` / `Clínica Paitilla`) | Cumple |
-| 3 | Fecha de inspección, Técnico responsable, Hora inicio/fin | Los 4 campos presentes, Técnico responsable precargado con el técnico ya asignado (Carlos Vergara) | Cumple (RN3 REQ-252) |
+| 3 | Fecha de inspección, Técnico responsable, Hora inicio/fin | Los 4 campos presentes, Técnico responsable precargado con el técnico ya asignado (Tecnico Test) | Cumple (RN3 REQ-252) |
 | 4 | Bloque "Hallazgos de la inspección" con diagnóstico dinámico por producto | Ticket sin productos asociados → renderiza campos estáticos del catálogo por tipo (Checklist técnico + Recomendación para cotización) — MISMO catálogo que el informe de escritorio (`fieldsForTicket()` compartido) | Cumple (RN1 REQ-252, mapeo 1:1) |
 | 5 | "+ Agregar hallazgo adicional" | Presente y funcional | Cumple |
 | 6 | "Materiales / insumos utilizados" con "+ Agregar material usado" | Presente; a diferencia del mockup (que autogenera "Material #1 — cant. 1"), acá son 2 inputs de texto libre reales ("Insumo/herramienta" + "Cantidad") | Cumple, MEJOR que el mockup (RN2 REQ-252 corrige explícitamente el placeholder genérico del mockup) |
@@ -73,14 +73,14 @@ funcionalmente (no visualmente) en el documento de Pre-QA: mismo registro visibl
 escritorio, indicador de tabla actualizado, PDF con firma real. **N/A para checklist visual
 puro, cubierto por Pre-QA.**
 
-## SCRUM-321 (REQ-258) — Comisión Carlos Vergara
+## SCRUM-321 (REQ-258) — Comisión Tecnico Test
 
 | # | Elemento del mockup | En la app real | Veredicto |
 |---|---|---|---|
 | 1 | Mini-bloque "Comisión del mes" en la tarjeta de Carlos, fondo ámbar, monto + "de $400 máx." | Presente — para Carlos/Gerencia: `$XXX.XX de $400 máx. · <Mes> <Año> · visible solo para...`. Para Aaron: solo botón "Comisión del mes" (captura), sin monto — variante INTENCIONAL de permisos (RN8), no de mockup | Cumple |
 | 2 | Modal de detalle: total grande, tabla Criterio/Peso/% obtenido/Bono parcial | Presente — "TOTAL DEL MES" destacado + tabla con las 5 filas (Calidad/Satisfacción/SLA/Puntualidad/Actitud), columnas Peso/% obtenido/Monto | Cumple (RN9) |
 | 3 | Nota de licencia médica cuando aplica | Presente (`licenciaMedicaNote`) cuando `capture.licencia_medica=true` — verificado en vivo con captura de julio 2026 | Cumple (RN5) |
-| 4 | Mini-indicador de comisión SOLO en la tarjeta de Carlos (no en las demás) | Confirmado — Miguel Castillo (`has_bonus_plan=false`) no muestra ningún bloque de comisión, Pedro/Agustín tampoco | Cumple (RN7) |
+| 4 | Mini-indicador de comisión SOLO en la tarjeta de Carlos (no en las demás) | Confirmado — Miguel [persona] (`has_bonus_plan=false`) no muestra ningún bloque de comisión, Pedro/[persona] tampoco | Cumple (RN7) |
 | 5 | Modal "Capturar indicadores del mes" (mockup solo lo simula con un `alert()`) | Implementación real: formulario funcional completo (Satisfacción, Puntualidad, Actitud, **+ Calidad manual**, checkbox Licencia médica, selector de período ← / →) | Cumple, MÁS COMPLETO que el mockup (el mockup marcaba esto como simulación a propósito) |
 | 6 | — (no está en el mockup, es superficie nueva de Batch 10) Pantalla "Ajustes de Servicios" | Pantalla nueva con los 21 valores paramétricos del plan de bonificación + SLA + operación, agrupados en 3 secciones, editable solo Gerencia/superadmin, visible-pero-deshabilitada para el resto con nota explícita | N/A contra mockup (no existe en el mockup de Jira) — verificado funcionalmente en Pre-QA, cumple con la regla dura del CLAUDE.md de no hardcodear umbrales de negocio |
 

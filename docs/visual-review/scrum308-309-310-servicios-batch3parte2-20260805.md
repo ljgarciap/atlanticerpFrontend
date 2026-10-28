@@ -35,7 +35,7 @@ Proyecto (`buildNuevoClienteSectionHtml()`, `openSearchPickerModal()`), checklis
 |---|---|---|
 | Aaron/Líder de Servicios, superadmin | Botón visible (mockup no modela roles) | Visible — verificado en Playwright |
 | Gerencia (`management`) | — | Visible — `test_management_puede_crear_ticket` |
-| Vendedor/Diseñador | — | Visible — verificado en Playwright con login real (`milena.e@grupolafayette.com`) |
+| Vendedor/Diseñador | — | Visible — verificado en Playwright con login real (`usuario@example.test`) |
 | Técnico interno / Garantías | — | Ausente — verificado en Playwright (`carlos@atlantic.com.pa`, sin el botón) |
 
 ## Veredicto

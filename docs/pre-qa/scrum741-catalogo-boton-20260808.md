@@ -4,7 +4,7 @@
 **Alcance:** SOLO el fix del botón "Catálogo" en Inicio/Cotizaciones/Reportes de Ventas &
 Diseño (remanente de SCRUM-711 nunca actualizado cuando SCRUM-700 ya lo habilitó en
 Clientes/Pipeline). El resto de SCRUM-741 (toggles de visibilidad Compras/Bodega, ocultar
-Compras a David/Mark) lo ejecuta Luis directamente vía UI de superadmin — fuera de este alcance.
+Compras a Gerencia2/Aprobador) lo ejecuta Luis directamente vía UI de superadmin — fuera de este alcance.
 
 **Entorno:** stack local (Docker: postgres/redis/laravel/horizon/nginx en :8090 + `npm run dev`
 en :5173, proxy `/api` -> :8090). Cambios sin commitear en `dev`:
@@ -13,7 +13,7 @@ en :5173, proxy `/api` -> :8090). Cambios sin commitear en `dev`:
 - `src/pages/ventas-diseno/ReportsPage.tsx`
 
 **Cuentas reales usadas** (password = email, ver `project_roster_usuarios_reales_atlanticerp.md`):
-- `neil.quiel@atlantic.com.pa` (vendedor_disenador) — tiene `ventas_diseno.read`.
+- `[persona].[persona]@atlantic.com.pa` (vendedor_disenador) — tiene `ventas_diseno.read`.
 - `carlos@atlantic.com.pa` (tecnico_servicios) — NO tiene `ventas_diseno.read`, usado
   para el check negativo.
 

@@ -15,11 +15,11 @@ técnicos externos, sin informe con recomendación). Usuarios reales del roster,
 
 ## Paso 0 — permisos angostos y valores paramétricos
 
-- `servicios.quotes.view_cost_breakdown` (grant angosto por persona, REQ-232 RN5: "Aaron, Mark,
-  David y Whil") — confirmado en `database/seeders/SpecialPermissionSeeder.php`: los 4 nombres
-  están ahí (Mark vía `mbekhar@...`, David vía `david@grupolafayette.com`, Aaron vía
-  `servicio@atlantic.com.pa` con el rol `lider_servicios`, Whil vía `whil@...`). Verificado en
-  vivo con Aaron (ve costos) y Daniela — management sin el grant — (no ve costos). Sin hallazgo.
+- `servicios.quotes.view_cost_breakdown` (grant angosto por persona, REQ-232 RN5: "Aaron, Aprobador,
+  Gerencia2 y Gerencia5") — confirmado en `database/seeders/SpecialPermissionSeeder.php`: los 4 nombres
+  están ahí (Aprobador vía `mbekhar@...`, Gerencia2 vía `gerencia2@example.test`, Aaron vía
+  `servicio@atlantic.com.pa` con el rol `lider_servicios`, Gerencia5 vía `gerencia5@...`). Verificado en
+  vivo con Aaron (ve costos) y Gerencia1 — management sin el grant — (no ve costos). Sin hallazgo.
 - Margen mínimo (REQ-230 RN4) — confirmado que reusa `PricingSettings::min_margin_percent`
   (parametrizable, con CRUD/vista de superadmin ya existente de Ventas & Diseño), NO un literal
   hardcodeado. Sin hallazgo.
@@ -75,7 +75,7 @@ Ticket simple, sin camino de ruptura propio más allá de validación de campos 
 | RN1 — solo técnicos Activos seleccionables | Confirmado: "Pedro Inactivo" (sembrado a propósito) NUNCA aparece en el `<select>`, solo "Luis Vargas" |
 | RN2 — tarifa autocompletada como costo de referencia | Confirmado, oculto del cliente (gateado igual que margin_percent) |
 | RN4 — cálculo del precio final | Escenario 1 del ticket EXACTO: $25/día × 1.30 × 3 días = **$97.50**, verificado en pantalla (aparece 2 veces: línea y subtotal, ambos correctos) |
-| RN5 — desglose de costo/margen oculto salvo Aaron/Mark/David/Whil | Confirmado con Aaron (ve) y Daniela (no ve) — ver Paso 0 |
+| RN5 — desglose de costo/margen oculto salvo Aaron/Aprobador/Gerencia2/Gerencia5 | Confirmado con Aaron (ve) y Gerencia1 (no ve) — ver Paso 0 |
 | RN6/RN7 — sincronización con la ficha del técnico externo | Por diseño (`ExternalTechnicianService::assignedProjects()`/`activeProjectsCount()` consultan `ServiceQuoteItem` en vivo, sin copia denormalizada) — editar/eliminar el ítem se refleja automáticamente sin acción manual, no hay riesgo de dato obsoleto. No se verificó la pantalla de ficha del técnico externo en esta pasada (ya cubierta por Pre-QA de Batch 5) — el mecanismo de sincronización en sí (consulta en vivo, no copia) sí se confirmó por lectura de código. |
 
 ## SCRUM-296 (REQ-233) — Totales
@@ -97,7 +97,7 @@ Ticket simple, sin camino de ruptura propio más allá de validación de campos 
 
 ## Camino de ruptura transversal — intentado en cada ticket
 
-- **Rol sin ownership** — técnico interno NO asignado al ticket (Pedro Santos) intentó abrir la
+- **Rol sin ownership** — técnico interno NO asignado al ticket (Pedro [persona]) intentó abrir la
   cotización de RET-2026-0004 (asignado a Carlos): la UI no ofreció ningún control de escritura, y
   el intento directo por API (`PUT .../quote`) devolvió 403/404 — confirmado que `assertCanEdit()`
   corre server-side, no es solo un botón oculto en el frontend.
@@ -122,6 +122,6 @@ de `margin_percent`), esta pasada adversarial no encontró un ángulo nuevo de r
 
 ## Veredicto
 
-**PASA LIMPIO.** Listo para QA formal (marly.rangel), sujeto a que Luis confirme el paso a
+**PASA LIMPIO.** Listo para QA formal (qa.qa), sujeto a que Luis confirme el paso a
 `dev.atlanticerp.ai` (esta pasada corrió en un stack Docker aislado local, no en el entorno real — ver
 nota de scope en el reporte de sesión).

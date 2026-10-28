@@ -29,7 +29,7 @@ desarrollo real, la pantalla se cae en blanco en vez de mostrar esa vista. Ver
 | Modal Generar reporte paso 2 — forma de pago (4 opciones) | Sí |
 | Tabla Reportes — N°/fecha/total/estado/realizado por/ver | Sí |
 | Detalle de reporte — agrupado igual que Pendientes | Sí |
-| Detalle de reporte — "Aprobar" solo si pendiente y sos Mark | Sí |
+| Detalle de reporte — "Aprobar" solo si pendiente y sos Aprobador | Sí |
 | Detalle de reporte — solo "Descargar" si finalizado | **No verificable — ver CRÍTICO arriba** |
 | Confirmación de aprobar con número + monto | Sí — "¿Aprobar el reporte 0005-2026 por un total de USD..." |
 | Tab Rechazados — panel vacío, sin romper | Sí — "No hay líneas rechazadas permanentemente." |
@@ -60,7 +60,7 @@ pendientes.**
 
 ## Nota — no bloquea Visual Review, sí anotado en Pre-QA
 
-Los botones "+ Nuevo gasto"/"Generar reporte" son visibles para Mark (rol sin permiso de escritura)
+Los botones "+ Nuevo gasto"/"Generar reporte" son visibles para Aprobador (rol sin permiso de escritura)
 — el mockup es una demo estática de un solo persona ("Administración"), no modela esto, así que no
 hay contradicción directa con el mockup. Ver la nota de Pre-QA para el detalle y la sugerencia de
 pulido.

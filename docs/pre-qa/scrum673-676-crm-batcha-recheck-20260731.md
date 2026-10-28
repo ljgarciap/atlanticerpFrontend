@@ -40,28 +40,28 @@ el checkout real para poder ejecutar contra las ediciones sin commitear).
 ### SCRUM-674 (REQ-594) — gate de perfil, los 3 buckets
 | Escenario | Resultado |
 |---|---|
-| `management` (Daniela) ve "Dashboard CRM" en sidebar y navega correctamente a `/crm/dashboard` | PASA |
+| `management` (Gerencia1) ve "Dashboard CRM" en sidebar y navega correctamente a `/crm/dashboard` | PASA |
 | `superadmin` (Luis) ve "Dashboard CRM" en sidebar Y llega por URL directa a `/crm/dashboard` (el gap específico de la pasada 2) | PASA — confirmado que ya NO queda bloqueado de su propia pantalla |
-| `vendedor_disenador` (Neil) NO ve "Dashboard CRM" en sidebar Y URL directa a `/crm/dashboard` lo redirige fuera | PASA |
-| `lider_admin_contab` (Felix) — no expone "Pedidos" | PASA, pero **no ejercita RN6 de forma concluyente**: Felix sigue sin ningún acceso a Ventas & Diseño en absoluto (gap preexistente, documentado en la pasada 1, no de este batch) — el grupo entero está ausente, así que "Pedidos no aparece" es trivialmente cierto por el gate de módulo, no por la exclusión de perfil que RN6 pide probar. Sigue sin poder reproducirse end-to-end hasta que Felix/Yaneth tengan `ventas_diseno.read` — decisión de negocio aparte, ya notificada a PM en la pasada 1. |
+| `vendedor_disenador` ([persona]) NO ve "Dashboard CRM" en sidebar Y URL directa a `/crm/dashboard` lo redirige fuera | PASA |
+| `lider_admin_contab` (Contabilidad) — no expone "Pedidos" | PASA, pero **no ejercita RN6 de forma concluyente**: Contabilidad sigue sin ningún acceso a Ventas & Diseño en absoluto (gap preexistente, documentado en la pasada 1, no de este batch) — el grupo entero está ausente, así que "Pedidos no aparece" es trivialmente cierto por el gate de módulo, no por la exclusión de perfil que RN6 pide probar. Sigue sin poder reproducirse end-to-end hasta que Contabilidad/Asistente tengan `ventas_diseno.read` — decisión de negocio aparte, ya notificada a PM en la pasada 1. |
 
 ### SCRUM-673 (REQ-593) — Pipeline/Clientes zero behavior change
 | Escenario | Resultado |
 |---|---|
 | Pipeline vía módulo CRM, URL `/ventas-diseno/pipeline` sin cambios, 4 etapas visibles (Lead/Diseño/Cotización/Propuesta) | PASA |
 | Clientes vía módulo CRM, URL `/ventas-diseno/clients` sin cambios, botón "Crear cliente" presente | PASA |
-| Usuario sin `ventas_diseno.read` (Esteban, `lider_bodega`): grupo CRM ausente del sidebar Y `/crm/dashboard` por URL directa redirige fuera | PASA — sin regresión introducida por los 2 fixes de perfil |
+| Usuario sin `ventas_diseno.read` (Liderbodega, `lider_bodega`): grupo CRM ausente del sidebar Y `/crm/dashboard` por URL directa redirige fuera | PASA — sin regresión introducida por los 2 fixes de perfil |
 
 ### REQ-596 — navegación real, mobile drawer, sidebar colapsado
 | Escenario | Resultado |
 |---|---|
-| Sidebar colapsado (estado inicial real de cualquier browser nuevo, SCRUM-711) — "Dashboard CRM" accesible como botón con tooltip/título, Gerencia (Daniela) | PASA |
+| Sidebar colapsado (estado inicial real de cualquier browser nuevo, SCRUM-711) — "Dashboard CRM" accesible como botón con tooltip/título, Gerencia (Gerencia1) | PASA |
 | Drawer móvil (390×844) — grupo CRM completo con labels de texto (Dashboard CRM, Pipeline, Clientes) | PASA |
 
 ### Otros grupos del sidebar — sin regresión
 | Escenario | Resultado |
 |---|---|
-| Compras · Inventario y Bodega siguen presentes para Daniela (Gerencia) | PASA |
+| Compras · Inventario y Bodega siguen presentes para Gerencia1 (Gerencia) | PASA |
 
 **Nota técnica de implementación descubierta en esta pasada** (no es un hallazgo, es una
 corrección de mi propio script de prueba): los ítems del sidebar se renderizan como `<button>`
@@ -80,7 +80,7 @@ este batch — dejar registrado para que futuros specs de Pre-QA en este árbol 
   esperar regresión, no se volvió a ejercitar clic a clic.
 - **SCRUM-676 (REQ-596)** — el punto real de intersección con el hallazgo crítico (RN1: usuario
   sin perfil Gerencia no debe poder llegar a Dashboard CRM haciendo clic en "CRM") queda cubierto
-  por el checklist de arriba (Neil no ve ni puede navegar a Dashboard CRM). El resto de REQ-596
+  por el checklist de arriba ([persona] no ve ni puede navegar a Dashboard CRM). El resto de REQ-596
   (arquitectura de acordeón vs. mockup de subtabs) no cambió — ya clasificado ACEPTABLE en la
   pasada 1, sin código nuevo que lo afecte.
 
@@ -90,12 +90,12 @@ este batch — dejar registrado para que futuros specs de Pre-QA en este árbol 
 
 Los dos hallazgos de las pasadas 1 y 2 (gate de perfil ausente; gate de perfil sin bypass
 superadmin) están corregidos y verificados en vivo, sin evidencia de regresión en el resto del
-checklist original. Único punto que sigue sin poder ejercitarse end-to-end es RN6 con Felix/Yaneth
+checklist original. Único punto que sigue sin poder ejercitarse end-to-end es RN6 con Contabilidad/Asistente
 directamente — no es un bloqueante de código, es la falta preexistente de acceso base a Ventas &
 Diseño para esos dos perfiles, ya notificada a PM en la pasada 1 como decisión de negocio pendiente
 (fuera del alcance de este batch).
 
 Recomendación: SCRUM-673/674/675/676 pueden pasar a `Dev Testing` y promoverse a `dev` según el
-protocolo — el gap de Felix/Yaneth debe quedar registrado como pendiente de decisión de
+protocolo — el gap de Contabilidad/Asistente debe quedar registrado como pendiente de decisión de
 Arquitecto/PM sobre el mecanismo de grant (rol vs. `SpecialPermissionSeeder`), no como blocker de
 este batch.

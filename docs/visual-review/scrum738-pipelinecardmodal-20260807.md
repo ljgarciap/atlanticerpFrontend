@@ -51,7 +51,7 @@ handler cambia.
 ## Evidencia (Playwright CLI, stack local)
 
 Fixture sembrado vía tinker (`[VISUALREVIEW] Proyecto Layout`, card id 275, tenant
-`atlantic`), login real como `milena.e@grupolafayette.com` (Vendedor/Diseñador), ruta
+`atlantic`), login real como `usuario@example.test` (Vendedor/Diseñador), ruta
 `/ventas-diseno/pipeline`.
 
 - `real_view_desktop.png` — modo vista, arriba del modal: dos columnas alineadas, sin floating.

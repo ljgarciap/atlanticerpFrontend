@@ -34,7 +34,7 @@ un permiso (ver más abajo) se eliminaron/revirtieron al cerrar esta sesión.
 | Elemento del mockup | AtlanticERP (verificado en vivo) | Veredicto |
 |---|---|---|
 | 5 pasos para proveedor normal/internacional, con "Salió de origen" como primer paso | Orden #232 (VR Timeline Normal SA, `en_transito`): 5 `data-testid="timeline-step-*"` (`ordenado`→`recibido`), paso 0 con texto `Salió de origen2026-08-01` | Cumple |
-| 3 pasos para proveedor local (Ordenado→En tránsito local→Recibido) — no está en el mockup mismo (su JS de demo no ejercita este caso, confirmado por `grep` — 0 menciones de "local" como origen), pero es comportamiento pedido explícitamente por RN1 de Daniela | Orden #233 (VR Timeline Local SA, `ordenado`): exactamente 3 pasos, paso 0 con texto `OrdenadoEn curso` (NO dice "Salió de origen") | Cumple |
+| 3 pasos para proveedor local (Ordenado→En tránsito local→Recibido) — no está en el mockup mismo (su JS de demo no ejercita este caso, confirmado por `grep` — 0 menciones de "local" como origen), pero es comportamiento pedido explícitamente por RN1 de Gerencia1 | Orden #233 (VR Timeline Local SA, `ordenado`): exactamente 3 pasos, paso 0 con texto `OrdenadoEn curso` (NO dice "Salió de origen") | Cumple |
 | Punto (`tl-dot`) done/current/pending por paso, con línea conectora | `data-state="done"` en pasos completados, `data-state="current"` en el paso activo, `data-state="pending"` en los futuros — confirmado por atributo real leído del DOM en la orden #232: paso 0 `done`, paso 1 (`en_transito`, estado real de la orden) `current`, paso 2+ `pending` | Cumple |
 | Paso completado muestra la fecha en que se completó | Paso 0 de la orden #232: `Salió de origen2026-08-01` — la columna `ordenado_at` (sembrada 5 días antes) se lee y se muestra | Cumple |
 | Paso actual visualmente distinto ("En curso") | Paso 1 de la orden #232 y paso 0 de la orden #233 muestran el texto `En curso` (vs. fecha o `—`) — coincide con `current-tag`/`En curso` del mockup | Cumple |
@@ -58,8 +58,8 @@ también `compras.edit` a nivel de `security_level_module_permissions` — los �
 
 Para verificar el gate de todas formas sin esperar a que exista ese usuario, se flippeó
 temporalmente `security_level_module_permissions.can_edit` a `false` para el nivel 8
-(`id=34`, el nivel de Whileyner Contreras — Gerencia Restringida), se logueó como
-`whil@atlantic.com.pa`, se confirmó: página `/compras/logistica` carga con normalidad
+(`id=34`, el nivel de Gerencia5 [persona] — Gerencia Restringida), se logueó como
+`gerencia5@atlantic.com.pa`, se confirmó: página `/compras/logistica` carga con normalidad
 (`READONLY_PAGE_HAS_LOGISTICA=true`), timeline visible (`READONLY_TIMELINE_VISIBLE=true`), botón
 de avance con conteo **0** en el DOM (`READONLY_ADVANCE_BUTTON_COUNT=0`). Se restauró el valor
 original (`can_edit=true`) inmediatamente después y se confirmó la restauración por consulta
@@ -110,7 +110,7 @@ Ninguno en esta pasada.
 ## ACEPTABLE (notas, no bloquean)
 
 - El mockup nunca dibuja una secuencia de 3 pasos para proveedor local — esa variante es
-  comportamiento pedido por el comentario de Daniela (RN1), no por el propio mockup. Se clasifica
+  comportamiento pedido por el comentario de Gerencia1 (RN1), no por el propio mockup. Se clasifica
   como cumplimiento pleno de RN1 (no como "variante que se aparta del mockup") porque el mockup
   simplemente no cubre ese caso, no lo contradice.
 - Visibilidad de RN7 para roles fuera de Compras/Gerencia sigue sin resolverse (bandera heredada

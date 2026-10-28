@@ -44,10 +44,10 @@ corrió y pasó limpio antes que este gate, ver `docs/pre-qa/scrum301-306-servic
 
 ## Evidencia (Playwright CLI, stack local `localhost:8090`)
 
-Fixtures: tickets `GAR-2026-0001` (warranty con producto, técnico Miguel Castillo),
-`RET-2026-0001` (retrofit con producto, técnico Pedro Santos), `INS-2026-0003`
+Fixtures: tickets `GAR-2026-0001` (warranty con producto, técnico Miguel [persona]),
+`RET-2026-0001` (retrofit con producto, técnico Pedro [persona]), `INS-2026-0003`
 (installation/inspection sin producto, informe ya completado), `RET-2026-0002` (retrofit sin
-producto, técnico Carlos Vergara) — mismos fixtures que documenta el e2e permanente de Pre-QA.
+producto, técnico Tecnico Test) — mismos fixtures que documenta el e2e permanente de Pre-QA.
 Login real como Aaron Leis (`servicio@atlantic.com.pa`, Líder de Servicios).
 
 - `vr-garantias-con-producto.png` — bloque Diagnóstico + Observación específica por producto.

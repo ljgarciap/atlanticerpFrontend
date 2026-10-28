@@ -5,10 +5,10 @@
 Visual Review — ver `docs/visual-review/scrum350-356-servicios-reportes-batch17-18-20260812.md`)
 **Entorno:** stack local Docker (API `http://localhost:8090`) + Vite propio en `:5182` sobre el
 checkout principal de `atlanticerp-frontend` en `dev`. Playwright CLI, navegador real.
-**Cuentas reales usadas** (nunca demo): Aaron Leis `lider_servicios`, Daniela Amaya `management`,
-Carlos Vergara `tecnico_servicios` (el caso de excepción de REQ-285), Pedro Santos
-`tecnico_servicios`, Miguel Castillo `garantias_servicios`, Milena Estrada `vendedor_disenador`,
-Yirena Teng `lider_compras`.
+**Cuentas reales usadas** (nunca demo): Aaron Leis `lider_servicios`, Gerencia1 Test `management`,
+Tecnico Test `tecnico_servicios` (el caso de excepción de REQ-285), Pedro [persona]
+`tecnico_servicios`, Miguel [persona] `garantias_servicios`, [persona] Estrada `vendedor_disenador`,
+Lider Compras Test `lider_compras`.
 
 **Veredicto: PASA LIMPIO** — 5 hallazgos reales encontrados y **corregidos dentro de esta misma
 pasada**, con el checklist completo re-corrido después de los fixes. 2 observaciones no bloqueantes
@@ -69,10 +69,10 @@ quedan documentadas abajo para PM/Luis.
 - **Re-verificado:** "5 4 2 2 / Ago / 13" — la suma de los 4 coincide con el total mostrado abajo.
 
 ### 4. SCRUM-355 — el gate de visibilidad de la comisión dependía del NOMBRE del técnico
-- **Criterio (RN2):** "Visible únicamente para Carlos Vergara y Gerencia".
+- **Criterio (RN2):** "Visible únicamente para Tecnico Test y Gerencia".
 - **Encontrado:** el backend resuelve al técnico por `has_bonus_plan = true`, pero el frontend lo
-  resolvía por `tech.nombre === 'Carlos Vergara'`. El nombre es editable desde Técnicos Internos.
-- **Escenario de ruptura ejecutado:** renombré el perfil a "Carlos A. Vergara" y entré como Carlos
+  resolvía por `tech.nombre === 'Tecnico Test'`. El nombre es editable desde Técnicos Internos.
+- **Escenario de ruptura ejecutado:** renombré el perfil a "Carlos A. Tecnico" y entré como Carlos
   → **la sección desaparecía por completo para él**, aunque el backend seguía autorizándolo (200 con
   su comisión). Su propia comisión dejaba de existir en Reportes por un renombre cosmético.
 - **Fix:** el frontend usa `has_bonus_plan`, el mismo flag que el backend.
@@ -98,13 +98,13 @@ quedan documentadas abajo para PM/Luis.
 1. **"Reportes" está oculto para `vendedor_disenador` en el menú, pero la URL directa muestra todo.**
    Los 7 tickets dicen "PERMISOS: Visible para todos los roles del módulo", mientras
    `ServiciosNavMenu.tsx` (REQ-288, Batch 19 ya cerrado y QA'd) excluye a Vendedor/Diseñador de esa
-   pestaña a propósito. Verificado con Milena: la pestaña no aparece, pero navegando a
+   pestaña a propósito. Verificado con [persona]: la pestaña no aparece, pero navegando a
    `/servicios/reportes` la pantalla carga completa y los 6 endpoints responden 200 (tiene
    `servicios.read`). No es un leak respecto de la letra de estos tickets — es una contradicción
    entre REQ-288 y el "todos los roles del módulo" de REQ-280→286, **preexistente a este batch**
    (ninguna de las 7 historias introdujo esa lógica). Hace falta una decisión: o se le da la
    pestaña, o se bloquea la ruta. **No bloquea el batch.**
-   (Contraste sano: Yirena `lider_compras` ni siquiera entra — el gate de módulo la redirige a
+   (Contraste sano: Lidercompras `lider_compras` ni siquiera entra — el gate de módulo la redirige a
    Compras.)
 2. **"Informes pendientes" ignora el selector de período** — es un número global "a hoy" (mismo que
    Tickets), mientras las otras 3 tarjetas de "Panorama del mes" sí respetan el período elegido.
@@ -119,7 +119,7 @@ quedan documentadas abajo para PM/Luis.
 | Escenario de ruptura intentado | Resultado |
 |---|---|
 | Aaron (`lider_servicios`) entra a Reportes y busca la comisión | No ve la sección **y no se dispara la llamada de red**; el endpoint le responde 403 a nivel de ruta |
-| Pedro Santos y Miguel Castillo (técnicos que no son Carlos) | Sin sección, sin llamada de red, 403 del backend ("No autorizado") |
+| Pedro [persona] y Miguel [persona] (técnicos que no son Carlos) | Sin sección, sin llamada de red, 403 del backend ("No autorizado") |
 | Renombrar al técnico con plan de bonificación y entrar como él | **Rompía** (hallazgo 4) — corregido y con test permanente |
 | Carlos entra a su propia comisión pese a que su rol base no calificaría | 200, ve el detalle completo — la excepción explícita de RN2 funciona |
 | Comisión de Reportes vs. Técnicos Internos, mismo período | Payload **idéntico byte a byte** (total 258, mismos 5 criterios) — RN1 cumplida, no hay cálculo paralelo |

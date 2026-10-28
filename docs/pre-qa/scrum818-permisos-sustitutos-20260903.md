@@ -2,7 +2,7 @@
 
 Rebote de Gerencia Test sobre "Comparación de Referencias" (módulo Sustitutos, Compras). El
 ticket llegó con capturas y una reproducción real en `dev.atlanticerp.ai` — el enfoque de esta pasada
-fue el comentario más reciente de Daniela (2026-09-03), foco explícito de Luis.
+fue el comentario más reciente de Gerencia1 (2026-09-03), foco explícito de Luis.
 
 ## Causa raíz (una sola, cinco síntomas)
 
@@ -20,12 +20,12 @@ El proyecto tiene **dos sistemas de permisos coexistiendo**:
 `ReplacementRequestController` y `QuoteListService::hasFullComprasAccess()` seguían llamando a
 `$user->hasPermission()` (v1) en vez de leer el claim `permissions` del JWT (v2) — el mismo patrón
 que `InventoryController`/`CatalogProductSearchController` ya usan correctamente en otras partes
-de Compras. Con datos reales de `dev.atlanticerp.ai` (David, Mark — Gerencia; Yirena — Líder de Compras)
+de Compras. Con datos reales de `dev.atlanticerp.ai` (Gerencia2, Aprobador — Gerencia; Lidercompras — Líder de Compras)
 verificados por SQL directo: ninguno tiene el string v1, los tres SÍ tienen el acceso v2 — la
 brecha entre ambos sistemas es exactamente la superficie del bug, no una casualidad de estos 3
 usuarios puntuales.
 
-## Los 5 hallazgos de Daniela → el fix concreto de cada uno
+## Los 5 hallazgos de Gerencia1 → el fix concreto de cada uno
 
 | # | Síntoma reportado | Causa | Fix |
 |---|---|---|---|
@@ -38,7 +38,7 @@ usuarios puntuales.
 ## Corrido en LOCAL contra `http://localhost:8090`, no `dev.atlanticerp.ai`
 
 Cuentas **reales**, no `*.test` — para reproducir exactamente la cuenta que reportó el bug:
-`gerencia3@test.com` (Mark, Gerencia), `lidercompras@test.com` (Yirena, Líder
+`gerencia3@test.com` (Aprobador, Gerencia), `lidercompras@test.com` (Lidercompras, Líder
 de Compras), `designer@atlantic.test` (Vendedor, control negativo). Datos sembrados vía
 tinker: `RoleModuleVisibility` real para `management`→`compras`/`gerencia` y
 `lider_compras`→`compras` (v2, **sin tocar `extra_permissions` v1** — para reproducir el estado
@@ -54,9 +54,9 @@ Rechazadas (una "global" sin proyecto, otra atada al proyecto del Vendedor).
 
 | Escenario | Resultado |
 |---|---|
-| Hallazgo 1 — Mark ve la solicitud Pendiente Gerencia y el botón Aprobar | Antes: lista vacía. Después: visible, botón presente |
-| Hallazgo 2 — Mark, al generar una solicitud, encuentra su proyecto en el picker filtrado por producto | Antes: "No existe ningún proyecto que contenga este producto" pese a existir. Después: el proyecto aparece, seleccionable, botón "Generar solicitud" del modal queda habilitado |
-| Hallazgo 3 — Yirena ve la lista y el botón "Generar orden" en la Rechazada | Antes: lista vacía (mismo síntoma que Mark). Después: visible |
+| Hallazgo 1 — Aprobador ve la solicitud Pendiente Gerencia y el botón Aprobar | Antes: lista vacía. Después: visible, botón presente |
+| Hallazgo 2 — Aprobador, al generar una solicitud, encuentra su proyecto en el picker filtrado por producto | Antes: "No existe ningún proyecto que contenga este producto" pese a existir. Después: el proyecto aparece, seleccionable, botón "Generar solicitud" del modal queda habilitado |
+| Hallazgo 3 — Lidercompras ve la lista y el botón "Generar orden" en la Rechazada | Antes: lista vacía (mismo síntoma que Aprobador). Después: visible |
 | Hallazgo 3(b) — control negativo: un Vendedor ve su propia solicitud Rechazada (scopeada a su proyecto) pero NUNCA el botón "Generar orden" | `can_generate_order=false` para su rol — botón ausente, aunque la fila sí sea visible |
 
 ## Cobertura de tests (no solo el check en vivo)

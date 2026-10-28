@@ -23,7 +23,7 @@ tocar S3 real). Frontend: `vite dev` apuntando al backend aislado (proxy `/api` 
 Playwright CLI contra `http://localhost:5173`. Cuentas reales, password = email (regla del
 proyecto, nunca `*@atlantic.test`): `servicio@atlantic.com.pa` (Aaron, lider_servicios),
 `carlos@atlantic.com.pa` (tecnico_servicios), `garantias@atlantic.com.pa`
-(garantias_servicios), `daniela@atlantic.com.pa` (management).
+(garantias_servicios), `gerencia1@atlantic.com.pa` (management).
 
 Smoke test permanente agregado: `e2e/preqa-scrum270-271-273-274-servicios-batch15-home-20260812.spec.ts`
 (12 casos, gate de rol + deep-link + rutas del día + indicadores — todos ejercitan comportamiento
@@ -68,7 +68,7 @@ ocurrencia es la definición misma. `HomeMonthlyIndicators.tsx` es puramente de 
 3 tarjetas), sin ningún botón/ícono/modal de edición. Tampoco existe en `ServiciosSettingsPage.tsx`
 ni en ningún otro componente.
 
-**Reproducción:** login como Aaron o Daniela (ambos con `role:superadmin,management`-equivalente
+**Reproducción:** login como Aaron o Gerencia1 (ambos con `role:superadmin,management`-equivalente
 o `lider_servicios`) → Inicio → panel Indicadores del mes → no hay ningún elemento clickeable
 sobre "Instalaciones completadas este mes" ni la meta (`3 / 36` en este entorno) — confirmado con
 Playwright (test 7 de la suite) y visualmente en `07-indicadores.png`.
@@ -147,7 +147,7 @@ aprobado todavía, PM debe confirmarlo antes de dar este batch por cerrado.
   este despacho pedía navegar a `/servicios/home` — la ruta real es `/servicios/inicio`
   (`App.tsx`). Con el typo, el catch-all `<Navigate to={getHomeRoute(user)}>` "disimulaba" el
   error para usuarios cuyo único módulo es Servicios (Aaron/Carlos/Miguel aterrizaban en la
-  pantalla correcta por coincidencia), pero redirigía a Daniela (con acceso a `ventas_diseno` con
+  pantalla correcta por coincidencia), pero redirigía a Gerencia1 (con acceso a `ventas_diseno` con
   mayor prioridad en `MODULE_HOME_ROUTES`) a la pantalla equivocada — así se descubrió y corrigió
   el propio test antes de reportar como hallazgo de la app. Dejado como comentario en el spec para
   que no se repita.
@@ -161,7 +161,7 @@ aprobado todavía, PM debe confirmarlo antes de dar este batch por cerrado.
 - Encabezado: título, botón Agenda (navega correcto, sin filtro), botón "+ Nuevo ticket" abre el
   MISMO formulario del módulo Tickets (Cliente Master, requerimientos especiales, productos).
 - Gate de rol de "+ Nuevo ticket" — re-verificado tras el fix de Senior Review, con 4 roles reales
-  distintos (Aaron sí, Carlos no, Miguel no, Daniela sí).
+  distintos (Aaron sí, Carlos no, Miguel no, Gerencia1 sí).
 - Rutas del día: límite de 5, "Ver agenda completa", colores de técnico consistentes con Técnicos
   Internos, botón Waze/Maps con URL real, misma fuente de datos que Agenda equipo.
 - Pendientes: badge de conteo real (no `items.length` del cliente), umbral de 3 días configurable
@@ -210,14 +210,14 @@ Confirmado end-to-end, backend + frontend, con cuentas reales:
   (antes `false` fijo) y `.value` refleja la suma real de `service_quotes` APROBADAS de tickets
   Instalación cerrados en el mes — sembrado un caso real vía tinker (ticket Instalación cerrado +
   cotización aprobada por USD 2000) y confirmado `value: 2000` en la respuesta, luego limpiado.
-- **Backend (`PUT /api/servicios/home/installation-goal`):** confirmado `200` con `daniela@
+- **Backend (`PUT /api/servicios/home/installation-goal`):** confirmado `200` con `gerencia1@
   atlantic.com.pa` (management) y `403` con `servicio@atlantic.com.pa` (lider_servicios,
   sin el rol requerido) — gate `role:superadmin,management` intacto. Validación `value >= 0` y
   `value` requerido confirmadas con `422` (con header `Accept: application/json` — sin ese header
   Laravel redirige 302 en vez de devolver JSON, comportamiento estándar de Laravel no relacionado
   con el fix, el frontend real siempre manda ese header vía axios).
 - **Frontend (`HomeMonthlyIndicators.tsx` + `InstallationGoalModal.tsx`):** ícono de lápiz visible
-  SOLO para `daniela@atlantic.com.pa` (management) — confirmado AUSENTE para
+  SOLO para `gerencia1@atlantic.com.pa` (management) — confirmado AUSENTE para
   `servicio@atlantic.com.pa` (lider_servicios) y `carlos@atlantic.com.pa`
   (tecnico_servicios). Modal abre prefilleado con el valor actual, guarda un valor nuevo (77),
   panel refleja `0 / 77` de inmediato (sin recargar), leyenda cambia a "Meta ajustada manualmente
@@ -234,7 +234,7 @@ de "—"), `m2b-modal-open.png`, `m2d-after-save.png` (`0/77` + leyenda actualiz
 Cerrado — ver backend arriba. La tarjeta "Ingresos por instalaciones" ya NO muestra "—" fijo: con
 `available: true` siempre formatea el monto real (`USD 0.00` cuando no hay cotizaciones aprobadas
 este mes, `USD 2,000.00` en el caso sembrado de prueba). Confirmado visualmente para 2 roles
-distintos (Aaron y Daniela).
+distintos (Aaron y Gerencia1).
 
 ### REQ-210 RN3 ("Repuesto sin llegar") — sigue diferido a propósito, NO es parte de este fix
 
@@ -245,7 +245,7 @@ todavía) — no se tocó en este fix y no correspondía tocarlo. No se re-clasi
 ### Checklist completo re-corrido (regla dura — no solo el punto que falló)
 
 - REQ-207 (encabezado, botón Agenda, "+ Nuevo ticket" con gate de rol) — sin regresión. Confirmado
-  con Aaron (ve el botón), Carlos (NO lo ve), Daniela (lo ve). Navegación de "Agenda" a Técnicos
+  con Aaron (ve el botón), Carlos (NO lo ve), Gerencia1 (lo ve). Navegación de "Agenda" a Técnicos
   Internos → Agenda equipo sigue funcionando.
 - REQ-208 (Rutas del día) — panel renderiza, estado vacío correcto ("No hay visitas agendadas para
   hoy."). Lógica de límite/slice sin cambios de código en este fix, no re-verificada con fixtures

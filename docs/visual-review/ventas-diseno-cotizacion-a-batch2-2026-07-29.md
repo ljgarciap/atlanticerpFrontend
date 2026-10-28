@@ -5,7 +5,7 @@
 **Commit revisado:** `a45f41e` (rama `dev`, `atlanticerp-frontend`) — desplegado y confirmado en
 `dev.atlanticerp.ai` vía CI (`CI — Build + Tests` y `CD — Deploy dev.atlanticerp.ai`, ambos verdes).
 **Mockup de referencia:** `1E__Ventas_Disen_o_Cotizacion.html` (compartido por los 3 tickets) +
-4 capturas de pantalla de Daniela Amaya (2026-07-23, adjuntas a SCRUM-116) + `Requerimientos
+4 capturas de pantalla de Gerencia1 Test (2026-07-23, adjuntas a SCRUM-116) + `Requerimientos
 Ventas Diseño.xlsx`.
 **Método:** Playwright CLI contra `https://dev.atlanticerp.ai`, usuario `designer@atlantic.test`
 (rol `vendedor_disenador`). UI observada en inglés (toggle EN activo en la sesión de prueba) —
@@ -34,7 +34,7 @@ cargadas) a "Única" dejaba las 2 fechas viejas en pantalla en vez de resetear a
 |---|---|---|
 | Sin Cliente Master elegido, lupa/búsqueda de Subcliente deshabilitada | Sí | Sí, confirmado: `disabled=true` en el campo Sub Client con Master Client vacío |
 | Con Cliente Master elegido, Subcliente solo muestra los de ese cliente | Sí (`searchSubClients` scoped por `masterClient.id`) | Sí |
-| Seleccionar/crear Subcliente autocompleta RUC | Sí | Sí, confirmado: seleccionar "Marly Rangel" autocompletó Tax ID = "123456" |
+| Seleccionar/crear Subcliente autocompleta RUC | Sí | Sí, confirmado: seleccionar "QA Test" autocompletó Tax ID = "123456" |
 | Borrar el texto de Cliente Master a mano limpia Y deshabilita Subcliente (fix de este batch) | Sí (`onClear` en `SimpleSearchPicker`) | Sí — tras seleccionar un Master y borrar el texto a mano, Sub Client quedó `disabled=true` y con valor vacío |
 | "+ Nuevo Subcliente" visible aunque la búsqueda SÍ traiga resultados (fix de este batch) | Sí | Sí — con query "a" trayendo 4 resultados reales, "+ New sub client" apareció igual como 5ta opción de la lista |
 
