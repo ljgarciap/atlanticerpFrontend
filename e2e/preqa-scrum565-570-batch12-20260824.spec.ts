@@ -22,7 +22,7 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const MARK  = 'gerencia3@test.com'
 
 async function login(page: Page, email: string) {
@@ -41,7 +41,7 @@ async function gotoNotasCredito(page: Page) {
 }
 
 test('Visual Review — entrada real desde el sidebar llega a Notas Crédito (no solo URL directa)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab`)
   await page.waitForTimeout(1200)
   // El dev real usa sidebar izquierdo (no subtabs superiores + dropdown como el mockup) — variante
@@ -58,7 +58,7 @@ test('Visual Review — entrada real desde el sidebar llega a Notas Crédito (no
 })
 
 test('SCRUM-569 REQ-492 — 5 tarjetas + historial muestra las 2 notas sembradas (F-0001/F-0002)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   // El número de nota (NC-000x) no es una columna visible de la tabla (mismo criterio que el
   // mockup, que tampoco la muestra) — identificamos las filas por la factura de origen, que sí es
@@ -69,7 +69,7 @@ test('SCRUM-569 REQ-492 — 5 tarjetas + historial muestra las 2 notas sembradas
 })
 
 test('SCRUM-569 RN1/RN3 — búsqueda por número de nota (NC-0001) filtra aunque la columna no se muestre', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   const search = page.locator('input[placeholder*="Buscar"]')
   await search.fill('NC-0001')
@@ -80,7 +80,7 @@ test('SCRUM-569 RN1/RN3 — búsqueda por número de nota (NC-0001) filtra aunqu
 })
 
 test('SCRUM-569 RN2/RN3 — filtro de estado "Pendiente de aprobación" + tipo "Anulación completa" combinados (AND)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   const selects = page.locator('select')
   const count = await selects.count()
@@ -96,7 +96,7 @@ test('SCRUM-569 RN2/RN3 — filtro de estado "Pendiente de aprobación" + tipo "
 })
 
 test('SCRUM-569 RN4 — Limpiar filtros resetea todo', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   const search = page.locator('input[placeholder*="Buscar"]')
   await search.fill('NC-0001')
@@ -111,7 +111,7 @@ test('SCRUM-569 RN4 — Limpiar filtros resetea todo', async ({ page }) => {
 })
 
 test('SCRUM-570 RN1/RN4 — detalle de nota pendiente_aprobacion (F-0001): sin motivo_rechazo/aprobado_por, Aprobar/Rechazar visibles y deshabilitados', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   await page.getByRole('row', { name: /F-0001/ }).click()
   await page.waitForTimeout(1000)
@@ -129,7 +129,7 @@ test('SCRUM-570 RN1/RN4 — detalle de nota pendiente_aprobacion (F-0001): sin m
 })
 
 test('SCRUM-570 RN2 — detalle de F-0002 (Corrección de datos, no Devolución): sin trazabilidad de Bodega', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   await page.getByRole('row', { name: /F-0002/ }).click()
   await page.waitForTimeout(1000)
@@ -147,7 +147,7 @@ test('SCRUM-570 RN2 — detalle de F-0002 (Corrección de datos, no Devolución)
 // Documentado como gap de credenciales, no como hallazgo funcional.
 
 test('SCRUM-565 RN2/RN6 Escenario 1 — Descuento comercial sin factura de origen bloquea el registro', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   await page.getByRole('button', { name: /Nueva nota/i }).click()
   await page.waitForTimeout(800)
@@ -180,7 +180,7 @@ test('SCRUM-565 RN2/RN6 Escenario 1 — Descuento comercial sin factura de orige
 })
 
 test('SCRUM-565 Escenario 2 — excedente "devolver dinero" exige cuenta bancaria antes de habilitar el registro', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   await page.getByRole('button', { name: /Nueva nota/i }).click()
   await page.waitForTimeout(800)
@@ -229,7 +229,7 @@ test('SCRUM-565 Escenario 2 — excedente "devolver dinero" exige cuenta bancari
 })
 
 test('SCRUM-566/567 — Corrección de datos abre revisión previa con tarjetas ANTES de confirmar (RN1), "Volver y corregir" preserva el formulario (RN4)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   await page.getByRole('button', { name: /Nueva nota/i }).click()
   await page.waitForTimeout(800)
@@ -329,7 +329,7 @@ test('SCRUM-566/567 — Corrección de datos abre revisión previa con tarjetas 
 // sobre el order 25 (misma factura F-0001), 2 unidades, status esperando_nota_credito.
 
 test('SCRUM-568 RN1/RN2 — fila ámbar en el historial abre el formulario precargado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
 
   const row = page.getByRole('row', { name: /DEV-2026-0003|Pendiente de generar nota/ }).first()
@@ -358,7 +358,7 @@ test('SCRUM-568 RN1/RN2 — fila ámbar en el historial abre el formulario preca
 })
 
 test('SCRUM-568 RN3 — al generar la nota, la fila deja de aparecer en la cola', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
 
   const row = page.getByRole('row', { name: /DEV-2026-0003|Pendiente de generar nota/ }).first()
@@ -389,7 +389,7 @@ test('SCRUM-568 RN3 — al generar la nota, la fila deja de aparecer en la cola'
 })
 
 test('SCRUM-570 Escenario 1 — detalle de nota de Devolución de mercancía aplicada muestra trazabilidad completa de Bodega', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await gotoNotasCredito(page)
   const row = page.getByRole('row', { name: /DEV-2026-0003/ })
   // La fila real de la nota generada (no la de la cola, que ya no existe tras RN3) referencia el
@@ -405,7 +405,7 @@ test('SCRUM-570 Escenario 1 — detalle de nota de Devolución de mercancía apl
 })
 
 test('DEBUG timezone check', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone)
   const check = await page.evaluate(() => new Date('2026-08-24').toLocaleDateString('es-PA', { day: '2-digit', month: 'short', year: 'numeric' }))
   console.log('BROWSER TIMEZONE:', tz, '| new Date(2026-08-24) formatted es-PA:', check)

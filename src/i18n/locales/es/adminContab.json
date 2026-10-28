@@ -1546,7 +1546,7 @@
       "dias6m": "6 meses",
       "anio": "Año"
     },
-    "felixCommission": {
+    "commissionTiers": {
       "title": "Comisión por gestión de cartera +90 días — Contabilidad",
       "subtitle": "A mayor cartera vencida cobrada, mayor comisión — en vivo, lo que va del mes",
       "cobradoMes": "Cobrado de cartera +90 días (mes actual)",

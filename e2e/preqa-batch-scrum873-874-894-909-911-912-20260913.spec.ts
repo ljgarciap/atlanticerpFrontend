@@ -590,7 +590,7 @@ test('SCRUM-911 — filtro general sincroniza el panel, navegacion local del pan
   await page.goto(`${DEV}/servicios/reportes`)
   await page.waitForTimeout(2500)
 
-  const commissionHeading = page.getByText(/comisión.*carlos vergara/i).first()
+  const commissionHeading = page.getByText(/comisión.*carlos tecnico/i).first()
   const visible = await commissionHeading.isVisible().catch(() => false)
   test.skip(!visible, 'panel Comision Tecnico Test no visible para este usuario/entorno')
   if (!visible) return

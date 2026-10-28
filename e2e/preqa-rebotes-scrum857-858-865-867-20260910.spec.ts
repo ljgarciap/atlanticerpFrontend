@@ -12,7 +12,7 @@ import { test, expect, Page } from '@playwright/test'
  */
 
 const BASE = 'https://dev.atlanticerp.ai'
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
 
 test.describe.configure({ mode: 'serial' })
@@ -31,7 +31,7 @@ async function login(page: Page, email: string): Promise<void> {
 
 // SCRUM-857 — Estado de Cuenta: "Pago a" y "Responsable" ya no salen en blanco (rebote Gerencia)
 test('SCRUM-857 — Estado de Cuenta: "Pago a: EMPRESA DEMO S.A." y "Responsable: Contabilidad Test"', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/facturacion/estado-cuenta?master_client_id=7040`)
   await page.waitForTimeout(4000)
   const body = page.locator('body')
@@ -53,7 +53,7 @@ test('SCRUM-857 — Estado de Cuenta: "Pago a: EMPRESA DEMO S.A." y "Responsable
   await page.screenshot({ path: 'e2e/__screenshots__/preqa-scrum857-estado-cuenta-20260910.png', fullPage: true })
 })
 
-// SCRUM-865 — Bodega > Devoluciones: "Ver nota de crédito" en DEV-2026-0003 (NO-GO marly)
+// SCRUM-865 — Bodega > Devoluciones: "Ver nota de crédito" en DEV-2026-0003 (NO-GO qa)
 test('SCRUM-865 — Devoluciones: fila PED-2026-0019 (Finalizado) muestra "Ver nota de crédito" + enlaces históricos', async ({ page }) => {
   await login(page, MARK)
   await page.goto(`${BASE}/bodega/devoluciones`)
@@ -70,9 +70,9 @@ test('SCRUM-865 — Devoluciones: fila PED-2026-0019 (Finalizado) muestra "Ver n
   await page.screenshot({ path: 'e2e/__screenshots__/preqa-scrum865-devoluciones-20260910.png', fullPage: true })
 })
 
-// SCRUM-867 — Arqueo de Caja: carga sin timeout + aviso de atraso (NO-GO marly, era blip)
+// SCRUM-867 — Arqueo de Caja: carga sin timeout + aviso de atraso (NO-GO qa, era blip)
 test('SCRUM-867 — Arqueo de Caja: daily-count responde 200 y muestra aviso de arqueo atrasado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const resp = page.waitForResponse(
     r => r.url().includes('/cash-position/daily-count') && r.request().method() === 'GET',
     { timeout: 25000 },

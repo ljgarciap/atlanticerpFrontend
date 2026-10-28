@@ -84,7 +84,7 @@ describe('CreateClientModal', () => {
       mockCanMarkConsumidorFinal = false
       renderClientModal()
       expect((screen.getByRole('option', { name: 'clients.receptorTipo.consumidorFinal' }) as HTMLOptionElement).disabled).toBe(true)
-      expect(screen.getByText('clients.receptorTipo.soloMarkFelix')).toBeInTheDocument()
+      expect(screen.getByText('clients.receptorTipo.soloGerenciaContabilidad')).toBeInTheDocument()
     })
 
     it('por defecto es Contribuyente y muestra RUC, DV y validación', () => {

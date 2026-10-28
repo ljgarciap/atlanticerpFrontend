@@ -18,10 +18,10 @@ test.describe.configure({ mode: 'serial' })
 // seguro correr el spec repetidas veces sin colisionar con datos de corridas previas.
 const BASE = 'http://localhost:8090'
 
-const FELIX = 'contabilidad@test.com'
-const YANETH = 'asistenteadministrativa@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
+const ASISTENTE = 'asistenteadministrativa@test.com'
 const MARK = 'gerencia3@test.com'
-const DANIELA = 'gerencia@test.com'
+const GERENCIA1 = 'gerencia@test.com'
 
 const RUN_ID = Date.now().toString()
 
@@ -39,7 +39,7 @@ const REAL_PNG = Buffer.from(
 )
 
 type Seed = {
-  felixId: number
+  contabilidadId: number
   reportA: string
   reportB: string
   reportC: string
@@ -147,7 +147,7 @@ async function openReport(page: Page, numero: string): Promise<void> {
 test.beforeAll(async ({ request }) => {
   test.setTimeout(60_000)
 
-  const felix = await apiLogin(request, FELIX)
+  const contabilidad = await apiLogin(request, CONTABILIDAD)
   const mark = await apiLogin(request, MARK)
 
   // Defensa: si una corrida previa interrumpida dejó `petty_cash_max_intentos_rechazo` en un
@@ -168,7 +168,7 @@ test.beforeAll(async ({ request }) => {
   }
 
   seed = {
-    felixId: felix.userId,
+    contabilidadId: contabilidad.userId,
     reportA: '',
     reportB: '',
     reportC: '',
@@ -182,44 +182,44 @@ test.beforeAll(async ({ request }) => {
   }
 
   // Reporte A — 3 líneas (SCRUM-618.1 rechaza 1, SCRUM-618.2 rechaza el resto).
-  const idsA = await createExpenses(request, felix.token, [
-    { proveedor: seed.provA1, solicitanteId: felix.userId },
-    { proveedor: seed.provA2, solicitanteId: felix.userId },
-    { proveedor: seed.provA3, solicitanteId: felix.userId },
+  const idsA = await createExpenses(request, contabilidad.token, [
+    { proveedor: seed.provA1, solicitanteId: contabilidad.userId },
+    { proveedor: seed.provA2, solicitanteId: contabilidad.userId },
+    { proveedor: seed.provA3, solicitanteId: contabilidad.userId },
   ])
-  seed.reportA = await groupReport(request, felix.token, idsA)
+  seed.reportA = await groupReport(request, contabilidad.token, idsA)
 
   // Reporte B — 1 línea (SCRUM-618.4, rechazo completo disuelve el reporte automáticamente).
-  const idsB = await createExpenses(request, felix.token, [{ proveedor: seed.provB1, solicitanteId: felix.userId }])
-  seed.reportB = await groupReport(request, felix.token, idsB)
+  const idsB = await createExpenses(request, contabilidad.token, [{ proveedor: seed.provB1, solicitanteId: contabilidad.userId }])
+  seed.reportB = await groupReport(request, contabilidad.token, idsB)
 
   // Reporte C — 1 línea, se mantiene PENDIENTE toda la corrida (SCRUM-618.5, SCRUM-622.2, SCRUM-623.2).
-  const idsC = await createExpenses(request, felix.token, [
-    { proveedor: `ProveedorC1-${RUN_ID}`, solicitanteId: felix.userId },
+  const idsC = await createExpenses(request, contabilidad.token, [
+    { proveedor: `ProveedorC1-${RUN_ID}`, solicitanteId: contabilidad.userId },
   ])
-  seed.reportC = await groupReport(request, felix.token, idsC)
+  seed.reportC = await groupReport(request, contabilidad.token, idsC)
 
   // Reporte D — 1 línea, aprobado por Gerencia de entrada (SCRUM-622.3 solo-lectura, SCRUM-623.3
   // descargar+"aprobado por Gerencia").
-  const idsD = await createExpenses(request, felix.token, [
-    { proveedor: `ProveedorD1-${RUN_ID}`, solicitanteId: felix.userId },
+  const idsD = await createExpenses(request, contabilidad.token, [
+    { proveedor: `ProveedorD1-${RUN_ID}`, solicitanteId: contabilidad.userId },
   ])
-  seed.reportD = await groupReport(request, felix.token, idsD)
+  seed.reportD = await groupReport(request, contabilidad.token, idsD)
   await approveReportApi(request, mark.token, seed.reportD)
 
   // Línea standalone (sin reporte) — SCRUM-622.1 (editar, solicitante no editable) y SCRUM-623.1
   // (ver soporte real). Primer soporte es el stub (insuficiente para verificar imagen real); el
   // 2do soporte real (REAL_PNG) se agrega aparte vía addExpenseAttachment, mismo patrón que el
   // spec original.
-  const idsStandalone = await createExpenses(request, felix.token, [
-    { proveedor: seed.provStandalone, solicitanteId: felix.userId },
+  const idsStandalone = await createExpenses(request, contabilidad.token, [
+    { proveedor: seed.provStandalone, solicitanteId: contabilidad.userId },
   ])
   seed.standaloneExpenseId = idsStandalone[0]
 
   const attachRes = await request.post(
     `${BASE}/api/admin-contab/petty-cash/expenses/${seed.standaloneExpenseId}/attachments`,
     {
-      headers: authHeaders(felix.token),
+      headers: authHeaders(contabilidad.token),
       multipart: {
         foto: { name: 'real.png', mimeType: 'image/png', buffer: REAL_PNG },
       },
@@ -305,16 +305,16 @@ test('SCRUM-618.4 — Reporte B (1 sola línea): rechazo completo disuelve el re
 })
 
 test('SCRUM-618.5 — Contabilidad (no Gerencia) no ve Rechazar/Rechazar reporte en un reporte pendiente', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openReport(page, seed.reportC)
 
   await expect(page.getByRole('button', { name: /^rechazar$/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /rechazar reporte/i })).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/SCRUM-618-5-felix-sin-rechazar.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/SCRUM-618-5-contabilidad-sin-rechazar.png', fullPage: true })
 })
 
 test('SCRUM-618.6 — backend real: Contabilidad intentando rechazar por API directa recibe 403 (no solo botón escondido)', async ({ page, request }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const bearer = await page.evaluate(() => localStorage.getItem('accessToken'))
   expect(bearer).toBeTruthy()
 
@@ -356,12 +356,12 @@ test('SCRUM-619.2 — 2do rechazo de la misma línea (Reporte generado sobre la 
   // dentro de un mismo test cuelgan la navegación a /login (ver nota en login(), no reproducible
   // fuera de esta combinación puntual; separar el login de setup de la navegación real evita el
   // problema por completo).
-  const felixLoginRes = await request.post(`${BASE}/api/auth/login`, {
-    data: { email: FELIX, password: FELIX },
+  const contabilidadLoginRes = await request.post(`${BASE}/api/auth/login`, {
+    data: { email: CONTABILIDAD, password: CONTABILIDAD },
   })
-  const { token: felixToken } = await felixLoginRes.json()
+  const { token: contabilidadToken } = await contabilidadLoginRes.json()
   const pendingRes = await request.get(`${BASE}/api/admin-contab/petty-cash/pending`, {
-    headers: { Authorization: `Bearer ${felixToken}` },
+    headers: { Authorization: `Bearer ${contabilidadToken}` },
   })
   const pendingData = await pendingRes.json()
   type Linea = { id: number; proveedor: string }
@@ -370,7 +370,7 @@ test('SCRUM-619.2 — 2do rechazo de la misma línea (Reporte generado sobre la 
   expect(linea).toBeTruthy()
 
   const genRes = await request.post(`${BASE}/api/admin-contab/petty-cash/reports`, {
-    headers: { Authorization: `Bearer ${felixToken}` },
+    headers: { Authorization: `Bearer ${contabilidadToken}` },
     data: { expense_ids: [linea!.id], forma_pago: 'efectivo' },
   })
   const { numero } = await genRes.json()
@@ -420,22 +420,22 @@ test('SCRUM-620.1 — panel Rechazados visible y correcto para Gerencia (solo 2/
 // 3 tests separados (no un loop con 3 logins en la misma page) — 2 logins de navegador
 // consecutivos en la misma page cuelgan la navegación a /login (mismo hallazgo que en SCRUM-619.2).
 test('SCRUM-620.2a — panel Rechazados visible para Contabilidad', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await assertRechazadosPanel(page)
 })
 
 test('SCRUM-620.2b — panel Rechazados visible para Asistente Administrativa', async ({ page }) => {
-  await login(page, YANETH)
+  await login(page, ASISTENTE)
   await assertRechazadosPanel(page)
 })
 
 test('SCRUM-620.2c — panel Rechazados visible para Gerencia (Gerencia)', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await assertRechazadosPanel(page)
 })
 
 // ---------------------------------------------------------------------------
-// SCRUM-621 (REQ-544) — reabrir línea rechazada permanentemente: exclusivo Contabilidad/Yaneth, NUNCA Gerencia
+// SCRUM-621 (REQ-544) — reabrir línea rechazada permanentemente: exclusivo Contabilidad/Asistente, NUNCA Gerencia
 // ---------------------------------------------------------------------------
 
 test('SCRUM-621.1 — Gerencia NO puede reabrir (sin botón; 403 real si se fuerza por API)', async ({ page, request }) => {
@@ -466,7 +466,7 @@ test('SCRUM-621.1 — Gerencia NO puede reabrir (sin botón; 403 real si se fuer
 })
 
 test('SCRUM-621.2 — Contabilidad reabre la línea permanentemente rechazada: motivo obligatorio, vuelve a Pendientes con intentos=0 y conserva historial completo', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByText(/^rechazados$/i).first().click()
   await page.waitForTimeout(700)
@@ -519,7 +519,7 @@ test('SCRUM-621.2 — Contabilidad reabre la línea permanentemente rechazada: m
 // ---------------------------------------------------------------------------
 
 test('SCRUM-622.1 — línea standalone en Pendientes: Editar visible, solicitante NUNCA editable, resto de campos sí', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.waitForTimeout(800)
   await page.getByText(new RegExp(seed.provStandalone, 'i')).click()
@@ -531,14 +531,14 @@ test('SCRUM-622.1 — línea standalone en Pendientes: Editar visible, solicitan
   await page.waitForTimeout(300)
 
   await expect(page.getByText(/no editable/i)).toBeVisible()
-  await expect(page.getByText(/felix campos/i).first()).toBeVisible()
+  await expect(page.getByText(/contabilidad campos/i).first()).toBeVisible()
   // Los otros campos SÍ deben ser inputs editables.
   await expect(page.locator('input[type="text"]')).toHaveCount(2, { timeout: 3000 }).catch(() => {})
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-622-1-editar-solicitante-no-editable.png', fullPage: true })
 })
 
 test('SCRUM-622.2 — modal anidado: línea dentro de Reporte C pendiente (sin cerrar el modal padre) — sin Editar, con Agregar soporte, overlays apilados correctamente', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openReport(page, seed.reportC)
 
   // Clic en una fila de línea dentro del modal de reporte — no debe cerrar el modal padre.
@@ -575,7 +575,7 @@ test('SCRUM-622.3 — línea dentro de Reporte D ya finalizado: de solo lectura 
 // ---------------------------------------------------------------------------
 
 test('SCRUM-623.1 — Ver soporte muestra la imagen real, no un placeholder roto', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.waitForTimeout(800)
   await page.getByText(new RegExp(seed.provStandalone, 'i')).click()
@@ -598,7 +598,7 @@ test('SCRUM-623.1 — Ver soporte muestra la imagen real, no un placeholder roto
 })
 
 test('SCRUM-623.2 — Descargar en un reporte PENDIENTE de aprobación funciona', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openReport(page, seed.reportC)
 
   const [download] = await Promise.all([

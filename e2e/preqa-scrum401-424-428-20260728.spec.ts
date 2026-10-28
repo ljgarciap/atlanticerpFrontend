@@ -2,13 +2,13 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
 
 /**
  * Pre-QA 2026-07-28 — re-check batch "Pedidos" (SCRUM-401, SCRUM-424, SCRUM-428).
- * Corre contra dev.atlanticerp.ai (mismos datos que usará marly), no contra un stack local.
+ * Corre contra dev.atlanticerp.ai (mismos datos que usará qa), no contra un stack local.
  * Serial a propósito: dev.atlanticerp.ai corre CrowdSec/ModSecurity (ver CLAUDE.md, Epic 11) — logins
  * en paralelo desde la misma IP disparan falsos timeouts.
  *
  * SCRUM-401 (REQ-331) — fix f95488c: la fila "Factura lista - ver" ahora vive en
  * `STAGES_WITH_INVOICE = ['por_despachar', 'despachado', 'entregado']` (antes solo
- * `por_despachar`) — marly rebotó 2 veces porque la factura ya lista desaparecía sin acceso al
+ * `por_despachar`) — qa rebotó 2 veces porque la factura ya lista desaparecía sin acceso al
  * avanzar el pedido. Se usa descubrimiento dinámico de tarjetas en vez de IDs fijos porque el
  * tablero de Pedidos es de datos vivos que otros Pre-QA/QA mueven de etapa entre corridas (el
  * fixture "dedicado" de la sesión anterior, order 19, ya había avanzado de por_despachar a
@@ -33,10 +33,10 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const ESTEBAN_EMAIL = 'liderbodega@test.com'
-const ESTEBAN_PASSWORD = 'liderbodega@test.com'
+const LIDERBODEGA_EMAIL = 'liderbodega@test.com'
+const LIDERBODEGA_PASSWORD = 'liderbodega@test.com'
 
-async function login(page: Page, email = ESTEBAN_EMAIL, password = ESTEBAN_PASSWORD) {
+async function login(page: Page, email = LIDERBODEGA_EMAIL, password = LIDERBODEGA_PASSWORD) {
   await page.goto(`${BASE}/login`)
   await page.locator('input[type="email"]').fill(email)
   await page.locator('input[type="password"]').fill(password)

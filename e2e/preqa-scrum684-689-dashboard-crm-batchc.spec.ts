@@ -35,7 +35,7 @@ async function login(page: Page, email: string, pass: string) {
 }
 
 test.describe('REQ-609 — acceso restringido a Gerencia', () => {
-  test('Gerencia (whil) llega al Dashboard CRM desde el menú lateral', async ({ page }) => {
+  test('Gerencia (gerencia5) llega al Dashboard CRM desde el menú lateral', async ({ page }) => {
     await login(page, MGMT_EMAIL, MGMT_PASS)
     // El sidebar agrupa "Dashboard CRM" como ítem propio dentro de la sección CRM (no hay
     // un ítem padre genérico "CRM" que se expanda) — ver Sidebar.tsx.

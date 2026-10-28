@@ -19,8 +19,8 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const FELIX = 'contabilidad@test.com'
-const YANETH = 'asistenteadministrativa@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
+const ASISTENTE = 'asistenteadministrativa@test.com'
 const MARK = 'gerencia3@test.com'
 const MARK_PASSWORD = 'B1n4X_2026?'
 
@@ -46,7 +46,7 @@ async function bearerToken(page: Page): Promise<string | null> {
 }
 
 test('REQ-522 — default de Contabilidad es Proyectado + 30 días, con las 4 tarjetas pobladas', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
 
@@ -56,11 +56,11 @@ test('REQ-522 — default de Contabilidad es Proyectado + 30 días, con las 4 ta
   await expect(page.getByText('Entradas proyectadas', { exact: true })).toBeVisible()
   await expect(page.getByText('Salidas proyectadas', { exact: true })).toBeVisible()
   await expect(page.getByText('Saldo proyectado', { exact: true })).toBeVisible()
-  await page.screenshot({ path: 'e2e/screenshots/batch18-felix-default.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch18-contabilidad-default.png', fullPage: true })
 })
 
 test('REQ-522 RN2 — Real + Hoy muestra Arqueo del día, no la tabla histórica', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -74,7 +74,7 @@ test('REQ-522 RN2 — Real + Hoy muestra Arqueo del día, no la tabla histórica
 })
 
 test('REQ-522 RN3 — Real + 30 días muestra tabla cronológica con saldo acumulado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -85,7 +85,7 @@ test('REQ-522 RN3 — Real + 30 días muestra tabla cronológica con saldo acumu
 })
 
 test('REQ-520 RN2 — las tarjetas proyectadas NO dependen de la pestaña activa (regresión SCRUM-597)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -98,14 +98,14 @@ test('REQ-520 RN2 — las tarjetas proyectadas NO dependen de la pestaña activa
 })
 
 test('REQ-524 — Asistente Administrativa aterriza directo en Arqueo del día, sin toggle/chips de Proyectado/Real', async ({ page }) => {
-  await login(page, YANETH)
+  await login(page, ASISTENTE)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
 
   await expect(page.getByRole('heading', { name: 'Arqueo del día' })).toBeVisible()
   await expect(page.getByRole('button', { name: /^proyectado$/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /real \(histórico\)/i })).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/batch18-yaneth-default.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch18-asistente-default.png', fullPage: true })
 })
 
 test('REQ-520/521/523 — Asistente Administrativa: /projected devuelve totales (sin detalle línea por línea), /real sigue 403', async ({ page, request }) => {
@@ -113,7 +113,7 @@ test('REQ-520/521/523 — Asistente Administrativa: /projected devuelve totales 
   // Pre-QA): REQ-520 le da a Asistente Administrativa el encabezado completo (los 3 totales agregados), REQ-521 solo
   // le veda el panel de detalle línea por línea y REQ-523 le veda la Vista real 30/90d. El backend
   // ahora responde 200 en /projected para su rol, con entradas/salidas vacíos y los totales reales.
-  await login(page, YANETH)
+  await login(page, ASISTENTE)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(800)
   const token = await bearerToken(page)
@@ -136,13 +136,13 @@ test('REQ-520/521/523 — Asistente Administrativa: /projected devuelve totales 
 })
 
 test('REQ-520 — Asistente Administrativa ve las 3 tarjetas de encabezado pobladas (no "—")', async ({ page }) => {
-  await login(page, YANETH)
+  await login(page, ASISTENTE)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1200)
 
   const cardsRow = page.locator('text=Saldo disponible hoy').locator('../..')
   await expect(cardsRow.getByText('—')).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/batch18-yaneth-cards-populated.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch18-asistente-cards-populated.png', fullPage: true })
 })
 
 test('REQ-524 — Gerencia (Gerencia): sin acceso a Arqueo del día, ni por UI ni por API directa', async ({ page, request }) => {
@@ -164,7 +164,7 @@ test('REQ-524 — Gerencia (Gerencia): sin acceso a Arqueo del día, ni por UI n
 })
 
 test('REQ-524 RN2 — observación por fila se guarda y persiste tras recargar', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()

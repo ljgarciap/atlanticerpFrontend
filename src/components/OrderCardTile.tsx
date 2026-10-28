@@ -49,7 +49,7 @@ const STAGES_WITH_GUIDE: OrderStage[] = ['por_despachar', 'despachado', 'entrega
  * (`Order::$invoice_ready` persiste true en `despachado`/`entregado`, confirmado en backend/
  * `OrderInvoiceController::show()` y `DeliveryService`), pero la fila solo se pintaba en
  * `por_despachar` — una vez despachado el pedido, la factura ya lista quedaba sin ningún punto
- * de acceso (QA/marly no la encontraba). Mismo patrón que `STAGES_WITH_GUIDE`. */
+ * de acceso (QA/qa no la encontraba). Mismo patrón que `STAGES_WITH_GUIDE`. */
 const STAGES_WITH_INVOICE: OrderStage[] = ['por_despachar', 'despachado', 'entregado']
 
 /** REQ-312/382 — botón de acción por etapa. SCRUM-383/384/385 (REQ-313/314/315) cablean

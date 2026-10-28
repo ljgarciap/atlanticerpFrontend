@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import ReportesPage from './ReportesPage'
 import { adminContabApi } from '@/api/adminContabApi'
-import type { ReportsFelixCommission, ReportsCartera, ReportsVentas, ReportsFlujoCaja, ReportsComisiones, ReportsNotasCredito } from '@/types/adminContab'
+import type { ReportsCommissionTiers, ReportsCartera, ReportsVentas, ReportsFlujoCaja, ReportsComisiones, ReportsNotasCredito } from '@/types/adminContab'
 import { useAuthStore } from '@/store/authStore'
 import { permissionsForOrEmpty } from '@/test/identities'
 import type { UserInfo } from '@/types/auth'
@@ -44,7 +44,7 @@ vi.mock('react-router-dom', async () => {
 vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
     reports: {
-      felixCommission: vi.fn(),
+      commissionTiers: vi.fn(),
       cartera: vi.fn(),
       ventas: vi.fn(),
       flujoCaja: vi.fn(),
@@ -65,7 +65,7 @@ function mockAuth(user: unknown) {
 
 function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   return {
-    id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'felix@atlantic.com.pa',
+    id: 1, first_name: 'Contabilidad', last_name: 'Test', email: 'contabilidad@atlantic.com.pa',
     role: 'lider_admin_contab',
     modules: { admin_contab: { view: true, view_team: true, edit: false, approve: false } },
     ...overrides,
@@ -74,7 +74,7 @@ function makeUser(overrides: Partial<UserInfo> = {}): UserInfo {
   } as UserInfo
 }
 
-function makeFelixCommission(overrides: Partial<ReportsFelixCommission> = {}): ReportsFelixCommission {
+function makeCommissionTiers(overrides: Partial<ReportsCommissionTiers> = {}): ReportsCommissionTiers {
   return {
     cobrado_mes: 8400, rango_actual: 'Menos de $15K', porcentaje: 1, comision: 84,
     tiers: [
@@ -140,7 +140,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   navigateMock.mockClear()
-  mockedApi.reports.felixCommission.mockResolvedValue(makeFelixCommission())
+  mockedApi.reports.commissionTiers.mockResolvedValue(makeCommissionTiers())
   mockedApi.reports.cartera.mockResolvedValue(makeCartera())
   mockedApi.reports.ventas.mockResolvedValue(makeVentasHoy())
   mockedApi.reports.flujoCaja.mockResolvedValue(makeFlujoCajaHoy())
@@ -170,11 +170,11 @@ describe('ReportesPage', () => {
 
   it('SCRUM-870: Contabilidad commission tiers show the compact K format, not full USD amounts', async () => {
     renderPage()
-    // tiers: [0–14999.99 @1%, 15000–19999.99 @1.5%, 20000–null @2%] — ver makeFelixCommission().
+    // tiers: [0–14999.99 @1%, 15000–19999.99 @1.5%, 20000–null @2%] — ver makeCommissionTiers().
     // "Menos de" usa tope exclusivo (ceil) → $15K; los cerrados/pisos truncan → $15K–$19K / $20K.
-    expect(await screen.findByText('adminContab:reportes.felixCommission.tramoMenosDe:hasta=$15K:pct=1')).toBeInTheDocument()
-    expect(screen.getByText('adminContab:reportes.felixCommission.tramoRango:desde=$15K:hasta=$19K:pct=1.5')).toBeInTheDocument()
-    expect(screen.getByText('adminContab:reportes.felixCommission.tramoDesde:desde=$20K:pct=2')).toBeInTheDocument()
+    expect(await screen.findByText('adminContab:reportes.commissionTiers.tramoMenosDe:hasta=$15K:pct=1')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:reportes.commissionTiers.tramoRango:desde=$15K:hasta=$19K:pct=1.5')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:reportes.commissionTiers.tramoDesde:desde=$20K:pct=2')).toBeInTheDocument()
   })
 
   it('changing the period refetches Ventas, Arqueo de Caja and Comisiones, never Contabilidad commission, Cartera or Notas de Crédito', async () => {
@@ -184,7 +184,7 @@ describe('ReportesPage', () => {
     expect(mockedApi.reports.ventas).toHaveBeenCalledWith('hoy')
     expect(mockedApi.reports.flujoCaja).toHaveBeenCalledWith('hoy')
     expect(mockedApi.reports.comisiones).toHaveBeenCalledWith('hoy')
-    expect(mockedApi.reports.felixCommission).toHaveBeenCalledTimes(1)
+    expect(mockedApi.reports.commissionTiers).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.cartera).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.notasCredito).toHaveBeenCalledTimes(1)
 
@@ -195,7 +195,7 @@ describe('ReportesPage', () => {
     expect(mockedApi.reports.comisiones).toHaveBeenCalledWith('6m')
 
     // Comisión Contabilidad, Cartera y Notas de Crédito nunca vuelven a pedirse — su query key no depende del período.
-    expect(mockedApi.reports.felixCommission).toHaveBeenCalledTimes(1)
+    expect(mockedApi.reports.commissionTiers).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.cartera).toHaveBeenCalledTimes(1)
     expect(mockedApi.reports.notasCredito).toHaveBeenCalledTimes(1)
   })
@@ -214,7 +214,7 @@ describe('ReportesPage', () => {
     expect(navigateMock).toHaveBeenCalledWith('/admin-contab/reportes/libro-facturas')
   })
 
-  // SCRUM-881 (Pre-QA, 2026-09-11) -- rebote: el backend ya bloqueaba GET /reports/felix-commission
+  // SCRUM-881 (Pre-QA, 2026-09-11) -- rebote: el backend ya bloqueaba GET /reports/commission-tiers
   // para asistente_administrativa (routes/admin-contab.php), pero esta tarjeta se renderizaba sin
   // ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio (fetch en 403).
   it('hides the Contabilidad commission card for asistente_administrativa (SCRUM-881)', async () => {
@@ -222,14 +222,14 @@ describe('ReportesPage', () => {
     renderPage()
 
     await waitFor(() => expect(screen.getAllByText(/22,100\.00/).length).toBeGreaterThan(0)) // Cartera por cobrar SI se ve
-    expect(screen.queryByText('adminContab:reportes.felixCommission.title')).not.toBeInTheDocument()
-    expect(mockedApi.reports.felixCommission).not.toHaveBeenCalled()
+    expect(screen.queryByText('adminContab:reportes.commissionTiers.title')).not.toBeInTheDocument()
+    expect(mockedApi.reports.commissionTiers).not.toHaveBeenCalled()
   })
 
   it('keeps showing the Contabilidad commission card for lider_admin_contab and management', async () => {
     mockAuth(makeUser({ role: 'management' }))
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('adminContab:reportes.felixCommission.title')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('adminContab:reportes.commissionTiers.title')).toBeInTheDocument())
   })
 })

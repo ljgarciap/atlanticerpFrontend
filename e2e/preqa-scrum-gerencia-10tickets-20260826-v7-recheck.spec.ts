@@ -29,7 +29,7 @@ test.describe.configure({ mode: 'serial' })
 // pero quedó con estado='aprobado' (inválido) en Bodega, no 'aprobada' — dato real de dev.atlanticerp.ai
 // dejado en este estado como evidencia, pendiente de corrección junto con el fix.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 const TECH_SUPERADMIN = 'superadmin3@test.com' // password real = default (email)
@@ -71,7 +71,7 @@ async function apiCall(page: Page, method: string, url: string, body?: unknown) 
 
 // ── SCRUM-159 — Panel Facturación ───────────────────────────────────────────
 test('SCRUM-159 RN2 — CORREGIDO: margen del año/mes ahora es un valor real calculado (57.66%), ya no hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')
@@ -80,7 +80,7 @@ test('SCRUM-159 RN2 — CORREGIDO: margen del año/mes ahora es un valor real ca
 })
 
 test('SCRUM-159 RN1 — gap arquitectónico PERSISTE, ahora con aviso transparente: el filtro de Vendedor no tiene efecto real en Facturación (AdminContInvoice no tiene FK de vendedor) — la UI ahora lo declara explícitamente en vez de fallar en silencio', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   const vendorSelect = page.locator('select').nth(0)
@@ -95,7 +95,7 @@ test('SCRUM-159 RN1 — gap arquitectónico PERSISTE, ahora con aviso transparen
 })
 
 test('SCRUM-159 RN3/Escenario 2 — SIGUE ROTO: clic en una barra del gráfico navega a Facturación genérica, sin el mes como filtro (el callback onBarClick descarta el parámetro "mes" que BarChart sí le pasa)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   const monthLabel = page.getByText('Ago', { exact: true }).first()
@@ -107,7 +107,7 @@ test('SCRUM-159 RN3/Escenario 2 — SIGUE ROTO: clic en una barra del gráfico n
 
 // ── SCRUM-160 — Panel Proyectos ─────────────────────────────────────────────
 test('SCRUM-160 RN1 — CORREGIDO Y CONFIRMADO EN VIVO: el filtro de Vendedor SÍ recalcula Proyectos ($769,441 → $55,000 con un vendedor real seleccionado)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   const before = await page.locator('text=Proyectos cerrados este año').locator('xpath=following-sibling::p[1]').textContent()
@@ -125,7 +125,7 @@ test('SCRUM-160 RN1 — CORREGIDO Y CONFIRMADO EN VIVO: el filtro de Vendedor S�
 })
 
 test('SCRUM-160 RN3 — CORREGIDO: margen cotizado año/mes ahora es un valor real (57.47%), ya no hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')
@@ -134,7 +134,7 @@ test('SCRUM-160 RN3 — CORREGIDO: margen cotizado año/mes ahora es un valor re
 })
 
 // ── SCRUM-161 — Aprobaciones listado personalizado ──────────────────────────
-// NOTA (2026-08-26): este test hace 3 logins seguidos (superadmin setup → WHIL → superadmin
+// NOTA (2026-08-26): este test hace 3 logins seguidos (superadmin setup → GERENCIA5 → superadmin
 // cleanup) — bajo carga de CrowdSec puede degradar silenciosamente el 2do login a `false` (ver
 // helper `login()` arriba) y hacer que el assert de abajo falle con types.size=0 en vez de
 // confirmar el hallazgo. El hallazgo YA fue confirmado en vivo y de forma concluyente durante la
@@ -150,19 +150,19 @@ test('SCRUM-161 RN2 — CRÍTICO CONFIRMADO EN VIVO (no solo lectura de código)
   test.skip(!supOk, 'credencial de superadmin de prueba no disponible en este entorno')
   const usersResp = await apiCall(page, 'GET', '/api/users?per_page=100')
   const users = (usersResp.json as any)?.data ?? (usersResp.json as any) ?? []
-  const whilUser = Array.isArray(users) ? users.find((u: any) => u.email === WHIL) : null
-  test.skip(!whilUser, 'no se pudo resolver el id de whil vía /api/users')
+  const gerencia5User = Array.isArray(users) ? users.find((u: any) => u.email === GERENCIA5) : null
+  test.skip(!gerencia5User, 'no se pudo resolver el id de gerencia5 vía /api/users')
 
   const createResp = await apiCall(page, 'POST', '/api/gerencia/reglas-aprobacion', {
     tipo: 'adjustment', activo: true,
     observaciones: 'TEST Pre-QA v7 — verificar aislamiento por tipo, ELIMINAR tras la prueba',
-    aprobador_ids: [whilUser.id],
+    aprobador_ids: [gerencia5User.id],
   })
   const reglaId = (createResp.json as any)?.id
   test.skip(!reglaId, 'no se pudo crear la regla de prueba')
 
   try {
-    await login(page, WHIL)
+    await login(page, GERENCIA5)
     const home = await apiCall(page, 'GET', '/api/gerencia/home')
     const types = new Set(((home.json as any)?.aprobaciones ?? []).map((a: any) => a.type))
     // Confirma el bug: ve tipos que NO son 'adjustment' (purchase_order, zona_libre, general_count)
@@ -175,8 +175,8 @@ test('SCRUM-161 RN2 — CRÍTICO CONFIRMADO EN VIVO (no solo lectura de código)
   }
 })
 
-test('SCRUM-161 — sin ninguna ReglaAprobacion activa (estado real de dev.atlanticerp.ai hoy), Gerencia/Whil no tienen forma de ser aprobadores — is_approver=false, aprobaciones=[]', async ({ page }) => {
-  await login(page, WHIL)
+test('SCRUM-161 — sin ninguna ReglaAprobacion activa (estado real de dev.atlanticerp.ai hoy), Gerencia/Gerencia5 no tienen forma de ser aprobadores — is_approver=false, aprobaciones=[]', async ({ page }) => {
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')
@@ -234,7 +234,7 @@ test('SCRUM-162 — código confirma el mismo patrón de valor-de-enum-inválido
 
 // ── SCRUM-166 — Salud Ventas & Diseño ───────────────────────────────────────
 test('SCRUM-166 RN1 — CONFIRMADO CORREGIDO: "En Final Stage" navega con ?stage=proposal y PipelinePage.tsx ahora sí lo reconoce (chip=final_stage), mostrando solo la columna Propuesta', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('En Final Stage', { exact: false }).first().click()
@@ -244,7 +244,7 @@ test('SCRUM-166 RN1 — CONFIRMADO CORREGIDO: "En Final Stage" navega con ?stage
 })
 
 test('SCRUM-166 RN2 — SIGUE ROTO, sin cambios desde v5/v6: "Estancados" navega con ?order=days, pero ese param en PipelinePage es orden de sorting (days/value), nunca activa el chip "stagnant"', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Estancados', { exact: false }).first().click()
@@ -254,7 +254,7 @@ test('SCRUM-166 RN2 — SIGUE ROTO, sin cambios desde v5/v6: "Estancados" navega
 })
 
 test('SCRUM-166 RN3/RN4 — SIGUE ROTO, sin cambios: "Monto cotizado/aprobado del mes" siguen navegando sin ningún querystring de mes', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Monto cotizado en el mes', { exact: false }).first().click()
@@ -264,7 +264,7 @@ test('SCRUM-166 RN3/RN4 — SIGUE ROTO, sin cambios: "Monto cotizado/aprobado de
 
 // ── SCRUM-167 — Salud Admin & Contab (redefinido por Gerencia 2026-08-25) ────
 test('SCRUM-167 — indicadores correctos (CxC Total / Cuentas al día, CxP eliminado) y navegación de origen correcta', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('CxC Total', { exact: false })).toBeVisible()
@@ -275,7 +275,7 @@ test('SCRUM-167 — indicadores correctos (CxC Total / Cuentas al día, CxP elim
 })
 
 test('SCRUM-167 CA4 — CRÍTICO NUEVO: CobrosPage.tsx no lee el query param "estado" en absoluto (solo lee master_client_id/accion) — el filtro "Esperando confirmación" nunca se aplica visualmente, el usuario ve el listado completo sin filtrar', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/admin-contab/cobros?estado=esperando_confirmacion')
   await page.waitForTimeout(1500)
   // El select de estado sigue en su default ("Todos los estados"), no en "Esperando confirmación"
@@ -285,7 +285,7 @@ test('SCRUM-167 CA4 — CRÍTICO NUEVO: CobrosPage.tsx no lee el query param "es
 
 // ── SCRUM-168 — Salud Compras ────────────────────────────────────────────────
 test('SCRUM-168 RN1 — CORREGIDO Y CONFIRMADO: el conteo de "Órdenes críticas" en la tarjeta (43) ahora COINCIDE con el total real que devuelve el filtro ?chip=critical (43) — antes 41 vs 43', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')
@@ -297,7 +297,7 @@ test('SCRUM-168 RN1 — CORREGIDO Y CONFIRMADO: el conteo de "Órdenes críticas
 })
 
 test('SCRUM-168 RN2/Escenario 1 — SIGUE FALTANDO, sin cambios: el indicador "Bajo stock sin ordenar" no existe en la tarjeta', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Bajo stock sin ordenar', { exact: false })).toHaveCount(0)
@@ -305,7 +305,7 @@ test('SCRUM-168 RN2/Escenario 1 — SIGUE FALTANDO, sin cambios: el indicador "B
 
 // ── SCRUM-169 — Salud Bodega (redefinido por Gerencia 2026-08-25) ───────────
 test('SCRUM-169 CA3 — CORRECTO: "Despachado a tiempo" es el único indicador sin navegación, tal como pide RN3 de Gerencia (no debe navegar ni ejecutar acción)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Despachado a tiempo', { exact: false }).first().click()
@@ -314,7 +314,7 @@ test('SCRUM-169 CA3 — CORRECTO: "Despachado a tiempo" es el único indicador s
 })
 
 test('SCRUM-169 CA1/CA4/CA5 — CRÍTICO NUEVO: PedidosPage.tsx (Bodega) inicializa el chip en useState<Chip>(\'all\') hardcodeado — nunca lee ?chip= de la URL — "Despachos urgentes" y "Despachos atrasados" navegan a URLs distintas pero la pantalla se ve IDÉNTICA en ambas (mismo total "25 pedidos en proceso")', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/bodega/pedidos?chip=urgentes')
   await page.waitForTimeout(1500)
   const urgentesText = await page.locator('body').innerText()
@@ -327,7 +327,7 @@ test('SCRUM-169 CA1/CA4/CA5 — CRÍTICO NUEVO: PedidosPage.tsx (Bodega) inicial
 
 // ── SCRUM-170 — Salud Servicios (redefinido por Gerencia 2026-08-25) ────────
 test('SCRUM-170 CA2/CA5 — CORRECTO: "Resuelto en 1ra visita" fue eliminado, quedan solo 2 indicadores (Sin responder / Completados este mes)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Resuelto en 1ra visita', { exact: false })).toHaveCount(0)
@@ -336,7 +336,7 @@ test('SCRUM-170 CA2/CA5 — CORRECTO: "Resuelto en 1ra visita" fue eliminado, qu
 })
 
 test('SCRUM-170 CA1/CA4 — CRÍTICO NUEVO: TicketsPage.tsx inicializa filtros en EMPTY_TICKET_FILTERS, nunca lee ?estado= de la URL — "Sin responder" navega a ?estado=reportado pero el listado muestra los 20 tickets totales, no solo los reportados', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/servicios/tickets?estado=reportado')
   await page.waitForTimeout(1500)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')
@@ -351,7 +351,7 @@ test('SCRUM-170 CA1/CA4 — CRÍTICO NUEVO: TicketsPage.tsx inicializa filtros e
 
 // ── SCRUM-171 — Agenda de Bodega — hoy ──────────────────────────────────────
 test('SCRUM-171 RN2 — SIGUE ROTO, sin cambios desde v5/v6: "Ver detalle" navega a /bodega/pedidos (lista genérica) — la pantalla "Rutas de entrega del día completo" que pide RN2 sigue sin existir en el código', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -363,7 +363,7 @@ test('SCRUM-171 RN2 — SIGUE ROTO, sin cambios desde v5/v6: "Ver detalle" naveg
 })
 
 test('SCRUM-171 — SIGUE SIN DATOS DE AGENDA HOY (3ra sesión consecutiva v5→v7): agendas.bodega=[] en dev.atlanticerp.ai, RN1/RN3 siguen sin poder ejercitarse end-to-end con datos reales', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await apiCall(page, 'GET', '/api/gerencia/home')

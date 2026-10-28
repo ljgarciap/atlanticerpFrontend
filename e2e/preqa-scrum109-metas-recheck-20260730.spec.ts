@@ -11,8 +11,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://test.atlanticerp.ai'
-const PAOLA_EMAIL = 'vendedor5@test.com'
-const PAOLA_PASS  = 'vendedor5@test.com'
+const VENDEDOR5_EMAIL = 'vendedor5@test.com'
+const VENDEDOR5_PASS  = 'vendedor5@test.com'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)
@@ -23,10 +23,10 @@ async function login(page: Page, email: string, pass: string) {
 }
 
 test('Vendedor (vendedora real con Meta sembrada) ve su Meta configurada en Reportes', async ({ page }) => {
-  await login(page, PAOLA_EMAIL, PAOLA_PASS)
+  await login(page, VENDEDOR5_EMAIL, VENDEDOR5_PASS)
   await page.goto(`${BASE}/ventas-diseno/reports`)
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-reportes-paola.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-reportes-vendedor5.png', fullPage: true })
 
   await expect(page.getByText(/sin meta configurada/i)).toHaveCount(0)
 })

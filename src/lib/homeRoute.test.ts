@@ -46,10 +46,10 @@ describe('getHomeRoute (SCRUM-175)', () => {
   })
 
   it('Lider Compras (lider_compras, solo compras.view=true) resuelve a /compras/inicio, no a Ventas & Diseño', () => {
-    const yirena = makeUser({
+    const lidercompras = makeUser({
       modules: { ...EMPTY_MODULES, compras: { view: true, view_team: false, edit: true, approve: false } },
     })
-    expect(getHomeRoute(yirena)).toBe('/compras/inicio')
+    expect(getHomeRoute(lidercompras)).toBe('/compras/inicio')
   })
 
   it('permiso legado <modulo>.read sin visibilidad de rol también resuelve (extra_permissions puntual)', () => {

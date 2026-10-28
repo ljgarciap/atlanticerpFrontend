@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // fixtures originales de familia/por_despachar de SCRUM-501 ya habían sido consumidos/avanzados
 // por verificaciones previas de Senior Review).
 
-const ESTEBAN = 'liderbodega@test.com' // Jefe de Bodega (lider_bodega)
-const OSVALDO = 'asistentebodega@test.com' // Asistente de Bodega
+const LIDERBODEGA = 'liderbodega@test.com' // Jefe de Bodega (lider_bodega)
+const ASISTENTEBODEGA = 'asistentebodega@test.com' // Asistente de Bodega
 
 const SOLO_ORDER_ID = 16
 const FAMILY_ROOT_ID = 17
@@ -40,7 +40,7 @@ function cardFor(page, orderId: number) {
 
 test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho', () => {
   test('RN1 — Asistente (Asistente Bodega) ve el control pero recibe 403 real del backend, no un bloqueo cosmético', async ({ page }) => {
-    await login(page, OSVALDO)
+    await login(page, ASISTENTEBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -62,7 +62,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
   })
 
   test('RN1 (camino feliz) — Lider Bodega (Jefe de Bodega) sí puede asignar; select incluye a Transporte Test real', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -77,11 +77,11 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
     await select.selectOption({ label: 'Transporte Test' })
     await card.getByTestId(`assign-courier-confirm-${SOLO_ORDER_ID}`).click()
     await page.waitForTimeout(1200)
-    await page.screenshot({ path: path.join(__dirname, '.tmp', 'scrum396-esteban-ok.png'), fullPage: true })
+    await page.screenshot({ path: path.join(__dirname, '.tmp', 'scrum396-liderbodega-ok.png'), fullPage: true })
   })
 
   test('SCRUM-398 RN2 — sin factura: Despachar bloquea con mensaje REAL del backend, no un boton pre-deshabilitado', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, SOLO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -100,7 +100,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
   })
 
   test('RN2 — asignar repartidor a la raiz de familia propaga automaticamente al hermano', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const rootCard = cardFor(page, FAMILY_ROOT_ID)
     await rootCard.scrollIntoViewIfNeeded()
@@ -123,7 +123,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
   })
 
   test('SCRUM-398 RN3 — despacho de familia no arrastra al miembro sin factura', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
 
     // Root (invoice_ready=true, ya con courier) SI puede despachar.
@@ -155,7 +155,7 @@ test.describe.serial('SCRUM-396/398 — Asignar Repartidor + bloqueo de despacho
 
 test.describe.serial('SCRUM-393/394/395 — Registrar Entrega (Packing)', () => {
   test('Camino de ruptura — tope real es qty_picked, motivo obligatorio en parcial, "otra" exige texto libre', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, PACKING_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -219,7 +219,7 @@ test.describe.serial('SCRUM-393/394/395 — Registrar Entrega (Packing)', () => 
   })
 
   test('SCRUM-395 — el pedido avanza y se crea la tarjeta Faltante vinculada a la familia', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     // El pedido original ya no debe seguir en Packing.
     const originalCardInPacking = page.getByTestId(`register-delivery-button-${PACKING_ORDER_ID}`)
@@ -238,7 +238,7 @@ test.describe.serial('SCRUM-393/394/395 — Registrar Entrega (Packing)', () => 
 
 test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guía de Entrega', () => {
   test('Validaciones de campo obligatorio (repartidor, quien recibio, archivo)', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, DESPACHADO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -263,7 +263,7 @@ test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guí
   })
 
   test('Camino feliz — receptor distinto al repartidor, avanza automaticamente a Entregado', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, DESPACHADO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -288,7 +288,7 @@ test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guí
   })
 
   test('SCRUM-400 — la Guia de Entrega muestra el nombre real de quien recibio, no el repartidor', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, DESPACHADO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -310,7 +310,7 @@ test.describe.serial('SCRUM-399/400 — Confirmar Guía Firmada + documento Guí
 
 test.describe('SCRUM-401 — acceso a Factura (placeholder, alcance reducido pre-aprobado)', () => {
   test('invoice_ready=true muestra "ver" y el modal placeholder sin acciones de edicion', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     // NOTA: la fila de Factura solo se renderiza en stage "por_despachar" (ver OrderCardTile) —
     // por eso se usa un fixture dedicado en vez de DESPACHADO_ORDER_ID, que ya avanzo a "entregado".
@@ -328,7 +328,7 @@ test.describe('SCRUM-401 — acceso a Factura (placeholder, alcance reducido pre
   })
 
   test('invoice_ready=false muestra estado "esperando", sin boton ver', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, FAMILY_SIBLING_ID) // invoice_ready=false, todavia en por_despachar
     await card.scrollIntoViewIfNeeded()
@@ -340,7 +340,7 @@ test.describe('SCRUM-401 — acceso a Factura (placeholder, alcance reducido pre
 
 test.describe('SCRUM-390 — Descarga a Excel desde Ver Detalle (alcance reducido, ya no depende del batch)', () => {
   test('Descargar Excel dispara una descarga real', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, DESPACHADO_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -369,7 +369,7 @@ const emojiRegex = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u
 
 test.describe('Chequeos adicionales — emoji (SCRUM-56) + recarga/doble-clic sobre los modales nuevos', () => {
   test('Emoji grep — tarjetas Por despachar (fila de factura) sin iconografia de emoji', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, INVOICE_READY_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -380,7 +380,7 @@ test.describe('Chequeos adicionales — emoji (SCRUM-56) + recarga/doble-clic so
   test('Recargar a mitad de "Asignar Repartidor" (form abierto) no rompe, no arrastra estado fantasma', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', err => errors.push(err.message))
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     const card = cardFor(page, INVOICE_READY_ORDER_ID)
     await card.scrollIntoViewIfNeeded()
@@ -395,7 +395,7 @@ test.describe('Chequeos adicionales — emoji (SCRUM-56) + recarga/doble-clic so
   })
 
   test('Doble clic rapido en "Despachar" (hermano bloqueado) no dispara 2 requests con resultado inconsistente', async ({ page }) => {
-    await login(page, ESTEBAN)
+    await login(page, LIDERBODEGA)
     await goToPedidos(page)
     // FAMILY_SIBLING_ID ya tiene "Despachar" visible (courier propagado por RN2), bloqueado por
     // falta de factura — confirma que doble-clic no genera un crash ni un estado inconsistente

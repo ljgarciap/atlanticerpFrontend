@@ -15,7 +15,7 @@ test.describe.configure({ mode: 'serial' })
 // destino recibe el filtro Y la pantalla destino lo aplica) vs. cuáles solo agregaron un
 // querystring que la pantalla destino no sabe interpretar.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email
 
@@ -40,7 +40,7 @@ async function fetchHome(page: Page) {
 
 // ── SCRUM-156 — Variación margen ────────────────────────────────────────────
 test('SCRUM-156 RN1 — SIGUE ROTO: margen_real_pct/margen_cotiz_pct existen en el payload pero están hardcodeados a 0 (TODO server-side), no calculados', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -53,7 +53,7 @@ test('SCRUM-156 RN1 — SIGUE ROTO: margen_real_pct/margen_cotiz_pct existen en 
 })
 
 test('SCRUM-156 RN3 — MEJORADO PERO ENGAÑOSO: subtítulo ahora muestra "Real X% · Cotizado Y%" pero ambos son el placeholder 0%, no el margen real', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText(/Real 0% · Cotizado 0%/)).toBeVisible()
@@ -61,7 +61,7 @@ test('SCRUM-156 RN3 — MEJORADO PERO ENGAÑOSO: subtítulo ahora muestra "Real 
 
 // ── SCRUM-159 — Panel Facturación ───────────────────────────────────────────
 test('SCRUM-159 RN1/Escenario 1 — CORREGIDO: selects Vendedor/Cliente ahora tienen opciones reales', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1500)
   const selects = page.locator('select')
@@ -73,7 +73,7 @@ test('SCRUM-159 RN1/Escenario 1 — CORREGIDO: selects Vendedor/Cliente ahora ti
 })
 
 test('SCRUM-159 RN1 — filtrar por vendedor recalcula el payload de facturación (Escenario 1)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw1 = await fetchHome(page)
@@ -94,7 +94,7 @@ test('SCRUM-159 RN1 — filtrar por vendedor recalcula el payload de facturació
 })
 
 test('SCRUM-159 RN2 — SIGUE ROTO: margen año/mes de Facturación sigue hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -104,7 +104,7 @@ test('SCRUM-159 RN2 — SIGUE ROTO: margen año/mes de Facturación sigue hardco
 
 // ── SCRUM-160 — Panel Proyectos ─────────────────────────────────────────────
 test('SCRUM-160 RN3 — SIGUE ROTO: margen cotizado año/mes de Proyectos sigue hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -114,7 +114,7 @@ test('SCRUM-160 RN3 — SIGUE ROTO: margen cotizado año/mes de Proyectos sigue 
 
 // ── SCRUM-161/162 — Aprobaciones (sin cambios en el commit reciente) ───────
 test('SCRUM-161 RN1/RN2 — SIN CAMBIOS, gap de diseño sigue vigente: aprobador único global, no rol por tipo', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Solo para aprobadores', { exact: false })).toBeVisible()
@@ -138,7 +138,7 @@ test('SCRUM-162 RN2 — SIN CAMBIOS: sigue sin existir botón Aprobar/Rechazar n
 
 // ── SCRUM-166 — Salud Ventas & Diseño ───────────────────────────────────────
 test('SCRUM-166 RN1 — SIGUE ROTO (mismatch de contrato): "En Final Stage" navega con ?stage=proposal, pero PipelinePage solo reconoce ?stage=approved — aterriza mostrando TODAS las etapas, no solo Propuesta', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('En Final Stage', { exact: false }).first().click()
@@ -151,7 +151,7 @@ test('SCRUM-166 RN1 — SIGUE ROTO (mismatch de contrato): "En Final Stage" nave
 })
 
 test('SCRUM-166 RN2 — SIGUE ROTO (mismatch de contrato): "Estancados" navega con ?order=days, pero ese param en PipelinePage es orden de sorting, no un filtro de chip "stagnant" — no se aplica ningún filtro', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Estancados', { exact: false }).first().click()
@@ -164,7 +164,7 @@ test('SCRUM-166 RN2 — SIGUE ROTO (mismatch de contrato): "Estancados" navega c
 })
 
 test('SCRUM-166 RN3/RN4 — SIN CAMBIOS: "Monto cotizado en el mes"/"Monto aprobado del mes" siguen sin querystring de mes', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Monto cotizado en el mes', { exact: false }).first().click()
@@ -175,14 +175,14 @@ test('SCRUM-166 RN3/RN4 — SIN CAMBIOS: "Monto cotizado en el mes"/"Monto aprob
 
 // ── SCRUM-168 — Salud Compras ───────────────────────────────────────────────
 test('SCRUM-168 RN2/Escenario 1 — SIGUE FALTANDO el indicador "Bajo stock sin ordenar" (sin cambios)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Bajo stock sin ordenar', { exact: false })).toHaveCount(0)
 })
 
 test('SCRUM-168 RN1 — MEJORADO PERO INCONSISTENTE: "Órdenes críticas" ahora navega con ?chip=critical, un filtro real — pero el conteo de la tarjeta (definición distinta en GerenciaHomeService) NO coincide con el total que devuelve ese filtro', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -207,7 +207,7 @@ test('SCRUM-168 RN1 — MEJORADO PERO INCONSISTENTE: "Órdenes críticas" ahora 
 
 // ── SCRUM-171 — Agenda Bodega ───────────────────────────────────────────────
 test('SCRUM-171 RN3 — CORREGIDO (por código, sin datos hoy en dev): PedidosPage.tsx SÍ soporta ?order=<id> y abre el modal de detalle de ESE pedido puntual', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/bodega/pedidos?order=1')
   await page.waitForTimeout(1200)
   // Confirma que el deep link abre un modal (no solo la lista) — mismo mecanismo verificado en
@@ -218,7 +218,7 @@ test('SCRUM-171 RN3 — CORREGIDO (por código, sin datos hoy en dev): PedidosPa
 })
 
 test('SCRUM-171 RN2 — SIN CAMBIOS: "Ver detalle" sigue llevando al listado /bodega/pedidos, no a una pantalla "Rutas de entrega del día" (esa pantalla sigue sin existir)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -231,7 +231,7 @@ test('SCRUM-171 RN2 — SIN CAMBIOS: "Ver detalle" sigue llevando al listado /bo
 
 // ── SCRUM-172 — Agenda Servicios ────────────────────────────────────────────
 test('SCRUM-172 RN3 — CORREGIDO EN VIVO: con dato real sembrado hoy (ticket INS-2026-0002, id=2), la fila navega a /servicios/tickets?ticket=2 y abre el detalle de ESE ticket puntual', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Servicios — hoy', { exact: true })
@@ -247,7 +247,7 @@ test('SCRUM-172 RN3 — CORREGIDO EN VIVO: con dato real sembrado hoy (ticket IN
 })
 
 test('SCRUM-172 RN2 — CONFIRMADO OK (sin regresión): "Ver detalle" sigue navegando a /servicios/inicio con el panel real "Rutas del día"', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Servicios — hoy', { exact: true })

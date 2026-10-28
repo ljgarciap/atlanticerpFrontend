@@ -121,7 +121,7 @@ test('SCRUM-362 — selector de período: navegar hacia atrás carga datos indep
   // Retrocede 2 meses -> junio 2026, período sembrado antes de esta corrida vía API directa
   // (Lider Servicios creó satisfaccion=4.7/incidencias=0/actitud=5, Gerencia lo editó después a
   // satisfaccion=3.5/incidencias=1/actitud=2.5) — el formulario debe mostrar el valor EDITADO
-  // (post-Daniela), no el original de Lider Servicios ni datos de otro período.
+  // (post-Gerencia1), no el original de Lider Servicios ni datos de otro período.
   await prevBtn.click()
   await expect(modal.getByText(/julio de 2026/i)).toBeVisible()
   await modal.getByText(/Pendiente de captura/i).waitFor({ timeout: 5000 }).catch(() => {})

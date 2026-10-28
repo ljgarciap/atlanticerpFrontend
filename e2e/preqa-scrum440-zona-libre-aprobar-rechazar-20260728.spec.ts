@@ -18,8 +18,8 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const YIRENA_EMAIL = 'lidercompras@test.com'
-const YIRENA_PASS = 'lidercompras@test.com'
+const LIDERCOMPRAS_EMAIL = 'lidercompras@test.com'
+const LIDERCOMPRAS_PASS = 'lidercompras@test.com'
 const ALMACEN_EMAIL = 'liderbodega@test.com'
 const ALMACEN_PASS = 'liderbodega@test.com'
 
@@ -41,13 +41,13 @@ async function goToBandeja(page: Page) {
 
 test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
   test('Lider Compras ve botones Aprobar/Rechazar en una fila pendiente real', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await goToBandeja(page)
 
     const aprobarBtns = page.getByRole('button', { name: /^aprobar$/i })
     const rechazarBtns = page.getByRole('button', { name: /^rechazar$/i })
     const count = await aprobarBtns.count()
-    await page.screenshot({ path: 'e2e/.tmp/preqa-440-yirena-bandeja-pendientes.png' })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-440-lidercompras-bandeja-pendientes.png' })
 
     if (count === 0) {
       test.info().annotations.push({ type: 'note', description: 'Sin órdenes pendientes sembradas — no se puede ejercitar aprobar/rechazar sin fixture.' })
@@ -58,7 +58,7 @@ test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
   })
 
   test('Rechazar sin motivo bloquea el envío (validación client-side)', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await goToBandeja(page)
 
     const rechazarBtns = page.getByRole('button', { name: /^rechazar$/i })
@@ -85,7 +85,7 @@ test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
   })
 
   test('Recargar a mitad del modal de Rechazar no deja la orden en limbo (sigue pendiente)', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await goToBandeja(page)
 
     const rechazarBtns = page.getByRole('button', { name: /^rechazar$/i })
@@ -108,7 +108,7 @@ test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
   })
 
   test('Aprobar una orden pendiente real genera una orden de compra visible en Compras (RN1)', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await goToBandeja(page)
 
     const aprobarBtns = page.getByRole('button', { name: /^aprobar$/i })
@@ -140,7 +140,7 @@ test.describe('SCRUM-440 — Lider Compras ve y usa Aprobar/Rechazar', () => {
   })
 
   test('Doble clic en Aprobar no genera 2 órdenes de compra (idempotencia)', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await goToBandeja(page)
 
     const aprobarBtns = page.getByRole('button', { name: /^aprobar$/i })

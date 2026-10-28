@@ -11,7 +11,7 @@ interface Props {
   percent:   number
 }
 
-// SCRUM-725 — advertencia de margen mínimo para usuarios con excepción (Gerencia/David,
+// SCRUM-725 — advertencia de margen mínimo para usuarios con excepción (Gerencia/Gerencia2,
 // ventas_diseno.override_min_margin): a diferencia de SaveQuoteConfirmModal (paso
 // normal de "Guardar"), este modal solo aparece cuando confirm() responde con
 // margin_warning=true — mismo patrón de overlay bespoke que el resto de la página.

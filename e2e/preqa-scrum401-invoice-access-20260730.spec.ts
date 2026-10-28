@@ -10,8 +10,8 @@ import { test, expect, type Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
-const ESTEBAN_EMAIL = 'liderbodega@test.com'
-const ESTEBAN_PASS  = 'liderbodega@test.com'
+const LIDERBODEGA_EMAIL = 'liderbodega@test.com'
+const LIDERBODEGA_PASS  = 'liderbodega@test.com'
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`)
@@ -22,7 +22,7 @@ async function login(page: Page, email: string, pass: string) {
 }
 
 test('el botón "Ver factura" abre el modal con el mensaje de estado real', async ({ page }) => {
-  await login(page, ESTEBAN_EMAIL, ESTEBAN_PASS)
+  await login(page, LIDERBODEGA_EMAIL, LIDERBODEGA_PASS)
   await page.goto(`${BASE}/bodega/pedidos`)
   await page.waitForTimeout(2000)
 

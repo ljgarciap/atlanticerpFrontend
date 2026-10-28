@@ -24,7 +24,7 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const VENDEDOR2  = 'vendedor2@test.com'
 
 async function login(page: Page, email: string) {
@@ -67,7 +67,7 @@ test('RBAC negativo -- vendedor no accede a /admin-contab/invoices*', async ({ p
 })
 
 test('Escenario 3 (sin saldo, Cliente C) -- preview NO muestra ninguna opción de saldo a favor', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -94,7 +94,7 @@ test('Escenario 3 (sin saldo, Cliente C) -- preview NO muestra ninguna opción d
 })
 
 test('Escenario 1 (saldo parcial, Cliente A) -- checkbox marcado por defecto, monto correcto, ambos totales visibles', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -133,7 +133,7 @@ test('Escenario 1 (saldo parcial, Cliente A) -- checkbox marcado por defecto, mo
 })
 
 test('Escenario 2 + RN3 (saldo excede el monto, lote de 2, Cliente B) -- cap al monto de la 1ra, aviso explícito, resto sin saldo', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 
@@ -169,7 +169,7 @@ test('Escenario 2 + RN3 (saldo excede el monto, lote de 2, Cliente B) -- cap al 
 })
 
 test('REQ-444 RN1 -- el selector de "+ Crear Factura" NO queda restringido por los filtros activos de la tabla', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 
@@ -194,7 +194,7 @@ test('REQ-444 RN1 -- el selector de "+ Crear Factura" NO queda restringido por l
 })
 
 test('REQ-445 RN4 -- contador "Mostrando X de Y" usa un denominador real, no list.length duplicado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 
@@ -225,7 +225,7 @@ test('RN5 REQ-444 -- bloqueo de avance sin ninguna entrega marcada es un mensaje
   let dialogFired = false
   page.on('dialog', async dialog => { dialogFired = true; await dialog.dismiss() })
 
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 
@@ -278,7 +278,7 @@ test('RN5 REQ-444 -- bloqueo de avance sin ninguna entrega marcada es un mensaje
 })
 
 test('REQ-446 -- export Excel respeta el filtro activo (contenido, no solo el request)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 
@@ -313,7 +313,7 @@ test('REQ-446 -- export Excel respeta el filtro activo (contenido, no solo el re
 })
 
 test('REQ-443 RN3 -- "Editar" desde la vista previa vuelve al wizard SIN perder cliente/proyecto/selección', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
 

@@ -300,7 +300,7 @@ test('13. Gerencia (management) — accede al Kardex de herramientas, ve filtros
   await login(page, 'gerencia@test.com')
   await page.goto(`${BASE}/servicios/tools/kardex`)
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: `${DL_DIR}/14-daniela-kardex-ok.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/14-gerencia1-kardex-ok.png`, fullPage: true })
 
   expect(page.url()).toContain('/servicios/tools/kardex')
   await expect(page.getByLabel(/herramienta/i).first()).toBeVisible()

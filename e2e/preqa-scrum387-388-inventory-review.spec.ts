@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * SCRUM-387/388 (REQ-317/318) — Pre-QA 2026-07-27. Nace del rebote de marly.rangel a
+ * SCRUM-387/388 (REQ-317/318) — Pre-QA 2026-07-27. Nace del rebote de qa.qa a
  * SCRUM-387/388 (2026-07-26): "no puedo probarlo por UI, el botón de esta etapa está
  * DESHABILITADO". La causa real era más profunda — `OrderCardTile` disparaba SIEMPRE
  * `start-picking` para toda tarjeta `picking_pendiente`, incluso las de

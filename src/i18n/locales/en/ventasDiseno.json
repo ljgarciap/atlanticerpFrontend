@@ -383,7 +383,7 @@
       "contribuyente": "Taxpayer (with tax ID)",
       "consumidorFinal": "Final consumer",
       "consumidorFinalAyuda": "Invoiced as CONSUMIDOR FINAL, with no tax ID or check digit. The internal PDF keeps the customer's name and says so; the fiscal printed version is issued by the authorized provider (PAC).",
-      "soloMarkFelix": "Only Gerencia and Contabilidad can mark a customer as Final consumer."
+      "soloGerenciaContabilidad": "Only Gerencia and Contabilidad can mark a customer as Final consumer."
     }
   },
   "architects": {

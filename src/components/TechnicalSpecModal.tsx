@@ -8,7 +8,7 @@ import { useTechnicalSpecRows } from '@/hooks/useTechnicalSpecFields'
  * SCRUM-425/426 (REQ-355/356) — "Ver ficha técnica" es el mismo dato y el mismo modal en
  * Compras (`InventarioPage.tsx`) y en Bodega (`BodegaInventarioPage.tsx`): los campos técnicos
  * de solo lectura del producto, sin precio/costo. Fase 9c: los campos y sus etiquetas salen del catálogo por empresa. Extraído acá para no duplicar la implementación
- * entre los 2 módulos (hallazgo de QA 2026-07-27, marly.rangel — el botón faltaba en Bodega).
+ * entre los 2 módulos (hallazgo de QA 2026-07-27, qa.qa — el botón faltaba en Bodega).
  *
  * Sin dependencia de un namespace de i18n fijo a propósito: cada módulo resuelve sus propios
  * textos con su propio namespace (`compras:...` / `bodega:...`) y se los pasa ya traducidos —

@@ -14,7 +14,7 @@ import { test, expect, Page } from '@playwright/test'
  */
 
 const BASE = 'http://localhost:5173'
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 
 async function login(page: Page, email: string): Promise<void> {
   await page.context().clearCookies()
@@ -35,7 +35,7 @@ async function login(page: Page, email: string): Promise<void> {
 // SCRUM-869 — Home de Administración: orden vertical de los bloques
 // ---------------------------------------------------------------------------
 test('SCRUM-869 — Home: Resumen del mes → (Pendientes | Mi Calendario) → Vencidos y por vencer', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/inicio`)
   await page.waitForTimeout(1800)
 
@@ -75,7 +75,7 @@ test('SCRUM-869 — Home: Resumen del mes → (Pendientes | Mi Calendario) → V
 // SCRUM-866 punto 1 — "Pendiente de factura" renombrado a "Pendiente Cuenta de cobro"
 // ---------------------------------------------------------------------------
 test('SCRUM-866.1 — Comisiones Externas no muestra "Pendiente de factura" en ninguna vista', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/comisiones/externas`)
   await page.waitForTimeout(1500)
 
@@ -91,7 +91,7 @@ test('SCRUM-866.1 — Comisiones Externas no muestra "Pendiente de factura" en n
 // SCRUM-870 punto 2 — tarjeta de comisión de Contabilidad: rangos en formato K
 // ---------------------------------------------------------------------------
 test('SCRUM-870.2 — tarjeta Contabilidad: rangos "$15K" / "$15K – $19K" / "$20K", nunca USD con decimales', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/reportes`)
   await page.waitForTimeout(2000)
 
@@ -110,7 +110,7 @@ test('SCRUM-870.2 — tarjeta Contabilidad: rangos "$15K" / "$15K – $19K" / "$
   expect(bodyText, 'tramo inferior de la LISTA debe ser "Menos de $15K → 1%", no "$14K"')
     .toMatch(/Menos de \$15K\s*→\s*1%/)
 
-  await page.screenshot({ path: 'e2e/screenshots/SCRUM-870-2-felix-tiers.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/SCRUM-870-2-contabilidad-tiers.png', fullPage: true })
 })
 
 // ---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ test('SCRUM-870.2 — tarjeta Contabilidad: rangos "$15K" / "$15K – $19K" / "$
 test('SCRUM-870.1 — Reportes: las gráficas de barra renderizan sin error', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/reportes`)
   await page.waitForTimeout(2500)
 

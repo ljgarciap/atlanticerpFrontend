@@ -365,7 +365,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   // del gate de módulo de arriba — "Dashboard CRM" solo Gerencia, "Pedidos" oculto para Líder
   // Admin (Contabilidad) y Asistente Administrativa (Asistente Administrativa). `user.role` en runtime es el role_key de
   // negocio (auth_roles.key vía JwtClaimsBuilder, no el enum legado) — confirmado en la DB local:
-  // Gerencia/Daniela/David/Whileyner (los 4 "Gerencia" del REQ) tienen role_key='management'; Contabilidad
+  // Gerencia/Gerencia1/Gerencia2/Gerencia5 (los 4 "Gerencia" del REQ) tienen role_key='management'; Contabilidad
   // ('lider_admin_contab') y Asistente Administrativa ('asistente_administrativa') no tienen ventas_diseno.read en
   // absoluto todavía, así que el escenario de "ve 3 de 4 pestañas" no es alcanzable hasta que se
   // les otorgue ese acceso base — decisión de negocio aparte, no de este batch. El gate de acá

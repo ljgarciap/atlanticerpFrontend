@@ -203,7 +203,7 @@ test('9. Tecnico Garantias (tecnico_garantias) — mismo gate: NO debe ver "+ Nu
 test('10. Gerencia (management) — SÍ debe ver "+ Nuevo ticket" (rol autorizado)', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await gotoHome(page)
-  await page.screenshot({ path: `${DL_DIR}/10-home-daniela.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/10-home-gerencia1.png`, fullPage: true })
 
   await expect(page.getByRole('button', { name: 'Nuevo ticket' })).toBeVisible()
 })

@@ -514,7 +514,7 @@ describe('BodegaInventarioPage — Confirmar llegada física (SCRUM-427)', () =>
 })
 
 // SCRUM-425 (REQ-355) — "Ver ficha técnica" en Bodega > Ver Inventario, mismo modal compartido
-// con Compras (`TechnicalSpecModal`). Hallazgo de QA (marly.rangel, 2026-07-27): el botón
+// con Compras (`TechnicalSpecModal`). Hallazgo de QA (qa.qa, 2026-07-27): el botón
 // existía en Compras pero faltaba acá.
 describe('BodegaInventarioPage — Ver ficha técnica (SCRUM-425)', () => {
   it('el botón abre el modal y llama a bodegaApi.inventory.get (lazy, solo al abrir)', async () => {

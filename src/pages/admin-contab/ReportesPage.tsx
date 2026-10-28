@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarController, BarElement, DoughnutController, Tooltip, Legend, type Plugin } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
 import {
-  useReportsFelixCommission, useReportsCartera, useReportsVentas, useReportsFlujoCaja,
+  useReportsCommissionTiers, useReportsCartera, useReportsVentas, useReportsFlujoCaja,
   useReportsComisiones, useReportsNotasCredito,
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
@@ -89,11 +89,11 @@ export default function ReportesPage() {
   const { t } = useTranslation(['common', 'adminContab'])
   const navigate = useNavigate()
   const [periodo, setPeriodo] = useState<ReportsPeriodo>('hoy')
-  // SCRUM-881 (Pre-QA, 2026-09-11) -- el backend ya bloqueaba GET /reports/felix-commission
+  // SCRUM-881 (Pre-QA, 2026-09-11) -- el backend ya bloqueaba GET /reports/commission-tiers
   // para asistente_administrativa (routes/admin-contab.php linea 396), pero esta tarjeta se
   // renderizaba sin ningun gate de rol -- Asistente Administrativa veia el titulo "-- Contabilidad" con el cuerpo vacio
   // (fetch bloqueado en 403). Mismo permiso que el backend (`admin_contab.oversight.manage`: líder y Gerencia, sin la asistente).
-  const canSeeFelixCommission = usePermission('admin_contab.oversight.manage')
+  const canSeeCommissionTiers = usePermission('admin_contab.oversight.manage')
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
@@ -118,7 +118,7 @@ export default function ReportesPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {canSeeFelixCommission && <FelixCommissionCard t={t} />}
+        {canSeeCommissionTiers && <CommissionTiersCard t={t} />}
         <CarteraPorCobrarCard t={t} onNavigate={() => navigate('/admin-contab/facturacion')} />
         <Cartera90CobradoCard t={t} onNavigate={() => navigate('/admin-contab/facturacion')} />
         <VentasCard t={t} periodo={periodo} onNavigate={() => navigate('/admin-contab/facturacion')} />
@@ -167,14 +167,14 @@ function CardLink({ label, onClick }: { label: string; onClick: () => void }) {
 /** REQ-567 — 3 KPIs + los tramos (`tiers`, ya resueltos por el backend desde la tabla paramétrica
  *  `cartera_commission_tiers`, ver ADR del batch) con el actual resaltado vía `es_actual`. Nunca
  *  hardcodea los montos de los tramos — vienen todos de la API. */
-function FelixCommissionCard({ t }: { t: Translate }) {
-  const { data, isLoading } = useReportsFelixCommission()
+function CommissionTiersCard({ t }: { t: Translate }) {
+  const { data, isLoading } = useReportsCommissionTiers()
 
   return (
     <Card variant="panel" className="p-4 sm:col-span-2">
       <div className="mb-4">
-        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t('adminContab:reportes.felixCommission.title')}</div>
-        <div className="text-[10.5px] text-slate-400 mt-0.5">{t('adminContab:reportes.felixCommission.subtitle')}</div>
+        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t('adminContab:reportes.commissionTiers.title')}</div>
+        <div className="text-[10.5px] text-slate-400 mt-0.5">{t('adminContab:reportes.commissionTiers.subtitle')}</div>
       </div>
 
       {isLoading || !data ? (
@@ -183,15 +183,15 @@ function FelixCommissionCard({ t }: { t: Translate }) {
         <>
           <div className="flex flex-wrap gap-8 justify-center text-center mb-4">
             <div>
-              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.felixCommission.cobradoMes')}</div>
+              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.commissionTiers.cobradoMes')}</div>
               <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{formatCurrency(data.cobrado_mes)}</div>
             </div>
             <div>
-              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.felixCommission.rangoActual')}</div>
+              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.commissionTiers.rangoActual')}</div>
               <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{data.rango_actual}</div>
             </div>
             <div>
-              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.felixCommission.comision')}</div>
+              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{t('adminContab:reportes.commissionTiers.comision')}</div>
               <div className="text-xl font-bold text-primary-dark">{formatCurrency(data.comision)}</div>
             </div>
           </div>
@@ -206,22 +206,22 @@ function FelixCommissionCard({ t }: { t: Translate }) {
                   {/* SCRUM-870 punto 2 — vuelve al formato del mockup original: "Menos de $15K" /
                       "$15K – $19K" / "Más de $20K", en vez de USD extendido con decimales. */}
                   {tier.monto_minimo === 0
-                    ? t('adminContab:reportes.felixCommission.tramoMenosDe', { hasta: formatCompactK(tier.monto_maximo ?? 0, 'exclusive'), pct: tier.porcentaje })
+                    ? t('adminContab:reportes.commissionTiers.tramoMenosDe', { hasta: formatCompactK(tier.monto_maximo ?? 0, 'exclusive'), pct: tier.porcentaje })
                     : tier.monto_maximo === null
-                    ? t('adminContab:reportes.felixCommission.tramoDesde', { desde: formatCompactK(tier.monto_minimo), pct: tier.porcentaje })
-                    : t('adminContab:reportes.felixCommission.tramoRango', { desde: formatCompactK(tier.monto_minimo), hasta: formatCompactK(tier.monto_maximo), pct: tier.porcentaje })}
+                    ? t('adminContab:reportes.commissionTiers.tramoDesde', { desde: formatCompactK(tier.monto_minimo), pct: tier.porcentaje })
+                    : t('adminContab:reportes.commissionTiers.tramoRango', { desde: formatCompactK(tier.monto_minimo), hasta: formatCompactK(tier.monto_maximo), pct: tier.porcentaje })}
                 </div>
                 {tier.es_actual && (
                   <div className="flex items-center justify-center gap-1 text-[10px] text-primary-dark mt-0.5">
                     <IcoCheck size={10} />
-                    {t('adminContab:reportes.felixCommission.rangoActualTag')}
+                    {t('adminContab:reportes.commissionTiers.rangoActualTag')}
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          <p className="text-[10.5px] text-slate-400 mt-4 text-center">{t('adminContab:reportes.felixCommission.footnote')}</p>
+          <p className="text-[10.5px] text-slate-400 mt-4 text-center">{t('adminContab:reportes.commissionTiers.footnote')}</p>
         </>
       )}
     </Card>

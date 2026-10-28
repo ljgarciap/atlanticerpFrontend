@@ -109,7 +109,7 @@ test('3. Tecnico (tecnico) — select de estado DESHABILITADO pero visible, no o
 test('4. Gerencia (management) — select de estado DESHABILITADO pero visible', async ({ page }) => {
   await login(page, 'gerencia@test.com')
   await gotoTickets(page)
-  await page.screenshot({ path: `${DL_DIR}/05-tabla-daniela.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/05-tabla-gerencia1.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
@@ -162,7 +162,7 @@ test('6. Lider Servicios — comparación: menú completo con 5 pestañas + 2 op
 
 test('7. Contabilidad (Administración) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
-  await page.screenshot({ path: `${DL_DIR}/09-felix-post-login.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/09-contabilidad-post-login.png`, fullPage: true })
 
   // Sidebar no debe mostrar el módulo Servicios en absoluto.
   const sidebarServicios = page.locator('a,button').filter({ hasText: /servicios/i })
@@ -172,18 +172,18 @@ test('7. Contabilidad (Administración) — SIN acceso al módulo Servicios (REQ
   // Navegación directa por URL — confirmar que no se puede usar el módulo igual.
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: `${DL_DIR}/10-felix-direct-url-servicios.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/10-contabilidad-direct-url-servicios.png`, fullPage: true })
   const bodyText = await page.textContent('body')
   console.log('[SCRUM-358] Contabilidad — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
 })
 
 test('8. Lider Compras (Compras) — SIN acceso al módulo Servicios (REQ-288 RN4)', async ({ page }) => {
   await login(page, 'lidercompras@test.com')
-  await page.screenshot({ path: `${DL_DIR}/11-yirena-post-login.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/11-lidercompras-post-login.png`, fullPage: true })
 
   await page.goto(`${BASE}/servicios/tickets`)
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: `${DL_DIR}/12-yirena-direct-url-servicios.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/12-lidercompras-direct-url-servicios.png`, fullPage: true })
   const bodyText = await page.textContent('body')
   console.log('[SCRUM-358] Lider Compras — contenido de /servicios/tickets vía URL directa (primeros 300 char):', bodyText?.slice(0, 300))
 })

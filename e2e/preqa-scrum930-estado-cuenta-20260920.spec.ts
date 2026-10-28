@@ -22,10 +22,10 @@ async function loginReal(page: Page, email: string) {
   await page.waitForTimeout(1800)
 }
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 
 test('SCRUM-930 — Sidebar abre Estado de Cuenta sin cliente preseleccionado, en ventana nueva', async ({ page, context }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
 
   // Expandir el sidebar si nace colapsado (regla conocida de Playwright en este proyecto).
   const sidebarToggle = page.locator('button[title="Expandir menú"]')
@@ -54,7 +54,7 @@ test('SCRUM-930 — Sidebar abre Estado de Cuenta sin cliente preseleccionado, e
 })
 
 test('SCRUM-930 — flujo completo: buscar cliente, columna antigüedad, 4 documentos clickeables, docs correctos', async ({ page }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion/estado-cuenta')
   await page.waitForTimeout(500)
 
@@ -151,7 +151,7 @@ test('SCRUM-930 — flujo completo: buscar cliente, columna antigüedad, 4 docum
 })
 
 test('SCRUM-930 punto 5/6 — orden del menú, no navega la pestaña actual, Status de Pedidos y Cerrar Ventana funcionan', async ({ page, context }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
   const urlBefore = page.url()
 
   const sidebarToggle = page.locator('button[title="Expandir menú"]')
@@ -200,7 +200,7 @@ test('SCRUM-930 punto 5/6 — orden del menú, no navega la pestaña actual, Sta
 })
 
 test('SCRUM-930 — cero emoji en Estado de Cuenta (regla dura de cliente)', async ({ page }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion/estado-cuenta')
   await page.waitForTimeout(500)
   await page.locator('input[placeholder]').first().fill('PreQA SCRUM930 UI')
@@ -216,7 +216,7 @@ test('SCRUM-930 — cero emoji en Estado de Cuenta (regla dura de cliente)', asy
 })
 
 test('SCRUM-930 — buscador sin preselección: cliente inexistente y buscar sin seleccionar no rompen', async ({ page }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion/estado-cuenta')
   await page.waitForTimeout(500)
 
@@ -235,7 +235,7 @@ test('SCRUM-930 — buscador sin preselección: cliente inexistente y buscar sin
 })
 
 test('SCRUM-930 — doble clic en el ítem del Sidebar no abre dos ventanas', async ({ page, context }) => {
-  await loginReal(page, FELIX)
+  await loginReal(page, CONTABILIDAD)
   const sidebarToggle = page.locator('button[title="Expandir menú"]')
   if (await sidebarToggle.isVisible().catch(() => false)) await sidebarToggle.click()
   await page.getByRole('button', { name: /admin\. ?& ?contab/i }).click()

@@ -99,8 +99,8 @@ echo json_encode(['orderId' => $order->id, 'invoiceId' => $invoice->id, 'masterC
 const BASE = 'http://localhost:5173'
 
 const ANDRES    = 'superadmin@test.com'
-const DANIELA   = 'gerencia@test.com' // local: password = default (email), no B1n4X_2026?
-const FELIX     = 'contabilidad@test.com'
+const GERENCIA1   = 'gerencia@test.com' // local: password = default (email), no B1n4X_2026?
+const CONTABILIDAD     = 'contabilidad@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<void> {
   await page.context().clearCookies()
@@ -179,7 +179,7 @@ test('SCRUM-850.3 — viewport desktop normal: sin regresión visual, tabla comp
 // ---------------------------------------------------------------------------
 
 test('SCRUM-855.1 — filtro "desde" por defecto es 1 de enero del año en curso, no el mes actual', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1500)
 
@@ -190,7 +190,7 @@ test('SCRUM-855.1 — filtro "desde" por defecto es 1 de enero del año en curso
 })
 
 test('SCRUM-855.2 — "Limpiar filtros" resetea "desde" a 1 de enero, no al mes actual', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(1500)
 
@@ -209,7 +209,7 @@ test('SCRUM-855.2 — "Limpiar filtros" resetea "desde" a 1 de enero, no al mes 
 })
 
 test('SCRUM-855.3 — dashboard carga sin error con rango amplio (~8-9 meses) y el drill-down de "monto del mes" sigue usando el mes actual', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/gerencia`)
   await page.waitForTimeout(2000)
 
@@ -243,7 +243,7 @@ test('SCRUM-855.3 — dashboard carga sin error con rango amplio (~8-9 meses) y 
 // ---------------------------------------------------------------------------
 
 test('SCRUM-856.1 — botón "Estado de cuenta" junto a "+ Crear factura" en Facturación', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/facturacion`)
   await page.waitForTimeout(1200)
 
@@ -257,7 +257,7 @@ test('SCRUM-856.1 — botón "Estado de cuenta" junto a "+ Crear factura" en Fac
 })
 
 test('SCRUM-856.2 — click abre Estado de cuenta en pestaña nueva, SIN cliente/proyecto/fecha preseleccionados (matchea mockup)', async ({ page, context }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/facturacion`)
   await page.waitForTimeout(1200)
 
@@ -290,7 +290,7 @@ test('SCRUM-856.2 — click abre Estado de cuenta en pestaña nueva, SIN cliente
 })
 
 test('SCRUM-856.3 — acceso EXISTENTE (desde detalle de cliente, con master_client_id) sigue funcionando igual que antes', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   // Acceso directo con query string, mismo patrón que el flujo viejo (detalle de cliente ->
   // openEstadoCuenta(masterClientId)) — confirmamos que sigue preseleccionando.
   await page.goto(`${BASE}/admin-contab/facturacion/estado-cuenta?master_client_id=1`)
@@ -324,7 +324,7 @@ async function openFacturaDetail(page: Page): Promise<void> {
 }
 
 test('SCRUM-858.1 — Facturación: detalle de la factura de prueba muestra "Registrar cobro" habilitado (saldo 0/500)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openFacturaDetail(page)
 
   await expect(page.getByRole('button', { name: /registrar cobro/i })).toBeVisible()
@@ -332,7 +332,7 @@ test('SCRUM-858.1 — Facturación: detalle de la factura de prueba muestra "Reg
 })
 
 test('SCRUM-858.2 — Registrar el cobro completo vía UI: cache se invalida solo (sin recargar), botón desaparece', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openFacturaDetail(page)
 
   await page.getByRole('button', { name: /registrar cobro/i }).click()
@@ -392,7 +392,7 @@ test('SCRUM-858.2 — Registrar el cobro completo vía UI: cache se invalida sol
 })
 
 test('SCRUM-858.3 — PDF del recibo: footer real con paginación "Página X de Y" y "ATLANTIC" junto al logo', async ({ page, request }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const bearer = await page.evaluate(() => localStorage.getItem('accessToken'))
   expect(bearer).toBeTruthy()
 
@@ -430,7 +430,7 @@ test('SCRUM-858.3 — PDF del recibo: footer real con paginación "Página X de 
       // viejo (que SÍ se veía) fue reemplazado por un mecanismo que no renderiza nada.
       expect(text, 'CRÍTICO SCRUM-858 — el footer de page_text() no renderiza: falta isPhpEnabled=true en PaymentReceiptPdfService::generate()').toMatch(/P[aá]gina\s+1\s+de\s+1/i)
 
-      // Rebote #3 (2026-09-09, marly.rangel) — con isPhpEnabled ya corregido, el texto seguía
+      // Rebote #3 (2026-09-09, qa.qa) — con isPhpEnabled ya corregido, el texto seguía
       // siendo el hardcodeado viejo con "AtlanticERP". Ahora nunca debe aparecer.
       expect(text, 'CRÍTICO — la palabra "AtlanticERP" no debería aparecer en ningún lugar del PDF').not.toMatch(/atlanticerp/i)
 
@@ -453,7 +453,7 @@ test('SCRUM-858.3 — PDF del recibo: footer real con paginación "Página X de 
 })
 
 test('SCRUM-858.4 — CASO DE RUPTURA: pegarle directo al endpoint de registrar cobro para una factura YA cubierta al 100% (no por UI) — verifica el fix del rebote (commit 0582d23)', async ({ page, request }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const bearer = await page.evaluate(() => localStorage.getItem('accessToken'))
   expect(bearer).toBeTruthy()
 

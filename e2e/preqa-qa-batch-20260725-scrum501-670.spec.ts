@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 // Pre-QA real para SCRUM-501 (siembra Pedidos de Bodega) y SCRUM-670 (siembra Zona Libre de
-// Colón), pedida por marly.rangel el 2026-07-25. Corre contra los fixtures sembrados por
+// Colón), pedida por qa.qa el 2026-07-25. Corre contra los fixtures sembrados por
 // database/seeders/QaTicketsBatch20260725Seeder.php (marcador [QA-BOD] / QA-ZL-*).
 
 async function login(page, email: string) {

@@ -5,13 +5,13 @@ import { test, expect, Page } from '@playwright/test'
 //
 // SCRUM-575/577 (Comisiones Internas, código): OBS-1 reordena tramos por monto_minimo,
 // BUG-1 pide confirmación antes de eliminar un tramo, RN3 las tarjetas de resumen ignoran el
-// filtro de vendedor. SCRUM-583/590/591/592/595/601: rebotados por marly como "BLOQUEADO, SIN
+// filtro de vendedor. SCRUM-583/590/591/592/595/601: rebotados por qa como "BLOQUEADO, SIN
 // DATOS DE PRUEBA" (no bugs de código) — verificamos que `admincont:seed-rebotes-qa` (corrido
 // contra dev.atlanticerp.ai el mismo día) efectivamente deja cada escenario visible/alcanzable.
 
 const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
   await page.context().clearCookies()
@@ -93,7 +93,7 @@ test('SCRUM-583 — proyecto compartido entre 2 vendedores visible en Comisiones
 })
 
 test('SCRUM-590/591/592/595 — proyectos de arquitecto sembrados visibles en Comisiones Externas con el estado esperado', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab/comisiones/externas')
   await page.waitForTimeout(800)
@@ -128,7 +128,7 @@ test('SCRUM-590/591/592/595 — proyectos de arquitecto sembrados visibles en Co
 })
 
 test('SCRUM-601 — cobro sembrado de hoy visible en Arqueo del día', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab/arqueo-caja')
   await page.waitForTimeout(1000)

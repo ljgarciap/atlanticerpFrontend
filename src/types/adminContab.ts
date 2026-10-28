@@ -1286,7 +1286,7 @@ export interface NotaCredito {
 /** `GET /admin-contab/notas-credito/itbms-rates` — REQ-480, catálogo de tasas configuradas en
  *  Configuración Fiscal (`ItbmsRate`, mismo shape), pero por un endpoint DISTINTO al de
  *  `/admin-contab/itbms-rates`: ese es exclusivo de Gerencia (403 en el GET para cualquier otro rol),
- *  y Contabilidad/Yaneth/Gerencia sí necesitan ver las 3 tasas acá para elegir el "tratamiento correcto"
+ *  y Contabilidad/Asistente/Gerencia sí necesitan ver las 3 tasas acá para elegir el "tratamiento correcto"
  *  — contrato a confirmar con Backend Dev, no reusar el endpoint de Gerencia tal cual. */
 export type NotaCreditoItbmsRateOption = Pick<ItbmsRate, 'id' | 'nombre' | 'descripcion' | 'porcentaje' | 'es_base'>
 
@@ -1783,7 +1783,7 @@ export interface ArchitectCommissionProject {
    *  mostrar la zona de carga según `regimen_fiscal` de la fila padre. */
   comprobante_retencion: { nombre_archivo: string; uploaded_at: string } | null
   fecha_pago: string | null // 'YYYY-MM-DD'
-  /** Batch 17 (REQ-516) — % propuesto por Contabilidad/Yaneth/Mark/Gerencia, pendiente de la decisión de
+  /** Batch 17 (REQ-516) — % propuesto por Contabilidad/Asistente/Mark/Gerencia, pendiente de la decisión de
    *  Gerencia. `null` si no hay ninguna propuesta activa. */
   porcentaje_pendiente: number | null
   porcentaje_pendiente_motivo: string | null
@@ -2283,7 +2283,7 @@ export interface ReportsCarteraCommissionTier {
   es_actual: boolean
 }
 
-export interface ReportsFelixCommission {
+export interface ReportsCommissionTiers {
   cobrado_mes: number
   rango_actual: string
   porcentaje: number

@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * Hallazgo transversal del batch: en SCRUM-337 y SCRUM-780 (nav) y en el logo de PDF de SCRUM-781,
  * el código YA estaba corregido y desplegado — el problema real era que dev.atlanticerp.ai servía un
- * build viejo cuando QA/Daniela probaron. Estos 3 puntos se verificaron por API/click real contra
+ * build viejo cuando QA/Gerencia1 probaron. Estos 3 puntos se verificaron por API/click real contra
  * el ambiente ya desplegado (ver docs/pre-qa/ de este batch) y no requieren cobertura acá salvo un
  * smoke rápido de navegación para dejar constancia. El resto (361, 779, 781-cancelar,
  * 781-tablero, 354) sí tenía bugs reales, corregidos en los commits de este mismo batch.

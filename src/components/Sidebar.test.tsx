@@ -1078,7 +1078,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
 
   // Pre-QA de SCRUM-1157 (C-1): Lider Operaciones tiene el módulo Compras en solo lectura por persona (`modules.compras.view=false`) y solo permisos de
   // consulta. Su aterrizaje /compras/ordenes y sus pantallas de consulta deben estar en el menú.
-  const mariam = (extra: string[] = []) => baseUser({
+  const lideroperaciones = (extra: string[] = []) => baseUser({
     role: 'lider_operaciones',
     permissions: ['compras.limited.view', 'compras.sustitutos.manage', 'ventas_diseno.read', 'admin_contab.view', ...extra],
     modules: { compras: noModule({ view: false }), admin_contab: noModule({ view: true }), ventas_diseno: noModule({ view: true }) },
@@ -1086,7 +1086,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
   const count = (text: string) => screen.queryAllByText(text).length
 
   it('con compras.limited.view y el módulo en solo lectura ve Ver Órdenes, Logística, Inventario, Ingresos y Sustitutos, y nada más de Compras', () => {
-    useAuthStore.setState({ user: mariam() })
+    useAuthStore.setState({ user: lideroperaciones() })
     renderSidebar()
     openCompras()
 
@@ -1110,7 +1110,7 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
   })
 
   it('no duplica Inventario, Sustitutos ni Órdenes (los links sueltos de Ventas & Diseño y Logística ceden al menú de consulta)', () => {
-    useAuthStore.setState({ user: mariam(['compras.logistica.view']) })
+    useAuthStore.setState({ user: lideroperaciones(['compras.logistica.view']) })
     renderSidebar()
     openCompras()
 
@@ -1304,7 +1304,7 @@ describe('Sidebar — Contabilidad: Pipeline solo lectura (SCRUM-1128)', () => {
 // SCRUM-1168 — con el concepto nuevo de cobros (flag `cobros_v2` del login) el menú Movimientos ofrece «Compensaciones» y deja de ofrecer
 // «Registrar abono» (el dinero que entra sin factura ahora es un cobro). Sin el flag, todo sigue como siempre.
 describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1168)', () => {
-  const felix = (cobrosV2: boolean | undefined) => baseUser({
+  const contabilidad = (cobrosV2: boolean | undefined) => baseUser({
     role: 'lider_admin_contab',
     modules: { admin_contab: noModule({ view: true }) },
     flags: { approve_large_amounts: false, manage_users: false, ...(cobrosV2 === undefined ? {} : { cobros_v2: cobrosV2 }) },
@@ -1316,7 +1316,7 @@ describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1
   const visible = (text: string) => screen.queryAllByText(text).length > 0
 
   it('con cobros_v2 ve «Compensaciones» y no «Registrar abono»', () => {
-    useAuthStore.setState({ user: felix(true) })
+    useAuthStore.setState({ user: contabilidad(true) })
     renderSidebar()
     abrirMovimientos()
     expect(visible('nav.compensaciones')).toBe(true)
@@ -1326,7 +1326,7 @@ describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1
   })
 
   it.each([false, undefined])('sin el concepto nuevo (flag %s) ve «Registrar abono» y no «Compensaciones»', flag => {
-    useAuthStore.setState({ user: felix(flag) })
+    useAuthStore.setState({ user: contabilidad(flag) })
     renderSidebar()
     abrirMovimientos()
     expect(visible('nav.registrarAbono')).toBe(true)

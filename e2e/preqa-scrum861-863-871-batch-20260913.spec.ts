@@ -127,16 +127,16 @@ test('SCRUM-861.3 — "Ajustes de Compras" NO está embebido en Proveedores, viv
 
 const greetingCases: { email: string; label: string; path: string; firstNameOnly: string; fullName: string }[] = [
   { email: 'vendedor2@test.com', label: 'Ventas & Diseño (Vendedor Test 2)', path: '/ventas-diseno/home', firstNameOnly: 'VENDEDOR', fullName: 'VENDEDOR TEST 2' },
-  { email: 'lidercompras@test.com', label: 'Compras (Lider Compras Test)', path: '/compras/home', firstNameOnly: 'YIRENA', fullName: 'YIRENA TENG' },
-  { email: 'liderbodega@test.com', label: 'Bodega (Lider Bodega Test)', path: '/bodega/home', firstNameOnly: 'ESTEBAN', fullName: 'ESTEBAN CARDENAS' },
+  { email: 'lidercompras@test.com', label: 'Compras (Lider Compras Test)', path: '/compras/home', firstNameOnly: 'LIDERCOMPRAS', fullName: 'LIDER COMPRAS TEST' },
+  { email: 'liderbodega@test.com', label: 'Bodega (Lider Bodega Test)', path: '/bodega/home', firstNameOnly: 'LIDERBODEGA', fullName: 'LIDER BODEGA TEST' },
   // NOTA 2026-09-13: el CLAUDE.md del proyecto (batch SCRUM-800, 2026-08-28) documenta que el
   // Líder de Servicios fue renombrado Lider Servicios→Lider Servicios (apellido real "Lider Servicios" pendiente de confirmar,
   // placeholder "Lider Servicios Test" en los 3 entornos) — la memoria de roster (project_roster_usuarios_
   // reales_atlanticerp) seguía diciendo "Lider Servicios Leis" para este email, desactualizada. Confirmado en vivo:
-  // BIENVENIDO, ALDO (no "Lider Servicios Test") — el saludo YA está correcto, el dato viejo era el nombre
+  // BIENVENIDO, LIDERSERVICIOS (no "Lider Servicios Test") — el saludo YA está correcto, el dato viejo era el nombre
   // esperado en este test, no un bug de SCRUM-863.
-  { email: 'liderservicios@test.com', label: 'Servicios (Lider Servicios, líder de Servicios)', path: '/servicios/home', firstNameOnly: 'ALDO', fullName: 'ALDO ALDO' },
-  { email: 'contabilidad@test.com', label: 'Administración (Contabilidad Test)', path: '/admin-contab/home', firstNameOnly: 'FELIX', fullName: 'FELIX CAMPOS' },
+  { email: 'liderservicios@test.com', label: 'Servicios (Lider Servicios, líder de Servicios)', path: '/servicios/home', firstNameOnly: 'LIDERSERVICIOS', fullName: 'LIDERSERVICIOS LIDERSERVICIOS' },
+  { email: 'contabilidad@test.com', label: 'Administración (Contabilidad Test)', path: '/admin-contab/home', firstNameOnly: 'CONTABILIDAD', fullName: 'CONTABILIDAD CAMPOS' },
 ]
 
 for (const c of greetingCases) {

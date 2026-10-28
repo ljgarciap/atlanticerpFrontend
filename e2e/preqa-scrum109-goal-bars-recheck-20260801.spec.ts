@@ -44,7 +44,7 @@ test('1. Vendedor (con Meta, $0 vendido) — barras + labels $ visibles, mes en 
 test('2. Vendedor (SIN Meta configurada) — resto del grafico sigue funcionando', async ({ page }) => {
   await login(page, 'vendedor6@test.com')
   await gotoReports(page)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/02-annie-sin-meta.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/02-usuario-sin-meta.png', fullPage: true })
 
   await expect(page.getByText(/sin meta configurada/i)).toBeVisible()
   // El resto del panel (barras de Vendido + mes en curso) no debe romperse solo porque
@@ -65,15 +65,15 @@ test('3. Gerencia (management) — toggle Inicio(personal) / Equipo re-renderiza
   // Scope toggle es el primer div "rounded-lg border" dentro del Card de filtros
   // (canSeeTeam) — "Inicio" tambien matchea el link del sidebar, hay que acotar.
   const scopeToggle = page.locator('div.rounded-lg.border.border-slate-200').first()
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03a-daniela-inicio-personal.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03a-gerencia1-inicio-personal.png', fullPage: true })
 
   await scopeToggle.getByRole('button', { name: /^equipo$/i }).click()
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03b-daniela-equipo.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03b-gerencia1-equipo.png', fullPage: true })
 
   await scopeToggle.getByRole('button', { name: /^inicio$/i }).click()
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03c-daniela-vuelta-personal.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/03c-gerencia1-vuelta-personal.png', fullPage: true })
 })
 
 test('4. Vendedor — selector de periodo (Mes/Trimestre/Año) no rompe el panel Metas', async ({ page }) => {

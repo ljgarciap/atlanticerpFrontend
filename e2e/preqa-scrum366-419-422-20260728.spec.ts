@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test'
 /**
  * SCRUM-366 (REQ-296), SCRUM-419 (REQ-349), SCRUM-422 (REQ-352) — Pre-QA 2026-07-28.
  * Todos del mismo commit eb8a6f9 (atlanticerp-backend, rama dev), desplegado en dev.atlanticerp.ai. Los 3
- * fueron rebotados por marly.rangel el 2026-07-24 y corregidos por Backend Dev el 2026-07-28,
+ * fueron rebotados por qa.qa el 2026-07-24 y corregidos por Backend Dev el 2026-07-28,
  * con Senior Review ya APROBADO (consolidado en el comentario de SCRUM-366).
  *
- * Corre contra dev.atlanticerp.ai (mismos datos que usará marly), no contra un stack local.
+ * Corre contra dev.atlanticerp.ai (mismos datos que usará qa), no contra un stack local.
  * Serial a propósito: dev.atlanticerp.ai corre CrowdSec/ModSecurity (ver CLAUDE.md, Epic 11) y logins
  * en paralelo desde la misma IP dispararon falsos timeouts en la primera corrida.
  */
@@ -27,7 +27,7 @@ async function login(page, email: string, password: string) {
 // SCRUM-366 — selector de persona dentro de "Equipo" (Bodega > Inicio)
 // ─────────────────────────────────────────────────────────────────────────
 test.describe('SCRUM-366 — selector de persona en Equipo', () => {
-  test('BUG 1 (marly) — el selector solo lista Asistentes, no Jefe/Ayudante/Transporte', async ({ page }) => {
+  test('BUG 1 (qa) — el selector solo lista Asistentes, no Jefe/Ayudante/Transporte', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
@@ -55,7 +55,7 @@ test.describe('SCRUM-366 — selector de persona en Equipo', () => {
     expect(body).toMatch(/el equipo tiene/i)
   })
 
-  test('BUG 2 (marly) — filtrar por una persona puntual habla en singular, no en plural de equipo', async ({ page }) => {
+  test('BUG 2 (qa) — filtrar por una persona puntual habla en singular, no en plural de equipo', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/home`)
     await page.getByRole('button', { name: 'Equipo', exact: true }).waitFor({ timeout: 15000 })
@@ -116,7 +116,7 @@ function brandSelect(page) {
 }
 
 test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
-  test('BUG (marly) — el dropdown Proveedor tiene opciones reales, no solo el placeholder', async ({ page }) => {
+  test('BUG (qa) — el dropdown Proveedor tiene opciones reales, no solo el placeholder', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
@@ -126,7 +126,7 @@ test.describe('SCRUM-419 — filtros Proveedor/Marca', () => {
     expect(options.some(o => /proveedor demo a/i.test(o))).toBeTruthy()
   })
 
-  test('BUG (marly) — el dropdown Marca tiene opciones reales, no solo el placeholder', async ({ page }) => {
+  test('BUG (qa) — el dropdown Marca tiene opciones reales, no solo el placeholder', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
@@ -306,7 +306,7 @@ function warehouseModal(page) {
 }
 
 test.describe('SCRUM-422 — desglose de stock por bodega', () => {
-  test('BUG 1/2 (marly) — SPOT-EMP-010 muestra "2 bodegas" y el modal desglosa 200/100 reales, no 7 en 0', async ({ page }) => {
+  test('BUG 1/2 (qa) — SPOT-EMP-010 muestra "2 bodegas" y el modal desglosa 200/100 reales, no 7 en 0', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)
@@ -331,7 +331,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
     await expect(items).toHaveCount(2)
   })
 
-  test('BUG 2 (marly) — APLQ-PAR-020 (60 disponibles) ya no dice "0 bodegas"', async ({ page }) => {
+  test('BUG 2 (qa) — APLQ-PAR-020 (60 disponibles) ya no dice "0 bodegas"', async ({ page }) => {
     await login(page, 'liderbodega@test.com', 'liderbodega@test.com')
     await page.goto(`${BASE}/bodega/inventario`)
     await page.waitForTimeout(2000)

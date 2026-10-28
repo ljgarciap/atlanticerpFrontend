@@ -705,7 +705,7 @@ function PriceEditModal({ quoteId, partId, item, onClose, onSaved }: {
   })
 
   // RN9.1 — "Guardar" bloqueado mientras haya una violación vigente que el
-  // usuario actual no pueda pasar por alto (Gerencia/David sí pueden, con
+  // usuario actual no pueda pasar por alto (Gerencia/Gerencia2 sí pueden, con
   // confirmación implícita del propio botón — no hay modal de advertencia acá,
   // a diferencia de confirm(), porque acá todavía no se está generando nada).
   const blocked = preview?.violates_margin === true && !preview.can_override

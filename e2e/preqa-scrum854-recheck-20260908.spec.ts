@@ -93,7 +93,7 @@ const BASE = 'http://localhost:5173'
 
 const LIDER_BODEGA = 'liderbodega@test.com'      // lider_bodega
 const ASISTENTE_BODEGA = 'asistentebodega@test.com' // asistente_bodega
-const DANIELA = 'gerencia@test.com'             // management -> canSeeTeam / canViewTeam
+const GERENCIA1 = 'gerencia@test.com'             // management -> canSeeTeam / canViewTeam
 const ANDRES = 'superadmin@test.com'           // superadmin
 
 async function login(page: Page, email: string, password?: string): Promise<void> {
@@ -188,7 +188,7 @@ test('SCRUM-854.1c — Pedidos: filtrar por 1 y por 2 vendedores devuelve result
 // ---------------------------------------------------------------------------
 
 test('SCRUM-854.2 — Pipeline: multi-select, búsqueda por nombre, limpiar, sin selección = todos, red lleva owner_ids[]', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
 
@@ -243,7 +243,7 @@ test('SCRUM-854.2 — Pipeline: multi-select, búsqueda por nombre, limpiar, sin
 // ---------------------------------------------------------------------------
 
 test('SCRUM-854.3 — Lista de Proyectos: mismo checklist', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/crm/projects`)
   await page.waitForTimeout(1500)
 
@@ -289,7 +289,7 @@ test('SCRUM-854.3 — Lista de Proyectos: mismo checklist', async ({ page }) => 
 // ---------------------------------------------------------------------------
 
 test('SCRUM-854.4 — Cotizaciones: mismo checklist', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/ventas-diseno/quotes-list`)
   await page.waitForTimeout(1500)
 
@@ -322,7 +322,7 @@ test('SCRUM-854.4 — Cotizaciones: mismo checklist', async ({ page }) => {
 // ---------------------------------------------------------------------------
 
 test('SCRUM-854.5 — Reportes VentasDiseno: recálculo real (red lleva owner_ids, no filtro visual post-render)', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/ventas-diseno/reports`)
   await page.waitForTimeout(1500)
 

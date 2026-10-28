@@ -154,7 +154,7 @@ export const ventasDisenoApi = {
     changeStage: (id: number, stage: PipelineStage): Promise<PipelineCardDetail> =>
       api.patch<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/stage`, { stage }).then(r => r.data),
 
-    // SCRUM-1128 — aprobación explícita de Gerencia/Félix; el backend genera el pedido una sola vez.
+    // SCRUM-1128 — aprobación explícita de Gerencia/Contabilidad; el backend genera el pedido una sola vez.
     passToOrder: (id: number): Promise<PipelineCardDetail> =>
       api.post<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/pass-to-order`).then(r => r.data),
 
@@ -379,7 +379,7 @@ export const ventasDisenoApi = {
     // asignado (422 si no); marca la cotización como registrada oficialmente
     // (confirmed_at), lo que la hace visible en Pipeline/Cotizaciones/Reportes/Dashboard.
     // SCRUM-725 — `overrideMarginWarning` es la confirmación explícita del modal de
-    // advertencia de margen (Gerencia/David); sin violaciones de margen no hace nada.
+    // advertencia de margen (Gerencia/Gerencia2); sin violaciones de margen no hace nada.
     confirm: (id: number, overrideMarginWarning?: boolean): Promise<QuoteDetail> =>
       api.post<QuoteDetail>(`/ventas-diseno/quotes/${id}/confirm`, overrideMarginWarning ? { override_margin_warning: true } : undefined).then(r => r.data),
 

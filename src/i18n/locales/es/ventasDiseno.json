@@ -383,7 +383,7 @@
       "contribuyente": "Contribuyente (con RUC)",
       "consumidorFinal": "Consumidor final",
       "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin RUC ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
-      "soloMarkFelix": "Solo Gerencia y Contabilidad pueden marcar un cliente como Consumidor final."
+      "soloGerenciaContabilidad": "Solo Gerencia y Contabilidad pueden marcar un cliente como Consumidor final."
     }
   },
   "architects": {

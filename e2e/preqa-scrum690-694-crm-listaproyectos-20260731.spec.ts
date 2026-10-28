@@ -63,7 +63,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
     await expect(page.getByRole('cell', { name: 'Vendedor Test 2' }).first()).toBeVisible()
     await expect(page.getByRole('cell', { name: 'Vendedor Test 4' })).toBeVisible()
 
-    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/02-daniela-equipo.png', fullPage: true })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/02-gerencia1-equipo.png', fullPage: true })
   })
 })
 
