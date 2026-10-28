@@ -550,9 +550,9 @@ export default function QuotePartCard({
                             </span>
                             <span className="shrink-0 flex items-center gap-1.5">
                               <StockBadge stock={product.stock_quantity} />
-                              {(product.stock_showroom ?? 0) > 0 && (
-                                <span className="shrink-0 text-[10px] text-slate-500 whitespace-nowrap" data-testid={`showroom-${product.id}`}>
-                                  {t('ventasDiseno:catalog.showroom', { count: product.stock_showroom })}
+                              {(product.stock_aparte ?? 0) > 0 && (
+                                <span className="shrink-0 text-[10px] text-slate-500 whitespace-nowrap" data-testid={`aparte-${product.id}`}>
+                                  {t('ventasDiseno:catalog.aparte', { count: product.stock_aparte })}
                                 </span>
                               )}
                               <span className="text-slate-500">${formatMoney(product.price_full)}</span>

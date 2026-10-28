@@ -324,7 +324,7 @@ test.describe('SCRUM-422 — desglose de stock por bodega', () => {
     await expect(modal).toBeVisible()
     await expect(modal).toContainText('Bodega Central')
     await expect(modal).toContainText('200')
-    await expect(modal).toContainText('Showroom Obarrio')
+    await expect(modal).toContainText('Sala de exhibición 1')
     await expect(modal).toContainText('100')
     // RN1 — no debe inventar bodegas sin stock (las otras 5 físicas no deben listarse en absoluto).
     const items = modal.locator('li')

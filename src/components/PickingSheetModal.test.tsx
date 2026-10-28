@@ -321,15 +321,15 @@ describe('PickingSheetModal', () => {
   // ── SCRUM-1196 — columna «Bodega»: sale de Bodega Central por defecto, con opción de tomar parte de otra bodega de venta ──────────────
 
   const CENTRAL = { warehouse_id: 1, name: 'Bodega Central', is_default: true, stock: 10, available: 10 }
-  const OBARRIO = { warehouse_id: 3, name: 'Showroom Obarrio', is_default: false, stock: 1, available: 1 }
-  const SALE = [{ id: 1, name: 'Bodega Central', is_default: true }, { id: 3, name: 'Showroom Obarrio', is_default: false }]
+  const EXHIBICION1 = { warehouse_id: 3, name: 'Sala de exhibición 1', is_default: false, stock: 1, available: 1 }
+  const SALE = [{ id: 1, name: 'Bodega Central', is_default: true }, { id: 3, name: 'Sala de exhibición 1', is_default: false }]
 
   function sheetWithWarehouses(item: Record<string, unknown> = {}): OrderPickingSheetResponse {
     return sheet({
       sale_warehouses: SALE,
       items: [{
         id: 100, reference: 'REF-PUB-001', factory_reference: 'FAB-001', description: 'Producto colgante', location: 'A-01', found_at: null, found_location: null,
-        found_note: null, qty_requested: 11, qty_picked: 0, qty_reserved: 10, picking_notes: null, allocations: [], warehouse_options: [CENTRAL, OBARRIO], ...item,
+        found_note: null, qty_requested: 11, qty_picked: 0, qty_reserved: 10, picking_notes: null, allocations: [], warehouse_options: [CENTRAL, EXHIBICION1], ...item,
       }],
     })
   }
@@ -356,12 +356,12 @@ describe('PickingSheetModal', () => {
     expect(screen.getByTestId('picking-warehouse-over-100')).toBeInTheDocument()
   })
 
-  it('SCRUM-1196 — «Tomar de otra bodega» manda el reparto: 10 de Central y 1 de Showroom Obarrio', () => {
+  it('SCRUM-1196 — «Tomar de otra bodega» manda el reparto: 10 de Central y 1 de Sala de exhibición 1', () => {
     mockedUseOrderPickingSheet.mockReturnValue({ data: sheetWithWarehouses(), isLoading: false } as unknown as ReturnType<typeof useOrderPickingSheet>)
     render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
 
     fireEvent.click(screen.getByTestId('picking-extra-add-100'))
-    // alistar los 11 pedidos: 10 de Central + 1 de Obarrio
+    // alistar los 11 pedidos: 10 de Central + 1 de Sala de exhibición 1
     fireEvent.change(screen.getByTestId('picking-alistada-input-100'), { target: { value: '11' } })
     expect(screen.queryByTestId('picking-warehouse-over-100')).not.toBeInTheDocument()
 
@@ -380,7 +380,7 @@ describe('PickingSheetModal', () => {
 
     fireEvent.click(screen.getByTestId('picking-extra-add-100'))
     const select = within(screen.getByTestId('picking-extra-100')).getByRole('combobox')
-    expect(within(select).getAllByRole('option').map(o => o.textContent)).toEqual(['Showroom Obarrio (1)'])
+    expect(within(select).getAllByRole('option').map(o => o.textContent)).toEqual(['Sala de exhibición 1 (1)'])
   })
 
   it('SCRUM-1196 (Pre-QA B1) — «Quitar» persiste: manda el reparto completo, todo a la bodega por defecto', () => {
@@ -399,7 +399,7 @@ describe('PickingSheetModal', () => {
 
   it('SCRUM-1196 — sin saldo en otra bodega no se ofrece «Tomar de otra bodega»', () => {
     mockedUseOrderPickingSheet.mockReturnValue({
-      data: sheetWithWarehouses({ warehouse_options: [CENTRAL, { ...OBARRIO, stock: 0, available: 0 }] }), isLoading: false,
+      data: sheetWithWarehouses({ warehouse_options: [CENTRAL, { ...EXHIBICION1, stock: 0, available: 0 }] }), isLoading: false,
     } as unknown as ReturnType<typeof useOrderPickingSheet>)
     render(<PickingSheetModal orderId={7} onClose={vi.fn()} />)
 
@@ -416,7 +416,7 @@ describe('PickingSheetModal', () => {
 
     const cell = screen.getByTestId('picking-warehouse-100')
     expect(cell).toHaveTextContent('Bodega Central: 10')
-    expect(cell).toHaveTextContent('Showroom Obarrio: 1')
+    expect(cell).toHaveTextContent('Sala de exhibición 1: 1')
   })
 
   it('SCRUM-1196 — una línea sin producto de catálogo (sin opciones de bodega) muestra un guion', () => {

@@ -735,8 +735,8 @@
       "estado": "Estado",
       "actions": "Acciones",
       "empty": "No hay productos registrados",
-      "showroom": "En Showroom Obarrio: {{count}}",
-      "showroomLabel": "En Showroom Obarrio (aparte)"
+      "aparte": "En exhibición (aparte): {{count}}",
+      "aparteLabel": "En exhibición (aparte)"
     },
     "estado": {
       "disponible": "Disponible",

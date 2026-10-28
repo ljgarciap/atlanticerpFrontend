@@ -53,7 +53,7 @@ test('2. Escenario 1/2 — Zona Libre: sin acción propia y excluida como destin
   await page.waitForTimeout(900)
   await page.getByRole('button', { name: 'Reubicar' }).click()
   await page.waitForTimeout(500)
-  const select = page.locator('select').filter({ hasText: /destino|Showroom|Merma/i }).last()
+  const select = page.locator('select').filter({ hasText: /destino|Exhibición|Merma/i }).last()
   const options = await select.locator('option').allTextContents()
   console.log('OPCIONES DE DESTINO:', options)
   expect(options.some(o => o.includes('Zona Libre'))).toBeFalsy()

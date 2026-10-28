@@ -78,7 +78,7 @@ function mockUser(permissions: string[] = ['bodega.read', 'bodega.write']) {
 const WAREHOUSES: PhysicalWarehouse[] = [
   { id: 1, name: 'Bodega Central', responsable: null, capacidad_pct: 68, modo_detalle: 'ubicacion_exacta' },
   { id: 2, name: 'Bodega Pendiente', responsable: null, capacidad_pct: null, modo_detalle: 'pendiente' },
-  { id: 3, name: 'Showroom Cliente', responsable: null, capacidad_pct: null, modo_detalle: 'cliente' },
+  { id: 3, name: 'Exhibición en cliente', responsable: null, capacidad_pct: null, modo_detalle: 'cliente' },
 ]
 
 function detailResponse(overrides: Partial<WarehouseDetailResponse> = {}): WarehouseDetailResponse {
@@ -123,7 +123,7 @@ describe('BodegasPage', () => {
 
     expect(await screen.findByText('Bodega Central')).toBeInTheDocument()
     expect(screen.getByText('Bodega Pendiente')).toBeInTheDocument()
-    expect(screen.getByText('Showroom Cliente')).toBeInTheDocument()
+    expect(screen.getByText('Exhibición en cliente')).toBeInTheDocument()
     await waitFor(() => expect(mockedBodegaApi.warehouses.show).toHaveBeenCalledWith(1, expect.anything()))
   })
 
@@ -254,7 +254,7 @@ describe('BodegasPage', () => {
     const destinationSelect = screen.getByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
     expect(within(destinationSelect).queryByText('Bodega Central')).not.toBeInTheDocument()
     expect(within(destinationSelect).queryByText('Bodega Pendiente')).not.toBeInTheDocument()
-    expect(within(destinationSelect).getByText('Showroom Cliente')).toBeInTheDocument()
+    expect(within(destinationSelect).getByText('Exhibición en cliente')).toBeInTheDocument()
   })
 
   it('el modal Reubicar no envía sin cantidad, destino o motivo', async () => {
@@ -280,7 +280,7 @@ describe('BodegasPage', () => {
     await screen.findByText('bodega:warehouses.relocateModal.title')
 
     // Mejora SCRUM-752 RN1 — destino '2' (Bodega Zona Libre) ya no existe como opción, se usa
-    // '3' (Showroom Cliente) como destino válido en su lugar.
+    // '3' (Exhibición en cliente) como destino válido en su lugar.
     const destinationSelect = screen.getByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
     fireEvent.change(destinationSelect, { target: { value: '3' } })
 
@@ -361,11 +361,11 @@ describe('BodegasPage', () => {
 
   // SCRUM-1160 — «Ver detalle» en cada solicitud, cualquier estado, solo consulta, con el motivo COMPLETO (en la tabla se corta a 180 px).
   describe('SCRUM-1160 — Ver detalle de una solicitud de reubicación', () => {
-    const MOTIVO_LARGO = 'Reorganización del piso de venta por cambio de temporada: se mueve el producto a la bodega de showroom para exhibirlo junto a la línea nueva y liberar espacio en la ubicación A-12 antes de la llegada del contenedor.'
+    const MOTIVO_LARGO = 'Reorganización del piso de venta por cambio de temporada: se mueve el producto a la bodega de exhibición para exhibirlo junto a la línea nueva y liberar espacio en la ubicación A-12 antes de la llegada del contenedor.'
     const filas = [
       { id: 5, producto: { id: 1, reference: 'CRISTAL-IMPERIAL', description: 'Modelo de cristal' }, bodega_origen: 'Bodega Central', bodega_destino: 'Merma',
         cantidad: 4, motivo: MOTIVO_LARGO, solicitado_por: 'Jorge P.', fecha: '2026-07-24T10:00:00Z', estado: 'pendiente' as const, motivo_rechazo: null, resuelto_por: null },
-      { id: 6, producto: { id: 2, reference: 'NORDIC-40', description: 'Producto colgante' }, bodega_origen: 'Bodega Central', bodega_destino: 'Showroom',
+      { id: 6, producto: { id: 2, reference: 'NORDIC-40', description: 'Producto colgante' }, bodega_origen: 'Bodega Central', bodega_destino: 'Exhibicion',
         cantidad: 2, motivo: 'Exhibición', solicitado_por: 'Ana R.', fecha: '2026-07-23T09:00:00Z', estado: 'aprobada' as const, motivo_rechazo: null, resuelto_por: 'Gerencia B.' },
       { id: 7, producto: { id: 3, reference: 'SPOT-9', description: 'Spot magnético' }, bodega_origen: 'Merma', bodega_destino: 'Bodega Central',
         cantidad: 1, motivo: 'Corrección', solicitado_por: 'Luis G.', fecha: '2026-07-22T08:00:00Z', estado: 'rechazada' as const, motivo_rechazo: 'No hay espacio en destino', resuelto_por: 'Gerencia B.' },
@@ -548,7 +548,7 @@ describe('BodegasPage', () => {
 
     expect(await screen.findByText('bodega:warehouses.locations.manageButton')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Showroom Cliente'))
+    fireEvent.click(screen.getByText('Exhibición en cliente'))
     mockedBodegaApi.warehouses.show.mockResolvedValue(detailResponse({ warehouse: WAREHOUSES[2] }))
 
     await waitFor(() => expect(screen.queryByText('bodega:warehouses.locations.manageButton')).not.toBeInTheDocument())

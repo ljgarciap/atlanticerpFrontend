@@ -446,7 +446,7 @@ describe('BodegaInventarioGeneralPage', () => {
   it('fila Aprobada con aplicado_at nulo muestra "Realizar ajuste"; tras aplicarlo, queda deshabilitado (SCRUM-466)', async () => {
     mockedApi.generalCounts.list.mockResolvedValue({
       data: [{
-        id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
+        id: 3, warehouse_id: 4, bodega: 'Sala de exhibición 1', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
         motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
@@ -454,7 +454,7 @@ describe('BodegaInventarioGeneralPage', () => {
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 }, can_approve: true,
     })
     mockedApi.generalCounts.apply.mockResolvedValue({
-      id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
+      id: 3, warehouse_id: 4, bodega: 'Sala de exhibición 1', realizado_por: 'Jorge P.',
       estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
       motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
       aplicado_at: '2026-07-25T10:00:00Z', fecha_solicitud_aprobacion: null,
@@ -473,7 +473,7 @@ describe('BodegaInventarioGeneralPage', () => {
     mockedUseAuthStore.mockReturnValue('management' as never) // rol de Gerencia
     mockedApi.generalCounts.list.mockResolvedValue({
       data: [{
-        id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
+        id: 3, warehouse_id: 4, bodega: 'Sala de exhibición 1', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
         motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
@@ -482,7 +482,7 @@ describe('BodegaInventarioGeneralPage', () => {
     })
 
     renderPage()
-    await screen.findByText('Showroom Obarrio')
+    await screen.findByText('Sala de exhibición 1')
 
     expect(screen.queryByText('bodega:generalCounts.tray.actions.applyAdjustment')).not.toBeInTheDocument()
   })
@@ -491,7 +491,7 @@ describe('BodegaInventarioGeneralPage', () => {
     mockedUseAuthStore.mockReturnValue('asistente_bodega' as never)
     mockedApi.generalCounts.list.mockResolvedValue({
       data: [{
-        id: 3, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
+        id: 3, warehouse_id: 4, bodega: 'Sala de exhibición 1', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
         motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: null, fecha_solicitud_aprobacion: null,
@@ -500,7 +500,7 @@ describe('BodegaInventarioGeneralPage', () => {
     })
 
     renderPage()
-    await screen.findByText('Showroom Obarrio')
+    await screen.findByText('Sala de exhibición 1')
 
     expect(screen.queryByText('bodega:generalCounts.tray.actions.applyAdjustment')).not.toBeInTheDocument()
   })
@@ -508,7 +508,7 @@ describe('BodegaInventarioGeneralPage', () => {
   it('fila Aprobada con aplicado_at ya presente muestra "Ajuste aplicado" deshabilitado, no un botón', async () => {
     mockedApi.generalCounts.list.mockResolvedValue({
       data: [{
-        id: 4, warehouse_id: 4, bodega: 'Showroom Obarrio', realizado_por: 'Jorge P.',
+        id: 4, warehouse_id: 4, bodega: 'Sala de exhibición 1', realizado_por: 'Jorge P.',
         estado: 'aprobada', total_productos: 1, diferencias_encontradas: 0, fecha: '2026-06-28T10:00:00Z',
         motivo_rechazo: null, resuelto_por: 'Gerencia', resuelto_at: '2026-06-29T10:00:00Z',
         aplicado_at: '2026-06-30T10:00:00Z', fecha_solicitud_aprobacion: null,

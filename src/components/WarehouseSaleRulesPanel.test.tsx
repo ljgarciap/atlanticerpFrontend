@@ -15,7 +15,7 @@ const mockedUpdate = vi.mocked(useUpdateWarehouseSaleRule)
 
 const RULES: WarehouseSaleRule[] = [
   { id: 1, name: 'Bodega Central', permite_venta: true, despacho_por_defecto: true, excluye_disponible: false },
-  { id: 3, name: 'Showroom Obarrio', permite_venta: true, despacho_por_defecto: false, excluye_disponible: true },
+  { id: 3, name: 'Sala de exhibición 1', permite_venta: true, despacho_por_defecto: false, excluye_disponible: true },
   { id: 7, name: 'Reclamos y Devoluciones', permite_venta: false, despacho_por_defecto: false, excluye_disponible: true },
 ]
 

@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test'
 //                       FRESCA (10u, nunca reportada por Bodega) -> usado para el flujo completo
 //                       de "Confirmar llegada física" (SCRUM-427).
 //   96  ITEM-COL-002  — sin ningún movimiento -> caso "nada pendiente" (sin botón/nota).
-//   97  SPOT-EMP-010  — stock repartido en 2 bodegas (200 Bodega Central + 100 Showroom Obarrio).
+//   97  SPOT-EMP-010  — stock repartido en 2 bodegas (200 Bodega Central + 100 Sala de exhibición 1).
 //   98  SPOT-EMP-011  — 120u en camino (PO a Marca Demo B Import, llegada estimada 2026-08-02).
 //   99  RIEL-TRK-050  — YA confirmado por Bodega vía API antes de este batch (awaiting_compras).
 //   100 APLQ-PAR-020  — awaiting_compras=true (bodega ya reportó, Compras no finalizó).
@@ -158,7 +158,7 @@ test('SCRUM-422 — Bodega(s): desglose real sin inventar bodegas sin stock', as
   const modal = await page.locator('.fixed.inset-0').innerText()
   expect(modal).toContain('Bodega Central')
   expect(modal).toContain('200')
-  expect(modal).toContain('Showroom Obarrio')
+  expect(modal).toContain('Sala de exhibición 1')
   expect(modal).toContain('100')
   await page.screenshot({ path: 'e2e/.tmp/scrum422-warehouse-breakdown.png', fullPage: true })
 })

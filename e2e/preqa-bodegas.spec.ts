@@ -21,9 +21,9 @@ test('Bodegas — las 7 pestañas se muestran, Bodega Central por defecto (REQ-3
 
   await expect(page.getByRole('button', { name: 'Bodega Central' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Bodega Zona Libre' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Showroom Obarrio' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Showroom SM' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Showroom Cliente' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sala de exhibición 1' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sala de exhibición 2' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Exhibición en cliente' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Merma' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Reclamos y Devoluciones' })).toBeVisible()
   expect(errors).toEqual([])

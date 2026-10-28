@@ -277,10 +277,10 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
       por_servir: 3,
       warehouses: [
         { warehouse_id: 1, name: 'Bodega Central', quantity: 200 },
-        { warehouse_id: 2, name: 'Showroom Obarrio', quantity: 100 },
+        { warehouse_id: 2, name: 'Sala de exhibición 1', quantity: 100 },
         { warehouse_id: 3, name: 'Bodega Zona Libre', quantity: 0 },
-        { warehouse_id: 4, name: 'Showroom SM', quantity: 0 },
-        { warehouse_id: 5, name: 'Showroom Cliente', quantity: 0 },
+        { warehouse_id: 4, name: 'Sala de exhibición 2', quantity: 0 },
+        { warehouse_id: 5, name: 'Exhibición en cliente', quantity: 0 },
         { warehouse_id: 6, name: 'Merma', quantity: 0 },
         { warehouse_id: 7, name: 'Reclamos y Devoluciones', quantity: 0 },
       ],
@@ -294,10 +294,10 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     const modalTitle = await screen.findByText(/warehouseModal\.title/)
     const modal = modalTitle.closest('[class*="rounded-2xl"]') as HTMLElement
     await waitFor(() => expect(within(modal).getByText('Bodega Central')).toBeInTheDocument())
-    expect(within(modal).getByText('Showroom Obarrio')).toBeInTheDocument()
+    expect(within(modal).getByText('Sala de exhibición 1')).toBeInTheDocument()
     expect(within(modal).queryByText('Bodega Zona Libre')).not.toBeInTheDocument()
-    expect(within(modal).queryByText('Showroom SM')).not.toBeInTheDocument()
-    expect(within(modal).queryByText('Showroom Cliente')).not.toBeInTheDocument()
+    expect(within(modal).queryByText('Sala de exhibición 2')).not.toBeInTheDocument()
+    expect(within(modal).queryByText('Exhibición en cliente')).not.toBeInTheDocument()
     expect(within(modal).queryByText('Merma')).not.toBeInTheDocument()
     expect(within(modal).queryByText('Reclamos y Devoluciones')).not.toBeInTheDocument()
   })

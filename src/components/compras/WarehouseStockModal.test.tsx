@@ -19,7 +19,7 @@ describe('WarehouseStockModal (SCRUM-1196)', () => {
     mocked.mockReturnValue({
       data: { data: [
         { warehouse_id: 1, warehouse_name: 'Bodega Central', quantity: 10 },
-        { warehouse_id: 3, warehouse_name: 'Showroom Obarrio', quantity: 1 },
+        { warehouse_id: 3, warehouse_name: 'Sala de exhibición 1', quantity: 1 },
         { warehouse_id: 7, warehouse_name: 'Reclamos y Devoluciones', quantity: -8 },
       ] }, isLoading: false,
     } as unknown as ReturnType<typeof useInventoryWarehouseStock>)

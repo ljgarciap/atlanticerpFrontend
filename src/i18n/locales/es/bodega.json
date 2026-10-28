@@ -789,7 +789,7 @@
     "forbidden": "No tienes acceso a esta pantalla.",
     "warehouseRules": {
       "title": "Reglas de bodega",
-      "help": "Qué bodegas pueden surtir pedidos de venta, cuál es la de despacho por defecto (siempre una, y de venta) y cuáles se excluyen del «Disponible». Lo de una bodega de venta excluida (p. ej. Showroom Obarrio) se muestra aparte a los vendedores.",
+      "help": "Qué bodegas pueden surtir pedidos de venta, cuál es la de despacho por defecto (siempre una, y de venta) y cuáles se excluyen del «Disponible». Lo de una bodega de venta excluida (p. ej. Sala de exhibición 1) se muestra aparte a los vendedores.",
       "loading": "Cargando bodegas…",
       "columns": {
         "warehouse": "Bodega",

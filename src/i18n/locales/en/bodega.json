@@ -789,7 +789,7 @@
     "forbidden": "You don't have access to this screen.",
     "warehouseRules": {
       "title": "Warehouse rules",
-      "help": "Which warehouses can fulfil sales orders, which one is the default dispatch warehouse (always one, and a sales one) and which ones are excluded from «Available». Stock in an excluded sales warehouse (e.g. Showroom Obarrio) is shown separately to sellers.",
+      "help": "Which warehouses can fulfil sales orders, which one is the default dispatch warehouse (always one, and a sales one) and which ones are excluded from «Available». Stock in an excluded sales warehouse (e.g. Sala de exhibición 1) is shown separately to sellers.",
       "loading": "Loading warehouses…",
       "columns": {
         "warehouse": "Warehouse",

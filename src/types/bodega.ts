@@ -1049,7 +1049,7 @@ export interface PickingSheetItem {
   /** SCRUM-1196 — lo que el sistema le reservó a este pedido (en la bodega de despacho por defecto, nunca más que su saldo). */
   qty_reserved?:     number
   picking_notes:     string | null
-  /** SCRUM-1196 — de qué bodega(s) sale la línea y cuánto (`manual` = la escogió Bodega, p. ej. 1 pieza de Showroom Obarrio). */
+  /** SCRUM-1196 — de qué bodega(s) sale la línea y cuánto (`manual` = la escogió Bodega, p. ej. 1 pieza de Sala de exhibición 1). */
   allocations?:      PickingSheetAllocation[]
   /** SCRUM-1196 — bodegas de venta que se pueden usar para esta línea, con su saldo; vacío en líneas personalizadas (sin producto de catálogo). */
   warehouse_options?: PickingWarehouseOption[]
@@ -1077,7 +1077,7 @@ export interface OrderPickingSheetResponse {
   /** RN3 (REQ-315) — `true` solo si `order.stage === 'en_picking'`; en cualquier otra etapa la
    * hoja es de solo consulta. */
   editable: boolean
-  /** SCRUM-1196 — bodegas de venta (Central y Showroom Obarrio); el selector de la hoja ofrece solo estas. */
+  /** SCRUM-1196 — bodegas de venta (Central y Sala de exhibición 1); el selector de la hoja ofrece solo estas. */
   sale_warehouses?: { id: number; name: string; is_default: boolean }[]
   items:    PickingSheetItem[]
 }
@@ -1593,7 +1593,7 @@ export interface BodegaRutasDiaResponse {
 export interface WarehouseSaleRule {
   id:                   number
   name:                 string
-  /** Puede surtir pedidos de venta (Central y Showroom Obarrio). */
+  /** Puede surtir pedidos de venta (Central y Sala de exhibición 1). */
   permite_venta:        boolean
   /** La que el picking propone: siempre exactamente una, y de venta. */
   despacho_por_defecto: boolean

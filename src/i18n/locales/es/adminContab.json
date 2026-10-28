@@ -148,7 +148,7 @@
       },
       "tipos": {
         "bodega": "Bodega",
-        "showroom": "Showroom",
+        "exhibicion": "Exhibición",
         "oficina": "Oficina",
         "otra": "Otra"
       },

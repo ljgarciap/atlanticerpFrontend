@@ -187,7 +187,7 @@
     "familyProductsCount": "{{count}} products",
     "familiesEmpty": "No families configured",
     "selectAllProducts": "Select products",
-    "showroom": "Showroom Obarrio: {{count}}"
+    "aparte": "On display (separate): {{count}}"
   },
   "catalogScreen": {
     "resultsCount_one": "{{count}} product",
@@ -231,7 +231,7 @@
       "availableCompact": "{{count}} units",
       "unavailableCompact": "Out of stock",
       "incoming": "+{{count}} incoming",
-      "showroom": "In Showroom Obarrio: {{count}}"
+      "aparte": "On display (separate): {{count}}"
     },
     "badge": {
       "ok": "Sheet",

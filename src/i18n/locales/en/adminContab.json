@@ -146,7 +146,7 @@
       },
       "tipos": {
         "bodega": "Warehouse",
-        "showroom": "Showroom",
+        "exhibicion": "Display room",
         "oficina": "Office",
         "otra": "Other"
       },

@@ -9,7 +9,7 @@ import type { CompanyProfile, Location, Contact } from '@/types/adminContab'
 // Batch Datos de la Empresa (SCRUM-638→642, REQ-561→565). Cubre: modo edición bloquea/desbloquea
 // campos (REQ-561), razón social/nombre comercial/moneda/año fiscal nunca editables (RN3 REQ-561,
 // RN1 REQ-565), gate de 403 → "acceso restringido", el select de tipo al crear ubicación no ofrece
-// Bodega/Showroom (RN1 REQ-563), ubicaciones no editables sin acción de desactivar, zona horaria
+// Bodega/Exhibición (RN1 REQ-563), ubicaciones no editables sin acción de desactivar, zona horaria
 // exige selección.
 
 vi.mock('react-i18next', () => ({
@@ -140,7 +140,7 @@ describe('CompanyProfilePage', () => {
     expect(screen.queryByText('adminContab:empresa.title')).not.toBeInTheDocument()
   })
 
-  it('el formulario de alta de ubicación solo ofrece Oficina/Otra, nunca Bodega/Showroom', async () => {
+  it('el formulario de alta de ubicación solo ofrece Oficina/Otra, nunca Bodega/Exhibición', async () => {
     renderPage()
     await screen.findByDisplayValue('https://atlantic.com.pa')
     fireEvent.click(screen.getByText('common:actions.edit'))
@@ -148,7 +148,7 @@ describe('CompanyProfilePage', () => {
     fireEvent.click(await screen.findByText('adminContab:empresa.ubicaciones.addButton'))
 
     const options = screen.getAllByRole('option').map(o => (o as HTMLOptionElement).value)
-    const tipoOptions = options.filter(v => v === 'oficina' || v === 'otra' || v === 'Bodega' || v === 'Showroom')
+    const tipoOptions = options.filter(v => v === 'oficina' || v === 'otra' || v === 'Bodega' || v === 'Exhibicion')
     expect(tipoOptions).toEqual(['oficina', 'otra'])
   })
 

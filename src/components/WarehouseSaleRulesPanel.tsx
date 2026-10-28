@@ -13,7 +13,7 @@ function errorMessage(err: unknown, fallback: string): string {
 
 /**
  * SCRUM-1196 — «Reglas de bodega» (Configuración de Bodega, solo superadmin): qué bodegas pueden surtir pedidos de venta, cuál es la de despacho por defecto
- * (siempre exactamente una, y de venta) y cuáles se excluyen del «Disponible» (lo de una bodega de venta excluida, hoy Showroom Obarrio, se muestra aparte
+ * (siempre exactamente una, y de venta) y cuáles se excluyen del «Disponible» (lo de una bodega de venta excluida, hoy Sala de exhibición 1, se muestra aparte
  * a los vendedores). Regla del proyecto: estos valores de negocio se cambian aquí, sin deploy. El servidor valida las invariantes; esto solo las guía.
  */
 export default function WarehouseSaleRulesPanel() {
