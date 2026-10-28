@@ -12,7 +12,7 @@ import { execSync } from 'node:child_process'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const DL_DIR = 'e2e/.tmp/preqa-scrum702'
 
 async function login(page: Page, email: string) {
@@ -149,7 +149,7 @@ test('6. Rol sin ventas_diseno.read — endpoint responde 401/403, no solo botó
 })
 
 test('7. Producto inactivo — NUNCA aparece, ni en modo completo', async ({ page }) => {
-  const sshBase = 'ssh -i /Users/lgarcia/.ssh/atlanticerp/atlanticerp-key.pem -o StrictHostKeyChecking=no ubuntu@dev.atlanticerp.ai'
+  const sshBase = `ssh -i /Users/lgarcia/.ssh/atlanticerp/atlanticerp-key.pem -o StrictHostKeyChecking=no ubuntu@${process.env.E2E_SSH_HOST}`
   const psql = (sql: string) =>
     execSync(
       `${sshBase} "cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml exec -T postgres psql -U atlanticerp -d atlanticerp -c \\"SET search_path TO atlantic_ventas_diseno; ${sql}\\""  < /dev/null`,

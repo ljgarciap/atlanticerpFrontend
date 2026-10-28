@@ -21,7 +21,7 @@ import { execSync } from 'node:child_process'
 // del anterior; en serial, un CRÍTICO real (ver 849.5 abajo) abortaría el resto de la corrida.
 // Se corre con --workers=1 desde la CLI para mantener las requests secuenciales contra
 // dev.atlanticerp.ai (ver feedback_preqa_crowdsec_no_paralelo.md).
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 interface Fixture849 {
   card1_lead_vendedor2_valid: number
@@ -42,7 +42,7 @@ let fx: Fixture849
 
 test.beforeAll(() => {
   const sshKey = '/Users/lgarcia/.ssh/atlanticerp/atlanticerp-key.pem'
-  const sshBase = `ssh -i ${sshKey} -o StrictHostKeyChecking=no ubuntu@dev.atlanticerp.ai`
+  const sshBase = `ssh -i ${sshKey} -o StrictHostKeyChecking=no ubuntu@${process.env.E2E_SSH_HOST}`
   const out = execSync(
     `${sshBase} "docker cp /tmp/seed_scrum849.php \\$(cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml ps -q laravel):/tmp/seed_scrum849.php && cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml exec -T laravel php artisan tinker /tmp/seed_scrum849.php < /dev/null"`,
     { stdio: 'pipe' },
@@ -52,7 +52,7 @@ test.beforeAll(() => {
   const end = out.indexOf('}', start)
   if (end === -1) throw new Error('SCRUM-849 self-seed devolvió JSON incompleto. Output crudo: ' + out)
   fx = JSON.parse(out.slice(start, end + 1))
-  console.log('SCRUM-849 fixture sembrado en dev.atlanticerp.ai:', JSON.stringify(fx))
+  console.log('SCRUM-849 fixture sembrado:', JSON.stringify(fx))
 })
 
 const VENDEDOR2    = 'vendedor2@test.com'

@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const EMAIL = 'management@atlantic.test'
 const PASSWORD = 'Password123!'
 

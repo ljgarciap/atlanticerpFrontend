@@ -35,7 +35,7 @@ test.describe.configure({ mode: 'serial' })
 
 test.beforeAll(() => {
   const host = new URL(BASE).hostname
-  if (!['localhost', '127.0.0.1', 'dev.atlanticerp.ai', 'test.atlanticerp.ai'].includes(host)) {
+  if (!['localhost', '127.0.0.1', ...(process.env.E2E_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)].includes(host)) {
     throw new Error(`fe-transmisiones-gating solo corre contra local, dev o test (BASE=${BASE})`)
   }
 })

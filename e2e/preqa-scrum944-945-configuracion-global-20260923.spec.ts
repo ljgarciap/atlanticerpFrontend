@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs'
  * Todo lo que el spec modifica se restaura en afterAll a los valores de la línea base
  * (crm_settings 3/7/21 y los tramos leídos al empezar).
  */
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

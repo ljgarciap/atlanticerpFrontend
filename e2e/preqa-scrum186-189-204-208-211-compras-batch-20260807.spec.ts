@@ -17,7 +17,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 const LIDER_COMPRAS_EMAIL = 'lidercompras@test.com'
 const LIDER_COMPRAS_PASS  = 'lidercompras@test.com'

@@ -175,7 +175,7 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
   function sshTinker(phpExpr: string): void {
     const escaped = phpExpr.replace(/"/g, '\\"')
     execSync(
-      'ssh -i /Users/lgarcia/.ssh/atlanticerp/atlanticerp-key.pem -o StrictHostKeyChecking=no ubuntu@dev.atlanticerp.ai ' +
+      'ssh -i /Users/lgarcia/.ssh/atlanticerp/atlanticerp-key.pem -o StrictHostKeyChecking=no ubuntu@' + process.env.E2E_SSH_HOST + ' ' +
       `"cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml exec -T laravel php artisan tinker --execute=\\"${escaped}\\"" < /dev/null`,
       { stdio: 'pipe' },
     )

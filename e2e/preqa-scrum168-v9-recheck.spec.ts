@@ -10,7 +10,7 @@ test.describe.configure({ mode: 'serial' })
 // dev.atlanticerp.ai — BASE explícito, no depende del default de playwright.config.ts (localhost:5173,
 // ver memoria feedback_playwright_spec_default_baseurl_remote_gotcha).
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8
 const RESTRICTED_LEVEL_PASSWORD = GERENCIA5 // default = email, confirmado en v7/v8
 

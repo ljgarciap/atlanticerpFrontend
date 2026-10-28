@@ -8,7 +8,7 @@ import { test, expect, Page } from '@playwright/test'
  * feedback_preqa_crowdsec_no_paralelo.
  */
 
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 // Umbral de referencia para distinguir "TOTAL real" de "tamaño del array ya capado" en el botón
 // "Ver los N artículos" de Artículos críticos — el cap real es MAX_HOME_CARD_ITEMS=5 en el
 // frontend (atlanticerp-frontend/src/lib/homeCards.ts), cualquier valor bien por encima de eso confirma

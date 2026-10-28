@@ -25,7 +25,7 @@ test.use({ baseURL: BASE })
 
 test.beforeAll(() => {
   const host = new URL(BASE).hostname
-  if (!['localhost', '127.0.0.1', 'dev.atlanticerp.ai', 'test.atlanticerp.ai'].includes(host)) {
+  if (!['localhost', '127.0.0.1', ...(process.env.E2E_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)].includes(host)) {
     throw new Error(`receptor-consumidor-final-facturacion solo corre contra local, dev o test (BASE=${BASE})`)
   }
 })

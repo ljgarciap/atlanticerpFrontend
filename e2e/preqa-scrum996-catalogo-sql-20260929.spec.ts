@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test'
 //   1. Home de Bodega "Artículos críticos": el total del botón debe coincidir con el Inventario al que enlaza (O1).
 //   2. Bodegas: la búsqueda dentro de una bodega (autocompletado + Enter) no da 5xx y filtra.
 //   3. Solicitud de ajuste: el buscador de producto del modal "Nueva solicitud" responde y tope de 10.
-test.use({ baseURL: process.env.E2E_BASE_URL ?? 'https://dev.atlanticerp.ai' })
+test.use({ baseURL: process.env.E2E_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092' })
 test.describe.configure({ mode: 'serial' })
 
 async function login(page: Page, email: string, password: string = email) {

@@ -32,7 +32,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const LIDERBODEGA_EMAIL = 'liderbodega@test.com'
 const LIDERBODEGA_PASSWORD = 'liderbodega@test.com'
 

@@ -10,7 +10,7 @@ import { writeFileSync } from 'node:fs'
  * no una versión simplificada.
  */
 
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

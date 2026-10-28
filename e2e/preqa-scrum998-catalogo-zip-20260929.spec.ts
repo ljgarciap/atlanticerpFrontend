@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test'
 // Precondición: `E2E_EXPORT_ID` = una exportación YA TERMINADA de `vendedor3@` (se genera con la API real: POST
 // /ventas-diseno/catalog/send-pdf con más productos que `catalog_pdf_max_single_products` y se espera a `done`; la corrida real
 // de Horizon + S3 la hace el Pre-QA). Sin esa variable el spec se salta: no fabrica datos por su cuenta.
-test.use({ baseURL: process.env.E2E_BASE_URL ?? 'https://dev.atlanticerp.ai' })
+test.use({ baseURL: process.env.E2E_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092' })
 test.describe.configure({ mode: 'serial' })
 
 const EXPORT_ID = process.env.E2E_EXPORT_ID ?? ''

@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test'
  * Contactos (incluido "Agregar contacto existente") queda disponible apenas se elige el
  * Subcliente, sin tocar "Guardar borrador". Sin cambio de código nuevo en este ticket.
  */
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 test('elegir Subcliente habilita "Agregar contacto existente" sin guardar antes', async ({ page }) => {
   await page.goto(`${BASE}/login`)

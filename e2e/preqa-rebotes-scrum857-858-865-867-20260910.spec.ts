@@ -11,7 +11,7 @@ import { test, expect, Page } from '@playwright/test'
  * el browser real: que las 3 pantallas rebotadas muestren el dato que faltaba.
  */
 
-const BASE = 'https://dev.atlanticerp.ai'
+const BASE = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 const CONTABILIDAD = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
 
