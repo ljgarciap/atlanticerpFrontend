@@ -57,18 +57,15 @@ function makeProduct(overrides: Partial<InventoryProduct> = {}): InventoryProduc
   }
 }
 
-// SCRUM-425/426 — mismos 12 campos/orden que TECHNICAL_SPEC_FIELDS en InventarioPage.tsx.
-const TECHNICAL_SPEC_FIELD_KEYS: (keyof TechnicalSpec)[] = [
-  'voltage', 'power', 'socket_type', 'color_temperature', 'luminous_flux', 'dimensions',
-  'weight', 'material_finish', 'ip_rating', 'estimated_lifespan', 'warranty', 'certifications',
-]
+// SCRUM-425/426 + Fase 9c — claves y etiquetas de respaldo (campos genéricos de sistema del catálogo `technical_spec_field`).
+const TECHNICAL_SPEC_FIELD_LABELS: Record<string, string> = {
+  dimensions: 'Dimensiones', weight: 'Peso', material_finish: 'Material / acabado', warranty: 'Garantía', certifications: 'Certificaciones',
+}
 
 function makeTechnicalSpec(overrides: Partial<TechnicalSpec> = {}): TechnicalSpec {
   return {
-    voltage: '110V - 220V', power: '12 W', socket_type: 'E27', color_temperature: '3000K (cálida)',
-    luminous_flux: '1050 lúmenes', dimensions: '40 x 40 x 55 cm', weight: '2.3 kg',
-    material_finish: 'Metal pintado, difusor en vidrio', ip_rating: 'IP20 (interior)',
-    estimated_lifespan: '25,000 horas', warranty: '12 meses', certifications: 'CE, RoHS',
+    dimensions: '40 x 40 x 55 cm', weight: '2.3 kg', material_finish: 'Metal pintado, difusor en vidrio',
+    warranty: '12 meses', certifications: 'CE, RoHS',
     ...overrides,
   }
 }
@@ -506,7 +503,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     expect(screen.queryByText(/compras:inventory.table.warehousesCount/)).not.toBeInTheDocument()
   })
 
-  it('SCRUM-425 (REQ-355) — "Ver ficha técnica" muestra los 12 campos de solo lectura', async () => {
+  it('SCRUM-425 (REQ-355) — "Ver ficha técnica" muestra los campos de solo lectura', async () => {
     const spec = makeTechnicalSpec()
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
@@ -525,13 +522,13 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.click(screen.getByText('compras:inventory.technicalSpec.button'))
 
     await waitFor(() => expect(screen.getByText('compras:inventory.technicalSpec.title')).toBeInTheDocument())
-    for (const key of TECHNICAL_SPEC_FIELD_KEYS) {
-      expect(screen.getByText(`compras:inventory.technicalSpec.fields.${key}`)).toBeInTheDocument()
+    for (const [key, label] of Object.entries(TECHNICAL_SPEC_FIELD_LABELS)) {
+      expect(screen.getByText(label)).toBeInTheDocument()
       expect(screen.getByText(spec[key])).toBeInTheDocument()
     }
   })
 
-  it('SCRUM-425 (REQ-355) — producto sin ficha técnica (creado antes de la feature) muestra estado vacío, no 12 campos en blanco', async () => {
+  it('SCRUM-425 (REQ-355) — producto sin ficha técnica (creado antes de la feature) muestra estado vacío, no campos en blanco', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
@@ -549,7 +546,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.click(screen.getByText('compras:inventory.technicalSpec.button'))
 
     await waitFor(() => expect(screen.getByText('compras:inventory.technicalSpec.empty')).toBeInTheDocument())
-    expect(screen.queryByText('compras:inventory.technicalSpec.fields.voltage')).not.toBeInTheDocument()
+    expect(screen.queryByText('Dimensiones')).not.toBeInTheDocument()
   })
 
   it('SCRUM-773 (compras.limited.view) — ve costo/margen en el detalle pero no puede editar precio/info general ni subir ficha técnica ni usar Acciones finales', async () => {

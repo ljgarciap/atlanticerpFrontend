@@ -1126,7 +1126,6 @@ function ProductDetailModal({ id, restricted, canManage, autoTriggerPrefill, onC
           reference={product.reference}
           spec={product.technical_spec}
           title={t('compras:inventory.technicalSpec.title')}
-          fieldLabel={key => t(`compras:inventory.technicalSpec.fields.${key}`)}
           emptyText={t('compras:inventory.technicalSpec.empty')}
           closeLabel={t('compras:inventory.actions.close')}
           onClose={() => setShowTechnicalSpec(false)}

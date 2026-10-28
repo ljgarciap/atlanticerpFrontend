@@ -598,7 +598,6 @@ function ProductDetailModal({ row, onClose }: { row: BodegaInventoryRow; onClose
           reference={row.reference}
           spec={detail?.technical_spec}
           title={t('bodega:inventory.technicalSpec.title')}
-          fieldLabel={key => t(`bodega:inventory.technicalSpec.fields.${key}`)}
           emptyText={t('bodega:inventory.technicalSpec.empty')}
           closeLabel={t('bodega:inventory.actions.close')}
           onClose={() => setShowTechnicalSpec(false)}
