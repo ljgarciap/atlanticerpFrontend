@@ -1,0 +1,313 @@
+import { test, expect, type APIRequestContext } from '@playwright/test'
+
+// Flujo ejecutable «venta a cobro» (catálogo: atlanticerp-backend/docs/flujos/cadena-venta-a-cobro.md).
+// Recorre por la API real y con la cuenta de cada rol: cliente → cotización → pipeline y compuertas → pase a pedido → compra y
+// existencias → picking, despacho y entrega → factura interna → cobro → saldo a favor. Cada paso verifica el ESTADO resultante, y
+// los permisos cruzados (el rol incorrecto recibe 403). Crea sus propios datos con prefijo «[FLUJO]» y no toca el demo.
+//
+// Correr con UN worker (npm run e2e:flujos): nginx limita la API a 10 conexiones simultáneas y en paralelo responde 503 por diseño.
+//
+// Prerrequisitos del entorno local (ver docs/flujos/README.md):
+//   - STORAGE_DRIVER=local en el .env del backend (subida de archivos del pipeline y guía firmada);
+//   - php artisan cobros:v2 on (concepto nuevo de cobros);
+//   - cuentas demo con contraseña = su correo; la cuenta bancaria la crea el propio flujo si no hay ninguna.
+
+const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:8092'
+const API = `${BASE}/api`
+const ROLES = ['vendedor', 'gerencia', 'lidercompras', 'liderbodega', 'asistentebodega', 'auxiliarbodega', 'transporte', 'contabilidad', 'superadmin'] as const
+type Rol = (typeof ROLES)[number]
+
+const tokens: Partial<Record<Rol, string>> = {}
+const ids: Record<string, number> = {}
+const ctx: Record<string, number | string> = {}
+const STAMP = String(Date.now())
+const PDF = Buffer.from('%PDF-1.4\n%flujo\n')
+
+type Res = { status: number; body: any }
+
+async function login(request: APIRequestContext, rol: Rol): Promise<string> {
+  const email = `${rol}@test.com`
+  const r = await request.post(`${API}/auth/login`, { data: { email, password: process.env.E2E_DEMO_PASSWORD ?? email }, headers: { Accept: 'application/json' } })
+  expect(r.status(), `login de ${email}`).toBe(200)
+  return (await r.json()).token as string
+}
+
+async function api(request: APIRequestContext, rol: Rol, method: string, path: string, data?: unknown): Promise<Res> {
+  const r = await request.fetch(`${API}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${tokens[rol]}`, Accept: 'application/json' },
+    ...(data !== undefined ? { data } : {}),
+  })
+  const text = await r.text()
+  let body: any = text
+  try { body = JSON.parse(text) } catch { /* cuerpo no JSON (PDF, etc.) */ }
+  return { status: r.status(), body }
+}
+
+async function subir(request: APIRequestContext, rol: Rol, path: string, campos: Record<string, string>): Promise<Res> {
+  const r = await request.post(`${API}${path}`, {
+    headers: { Authorization: `Bearer ${tokens[rol]}`, Accept: 'application/json' },
+    multipart: { ...campos, file: { name: 'flujo.pdf', mimeType: 'application/pdf', buffer: PDF } },
+  })
+  return { status: r.status(), body: await r.json().catch(() => null) }
+}
+
+const data = (b: any) => (b && typeof b === 'object' && 'data' in b ? b.data : b)
+const redondear = (n: number) => Math.round(n * 100) / 100
+
+test.describe.configure({ mode: 'serial' })
+
+test.describe('Flujo venta a cobro', () => {
+  test.beforeAll(async ({ request }) => {
+    for (const rol of ROLES) tokens[rol] = await login(request, rol)
+    for (const rol of ['auxiliarbodega', 'transporte'] as const) {
+      const u = data((await api(request, 'superadmin', 'GET', `/users?search=${rol}`)).body) as { id: number; email: string }[]
+      ids[rol] = u.find(x => x.email === `${rol}@test.com`)!.id
+    }
+  })
+
+  test('1. cliente, subcliente, contacto y tarjeta de pipeline', async ({ request }) => {
+    const mc = await api(request, 'vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${STAMP}` })
+    expect(mc.status).toBe(201)
+    ctx.mc = mc.body.id
+
+    const sinRuc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.` })
+    expect(sinRuc.status, 'sin RUC o cédula no se crea').toBe(422)
+
+    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
+    expect(sc.status).toBe(201)
+    ctx.sc = sc.body.id
+
+    const rolInvalido = await api(request, 'vendedor', 'POST', `/ventas-diseno/sub-clients/${ctx.sc}/contacts`, { name: 'Contacto Flujo', role: 'otro-rol', email: 'contacto.flujo@example.test' })
+    expect(rolInvalido.status).toBe(422)
+    const ct = await api(request, 'vendedor', 'POST', `/ventas-diseno/sub-clients/${ctx.sc}/contacts`, { name: 'Contacto Flujo', role: 'client', email: 'contacto.flujo@example.test', phone: '6000-0000' })
+    expect(ct.status).toBe(201)
+    ctx.contacto = ct.body.id
+
+    const card = await api(request, 'vendedor', 'POST', '/ventas-diseno/pipeline', { type: 'design', name: `[FLUJO] Proyecto ${STAMP}`, sub_client_id: ctx.sc })
+    expect(card.status).toBe(201)
+    expect(card.body.stage).toBe('design')
+    ctx.card = card.body.id
+    ctx.spId = card.body.sales_project.id
+  })
+
+  test('2. cotización: líneas, validación, folio, confirmación y PDF', async ({ request }) => {
+    const prods = data((await api(request, 'vendedor', 'GET', '/ventas-diseno/catalog-products?per_page=5')).body) as { id: number; price_full: number }[]
+    expect(prods.length, 'el catálogo demo tiene productos').toBeGreaterThan(0)
+    ctx.prod = prods[0].id
+
+    const q = await api(request, 'vendedor', 'POST', '/ventas-diseno/quotes', { from_pipeline_card_id: ctx.card })
+    expect(q.status).toBe(201)
+    expect(q.body.document_status).toBe('draft')
+    ctx.q = q.body.id
+
+    const vacia = (await api(request, 'vendedor', 'GET', `/ventas-diseno/quotes/${ctx.q}/validate`)).body
+    expect(vacia.valid).toBe(false)
+    expect(vacia.missing.join('|')).toMatch(/Ítems/)
+
+    const parte = await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/parts`, { name: 'Planta baja' })
+    expect(parte.status).toBe(201)
+    const it1 = await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/parts/${parte.body.id}/items`, { catalog_product_id: ctx.prod, quantity: 3 })
+    expect(it1.status).toBe(201)
+    const it2 = await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/parts/${parte.body.id}/items`, { reference: 'CUSTOM-1', description: 'Pieza a medida', quantity: 2, unit_price: 120, cost: 70 })
+    expect(it2.status).toBe(201)
+
+    await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/contacts`, { sub_client_contact_id: ctx.contacto })
+    const fecha = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10)
+    const up = await api(request, 'vendedor', 'PUT', `/ventas-diseno/quotes/${ctx.q}`, { description: 'Cotización de flujo', delivery_type: 'single', delivery_dates: [fecha], price_type: 'project' })
+    expect(up.status).toBe(200)
+    ctx.fecha = fecha
+
+    expect((await api(request, 'vendedor', 'GET', `/ventas-diseno/quotes/${ctx.q}/validate`)).body).toMatchObject({ valid: true, missing: [] })
+
+    const gen = await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/generate`)
+    expect(gen.status).toBe(200)
+    expect(gen.body.folio).toMatch(/^COT-\d{4}-\d{4}$/)
+
+    const conf = await api(request, 'vendedor', 'POST', `/ventas-diseno/quotes/${ctx.q}/confirm`)
+    expect(conf.status).toBe(200)
+    expect(conf.body.document_status).toBe('sent')
+    expect(conf.body.confirmed_at).toBeTruthy()
+
+    const q2 = (await api(request, 'vendedor', 'GET', `/ventas-diseno/quotes/${ctx.q}`)).body
+    const esperado = redondear(Number(q2.subtotal) + Number(q2.itbms))
+    ctx.total = esperado
+
+    const tarjeta = data((await api(request, 'vendedor', 'GET', `/ventas-diseno/pipeline/${ctx.card}`)).body)
+    expect(tarjeta.stage, 'confirmar mueve la tarjeta a Cotización').toBe('quote')
+    expect(Number(tarjeta.amount)).toBeCloseTo(esperado, 2)
+
+    const pdf = await request.get(`${API}/ventas-diseno/quotes/${ctx.q}/pdf`, { headers: { Authorization: `Bearer ${tokens.vendedor}` } })
+    expect(pdf.status()).toBe(200)
+    expect(pdf.headers()['content-type']).toContain('application/pdf')
+  })
+
+  test('3. pipeline: compuertas, archivos y pase a pedido (solo Gerencia)', async ({ request }) => {
+    const mover = (rol: Rol, stage: string) => api(request, rol, 'PATCH', `/ventas-diseno/pipeline/${ctx.card}/stage`, { stage })
+
+    expect((await mover('vendedor', 'approved')).status, 'no se saltan etapas').toBe(422)
+    expect((await mover('vendedor', 'proposal')).status, 'Propuesta exige los m² trabajados').toBe(422)
+    expect((await api(request, 'vendedor', 'PUT', `/ventas-diseno/pipeline/${ctx.card}`, { worked_area_m2: 120 })).status).toBe(200)
+    expect((await mover('vendedor', 'proposal')).status).toBe(200)
+
+    const sinArchivos = await mover('vendedor', 'approved')
+    expect(sinArchivos.status, 'Aprobado exige la cotización firmada').toBe(422)
+
+    const firmada = await subir(request, 'vendedor', `/ventas-diseno/pipeline/${ctx.card}/files`, { type: 'signed_quote' })
+    expect(firmada.status, 'la subida funciona (STORAGE_DRIVER=local en el entorno local)').toBe(201)
+    expect((await subir(request, 'vendedor', `/ventas-diseno/pipeline/${ctx.card}/files`, { type: 'approval_proof' })).status).toBe(201)
+    expect((await mover('vendedor', 'approved')).status).toBe(200)
+
+    const url = (await api(request, 'vendedor', 'GET', `/ventas-diseno/pipeline/${ctx.card}/files/${firmada.body.id}/url`)).body.url as string
+    expect((await request.get(url)).status(), 'URL firmada válida').toBe(200)
+    expect((await request.get(url.split('signature=')[0] + 'signature=alterada')).status(), 'firma alterada').toBe(403)
+
+    expect((await api(request, 'vendedor', 'POST', `/ventas-diseno/pipeline/${ctx.card}/pass-to-order`)).status, 'el vendedor no pasa a pedido').toBe(403)
+    expect((await api(request, 'gerencia', 'POST', `/ventas-diseno/pipeline/${ctx.card}/pass-to-order`)).status).toBe(200)
+    expect((await api(request, 'gerencia', 'POST', `/ventas-diseno/pipeline/${ctx.card}/pass-to-order`)).status, 'no se pasa dos veces').toBe(409)
+  })
+
+  test('4. compras: la orden recibida sube las existencias', async ({ request }) => {
+    const stock = async () => {
+      const r = (await api(request, 'lidercompras', 'GET', `/bodega/adjustment-requests/products/${ctx.prod}/warehouse-stock`)).body
+      const central = (r.warehouses as { name: string; warehouse_id: number; quantity: number }[]).find(w => w.name === 'Bodega Central')!
+      ctx.central = central.warehouse_id
+      return central.quantity
+    }
+    const antes = await stock()
+
+    const prov = data((await api(request, 'lidercompras', 'GET', '/compras/providers?per_page=5')).body) as { id: number }[]
+    const oc = await api(request, 'lidercompras', 'POST', '/compras/orders', { provider_id: prov[0].id, modality: 'directo', lines: [{ catalog_product_id: ctx.prod, quantity: 10, unit_cost: 50 }] })
+    expect(oc.status).toBe(201)
+    expect(oc.body.status).toBe('pendiente_liquidar')
+    ctx.oc = oc.body.id
+
+    const recorrido: string[] = [oc.body.status]
+    for (let i = 0; i < 4; i++) {
+      const r = await api(request, 'lidercompras', 'PATCH', `/compras/orders/${ctx.oc}/advance`)
+      expect(r.status).toBe(200)
+      recorrido.push(r.body.status)
+    }
+    expect(recorrido).toEqual(['pendiente_liquidar', 'ordenado', 'en_transito', 'en_aduana', 'en_transito_local'])
+    expect((await api(request, 'lidercompras', 'PATCH', `/compras/orders/${ctx.oc}/advance`)).status, 'no se recibe sin ingreso de mercancía').toBe(422)
+
+    const ingreso = await api(request, 'lidercompras', 'POST', '/compras/goods-receipts', { purchase_order_id: ctx.oc, lines: [{ catalog_product_id: ctx.prod, quantity: 10, unit_cost: 50, warehouse_id: ctx.central }] })
+    expect(ingreso.status).toBe(201)
+    expect(await stock(), 'registrar el ingreso aún no mueve el stock').toBe(antes)
+    expect((await api(request, 'lidercompras', 'POST', `/compras/goods-receipts/lines/${ingreso.body.lines[0].id}/confirm`)).status).toBe(200)
+    expect(await stock(), 'confirmar la línea suma 10').toBe(antes + 10)
+    const recibido = await api(request, 'lidercompras', 'PATCH', `/compras/orders/${ctx.oc}/advance`)
+    expect(recibido.body.status).toBe('recibido')
+  })
+
+  test('5. bodega: del pedido asignado a la entrega firmada', async ({ request }) => {
+    const buscar = async () => {
+      const r = (await api(request, 'liderbodega', 'GET', `/bodega/orders?per_page=50&search=${encodeURIComponent(`[FLUJO] Proyecto ${STAMP}`)}`)).body
+      return (r.cards as { id: number; stage: string; order_type: string }[])
+    }
+    const tarjetas = await buscar()
+    const pedido = tarjetas.find(c => c.order_type === 'pedido')!
+    expect(pedido, 'el pase a pedido creó la tarjeta').toBeTruthy()
+    expect(pedido.stage).toBe('asignado')
+    ctx.pedido = pedido.id
+    const stage = async (id = pedido.id) => (await api(request, 'asistentebodega', 'GET', `/bodega/orders/${id}`)).body.stage
+
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/orders/${pedido.id}/assign-picker`, { picker_id: ids.auxiliarbodega })).status).toBe(200)
+    expect(await stage()).toBe('picking_pendiente')
+    expect((await api(request, 'transporte', 'POST', `/bodega/orders/${pedido.id}/start-picking`)).status, 'el transporte no arma pedidos').toBe(403)
+    expect((await api(request, 'auxiliarbodega', 'POST', `/bodega/orders/${pedido.id}/start-picking`)).status).toBe(200)
+    expect(await stage()).toBe('en_picking')
+
+    const hoja = (await api(request, 'auxiliarbodega', 'GET', `/bodega/orders/${pedido.id}/picking-sheet`)).body
+    const items = hoja.items as { id: number; reference: string; qty_requested: number }[]
+    const conCatalogo = items.find(i => i.reference !== 'CUSTOM-1')!
+    const libre = items.find(i => i.reference === 'CUSTOM-1')!
+
+    const demas = await api(request, 'auxiliarbodega', 'PATCH', `/bodega/orders/${pedido.id}/picking-sheet`, { items: [{ order_item_id: conCatalogo.id, qty_picked: 9999, allocations: [{ warehouse_id: ctx.central, qty_picked: 9999 }] }] })
+    expect(demas.status, 'no se alista más de lo que hay').toBe(422)
+
+    const cantidad = conCatalogo.qty_requested
+    expect((await api(request, 'auxiliarbodega', 'PATCH', `/bodega/orders/${pedido.id}/picking-sheet`, { items: [{ order_item_id: conCatalogo.id, qty_picked: cantidad, allocations: [{ warehouse_id: ctx.central, qty_picked: cantidad }] }, { order_item_id: libre.id, qty_picked: 0 }] })).status).toBe(200)
+    const completo = await api(request, 'auxiliarbodega', 'POST', `/bodega/orders/${pedido.id}/complete-picking`, { items: [{ order_item_id: conCatalogo.id, qty_picked: cantidad }, { order_item_id: libre.id, qty_picked: 0 }] })
+    expect(completo.status).toBe(200)
+    expect(completo.body.order.stage).toBe('packing')
+    const revision = completo.body.review.id as number
+
+    const res = await api(request, 'asistentebodega', 'POST', `/bodega/orders/${revision}/resolve-inventory-review`, { decisions: [{ order_item_id: (await api(request, 'asistentebodega', 'GET', `/bodega/orders/${revision}`)).body.items[0].id, found: false }] })
+    expect(res.status).toBe(200)
+    expect(res.body.review.order_type, 'lo no encontrado queda como faltante').toBe('faltante')
+
+    const reg = await api(request, 'asistentebodega', 'POST', `/bodega/orders/${pedido.id}/register-delivery`, { items: [{ order_item_id: conCatalogo.id, qty_delivered: cantidad }, { order_item_id: libre.id, qty_delivered: 0, motivo: 'sin_stock' }] })
+    expect(reg.status).toBe(200)
+    expect(await stage()).toBe('por_despachar')
+
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/orders/${pedido.id}/assign-courier`, { courier_id: ids.transporte })).status, 'solo el jefe asigna repartidor').toBe(403)
+    expect((await api(request, 'liderbodega', 'POST', `/bodega/orders/${pedido.id}/assign-courier`, { courier_id: ids.transporte })).status).toBe(200)
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/orders/${pedido.id}/dispatch`)).status).toBe(200)
+    expect(await stage()).toBe('despachado')
+
+    const guia = await subir(request, 'transporte', `/bodega/orders/${pedido.id}/register-signed-guide`, { delivered_by_courier_id: String(ids.transporte), received_by_name: 'Recibe Flujo' })
+    expect(guia.status).toBe(200)
+    expect(await stage()).toBe('entregado')
+    ctx.entregado = cantidad
+  })
+
+  test('6. factura interna: completa o solo lo entregado', async ({ request }) => {
+    const preview = async (modo: string) => (await api(request, 'contabilidad', 'POST', '/admin-contab/invoices/preview', { order_ids: [ctx.pedido], modo })).body.results[0]
+    const completa = await preview('completo')
+    const entrega = await preview('entrega')
+    expect(Number(completa.total)).toBeCloseTo(Number(ctx.total), 2)
+    expect(completa.cierra_pedido).toBe(true)
+    expect(entrega.tipo).toBe('parcial')
+    expect(entrega.cierra_pedido).toBe(false)
+    expect(entrega.items).toHaveLength(1)
+    expect(Number(entrega.total), 'solo lo entregado, menos que la cotización').toBeLessThan(Number(ctx.total))
+    expect(redondear(Number(entrega.total) + Number(entrega.restante_despues))).toBeCloseTo(Number(ctx.total), 2)
+
+    const sinPermiso = await api(request, 'vendedor', 'POST', '/admin-contab/invoices', { order_ids: [ctx.pedido], modo: 'entrega' })
+    expect(sinPermiso.status, 'el vendedor no factura').toBe(403)
+
+    const f = await api(request, 'contabilidad', 'POST', '/admin-contab/invoices', { order_ids: [ctx.pedido], modo: 'entrega' })
+    expect(f.status, JSON.stringify(f.body).slice(0, 200)).toBe(201)
+    const factura = f.body.invoices[0]
+    expect(factura.numero).toMatch(/^F-\d{4}$/)
+    expect(factura.tipo).toBe('parcial')
+    expect(Number(factura.monto)).toBeCloseTo(Number(entrega.total), 2)
+    ctx.factura = factura.id
+    ctx.montoFactura = Number(factura.monto)
+  })
+
+  test('7. cobro: aplicado a la factura, confirmado, y saldo a favor del excedente', async ({ request }) => {
+    let cuentas = (await api(request, 'contabilidad', 'GET', '/admin-contab/bank-accounts')).body as { id: number }[]
+    if (!cuentas.length) {
+      const c = await api(request, 'contabilidad', 'POST', '/admin-contab/bank-accounts', { banco: '[FLUJO] Banco Demo', ultimos_4_digitos: '0001' })
+      expect(c.status).toBe(201)
+      cuentas = [c.body]
+    }
+    const banco = cuentas[0].id
+
+    const abiertas = async () => (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/open-invoices?master_client_id=${ctx.mc}`)).body
+    expect((await abiertas()).invoices.map((i: { id: number }) => i.id)).toContain(ctx.factura)
+
+    const intento = await api(request, 'contabilidad', 'POST', '/admin-contab/payments/cobro', { master_client_id: ctx.mc, monto_recibido: ctx.montoFactura, metodo_pago: 'transferencia', bank_account_id: banco, aplicaciones: [{ invoice_id: ctx.factura, monto: ctx.montoFactura }] })
+    test.skip(intento.status === 422 && /todavía no está activo/.test(JSON.stringify(intento.body)), 'Falta encender el concepto nuevo de cobros: php artisan cobros:v2 on')
+    expect(intento.status).toBe(201)
+    expect(intento.body.estado).toBe('esperando_confirmacion')
+    expect(Number(intento.body.total_facturas)).toBeCloseTo(Number(ctx.montoFactura), 2)
+
+    const conf = await api(request, 'contabilidad', 'PUT', `/admin-contab/payments/${intento.body.id}/confirm`)
+    expect(conf.status).toBe(200)
+    expect(conf.body.estado).toBe('confirmado')
+    expect((await abiertas()).invoices, 'la factura queda saldada').toEqual([])
+
+    const extra = 50
+    const aCuenta = await api(request, 'contabilidad', 'POST', '/admin-contab/payments/cobro', { master_client_id: ctx.mc, monto_recibido: extra, metodo_pago: 'transferencia', bank_account_id: banco })
+    expect(aCuenta.status).toBe(201)
+    expect(Number(aCuenta.body.saldo_sin_aplicar)).toBe(extra)
+    expect((await api(request, 'contabilidad', 'PUT', `/admin-contab/payments/${aCuenta.body.id}/confirm`)).status).toBe(200)
+
+    const saldo = (await api(request, 'contabilidad', 'GET', '/admin-contab/saldo-favor')).body
+    const fila = (saldo.rows as { master_client_id: number; saldo_disponible?: number }[]).find(r => r.master_client_id === ctx.mc)
+    expect(fila, 'el excedente aparece como saldo a favor del cliente').toBeTruthy()
+  })
+})

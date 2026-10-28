@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "e2e:flujos": "E2E_BASE_URL=${E2E_BASE_URL:-http://localhost:8092} playwright test e2e/flujos --workers=1",
     "e2e:humo": "E2E_BASE_URL=${E2E_BASE_URL:-http://localhost:8092} playwright test e2e/humo-atlantic.spec.ts --workers=1",
     "dev": "vite",
     "build": "tsc && vite build",
