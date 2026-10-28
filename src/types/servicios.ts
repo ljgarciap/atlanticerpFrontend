@@ -669,7 +669,7 @@ export type ServiceQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected'
 
 export type ServiceQuoteItemType = 'product' | 'labor' | 'subcontracted'
 
-// `cost_reference` solo viene poblado cuando `can_view_cost_breakdown` es true (Lider Servicios/Mark/Gerencia2/
+// `cost_reference` solo viene poblado cuando `can_view_cost_breakdown` es true (Lider Servicios/Aprobador/Gerencia2/
 // Gerencia, `servicios.quotes.view_cost_breakdown`) — el resto de roles ni siquiera recibe la clave,
 // nunca `null` como valor "oculto" (evita filtrar por inspección de red que el dato existe).
 export interface ServiceQuoteItem {

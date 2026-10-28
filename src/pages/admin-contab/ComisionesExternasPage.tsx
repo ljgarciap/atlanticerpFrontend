@@ -40,7 +40,7 @@ const ESTADO_COBRO_CLIENTE_PILL_CLASSES: Record<ArchitectCommissionEstadoCobroCl
  * comprobante de retención, recordatorio al arquitecto).
  *
  * Sin distinción `view`/`view_team` (a diferencia de Comisiones Internas) — la audiencia de esta
- * pantalla es Contabilidad/Asistente/Mark/Gerencia únicamente, todos ven la tabla completa (ver §5 del ADR).
+ * pantalla es Contabilidad/Asistente/Aprobador/Gerencia únicamente, todos ven la tabla completa (ver §5 del ADR).
  * "Subir cuenta de cobro" se oculta para Gerencia/Gerencia (`role: management`) — el backend ya
  * responde 403 para ese rol (REQ-513, sin el carve-out que sí tiene REQ-510), la UI solo evita
  * mostrar un botón que siempre fallaría.

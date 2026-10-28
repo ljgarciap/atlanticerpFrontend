@@ -197,7 +197,7 @@ describe('ComisionesInternasPage — scoping view vs view_team (REQ-575/577)', (
     expect(mockedApi.commissionsInternal.vendorOptions).not.toHaveBeenCalled()
   })
 
-  it('Contabilidad/Mark/Gerencia (view_team) sí ven el botón de exportar', async () => {
+  it('Contabilidad/Aprobador/Gerencia (view_team) sí ven el botón de exportar', async () => {
     renderPage()
     expect(await screen.findByText('adminContab:comisionesInternas.exportar.label')).toBeInTheDocument()
   })

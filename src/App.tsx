@@ -368,7 +368,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* SCRUM-897 — se agrega `admin_contab.view` al permiso de entrada: Administración →
-                Facturación replica este mismo botón/pantalla (Contabilidad/Asistente/Mark/Gerencia no tienen
+                Facturación replica este mismo botón/pantalla (Contabilidad/Asistente/Aprobador/Gerencia no tienen
                 `bodega.read` ni `ventas_diseno.read`). Backend Dev ya amplió el roster real en
                 `OrderStatusController::resolveAccess()` (SCRUM-897) — este permiso de ruta solo
                 evita el flash de "acceso denegado" del lado del cliente antes de llegar al backend. */}
@@ -656,7 +656,7 @@ export default function App() {
             } />
             {/* Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Mismo gate
                 `admin_contab.view` — a diferencia de Internas, la audiencia acá es únicamente
-                Contabilidad/Asistente/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
+                Contabilidad/Asistente/Aprobador/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
                 ADR-SCRUM585-590-batch16-comisiones-externas.md.
                 SCRUM-882 — RequirePermission agregado, mismo fix que /admin-contab/inicio (a diferencia
                 de Comisiones Internas, acá no hay versión acotada para vendedor). */}
