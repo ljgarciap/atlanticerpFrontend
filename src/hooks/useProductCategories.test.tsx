@@ -27,6 +27,6 @@ describe('useProductCategories (Fase 9a)', () => {
   it('una categoría desactivada o desconocida se muestra con su clave legible', () => {
     data = [{ key: 'general', label: 'General' }]
     const { result } = renderHook(() => useProductCategories())
-    expect(result.current.label('lamparas_de_mesa')).toBe('Lamparas de mesa')
+    expect(result.current.label('piezas_de_mesa')).toBe('Piezas de mesa')
   })
 })
