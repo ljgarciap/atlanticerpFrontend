@@ -440,7 +440,7 @@ export default function QuotePage() {
   // Dashboard — gateado detrás de un modal de confirmación (showSaveConfirm).
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
   // SCRUM-725 — si confirm() responde 422 con margin_warning=true (solo posible
-  // para Gerencia/David, ventas_diseno.override_min_margin), se reemplaza el error
+  // para Gerencia/Gerencia2, ventas_diseno.override_min_margin), se reemplaza el error
   // genérico por este modal; "Continuar" reintenta confirm() con el flag explícito.
   const [marginWarning, setMarginWarning] = useState<QuoteMarginWarning | null>(null)
   const confirmMutation = useMutation({

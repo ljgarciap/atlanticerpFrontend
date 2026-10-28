@@ -11,7 +11,7 @@ import { execSync } from 'node:child_process'
 // vez de asumir un pedido pre-sembrado a mano (que se pierde en la siguiente corrida, o si otra
 // sesion lo despuebla como paso en esta misma sesion).
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
 const MILENA = 'vendedor@test.com'
@@ -33,7 +33,7 @@ async function goToComisiones(page: Page): Promise<void> {
 }
 
 test('REQ-503/505 — Vendedor Test 2: NC visible con referencia, agrupacion por mes con arrastre', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await goToComisiones(page)
 
@@ -64,7 +64,7 @@ test('REQ-503/505 — Vendedor Test 2: NC visible con referencia, agrupacion por
 })
 
 test('REQ-507 — estado de cuenta: mes en curso (3 totales) vs mes cerrado (solo pagado), boton PDF', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await goToComisiones(page)
 
@@ -121,7 +121,7 @@ test('REQ-507 — estado de cuenta: mes en curso (3 totales) vs mes cerrado (sol
 })
 
 test('REQ-505 — vendedor con cero pedidos EN TODA LA HISTORIA (Vendedor Demo, id 48): fila y mensaje', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await goToComisiones(page)
 
@@ -201,7 +201,7 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
   })
 
   test('pedido compartido: badge de compartido + total del proyecto, en ambos responsables', async ({ page }) => {
-    const ok = await login(page, FELIX)
+    const ok = await login(page, CONTABILIDAD)
     expect(ok).toBeTruthy()
     await goToComisiones(page)
 

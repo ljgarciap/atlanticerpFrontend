@@ -21,7 +21,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
 
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 const MARK = process.env.E2E_FE_MARK_EMAIL ?? 'gerencia3@test.com'
-const FELIX = process.env.E2E_FE_NOMARK_EMAIL ?? 'contabilidad@test.com'
+const CONTABILIDAD = process.env.E2E_FE_NOMARK_EMAIL ?? 'contabilidad@test.com'
 // En los entornos con roster real la contraseña de las cuentas de prueba es su propio email.
 const passwordOf = (email: string) => process.env.E2E_FE_PASSWORD ?? email
 
@@ -84,12 +84,12 @@ async function abrirFactura(page: Page, folio: string) {
 }
 
 test('API: un actor que no es Gerencia recibe 403 en ambos endpoints de transmisiones; Gerencia no', async ({ request }) => {
-  const felix = await apiToken(request, FELIX)
+  const contabilidad = await apiToken(request, CONTABILIDAD)
   const mark = await apiToken(request, MARK)
 
   // ID arbitrario a propósito: `primary_approver_only` responde antes de resolver el documento.
   for (const path of ['/api/admin-contab/invoices/1/fe-transmisiones', '/api/admin-contab/notas-credito/1/fe-transmisiones']) {
-    const denegado = await request.get(path, { headers: { Authorization: `Bearer ${felix}` } })
+    const denegado = await request.get(path, { headers: { Authorization: `Bearer ${contabilidad}` } })
     expect(denegado.status(), `${path} con Contabilidad`).toBe(403)
     await espaciar()
 
@@ -104,9 +104,9 @@ test('API: el detalle de una factura solo trae el flag y fe_detalle para Gerenci
   const fila = await primeraFacturada(request, mark)
   test.skip(fila === null, 'el entorno no tiene ninguna factura facturada para inspeccionar')
 
-  const felix = await apiToken(request, FELIX)
+  const contabilidad = await apiToken(request, CONTABILIDAD)
   const resMark = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${mark}` } })
-  const resFelix = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${felix}` } })
+  const resFelix = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${contabilidad}` } })
   expect(resMark.status()).toBe(200)
   expect(resFelix.status()).toBe(200)
   const conMark = await resMark.json()
@@ -163,7 +163,7 @@ test('UI: un usuario que no es Gerencia no ve el visor ni dispara la petición d
   page.on('request', r => { if (r.url().includes('fe-transmisiones')) llamadas.push(r.url()) })
   await forzarEstadoRechazado(page)
 
-  await uiLogin(page, FELIX)
+  await uiLogin(page, CONTABILIDAD)
   const detalle = page.waitForResponse(r => /\/admin-contab\/invoices\/\d+\/detail/.test(r.url()))
   await abrirFactura(page, fila!.numero_factura!)
   expect((await detalle).status()).toBe(200)

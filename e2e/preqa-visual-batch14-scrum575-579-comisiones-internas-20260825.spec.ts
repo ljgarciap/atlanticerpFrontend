@@ -4,7 +4,7 @@ import { test, expect, Page } from '@playwright/test'
 // Contra dev.atlanticerp.ai (backend ac2a712, frontend c9d4084). Ver docs/reviews/scrum575-579-batch14-comisiones-internas-20260825.md
 // y docs/adr/ADR-SCRUM575-579-batch14-comisiones-internas.md (§3 — alcance vs Batch 15).
 
-const FELIX = 'contabilidad@test.com' // Lider Admin&Cont
+const CONTABILIDAD = 'contabilidad@test.com' // Lider Admin&Cont
 const MARK = 'gerencia3@test.com'
 const MARK_PASS = 'B1n4X_2026?'
 const VENDEDOR = 'vendedor@test.com'
@@ -21,7 +21,7 @@ async function login(page: Page, email: string, password?: string): Promise<bool
 }
 
 test('SIDEBAR — Comisiones ▸ Internas es alcanzable desde el sidebar de Admin&Contab (Contabilidad)', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab')
   await page.waitForTimeout(900)
@@ -43,8 +43,8 @@ test('SIDEBAR — Comisiones ▸ Internas es alcanzable desde el sidebar de Admi
   expect(page.url()).toMatch(/comisiones\/internas/i)
 })
 
-test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, exportar', async ({ page }) => {
-  const ok = await login(page, FELIX)
+test('CONTABILIDAD — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, exportar', async ({ page }) => {
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
 
   // navegar directo por URL para no depender del hallazgo anterior
@@ -59,7 +59,7 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
     }
   }
   expect(landed).toBeTruthy()
-  await page.screenshot({ path: 'e2e/.tmp/b14-03-felix-home.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/b14-03-contabilidad-home.png', fullPage: true })
 
   // Encabezado
   await expect(page.getByText('Comisiones Internas', { exact: false }).first()).toBeVisible()
@@ -120,8 +120,8 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
   }
 })
 
-test('FELIX — exportar PDF/Excel funciona sin error 500 (bug corregido en Senior Review)', async ({ page, context }) => {
-  const ok = await login(page, FELIX)
+test('CONTABILIDAD — exportar PDF/Excel funciona sin error 500 (bug corregido en Senior Review)', async ({ page, context }) => {
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1200)

@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // copy/labels y wiring — el spec v2 (16 tests) quedó con selectores del texto viejo, por eso este
 // spec nuevo verifica contra el estado real post-deploy en vez de reciclar aserciones stale.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -18,7 +18,7 @@ async function login(page: Page, email: string) {
 }
 
 test('SCRUM-159 — los filtros Vendedor/Cliente ya existen (RN1), pero sin lista real de opciones', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const selects = page.locator('select')
@@ -32,7 +32,7 @@ test('SCRUM-159 — los filtros Vendedor/Cliente ya existen (RN1), pero sin list
 })
 
 test('SCRUM-156/159 — "Facturado este año" ahora navega (antes no hacía nada)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Facturado este año', { exact: false }).first().click()
@@ -41,7 +41,7 @@ test('SCRUM-156/159 — "Facturado este año" ahora navega (antes no hacía nada
 })
 
 test('SCRUM-160 — "Proyectos cerrados este año" ahora navega a Ventas & Diseño', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Proyectos cerrados este año', { exact: false }).first().click()
@@ -50,7 +50,7 @@ test('SCRUM-160 — "Proyectos cerrados este año" ahora navega a Ventas & Dise�
 })
 
 test('SCRUM-160 — el margen del año/mes sigue siendo un stub fijo en 0% (comentario propio "TODO" en el backend)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await page.evaluate(async () => {
@@ -65,14 +65,14 @@ test('SCRUM-160 — el margen del año/mes sigue siendo un stub fijo en 0% (come
 })
 
 test('SCRUM-166 — indicador "En Final Stage" ya existe (antes faltaba)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('En Final Stage', { exact: false })).toBeVisible()
 })
 
 test('SCRUM-166 — SIGUE ROTO: los 4 indicadores de Salud Ventas&Diseño siguen navegando los 4 al mismo /ventas-diseno sin filtrar', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
 
@@ -91,14 +91,14 @@ test('SCRUM-166 — SIGUE ROTO: los 4 indicadores de Salud Ventas&Diseño siguen
 })
 
 test('SCRUM-168 — SIGUE FALTANDO el indicador "Bajo stock sin ordenar" (Escenario 1 del ticket depende de él)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Bajo stock sin ordenar')).toHaveCount(0)
 })
 
 test('SCRUM-168 — SIGUE ROTO: los indicadores de Salud Compras siguen navegando todos al mismo /compras sin filtrar', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
 
@@ -117,7 +117,7 @@ test('SCRUM-168 — SIGUE ROTO: los indicadores de Salud Compras siguen navegand
 })
 
 test('SCRUM-171 — CONFIRMADO ARREGLADO: "Ver detalle" de Bodega ahora navega a /bodega/home', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -136,7 +136,7 @@ test('MEDIO#9 — CONFIRMADO ARREGLADO: un rol sin acceso ahora es redirigido fu
 })
 
 test('SCRUM-157 — CONFIRMADO: "CxC al día" ahora navega (antes no hacía nada)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('CxC al día', { exact: false }).first().click()
@@ -145,7 +145,7 @@ test('SCRUM-157 — CONFIRMADO: "CxC al día" ahora navega (antes no hacía nada
 })
 
 test('SCRUM-161/162 — Gerencia (no es Gerencia Approver) ve "Solo para aprobadores", no el placeholder viejo', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Solo para aprobadores')).toBeVisible()
@@ -158,13 +158,13 @@ test('SCRUM-161/162 — Gerencia (no es Gerencia Approver) ve "Solo para aprobad
   expect(raw.aprobaciones).toEqual([])
 })
 
-test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Gerencia Approver global, no "cada tipo con su propio rol autorizado" (Gerencia/David/Whil)', async ({ page }) => {
+test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un solo Gerencia Approver global, no "cada tipo con su propio rol autorizado" (Gerencia/Gerencia2/Gerencia5)', async ({ page }) => {
   // No es un bug de comportamiento — es una verificación de que el modelo implementado
   // (ComprasSettings.primary_approver_user_id, un único aprobador) sigue sin ser el que describe el
   // ticket (RN1: "cada tipo de solicitud tiene un rol autorizado"; RN2: "el listado se filtra
   // según quién inició sesión" — implica varios aprobadores posibles, uno por tipo). Documentado
   // acá para que quede trazable en el spec, no solo en el reporte .md.
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await page.evaluate(async () => {

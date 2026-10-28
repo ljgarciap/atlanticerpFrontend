@@ -17,7 +17,7 @@ const BACKEND_URL = process.env.PREQA_BACKEND_URL ?? 'http://localhost:8090'
 
 // Cuentas reales (password = email), ver project_roster_usuarios_reales_atlanticerp.md.
 const SUPERADMIN = { email: 'superadmin@test.com', password: 'superadmin@test.com' }
-const DAVID = { email: 'gerencia2@test.com', password: 'gerencia2@test.com' } // Gerencia, compras.read/bodega.read reales
+const GERENCIA2 = { email: 'gerencia2@test.com', password: 'gerencia2@test.com' } // Gerencia, compras.read/bodega.read reales
 const MARK = { email: 'gerencia3@test.com', password: 'gerencia3@test.com' } // Gerencia, ídem
 
 async function login(request: APIRequestContext, email: string, password: string): Promise<string> {
@@ -57,25 +57,25 @@ test.describe('SCRUM-741 — UAT oculto (Compras/Bodega) corta acceso real, incl
 
   test('Gerencia y Gerencia (Gerencia, compras.read/bodega.read reales) pierden acceso real mientras el módulo está oculto por UAT', async ({ request }) => {
     const saToken = await login(request, SUPERADMIN.email, SUPERADMIN.password)
-    const davidToken = await login(request, DAVID.email, DAVID.password)
+    const gerencia2Token = await login(request, GERENCIA2.email, GERENCIA2.password)
     const markToken = await login(request, MARK.email, MARK.password)
 
     await setUatHidden(request, saToken, ['compras', 'bodega'], 'hide')
 
-    const davidInventory = await request.get(`${BACKEND_URL}/api/compras/inventory`, {
-      headers: { Authorization: `Bearer ${davidToken}`, Accept: 'application/json' },
+    const gerencia2Inventory = await request.get(`${BACKEND_URL}/api/compras/inventory`, {
+      headers: { Authorization: `Bearer ${gerencia2Token}`, Accept: 'application/json' },
     })
-    expect(davidInventory.status(), 'Gerencia debe recibir 403 real en /api/compras/inventory con Compras oculto').toBe(403)
+    expect(gerencia2Inventory.status(), 'Gerencia debe recibir 403 real en /api/compras/inventory con Compras oculto').toBe(403)
 
     const markInventory = await request.get(`${BACKEND_URL}/api/compras/inventory`, {
       headers: { Authorization: `Bearer ${markToken}`, Accept: 'application/json' },
     })
     expect(markInventory.status(), 'Gerencia debe recibir 403 real en /api/compras/inventory con Compras oculto').toBe(403)
 
-    const davidBodega = await request.get(`${BACKEND_URL}/api/bodega/orders/status`, {
-      headers: { Authorization: `Bearer ${davidToken}`, Accept: 'application/json' },
+    const gerencia2Bodega = await request.get(`${BACKEND_URL}/api/bodega/orders/status`, {
+      headers: { Authorization: `Bearer ${gerencia2Token}`, Accept: 'application/json' },
     })
-    expect(davidBodega.status(), 'Gerencia debe recibir 403 real en /api/bodega/orders/status con Bodega oculto').toBe(403)
+    expect(gerencia2Bodega.status(), 'Gerencia debe recibir 403 real en /api/bodega/orders/status con Bodega oculto').toBe(403)
 
     const markBodega = await request.get(`${BACKEND_URL}/api/bodega/orders/status`, {
       headers: { Authorization: `Bearer ${markToken}`, Accept: 'application/json' },
@@ -93,7 +93,7 @@ test.describe('SCRUM-741 — UAT oculto (Compras/Bodega) corta acceso real, incl
 
   test('restaurar el módulo devuelve acceso funcional completo a Gerencia/Mark — el mecanismo sigue siendo reversible', async ({ request }) => {
     const saToken = await login(request, SUPERADMIN.email, SUPERADMIN.password)
-    const davidToken = await login(request, DAVID.email, DAVID.password)
+    const gerencia2Token = await login(request, GERENCIA2.email, GERENCIA2.password)
     const markToken = await login(request, MARK.email, MARK.password)
 
     // Este test asume que el anterior dejó compras/bodega ocultos (mismo describe, orden secuencial
@@ -102,12 +102,12 @@ test.describe('SCRUM-741 — UAT oculto (Compras/Bodega) corta acceso real, incl
 
     await setUatHidden(request, saToken, ['compras', 'bodega'], 'restore')
 
-    const davidInventory = await request.get(`${BACKEND_URL}/api/compras/inventory`, {
-      headers: { Authorization: `Bearer ${davidToken}`, Accept: 'application/json' },
+    const gerencia2Inventory = await request.get(`${BACKEND_URL}/api/compras/inventory`, {
+      headers: { Authorization: `Bearer ${gerencia2Token}`, Accept: 'application/json' },
     })
-    expect(davidInventory.status()).toBe(200)
-    const davidBody = await davidInventory.json()
-    expect(davidBody.restricted, 'Gerencia debe recuperar el modo NO restringido tras restaurar').toBe(false)
+    expect(gerencia2Inventory.status()).toBe(200)
+    const gerencia2Body = await gerencia2Inventory.json()
+    expect(gerencia2Body.restricted, 'Gerencia debe recuperar el modo NO restringido tras restaurar').toBe(false)
 
     const markBodega = await request.get(`${BACKEND_URL}/api/bodega/orders/status`, {
       headers: { Authorization: `Bearer ${markToken}`, Accept: 'application/json' },

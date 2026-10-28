@@ -368,7 +368,7 @@ export default function App() {
               </RequirePermission>
             } />
             {/* SCRUM-897 — se agrega `admin_contab.view` al permiso de entrada: Administración →
-                Facturación replica este mismo botón/pantalla (Contabilidad/Yaneth/Mark/Gerencia no tienen
+                Facturación replica este mismo botón/pantalla (Contabilidad/Asistente/Mark/Gerencia no tienen
                 `bodega.read` ni `ventas_diseno.read`). Backend Dev ya amplió el roster real en
                 `OrderStatusController::resolveAccess()` (SCRUM-897) — este permiso de ruta solo
                 evita el flash de "acceso denegado" del lado del cliente antes de llegar al backend. */}
@@ -581,7 +581,7 @@ export default function App() {
             } />
             {/* Batch 1 del cuerpo principal de Admin&Cont (SCRUM-607→611, REQ-530→534) — Cuentas
                 Bancarias. A diferencia de Fiscal/Empresa, NO es exclusiva de Gerencia — el backend
-                gatea cada acción por rol (Contabilidad/Yaneth/Gerencia), sin 403 en el GET general. */}
+                gatea cada acción por rol (Contabilidad/Asistente/Gerencia), sin 403 en el GET general. */}
             {/* SCRUM-882 — mismo fix que /admin-contab/inicio arriba: vendedor no debe
                 llegar acá por URL directa (Tesorería no forma parte de lo que ve este rol). */}
             <Route path="/admin-contab/cuentas-bancarias" element={
@@ -656,7 +656,7 @@ export default function App() {
             } />
             {/* Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Mismo gate
                 `admin_contab.view` — a diferencia de Internas, la audiencia acá es únicamente
-                Contabilidad/Yaneth/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
+                Contabilidad/Asistente/Mark/Gerencia, sin versión acotada por rol dentro de la pantalla. Ver
                 ADR-SCRUM585-590-batch16-comisiones-externas.md.
                 SCRUM-882 — RequirePermission agregado, mismo fix que /admin-contab/inicio (a diferencia
                 de Comisiones Internas, acá no hay versión acotada para vendedor). */}
@@ -681,7 +681,7 @@ export default function App() {
             } />
             {/* Batch 20 (SCRUM-612→617, REQ-535→540) — Caja Chica. Mismo gate de entrada
                 `admin_contab.view` que el resto del módulo — el gate fino por rol (registrar/
-                generar reporte solo Contabilidad/Yaneth, aprobar exclusivo Gerencia) vive en el backend.
+                generar reporte solo Contabilidad/Asistente, aprobar exclusivo Gerencia) vive en el backend.
                 SCRUM-882 — RequirePermission agregado, mismo fix que /admin-contab/inicio. */}
             <Route path="/admin-contab/caja-chica" element={
               <RequirePermission permission="admin_contab.view">

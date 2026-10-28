@@ -12,7 +12,7 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -25,7 +25,7 @@ async function login(page: Page, email: string) {
 }
 
 test('tabla principal (Vista plana) muestra la pastilla "Pendiente de aprobación" para P, no "Facturada"', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -43,7 +43,7 @@ test('tabla principal (Vista plana) muestra la pastilla "Pendiente de aprobació
 })
 
 test('tabla principal muestra "Facturada" lisa para N (control) y estado tachado para A (anulada)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -62,7 +62,7 @@ test('tabla principal muestra "Facturada" lisa para N (control) y estado tachado
 })
 
 test('P sigue en la pestaña "Cartera cobrable" (RN3 REQ-448 — pendiente no se mueve a incobrable)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -84,7 +84,7 @@ test('filtro por estado (dropdown UI) sigue funcionando para facturada -- incluy
   // criterio ya aceptado para el MENOR original: no hay flujo real que genere anuladas todavía).
   // El filtro `estado=anulada` SÍ funciona correctamente a nivel API (verificado por curl directo
   // en esta misma sesión de re-check) -- solo no es alcanzable desde este dropdown de la UI.
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()
@@ -102,7 +102,7 @@ test('filtro por estado (dropdown UI) sigue funcionando para facturada -- incluy
 })
 
 test('bloque de pago (Cuenta número/Responsable) sigue en el PDF real -- confirmación de e91c09a', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: 'Vista plana' }).click()

@@ -20,7 +20,7 @@ if (/atlanticerp\.ai/i.test(BASE) && !process.env.PREQA_ALLOW_REMOTE) {
 }
 const API = `${BASE}/api`
 const MARK = 'gerencia3@test.com'
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const RUN = Date.now().toString().slice(-7)
 
 test.describe.configure({ mode: 'serial' })
@@ -364,20 +364,20 @@ test('928.2 UI — Pipeline > tarjeta Lead (PipelineCardModal): mini-form de Sub
 // ---------------------------------------------------------------------------------------------
 
 test('928.3 API — factura/estado de cuenta nunca traen ****XXXX; sin número completo => null (la vista muestra "—")', async () => {
-  const felix = await token(FELIX)
+  const contabilidad = await token(CONTABILIDAD)
   const mark = await token(MARK)
   const ctx = await pwRequest.newContext()
 
   // Cuenta activa: si no hay ninguna, se siembra una SIN número completo (caso "—").
-  let accounts = await (await ctx.get(`${API}/admin-contab/bank-accounts`, { headers: auth(felix) })).json()
+  let accounts = await (await ctx.get(`${API}/admin-contab/bank-accounts`, { headers: auth(contabilidad) })).json()
   if (!accounts.some((a: { activa: boolean }) => a.activa)) {
-    const c = await ctx.post(`${API}/admin-contab/bank-accounts`, { headers: auth(felix), data: { banco: 'Banco PQ928', ultimos_4_digitos: '4554', tipo_cuenta: 'corriente' } })
+    const c = await ctx.post(`${API}/admin-contab/bank-accounts`, { headers: auth(contabilidad), data: { banco: 'Banco PQ928', ultimos_4_digitos: '4554', tipo_cuenta: 'corriente' } })
     expect(c.status()).toBe(201)
-    accounts = await (await ctx.get(`${API}/admin-contab/bank-accounts`, { headers: auth(felix) })).json()
+    accounts = await (await ctx.get(`${API}/admin-contab/bank-accounts`, { headers: auth(contabilidad) })).json()
   }
   const cliente = await seedClient(ctx, mark, 'estado')
 
-  const st = await (await ctx.get(`${API}/admin-contab/account-statement?master_client_id=${cliente.id}`, { headers: auth(felix) })).json()
+  const st = await (await ctx.get(`${API}/admin-contab/account-statement?master_client_id=${cliente.id}`, { headers: auth(contabilidad) })).json()
   const oldestActive = accounts.filter((a: { activa: boolean }) => a.activa).sort((a: { id: number }, b: { id: number }) => a.id - b.id)[0]
   for (const v of [st.numero_cuenta, st.cuenta_pago]) {
     if (v !== null) expect(String(v)).not.toContain('*')
@@ -393,7 +393,7 @@ test('928.3 API — factura/estado de cuenta nunca traen ****XXXX; sin número c
   }
 
   // PDF del estado de cuenta: texto plano, sin asteriscos y con "—" cuando no hay número.
-  const pdf = await ctx.get(`${API}/admin-contab/account-statement/pdf?master_client_id=${cliente.id}`, { headers: auth(felix) })
+  const pdf = await ctx.get(`${API}/admin-contab/account-statement/pdf?master_client_id=${cliente.id}`, { headers: auth(contabilidad) })
   expect(pdf.status()).toBe(200)
   expect(pdf.headers()['content-type']).toContain('application/pdf')
   await ctx.dispose()
@@ -404,7 +404,7 @@ test('928.3 UI — Estado de Cuenta muestra "Cuenta número" sin asteriscos', as
   const ctx = await pwRequest.newContext()
   const cliente = await seedClient(ctx, mark, 'estadoui')
   await ctx.dispose()
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/facturacion/estado-cuenta?master_client_id=${cliente.id}`)
   await page.waitForTimeout(3500)
   const body = page.locator('body')

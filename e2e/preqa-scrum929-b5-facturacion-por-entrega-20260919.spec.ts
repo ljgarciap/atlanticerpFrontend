@@ -19,7 +19,7 @@ const TMP_DIR = 'e2e/.tmp'
 const SEED_SCRIPT = resolve(TMP_DIR, 'seed-scrum929-b5.php')
 const CLEANUP_SCRIPT = resolve(TMP_DIR, 'cleanup-scrum929-b5.php')
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 
 function runTinker(scriptPath: string): string {
   const out = execSync(
@@ -36,7 +36,7 @@ function seedFamiliaDe963(): string {
 
   const php = `
 \\App\\Shared\\Multitenancy\\Tenant::where('slug', 'atlantic')->first()->makeCurrent();
-$ownerId = \\App\\Models\\User::where('email', '${FELIX}')->value('id') ?? \\App\\Models\\User::first()->id;
+$ownerId = \\App\\Models\\User::where('email', '${CONTABILIDAD}')->value('id') ?? \\App\\Models\\User::first()->id;
 $master = \\App\\Modules\\VentasDiseno\\Models\\MasterClient::create(['name' => 'Cliente E2E929 ' . time()]);
 $sub = \\App\\Modules\\VentasDiseno\\Models\\SubClient::create(['master_client_id' => $master->id, 'business_name' => 'Sub E2E929 ' . time(), 'tax_id' => '155-9299-1-' . random_int(1000, 9999)]);
 $project = \\App\\Modules\\VentasDiseno\\Models\\SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'Proyecto E2E929']);
@@ -97,8 +97,8 @@ test('SCRUM-929 B5 — pedido de 3 entregas: facturar la 1ra por entrega, luego 
   try {
     await page.context().clearCookies()
     await page.goto('/login')
-    await page.locator('input[type="email"]').fill(FELIX)
-    await page.locator('input[type="password"]').fill(FELIX)
+    await page.locator('input[type="email"]').fill(CONTABILIDAD)
+    await page.locator('input[type="password"]').fill(CONTABILIDAD)
     await page.getByRole('button', { name: /iniciar sesión|login/i }).click()
     await page.waitForTimeout(1200)
 

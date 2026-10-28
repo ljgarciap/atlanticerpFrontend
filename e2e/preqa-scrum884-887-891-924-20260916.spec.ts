@@ -134,8 +134,8 @@ test('SCRUM-884 — Gerencia puede quitarse del campo Responsable dejando otro a
   if (!stillHasChips) {
     await responsableSection.getByRole('button').first().click()
     await page.waitForTimeout(300)
-    const annieRow = page.locator('li', { hasText: /anelhys|annie/i }).first()
-    await annieRow.locator('input[type="checkbox"]').check()
+    const usuarioRow = page.locator('li', { hasText: /usuario|usuario/i }).first()
+    await usuarioRow.locator('input[type="checkbox"]').check()
     await page.waitForTimeout(200)
     await page.locator('div.fixed.inset-0.z-10').click()
     await page.waitForTimeout(300)
@@ -282,8 +282,8 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   const responsableSection = page.locator('label', { hasText: /responsable/i }).first().locator('..')
   await responsableSection.getByRole('button').first().click()
   await page.waitForTimeout(300)
-  const annieChip = page.locator('span', { hasText: /annie|anelhys/i }).first()
-  await expect(annieChip, 'el chip de un creador vendedor/diseñador debe seguir siendo removible (regresión)').toBeVisible({ timeout: 5000 })
+  const usuarioChip = page.locator('span', { hasText: /usuario|usuario/i }).first()
+  await expect(usuarioChip, 'el chip de un creador vendedor/diseñador debe seguir siendo removible (regresión)').toBeVisible({ timeout: 5000 })
 
   // Agregar a otro vendedor (Vendedor, sí está en teamVendors) ANTES de quitar a Vendedor, para poder
   // guardar sin violar min:1 — a diferencia de Gerencia (Gerencia), Vendedor sí es una opción válida acá.
@@ -292,7 +292,7 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   await page.waitForTimeout(200)
   await page.locator('div.fixed.inset-0.z-10').click()
   await page.waitForTimeout(300)
-  await page.getByRole('button', { name: /quitar anelhys|quitar annie/i }).click()
+  await page.getByRole('button', { name: /quitar usuario|quitar usuario/i }).click()
   await page.waitForTimeout(300)
 
   const [putResponse3] = await Promise.all([
@@ -302,5 +302,5 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
   expect(putResponse3.status(), 'quitar a un creador vendedor del campo Responsable debe seguir funcionando (200)').toBe(200)
 
   const detailAfter = await apiGet(page, `/api/ventas-diseno/pipeline/${vendorCardId}`)
-  expect((detailAfter.body.assignees ?? []).some((a: any) => /anelhys|annie/i.test(a.name)), 'Vendedor ya no debe estar en assignees').toBe(false)
+  expect((detailAfter.body.assignees ?? []).some((a: any) => /usuario|usuario/i.test(a.name)), 'Vendedor ya no debe estar en assignees').toBe(false)
 })

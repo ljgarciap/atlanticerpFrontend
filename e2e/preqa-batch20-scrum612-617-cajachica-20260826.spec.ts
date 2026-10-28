@@ -9,8 +9,8 @@ test.describe.configure({ mode: 'serial' })
 // docs/visual-review/caja-chica-batch20-2026-08-26.md para el detalle completo.
 const BASE = 'http://localhost:5173'
 
-const FELIX = 'contabilidad@test.com'
-const YANETH = 'asistenteadministrativa@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
+const ASISTENTE = 'asistenteadministrativa@test.com'
 const MARK = 'gerencia3@test.com'
 const MARK_PASSWORD = MARK
 
@@ -27,7 +27,7 @@ async function login(page: Page, email: string, password?: string): Promise<void
 }
 
 test('REQ-535/536 — header, tabs con contador, foto obligatoria bloquea el guardado completo indicando la línea', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.waitForTimeout(1000)
 
@@ -60,7 +60,7 @@ test('REQ-535/536 — header, tabs con contador, foto obligatoria bloquea el gua
 })
 
 test('REQ-535 RN1 — ITBMS vacío bloquea, "0" explícito no', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByRole('button', { name: /nuevo gasto/i }).click()
   await page.waitForTimeout(300)
@@ -78,7 +78,7 @@ test('REQ-535 RN1 — ITBMS vacío bloquea, "0" explícito no', async ({ page })
 })
 
 test('REQ-535 — multi-línea de 2 solicitantes con foto real se registra y aparece agrupado en Pendientes', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByRole('button', { name: /nuevo gasto/i }).click()
   await page.waitForTimeout(300)
@@ -120,7 +120,7 @@ test('REQ-535 — multi-línea de 2 solicitantes con foto real se registra y apa
 })
 
 test('REQ-538 — generar reporte: desmarcar un solicitante completo, forma de pago obligatoria, folio consecutivo', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.waitForTimeout(800)
 
@@ -150,7 +150,7 @@ test('REQ-538 — generar reporte: desmarcar un solicitante completo, forma de p
 })
 
 test('REQ-539 — Contabilidad NO ve el botón Aprobar en un reporte pendiente', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/caja-chica`)
   await page.getByText(/reportes/i).first().click()
   await page.waitForTimeout(600)
@@ -159,7 +159,7 @@ test('REQ-539 — Contabilidad NO ve el botón Aprobar en un reporte pendiente',
 
   const aprobarFelix = page.getByRole('button', { name: /^aprobar reporte$/i })
   await expect(aprobarFelix).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/batch20-detalle-felix-sin-aprobar.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch20-detalle-contabilidad-sin-aprobar.png', fullPage: true })
 })
 
 test('REQ-540 — Gerencia aprueba con confirmación número+monto, no se puede reaprobar', async ({ page }) => {

@@ -30,7 +30,7 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const [draft, setDraft] = useState({ name: '', role: 'client' as ContactRole, phone: '', email: '' })
   const [contactError, setContactError] = useState<string | null>(null)
   const [showEditTaxData, setShowEditTaxData] = useState(false)
-  // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Gerencia/Felix).
+  // SCRUM-1002 — quien edita en Ventas & Diseño (`.edit`) o tiene el permiso angosto (Gerencia/Contabilidad).
   // SCRUM-1182 — los hooks se llaman SIEMPRE, todos, y se combinan después (`a || b` no ejecuta el segundo hook y cambia el número de hooks entre renders).
   const hasVentasDisenoEdit = usePermission('ventas_diseno.edit')
   const hasEditClientTaxData = usePermission('ventas_diseno.edit.client_tax_data')

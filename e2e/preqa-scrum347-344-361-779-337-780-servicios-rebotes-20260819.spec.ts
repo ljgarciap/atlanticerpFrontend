@@ -1,7 +1,7 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test'
 
 /**
- * Visual Review + Pre-QA fusionados — 5 rebotes de QA (marly.rangel) del 2026-08-19 sobre la
+ * Visual Review + Pre-QA fusionados — 5 rebotes de QA (qa.qa) del 2026-08-19 sobre la
  * épica de Servicios (SCRUM-330), ya desplegados a dev.atlanticerp.ai por script manual
  * (`infra/deploy-manual.sh dev`, GitHub Actions caído por facturación de la org). Senior Review
  * propio del Arquitecto ya corrió (suite completa PHPUnit/PHPStan/vitest/tsc en verde antes de
@@ -13,7 +13,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  * Corre contra dev.atlanticerp.ai real (playwright.dev-remote.config.ts). Cuentas reales
  * (password = email): liderservicios@test.com (Lider Servicios, lider_servicios),
  * tecnico@test.com (Tecnico Test, tecnico), lidercompras@test.com
- * (Lider Compras, lider_compras), gerencia5@test.com (Gerencia, management — mbekhar/daniela/
+ * (Lider Compras, lider_compras), gerencia5@test.com (Gerencia, management — mbekhar/gerencia1/
  * luis.garcia NO loguean con password=email en este entorno, ver hallazgo de proceso en el reporte).
  *
  * HALLAZGO CRÍTICO real de este pase (SCRUM-337, ver tests 8/9 abajo): el fix de backend

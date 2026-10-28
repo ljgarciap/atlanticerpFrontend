@@ -173,7 +173,7 @@ export default function GoodsReceiptWizardPage() {
 
   const isLocal = orderProducts?.provider_origin === 'local'
 
-  // REQ-164 Escenario 1 (fix Pre-QA 2026-07-20, rechazado por marly: el reparto no era
+  // REQ-164 Escenario 1 (fix Pre-QA 2026-07-20, rechazado por qa: el reparto no era
   // observable) — preview client-side del costeo por línea, mismo cálculo que
   // GoodsReceiptController::saveReceipt() (proveedor local: impuesto con la tasa de Configuración Fiscal; no local: prorrateo
   // proporcional al valor de línea). Es solo un preview -- la fuente de verdad persistida es la

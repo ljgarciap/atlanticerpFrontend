@@ -54,7 +54,7 @@ function buildSchema(t: (key: string) => string) {
     // `required` ni `min:1` — ver docblock de `prepareForValidation()`), pero este schema de Zod
     // seguía exigiendo `min(1)`: el resolver de react-hook-form bloqueaba el submit ANTES de que
     // el PUT saliera siquiera, así que un usuario real seguía sin poder vaciar el campo pese al
-    // fix de backend — el bug original de Gerencia/marly seguía intacto desde la UI. Alineado con
+    // fix de backend — el bug original de Gerencia/qa seguía intacto desde la UI. Alineado con
     // el backend: `string()` sin longitud mínima.
     razon_social:      z.string(),
     nombre_comercial:  z.string(),

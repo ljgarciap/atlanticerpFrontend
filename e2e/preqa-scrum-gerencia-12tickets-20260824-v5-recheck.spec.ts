@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test'
 // barras del gráfico. Verifica en vivo contra dev.atlanticerp.ai cuáles hallazgos de
 // docs/pre-qa/gerencia-epic-12tickets-20260824-v4-final.md siguen vigentes tras ese fix.
 
-const WHIL = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
+const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 const MARK = 'gerencia3@test.com' // Gerencia Approver real
 
 async function login(page: Page, email: string, password?: string): Promise<boolean> {
@@ -30,7 +30,7 @@ async function fetchHome(page: Page) {
 
 // ── SCRUM-156 — Variación margen ────────────────────────────────────────────
 test('SCRUM-156 RN1/RN3 — SIGUE ROTO: el KPI calcula variación de MONTO, no de margen en puntos porcentuales; subtítulo sigue en $, no en %', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -47,7 +47,7 @@ test('SCRUM-156 RN1/RN3 — SIGUE ROTO: el KPI calcula variación de MONTO, no d
 })
 
 test('SCRUM-156 Escenario 2 — MEJORADO: clic navega a /admin-contab/facturacion (antes /admin-contab genérico)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await page.getByText('Variación margen facturado vs. cotizado', { exact: false }).first().click()
@@ -57,7 +57,7 @@ test('SCRUM-156 Escenario 2 — MEJORADO: clic navega a /admin-contab/facturacio
 
 // ── SCRUM-157 — CxC al día (ya pasaba en v4, re-confirmar no hay regresión) ─
 test('SCRUM-157 — sigue OK: monto $ como valor principal, subtítulo con % y total entre paréntesis, navega a /admin-contab/facturacion', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('CxC al día', { exact: false }).first()).toBeVisible()
@@ -68,7 +68,7 @@ test('SCRUM-157 — sigue OK: monto $ como valor principal, subtítulo con % y t
 
 // ── SCRUM-158 — Proyectos activos (ya pasaba en v4, re-confirmar) ───────────
 test('SCRUM-158 — sigue OK: cuenta total + subtítulo, navega a /ventas-diseno/pipeline', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('en todos los módulos', { exact: false })).toBeVisible()
@@ -79,7 +79,7 @@ test('SCRUM-158 — sigue OK: cuenta total + subtítulo, navega a /ventas-diseno
 
 // ── SCRUM-159 — Panel Facturación ───────────────────────────────────────────
 test('SCRUM-159 RN1/Escenario 1 — SIGUE ROTO: selects Vendedor/Cliente sin opciones reales, Escenario 1 no ejecutable', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const selects = page.locator('select')
@@ -89,7 +89,7 @@ test('SCRUM-159 RN1/Escenario 1 — SIGUE ROTO: selects Vendedor/Cliente sin opc
 })
 
 test('SCRUM-159 RN2 — SIGUE ROTO: margen del año/mes de Facturación hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -98,7 +98,7 @@ test('SCRUM-159 RN2 — SIGUE ROTO: margen del año/mes de Facturación hardcode
 })
 
 test('SCRUM-159 RN3/Escenario 2 — MEJORADO: las barras ya son clickeables y navegan, pero sin filtrar por el mes específico de la barra', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const chartArea = page.locator('text=Facturado por mes').locator('xpath=following::div[1]')
@@ -111,7 +111,7 @@ test('SCRUM-159 RN3/Escenario 2 — MEJORADO: las barras ya son clickeables y na
 
 // ── SCRUM-160 — Panel Proyectos ─────────────────────────────────────────────
 test('SCRUM-160 RN3 — SIGUE ROTO: margen cotizado del año/mes de Proyectos hardcodeado en 0%', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const raw = await fetchHome(page)
@@ -120,7 +120,7 @@ test('SCRUM-160 RN3 — SIGUE ROTO: margen cotizado del año/mes de Proyectos ha
 })
 
 test('SCRUM-160 Escenario 1 — sigue OK: etiquetas y orden correctos (cerrados año/mes, luego márgenes)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Proyectos cerrados este año', { exact: false })).toBeVisible()
@@ -129,7 +129,7 @@ test('SCRUM-160 Escenario 1 — sigue OK: etiquetas y orden correctos (cerrados 
 
 // ── SCRUM-161/162 — Aprobaciones ────────────────────────────────────────────
 test('SCRUM-161 RN1/RN2 — GAP DE DISEÑO sigue vigente: un único Gerencia Approver global (ComprasSettings.primary_approver_user_id), no un rol autorizado por tipo', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Solo para aprobadores', { exact: false })).toBeVisible()
@@ -155,7 +155,7 @@ test('SCRUM-162 RN2 — SIGUE ROTO: no existe botón Aprobar/Rechazar ni modal d
 
 // ── SCRUM-165 — Mi calendario Día/Semana/Mes (ya pasaba en v4) ─────────────
 test('SCRUM-165 — sigue OK: pill Día activo por defecto, clic en Semana cambia la vista', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const semana = page.getByRole('button', { name: /^Semana$/i })
@@ -167,7 +167,7 @@ test('SCRUM-165 — sigue OK: pill Día activo por defecto, clic en Semana cambi
 
 // ── SCRUM-166 — Salud Ventas & Diseño ───────────────────────────────────────
 test('SCRUM-166 — MEJORADO: los 5 indicadores ahora tienen 3 destinos DISTINTOS (antes 1 solo), pero ninguno lleva filtro aplicado', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
 
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
@@ -197,14 +197,14 @@ test('SCRUM-166 — MEJORADO: los 5 indicadores ahora tienen 3 destinos DISTINTO
 
 // ── SCRUM-168 — Salud Compras ───────────────────────────────────────────────
 test('SCRUM-168 RN2/Escenario 1 — SIGUE FALTANDO el indicador "Bajo stock sin ordenar"', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   await expect(page.getByText('Bajo stock sin ordenar', { exact: false })).toHaveCount(0)
 })
 
 test('SCRUM-168 — MEJORADO: Órdenes críticas → /compras/ordenes, Próximas a llegar → /compras/logistica (antes ambos a /compras genérico)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
 
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
@@ -224,7 +224,7 @@ test('SCRUM-168 — MEJORADO: Órdenes críticas → /compras/ordenes, Próximas
 
 // ── SCRUM-171 — Agenda Bodega ───────────────────────────────────────────────
 test('SCRUM-171 RN3 — SIGUE ROTO: cada fila navega al mismo destino genérico /bodega/pedidos, item.id nunca se usa', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -239,7 +239,7 @@ test('SCRUM-171 RN3 — SIGUE ROTO: cada fila navega al mismo destino genérico 
 })
 
 test('SCRUM-171 RN2 — destino "Ver detalle" (/bodega/pedidos) es un listado de pedidos, no una pantalla de "Rutas de entrega del día" (esa pantalla no existe en el código)', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Bodega — hoy', { exact: true })
@@ -252,7 +252,7 @@ test('SCRUM-171 RN2 — destino "Ver detalle" (/bodega/pedidos) es un listado de
 
 // ── SCRUM-172 — Agenda Servicios ────────────────────────────────────────────
 test('SCRUM-172 RN3 — SIGUE ROTO: cada fila navega al mismo destino genérico /servicios/tickets, item.id nunca se usa', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Servicios — hoy', { exact: true })
@@ -266,7 +266,7 @@ test('SCRUM-172 RN3 — SIGUE ROTO: cada fila navega al mismo destino genérico 
 })
 
 test('SCRUM-172 RN2 — CONFIRMADO OK: "Ver detalle" navega a /servicios/inicio, que sí tiene panel "Rutas del día" real', async ({ page }) => {
-  await login(page, WHIL)
+  await login(page, GERENCIA5)
   await page.goto('/gerencia')
   await page.waitForTimeout(1200)
   const heading = page.getByText('Agenda de Servicios — hoy', { exact: true })

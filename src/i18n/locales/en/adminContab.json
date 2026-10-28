@@ -1495,7 +1495,7 @@
       "dias6m": "6 months",
       "anio": "Year"
     },
-    "felixCommission": {
+    "commissionTiers": {
       "title": "Commission for +90-day past-due collections — Contabilidad",
       "subtitle": "The more past-due receivables collected, the higher the commission — live, month to date",
       "cobradoMes": "+90-day receivables collected (current month)",

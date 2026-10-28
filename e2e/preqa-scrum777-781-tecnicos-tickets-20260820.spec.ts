@@ -68,11 +68,11 @@ test('1. SCRUM-777 REQ-255 — asignar herramienta a Tecnico actualiza el conteo
   for (let i = 0; i < count; i++) {
     const sel = selects.nth(i)
     const options = await sel.locator('option').allTextContents()
-    if (options.some(o => /carlos vergara/i.test(o)) && options.some(o => /bodega/i.test(o))) {
+    if (options.some(o => /carlos tecnico/i.test(o)) && options.some(o => /bodega/i.test(o))) {
       const current = await sel.inputValue()
       const bodegaOption = await sel.locator('option').filter({ hasText: /bodega/i }).first().getAttribute('value')
       if (current === (bodegaOption ?? '')) {
-        await sel.selectOption({ label: (await sel.locator('option').filter({ hasText: /carlos vergara/i }).first().textContent())!.trim() })
+        await sel.selectOption({ label: (await sel.locator('option').filter({ hasText: /carlos tecnico/i }).first().textContent())!.trim() })
         assigned = true
         break
       }

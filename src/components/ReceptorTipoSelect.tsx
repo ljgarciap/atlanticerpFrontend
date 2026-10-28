@@ -31,7 +31,7 @@ export default function ReceptorTipoSelect(
         <option value="02" disabled={!permitirConsumidorFinal && valorOriginal !== '02'}>{t(`${k}.consumidorFinal`)}</option>
       </select>
       {!permitirConsumidorFinal && valorOriginal !== '02' && (
-        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t(`${k}.soloMarkFelix`)}</p>
+        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t(`${k}.soloGerenciaContabilidad`)}</p>
       )}
       {value === '02' && <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t(`${k}.consumidorFinalAyuda`)}</p>}
     </div>

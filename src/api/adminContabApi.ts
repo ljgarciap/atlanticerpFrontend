@@ -33,7 +33,7 @@ import type {
   PettyCashReportDetail, PettyCashApproveResponse, CreatePettyCashReportPayload,
   PettyCashExpenseDetail, UpdatePettyCashExpensePayload,
   RejectPettyCashExpenseResponse, RejectPettyCashReportResponse,
-  ReportsPeriodo, ReportsFelixCommission, ReportsCartera, ReportsVentas, ReportsFlujoCaja,
+  ReportsPeriodo, ReportsCommissionTiers, ReportsCartera, ReportsVentas, ReportsFlujoCaja,
   CarteraCommissionTier, CreateCarteraCommissionTierPayload,
   ReportsComisiones, ReportsNotasCredito,
   ClientCollectionReport, ClientCollectionReportParams,
@@ -798,7 +798,7 @@ export const adminContabApi = {
     updateCuentaPago: (pipelineCardId: number, data: UpdateCuentaPagoPayload): Promise<{ bank_account_id: number | null }> =>
       api.put<{ bank_account_id: number | null }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/cuenta-pago`, data).then(r => r.data),
 
-    // REQ-516 RN3 — Contabilidad/Yaneth/Mark/Gerencia proponen, queda pendiente de Gerencia.
+    // REQ-516 RN3 — Contabilidad/Asistente/Mark/Gerencia proponen, queda pendiente de Gerencia.
     proposePercent: (pipelineCardId: number, data: ProposePercentPayload): Promise<{ porcentaje_pendiente: number }> =>
       api.post<{ porcentaje_pendiente: number }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/propose`, data).then(r => r.data),
 
@@ -889,7 +889,7 @@ export const adminContabApi = {
       URL.revokeObjectURL(url)
     },
 
-    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Contabilidad/Yaneth/Mark/
+    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Contabilidad/Asistente/Mark/
     // Gerencia, ver ADR §9).
     exportHistory: async (id: number, numero: number | null): Promise<void> => {
       const res = await api.get(`/admin-contab/cash-position/history/${id}/export`, { responseType: 'blob' })
@@ -992,7 +992,7 @@ export const adminContabApi = {
     rejectReport: (numero: string, motivo: string): Promise<RejectPettyCashReportResponse> =>
       api.put<RejectPettyCashReportResponse>(`/admin-contab/petty-cash/reports/${numero}/reject`, { motivo }).then(r => r.data),
 
-    // REQ-544 — Contabilidad/Yaneth, NUNCA Gerencia (al revés que rechazar — el backend nunca deja pasar a
+    // REQ-544 — Contabilidad/Asistente, NUNCA Gerencia (al revés que rechazar — el backend nunca deja pasar a
     // Gerencia acá, no es el mismo gate que approve/reject).
     reopenExpense: (id: number, motivo: string): Promise<PettyCashExpenseDetail> =>
       api.put<PettyCashExpenseDetail>(`/admin-contab/petty-cash/expenses/${id}/reopen`, { motivo }).then(r => r.data),
@@ -1002,8 +1002,8 @@ export const adminContabApi = {
   // nunca reciben `periodo` — siempre mes/estado en curso, mismo criterio que `cash-position`
   // (header vs. projected).
   reports: {
-    felixCommission: (): Promise<ReportsFelixCommission> =>
-      api.get<ReportsFelixCommission>('/admin-contab/reports/felix-commission').then(r => r.data),
+    commissionTiers: (): Promise<ReportsCommissionTiers> =>
+      api.get<ReportsCommissionTiers>('/admin-contab/reports/commission-tiers').then(r => r.data),
 
     cartera: (): Promise<ReportsCartera> =>
       api.get<ReportsCartera>('/admin-contab/reports/cartera').then(r => r.data),

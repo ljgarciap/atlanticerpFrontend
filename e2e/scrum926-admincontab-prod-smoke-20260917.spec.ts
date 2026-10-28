@@ -40,7 +40,7 @@ test('login como Contabilidad (lider_admin_contab, no-superadmin)', async ({ pag
 
 test('Contabilidad aterriza en Admin&Cont con nav completo (rol scopeado a un solo módulo)', async ({ page }) => {
   await login(page)
-  await expect(page.getByRole('heading', { name: /bienvenido, felix/i })).toBeVisible({ timeout: 10000 })
+  await expect(page.getByRole('heading', { name: /bienvenido, contabilidad/i })).toBeVisible({ timeout: 10000 })
   await expect(page.getByRole('button', { name: 'Facturación', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Tesorería', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Reportes', exact: true })).toBeVisible()

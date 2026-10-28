@@ -44,7 +44,7 @@ export const gerenciaApi = {
   },
 
   // SCRUM-163 (REQ-101) — infraestructura configurable de "quién aprueba cada tipo de solicitud".
-  // Exclusivo de superadmin hasta que el cliente defina si Gerencia/David/Whil pueden configurarlo
+  // Exclusivo de superadmin hasta que el cliente defina si Gerencia/Gerencia2/Gerencia5 pueden configurarlo
   // también (ver docblock del backend, ReglaAprobacionController).
   vendors: (): Promise<{ id: number; name: string }[]> =>
     api.get('/gerencia/vendors').then(r => r.data),

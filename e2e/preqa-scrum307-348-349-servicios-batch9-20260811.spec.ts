@@ -22,7 +22,7 @@ import { test, expect, Page, Locator } from '@playwright/test'
 const AARON    = 'liderservicios@test.com'
 const PEDRO    = 'tecnico2@test.com'
 const AGUSTIN  = 'tecnico3@test.com'
-const DANIELA  = 'gerencia@test.com'
+const GERENCIA1  = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')
@@ -158,7 +158,7 @@ test('SCRUM-349 RN3 — hoja completada: cualquier rol con acceso puede Ver/Impr
   // Gerencia (management) no puede editar Hoja de Reclamo (route role gate la bloquea), pero
   // servicios.read sí le da acceso de lectura/impresión — confirmar que el botón Ver/Imprimir
   // aparece y funciona una vez la hoja (T96, Tecnico) ya está completada.
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await openTicketByNumero(page, 'REC-2026-0002') // T96, completada
   await page.getByRole('button', { name: /Completada/ }).last().click()
   const modal = activeModal(page)
@@ -195,7 +195,7 @@ test('SCRUM-307 RN2/RN3 — botón cambia de plantilla en blanco a informe lleno
 })
 
 test('SCRUM-307 permisos — rol fuera del roster de pdf/blank: el botón NO se muestra (frontend gatea por rol, no solo el backend)', async ({ page }) => {
-  await login(page, DANIELA) // management, no está en el roster route-level de pdf/blank
+  await login(page, GERENCIA1) // management, no está en el roster route-level de pdf/blank
   await openTicketByNumero(page, 'INS-2026-0002') // sin informe completado todavía
   await page.getByRole('button', { name: /Generar informe|Completado/ }).last().click()
   const modal = activeModal(page)

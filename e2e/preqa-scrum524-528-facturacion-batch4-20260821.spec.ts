@@ -38,11 +38,11 @@ import { test, expect, Page } from '@playwright/test'
 // aging RN1/RN2 con matematica real de antiguedad (75 dias backdateados -> 45 dias vencido con
 // dias_credito_factura=30 -> bucket 31-60, confirmado antes y despues de aprobar/rechazar). Este
 // spec cubre lo que solo se puede verificar en el navegador real: gates visuales de Mark-only,
-// banda de PDF/watermark, navegacion de "Registrar cobro", y el flujo completo Felix->Gerencia en vivo.
+// banda de PDF/watermark, navegacion de "Registrar cobro", y el flujo completo Contabilidad->Gerencia en vivo.
 
 test.describe.configure({ mode: 'serial' })
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const MARK = 'gerencia3@test.com'
 const VENDEDOR2 = 'vendedor2@test.com'
 
@@ -94,7 +94,7 @@ test('RBAC negativo -- vendedor no accede a /admin-contab/invoices*', async ({ p
 })
 
 test('REQ-447 Escenario 1 -- entrega pendiente-facturar muestra Cotizacion completa, Factura/Guia pendientes', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente I')
   const modal = detailModal(page)
 
@@ -108,7 +108,7 @@ test('REQ-447 Escenario 1 -- entrega pendiente-facturar muestra Cotizacion compl
 })
 
 test('REQ-447 Escenario 2 -- trazabilidad completa (Cotizacion+Factura+Guia) tras Guia real post-factura', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente B')
   const modal = detailModal(page)
 
@@ -124,7 +124,7 @@ test('REQ-447 Escenario 2 -- trazabilidad completa (Cotizacion+Factura+Guia) tra
 })
 
 test('REQ-447 RN2 -- Guia de Entrega generada ANTES de la factura no cuenta hasta que la factura exista', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente C')
   const modal = detailModal(page)
 
@@ -139,7 +139,7 @@ test('REQ-447 RN2 -- Guia de Entrega generada ANTES de la factura no cuenta hast
 })
 
 test('REQ-449 RN1/RN2 -- bloque de pago completo (Cuenta numero/Responsable) + ambos totales con saldo a favor', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente D')
   const modal = detailModal(page)
 
@@ -182,7 +182,7 @@ test('REQ-449 RN1/RN2 -- bloque de pago completo (Cuenta numero/Responsable) + a
 })
 
 test('REQ-449 RN3 -- factura anulada muestra marca de agua ANULADA (seteada manualmente, sin flujo real todavia)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente F')
   const modal = detailModal(page)
 
@@ -211,7 +211,7 @@ test('REQ-449 RN3 -- factura anulada muestra marca de agua ANULADA (seteada manu
 })
 
 test('REQ-448 RN4 -- Contabilidad NO ve los botones Aprobar/Rechazar sobre una propuesta pendiente (Mark-only)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   // Idempotencia entre corridas -- el test siguiente (Gerencia rechaza) deja a G de vuelta en estado
   // normal. Si este spec ya corrio una vez contra este mismo ambiente, G ya no esta pendiente --
   // se vuelve a proponer por API (ignorando 422 si por algun motivo ya estuviera pendiente) antes
@@ -233,7 +233,7 @@ test('REQ-448 RN4 -- Contabilidad NO ve los botones Aprobar/Rechazar sobre una p
   await expect(modal.getByRole('button', { name: /Rechazar/i })).toHaveCount(0)
   // RN2 REQ-451 -- pese a la propuesta pendiente, "Registrar cobro" sigue disponible.
   await expect(modal.getByRole('button', { name: /Registrar cobro/i })).toBeVisible()
-  await page.screenshot({ path: 'test-results/scrum524-528-req448-felix-sin-botones.png', fullPage: true })
+  await page.screenshot({ path: 'test-results/scrum524-528-req448-contabilidad-sin-botones.png', fullPage: true })
 })
 
 test('REQ-448 RN4 -- Gerencia SI ve y puede usar Aprobar/Rechazar; al rechazar vuelve exactamente a normal', async ({ page }) => {
@@ -259,7 +259,7 @@ test('REQ-448 RN4 -- Gerencia SI ve y puede usar Aprobar/Rechazar; al rechazar v
 })
 
 test('REQ-451 RN1 -- factura incobrable APROBADA nunca muestra "Registrar cobro"', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente H', 'incobrable')
   const modal = detailModal(page)
 
@@ -269,7 +269,7 @@ test('REQ-451 RN1 -- factura incobrable APROBADA nunca muestra "Registrar cobro"
 })
 
 test('REQ-451 RN3 -- "Registrar cobro" navega a Cobros con el cliente correcto preseleccionado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await openDetailFor(page, 'PREQA4 Subcliente D')
   const modal = detailModal(page)
 
@@ -286,7 +286,7 @@ test('REQ-451 RN3 -- "Registrar cobro" navega a Cobros con el cliente correcto p
 })
 
 test('REQ-450 -- panel Antiguedad de cartera visible y con los 4 rangos', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto('/admin-contab/facturacion')
   await page.waitForTimeout(1200)
 

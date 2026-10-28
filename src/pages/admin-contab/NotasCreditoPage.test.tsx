@@ -124,7 +124,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
       factura_origen_id: 5,
       factura_origen_numero: 'HS-3402',
       project: 'Proyecto Paso a Bodega 1',
-      contact_name: 'PERSONA QUE DEVUELVE DANIELA',
+      contact_name: 'PERSONA QUE DEVUELVE GERENCIA1',
       contact_phone: '54345434',
       has_signed_document: true,
       productos: [{ reference: 'XL-100', description: 'Producto XL', unit_price: null, qty_received: 2, reason: null, reason_detail: null }],
@@ -138,7 +138,7 @@ describe('NotasCreditoPage — REQ-491 cola de devoluciones confirmadas por Bode
     // SCRUM-865 punto 2 — el backend ya trae proyecto/persona que devuelve/conformidad cuando
     // Bodega los capturó; el formulario debe mostrar el dato real, no el placeholder.
     expect(screen.getByText('Proyecto Paso a Bodega 1')).toBeInTheDocument()
-    expect(screen.getByText('PERSONA QUE DEVUELVE DANIELA — 54345434')).toBeInTheDocument()
+    expect(screen.getByText('PERSONA QUE DEVUELVE GERENCIA1 — 54345434')).toBeInTheDocument()
     expect(screen.getByText('notasCredito.formulario.conformidadVerDocumento')).toBeInTheDocument()
     expect(screen.queryByText('notasCredito.formulario.precargaDatoNoDisponible')).not.toBeInTheDocument()
     expect(screen.getByText(/Producto XL/)).toBeInTheDocument()

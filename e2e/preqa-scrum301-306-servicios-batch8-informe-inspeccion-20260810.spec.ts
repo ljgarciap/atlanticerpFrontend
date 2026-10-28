@@ -13,7 +13,7 @@ import { test, expect, Page } from '@playwright/test'
 const AARON   = 'liderservicios@test.com'
 const MIGUEL  = 'tecnicogarantias@test.com'
 const CARLOS  = 'tecnico@test.com'
-const DANIELA = 'gerencia@test.com'
+const GERENCIA1 = 'gerencia@test.com'
 
 async function login(page: Page, email: string) {
   await page.goto('/login')
@@ -110,7 +110,7 @@ test('SCRUM-306 — modo alternativo Súbelo aquí oculta el formulario', async 
 })
 
 test('SCRUM-241/242 — Fotos Antes/Después separadas y firma Pendiente de firma en vista de solo lectura', async ({ page }) => {
-  await login(page, DANIELA) // Gerencia — solo lectura
+  await login(page, GERENCIA1) // Gerencia — solo lectura
   await openTicketByNumero(page, 'INS-2026-0003') // T84 ya tiene informe completado (via curl), firmas vacías
   await openInspectionReport(page)
 

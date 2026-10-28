@@ -82,7 +82,7 @@ export default function BodegaInventarioPage() {
             Libre, el único flujo de compra que Bodega puede iniciar (Bodega no tiene
             `compras.write` para el flujo general de Compras). Antes navegaba por error a
             /bodega/pedidos (tablero Kanban de Pedidos, una pantalla completamente distinta) —
-            hallazgo de QA (marly.rangel, 2026-07-24).
+            hallazgo de QA (qa.qa, 2026-07-24).
           */}
           <Button variant="outline" onClick={() => navigate('/bodega/ordenes-zona-libre')}>
             {t('bodega:inventory.actions.goToOrders')}
@@ -484,7 +484,7 @@ function ProductDetailModal({ row, onClose }: { row: BodegaInventoryRow; onClose
   const { t } = useTranslation(['common', 'bodega'])
   const [confirming, setConfirming] = useState(false)
   // SCRUM-425 (REQ-355) — "Ver ficha técnica", mismo modal compartido con Compras
-  // (`components/TechnicalSpecModal.tsx`). Hallazgo de QA (marly.rangel, 2026-07-27): el botón
+  // (`components/TechnicalSpecModal.tsx`). Hallazgo de QA (qa.qa, 2026-07-27): el botón
   // existía en Compras > Inventario pero faltaba acá — el ticket dice UBICACION "Ver inventario"
   // y PERMISOS "Visible para todos los perfiles de Bodega".
   const [showTechnicalSpec, setShowTechnicalSpec] = useState(false)

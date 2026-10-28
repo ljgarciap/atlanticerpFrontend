@@ -1611,7 +1611,7 @@ describe('QuotePage', () => {
     })
   })
 
-  // ── SCRUM-725 — advertencia de margen mínimo (Gerencia/David) al confirmar ──────
+  // ── SCRUM-725 — advertencia de margen mínimo (Gerencia/Gerencia2) al confirmar ──────
 
   it('confirm() con margin_warning muestra el modal de advertencia en vez de un error genérico', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))

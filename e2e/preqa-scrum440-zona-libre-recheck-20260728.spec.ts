@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * SCRUM-440 (REQ-370) — Pre-QA re-check 2026-07-28, "Ciclo de vida completo de una orden Zona
- * Libre". Re-abierto por marly (2026-07-25/26): Lider Compras (lidercompras@test.com,
+ * Libre". Re-abierto por qa (2026-07-25/26): Lider Compras (lidercompras@test.com,
  * lider_compras) no podía entrar a /bodega/ordenes-zona-libre (la redirigía al dashboard) — sin
  * acceso, no podía ejecutar el Escenario 2 (aprobación) desde la UI.
  *
@@ -28,7 +28,7 @@ import { test, expect, type Page } from '@playwright/test'
  * POST /compras/zona-libre/requests/{id}/approve|reject (routes/compras.php, permiso
  * compras.zona-libre.approve) y Lider Compras SÍ tiene el permiso — pero no hay ningún botón en toda la
  * SPA que lo invoque. Por eso el Escenario 2 (y el "rechazar con motivo" desde la UI) siguen sin
- * poder verificarse — es exactamente el mismo hueco que marly reportó el 2026-07-25/26, el fix de
+ * poder verificarse — es exactamente el mismo hueco que qa reportó el 2026-07-25/26, el fix de
  * hoy solo resolvió la mitad (acceso), no la acción en sí.
  *
  * Corre contra dev.atlanticerp.ai. Serial a propósito: CrowdSec/ModSecurity dispara falsos timeouts con
@@ -38,8 +38,8 @@ test.describe.configure({ mode: 'serial' })
 
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
-const YIRENA_EMAIL = 'lidercompras@test.com'
-const YIRENA_PASS  = 'lidercompras@test.com'
+const LIDERCOMPRAS_EMAIL = 'lidercompras@test.com'
+const LIDERCOMPRAS_PASS  = 'lidercompras@test.com'
 const ALMACEN_EMAIL = 'liderbodega@test.com'
 const ALMACEN_PASS  = 'liderbodega@test.com'
 
@@ -54,18 +54,18 @@ async function login(page: Page, email: string, password: string) {
 
 test.describe('SCRUM-440 — Lider Compras YA puede entrar a la bandeja (fix cb0f413)', () => {
   test('Lider Compras entra a /bodega/ordenes-zona-libre sin ser redirigida al dashboard', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await page.goto(`${BASE}/bodega/ordenes-zona-libre`)
     await page.waitForTimeout(1500)
 
     expect(page.url()).toContain('/bodega/ordenes-zona-libre')
     // La bandeja real, no un placeholder ni un 403/dashboard.
     await expect(page.getByRole('table')).toBeVisible()
-    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum440-yirena-bandeja.png' })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum440-lidercompras-bandeja.png' })
   })
 
   test('efecto secundario aceptado — Lider Compras ve el resto del menú de Bodega en el Sidebar, no solo Zona Libre', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await page.goto(`${BASE}/bodega/home`)
     await page.waitForTimeout(1500)
 
@@ -75,13 +75,13 @@ test.describe('SCRUM-440 — Lider Compras YA puede entrar a la bandeja (fix cb0
 
     const nav = page.locator('aside').first()
     await expect(nav.getByRole('button', { name: 'Bodega', exact: true })).toBeVisible()
-    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum440-yirena-sidebar-bodega.png' })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum440-lidercompras-sidebar-bodega.png' })
   })
 })
 
 test.describe('SCRUM-440 — HALLAZGO: no existe botón Aprobar/Rechazar en ninguna parte de la SPA', () => {
   test('CRÍTICO — en la bandeja, Lider Compras NO tiene botón Aprobar/Rechazar en ninguna fila (ningún estado)', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
     await page.goto(`${BASE}/bodega/ordenes-zona-libre`)
     await page.waitForTimeout(1500)
 
@@ -102,7 +102,7 @@ test.describe('SCRUM-440 — HALLAZGO: no existe botón Aprobar/Rechazar en ning
   })
 
   test('CRÍTICO — no existe ninguna ruta de Compras dedicada a aprobar/rechazar BodegaZonaLibreRequest', async ({ page }) => {
-    await login(page, YIRENA_EMAIL, YIRENA_PASS)
+    await login(page, LIDERCOMPRAS_EMAIL, LIDERCOMPRAS_PASS)
 
     // "Ver Órdenes" (compras/ordenes) SÍ tiene un filtro "Zona Libre" — pero es un filtro por
     // PROVEEDOR sobre PurchaseOrders normales (RN1: una vez aprobada, la solicitud de Bodega SE

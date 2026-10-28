@@ -118,7 +118,7 @@ test('SCRUM-881.1 — Cobros: tarjetas de indicadores con valores reales para As
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/cobros')
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-881-01-cobros-yaneth.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-881-01-cobros-asistente.png', fullPage: true })
   const bodyText = await page.locator('body').innerText()
   // Con datos $0 la regresión concreta era mostrar "-" en vez de "$0.00"/"0" real — confirmamos
   // que NO aparece un guion suelto como placeholder de error en las tarjetas de indicadores.
@@ -129,7 +129,7 @@ test('SCRUM-881.2 — Comisiones Internas: Asistente Administrativa ve la tabla 
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-881-02-comisiones-internas-yaneth.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-881-02-comisiones-internas-asistente.png', fullPage: true })
   const rows = page.locator('table tbody tr')
   const count = await rows.count()
   expect(count).toBeGreaterThanOrEqual(11)
@@ -139,16 +139,16 @@ test('SCRUM-881.3 — Reportes: tarjeta "Comisión Contabilidad +90 días" NO ap
   await login(page, 'asistenteadministrativa@test.com')
   await page.goto('/admin-contab/reportes')
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-881-03-reportes-yaneth.png', fullPage: true })
-  await expect(page.getByText(/comisi[oó]n.*felix/i)).toHaveCount(0)
+  await page.screenshot({ path: 'e2e/.tmp/preqa-881-03-reportes-asistente.png', fullPage: true })
+  await expect(page.getByText(/comisi[oó]n.*contabilidad/i)).toHaveCount(0)
 })
 
 test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Contabilidad', async ({ page }) => {
   await login(page, 'contabilidad@test.com')
   await page.goto('/admin-contab/reportes')
   await page.waitForTimeout(1500)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-881-04-reportes-felix.png', fullPage: true })
-  await expect(page.getByText(/comisi[oó]n.*felix/i).first()).toBeVisible()
+  await page.screenshot({ path: 'e2e/.tmp/preqa-881-04-reportes-contabilidad.png', fullPage: true })
+  await expect(page.getByText(/comisi[oó]n.*contabilidad/i).first()).toBeVisible()
 })
 
 // ---------------------------------------------------------------------------

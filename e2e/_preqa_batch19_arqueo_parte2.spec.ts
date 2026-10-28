@@ -8,10 +8,10 @@ test.describe.configure({ mode: 'serial' })
 // Password LOCAL = email para todos los usuarios (distinto de dev/test.atlanticerp.ai).
 const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
 
-const FELIX = 'contabilidad@test.com'
-const YANETH = 'asistenteadministrativa@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
+const ASISTENTE = 'asistenteadministrativa@test.com'
 const MARK = 'gerencia3@test.com'
-const DANIELA = 'gerencia@test.com'
+const GERENCIA1 = 'gerencia@test.com'
 
 async function login(page: Page, email: string): Promise<void> {
   await page.context().clearCookies()
@@ -35,7 +35,7 @@ async function bearerToken(page: Page): Promise<string | null> {
 }
 
 test('REQ-527 — arqueo activo es el atrasado (ayer), no hoy, con aviso explícito', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -45,11 +45,11 @@ test('REQ-527 — arqueo activo es el atrasado (ayer), no hoy, con aviso explíc
   await expect(page.getByRole('heading', { name: 'Arqueo del día' })).toBeVisible()
   const banner = page.locator('text=/no quedó cerrado|atrasad/i')
   await expect(banner.first()).toBeVisible()
-  await page.screenshot({ path: 'e2e/screenshots/batch19-felix-atrasado-banner.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch19-contabilidad-atrasado-banner.png', fullPage: true })
 })
 
 test('REQ-525 RN1/RN2 — sección Ajustes/Retención visible con estado Pendiente', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -63,7 +63,7 @@ test('REQ-525 RN1/RN2 — sección Ajustes/Retención visible con estado Pendien
 })
 
 test('REQ-526 RN2 — modal de cierre avisa de retención pendiente sin bloquear', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -82,7 +82,7 @@ test('REQ-526 RN2 — modal de cierre avisa de retención pendiente sin bloquear
 })
 
 test('REQ-525 — subir constancia, queda como completado', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -101,7 +101,7 @@ test('REQ-525 — subir constancia, queda como completado', async ({ page }) => 
 })
 
 test('REQ-525 escenario negativo — subir constancia sobre pago NO retención da 422 (API directa)', async ({ page, request }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   const token = await bearerToken(page)
   expect(token).toBeTruthy()
 
@@ -118,7 +118,7 @@ test('REQ-525 escenario negativo — subir constancia sobre pago NO retención d
 })
 
 test('REQ-526 — cerrar arqueo atrasado (ya sin retención pendiente) avanza a hoy (RN3 REQ-527)', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -141,7 +141,7 @@ test('REQ-526 — cerrar arqueo atrasado (ya sin retención pendiente) avanza a 
 })
 
 test('REQ-529 — Descargar resumen del arqueo activo genera PDF no vacío', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1000)
   await page.getByRole('button', { name: /real \(histórico\)/i }).click()
@@ -160,7 +160,7 @@ test('REQ-529 — Descargar resumen del arqueo activo genera PDF no vacío', asy
 })
 
 test('REQ-528 — historial muestra el arqueo cerrado pendiente de aprobación, contador correcto', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1500)
 
@@ -170,7 +170,7 @@ test('REQ-528 — historial muestra el arqueo cerrado pendiente de aprobación, 
 })
 
 test('REQ-528 RN2 — Asistente Administrativa (asistente) NO puede aprobar ni por UI ni por API directa (403)', async ({ page, request }) => {
-  await login(page, YANETH)
+  await login(page, ASISTENTE)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1500)
 
@@ -178,7 +178,7 @@ test('REQ-528 RN2 — Asistente Administrativa (asistente) NO puede aprobar ni p
   await page.getByRole('button', { name: /^ver$/i }).first().click()
   await page.waitForTimeout(800)
   await expect(page.getByRole('button', { name: /^aprobar$/i })).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/batch19-yaneth-sin-aprobar.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/screenshots/batch19-asistente-sin-aprobar.png', fullPage: true })
 
   const token = await bearerToken(page)
   // Find the id of the pending record via history endpoint
@@ -194,7 +194,7 @@ test('REQ-528 RN2 — Asistente Administrativa (asistente) NO puede aprobar ni p
 })
 
 test('REQ-528 RN2 — Gerencia (management, no es Gerencia) tampoco puede aprobar vía API (403)', async ({ page, request }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   const token = await bearerToken(page)
   const hist = await request.get(`${BASE}/api/admin-contab/cash-position/history?page=1`, { headers: { Authorization: `Bearer ${token}` } })
   const histJson = await hist.json()
@@ -224,7 +224,7 @@ test('REQ-528 escenario 2 — Gerencia ve y aprueba, queda "Aprobado por Gerenci
 
   await aprobarBtn.click()
   await page.waitForTimeout(1200)
-  await expect(page.getByText(/aprobado por mark bekhar/i).first()).toBeVisible()
+  await expect(page.getByText(/aprobado por mark gerencia3/i).first()).toBeVisible()
   await page.screenshot({ path: 'e2e/screenshots/batch19-mark-aprobado.png', fullPage: true })
 })
 
@@ -262,12 +262,12 @@ test('REQ-529 — Descargar resumen desde el historial (ya aprobado) genera PDF 
 test('Chequeo cruzado de permisos — un rol sin acceso a Admin&Cont recibe 403, no 200/500', async ({ request }) => {
   // Reuse Contabilidad login just to get a valid backend, but hit endpoints as an unauthenticated actor is
   // already covered elsewhere — here we specifically re-verify approve requires primary_approver_only even with
-  // a well-formed but wrong-role token is already covered above (Asistente Administrativa/Daniela). Skipped duplicate.
-  test.skip(true, 'cubierto arriba con Asistente Administrativa/Daniela')
+  // a well-formed but wrong-role token is already covered above (Asistente Administrativa/Gerencia1). Skipped duplicate.
+  test.skip(true, 'cubierto arriba con Asistente Administrativa/Gerencia1')
 })
 
 test('Chequeo de iconografía — sin emojis en la UI nueva de Arqueo de Caja', async ({ page }) => {
-  await login(page, FELIX)
+  await login(page, CONTABILIDAD)
   await page.goto(`${BASE}/admin-contab/arqueo-caja`)
   await page.waitForTimeout(1500)
   const bodyText = await page.locator('body').innerText()

@@ -57,10 +57,10 @@ test.beforeAll(() => {
 
 const VENDEDOR2    = 'vendedor2@test.com'
 const VENDEDOR3    = 'vendedor3@test.com'
-const DANIELA = 'gerencia@test.com'
+const GERENCIA1 = 'gerencia@test.com'
 
 // ⚠️ Hallazgo de credenciales (no es del código de SCRUM-849, documentado aparte en el reporte):
-// la contraseña que Luis dio para daniela (B1n4X_2026?) fue RECHAZADA en vivo por dev.atlanticerp.ai
+// la contraseña que Luis dio para gerencia1 (B1n4X_2026?) fue RECHAZADA en vivo por dev.atlanticerp.ai
 // (verificado con Hash::check() por SSH — false). El default real vigente HOY en dev es el email
 // como password (Hash::check() -> true), igual que vendedor2/vendedor3. Se usa el default real acá.
 async function login(page: Page, email: string): Promise<void> {
@@ -98,7 +98,7 @@ async function login(page: Page, email: string): Promise<void> {
 // quote.owner (que el backend sí devuelve correctamente).
 // ---------------------------------------------------------------------------
 test('SCRUM-849.5 — CRITICO: Gerencia abre la cotización de otro diseñador y ve SU PROPIO nombre/teléfono, no el del dueño real', async ({ page }) => {
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`) // owned by vendedor2 (Vendedor Test 2)
   await page.waitForTimeout(1500)
 
@@ -217,7 +217,7 @@ test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve tex
   const cardParam = `?card=${fx.card8_multiassign_vendedor2_vendedor3}`
 
   // Como Gerencia (Gerencia): abrir la tarjeta compartida.
-  await login(page, DANIELA)
+  await login(page, GERENCIA1)
   await page.goto(`${BASE}/ventas-diseno/pipeline${cardParam}`)
   await page.waitForTimeout(1500)
   const modal = page.locator('div.fixed.inset-0.z-50')

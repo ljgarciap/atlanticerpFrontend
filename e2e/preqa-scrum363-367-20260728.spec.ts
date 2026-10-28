@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test'
  *
  * SCRUM-363: navegación estándar de las 13 pantallas de Bodega — sidebar con 7 accesos de
  * nivel superior (Inicio, Pedidos, Inventario▾, Bodegas, Movimientos, Reportes, Configuración
- * solo superadmin.all), RN5 agregada 2026-07-28 tras hallazgo de marly (faltaba Reportes,
+ * solo superadmin.all), RN5 agregada 2026-07-28 tras hallazgo de qa (faltaba Reportes,
  * Movimientos/Configuración no documentados). Corregido: link de Reportes (commit 9d5a00d,
  * 2026-07-27).
  *
@@ -14,7 +14,7 @@ import { test, expect, type Page } from '@playwright/test'
  * order_stage_history (0 con datos sembrados directo), ahora cuenta el backlog actual asignado
  * al alcance activo (cualquier etapa salvo Entregado).
  *
- * Corre contra dev.atlanticerp.ai (mismos datos que usará marly), no contra un stack local. Serial a
+ * Corre contra dev.atlanticerp.ai (mismos datos que usará qa), no contra un stack local. Serial a
  * propósito: dev.atlanticerp.ai corre CrowdSec/ModSecurity (ver CLAUDE.md, Epic 11) — logins en
  * paralelo desde la misma IP ya dispararon falsos timeouts en sesiones previas.
  */
@@ -155,7 +155,7 @@ test.describe('SCRUM-363 — navegación Bodega (RN1-RN5)', () => {
 // SCRUM-367 — "Pedidos hoy" ya no da 0 (fix backend d82fc5f)
 // ─────────────────────────────────────────────────────────────────────────
 test.describe('SCRUM-367 — Mi día / Pedidos hoy', () => {
-  test('BUG (marly, 2026-07-26) — "Pedidos hoy" ya NO da 0 en alcance Equipo con pedidos activos reales', async ({ page }) => {
+  test('BUG (qa, 2026-07-26) — "Pedidos hoy" ya NO da 0 en alcance Equipo con pedidos activos reales', async ({ page }) => {
     await login(page, ALMACEN_EMAIL, ALMACEN_PASS)
     await page.goto(`${BASE}/bodega/home`)
     await page.waitForTimeout(1500)

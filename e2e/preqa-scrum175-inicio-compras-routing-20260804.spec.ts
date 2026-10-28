@@ -63,7 +63,7 @@ test('CRÍTICO original — Lider Compras (lider_compras) aterriza directo en /c
   expect(pendientesBox && ordenesBox && Math.abs(pendientesBox.y - ordenesBox.y) < 20).toBeTruthy()
   expect(resumenBox && pendientesBox && pendientesBox.y > resumenBox.y).toBeTruthy()
 
-  await page.screenshot({ path: 'test-results/scrum175-compras-home-yirena.png', fullPage: true })
+  await page.screenshot({ path: 'test-results/scrum175-compras-home-lidercompras.png', fullPage: true })
 })
 
 test('logout/login repetido — no es un fluke de caché, Lider Compras sigue aterrizando en /compras/inicio', async ({ page }) => {

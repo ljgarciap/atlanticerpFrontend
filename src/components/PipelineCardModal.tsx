@@ -61,7 +61,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     enabled:  canSeeTeam,
   })
 
-  // SCRUM-884 (rebote 2026-09-16) — cuando quien crea el proyecto es Gerencia (Gerencia/David/Will),
+  // SCRUM-884 (rebote 2026-09-16) — cuando quien crea el proyecto es Gerencia (Gerencia/Gerencia2/Will),
   // queda en `assigneeIds` (owner_id) pero `teamVendors` nunca lo incluye (es la lista de
   // vendedores/diseñadores, no de Gerencia). `UserMultiSelect` solo renderiza como "chip"
   // removible a quien esté en la lista `users` que recibe — sin este id ahí, no había forma de

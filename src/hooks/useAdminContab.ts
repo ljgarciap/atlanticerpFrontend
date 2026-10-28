@@ -1411,7 +1411,7 @@ export function useRejectPettyCashReport() {
   })
 }
 
-// REQ-544 — Contabilidad/Yaneth, no Gerencia. El detalle actualizado viene completo, setQueryData es seguro.
+// REQ-544 — Contabilidad/Asistente, no Gerencia. El detalle actualizado viene completo, setQueryData es seguro.
 export function useReopenPettyCashExpense() {
   const qc = useQueryClient()
   return useMutation({
@@ -1430,15 +1430,15 @@ export function useReopenPettyCashExpense() {
 // que cambiar el selector jamás las re-dispara (mismo criterio que `CASH_POSITION_HEADER_KEY` vs.
 // `cashPositionProjectedKey`).
 
-const REPORTS_FELIX_COMMISSION_KEY = ['admin-contab', 'reports', 'felix-commission']
+const REPORTS_COMMISSION_TIERS_KEY = ['admin-contab', 'reports', 'commission-tiers']
 const REPORTS_CARTERA_KEY          = ['admin-contab', 'reports', 'cartera']
 const reportsVentasKey             = (periodo: ReportsPeriodo) => ['admin-contab', 'reports', 'ventas', periodo]
 const reportsFlujoCajaKey          = (periodo: ReportsPeriodo) => ['admin-contab', 'reports', 'flujo-caja', periodo]
 
-export function useReportsFelixCommission() {
+export function useReportsCommissionTiers() {
   return useQuery({
-    queryKey: REPORTS_FELIX_COMMISSION_KEY,
-    queryFn:  () => adminContabApi.reports.felixCommission(),
+    queryKey: REPORTS_COMMISSION_TIERS_KEY,
+    queryFn:  () => adminContabApi.reports.commissionTiers(),
   })
 }
 

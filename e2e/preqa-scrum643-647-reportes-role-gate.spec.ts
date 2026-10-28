@@ -15,7 +15,7 @@ import { test, expect, Page } from '@playwright/test'
 // routes/admin-contab.php) -- el gap era solo de frontend. Fix: RequireRole anidado dentro de
 // RequirePermission en App.tsx, mismo patron ya usado en /crm/dashboard (SCRUM-674, 2026-07-31).
 
-const FELIX = 'contabilidad@test.com'
+const CONTABILIDAD = 'contabilidad@test.com'
 const DESIGNER = 'vendedor2@test.com'
 
 async function login(page: Page, email: string): Promise<boolean> {
@@ -49,7 +49,7 @@ test('vendedor NO puede entrar a /admin-contab/reportes por URL directa pese a t
 })
 
 test('roster con acceso real (Contabilidad) sigue entrando sin regresion', async ({ page }) => {
-  const ok = await login(page, FELIX)
+  const ok = await login(page, CONTABILIDAD)
   expect(ok).toBeTruthy()
 
   await page.goto('/admin-contab/reportes')

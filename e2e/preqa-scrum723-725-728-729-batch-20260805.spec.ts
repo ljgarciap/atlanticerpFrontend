@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 /**
  * Pre-QA — SCRUM-723 (warn "Volver a Pipeline" sin guardar), SCRUM-725 (margen mínimo
- * por producto/global + override Gerencia/David + precio manual de catálogo), SCRUM-728
+ * por producto/global + override Gerencia/Gerencia2 + precio manual de catálogo), SCRUM-728
  * (submenú Catálogo en CRM), SCRUM-729 (sidebar Compras un solo activo + provider
  * picker con foco/blur).
  *
@@ -20,7 +20,7 @@ test.describe.configure({ mode: 'serial' })
 
 const VENDEDOR_SIN_PERMISO = 'vendedor@test.com'
 const MARK = 'gerencia3@test.com'
-const DAVID = 'gerencia2@test.com'
+const GERENCIA2 = 'gerencia2@test.com'
 const LIDER_COMPRAS = 'lidercompras@test.com'
 const TECNICO_SIN_VENTAS = 'tecnico@test.com' // solo-lectura, servicios — sin ventas_diseno.read
 
@@ -304,7 +304,7 @@ function itemRowByReference(page: Page, reference: string) {
   return page.locator('tr').filter({ has: page.locator(`input[value="${reference}"]`) })
 }
 
-test.describe('SCRUM-725 — margen mínimo (30%) por producto/global + excepción Gerencia/David', () => {
+test.describe('SCRUM-725 — margen mínimo (30%) por producto/global + excepción Gerencia/Gerencia2', () => {
   let vendorQuoteUrl = ''
 
   test('1. Sin permiso — agregar producto de margen bajo (20%) BLOQUEA (422), revelando el 30% (decisión de Luis 2026-08-05)', async ({ page }) => {

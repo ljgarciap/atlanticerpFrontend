@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test'
 // `bodega.read` en la ruta (no solo escondido en el sidebar).
 //
 // Corre contra dev.atlanticerp.ai (BASE_URL), no contra un stack local — mismos datos que usará
-// marly.rangel al validar. `liderbodega@test.com` (Lider Bodega Test, lider_bodega) es el
+// qa.qa al validar. `liderbodega@test.com` (Lider Bodega Test, lider_bodega) es el
 // usuario real con bodega.read; `vendedor@atlantic.test` es el usuario demo SIN bodega.read
 // usado también por `BodegaReportsControllerTest::test_reportes_requieren_bodega_read` (403 a
 // nivel API) — acá se verifica el mismo gate a nivel de ruta de React Router.

@@ -13,7 +13,7 @@ import type { UserInfo } from '@/types/auth'
 
 // Batch 16 (SCRUM-585→590, REQ-508→513) — Comisiones Externas. Cubre: 5 tarjetas (REQ-508),
 // aviso + montos ocultos cuando faltan datos fiscales (REQ-510/511), estados (REQ-512), gate de
-// rol de "Subir cuenta de cobro" (REQ-513 — Contabilidad/Yaneth sí, Gerencia no).
+// rol de "Subir cuenta de cobro" (REQ-513 — Contabilidad/Asistente sí, Gerencia no).
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
