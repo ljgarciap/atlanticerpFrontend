@@ -30,15 +30,19 @@ export default function WarehousesAdminPanel() {
 
   const error = create.error ?? update.error ?? remove.error
   const nameOf = (w: WarehouseSaleRule) => names[w.id] ?? w.name
+  // Solo se muestra el error de la última acción: al iniciar otra se limpia el anterior.
+  const clearErrors = () => { create.reset(); update.reset(); remove.reset() }
+  const change = (id: number, data: Parameters<typeof update.mutate>[0]['data'], opts?: Parameters<typeof update.mutate>[1]) => { clearErrors(); if (opts) update.mutate({ id, data }, opts); else update.mutate({ id, data }) }
 
   function add(e: React.FormEvent) {
     e.preventDefault()
     if (newName.trim().length < 2) return
+    clearErrors()
     create.mutate({ name: newName.trim(), tipo: newTipo }, { onSuccess: () => setNewName('') })
   }
 
   function confirmAndDelete(w: WarehouseSaleRule) {
-    if (window.confirm(t('bodega:settings.warehousesAdmin.actions.confirmDelete', { name: w.name }))) remove.mutate(w.id)
+    if (window.confirm(t('bodega:settings.warehousesAdmin.actions.confirmDelete', { name: w.name }))) { clearErrors(); remove.mutate(w.id) }
   }
 
   return (
@@ -97,7 +101,7 @@ export default function WarehousesAdminPanel() {
                     <td className="px-3 py-2">
                       <select
                         value={w.tipo ?? 'bodega'} disabled={busy}
-                        onChange={e => update.mutate({ id: w.id, data: { tipo: e.target.value as WarehouseTipo } })}
+                        onChange={e => change(w.id, { tipo: e.target.value as WarehouseTipo })}
                         aria-label={t('bodega:settings.warehousesAdmin.aria.tipo', { name: w.name })}
                         className="rounded border border-slate-200 dark:border-slate-700 bg-transparent px-2 py-1" data-testid={`warehouse-tipo-${w.id}`}
                       >
@@ -112,7 +116,7 @@ export default function WarehousesAdminPanel() {
                       {nameOf(w).trim() !== w.name && nameOf(w).trim().length >= 2 && (
                         <Button
                           variant="secondary" disabled={busy} data-testid={`warehouse-save-${w.id}`}
-                          onClick={() => update.mutate({ id: w.id, data: { name: nameOf(w).trim() } }, { onSuccess: () => setNames(prev => { const { [w.id]: _omit, ...rest } = prev; return rest }) })}
+                          onClick={() => change(w.id, { name: nameOf(w).trim() }, { onSuccess: () => setNames(prev => { const { [w.id]: _omit, ...rest } = prev; return rest }) })}
                         >
                           {t('bodega:settings.warehousesAdmin.actions.save')}
                         </Button>
@@ -120,7 +124,7 @@ export default function WarehousesAdminPanel() {
                       {!system && (
                         <Button
                           variant="outline" disabled={busy} data-testid={`warehouse-toggle-${w.id}`}
-                          onClick={() => update.mutate({ id: w.id, data: { is_active: !active } })}
+                          onClick={() => change(w.id, { is_active: !active })}
                         >
                           {t(active ? 'bodega:settings.warehousesAdmin.actions.deactivate' : 'bodega:settings.warehousesAdmin.actions.activate')}
                         </Button>

@@ -27,9 +27,9 @@ let removeMutate: ReturnType<typeof vi.fn>
 function setup(opts: { error?: unknown } = {}) {
   createMutate = vi.fn(); updateMutate = vi.fn(); removeMutate = vi.fn()
   vi.mocked(useWarehouseSaleRules).mockReturnValue({ data: WAREHOUSES, isLoading: false } as unknown as ReturnType<typeof useWarehouseSaleRules>)
-  vi.mocked(useCreateWarehouse).mockReturnValue({ mutate: createMutate, isPending: false } as unknown as ReturnType<typeof useCreateWarehouse>)
-  vi.mocked(useUpdateWarehouseSaleRule).mockReturnValue({ mutate: updateMutate, isPending: false, error: opts.error } as unknown as ReturnType<typeof useUpdateWarehouseSaleRule>)
-  vi.mocked(useDeleteWarehouse).mockReturnValue({ mutate: removeMutate, isPending: false } as unknown as ReturnType<typeof useDeleteWarehouse>)
+  vi.mocked(useCreateWarehouse).mockReturnValue({ mutate: createMutate, isPending: false, reset: vi.fn() } as unknown as ReturnType<typeof useCreateWarehouse>)
+  vi.mocked(useUpdateWarehouseSaleRule).mockReturnValue({ mutate: updateMutate, isPending: false, error: opts.error, reset: vi.fn() } as unknown as ReturnType<typeof useUpdateWarehouseSaleRule>)
+  vi.mocked(useDeleteWarehouse).mockReturnValue({ mutate: removeMutate, isPending: false, reset: vi.fn() } as unknown as ReturnType<typeof useDeleteWarehouse>)
   render(<WarehousesAdminPanel />)
 }
 
