@@ -20,14 +20,14 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
   la había sembrado y reasignado horas antes, pero `infra/test.sh` comparte la misma base que dev
   local y la resetea — gotcha ya documentado en `CLAUDE.md`). Se corrió
   `VentasDisenoDemoSeeder` + reasignación manual vía tinker para cubrir: 2 tarjetas de un Vendedor
-  real (Neil Quiel, una con `amount`/`worked_area_m2` null y otra con ambos con valor), 1 tarjeta
-  de otro Vendedor real (Vanessa, para poder probar fuga de scope entre pares), 2 tarjetas de
-  Gerencia (Daniela). Se repitió la siembra al final de la sesión porque `infra/test.sh` volvió a
+  real ([persona] [persona], una con `amount`/`worked_area_m2` null y otra con ambos con valor), 1 tarjeta
+  de otro Vendedor real ([persona], para poder probar fuga de scope entre pares), 2 tarjetas de
+  Gerencia (Gerencia1). Se repitió la siembra al final de la sesión porque `infra/test.sh` volvió a
   resetear la base tras correr la suite con el fix — estado final de datos consistente con lo de
   arriba.
 - **Rol "Líder" vs "Gerencia"**: no son sinónimos automáticos en este módulo — se confirmó en
   código (`RoleModuleVisibility`) que solo el rol `management` tiene `can_view_team=true` para el
-  módulo `ventas_diseno`; el rol `lider_admin_contab` (Felix, `conta@atlantic.com.pa`) no
+  módulo `ventas_diseno`; el rol `lider_admin_contab` (Contabilidad, `conta@atlantic.com.pa`) no
   tiene ninguna fila de visibilidad para `ventas_diseno` en absoluto (`view=false`), por lo que ni
   siquiera puede entrar a `/crm/projects` (403 backend, redirect frontend). Esto es consistente con
   el resto del módulo (mismo gate que Pipeline/Clientes), no es un gap de este batch.
@@ -38,12 +38,12 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
 
 | Escenario / intento de ruptura | Resultado |
 |---|---|
-| Vendedor (Neil) ve solo sus proyectos por defecto | OK — 2/2 tarjetas propias, ninguna ajena |
+| Vendedor ([persona]) ve solo sus proyectos por defecto | OK — 2/2 tarjetas propias, ninguna ajena |
 | Vendedor forzando `?scope=team` directo en la URL de la API (sin pasar por la UI) | Bloqueado — backend ignora el parámetro, sigue devolviendo solo sus propios registros (`can_view_team: false`) |
 | Vendedor forzando `?owner_id=<otro vendedor>` sin `scope=team` | Bloqueado — mismo resultado, se ignora |
 | Vendedor forzando `?scope=team&owner_id=<otro>` combinados | Bloqueado — combinación también ignorada, confirmado por curl directo contra el backend real |
 | Vendedor forzando el bypass también contra `/export` (CSV) | Bloqueado — el CSV tampoco filtra por el owner ajeno |
-| Gerencia (Daniela) con `scope=team` ve todo el equipo | OK — 6/6 tarjetas, de 3 responsables distintos |
+| Gerencia (Gerencia1) con `scope=team` ve todo el equipo | OK — 6/6 tarjetas, de 3 responsables distintos |
 | Columnas exactas (10, mismo orden) | OK — confirmado en pantalla y en el `<thead>` |
 | Etapa con color de Pipeline | OK — mismo `PIPELINE_STAGES` |
 | Etiqueta = valor real | OK — Diseño/Cotización/Diseño+Cotización/vacío→"—" |
@@ -55,7 +55,7 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
 |---|---|
 | Búsqueda de texto en tiempo real, sin botón "Buscar" | OK — confirmado que no existe el botón y que el filtro corre por `onChange` puro |
 | Búsqueda case-insensitive, proyecto o cliente master | OK (ya cubierto por Senior Review, `ilike`) |
-| Filtro Responsable sin efecto para Vendedor, ni oculto ni forzable | OK — no visible en UI para Neil/Vanessa; forzado por API, ya cubierto arriba (se ignora) |
+| Filtro Responsable sin efecto para Vendedor, ni oculto ni forzable | OK — no visible en UI para [persona]/[persona]; forzado por API, ya cubierto arriba (se ignora) |
 | Filtro Etapa/Etiqueta combinados (AND) | OK — confirmado con combinaciones múltiples |
 | Sin resultados → mensaje exacto | OK — "Sin resultados para los filtros actuales", texto literal, no una tabla vacía silenciosa (verificado con un término de búsqueda inexistente) |
 | Cambiar de página y luego aplicar un filtro nuevo | OK — no queda una página fuera de rango con 0 resultados confusos; o vuelve a página 1 con datos o muestra el mensaje real de sin resultados |
@@ -73,7 +73,7 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
 | Escenario / intento de ruptura | Resultado |
 |---|---|
 | Exportar con filtro de etapa aplicado → solo esas filas | OK (ya cubierto por Senior Review y test automatizado) |
-| Exportar con scope "Mías" → solo las propias, nunca las de otro responsable | OK — confirmado con Neil, el CSV nunca contiene "Amenidades Delta" (proyecto de Daniela/Vanessa) |
+| Exportar con scope "Mías" → solo las propias, nunca las de otro responsable | OK — confirmado con [persona], el CSV nunca contiene "Amenidades Delta" (proyecto de Gerencia1/[persona]) |
 | Exactamente 10 columnas, sin RUC/teléfono | OK — cabecera exacta confirmada en el archivo real descargado vía navegador |
 | Doble clic en "Exportar CSV" | El botón se deshabilita mientras `exportMutation.isPending` (prop `loading` del componente `Button`, mismo patrón ya usado en el resto de la app) — no es una operación con efecto de escritura en BD (a diferencia del bug de idempotencia de Batch C), así que un doble disparo en el peor caso son 2 descargas idénticas, no datos duplicados. Confirmado además que 2 requests concurrentes directos al endpoint devuelven contenido idéntico (operación de lectura, sin estado) |
 
@@ -81,8 +81,8 @@ sin reglas adicionales al texto de Jira — Jira ya es fiel al Excel para este b
 
 | Escenario / intento de ruptura | Resultado |
 |---|---|
-| Clic navega a Pipeline y abre el modal de creación sin clic adicional | OK, confirmado con Neil (Vendedor) |
-| Usuario sin `ventas_diseno.read` (Felix) intentando llegar a la pantalla | Bloqueado antes de poder ver el botón — la ruta completa `/crm/projects` está gateada por `RequirePermission permission="ventas_diseno.read"` en el frontend y por el mismo permiso en el backend (403 confirmado por curl); mismo patrón que Pipeline, no es un gap nuevo de este batch |
+| Clic navega a Pipeline y abre el modal de creación sin clic adicional | OK, confirmado con [persona] (Vendedor) |
+| Usuario sin `ventas_diseno.read` (Contabilidad) intentando llegar a la pantalla | Bloqueado antes de poder ver el botón — la ruta completa `/crm/projects` está gateada por `RequirePermission permission="ventas_diseno.read"` en el frontend y por el mismo permiso en el backend (403 confirmado por curl); mismo patrón que Pipeline, no es un gap nuevo de este batch |
 
 ## Hallazgos
 

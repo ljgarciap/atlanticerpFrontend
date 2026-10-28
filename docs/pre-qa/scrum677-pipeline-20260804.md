@@ -11,7 +11,7 @@ vez, ver `feedback_e2e_no_desechar` en memoria del proyecto)
 
 ## Contexto
 
-Daniela Amaya reportó dos veces (2026-08-03 y 2026-08-04, con video adjunto 11663) que al mover
+Gerencia1 Test reportó dos veces (2026-08-03 y 2026-08-04, con video adjunto 11663) que al mover
 una tarjeta de etapa sin un dato requerido, el aviso de "dato faltante" quedaba visible para
 siempre incluso después de completar el dato y mover la tarjeta con éxito. Causa raíz real
 (confirmada por Senior Review): `stageError`/`quoteGateError` solo se limpiaban en el `onSuccess`
@@ -21,19 +21,19 @@ el dato se completaba por otra vía. Fix: `saveMutation`, `uploadFileMutation` y
 
 ## Nota de entorno — desvío del login sugerido en el ticket
 
-La instrucción original pedía loguear con `idmar@atlantic.com.pa` ("vendedor con data real
+La instrucción original pedía loguear con `[persona]@atlantic.com.pa` ("vendedor con data real
 sembrada"). En el Postgres LOCAL de esta sesión ese usuario no tenía ninguna tarjeta de pipeline
 propia — `VentasDisenoDemoSeeder` resuelve el rol `designer` seedeado a
-**neil.quiel@atlantic.com.pa**, no a idmar (válido para `dev.atlanticerp.ai`, no para local). Se
-usó **neil.quiel@atlantic.com.pa** (Vendedor/Diseñador) y **daniela@atlantic.com.pa**
+**[persona].[persona]@atlantic.com.pa**, no a [persona] (válido para `dev.atlanticerp.ai`, no para local). Se
+usó **[persona].[persona]@atlantic.com.pa** (Vendedor/Diseñador) y **gerencia1@atlantic.com.pa**
 (Gerencia, dueña de tarjetas en Cotización/Propuesta) — ambas cuentas reales, password = mismo
 email, mismo patrón que el resto de `e2e/`. Adicionalmente, `infra/test.sh` corrido en esta misma
 sesión (para validar el backend) comparte el Postgres local y lo dejó sin datos — se corrió
 `tenants:artisan db:seed --force` después, restaurando el estado para la siguiente sesión.
 
-## Escenario reproducido — EXACTO al de Daniela (video 11663)
+## Escenario reproducido — EXACTO al de Gerencia1 (video 11663)
 
-**Tarjeta "PreQA Lead 677" (Diseño, neil.quiel), sin superficie trabajada:**
+**Tarjeta "PreQA Lead 677" (Diseño, [persona].[persona]), sin superficie trabajada:**
 1. Clic en "Crear cotización" → aparece "Falta la superficie trabajada. Completala antes de crear
    la cotización."
 2. **Se resolvió por Editar → Guardar (NO reintentando "Crear cotización")** — superficie = 55 m².
@@ -51,13 +51,13 @@ sesión (para validar el backend) comparte el Postgres local y lo dejó sin dato
 7. Se resolvió subiendo el archivo (NO reintentando "Crear cotización") → el aviso desapareció sin
    necesidad de un clic adicional.
 
-**Resultado: PASS.** El escenario exacto reportado por Daniela — "Diseño a Cotización, se edita,
+**Resultado: PASS.** El escenario exacto reportado por Gerencia1 — "Diseño a Cotización, se edita,
 se agrega el campo que se pide, se guarda, la alerta sigue apareciendo" — ya NO reproduce. El
 banner se limpia correctamente.
 
 ## Segundo camino — `changeStageMutation` (stageError) con 2 gates en secuencia
 
-**Tarjeta "[DEMO] Amenidades Delta" (Cotización, daniela), sin superficie ni cotización firmada:**
+**Tarjeta "[DEMO] Amenidades Delta" (Cotización, gerencia1), sin superficie ni cotización firmada:**
 1. "Mover a Propuesta" → "Falta la superficie trabajada (m²) antes de mover a Propuesta."
 2. Editar → Guardar (superficie = 80) → el aviso desaparece.
 3. "Mover a Propuesta" de nuevo → gate DISTINTO: "Falta el archivo de la cotización firmada antes
@@ -70,7 +70,7 @@ banner se limpia correctamente.
 
 ## Tercer camino — `addContactMutation` (quoteGateError, Lead sin contacto)
 
-**Tarjeta "PreQA SubClient 677" (Lead, neil.quiel), sin contactos:**
+**Tarjeta "PreQA SubClient 677" (Lead, [persona].[persona]), sin contactos:**
 1. "Crear cotización" → "Este Lead no tiene contactos registrados. Agregá al menos uno antes de
    continuar."
 2. Se agregó un contacto vía el mini-formulario (NO reintentando "Crear cotización") → el aviso
@@ -95,7 +95,7 @@ No se encontró ningún hallazgo bloqueante ni menor en esta pasada.
   nuevo en esta sesión puntual porque el fix es 100% frontend; Senior Review ya reportó
   1405/1405+regresión backend íntegra el 2026-08-04).
 - Frontend: `npx vitest run` → **866/866 OK** (incluye el test de regresión nuevo agregado en el
-  mismo commit del fix, que reproduce el flujo exacto de Daniela).
+  mismo commit del fix, que reproduce el flujo exacto de Gerencia1).
 - Playwright (`e2e/preqa-scrum677-alert-cleanup-20260804.spec.ts`) → **3/3 OK**, corrida limpia
   final tras reset de fixtures.
 
@@ -103,14 +103,14 @@ No se encontró ningún hallazgo bloqueante ni menor en esta pasada.
 
 El commit `0abbf69` está en `dev` local (rama `dev`, 17 commits por delante de `origin/dev` al
 momento de esta revisión, junto con otros commits de la misma sesión — SCRUM-685/686). **Este fix
-no está todavía en `dev.atlanticerp.ai`** — antes de que marly (QA formal) pueda probarlo ahí, alguien
+no está todavía en `dev.atlanticerp.ai`** — antes de que qa (QA formal) pueda probarlo ahí, alguien
 tiene que pushear. Dejar esto explícito para quien transicione el ticket: el paso de Pre-QA local
-dio PASS, pero el criterio "el objetivo es que marly pueda probarlo en dev.atlanticerp.ai" (regla dura
+dio PASS, pero el criterio "el objetivo es que qa pueda probarlo en dev.atlanticerp.ai" (regla dura
 del proyecto) todavía no se cumple hasta el push.
 
 ## Resultado final
 
-**PASADA LIMPIA.** Sin hallazgos bloqueantes. El escenario exacto de Daniela (video 11663) fue
+**PASADA LIMPIA.** Sin hallazgos bloqueantes. El escenario exacto de Gerencia1 (video 11663) fue
 reproducido y confirmado resuelto, junto con los otros 2 caminos que toca el fix
 (`uploadFileMutation`, `addContactMutation`) y el camino de `changeStageMutation` con 2 gates en
 secuencia. Recomendado transicionar a `QA` **una vez confirmado el push a `dev` remoto**.

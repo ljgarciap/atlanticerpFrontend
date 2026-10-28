@@ -6,8 +6,8 @@
 **Entorno probado:** stack local (Docker, API `http://localhost:8090`) + Vite propio en `:5182`
 sobre el checkout principal de `atlanticerp-frontend` en `dev` (NO el dev server de otra sesión en 5173).
 **Herramienta:** Playwright CLI (scripts descartables + capturas full-page). Cuentas reales
-(Aaron `lider_servicios`, Daniela `management`, Carlos `tecnico_servicios`, Pedro
-`tecnico_servicios`, Milena `vendedor_disenador`, Yirena `lider_compras`) — nunca cuentas demo.
+(Aaron `lider_servicios`, Gerencia1 `management`, Carlos `tecnico_servicios`, Pedro
+`tecnico_servicios`, [persona] `vendedor_disenador`, Lidercompras `lider_compras`) — nunca cuentas demo.
 
 **Veredicto: APROBADO** tras corregir 4 hallazgos CRÍTICOS en el momento y re-correr el checklist
 completo (ver "Fixes aplicados" al final).
@@ -30,7 +30,7 @@ completo (ver "Fixes aplicados" al final).
 | 10 | "Servicios completados — 2026": grilla de 6 columnas, 2da fila automática | ✅ | Ene–Jun fila 1, Jul–Ago fila 2 |
 | 11 | 4 barras individuales por mes, **cada una con su número visible encima** | ✅ (tras fix) | Los números solo existían como tooltip (`title`) al pasar el mouse. Corregidos a números visibles |
 | 12 | Total del mes debajo del nombre del mes | ✅ | |
-| 13 | Sección "Comisión — Carlos Vergara" visualmente diferenciada (fondo/borde distinto) | ✅ | Panel ámbar `#FFFBF3` con borde `#f0d9a8` |
+| 13 | Sección "Comisión — Tecnico Test" visualmente diferenciada (fondo/borde distinto) | ✅ | Panel ámbar `#FFFBF3` con borde `#f0d9a8` |
 | 14 | Comisión: total del mes + los 5 criterios ponderados con peso/% obtenido/monto | ✅ | Idéntico al modal de Técnicos Internos (misma fuente, ver Pre-QA) |
 | 15 | Comisión: navegación de período propia | ✅ | Botones ‹ › con el mes siguiente deshabilitado en el mes actual |
 | 16 | Biblioteca: buscador + select de tipo de documento + select de estado | ✅ | Combinables |

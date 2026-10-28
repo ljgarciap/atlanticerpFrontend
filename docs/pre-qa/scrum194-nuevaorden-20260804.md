@@ -1,13 +1,13 @@
 # Pre-QA — SCRUM-194 (REQ-131): validación de referencia duplicada en "+ Producto nuevo" (2026-08-04)
 
 Gate que ya se rompió 3 veces en este mismo ticket: QA rechazó 2026-07-17 (aceptaba duplicado sin
-aviso), Daniela Amaya encontró un gap nuevo 2026-07-30 (2 líneas nuevas duplicadas dentro del mismo
+aviso), Gerencia1 Test encontró un gap nuevo 2026-07-30 (2 líneas nuevas duplicadas dentro del mismo
 borrador), y volvió a reportar "AUN ME SIGUE DEJANDO CREAR PRODUCTOS NUEVOS CON LA MISMA
 REFERENCIA" hoy 2026-08-04. Fix bajo revisión: precheck async (`comprasApi.products.search`) en
 `NewProductModal.tsx`, aprobado en Senior Review hoy mismo (19:12).
 
 Entorno: local (Docker `:8090` + Vite `:5173`, código de `dev` local con el fix ya mergeado).
-Usuario: `gerencia2@atlantic.com.pa` (lider_compras, Yirena Teng) — password = email, funcionó
+Usuario: `gerencia2@atlantic.com.pa` (lider_compras, Lider Compras Test) — password = email, funcionó
 al primer intento, sin fallback necesario. Smoke test permanente:
 `atlanticerp-frontend/e2e/preqa-scrum194-nuevaorden-20260804.spec.ts` (1 test con 7 `test.step()`,
 corrido con `npx playwright test e2e/preqa-scrum194-nuevaorden-20260804.spec.ts --workers=1
@@ -46,7 +46,7 @@ La corrida final fue determinística y reproducible.
 
 Ver detalle completo en `docs/visual-review/scrum194-nuevaorden-20260804.md`. Resumen: el campo de
 monto de "Costo adicional estimado" renderizaba a ~26px de ancho (bug de cascada CSS entre
-`w-full` y `w-32` en el `<select>` vecino) — coincide con el reclamo de Daniela Amaya de hoy ("el
+`w-full` y `w-32` en el `<select>` vecino) — coincide con el reclamo de Gerencia1 Test de hoy ("el
 campo quedó muy pequeño"). Fix aplicado en el mismo archivo (`NewProductModal.tsx`), verificado con
 `getComputedStyle` antes/después (428px→128px en el select, input de monto pasa a ser usable),
 checklist completo de los 7 pasos re-corrido tras el fix (pasada limpia), `tsc --noEmit` limpio,
@@ -56,12 +56,12 @@ checklist completo de los 7 pasos re-corrido tras el fix (pasada limpia), `tsc -
 
 La tabla de "Líneas de la orden" no tiene columnas separadas "Ref. fábrica" / "Referencia pública"
 como exige el mockup (`2H__Compras_NuevaOrden.html`) — ambas referencias aparecen concatenadas sin
-etiqueta bajo la descripción. Mismo comentario de Daniela Amaya de hoy lo señala explícitamente.
+etiqueta bajo la descripción. Mismo comentario de Gerencia1 Test de hoy lo señala explícitamente.
 Esto es sobre `OrderLinesEditor.tsx` (la tabla de líneas), no sobre `NewProductModal.tsx` (el modal
 que este Pre-QA tenía instrucción explícita de revisar) — **no se corrige en esta sesión** por ser
 un cambio de alcance mayor (agregar 2 columnas a una tabla ya con 5, revisar breakpoints). Queda
 como hallazgo bloqueante pendiente, notificado a PM/Luis: si el criterio de cierre de SCRUM-194
-incluye la tabla (el reporte de Daniela mezcla ambos temas bajo el mismo ticket), este ticket NO
+incluye la tabla (el reporte de Gerencia1 mezcla ambos temas bajo el mismo ticket), este ticket NO
 puede darse por completamente cerrado sin ese fix o sin que PM/Luis lo derive explícitamente a
 alcance separado.
 
@@ -92,7 +92,7 @@ por el backend, fallo de red no bloquea, limpieza de error al editar): PASA LIMP
 en esta sesión.**
 
 **SCRUM-194 completo: NO recomendado pasar a QA todavía** — el hallazgo de la tabla de líneas
-(columnas Ref. fábrica/Referencia pública ausentes, reportado por Daniela hoy mismo) sigue abierto
+(columnas Ref. fábrica/Referencia pública ausentes, reportado por Gerencia1 hoy mismo) sigue abierto
 y no fue autorizado a diferirse por PM/Luis en esta sesión. Recomendación: confirmar con PM/Luis si
 esa tabla es parte del alcance de SCRUM-194 antes de transicionar el ticket — si se confirma como
 alcance separado, el modal en sí ya está listo para QA.

@@ -7,13 +7,13 @@
 local. Reemplaza el placeholder "próximamente".
 **Mockup de referencia:** `2B__CRM_Lista_Proyectos.html` (attachment 11545 de SCRUM-690).
 **Método:** Playwright CLI contra la app LOCAL (`http://localhost:5173`, proxy a `infra-nginx-1`
-puerto 8090, contenedores Docker ya corrientes). Cuentas reales: Daniela Amaya
-(`daniela@atlantic.com.pa`, Gerencia) y Neil Quiel (`neil.quiel@atlantic.com.pa`,
+puerto 8090, contenedores Docker ya corrientes). Cuentas reales: Gerencia1 Test
+(`gerencia1@atlantic.com.pa`, Gerencia) y [persona] [persona] (`[persona].[persona]@atlantic.com.pa`,
 Vendedor/Diseñador).
 **Nota de datos:** `pipeline_cards` estaba vacía en la BD local (0 filas) al empezar — no permitía
 ejercitar filtros/scope/click-de-fila/CSV con datos reales. Se corrió `db:seed --force` en el
 tenant (`VentasDisenoDemoSeeder`, ya gateado a `local/dev/testing`, mecanismo estándar del
-proyecto) y se reasignó 1 tarjeta demo a `neil.quiel` vía tinker para poder probar el escenario
+proyecto) y se reasignó 1 tarjeta demo a `[persona].[persona]` vía tinker para poder probar el escenario
 "Mías" con datos propios — cambios solo en la BD local (fixtures descartables), ningún archivo de
 código tocado.
 
@@ -28,8 +28,8 @@ Extraído literalmente de `2B__CRM_Lista_Proyectos.html` (tabla `proj-list-table
 | Etapa con color por etapa (Lead/Diseño/Cotización/Propuesta/Aprobado/Perdido) | Sí | Usa `PIPELINE_STAGES` — mismos colores que Pipeline (REQ-610 lo exige explícitamente) |
 | Etiqueta = Diseño / Cotización / Diseño+Cotización / vacío | Sí | Mapea a `dashboard.tagLabels` (mismo vocabulario que Dashboard CRM Batch C); vacío → "—" |
 | "—" cuando falta Valor o Superficie | Sí | Confirmado con datos reales (`amount`/`worked_area_m2` null) |
-| Alcance Mías/Equipo — Vendedor ve solo lo suyo | Sí | `neil.quiel` (Vendedor): 1 fila, exactamente su propia tarjeta reasignada, sin toggle de alcance ni filtro Responsable visibles |
-| Alcance Mías/Equipo — Líder/Gerencia ve todo el equipo | Sí | `daniela` (Gerencia): toggle "Inicio"/"Equipo" visible, 2 filas propias → 6 al cambiar a Equipo (paginado 5/pág) |
+| Alcance Mías/Equipo — Vendedor ve solo lo suyo | Sí | `[persona].[persona]` (Vendedor): 1 fila, exactamente su propia tarjeta reasignada, sin toggle de alcance ni filtro Responsable visibles |
+| Alcance Mías/Equipo — Líder/Gerencia ve todo el equipo | Sí | `gerencia1` (Gerencia): toggle "Inicio"/"Equipo" visible, 2 filas propias → 6 al cambiar a Equipo (paginado 5/pág) |
 | Buscador texto libre (proyecto o cliente) | Sí | Filtra en vivo (`onChange`, sin botón — igual que el mockup, que también filtra con `oninput`, sin submit) |
 | Filtro Etapa | Sí | Mismas 6 opciones + "Todas las etapas", mismo orden que el mockup |
 | Filtro Etiqueta | Sí | Mismas 3 opciones + "Todas las etiquetas", mismo orden y texto ("Diseño + Cotización") |

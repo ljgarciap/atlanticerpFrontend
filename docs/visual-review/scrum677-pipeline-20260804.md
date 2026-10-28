@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-04
 **Ticket:** [SCRUM-677](https://grupolafayette.atlassian.net/browse/SCRUM-677) — REQ-597, Pipeline de Ventas & Diseño
-**Mockup adjunto:** `2A__CRM_Pipeline.html` (attachment 11520, Daniela Amaya)
+**Mockup adjunto:** `2A__CRM_Pipeline.html` (attachment 11520, Gerencia1 Test)
 **Componente:** `atlanticerp-frontend/src/components/PipelineCardModal.tsx`
 **Commit revisado:** `0abbf69` (dev local, no pusheado a origin al momento de esta revisión)
 

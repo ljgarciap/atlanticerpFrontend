@@ -11,7 +11,7 @@
 SCRUM-738 (épica Ventas&Diseño, parent SCRUM-327, prioridad Highest). Pide reorganizar los
 campos del modal de detalle de proyecto (`PipelineCardModal.tsx`) en dos columnas alineadas y
 consistentes, siguiendo el mockup adjunto — sin tocar información, campos, funcionalidades,
-botones ni lógica existente. Reportado por Daniela Amaya con captura de "estado actual" donde
+botones ni lógica existente. Reportado por Gerencia1 Test con captura de "estado actual" donde
 "Días en etapa" y "Valor" aparecen desplazados respecto al resto de los campos.
 
 ## Causa raíz

@@ -13,14 +13,14 @@ El comentario original en `App.tsx` (Batch 22) asumía que el rol `vendedor_dise
 `admin_contab.view` y por eso no hacía falta un `RequireRole` adicional — falso: ese rol SÍ tiene
 `admin_contab.view=true` en su JWT real (lo necesita para ver su propio historial de Comisiones
 Internas, Batch 14/15), así que la ruta `RequirePermission permission="admin_contab.view"` sola lo
-dejaba pasar. Confirmado con la cuenta real `neil.quiel@atlantic.com.pa` (rol
+dejaba pasar. Confirmado con la cuenta real `[persona].[persona]@atlantic.com.pa` (rol
 `vendedor_disenador`):
 
 - El sidebar mostraba "Reportes" bajo Admin. & Contab. (item plano, sin gate por-ítem, mismo
   criterio que el resto del menú — ver comentario de Sidebar.tsx).
 - La ruta montaba `ReportesPage` completa: título, subtítulo, selector de período y los 5 títulos
   de tarjeta visibles.
-- Las 4 queries (`felix-commission`, `cartera`, `ventas`, `flujo-caja`) SÍ estaban bloqueadas
+- Las 4 queries (`commission-tiers`, `cartera`, `ventas`, `flujo-caja`) SÍ estaban bloqueadas
   correctamente por el backend (`role:superadmin,lider_admin_contab,asistente_administrativa,
   management` en `routes/admin-contab.php`) — 403 en las 4, confirmado con `curl` directo y con
   Playwright (0 datos reales expuestos). Pero como el frontend usa
@@ -37,10 +37,10 @@ anidar `RequireRole roles={['superadmin', 'lider_admin_contab', 'asistente_admin
 mismo mecanismo, mismo roster que el backend. Sin cambios de backend (el 403 ya era correcto).
 
 **Re-verificación tras el fix** (checklist completo, no solo el punto que falló):
-- `neil.quiel@atlantic.com.pa` → redirigido a su home real (`/ventas-diseno/home`) antes de
+- `[persona].[persona]@atlantic.com.pa` → redirigido a su home real (`/ventas-diseno/home`) antes de
   montar `ReportesPage`; **0** requests a `/api/admin-contab/reports/*` disparados (antes había 4,
   todas 403); texto "Comisión por gestión de cartera +90 días" ya no aparece en el DOM.
-- Felix/Yaneth/Mark siguen entrando sin regresión — confirmado con Playwright tras el fix.
+- Contabilidad/Asistente/Aprobador siguen entrando sin regresión — confirmado con Playwright tras el fix.
 - `npx vitest run src/pages/admin-contab/` → 147/147 tests OK (12 archivos, incluye
   `ReportesPage.test.tsx`) — sin regresión en el resto del módulo por el cambio en `App.tsx`.
 - Test promovido a permanente: `e2e/preqa-scrum643-647-reportes-role-gate.spec.ts` (mismo criterio
@@ -48,17 +48,17 @@ mismo mecanismo, mismo roster que el backend. Sin cambios de backend (el 403 ya 
 
 ## Lo que se intentó romper y NO se rompió
 
-- **RN4/RN3 (selector de período nunca recalcula Comisión Felix/Cartera)** — confirmado a 3
-  niveles: query keys fijas en `useAdminContab.ts` (`REPORTS_FELIX_COMMISSION_KEY`/
+- **RN4/RN3 (selector de período nunca recalcula Comisión Contabilidad/Cartera)** — confirmado a 3
+  niveles: query keys fijas en `useAdminContab.ts` (`REPORTS_COMMISSION_TIERS_KEY`/
   `REPORTS_CARTERA_KEY` sin `periodo`), test de vitest (`ReportesPage.test.tsx`, mockea las 4 APIs
   y cuenta invocaciones antes/después de cambiar el selector), y Playwright real contra
-  `localhost:5173` capturando XHR reales — 0 requests a `felix-commission`/`cartera` tras cambiar
+  `localhost:5173` capturando XHR reales — 0 requests a `commission-tiers`/`cartera` tras cambiar
   a "6 meses". Probado también con doble/triple cambio rápido de selector (3m→6m→año) sin
   disparar pedidos descontrolados ni quedar en un estado inconsistente — la última selección
   siempre gana.
 - **RN2 REQ-566 ("Año" = año a la fecha, no 12 meses fijos)** — hoy es 2026-08-27; `periodo=anio`
   devuelve exactamente 8 meses (Ene→Ago 2026), confirmado por API directa.
-- **RN4 REQ-567 / corte de mes calendario de la comisión de Felix** — `over90DaysCollectedForCurrentMonth()`
+- **RN4 REQ-567 / corte de mes calendario de la comisión de Contabilidad** — `over90DaysCollectedForCurrentMonth()`
   filtra por `whereBetween('created_at', [monthStart, monthEnd])` sobre el pago, no sobre "últimos
   30 días" — confirmado leyendo el código y con el test PHPUnit
   `test_cobrado_90_dias_solo_cuenta_pagos_de_facturas_vencidas_hace_mas_de_90_dias` (factura vieja
@@ -83,8 +83,8 @@ mismo mecanismo, mismo roster que el backend. Sin cambios de backend (el 403 ya 
 - **RN1 REQ-570 (gráfico de flujo neto, no entradas/salidas por separado)** — confirmado: el bar
   chart de meses solo grafica `neto` (color condicional verde/rojo según signo); el desglose
   entradas/salidas solo aparece como texto en el KPI "Hoy", no como serie separada en el gráfico.
-- **Gate `mark_only` de los tramos de comisión** — Felix/Yaneth/Designer → 403 en POST/PUT/DELETE;
-  Mark → 201/200/204. Confirmado con `curl` directo (no solo UI oculta) contra los 3 verbos.
+- **Gate `mark_only` de los tramos de comisión** — Contabilidad/Asistente/Designer → 403 en POST/PUT/DELETE;
+  Aprobador → 201/200/204. Confirmado con `curl` directo (no solo UI oculta) contra los 3 verbos.
 - **Reload a mitad de flujo** — cambiar el selector a "Año" y recargar la página vuelve a "Hoy"
   (RN1, sin persistencia de estado a medio camino, tal como se espera de un `useState` local sin
   querystring ni localStorage).
@@ -95,9 +95,9 @@ mismo mecanismo, mismo roster que el backend. Sin cambios de backend (el 403 ya 
 ## Paso 0 (permisos angostos / valores paramétricos) — sin hallazgos nuevos
 
 - Los 3 tramos de comisión ($15K/1%, $15K–19K/1.5%, ≥20K/2%) viven en tabla paramétrica real
-  (`cartera_commission_tiers`) con CRUD `mark_only` — no hardcodeados. Confirmado con Mark
+  (`cartera_commission_tiers`) con CRUD `mark_only` — no hardcodeados. Confirmado con Aprobador
   pudiendo crear/editar/borrar un tramo de prueba (limpiado después).
-- El roster amplio (Felix/Yaneth/Mark) de las rutas GET ya estaba correctamente concedido vía rol
+- El roster amplio (Contabilidad/Asistente/Aprobador) de las rutas GET ya estaba correctamente concedido vía rol
   base (`lider_admin_contab`/`asistente_administrativa`/`management`), sin necesidad de
   `extra_permissions` puntuales — no aplica el gap de `SpecialPermissionSeeder.php`.
 

@@ -20,8 +20,8 @@ commiteados).
   `BodegaInventarioGeneralPage.tsx` (badge + test) y ambos i18n (`en`/`es`), para alinear con el
   enum real del backend (`GeneralCountRequest::ESTADO_PENDIENTE_EVALUACION`) — el frontend tenía un
   valor obsoleto de una iteración anterior del contrato.
-**Usuarios de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, rol con `bodega.write`) y
-`mbekhar@atlantic.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno).
+**Usuarios de prueba:** `almacen@atlantic.com.pa` (Lider Bodega Test, rol con `bodega.write`) y
+`gerencia3@test.com` (Gerencia3 Test, único con `bodega.approve` en este entorno).
 **Datos de prueba:** productos `VR-B5-TEST-001` (sin cruce, stock 10 en Bodega Central id 6) y
 `VR-B5-TEST-002` (con cruce, stock 20 en Bodega Central), + `AdjustmentRequestLine` pendiente sobre
 el segundo (creada con fecha 2026-06-26 para probar RN1 REQ-391) — sembrados a mano vía tinker.
@@ -63,7 +63,7 @@ producción) estaba mal armado y se corrigió en el propio spec descartable — 
   REQ-394) y, al armar un segundo conteo sobre la misma bodega, el aviso ya no aparece para ese
   producto — confirmado en vivo.
 
-## 3. Ciclo de Mark — rechazar / aprobar / aplicar (SCRUM-465/466)
+## 3. Ciclo de Aprobador — rechazar / aprobar / aplicar (SCRUM-465/466)
 
 - Rechazar sin motivo bloquea con el mensaje de validación; con motivo, pasa a "Rechazada" y
   desaparece de "Pendientes"; "Ver motivo" (tooltip vía `title`, no `alert()`) muestra el motivo

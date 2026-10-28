@@ -29,7 +29,7 @@ checklist COMPLETO (no solo los 2 puntos corregidos) encontró un hallazgo nuevo
 
 - 🔴 CRÍTICO — REQ-629 RN4 dice que Pedidos no tiene selector Mías/Equipo (el frontend nunca manda
   `scope`). `OrdersService::list()` defaulteaba a `'own'` cuando el filtro no venía — como nadie
-  manda `'team'` explícito, Líder/Gerencia/Mark quedaban viendo solo sus propios pedidos en la app
+  manda `'team'` explícito, Líder/Gerencia/Aprobador quedaban viendo solo sus propios pedidos en la app
   real, nunca el equipo completo. Confirmado en vivo con Playwright logueado como
   `management@atlantic.test` contra `localhost:5173`, sin query params.
   **Fix:** el default pasó de `'own'` a `'team'` — sin selector en el frontend, pedir siempre

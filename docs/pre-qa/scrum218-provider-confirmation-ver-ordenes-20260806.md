@@ -31,7 +31,7 @@ rechazado por el sandbox) — falta copiarlo a `atlanticerp-frontend/docs/pre-qa
 ## Setup de datos (vía API, con cleanup al final)
 
 Sin órdenes de compra en el Postgres local, se crearon vía API real (no fixtures directos en
-BD): proveedor "Preqa Provider SCRUM218", orden #1 (aprobada por Mark Bekhar vía su cuenta real,
+BD): proveedor "Preqa Provider SCRUM218", orden #1 (aprobada por Gerencia3 Test vía su cuenta real,
 avanzada a `ordenado`) y orden #2 (sin documentos, para el estado vacío). Se subió un PDF dummy
 como `confirmacion_proveedor` a la orden #1 — la validación IA disparó automáticamente (SCRUM-211)
 y devolvió `status: failed` (PDF dummy inválido para el proveedor real de Anthropic — comportamiento

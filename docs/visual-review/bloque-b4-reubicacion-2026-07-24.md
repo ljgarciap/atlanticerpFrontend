@@ -20,8 +20,8 @@ de la revisión, nunca commiteados).
   de llamar el endpoint directo sin pasar por la UI.
 - Frontend build (`npm run build`) confirmado más nuevo que el fix fuente y servido por nginx —
   verificado con `grep -o "Ver detalle" dist/assets/index-*.js`.
-**Usuarios de prueba:** `almacen@atlantic.com.pa` (Esteban Cardenas, `lider_bodega`) y
-`mbekhar@atlantic.com.pa` (Mark Bekhar, único con `bodega.approve` en este entorno) —
+**Usuarios de prueba:** `almacen@atlantic.com.pa` (Lider Bodega Test, `lider_bodega`) y
+`gerencia3@test.com` (Gerencia3 Test, único con `bodega.approve` en este entorno) —
 password = mismo email en ambos casos, confirmado con `Hash::check()` contra `password_hash` antes
 de arrancar.
 **Datos de prueba:** producto `VR-B4-TEST-001` (id 344) + 2 `WarehouseLocation` en Bodega Central
@@ -101,7 +101,7 @@ Sin regresión respecto a la corrida anterior.
 
 ---
 
-## 5. Ciclo completo Aprobar / Rechazar (Mark, único con `bodega.approve`)
+## 5. Ciclo completo Aprobar / Rechazar (Aprobador, único con `bodega.approve`)
 
 **5a — Rechazar (solicitud cantidad=3, creada en el paso 2):**
 - Enviar sin motivo bloquea con el mensaje "Escribe un motivo para rechazar la solicitud." — RN1

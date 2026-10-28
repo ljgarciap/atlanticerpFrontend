@@ -4,7 +4,7 @@ Fecha: 2026-07-29
 Reviewer: Visual Reviewer (AtlanticERP)
 Entorno: `https://dev.atlanticerp.ai` (usuario `management@atlantic.test`)
 Mockup de referencia: `1A__Ventas_Disen_o_Pipeline.html` (adjunto Jira 10136/10139/10142, subido por
-Daniela Amaya 2026-07-07) + `Requerimientos Ventas Diseño.xlsx` (REQ-019/020/022).
+Gerencia1 Test 2026-07-07) + `Requerimientos Ventas Diseño.xlsx` (REQ-019/020/022).
 
 Gate previo: Senior Review y Pre-QA (adversarial, en vivo) ya dieron pasada limpia sobre estos 3
 tickets. Este documento cubre exclusivamente fidelidad funcional contra el mockup.
@@ -117,7 +117,7 @@ forzado a "Equipo", banner "Mostrando resultado para: [nombre] · Ver todo el pi
   `/ventas-diseno/pipeline?card=<id>` y **abre directamente el detalle de esa tarjeta** (más directo
   que el resaltado con scroll+glow del mockup, pero cumple el mismo objetivo: el usuario llega
   exactamente al proyecto que buscaba). El tablero de fondo mostraba tarjetas de múltiples
-  responsables (Idmar Hernandez, Bernardo Gomez, etc.), consistente con alcance forzado a Equipo.
+  responsables ([persona] [persona], [persona] Gomez, etc.), consistente con alcance forzado a Equipo.
 
 **ACEPTABLE (nota, no bloquea):**
 - La implementación usa un identificador de tarjeta (`?card=<id>`) y abre el detalle directamente,

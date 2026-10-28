@@ -25,7 +25,7 @@ directa) — documentado y ya corregido en
 |---|---|
 | Encabezado "Reportes" + subtítulo | Sí, texto equivalente |
 | Selector de período (Hoy/3 meses/6 meses/Año) | Sí, mismas 4 opciones, mismo orden, default "Hoy" |
-| Tarjeta "Comisión por gestión de cartera +90 días — Felix" (wide) | Sí |
+| Tarjeta "Comisión por gestión de cartera +90 días — Contabilidad" (wide) | Sí |
 | — 3 KPIs (cobrado del mes / rango actual / comisión) | Sí |
 | — 3 tramos con el actual resaltado + check | Sí — check es icono SVG propio (`IcoCheck`), no el glyph `✓` del mockup (regla SCRUM-56, ya corregido en Senior Review) |
 | — footnote explicativo | Sí, texto equivalente |
@@ -41,7 +41,7 @@ directa) — documentado y ya corregido en
 ## Variantes ACEPTABLES (no bloquean)
 
 - Layout: 2 columnas (`sm:grid-cols-2`) con las tarjetas "wide" ocupando ambas columnas — mismo
-  orden y agrupación visual que el mockup (Comisión Felix arriba wide, las 2 de Cartera lado a
+  orden y agrupación visual que el mockup (Comisión Contabilidad arriba wide, las 2 de Cartera lado a
   lado, Ventas wide, Arqueo de Caja wide). Sin diferencias de jerarquía.
 - Formato de moneda `Intl.NumberFormat('es-PA', ...)` → `USD 17,000.00` en vez del `$17,000` corto
   del mockup — mismo patrón ya usado y aceptado en el resto de Admin&Cont (Arqueo de Caja, Cobros,
@@ -62,7 +62,7 @@ directa) — documentado y ya corregido en
 - `docs/visual-review/screenshots/SCRUM-643-647-1-hoy.png` — período "Hoy", datos reales
   sembrados (tramo 2 de comisión resaltado, 4 rangos de antigüedad poblados).
 - `docs/visual-review/screenshots/SCRUM-643-647-2-6meses.png` — período "6 meses", barras de
-  Ventas con el último mes resaltado + variación `+100% vs. mes anterior`, Comisión Felix/Cartera
+  Ventas con el último mes resaltado + variación `+100% vs. mes anterior`, Comisión Contabilidad/Cartera
   sin cambios (mismos valores que en "Hoy") confirmando RN3/RN4 también visualmente.
 
 ## Veredicto

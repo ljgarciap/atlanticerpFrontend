@@ -6,7 +6,7 @@
 **Mockup de referencia:** `2B__Compras_Logistica.html` (adjunto SCRUM-216, id 10394 y su re-upload idéntico id 11704 del 2026-08-05 — mismo contenido, sin diferencias, confirmado con `diff`)
 **Método:** lectura de mockup real (HTML+CSS+JS, no solo capturas), lectura de código (`LogisticsPage.tsx`, `ReceptionBadge.tsx`, `PurchaseOrder.php` backend), y verificación en vivo con Playwright CLI contra Docker local (`http://localhost:8090`, login real `gerencia2@atlantic.com.pa`/lider_compras). El Docker local no tenía ninguna orden en estado de envío activo (`atlantic_compras.purchase_orders` vacía) — se sembró 1 fixture mínimo (proveedor + orden #28, en_transito, con `estimated_arrival_date` vencida para forzar el caso "retrasada") para obtener una captura real, y se eliminó al cerrar esta auditoría.
 
-**Por qué esta auditoría existe:** SCRUM-214/216/217/218 fueron aprobados en QA el 2026-07-16/17, antes de que existiera el gate de Visual Reviewer (2026-07-24) — nunca se validó fidelidad visual contra el mockup, solo equivalencia funcional con "Ver Órdenes". El 2026-08-04/05 Daniela (QA) encontró diferencias grandes contra el mockup en varios tickets a la vez. Esta es una pasada única y completa de toda la pantalla, no 4 documentos separados.
+**Por qué esta auditoría existe:** SCRUM-214/216/217/218 fueron aprobados en QA el 2026-07-16/17, antes de que existiera el gate de Visual Reviewer (2026-07-24) — nunca se validó fidelidad visual contra el mockup, solo equivalencia funcional con "Ver Órdenes". El 2026-08-04/05 Gerencia1 (QA) encontró diferencias grandes contra el mockup en varios tickets a la vez. Esta es una pasada única y completa de toda la pantalla, no 4 documentos separados.
 
 ---
 
@@ -45,15 +45,15 @@
 | Etiquetas: modalidad, tipo de envío, estado, recepción (4 al mismo nivel) | `Directo` `Marítimo` `En tránsito` `Pendiente` — las 4 presentes y al mismo nivel visual | Cumple |
 | Llegada estimada (solo lectura) | `2026-08-03` como texto plano, sin `<input>` alrededor — confirmado en la captura y en el DOM | Cumple |
 | Llegada real | Input de fecha editable — **difiere del mockup**, ver hallazgo RN3 abajo | Ver nota |
-| Responsable asignado | `Yirena Teng`, posicionado junto a Llegada estimada, igual que en el mockup (`ship-responsable`) | Cumple |
+| Responsable asignado | `Lider Compras Test`, posicionado junto a Llegada estimada, igual que en el mockup (`ship-responsable`) | Cumple |
 
-**Lo que sí cumple:** título, ruta, las 4 etiquetas, Llegada estimada de solo lectura y posición del responsable — los 4 hallazgos que Daniela reportó el 2026-08-04 sobre este REQ (capturas 17:34-17:48) están corregidos y verificados en vivo hoy.
+**Lo que sí cumple:** título, ruta, las 4 etiquetas, Llegada estimada de solo lectura y posición del responsable — los 4 hallazgos que Gerencia1 reportó el 2026-08-04 sobre este REQ (capturas 17:34-17:48) están corregidos y verificados en vivo hoy.
 
 **CRÍTICO:** ninguno sobre el AC original de REQ-153 (Escenario 1: "los datos de la tarjeta son exactamente los mismos que en Ver Órdenes" — pasa limpio).
 
 **ACEPTABLE (nota):** posición de los campos "N° de contenedor"/"Naviera" — en AtlanticERP aparecen inmediatamente después de las etiquetas (antes del botón de avance); en el mockup aparecen después del checklist de documentos, justo antes de la fila de fechas. Es reordenamiento de layout, ningún campo falta — ACEPTABLE.
 
-### Hallazgo de scope — RN1-RN7 (comentario de Daniela, SCRUM-216, 2026-08-05 17:07)
+### Hallazgo de scope — RN1-RN7 (comentario de Gerencia1, SCRUM-216, 2026-08-05 17:07)
 
 Este es el foco explícito de esta auditoría. Cruzando cada regla contra lo que el mockup **muestra visualmente** (no contra el texto del comentario, que describe comportamiento nuevo con más detalle del que el mockup dibuja):
 
@@ -68,7 +68,7 @@ Este es el foco explícito de esta auditoría. Cruzando cada regla contra lo que
 | RN7 — Ese dato alimenta % de proveedores en Proveedores/Reportes | No aplica a esta pantalla (mockups de Proveedores/Reportes son otros archivos, no auditados acá) | Fuera de alcance de esta pantalla |
 
 **Conclusión para PM/Arquitecto (la pregunta que pidió Luis que se responda explícitamente):**
-- RN1, RN3 y RN5 **sí tienen representación visual clara en el mockup de Logística** — no son "regla de negocio nueva sin representación visual", son comportamiento que el mockup ya dibuja y que AtlanticERP hoy contradice o no implementa. RN3 en particular es un CRÍTICO real: el mockup nunca muestra un campo de fecha editable para Llegada real, siempre lo llena el sistema — AtlanticERP lo deja como input libre, lo que technically ya viola lo que el propio REQ-153 pedía sobre esa fecha, no solo lo que pide el comentario nuevo de Daniela.
+- RN1, RN3 y RN5 **sí tienen representación visual clara en el mockup de Logística** — no son "regla de negocio nueva sin representación visual", son comportamiento que el mockup ya dibuja y que AtlanticERP hoy contradice o no implementa. RN3 en particular es un CRÍTICO real: el mockup nunca muestra un campo de fecha editable para Llegada real, siempre lo llena el sistema — AtlanticERP lo deja como input libre, lo que technically ya viola lo que el propio REQ-153 pedía sobre esa fecha, no solo lo que pide el comentario nuevo de Gerencia1.
 - RN2, RN4 son consecuencia directa de RN1/RN3 (no agregan superficie nueva de UI, solo endurecen la regla ya visible).
 - RN6/RN7 son la única parte genuinamente nueva sin representación visual en esta pantalla — requieren una columna nueva persistida y tocan Proveedores/Reportes, cuyos mockups no fueron parte de este alcance. Esta parte sí es "scope propio" para que Arquitecto la desglose (ticket nuevo vs. ampliar SCRUM-216).
 
@@ -78,7 +78,7 @@ Este es el foco explícito de esta auditoría. Cruzando cada regla contra lo que
 
 **Estado del ticket:** PM Review.
 
-Este es, confirmado, **el hallazgo más grande de toda la pantalla** — coincide exactamente con lo que Daniela marcó como "la diferencia más grande" (comentario 17:23).
+Este es, confirmado, **el hallazgo más grande de toda la pantalla** — coincide exactamente con lo que Gerencia1 marcó como "la diferencia más grande" (comentario 17:23).
 
 **Checklist funcional (mockup vs AtlanticERP, verificado en código Y en la captura real de la orden #28):**
 
@@ -87,15 +87,15 @@ Este es, confirmado, **el hallazgo más grande de toda la pantalla** — coincid
 | Línea de tiempo visual de 5 pasos (o 3 para proveedor local), con punto (`tl-dot`) done/current/pending y línea conectora | **Ausente por completo.** La captura real de la orden #28 (`en_transito`) no muestra ningún elemento de timeline entre las 4 etiquetas y el campo "Número de contenedor" — no existe en el DOM (`grep` de `LogisticsPage.tsx` confirma: no hay componente de timeline, solo el estado actual dentro de la 3ra etiqueta) | **CRÍTICO** |
 | Cada paso completado muestra la fecha en que se completó | No existe ningún dato persistido de fecha por etapa — `purchase_orders` solo tiene `status` + `status_changed_at` (fecha del ÚLTIMO cambio, no un historial por etapa) — confirmado en el modelo backend | **CRÍTICO** (requiere modelo de datos nuevo, no solo UI) |
 | Paso actual visualmente distinto ("En curso"), pasos futuros atenuados | No existe, ver arriba | **CRÍTICO** (parte del mismo gap) |
-| Botón que dice a qué etapa avanza (mockup: genérico "✓ Completar etapa actual"; RN2 de Daniela pide texto explícito tipo "Avanzar a: En aduana") | AtlanticERP YA muestra "Completar etapa actual → En aduana" — confirmado en la captura real. Esto **ya cubre la intención de RN2**, con mejor claridad que el propio mockup (el mockup no nombra la etapa destino en el botón, solo en el timeline) | Cumple (incluso mejora sobre RN2) |
+| Botón que dice a qué etapa avanza (mockup: genérico "✓ Completar etapa actual"; RN2 de Gerencia1 pide texto explícito tipo "Avanzar a: En aduana") | AtlanticERP YA muestra "Completar etapa actual → En aduana" — confirmado en la captura real. Esto **ya cubre la intención de RN2**, con mejor claridad que el propio mockup (el mockup no nombra la etapa destino en el botón, solo en el timeline) | Cumple (incluso mejora sobre RN2) |
 | Botón desaparece al llegar a "Recibido" (RN2) | Backend: `next_status` es `null` en Recibido → AtlanticERP muestra un texto ("Sin siguiente etapa") en vez de ocultar el bloque — variante menor, la intención (no permitir avanzar más) sí se cumple funcionalmente | ACEPTABLE — el botón no aparece, solo queda un texto informativo en su lugar en vez de nada. No es pérdida de funcionalidad |
 | Al completar la última etapa: Llegada real = hoy, ícono de atraso desaparece, productos "Por ingresar" se confirman en Inventario | Backend: `isCritical()` ya se apaga solo al llegar a Recibido (confirmado por código). Auto-confirmación de Inventario: confirmada por Pre-QA original (2026-07-16, "Escenario 1" del ticket) como funcionando. Auto-fill de Llegada real: **NO implementado** — sigue siendo el mismo input manual de REQ-153 | **CRÍTICO parcial** (el auto-fill de fecha es el único de los 3 efectos que falta) |
 | Sincronización inmediata con Ver Órdenes sin recargar | Confirmado por Pre-QA original vía mecanismo de invalidación de query (`['compras/orders']`) — no fue posible verificarlo por click-through real en esta sesión por falta de una 2da orden con la que cruzar pantallas, pero el mecanismo de código es el mismo que ya se usa en Ver Órdenes/Home | Cumple (mecanismo confirmado) |
-| Solo Compras ve/usa el botón; otros roles ven timeline sin botón (RN7) | El botón está gateado por `permission:compras.edit` en el backend (403 real si no se tiene el permiso, patrón ya testeado en SCRUM-218). No se verificó en esta sesión si un rol de solo-lectura (ej. Vendedor/Diseñador) puede siquiera **ver** esta pantalla — el REQ-153 original limita el acceso a "Compras y Gerencia", mientras que RN7 de Daniela pide visibilidad más amplia ("cualquier otro rol... puede ver la línea de tiempo") | Fuera de alcance de esta pasada — bandera para Arquitecto, mismo bucket de scope que RN6/RN7 de arriba |
+| Solo Compras ve/usa el botón; otros roles ven timeline sin botón (RN7) | El botón está gateado por `permission:compras.edit` en el backend (403 real si no se tiene el permiso, patrón ya testeado en SCRUM-218). No se verificó en esta sesión si un rol de solo-lectura (ej. Vendedor/Diseñador) puede siquiera **ver** esta pantalla — el REQ-153 original limita el acceso a "Compras y Gerencia", mientras que RN7 de Gerencia1 pide visibilidad más amplia ("cualquier otro rol... puede ver la línea de tiempo") | Fuera de alcance de esta pasada — bandera para Arquitecto, mismo bucket de scope que RN6/RN7 de arriba |
 
 **Lo que sí cumple:** secuencia de estados correcta en backend (`statusSequence()`, incluye el caso proveedor local saltando aduana — REQ-141, ya confirmado por Pre-QA con tests), el botón de avance ya es más explícito que el propio mockup, sincronización cross-page confirmada por mecanismo.
 
-**CRÍTICO:** la línea de tiempo visual de 5 (o 3) pasos con estado done/current/pending y fecha por paso **no existe en absoluto** en el desarrollo — hoy solo hay 1 etiqueta de estado + 1 botón, exactamente lo que el propio REQ-154 describe como "no basta con mostrar una sola etiqueta de Estado como si fuera un dato aislado" (RN1 de Daniela). Esto confirma con evidencia visual real (no solo lectura de código) el hallazgo de Pre-QA original del 2026-07-16 (ticket marcado "parcial") y el de Daniela del 2026-08-05.
+**CRÍTICO:** la línea de tiempo visual de 5 (o 3) pasos con estado done/current/pending y fecha por paso **no existe en absoluto** en el desarrollo — hoy solo hay 1 etiqueta de estado + 1 botón, exactamente lo que el propio REQ-154 describe como "no basta con mostrar una sola etiqueta de Estado como si fuera un dato aislado" (RN1 de Gerencia1). Esto confirma con evidencia visual real (no solo lectura de código) el hallazgo de Pre-QA original del 2026-07-16 (ticket marcado "parcial") y el de Gerencia1 del 2026-08-05.
 
 ---
 
@@ -108,7 +108,7 @@ Este es, confirmado, **el hallazgo más grande de toda la pantalla** — coincid
 | Elemento del mockup | AtlanticERP (verificado) | Veredicto |
 |---|---|---|
 | Lista de documentos ya subidos, consultable | Presente ("Sin documentos subidos" en el fixture vacío; código confirma que lista documentos con link "Ver archivo" cuando existen) | Cumple |
-| Selector desplegable + botón "Subir" (mecanismo distinto a filas fijas del mockup) | Presente — confirmado en la captura, `select` con "Factura comercial" + botón "Subir" | Cumple (variante de mecanismo ya aceptada explícitamente por el comentario de Daniela — "no hace falta rehacerlo como filas fijas") |
+| Selector desplegable + botón "Subir" (mecanismo distinto a filas fijas del mockup) | Presente — confirmado en la captura, `select` con "Factura comercial" + botón "Subir" | Cumple (variante de mecanismo ya aceptada explícitamente por el comentario de Gerencia1 — "no hace falta rehacerlo como filas fijas") |
 | Categorías: Factura comercial, Declaración de nacionalización, Permiso de importación, BL, Otro | `DOCUMENT_CATEGORIES` en código = exactamente esas 5, sin "Confirmación del proveedor" — corregido hoy | Cumple (ya corregido) |
 | Marca visual de "ya subido" en el desplegable | Implementado hoy: `{categoría} (subido)` — confirmado por código, no reverificado por click-through en esta sesión por falta de tiempo de sembrar un 2do documento, pero el mecanismo (`alreadyUploaded`) es directo y de bajo riesgo | Cumple (por código; recomendable que Pre-QA lo reconfirme en su próximo re-check, ya lo tiene documentado) |
 
@@ -118,7 +118,7 @@ Este es, confirmado, **el hallazgo más grande de toda la pantalla** — coincid
 
 No se repite el detalle completo acá porque ya está documentado con precisión en el comentario de Pre-QA de hoy en SCRUM-218 — se referencia como hallazgo confirmado, no se vuelve a investigar desde cero.
 
-**Lo que sí cumple:** el resto del checklist de documentos (subir, listar, categorías correctas, marca de ya-subido) — 3 de los 4 hallazgos originales de Daniela sobre este REQ están cerrados.
+**Lo que sí cumple:** el resto del checklist de documentos (subir, listar, categorías correctas, marca de ya-subido) — 3 de los 4 hallazgos originales de Gerencia1 sobre este REQ están cerrados.
 
 ---
 

@@ -5,7 +5,7 @@ Ticket ancla: SCRUM-695
 Ruta: `/ventas-diseno/catalog`
 Entorno: local (Docker `infra-*` + Vite dev server), rama `dev` en ambos repos, código commiteado
 localmente (backend `f435cd8`, frontend `7acafb8`) pero SIN pushear al arrancar esta sesión.
-Cuenta usada: `neil.quiel@atlantic.com.pa` (Vendedor/Diseñador — `ventas_diseno.read`, sin
+Cuenta usada: `[persona].[persona]@atlantic.com.pa` (Vendedor/Diseñador — `ventas_diseno.read`, sin
 `bodega.read` ni `compras.read`).
 Herramientas: curl directo contra la API (inspección de JSON crudo + concurrencia), `aws s3` CLI
 contra el bucket real `atlanticerp-dev`, Playwright CLI (`npx playwright test`, suite promovida a
@@ -49,7 +49,7 @@ comparación visual contra mockup pueden atrapar.
 | REQ-618 (concurrencia) | — | **2 uploads simultáneos al mismo producto** (`curl` en paralelo, simulando doble clic antes de que el botón se deshabilite o 2 pestañas abiertas) | **🔴 CRÍTICO encontrado y corregido en el momento** — ver detalle abajo. Reproducido 4/4 veces antes del fix (siempre 2 archivos huérfanos en S3, nunca limpiados), 0/4 veces después del fix (siempre 1 archivo, consistente con la BD). |
 | REQ-619 (selección + filtro) | "Seleccionar todo" con un filtro activo selecciona solo lo visible | **Seleccionar todo con Familia=A (3 productos) → cambiar a Familia=B (3 productos distintos)** — ¿el contador se ajusta? | **🟡 MEDIO encontrado y corregido en el momento** — ver detalle abajo. |
 | REQ-619 (envío) | Botones habilitados/deshabilitados según selección, toast al enviar | Confirmado que ningún botón dispara una llamada HTTP real (REQ-622 fuera de alcance, toast informativo únicamente) | **Limpio**, sin error. |
-| REQ-620 | Botones navegan a `/inventario` y `/bodega/inventario` | Click en "Inventario de Bodega" con un usuario **sin** `bodega.read` (`neil.quiel`) | **Limpio.** La navegación ocurre, pero `RequirePermission` de la ruta destino rebota a `FALLBACK_ROUTE` de inmediato — Catálogo no rompe nada, no expande ni restringe el permiso (RN3 cumplida). `/inventario` (Compras) es accesible en modo restringido con solo `ventas_diseno.read` por diseño preexistente de esa pantalla (`InventoryController::resolveAccess()`, SCRUM-231→244, no es parte de este batch) — confirmado que Catálogo no lo alteró. |
+| REQ-620 | Botones navegan a `/inventario` y `/bodega/inventario` | Click en "Inventario de Bodega" con un usuario **sin** `bodega.read` (`[persona].[persona]`) | **Limpio.** La navegación ocurre, pero `RequirePermission` de la ruta destino rebota a `FALLBACK_ROUTE` de inmediato — Catálogo no rompe nada, no expande ni restringe el permiso (RN3 cumplida). `/inventario` (Compras) es accesible en modo restringido con solo `ventas_diseno.read` por diseño preexistente de esa pantalla (`InventoryController::resolveAccess()`, SCRUM-231→244, no es parte de este batch) — confirmado que Catálogo no lo alteró. |
 | REQ-621 | Descarga el PDF real | Confirmado tamaño exacto (5290 bytes) y validez (`file` → "PDF document, version 1.4, 2 pages") vía descarga real por API, no solo lectura de código | **Limpio.** |
 | Regresión — `QuotePartCard` (REQ-036/037) | Buscar producto + tab Familias dentro del picker de Cotización | Abrir una Cotización real, abrir el picker, buscar por referencia (`RIEL-TRK-050`) y abrir el tab Familias | **Limpio.** Sigue funcionando igual que antes — Batch E no tocó `CatalogProductController`/`CatalogProductFamilyController` ni `QuotePartCard.tsx`, confirmado en código por Senior Review y ahora también en runtime. |
 

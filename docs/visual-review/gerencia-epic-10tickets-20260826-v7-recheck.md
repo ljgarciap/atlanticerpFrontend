@@ -11,7 +11,7 @@ hallazgos de esta ronda son de comportamiento/datos (dominio Pre-QA — ver
 `atlanticerp/docs/pre-qa/gerencia-epic-10tickets-20260826-v7-recheck.md` para el detalle completo) y por
 regla dura del proyecto **no llevan captura** (esa exigencia aplica solo a CRÍTICOs de Visual
 Reviewer). Este documento cubre específicamente la fidelidad funcional/visual de los elementos
-nuevos contra lo que el ticket (o el comentario de redefinición de Daniela, cuando aplica) exige.
+nuevos contra lo que el ticket (o el comentario de redefinición de Gerencia1, cuando aplica) exige.
 
 ## Checklist funcional — elementos nuevos de esta ronda
 
@@ -27,13 +27,13 @@ el propio Gherkin del ticket:
 - Botón "Ver en [módulo] →" — **presente**, navega con el ID puntual (confirmado:
   `/bodega/inventario-general?count=5`, `/compras/ordenes?order=8`)
 - Modal de confirmación secundario ("¿Aprobar/Rechazar X? / Sí, aprobar / Cancelar") — **presente**
-- **ACEPTABLE** (no bloquea): el modal es una implementación completamente nueva de Marly/Claude sin
+- **ACEPTABLE** (no bloquea): el modal es una implementación completamente nueva de Qa/Claude sin
   spec visual propia — el diseño (tarjeta centrada, badge de módulo, botones a la derecha) es
   consistente con el resto del sistema de diseño de Atlantic (paleta teal/lima, sin
   iconografía de emoji — cumple regla SCRUM-56).
 
-### SCRUM-167/169/170 — Tarjetas "Salud por módulo" redefinidas por Daniela (2026-08-25)
-Sin mockup propio (Daniela redefinió vía comentario de texto + diagrama ASCII, no un archivo de
+### SCRUM-167/169/170 — Tarjetas "Salud por módulo" redefinidas por Gerencia1 (2026-08-25)
+Sin mockup propio (Gerencia1 redefinió vía comentario de texto + diagrama ASCII, no un archivo de
 imagen/HTML) — el checklist es literal contra su propio comentario:
 
 **Admin & Contab (SCRUM-167):** "CxC Total" + "Cuentas al día", sin tercer indicador "CxP total"

@@ -11,8 +11,8 @@ también contra `7__Requerimientos_CRM.xlsx` (attachment 11534, hojas "CRM"/"His
 Usuario"/"Modelo de Datos"/"Matriz de Permisos por Rol") — sin conflictos entre Excel y Jira para
 este batch.
 **Método:** Playwright CLI contra `https://dev.atlanticerp.ai` (ya desplegado por CI/CD antes de esta
-sesión). Cuentas reales: Whileyner Contreras (`whil@atlantic.com.pa`, Gerencia) y Milena
-Estrada (`milena.e@grupolafayette.com`, Vendedor/Diseñador). Capturas en
+sesión). Cuentas reales: Gerencia5 [persona] (`gerencia5@atlantic.com.pa`, Gerencia) y [persona]
+Estrada (`usuario@example.test`, Vendedor/Diseñador). Capturas en
 `e2e/.tmp/preqa-dashboard-batchc/` (1 a 6, descartables, no promovidas — el artefacto de esta
 revisión es la comparación, no el script de captura, per convención de este agente).
 
