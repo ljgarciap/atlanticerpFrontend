@@ -214,7 +214,7 @@ describe('Sidebar — módulos placeholder del catálogo de 7 (SCRUM-58)', () =>
     expect(screen.queryByText('Externas')).not.toBeInTheDocument()
   })
 
-  // SCRUM-1002 — Contabilidad/Mark editan los datos fiscales de un cliente desde Admin&Cont (no tienen la pantalla Clientes).
+  // SCRUM-1002 — Contabilidad/Aprobador editan los datos fiscales de un cliente desde Admin&Cont (no tienen la pantalla Clientes).
   describe('"Datos fiscales de clientes" (SCRUM-1002)', () => {
     function abrirConfiguracion(user: Partial<UserInfo>) {
       useAuthStore.setState({ user: baseUser({ modules: { admin_contab: noModule({ view: true }) }, ...user }) })
@@ -899,7 +899,7 @@ describe('Sidebar — UAT oculta un módulo de negocio pese al permiso plano por
     expect(screen.getAllByText('Servicios').length).toBeGreaterThan(0)
   })
 
-  // SCRUM-741 — hallazgo real en producción (Gerencia/Mark, Gerencia): a diferencia de
+  // SCRUM-741 — hallazgo real en producción (Gerencia/Aprobador, Gerencia): a diferencia de
   // ventas_diseno/bodega/servicios arriba, "Inventario" (dentro de la sección "Compras ·
   // Inventario") tiene su PROPIO OR de dos niveles (canSeeCompras || canSeeVentasDiseno,
   // SCRUM-231→244/REQ-168) que nunca leía __module__ — así que ocultar Compras vía UAT no

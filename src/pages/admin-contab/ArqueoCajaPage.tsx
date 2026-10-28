@@ -693,7 +693,7 @@ function CerrarArqueoModal(
 }
 
 /** REQ-528 — panel de solo lectura de arqueos ya cerrados, disponible para los 4 roles del módulo
- *  (Contabilidad/Asistente/Mark/Gerencia) sin importar la pestaña activa (a diferencia del Arqueo del día,
+ *  (Contabilidad/Asistente/Aprobador/Gerencia) sin importar la pestaña activa (a diferencia del Arqueo del día,
  *  que Gerencia/Gerencia nunca ven) — por eso vive fuera del `Card` de toggle/chips, siempre visible. */
 function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, unknown>) => string }) {
   const [page, setPage] = useState(1)

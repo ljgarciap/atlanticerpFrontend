@@ -798,7 +798,7 @@ export const adminContabApi = {
     updateCuentaPago: (pipelineCardId: number, data: UpdateCuentaPagoPayload): Promise<{ bank_account_id: number | null }> =>
       api.put<{ bank_account_id: number | null }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/cuenta-pago`, data).then(r => r.data),
 
-    // REQ-516 RN3 — Contabilidad/Asistente/Mark/Gerencia proponen, queda pendiente de Gerencia.
+    // REQ-516 RN3 — Contabilidad/Asistente/Aprobador/Gerencia proponen, queda pendiente de Gerencia.
     proposePercent: (pipelineCardId: number, data: ProposePercentPayload): Promise<{ porcentaje_pendiente: number }> =>
       api.post<{ porcentaje_pendiente: number }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/percent/propose`, data).then(r => r.data),
 
@@ -819,7 +819,7 @@ export const adminContabApi = {
   // Batch 18 (SCRUM-597→601, REQ-520→524) — Arqueo / Flujo de Caja, parte 1. Ver
   // ADR-SCRUM597-601-batch18-arqueo-caja.md para el contrato completo. `projected`/`real` 403 para
   // asistente_administrativa (Asistente Administrativa) — REQ-521/523 no la incluyen; `daily-count` 403 para
-  // management/superadmin-no-Mark si el backend decide gatear distinto — el frontend nunca asume,
+  // management/superadmin-no-aprobador si el backend decide gatear distinto — el frontend nunca asume,
   // solo maneja el 403 con el estado vacío/oculto correspondiente (ver ArqueoCajaPage).
   cashPosition: {
     header: (): Promise<CashPositionHeader> =>
@@ -889,7 +889,7 @@ export const adminContabApi = {
       URL.revokeObjectURL(url)
     },
 
-    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Contabilidad/Asistente/Mark/
+    // REQ-529 Escenario 2 — resumen de un arqueo del historial, gate amplio (Contabilidad/Asistente/Aprobador/
     // Gerencia, ver ADR §9).
     exportHistory: async (id: number, numero: number | null): Promise<void> => {
       const res = await api.get(`/admin-contab/cash-position/history/${id}/export`, { responseType: 'blob' })

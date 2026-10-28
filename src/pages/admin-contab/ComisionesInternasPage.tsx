@@ -51,7 +51,7 @@ function formatOptionalDate(iso: string | null, fallback: string): string {
  * exacto de este batch vs. lo diferido a Batch 15 (notas de crédito restando la base, agrupación
  * visual de arrastrados, proyectos compartidos, estado de cuenta imprimible).
  *
- * Permisos (§4 del ADR): `view_team` (Contabilidad/Mark/Gerencia) ve todos los vendedores, filtra por
+ * Permisos (§4 del ADR): `view_team` (Contabilidad/Aprobador/Gerencia) ve todos los vendedores, filtra por
  * vendedor y exporta. `view` sin `view_team` (vendedor) ve solo su propia fila, sin selector de
  * vendedor ni botón de exportar — el backend ya debería devolver un único vendedor en ese caso,
  * pero la UI igual oculta los controles que no le corresponden.

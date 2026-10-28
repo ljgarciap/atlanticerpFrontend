@@ -145,7 +145,7 @@ describe('ArqueoCajaPage — REQ-520 encabezado y tarjetas', () => {
     expect(screen.getByText(/28,400\.00.*340\.00|340\.00.*28,400\.00/)).toBeInTheDocument()
   })
 
-  it('default Contabilidad/Mark/Gerencia: Proyectado + 30 días (RN1 REQ-522), con las 4 tarjetas', async () => {
+  it('default Contabilidad/Aprobador/Gerencia: Proyectado + 30 días (RN1 REQ-522), con las 4 tarjetas', async () => {
     renderPage()
     await screen.findByText(/28,740\.00/)
     expect(mockedApi.cashPosition.projected).toHaveBeenCalledWith(30)

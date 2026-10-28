@@ -293,7 +293,7 @@ export type CarteraTab = 'cobrable' | 'incobrable'
 export type FacturacionView = 'agrupado' | 'plana'
 
 /** Estado de la propuesta de incobrable de una factura — REQ-448. `normal` = sin ninguna
- *  propuesta activa; `pendiente_aprobacion` = Contabilidad/Mark/Gerencia la propuso, esperando la
+ *  propuesta activa; `pendiente_aprobacion` = Contabilidad/Aprobador/Gerencia la propuso, esperando la
  *  decisión de Gerencia; `incobrable` = Gerencia ya la aprobó (equivalente a `es_incobrable=true`). */
 export type CobrabilidadEstado = 'normal' | 'pendiente_aprobacion' | 'incobrable'
 
@@ -1783,7 +1783,7 @@ export interface ArchitectCommissionProject {
    *  mostrar la zona de carga según `regimen_fiscal` de la fila padre. */
   comprobante_retencion: { nombre_archivo: string; uploaded_at: string } | null
   fecha_pago: string | null // 'YYYY-MM-DD'
-  /** Batch 17 (REQ-516) — % propuesto por Contabilidad/Asistente/Mark/Gerencia, pendiente de la decisión de
+  /** Batch 17 (REQ-516) — % propuesto por Contabilidad/Asistente/Aprobador/Gerencia, pendiente de la decisión de
    *  Gerencia. `null` si no hay ninguna propuesta activa. */
   porcentaje_pendiente: number | null
   porcentaje_pendiente_motivo: string | null
