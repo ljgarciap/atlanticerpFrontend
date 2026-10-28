@@ -1144,12 +1144,12 @@ describe('Sidebar — Compras solo muestra lo que la ruta deja abrir (SCRUM-1157
 })
 
 // SCRUM-1157 — «Datos de la Empresa» y «Configuración Fiscal» son exclusivas de Gerencia (403 para el resto del roster de Admin&Cont, Contabilidad y
-// Lider Operaciones incluidos): el menú solo las ofrece al aprobador Gerencia (flag `mark_approver`) y a superadmin.
+// Lider Operaciones incluidos): el menú solo las ofrece al aprobador Gerencia (flag `primary_approver`) y a superadmin.
 describe('Sidebar — Empresa y Fiscal solo para Gerencia y superadmin (SCRUM-1157)', () => {
   const adminUser = (role: string, mark: boolean | undefined, permissions: string[] = []) => baseUser({
     role, permissions,
     modules: { admin_contab: noModule({ view: true }) },
-    flags: { approve_large_amounts: false, manage_users: false, ...(mark === undefined ? {} : { mark_approver: mark }) },
+    flags: { approve_large_amounts: false, manage_users: false, ...(mark === undefined ? {} : { primary_approver: mark }) },
   })
   const abrirConfiguracion = () => { const c = screen.queryAllByText('Configuración')[0]; if (c) fireEvent.click(c) }
   const visible = (text: string) => screen.queryAllByText(text).length > 0

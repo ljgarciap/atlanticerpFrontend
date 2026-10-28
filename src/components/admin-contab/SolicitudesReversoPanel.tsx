@@ -22,7 +22,7 @@ export default function SolicitudesReversoPanel() {
   const { t } = useTranslation('adminContab')
   const user = useAuthStore(s => s.user)
   const esSuperadmin = usePermission('superadmin.all')
-  const puedeDecidir = esSuperadmin || user?.flags?.mark_approver === true
+  const puedeDecidir = esSuperadmin || user?.flags?.primary_approver === true
 
   const { data } = useReversalRequests({ estado: 'solicitada', per_page: 50 })
   const decideMutation = useDecideReversal()
@@ -54,7 +54,7 @@ export default function SolicitudesReversoPanel() {
   return (
     <Card variant="panel" className="p-4 mt-4" data-testid="solicitudes-reverso">
       <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('solicitudesReverso.titulo')}</h2>
-      <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{puedeDecidir ? t('solicitudesReverso.ayudaMark') : t('solicitudesReverso.ayudaOtros')}</p>
+      <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{puedeDecidir ? t('solicitudesReverso.ayudaAprobador') : t('solicitudesReverso.ayudaOtros')}</p>
 
       {resultado && <p role="status" data-testid="solicitud-resultado" className="text-sm text-emerald-700 dark:text-emerald-300 mb-2">{resultado}</p>}
       {error && <p role="alert" className="text-sm text-red-600 mb-2">{error}</p>}

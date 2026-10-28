@@ -1963,7 +1963,7 @@
   },
   "solicitudesReverso": {
     "titulo": "Solicitudes de anulación de cobros",
-    "ayudaMark": "Aprueba o rechaza. Al aprobar se reversan las aplicaciones del cobro, el dinero sale de caja hoy y, si un pedido ya tenía su comisión liquidada, se registra un descuento para la siguiente liquidación del vendedor.",
+    "ayudaAprobador": "Aprueba o rechaza. Al aprobar se reversan las aplicaciones del cobro, el dinero sale de caja hoy y, si un pedido ya tenía su comisión liquidada, se registra un descuento para la siguiente liquidación del vendedor.",
     "ayudaOtros": "Pendientes de la decisión de Gerencia.",
     "anular": "Anular el cobro {{recibo}}",
     "detalle": "Solicitada por {{quien}} el {{fecha}}",

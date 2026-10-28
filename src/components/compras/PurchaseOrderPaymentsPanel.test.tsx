@@ -150,7 +150,7 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     renderPanel(makeOrder({ pending_amount_change: 150, amount_change_requested_by: 1 }))
 
     await waitFor(() => expect(screen.getByText(/pendingAmountChange amount/)).toBeInTheDocument())
-    // Esperar a que compras/settings resuelva (isMark depende de primary_approver_user_id real, no
+    // Esperar a que compras/settings resuelva (isApprover depende de primary_approver_user_id real, no
     // se evalúa antes de tener la respuesta) antes de confirmar la ausencia de los botones.
     await waitFor(() => expect(mockedComprasApi.settings.get).toHaveBeenCalled())
     await waitFor(() => expect(screen.queryByText('compras:orders.detail.payments.approveAmountChange')).not.toBeInTheDocument())

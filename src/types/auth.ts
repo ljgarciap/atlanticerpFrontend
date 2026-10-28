@@ -17,7 +17,7 @@ export interface UserFlags {
    * SCRUM-1157 — identidad (no permiso): es el aprobador Gerencia. «Datos de la Empresa» y «Configuración Fiscal» responden 403 a cualquier otra
    * persona (superadmin aparte); el menú las oculta cuando viene en `false`. Opcional: una sesión abierta antes de este cambio no lo trae.
    */
-  mark_approver?:        boolean
+  primary_approver?:        boolean
   /** SCRUM-1168 — este entorno tiene el concepto nuevo de cobros (cobro con o sin factura, compensaciones). Solo visual: el menú ofrece «Compensaciones». */
   cobros_v2?:            boolean
 }
