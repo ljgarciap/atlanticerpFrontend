@@ -1359,13 +1359,13 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
 
 // SCRUM-1128 (Pre-QA) — Contabilidad: solo lectura del Pipeline, aunque el payload diga can_edit=true.
 describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () => {
-  const asFelix = () =>
+  const asContabilidad = () =>
     mockedStore.mockReturnValue({
       user: { id: 9, role: 'contabilidad', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pass_to_order'] },
     } as never)
 
   it('no muestra controles de escritura ni "Ver cotizaciones" aunque can_edit sea true', async () => {
-    asFelix()
+    asContabilidad()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true, latest_quote_id: 7 }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1376,7 +1376,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('no muestra Reactivar en una tarjeta Perdida (can_edit es false en Perdido para todos, no sirve de gate)', async () => {
-    asFelix()
+    asContabilidad()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1384,7 +1384,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('no muestra "Asignar productos a entrega" con entrega parcial ni pide las asignaciones', async () => {
-    asFelix()
+    asContabilidad()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: false, delivery_type: 'partial' }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1393,7 +1393,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('no muestra el banner "no editable (Aprobado)" en etapas activas: no es la causa de que no pueda editar', async () => {
-    asFelix()
+    asContabilidad()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'quote', can_edit: false }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1411,7 +1411,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('conserva Pasar a Pedido en una tarjeta aprobada pendiente', async () => {
-    asFelix()
+    asContabilidad()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({
       stage: 'approved', can_edit: false, order_status: 'pending', can_pass_to_order: true, latest_quote_id: 7,
     }))
@@ -1421,7 +1421,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('Escape sobre la confirmación de Pasar a Pedido la cierra sin cerrar el modal ni llamar al backend', async () => {
-    asFelix()
+    asContabilidad()
     const onClose = vi.fn()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({
       stage: 'approved', can_edit: false, order_status: 'pending', can_pass_to_order: true,
@@ -1445,13 +1445,13 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
 
 // SCRUM-1139 — Contabilidad con `pipeline.edit`: edita el Pipeline, pero sigue sin ventas_diseno.read (no abre cotizaciones).
 describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-1139)', () => {
-  const asFelixEditor = () =>
+  const asContabilidadEditor = () =>
     mockedStore.mockReturnValue({
       user: { id: 9, role: 'lider_admin_contab', permissions: ['ventas_diseno.pipeline.read_all', 'ventas_diseno.pipeline.edit', 'ventas_diseno.pass_to_order'] },
     } as never)
 
   it('con can_edit=true ve Editar y Marcar como Perdido, pero no Crear cotización ni Ver cotizaciones', async () => {
-    asFelixEditor()
+    asContabilidadEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lead', can_edit: true, latest_quote_id: 7 }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1462,7 +1462,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
   })
 
   it('respeta can_edit=false del backend (Aprobado): sin Editar y con el aviso de no editable', async () => {
-    asFelixEditor()
+    asContabilidadEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'approved', can_edit: false }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
@@ -1471,7 +1471,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
   })
 
   it('en una tarjeta Perdida ofrece Reactivar (es un cambio de etapa del propio Pipeline)', async () => {
-    asFelixEditor()
+    asContabilidadEditor()
     mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
     renderModal()
     await screen.findByText('Proyecto Alfa')

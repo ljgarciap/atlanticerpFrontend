@@ -157,8 +157,8 @@ test('REQ-539 — Contabilidad NO ve el botón Aprobar en un reporte pendiente',
   await page.getByRole('button', { name: /^ver$/i }).first().click()
   await page.waitForTimeout(500)
 
-  const aprobarFelix = page.getByRole('button', { name: /^aprobar reporte$/i })
-  await expect(aprobarFelix).toHaveCount(0)
+  const aprobarContabilidad = page.getByRole('button', { name: /^aprobar reporte$/i })
+  await expect(aprobarContabilidad).toHaveCount(0)
   await page.screenshot({ path: 'e2e/screenshots/batch20-detalle-contabilidad-sin-aprobar.png', fullPage: true })
 })
 
