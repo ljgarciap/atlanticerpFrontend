@@ -14,7 +14,7 @@ export interface ProjectFilters {
   // SCRUM-854 — filtro multi-selección Vendedor/Diseñador (OR entre seleccionados), reemplaza
   // el uso de `user_id` singular en este endpoint.
   user_ids?:  number[]
-  dialux?:    boolean
+  requires_technical_study?:    boolean
   per_page?:  number
   page?:      number
 }

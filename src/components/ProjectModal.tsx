@@ -39,7 +39,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const [developer,    setDeveloper]    = useState('')
   const [arquitecto,   setArquitecto]   = useState('')
   const [tipo,         setTipo]         = useState<TipoSolicitud>('ambos')
-  const [dialux,       setDialux]       = useState(false)
+  const [requires_technical_study,       setRequiresTechnicalStudy]       = useState(false)
   const [despacho,     setDespacho]     = useState('')
   const [ubicacion,    setUbicacion]    = useState('')
   const [etapa,        setEtapa]        = useState<Etapa>('lead')
@@ -59,7 +59,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
     if (isNew || !project) {
       setNombre(''); setContacto(''); setEmail(''); setCelular('')
       setEncargado(''); setDeveloper(''); setArquitecto('')
-      setTipo('ambos'); setDialux(false); setDespacho(''); setUbicacion('')
+      setTipo('ambos'); setRequiresTechnicalStudy(false); setDespacho(''); setUbicacion('')
       setEtapa('lead'); setFechaEntrega(''); setValor(''); setArea(''); setNotas('')
       setAssigneeIds([]); setShowDeleteConfirm(false)
     } else {
@@ -71,7 +71,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
       setDeveloper(project.developer ?? '')
       setArquitecto(project.arquitecto ?? '')
       setTipo(project.tipo)
-      setDialux(project.dialux)
+      setRequiresTechnicalStudy(project.requires_technical_study)
       setDespacho(project.despacho ?? '')
       setUbicacion(project.ubicacion ?? '')
       setEtapa(project.etapa)
@@ -107,7 +107,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const saveMutation = useMutation({
     mutationFn: () => {
       const payload: Record<string, unknown> = {
-        nombre, tipo, dialux, etapa,
+        nombre, tipo, requires_technical_study, etapa,
         contacto:      contacto  || null,
         email:         email     || null,
         celular:       celular   || null,
@@ -216,8 +216,8 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
                   ))}
                 </div>
                 <label className="flex items-center gap-2 mt-2 cursor-pointer text-sm font-semibold text-slate-700">
-                  <input type="checkbox" checked={dialux} onChange={e => setDialux(e.target.checked)} className="w-auto" />
-                  {t('crm:project.dialux')}
+                  <input type="checkbox" checked={requires_technical_study} onChange={e => setRequiresTechnicalStudy(e.target.checked)} className="w-auto" />
+                  {t('crm:project.requiresTechnicalStudy')}
                 </label>
               </div>
 

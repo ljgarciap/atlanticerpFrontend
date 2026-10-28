@@ -58,8 +58,8 @@ export default function ProjectCard({ project, onClick }: Props) {
       {/* Badges row */}
       <div className="flex items-center gap-1 mb-2 flex-wrap">
         <TipoTag tipo={project.tipo} />
-        {project.dialux && (
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">DIALux</span>
+        {project.requires_technical_study && (
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Estudio técnico</span>
         )}
         <span
           className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getFreshnessClass(project.freshness)}`}
