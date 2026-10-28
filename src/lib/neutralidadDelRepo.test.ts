@@ -17,14 +17,12 @@ const ENTIDADES = [
   'showrooms?', 'obarrio',
 ]
 const SECTOR_CI = [
-  'iluminaci', 'iluminacon', 'luminaria', 'l[aá]mpara', 'lamparas', 'downlight', 'candelabro', 'bombill', 'chandelier', 'luminaire',
+  'iluminaci', 'iluminacon', 'luminaria', 'l[aá]mpara', 'lamparas', 'downlight', 'candelabro', 'bombill', 'chandelier', 'luminaire', 'dialux',
 ]
 // siglas: distinguen mayúsculas
 const SECTOR_CS = ['\\bLED\\b', '(?<![A-Za-z])LAMP(?![A-Za-z])']
 
-const ALLOWED: Record<string, string> = {
-  'dialux': 'catálogo de productos genérico',
-}
+const ALLOWED: Record<string, string> = {}
 
 const files = {
   ...import.meta.glob('/src/**/*.{ts,tsx,json}', { query: '?raw', import: 'default', eager: true }),

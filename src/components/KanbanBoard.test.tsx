@@ -71,7 +71,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     developer:       null,
     arquitecto:      null,
     tipo:            'ambos',
-    dialux:          false,
+    requires_technical_study:          false,
     area:            null,
     despacho:        null,
     ubicacion:       null,

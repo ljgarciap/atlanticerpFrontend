@@ -112,7 +112,7 @@ export interface Project {
   developer:       string | null
   arquitecto:      string | null
   tipo:            TipoSolicitud
-  dialux:          boolean
+  requires_technical_study:          boolean
   area:            string | null
   despacho:        string | null
   ubicacion:       string | null

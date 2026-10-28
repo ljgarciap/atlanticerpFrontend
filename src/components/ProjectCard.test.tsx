@@ -37,7 +37,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     developer:       null,
     arquitecto:      null,
     tipo:            'ambos',
-    dialux:          false,
+    requires_technical_study:          false,
     area:            null,
     despacho:        null,
     ubicacion:       'Ciudad de Panamá',
@@ -109,17 +109,17 @@ describe('ProjectCard — tipo badge', () => {
   })
 })
 
-// ── Badge DIALux ───────────────────────────────────────────────────────────
+// ── Badge estudio técnico ───────────────────────────────────────────────────────────
 
-describe('ProjectCard — DIALux', () => {
-  it('muestra el badge DIALux cuando dialux=true', () => {
-    render(<ProjectCard project={makeProject({ dialux: true })} onClick={vi.fn()} />)
-    expect(screen.getByText('DIALux')).toBeInTheDocument()
+describe('ProjectCard — estudio técnico', () => {
+  it('muestra el badge estudio técnico cuando requires_technical_study=true', () => {
+    render(<ProjectCard project={makeProject({ requires_technical_study: true })} onClick={vi.fn()} />)
+    expect(screen.getByText('Estudio técnico')).toBeInTheDocument()
   })
 
-  it('no muestra el badge DIALux cuando dialux=false', () => {
-    render(<ProjectCard project={makeProject({ dialux: false })} onClick={vi.fn()} />)
-    expect(screen.queryByText('DIALux')).not.toBeInTheDocument()
+  it('no muestra el badge estudio técnico cuando requires_technical_study=false', () => {
+    render(<ProjectCard project={makeProject({ requires_technical_study: false })} onClick={vi.fn()} />)
+    expect(screen.queryByText('Estudio técnico')).not.toBeInTheDocument()
   })
 })
 

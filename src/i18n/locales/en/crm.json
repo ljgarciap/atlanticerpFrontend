@@ -47,11 +47,6 @@
     "espacioPublico": "Public Space",
     "otro": "Other"
   },
-  "dialux": {
-    "all": "With or without DIALUX",
-    "only": "DIALUX only",
-    "none": "No DIALUX"
-  },
   "filters": {
     "search": "Search project...",
     "searchPipeline": "Search project, contact, owner...",
@@ -83,7 +78,6 @@
     "developer": "Developer / Real estate",
     "arquitecto": "Architect",
     "tipo": "What does the client request? *",
-    "dialux": "Includes DIALux (lighting calculation)",
     "area": "Area / Type",
     "despacho": "Office",
     "ubicacion": "Location",
@@ -102,7 +96,8 @@
       "diseno": "Design Only",
       "cotizacion": "Quotation Only",
       "ambos": "Design + Quotation"
-    }
+    },
+    "requiresTechnicalStudy": "Requires technical study"
   },
   "activity": {
     "title": "Activities",
@@ -446,5 +441,10 @@
       "title": "Catalog PDF",
       "subtitle": "Up to the maximum, the PDF downloads right away. Above it, a ZIP of volumes (one PDF per batch) is generated in the background and you are notified when it is ready. Each photo is a download, so the flat PDF also has a photo maximum. The product maximum cannot exceed 1,000, the photo maximum 500, and the volume size ranges from 50 to 1,000."
     }
+  },
+  "technicalStudy": {
+    "all": "With or without technical study",
+    "only": "Technical study only",
+    "none": "No technical study"
   }
 }
