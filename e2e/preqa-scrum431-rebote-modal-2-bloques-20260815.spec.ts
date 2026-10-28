@@ -53,7 +53,7 @@ test('2. Escenario 2/3/4 — encabezado nombre+categoría, indicadores en 4 colu
 
   // Encabezado: nombre grande + categoría debajo, NO el título genérico.
   expect(modalText).toContain('Producto colgante Nordic 40cm')
-  expect(modalText).toContain('Candelabros y Colgantes')
+  expect(modalText).toContain('General')
   expect(modalText).not.toContain('Detalle del producto\n')
 
   // Bloque 1 — indicadores. Las etiquetas se renderizan en mayúscula por CSS (uppercase),

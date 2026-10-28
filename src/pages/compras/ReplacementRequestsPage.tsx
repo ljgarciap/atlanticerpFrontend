@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import type { ComprasCatalogProduct, SubstituteSearchResult } from '@/types/compras'
+import { useProductCategories } from '@/hooks/useProductCategories'
 
 type Chip = 'all' | 'pendiente' | 'pendiente_gerencia' | 'aprobada' | 'rechazada'
 type Tab = 'search' | 'requests'
@@ -262,6 +263,7 @@ function SimilarityBar({ percent }: { percent: number | null }) {
 
 function SearchTab() {
   const { t } = useTranslation(['common', 'compras'])
+  const { label: categoryLabel } = useProductCategories()
 
   const [original, setOriginal] = useState<ComprasCatalogProduct | null>(null)
   const [originalSearch, setOriginalSearch] = useState('')
@@ -478,7 +480,7 @@ function SearchTab() {
                     {r.reasoning && <div className="text-xs text-slate-400 mt-1 max-w-sm">{r.reasoning}</div>}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {r.category ? t(`compras:newOrder.newProduct.categories.${r.category}`) : '—'}
+                    {r.category ? categoryLabel(r.category) : '—'}
                   </td>
                   <td className="px-4 py-3 text-slate-600">{r.stock_quantity ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600">${r.price_full.toFixed(2)}</td>

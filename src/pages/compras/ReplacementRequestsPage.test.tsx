@@ -56,7 +56,7 @@ beforeEach(() => {
   mockedComprasApi.replacementRequests.list.mockResolvedValue({ data: [], meta: { total: 0, per_page: 20, current_page: 1, last_page: 1 } })
   mockedComprasApi.products.search.mockResolvedValue({ fuzzy: false, data: [] })
   mockedComprasApi.approvedProjects.search.mockResolvedValue({ data: [] })
-  mockedVentasDisenoApi.catalogProductFamilies.list.mockResolvedValue({ data: [{ id: 5, name: 'Bombillos', description: null, products_count: 2 }] })
+  mockedVentasDisenoApi.catalogProductFamilies.list.mockResolvedValue({ data: [{ id: 5, name: 'Accesorios', description: null, products_count: 2 }] })
 })
 
 async function goToSearchTab() {
@@ -104,7 +104,7 @@ describe('ReplacementRequestsPage', () => {
     await pickOriginal()
 
     mockedComprasApi.products.search.mockResolvedValueOnce({
-      fuzzy: false, data: [{ ...CANDIDATE, category: 'bombillos' }],
+      fuzzy: false, data: [{ ...CANDIDATE, category: 'general' }],
     })
     fireEvent.change(screen.getByPlaceholderText('compras:replacements.search.catalogPlaceholder'), { target: { value: 'generico' } })
 
@@ -117,7 +117,7 @@ describe('ReplacementRequestsPage', () => {
     expect(screen.queryByText('compras:replacements.search.resultsTable.cost')).not.toBeInTheDocument()
 
     // Categoría de la fila, con el mismo catálogo de labels que el resto de Compras.
-    expect(screen.getByText('compras:newOrder.newProduct.categories.bombillos')).toBeInTheDocument()
+    expect(screen.getByText('General')).toBeInTheDocument()
     // Sin similarity_percent (búsqueda por catálogo, sin IA) — em dash, nunca 0%.
     expect(screen.getByText('—')).toBeInTheDocument()
   })
@@ -203,7 +203,7 @@ describe('ReplacementRequestsPage', () => {
     await pickOriginal()
 
     fireEvent.click(screen.getByText('compras:replacements.search.methodPhoto'))
-    await waitFor(() => expect(screen.getByText('Bombillos')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Accesorios')).toBeInTheDocument())
 
     fireEvent.change(screen.getByRole('combobox'), { target: { value: '5' } })
     const file = new File(['fake'], 'foto.jpg', { type: 'image/jpeg' })

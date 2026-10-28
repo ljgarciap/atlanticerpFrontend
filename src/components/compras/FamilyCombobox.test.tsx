@@ -38,7 +38,7 @@ beforeEach(() => {
   mockedComprasApi.families.list.mockResolvedValue({
     restricted: false, can_manage: true,
     data: [
-      { id: 1, name: 'Iluminación Exterior', description: null, product_count: 3, total_value: 100 },
+      { id: 1, name: 'Familia Exterior', description: null, product_count: 3, total_value: 100 },
       { id: 2, name: 'Colgantes Sala', description: null, product_count: 5, total_value: 200 },
     ],
     meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
@@ -74,7 +74,7 @@ describe('FamilyCombobox (SCRUM-237/240)', () => {
 
   it('con una familia ya seleccionada, muestra su nombre y un botón para cambiarla', async () => {
     renderCombobox(1)
-    await waitFor(() => expect(screen.getByText('Iluminación Exterior')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Familia Exterior')).toBeInTheDocument())
     expect(screen.getByText('compras:inventory.detail.familyChange')).toBeInTheDocument()
   })
 })

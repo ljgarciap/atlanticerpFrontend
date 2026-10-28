@@ -9,11 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
 import type { NewCatalogProductPayload } from '@/types/compras'
-
-const CATALOG_PRODUCT_CATEGORIES = [
-  'candelabros_colgantes', 'iluminacion_techo', 'apliques_pared', 'iluminacion_bano',
-  'iluminacion_exterior', 'lamparas_piso_mesa', 'iluminacion_empotrada', 'bombillos',
-] as const
+import { useProductCategories } from '@/hooks/useProductCategories'
 
 const CATALOG_PRODUCT_ROTATIONS = ['alta', 'media', 'baja', 'unica'] as const
 
@@ -41,7 +37,7 @@ function buildSchema(t: TFunction) {
     // de validar contra el enum, mismo criterio que ProviderFormDrawer (SCRUM-189/194).
     category:             z.preprocess(
                             v => (v === '' ? null : v),
-                            z.enum(CATALOG_PRODUCT_CATEGORIES).nullable().optional(),
+                            z.string().max(50).nullable().optional(),
                           ),
     rotation:             z.enum(CATALOG_PRODUCT_ROTATIONS).nullable().optional(),
     // SCRUM-194 (REQ-131, mockup 2H) — toggle $ monto / % del costo, sustituye el % único de antes.
@@ -66,6 +62,7 @@ interface Props {
 
 export default function NewProductModal({ providerId, onClose, onAdd }: Props) {
   const { t } = useTranslation(['common', 'compras'])
+  const { options: categoryOptions } = useProductCategories()
   const schema = useMemo(() => buildSchema(t), [t])
   const {
     register, handleSubmit, watch, setError, clearErrors, formState: { errors },
@@ -218,8 +215,8 @@ export default function NewProductModal({ providerId, onClose, onAdd }: Props) {
               </label>
               <select {...register('category')} className={inputCls(false)}>
                 <option value="">—</option>
-                {CATALOG_PRODUCT_CATEGORIES.map(c => (
-                  <option key={c} value={c}>{t(`compras:newOrder.newProduct.categories.${c}`)}</option>
+                {categoryOptions.map(c => (
+                  <option key={c.key} value={c.key}>{c.label}</option>
                 ))}
               </select>
             </div>

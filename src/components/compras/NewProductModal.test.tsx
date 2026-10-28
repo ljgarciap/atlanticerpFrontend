@@ -19,6 +19,9 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
+vi.mock('@/hooks/useProductCategories', () => ({
+  useProductCategories: () => ({ options: [{ key: 'general', label: 'General' }], label: (k: string) => k }),
+}))
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: {
     products: { search: vi.fn() },

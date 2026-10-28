@@ -680,7 +680,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.reference')} *`), { target: { value: overrides.reference ?? 'REF-1' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.brand')} *`), { target: { value: overrides.brand ?? 'Marca X' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.barcode')} *`), { target: { value: overrides.barcode ?? '7501234567890' } })
-    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.category')} *`), { target: { value: overrides.category ?? 'bombillos' } })
+    fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.category')} *`), { target: { value: overrides.category ?? 'general' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.cost')} *`), { target: { value: overrides.cost ?? '15' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:newOrder.newProduct.additionalCost')} *`), { target: { value: overrides.additionalCost ?? '2' } })
     fireEvent.change(screen.getByLabelText(`${t('compras:inventory.detail.priceFull')} *`), { target: { value: overrides.priceFull ?? '30' } })
@@ -725,7 +725,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
         // SCRUM-240 (rebote de Gerencia Test 2026-08-12) — Nombre y Descripción ya no comparten
         // columna: "Producto nueva" va a `name`, `description` queda vacío (no se llenó en este test).
         reference: 'REF-1', factory_reference: 'FAB-1', name: 'Producto nueva', description: '',
-        brand: 'Marca X', barcode: '7501234567890', category: 'bombillos',
+        brand: 'Marca X', barcode: '7501234567890', category: 'general',
         provider_id: 9, cost: 15, price_full: 30, other_cost: 2,
         initial_stock: [{ warehouse_id: 1, quantity: 5 }],
       }),
@@ -1134,7 +1134,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
       fuzzy: false, restricted: false, can_manage: true,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 200 },
       data: [makeProduct({
-        category: 'bombillos', rotation: 'alta', reorder_point: 5, por_servir: 3,
+        category: 'general', rotation: 'alta', reorder_point: 5, por_servir: 3,
         warehouses: [{ warehouse_id: 1, warehouse_name: 'Atlantic', quantity: 7 }],
       })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
@@ -1143,7 +1143,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     renderPage()
     await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
 
-    expect(screen.getByText('compras:newOrder.newProduct.categories.bombillos')).toBeInTheDocument()
+    expect(screen.getByText('General')).toBeInTheDocument()
     expect(screen.getByText('compras:inventory.rotation.alta')).toBeInTheDocument()
     // SCRUM-244 (rebote 2026-08-12) — ya no lista "Atlantic (7)" en la celda, muestra el
     // acceso compacto "1 Bodega" (ver describe de SCRUM-244 más abajo para el detalle completo).
@@ -1156,7 +1156,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
-      data: [makeProduct({ category: 'bombillos', rotation: 'media', provider_name: 'Proveedor Uno', por_ingresar: 4, en_camino: 6 })],
+      data: [makeProduct({ category: 'general', rotation: 'media', provider_name: 'Proveedor Uno', por_ingresar: 4, en_camino: 6 })],
       meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
     })
 
@@ -1204,7 +1204,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   it('SCRUM-238 — el modal de detalle en modo Ventas & Diseño también muestra "Datos generales" (gap real reportado por Gerencia 2026-08-12)', async () => {
     const product = makeProduct({
       provider_name: 'Proveedor Uno', por_servir: 2, por_ingresar: 4, en_camino: 6, disponible: 8,
-      category: 'bombillos',
+      category: 'general',
     })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
@@ -1221,7 +1221,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     await waitFor(() => expect(screen.getByText('compras:inventory.detail.generalDataSection')).toBeInTheDocument())
     // getAllByText: el mismo label de categoría también aparece en la fila de la tabla detrás del modal
-    expect(screen.getAllByText('compras:newOrder.newProduct.categories.bombillos').length).toBeGreaterThan(0) // subtítulo de categoría
+    expect(screen.getAllByText('General').length).toBeGreaterThan(0) // subtítulo de categoría
     expect(screen.getAllByText('Proveedor Uno').length).toBeGreaterThan(0)
     expect(screen.getAllByText('4').length).toBeGreaterThan(0) // Por ingresar
     expect(screen.getAllByText('6').length).toBeGreaterThan(0) // En camino
@@ -1231,7 +1231,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   })
 
   it('SCRUM-238 (rebote Gerencia 2026-08-12, comparado contra mockup real) — en modo restringido "Información del producto" va ANTES que "Precios", con "Ver ficha técnica" agrupado dentro', async () => {
-    const product = makeProduct({ category: 'bombillos' })
+    const product = makeProduct({ category: 'general' })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
@@ -1258,7 +1258,7 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
   })
 
   it('SCRUM-238 — en modo Compras (no restringido) el orden de secciones NO cambia: "Precios" sigue antes que "Información del producto"', async () => {
-    const product = makeProduct({ category: 'bombillos' })
+    const product = makeProduct({ category: 'general' })
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: false, can_manage: true,
       kpis: { total_products: 1, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
@@ -1296,13 +1296,13 @@ describe('InventarioPage — Productos (SCRUM-231→244)', () => {
 
     fireEvent.click(screen.getByText('compras:inventory.actions.editGeneral'))
     const categorySelect = await screen.findByDisplayValue('—')
-    fireEvent.change(categorySelect, { target: { value: 'bombillos' } })
+    fireEvent.change(categorySelect, { target: { value: 'general' } })
 
     fireEvent.click(screen.getByText('compras:inventory.actions.save'))
     fireEvent.click(screen.getByText('compras:inventory.actions.confirm'))
 
     await waitFor(() => expect(mockedComprasApi.inventory.update).toHaveBeenCalledWith(
-      1, expect.objectContaining({ category: 'bombillos' }),
+      1, expect.objectContaining({ category: 'general' }),
     ))
   })
 

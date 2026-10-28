@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoGrid, IcoList, IcoClose, IcoCheck, IcoAlertTriangle, IcoImage, IcoFileText } from '@/components/icons'
+import { useProductCategories } from '@/hooks/useProductCategories'
 
 type ViewMode = 'grid' | 'list'
 type StockFilter = 'con' | 'sin' | ''
@@ -43,6 +44,7 @@ function fmtMoney(n: number): string {
  */
 export default function VentasDisenoCatalogPage() {
   const { t }     = useTranslation(['common', 'ventasDiseno', 'compras'])
+  const { label: categoryLabel } = useProductCategories()
   const navigate  = useNavigate()
   const showToast = useToastStore(s => s.show)
   const queryClient = useQueryClient()
@@ -290,7 +292,7 @@ export default function VentasDisenoCatalogPage() {
         <select value={category} onChange={e => { setCategory(e.target.value as CatalogProductCategory | ''); setPage(1) }} className={selectClass}>
           <option value="">{t('ventasDiseno:catalogScreen.filters.allCategories')}</option>
           {categories.map(c => (
-            <option key={c.value} value={c.value}>{t(`compras:newOrder.newProduct.categories.${c.value}`)}</option>
+            <option key={c.value} value={c.value}>{categoryLabel(c.value)}</option>
           ))}
         </select>
         <select value={familyId} onChange={e => { setFamilyId(e.target.value ? Number(e.target.value) : ''); setPage(1) }} className={selectClass}>
@@ -386,7 +388,7 @@ export default function VentasDisenoCatalogPage() {
                     <p className="font-semibold text-slate-800 dark:text-slate-100">{item.name}</p>
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {item.category ? t(`compras:newOrder.newProduct.categories.${item.category}`) : '—'}
+                    {item.category ? categoryLabel(item.category) : '—'}
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{fmtMoney(item.price_full)}</td>
                   <td className="px-4 py-3">
@@ -505,6 +507,7 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
   onUploaded: () => void
 }) {
   const { t } = useTranslation(['common', 'ventasDiseno', 'compras'])
+  const { label: categoryLabel } = useProductCategories()
   const showToast = useToastStore(s => s.show)
   const [showUpload, setShowUpload] = useState(false)
   const [viewing, setViewing] = useState(false)
@@ -547,7 +550,7 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
             <DetailRow label={t('ventasDiseno:catalogScreen.detail.price')} value={fmtMoney(item.price_full)} />
             <DetailRow
               label={t('ventasDiseno:catalogScreen.detail.category')}
-              value={item.category ? t(`compras:newOrder.newProduct.categories.${item.category}`) : '—'}
+              value={item.category ? categoryLabel(item.category) : '—'}
             />
             {item.family_name && <DetailRow label={t('ventasDiseno:catalogScreen.detail.family')} value={item.family_name} />}
             <DetailRow label={t('ventasDiseno:catalogScreen.detail.available')} value={<StockLabel item={item} />} />
