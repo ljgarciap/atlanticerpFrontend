@@ -23,7 +23,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = 'https://dev.atlanticerp.ai'
+const BASE = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 const DL_DIR = 'e2e/.tmp/preqa-scrum777-781-20260820'
 
 async function login(page: Page, email: string) {

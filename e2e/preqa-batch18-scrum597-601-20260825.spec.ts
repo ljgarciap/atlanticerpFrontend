@@ -17,7 +17,7 @@ test.describe.configure({ mode: 'serial' })
 // ventana elegida, no de qué pestaña está activa (el propio mockup las recalcula siempre, sin
 // importar `currentView`). Corregido — el test de abajo ya no es `fixme`, confirma el fix.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 const CONTABILIDAD = 'contabilidad@test.com'
 const ASISTENTE = 'asistenteadministrativa@test.com'

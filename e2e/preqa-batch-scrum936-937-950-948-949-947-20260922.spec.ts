@@ -19,7 +19,7 @@ import { test, expect, type Page } from '@playwright/test'
  *  - almacen (Bodega): liderbodega@test.com — bodega.view=true, compras.view=false.
  *  - gerencia2 (Gerencia): lidercompras@test.com — compras.view=true, bodega.view=false.
  */
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

@@ -20,7 +20,7 @@ test.describe.configure({ mode: 'serial' })
 // vivo de `summary` por id, en vez de guardar el objeto completo) + test de regresión agregado en
 // `ComisionesExternasPage.test.tsx` ("REQ-519 modal de detalle refleja mutaciones...").
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 const MARK  = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?'

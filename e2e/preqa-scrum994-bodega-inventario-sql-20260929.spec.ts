@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test'
 // real de Lafayette (~29.6K productos). Corre contra `E2E_BASE_URL` (por defecto dev.atlanticerp.ai) con el
 // usuario real de Bodega `almacen@` (password = correo en dev). Los números esperados son del catálogo real
 // de dev al 2026-09-29 (`docs/pre-qa/scrum994-bodega-inventory-20260929.md`, oráculo SQL independiente).
-test.use({ baseURL: process.env.E2E_BASE_URL ?? 'https://dev.atlanticerp.ai' })
+test.use({ baseURL: process.env.E2E_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092' })
 test.describe.configure({ mode: 'serial' })
 
 const KPIS = { total: 29630, low: 2, out: 26283, attention: 21, porServir: 213 }

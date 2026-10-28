@@ -42,7 +42,7 @@ import { execSync } from 'node:child_process'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE             = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE             = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const LIDER_SERVICIOS  = 'liderservicios@test.com'
 const MANAGEMENT       = 'gerencia@test.com'
 const TECNICO_AJENO    = 'tecnico2@test.com'

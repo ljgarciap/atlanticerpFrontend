@@ -23,7 +23,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const API_BASE = process.env.PREQA_API_BASE_URL ?? 'http://localhost:8090'
 const DL_DIR = 'e2e/.tmp/preqa-servicios-grupoD-parte2'
 const PRODUCT_SEARCH = 'Artículo decorativo'

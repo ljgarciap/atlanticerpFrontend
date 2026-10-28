@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs'
 // Corre contra test.atlanticerp.ai (deploy real del commit 3ce226b). Descarga el PDF real que abre
 // "Imprimir" para confirmar que ya no es el HTML del modal via window.print().
 
-const BASE = 'https://test.atlanticerp.ai'
+const BASE = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 async function login(page, email: string) {
   await page.goto(`${BASE}/login`)

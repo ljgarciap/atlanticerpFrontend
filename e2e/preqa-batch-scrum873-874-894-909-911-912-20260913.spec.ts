@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test'
  * Foco: caminos de ruptura de cada criterio de aceptación, no solo el camino feliz.
  */
 
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

@@ -14,16 +14,16 @@
 #        docs/ o archivos .md.
 #
 # CD:  rsync de dist/ al EC2 correspondiente vía SSH (el deploy en sí tarda ~15 s).
-#      dev    → EC2_DEV_HOST  (dev.atlanticerp.ai)   — push a `dev`, tras el build, SIN tests
-#      test   → EC2_TEST_HOST (test.atlanticerp.ai)  — push a `test`, tras el build, SIN tests
-#      master → EC2_PROD_HOST (atlanticerp.ai)        — push a `master`, tras el build Y los tests
+#      dev    → EC2_DEV_HOST  (vars.APP_URL del Environment)   — push a `dev`, tras el build, SIN tests
+#      test   → EC2_TEST_HOST (vars.APP_URL del Environment)  — push a `test`, tras el build, SIN tests
+#      master → EC2_PROD_HOST (vars.APP_URL del Environment)        — push a `master`, tras el build Y los tests
 #      Cada deploy termina verificando que el sitio responda.
 #      Si Actions no tiene minutos: infra/deploy-manual.sh <dev|test|prod> (reutiliza el recibo del gate).
 #
 # Secrets requeridos (GitHub → Settings → Secrets and variables → Actions):
-#   EC2_DEV_HOST    — IP del EC2 de dev   (dev.atlanticerp.ai)
-#   EC2_TEST_HOST   — IP del EC2 de test  (test.atlanticerp.ai)
-#   EC2_PROD_HOST   — IP del EC2 de prod  (atlanticerp.ai)
+#   EC2_DEV_HOST    — IP del EC2 de dev   (vars.APP_URL del Environment)
+#   EC2_TEST_HOST   — IP del EC2 de test  (vars.APP_URL del Environment)
+#   EC2_PROD_HOST   — IP del EC2 de prod  (vars.APP_URL del Environment)
 #   EC2_SSH_KEY     — Clave privada SSH (PEM); el par público debe estar
 #                     en /home/ubuntu/.ssh/authorized_keys de cada EC2.
 #
@@ -110,7 +110,7 @@ jobs:
           retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 2 — CD dev: rsync a dev.atlanticerp.ai (solo en push a `dev`)
+  # JOB 2 — CD dev: rsync al host del Environment (solo en push a `dev`)
   # ─────────────────────────────────────────────────────────────────────────────
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ jobs:
       # para que useDevLiveReload detecte nuevos deploys y recargue el navegador.
 
   deploy-dev:
-    name: CD — Deploy dev.atlanticerp.ai
+    name: CD — Deploy dev
     needs: build
     concurrency:
       group: frontend-deploy-dev
@@ -198,7 +198,7 @@ jobs:
     if: false && github.event_name == 'push' && github.ref == 'refs/heads/dev'
     environment:
       name: dev
-      url: https://dev.atlanticerp.ai
+      url: ${{ vars.APP_URL }}
 
     steps:
       - name: Descargar dist/
@@ -241,12 +241,12 @@ jobs:
       - name: Verificar que el sitio responde
         run: |
           for i in 1 2 3 4 5 6; do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://dev.atlanticerp.ai/" || true)
-            echo "intento $i: https://dev.atlanticerp.ai/ = $CODE (se espera 200)"
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${{ vars.APP_URL }}/" || true)
+            echo "intento $i: ${{ vars.APP_URL }}/ = $CODE (se espera 200)"
             if [ "$CODE" = "200" ]; then exit 0; fi
             sleep 10
           done
-          echo "ERROR: dev.atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          echo "ERROR: ${{ vars.APP_URL }} no responde 200 tras el deploy del frontend." >&2
           exit 1
 
       - name: Limpiar clave SSH
@@ -254,10 +254,10 @@ jobs:
         run: rm -f ~/.ssh/deploy_key
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 3 — CD test: rsync a test.atlanticerp.ai (solo en push a `test`)
+  # JOB 3 — CD test: rsync al host del Environment (solo en push a `test`)
   # ─────────────────────────────────────────────────────────────────────────────
   deploy-test:
-    name: CD — Deploy test.atlanticerp.ai
+    name: CD — Deploy test
     needs: build
     concurrency:
       group: frontend-deploy-test
@@ -267,7 +267,7 @@ jobs:
     if: false && github.event_name == 'push' && github.ref == 'refs/heads/test'
     environment:
       name: test
-      url: https://test.atlanticerp.ai
+      url: ${{ vars.APP_URL }}
 
     steps:
       - name: Descargar dist/
@@ -304,12 +304,12 @@ jobs:
       - name: Verificar que el sitio responde
         run: |
           for i in 1 2 3 4 5 6; do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://test.atlanticerp.ai/" || true)
-            echo "intento $i: https://test.atlanticerp.ai/ = $CODE (se espera 200)"
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${{ vars.APP_URL }}/" || true)
+            echo "intento $i: ${{ vars.APP_URL }}/ = $CODE (se espera 200)"
             if [ "$CODE" = "200" ]; then exit 0; fi
             sleep 10
           done
-          echo "ERROR: test.atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          echo "ERROR: ${{ vars.APP_URL }} no responde 200 tras el deploy del frontend." >&2
           exit 1
 
       - name: Limpiar clave SSH
@@ -317,12 +317,12 @@ jobs:
         run: rm -f ~/.ssh/deploy_key
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 4 — CD prod: rsync a atlanticerp.ai (solo en push a `master`)
+  # JOB 4 — CD prod: rsync al host del Environment (solo en push a `master`)
   # ─────────────────────────────────────────────────────────────────────────────
   # IMPORTANTE: antes de activar deploys a prod, configurar el Environment `prod`
   # en GitHub con "Required reviewers: Luis" para exigir aprobación manual.
   deploy-prod:
-    name: CD — Deploy atlanticerp.ai (PRODUCCIÓN)
+    name: CD — Deploy prod (PRODUCCIÓN)
     needs: [build, test]
     concurrency:
       group: frontend-deploy-prod
@@ -332,7 +332,7 @@ jobs:
     if: false && github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
       name: prod
-      url: https://atlanticerp.ai
+      url: ${{ vars.APP_URL }}
 
     steps:
       - name: Descargar dist/
@@ -370,12 +370,12 @@ jobs:
       - name: Verificar que el sitio responde
         run: |
           for i in 1 2 3 4 5 6; do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://atlanticerp.ai/" || true)
-            echo "intento $i: https://atlanticerp.ai/ = $CODE (se espera 200)"
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${{ vars.APP_URL }}/" || true)
+            echo "intento $i: ${{ vars.APP_URL }}/ = $CODE (se espera 200)"
             if [ "$CODE" = "200" ]; then exit 0; fi
             sleep 10
           done
-          echo "ERROR: atlanticerp.ai no responde 200 tras el deploy del frontend." >&2
+          echo "ERROR: ${{ vars.APP_URL }} no responde 200 tras el deploy del frontend." >&2
           exit 1
 
       - name: Limpiar clave SSH

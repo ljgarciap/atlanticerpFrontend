@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test'
  * el 29/jul) — Aprobado $2,418.36 (3), Perdido $54.57 (1), 75% de conversión. Sin gap real, sin
  * cambio de código ni de datos.
  */
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 test('las tarjetas resumen de Vendedor muestran montos reales, no $0/0%', async ({ page }) => {
   await page.goto(`${BASE}/login`)

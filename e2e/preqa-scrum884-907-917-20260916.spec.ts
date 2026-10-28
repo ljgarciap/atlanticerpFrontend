@@ -13,7 +13,7 @@ import { test, expect, Page } from '@playwright/test'
  * que ejercita exactamente el mismo código (controller+service) que un clic real dispararía.
  */
 
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

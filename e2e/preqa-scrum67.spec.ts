@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 // SCRUM-67 (hallazgo QA Gerencia Test, 2026-07-20) — el mock abre un listado completo de
 // pendientes antes del drill-down al detalle; el "+N más" no tenía ningún onClick, así que no

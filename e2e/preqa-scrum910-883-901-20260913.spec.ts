@@ -7,8 +7,8 @@ import { test, expect, Page } from '@playwright/test'
  * feedback_preqa_crowdsec_no_paralelo.
  */
 
-const DEV = 'https://dev.atlanticerp.ai'
-const TEST = 'https://test.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
+const TEST = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

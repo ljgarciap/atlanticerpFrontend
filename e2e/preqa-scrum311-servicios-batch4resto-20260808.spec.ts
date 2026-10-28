@@ -11,7 +11,7 @@ import path from 'path'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const DL_DIR = 'e2e/.tmp/preqa-scrum311'
 const FILES_DIR = path.resolve(process.cwd(), 'e2e/.tmp/preqa-scrum311-files')
 

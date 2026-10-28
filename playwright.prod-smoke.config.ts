@@ -6,6 +6,6 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   reporter: 'list',
-  use: { baseURL: 'https://atlanticerp.ai', trace: 'off' },
+  use: { baseURL: process.env.E2E_BASE_URL, trace: 'off' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 })

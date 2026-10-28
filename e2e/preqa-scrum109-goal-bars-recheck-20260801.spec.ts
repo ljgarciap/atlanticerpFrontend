@@ -15,7 +15,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 
 async function login(page: Page, email: string) {
   await page.goto(`${BASE}/login`)

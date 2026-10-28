@@ -11,7 +11,7 @@ import { test, expect, type Page, type Route } from '@playwright/test'
 // Cuentas (roster real, contraseña = su email): Contabilidad tiene `receptor_fiscal` y `receptor_consumidor_final`; la asistente no.
 // BASE explícito: PREQA_BASE_URL (default localhost). Se niega a correr contra producción.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const CON_PERMISO = process.env.E2E_RECEPTOR_CON_PERMISO ?? 'contabilidad@test.com'
 const SIN_PERMISO = process.env.E2E_RECEPTOR_SIN_PERMISO ?? 'asistenteadministrativa@test.com'
 const passwordOf = (email: string) => process.env.E2E_RECEPTOR_PASSWORD ?? email
@@ -25,7 +25,7 @@ test.use({ baseURL: BASE })
 
 test.beforeAll(() => {
   const host = new URL(BASE).hostname
-  if (!['localhost', '127.0.0.1', 'dev.atlanticerp.ai', 'test.atlanticerp.ai'].includes(host)) {
+  if (!['localhost', '127.0.0.1', ...(process.env.E2E_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)].includes(host)) {
     throw new Error(`receptor-consumidor-final-facturacion solo corre contra local, dev o test (BASE=${BASE})`)
   }
 })

@@ -15,7 +15,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = 'https://dev.atlanticerp.ai'
+const BASE = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 const DL_DIR = 'e2e/.tmp/preqa-admincont-batch5-cobros-20260823'
 const MASTER_CLIENT_ID = 7560
 

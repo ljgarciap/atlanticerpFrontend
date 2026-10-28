@@ -27,7 +27,7 @@ import { test, expect, type Page } from '@playwright/test'
  *  - Lider Bodega Test (lider_bodega): liderbodega@test.com
  *  - Contabilidad Test (lider_admin_contab): contabilidad@test.com
  */
-const DEV = 'https://dev.atlanticerp.ai'
+const DEV = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 
 test.describe.configure({ mode: 'serial' })
 test.use({ actionTimeout: 25000, navigationTimeout: 40000 })

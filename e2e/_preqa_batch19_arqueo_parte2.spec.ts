@@ -6,7 +6,7 @@ test.describe.configure({ mode: 'serial' })
 // Caja parte 2. Corrido LOCAL (Docker infra-nginx-1:8090 proxied by Vite dev server on 5173) —
 // código commiteado sin push en dev de ambos repos, no desplegado a dev.atlanticerp.ai todavía.
 // Password LOCAL = email para todos los usuarios (distinto de dev/test.atlanticerp.ai).
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 
 const CONTABILIDAD = 'contabilidad@test.com'
 const ASISTENTE = 'asistenteadministrativa@test.com'

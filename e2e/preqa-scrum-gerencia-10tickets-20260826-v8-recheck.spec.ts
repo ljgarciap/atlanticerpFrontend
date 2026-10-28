@@ -30,7 +30,7 @@ test.describe.configure({ mode: 'serial' })
 // reporte que lo acompaña — son la verificación INDEPENDIENTE real contra dev.atlanticerp.ai, sin
 // asumir ninguno de esos comentarios como válido.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const GERENCIA5 = 'gerencia5@test.com' // Gerencia Restringida, Nivel 8 — NO es Gerencia Approver
 const MARK = 'gerencia3@test.com' // Gerencia Approver real
 const MARK_PASSWORD = 'B1n4X_2026?' // password real en dev/test — NO es el default email

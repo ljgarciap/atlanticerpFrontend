@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 
 async function login(page) {
   await page.goto(`${BASE}/login`)

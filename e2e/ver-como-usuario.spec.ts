@@ -14,7 +14,7 @@ import { test, expect, type Page } from '@playwright/test'
 // del backend (eso lo cubre el Pre-QA contra el backend de SCRUM-1158): aquí el contrato es el acordado en el diseño §3.
 // BASE explícito por VER_COMO_BASE_URL (default: localhost del dev server, nunca dev.atlanticerp.ai).
 
-const BASE = process.env.VER_COMO_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.VER_COMO_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 test.use({ baseURL: BASE })
 
 const ACTOR_TOKEN   = 'e2e-actor-access'
@@ -203,6 +203,7 @@ test.describe('Ver como usuario — sesión observada', () => {
   })
 
   test('una escritura rechazada (403 impersonation_read_only) se explica con un aviso de solo lectura', async ({ page }) => {
+    test.skip(!!process.env.E2E_BASE_URL, 'importa /src/api/authApi.ts: solo funciona con el servidor de Vite (npm run dev)')
     await setup(page, newCaptures())
     await page.route('**/api/e2e/escritura', route => route.fulfill(json({ message: 'ro', code: 'impersonation_read_only' }, 403)))
     await openUsers(page)
@@ -221,6 +222,7 @@ test.describe('Ver como usuario — sesión observada', () => {
   })
 
   test('un 401 (sesión terminada) devuelve a la sesión real con aviso, no al login', async ({ page }) => {
+    test.skip(!!process.env.E2E_BASE_URL, 'importa /src/api/authApi.ts: solo funciona con el servidor de Vite (npm run dev)')
     await setup(page, newCaptures())
     await page.route('**/api/e2e/ping', route => route.fulfill(json({ message: 'x', code: 'impersonation_ended' }, 401)))
     await openUsers(page)

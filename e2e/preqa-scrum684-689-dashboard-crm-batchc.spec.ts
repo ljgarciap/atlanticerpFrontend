@@ -19,7 +19,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const MGMT_EMAIL = 'gerencia5@test.com'
 const MGMT_PASS = 'gerencia5@test.com'
 const VENDOR_EMAIL = 'vendedor@test.com'

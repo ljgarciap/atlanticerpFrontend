@@ -19,7 +19,7 @@ import { test, expect, type Page, type APIRequestContext } from '@playwright/tes
 //
 // BASE explícito: PREQA_BASE_URL (default localhost). Se niega a correr contra producción.
 
-const BASE = process.env.PREQA_BASE_URL ?? 'http://localhost:5173'
+const BASE = process.env.PREQA_BASE_URL ?? process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const MARK = process.env.E2E_FE_MARK_EMAIL ?? 'gerencia3@test.com'
 const CONTABILIDAD = process.env.E2E_FE_NOMARK_EMAIL ?? 'contabilidad@test.com'
 // En los entornos con roster real la contraseña de las cuentas de prueba es su propio email.
@@ -35,7 +35,7 @@ test.describe.configure({ mode: 'serial' })
 
 test.beforeAll(() => {
   const host = new URL(BASE).hostname
-  if (!['localhost', '127.0.0.1', 'dev.atlanticerp.ai', 'test.atlanticerp.ai'].includes(host)) {
+  if (!['localhost', '127.0.0.1', ...(process.env.E2E_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)].includes(host)) {
     throw new Error(`fe-transmisiones-gating solo corre contra local, dev o test (BASE=${BASE})`)
   }
 })

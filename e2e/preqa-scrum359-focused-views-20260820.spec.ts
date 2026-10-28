@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 test.describe.configure({ mode: 'serial' })
 
-const BASE = 'https://dev.atlanticerp.ai'
+const BASE = (process.env.E2E_BASE_URL ?? 'http://localhost:8092')
 const DL_DIR = 'e2e/.tmp/preqa-scrum359-focused-views-20260820'
 
 async function login(page: Page, email: string) {
