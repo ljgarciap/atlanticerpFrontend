@@ -131,14 +131,14 @@ describe('VentasDisenoHomePage', () => {
 
   it('muestra el selector Equipo/vendedor para Gerencia', async () => {
     mockedStore.mockReturnValue({ user: { id: 1, role: 'management', permissions: ['platform.management'] } } as never)
-    const vendors: Vendor[] = [{ id: 2, name: 'Designer Demo' }]
+    const vendors: Vendor[] = [{ id: 2, name: 'Vendedor Demo' }]
     mockedApi.home.vendors.mockResolvedValue(vendors)
 
     renderPage()
     expect(await screen.findByText('ventasDiseno:scope.team')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('ventasDiseno:scope.team'))
-    expect(await screen.findByText('Designer Demo')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Demo')).toBeInTheDocument()
   })
 
   it('lista pendientes y abre el detalle al hacer clic', async () => {

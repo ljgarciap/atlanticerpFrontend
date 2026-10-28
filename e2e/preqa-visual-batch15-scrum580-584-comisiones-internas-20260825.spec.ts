@@ -120,20 +120,20 @@ test('REQ-507 — estado de cuenta: mes en curso (3 totales) vs mes cerrado (sol
   await expect(totalsBlockClosed.getByText('Pendiente de cobro', { exact: false })).toHaveCount(0)
 })
 
-test('REQ-505 — vendedor con cero pedidos EN TODA LA HISTORIA (Designer Demo, id 48): fila y mensaje', async ({ page }) => {
+test('REQ-505 — vendedor con cero pedidos EN TODA LA HISTORIA (Vendedor Demo, id 48): fila y mensaje', async ({ page }) => {
   const ok = await login(page, FELIX)
   expect(ok).toBeTruthy()
   await goToComisiones(page)
 
   const vendorSelect = page.locator('select').nth(1)
-  await vendorSelect.selectOption({ label: 'Designer Demo' })
+  await vendorSelect.selectOption({ label: 'Vendedor Demo' })
   await page.waitForTimeout(1000)
   await page.screenshot({ path: 'e2e/.tmp/b15-05-designer-demo-sin-pedidos.png', fullPage: true })
 
   // Regresion SCRUM-582: antes del fix, filtrar a un vendedor sin NINGUN pedido en su historia
   // devolvia "vendedores: []" y la tabla mostraba "Sin vendedores para este filtro." — nunca
   // habia fila que expandir. Debe existir la fila y, al expandirla, mostrar el mensaje correcto.
-  const row = page.locator('td', { hasText: 'Designer Demo' }).first()
+  const row = page.locator('td', { hasText: 'Vendedor Demo' }).first()
   await expect(row).toBeVisible()
   await row.click()
   await page.waitForTimeout(600)

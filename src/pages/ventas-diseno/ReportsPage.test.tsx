@@ -248,13 +248,13 @@ describe('VentasDisenoReportsPage', () => {
   it('guardar una Meta refresca el resumen de Reportes (regresión E2E)', async () => {
     mockAuthState({ id: 1, role: 'management', permissions: ['ventas_diseno.reports.configure', 'platform.management'] })
     mockedApi.reports.goals.list.mockResolvedValue([
-      { user_id: 1, user_name: 'Designer Demo', goal_amount: null, goal_plus_amount: null },
+      { user_id: 1, user_name: 'Vendedor Demo', goal_amount: null, goal_plus_amount: null },
     ])
-    mockedApi.reports.goals.upsert.mockResolvedValue({ user_id: 1, user_name: 'Designer Demo', goal_amount: 15000, goal_plus_amount: null })
+    mockedApi.reports.goals.upsert.mockResolvedValue({ user_id: 1, user_name: 'Vendedor Demo', goal_amount: 15000, goal_plus_amount: null })
     renderPage()
 
     fireEvent.click(await screen.findByText('ventasDiseno:reports.config.toggle'))
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const goalInput = document.querySelectorAll('input[inputmode="decimal"]')[0] as HTMLInputElement
     fireEvent.change(goalInput, { target: { value: '15000' } })
@@ -316,13 +316,13 @@ describe('VentasDisenoReportsPage', () => {
     mockAuthState({ id: 1, role: 'management', permissions: ['platform.management'] })
     mockedApi.reports.summary.mockResolvedValue(makeSummary({
       scope: 'team',
-      top_vendors: [{ user_id: 1, user_name: 'Designer Demo', total_current_month: 3000, low_sales_alert: true }],
+      top_vendors: [{ user_id: 1, user_name: 'Vendedor Demo', total_current_month: 3000, low_sales_alert: true }],
     }))
     renderPage()
 
     fireEvent.click(await screen.findByText('ventasDiseno:scope.team'))
 
-    expect(await screen.findByText('Designer Demo')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Demo')).toBeInTheDocument()
     expect(screen.getByText('$3,000')).toBeInTheDocument()
     // SCRUM-112 — el texto de la alerta debe verse siempre, no solo al hover (title).
     expect(screen.getByText('ventasDiseno:reports.topVendors.alertBadge')).toBeInTheDocument()

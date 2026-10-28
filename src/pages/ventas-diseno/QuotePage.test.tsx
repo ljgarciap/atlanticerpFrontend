@@ -67,7 +67,7 @@ function emptyQuote(overrides: Partial<QuoteDetail> = {}): QuoteDetail {
     id: 1, status: 'draft', folio: null, generated_at: null, confirmed_at: null,
     pipeline_card_id: null, document_status: 'draft',
     master_client: null, sub_client: null, sales_project: null,
-    ruc: null, description: null, owner: { id: 1, name: 'Designer Demo' }, architect: null,
+    ruc: null, description: null, owner: { id: 1, name: 'Vendedor Demo' }, architect: null,
     delivery_type: null, delivery_dates: [], contacts: [], can_edit: true,
     price_type: 'public', discount_mode: 'line', global_discount_percent: 0,
     global_below_min_margin: false, can_override_min_margin: false, min_margin_percent: 30,
@@ -250,7 +250,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
 
-    expect(await screen.findByText('Designer Demo')).toBeInTheDocument()
+    expect(await screen.findByText('Vendedor Demo')).toBeInTheDocument()
   })
 
   // ── SCRUM-734 (sección 6): mensajes guía de orden de llenado ────────────────
@@ -267,7 +267,7 @@ describe('QuotePage', () => {
       master_client: { id: 1, name: 'Grupo Delta' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     await waitFor(() => {
       expect(screen.queryByText('ventasDiseno:quote.fillOrderHint.needsMasterClient')).not.toBeInTheDocument()
@@ -281,7 +281,7 @@ describe('QuotePage', () => {
       sub_client: { id: 10, business_name: 'Delta Residencial' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     await waitFor(() => {
       expect(screen.queryByText('ventasDiseno:quote.fillOrderHint.needsMasterClient')).not.toBeInTheDocument()
@@ -297,9 +297,9 @@ describe('QuotePage', () => {
       { id: 10, business_name: 'Delta Residencial', tax_id: '155-0000-1-2026', contacts_count: 1 },
     ])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
-    // "Designer Demo" viene del store de auth (síncrono) y puede aparecer ANTES de
+    // "Vendedor Demo" viene del store de auth (síncrono) y puede aparecer ANTES de
     // que el efecto de hidratación (setMasterClient/setSubClient desde quote, ver
     // QuotePage.tsx) haya corrido — el Subcliente depende de masterClient ya
     // hidratado (disabled={!canEdit || !masterClient}). Ubicar el input por label
@@ -332,7 +332,7 @@ describe('QuotePage', () => {
       { id: 10, business_name: 'Delta Residencial', tax_id: '155-0000-1-2026', contacts_count: 1 },
     ])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     // Ver comentario del test anterior: ubicar por label + esperar a que se habilite
     // antes de interactuar, en vez de asumir un índice fijo ya hidratado.
@@ -379,7 +379,7 @@ describe('QuotePage', () => {
     }))
     mockedApi.quotes.contacts.create.mockResolvedValue({ pivot_id: 1, id: 100, name: 'Juan Pérez', role: 'client', phone: '6000-1111', email: null })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const subClientLabel = screen.getByText('ventasDiseno:modal.subClient')
     const subClientInput = subClientLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -434,7 +434,7 @@ describe('QuotePage', () => {
   it('el campo Arquitecto NO depende del Subcliente: la base de asociados es global (SCRUM-1121)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -448,7 +448,7 @@ describe('QuotePage', () => {
   it('muestra el texto aclaratorio de que Arquitecto es opcional, para comisión (SCRUM-873)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.getByText('ventasDiseno:quote.architectHint')).toBeInTheDocument()
   })
@@ -464,13 +464,13 @@ describe('QuotePage', () => {
       { id: 2, name: 'Arq. QA Real2', phone: null, email: null },
     ] as never)
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
     // El campo depende de la hidratación async de subClient (SCRUM-122) — esperar a que
     // se habilite antes de interactuar, mismo mecanismo de carrera que subClientInput más
-    // arriba en este archivo (nunca asumir que ya hidrató solo porque "Designer Demo" apareció).
+    // arriba en este archivo (nunca asumir que ya hidrató solo porque "Vendedor Demo" apareció).
     await waitFor(() => expect(architectInput).not.toBeDisabled())
     fireEvent.focus(architectInput)
     fireEvent.change(architectInput, { target: { value: 'QA Live Test Arch XYZ' } })
@@ -483,7 +483,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ sub_client: { id: 10, business_name: 'Delta Residencial' } }))
     mockedApi.architects.search.mockResolvedValue([{ id: 1, name: 'Arq. QA Real', phone: null, email: null }] as never)
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -500,7 +500,7 @@ describe('QuotePage', () => {
     mockedApi.architects.search.mockResolvedValue([] as never)
     mockedApi.architects.create.mockResolvedValue({ id: 9, name: 'Arq. Nuevo', phone: null, email: 'nuevo@arq.test' })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -532,7 +532,7 @@ describe('QuotePage', () => {
       { id: 1, name: 'Arq. QA Real', phone: '6000-1111', email: 'qa.real@arq.test' },
     ] as never)
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -550,7 +550,7 @@ describe('QuotePage', () => {
     mockedApi.architects.search.mockResolvedValue([] as never)
     mockedApi.architects.create.mockResolvedValue({ id: 9, name: 'Arq. Nuevo', phone: '6000-2222', email: 'nuevo@arq.test' })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -577,7 +577,7 @@ describe('QuotePage', () => {
       architect: { id: 5, name: 'Arq. Ya Asignado', phone: '6000-3333', email: 'asignado@arq.test' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -592,7 +592,7 @@ describe('QuotePage', () => {
       architect: { id: 6, name: 'Arq. Viejo Sin Datos', phone: null, email: null },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectLabel = screen.getByText('ventasDiseno:quote.architect')
     const architectInput = architectLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -610,7 +610,7 @@ describe('QuotePage', () => {
     }))
     mockedApi.architects.update.mockResolvedValue({ id: 5, name: 'Arq. Ya Asignado', phone: '6000-4444', email: 'nuevo@arq.test' })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     await screen.findByText('6000-3333')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.edit'))
@@ -635,7 +635,7 @@ describe('QuotePage', () => {
       architect: { id: 5, name: 'Arq. Ya Asignado', phone: '6000-3333', email: 'asignado@arq.test' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     await screen.findByText('6000-3333')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.edit'))
@@ -655,7 +655,7 @@ describe('QuotePage', () => {
       response: { data: { message: 'No se pudo actualizar el arquitecto.' } },
     })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     await screen.findByText('6000-3333')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.edit'))
@@ -670,7 +670,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.masterClients.list.mockResolvedValue([])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const masterLabel = screen.getByText('ventasDiseno:modal.masterClient')
     const masterInput = masterLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -687,7 +687,7 @@ describe('QuotePage', () => {
       { id: 10, business_name: 'Delta Residencial', tax_id: '155-0000-1-2026', contacts_count: 1 },
     ])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     // Ver comentario de "al elegir un subcliente existente autocompleta el RUC" más
     // arriba: ubicar por label + esperar habilitación en vez de índice fijo.
@@ -708,7 +708,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.masterClients.list.mockResolvedValue([])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const masterLabel = screen.getByText('ventasDiseno:modal.masterClient')
     const masterInput = masterLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -749,7 +749,7 @@ describe('QuotePage', () => {
       sub_client: { id: 20, business_name: 'Constructora XYZ' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const masterLabel = screen.getByText('ventasDiseno:modal.masterClient')
     const masterInput = masterLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -783,7 +783,7 @@ describe('QuotePage', () => {
     }))
     mockedApi.subClients.list.mockResolvedValue([])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const subClientLabel = screen.getByText('ventasDiseno:modal.subClient')
     const subClientInput = subClientLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -806,7 +806,7 @@ describe('QuotePage', () => {
     }))
     mockedApi.masterClients.list.mockResolvedValue([])
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const masterLabel = screen.getByText('ventasDiseno:modal.masterClient')
     const masterInput = masterLabel.parentElement!.querySelector('input') as HTMLInputElement
@@ -814,7 +814,7 @@ describe('QuotePage', () => {
     const subClientInput = subClientLabel.parentElement!.querySelector('input') as HTMLInputElement
 
     // Esperar a que el fetch de la cotización (async, mockeado) se refleje en el
-    // input antes de "borrarlo" — "Designer Demo" viene del store de auth (síncrono)
+    // input antes de "borrarlo" — "Vendedor Demo" viene del store de auth (síncrono)
     // y puede aparecer antes de que `quote` resuelva, dejando el picker todavía en
     // su valor inicial vacío. Si el fireEvent.change de abajo dispara sobre un campo
     // que YA está en '', React no detecta cambio (mismo valor) y nunca llama a
@@ -835,12 +835,12 @@ describe('QuotePage', () => {
       sub_client:    { id: 10, business_name: 'Delta Residencial' },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
-    // "Designer Demo" (store de auth, síncrono) puede pintar antes de que el efecto
+    // "Vendedor Demo" (store de auth, síncrono) puede pintar antes de que el efecto
     // de hidratación (setSubClient desde quote.sub_client) corra — contactsReady
     // depende de ese subClient local, así que "addExistingContact" solo aparece en
-    // el render POSTERIOR al de "Designer Demo". Causa raíz confirmada de flake
+    // el render POSTERIOR al de "Vendedor Demo". Causa raíz confirmada de flake
     // intermitente en CI (sesión 2026-07-31): usar findByText (async), no getByText.
     // saveBeforeContacts es seguro como chequeo síncrono: nunca aparece en ningún
     // render de este escenario (antes de hidratar, subClient local es null y esa
@@ -855,7 +855,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.saveDraft.mockResolvedValue(emptyQuote({ description: 'Cotizacion X' }))
     renderPage()
 
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     // Orden en el DOM: [0] Master, [1] Sub, [2] RUC, [3] Proyecto, [4] Descripción.
     const descriptionInput = document.querySelectorAll('input[type="text"]')[4] as HTMLInputElement
     fireEvent.change(descriptionInput, { target: { value: 'Cotizacion X' } })
@@ -871,7 +871,7 @@ describe('QuotePage', () => {
   it('cambiar de Entrega Parcial (2 fechas) a Única resetea a un solo campo de fecha (SCRUM-124)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const deliveryTypeLabel = screen.getByText('ventasDiseno:modal.deliveryType')
     const deliveryTypeSelect = deliveryTypeLabel.parentElement!.querySelector('select') as HTMLSelectElement
@@ -891,7 +891,7 @@ describe('QuotePage', () => {
   it('SCRUM-796 — "Por definir" oculta el selector de fechas y no las exige', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     // Rename de label (secc. 7): "Tipo de Entrega" pasa a "Fecha estimada de entrega"
     // (misma clave i18n ventasDiseno:modal.deliveryType, ya renderizada con el texto nuevo).
@@ -912,7 +912,7 @@ describe('QuotePage', () => {
   it('Entrega Parcial permite quitar una fecha agregada pero nunca bajar de 2 (Pre-QA SCRUM-124, REQ-032 Excel)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const deliveryTypeLabel = screen.getByText('ventasDiseno:modal.deliveryType')
     const deliveryTypeSelect = deliveryTypeLabel.parentElement!.querySelector('select') as HTMLSelectElement
@@ -948,7 +948,7 @@ describe('QuotePage', () => {
   it('deshabilita Precio Socio sin el permiso select_partner_price', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const partnerOption = screen.getByText('ventasDiseno:priceType.partner', { exact: false })
     expect((partnerOption as HTMLOptionElement).disabled).toBe(true)
@@ -958,7 +958,7 @@ describe('QuotePage', () => {
     mockAuthState({ id: 1, first_name: 'Designer', last_name: 'Demo', permissions: ['ventas_diseno.select_partner_price'] })
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const partnerOption = screen.getByText('ventasDiseno:priceType.partner', { exact: false })
     expect((partnerOption as HTMLOptionElement).disabled).toBe(false)
@@ -968,7 +968,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.update.mockResolvedValue(emptyQuote({ price_type: 'project' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     // Orden en el DOM: [0] tipo de entrega, [1] tipo de precio general.
     const select = document.querySelectorAll('select')[1] as HTMLSelectElement
@@ -998,7 +998,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       mockedApi.quotes.update.mockResolvedValue(emptyQuote({ price_type: 'project' }))
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       expect(screen.queryByTestId('price-type-own-note')).not.toBeInTheDocument()
 
       fireEvent.change(selectGeneral(), { target: { value: 'project' } })
@@ -1061,7 +1061,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.update.mockResolvedValue(emptyQuote({ discount_mode: 'global' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.discountGlobal'))
 
@@ -1072,7 +1072,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.parts.create.mockResolvedValue({ id: 1, name: 'Catalogación', position: 0, subtotal: 0, items: [] })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.change(screen.getByPlaceholderText('ventasDiseno:quote.newPartName'), { target: { value: 'Catalogación' } })
     fireEvent.click(screen.getByText('ventasDiseno:quote.addPart'))
@@ -1086,7 +1086,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.saveDraft.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const textarea = document.querySelector('textarea') as HTMLTextAreaElement
     fireEvent.change(textarea, { target: { value: 'Nota del vendedor' } })
@@ -1103,7 +1103,7 @@ describe('QuotePage', () => {
   it('el texto de Condiciones siempre es de solo lectura en la cotización', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ conditions_text: 'Texto fijo' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.getByText('ventasDiseno:quote.conditionsLocked')).toBeInTheDocument()
     const conditionsTextarea = await screen.findByDisplayValue('Texto fijo')
@@ -1113,7 +1113,7 @@ describe('QuotePage', () => {
   it('no muestra el botón Configurar condiciones sin el permiso edit.conditions', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.queryByText('ventasDiseno:quote.conditionsConfig.toggle')).not.toBeInTheDocument()
   })
@@ -1134,7 +1134,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.update.mockResolvedValue(emptyQuote({ discount_totals_value: 10 }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const discountInput = screen.getByLabelText('ventasDiseno:quote.totals.discount')
     fireEvent.change(discountInput, { target: { value: '10' } })
@@ -1148,7 +1148,7 @@ describe('QuotePage', () => {
   it('descuento de Totales acepta coma decimal y se clampa a 100% al salir del campo (SCRUM-137)', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const discountInput = screen.getByLabelText('ventasDiseno:quote.totals.discount')
     fireEvent.change(discountInput, { target: { value: '10,5' } })
@@ -1163,7 +1163,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.quotes.validate.mockResolvedValue({ valid: false, missing: ['Cliente Master', 'Ítems'] })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.validation.check'))
 
@@ -1184,7 +1184,7 @@ describe('QuotePage', () => {
       // el backend los manda desordenados a propósito: la UI ordena por campo
       rejectMissing(['Contacto', 'Descripción', 'Cliente Master', 'Ítems'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
 
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
 
@@ -1204,7 +1204,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote({ delivery_type: 'single', delivery_dates: [] }))
       rejectMissing(['Fecha de entrega'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'single' } })
 
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
@@ -1223,7 +1223,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       rejectMissing(['Fecha de entrega'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await screen.findByText(FIELD('deliveryDates'))
@@ -1243,7 +1243,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       rejectMissing(['Descripción', 'RUC / Cédula'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
 
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await screen.findByText(FIELD('description'))
@@ -1264,7 +1264,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       rejectMissing(['Fecha de entrega'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await screen.findByText(FIELD('deliveryDates'))
@@ -1289,7 +1289,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       rejectMissing(['Fecha de entrega'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'single' } })
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await waitFor(() => expect(mockedApi.quotes.saveDraft).toHaveBeenCalled())
@@ -1303,7 +1303,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       mockedApi.quotes.saveDraft.mockResolvedValue(emptyQuote())
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'partial' } })
       const dateWrap = screen.getByText('ventasDiseno:modal.deliveryDates').parentElement as HTMLElement
       fireEvent.change(dateWrap.querySelectorAll('input[type="date"]')[1] as HTMLInputElement, { target: { value: '2026-12-01' } })
@@ -1317,7 +1317,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       mockedApi.quotes.saveDraft.mockRejectedValue(laravel422Format())
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'single' } })
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
 
@@ -1332,7 +1332,7 @@ describe('QuotePage', () => {
       // 1er guardado: lo que realmente llegaba (422 de formato + nada de `missing`)
       mockedApi.quotes.saveDraft.mockRejectedValueOnce(laravel422Format())
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.change(deliverySelect(), { target: { value: 'single' } })
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await screen.findByText(FIELD('deliveryDates'))
@@ -1357,7 +1357,7 @@ describe('QuotePage', () => {
         isAxiosError: true, response: { status: 500, data: { message: 'Fallo inesperado' } },
       })
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       expect(await screen.findByText('Fallo inesperado')).toBeInTheDocument()
 
@@ -1369,7 +1369,7 @@ describe('QuotePage', () => {
       mockedApi.quotes.get.mockResolvedValue(emptyQuote())
       rejectMissing(['Contacto'])
       renderPage()
-      await screen.findByText('Designer Demo')
+      await screen.findByText('Vendedor Demo')
       fireEvent.click(screen.getByText('ventasDiseno:quote.saveDraft'))
       await screen.findByText(FIELD('contacts'))
       const block = screen.getByText('ventasDiseno:modal.contacts').parentElement as HTMLElement
@@ -1387,7 +1387,7 @@ describe('QuotePage', () => {
     mockedApi.subClients.contacts.list.mockResolvedValue([{ id: 9, name: 'Contacto X', role: 'client', phone: '6000-0000', email: null }])
     mockedApi.quotes.contacts.create.mockResolvedValue({ pivot_id: 1, id: 9, name: 'Contacto X', role: 'client', phone: '6000-0000', email: null })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     // Esperar a que "addExistingContact" aparezca (depende del mismo efecto de
     // hidratación que setea subClient desde quote.sub_client, ver comentario en
@@ -1414,7 +1414,7 @@ describe('QuotePage', () => {
   it('las pestañas de Vista Previa/Externa quedan deshabilitadas sin folio', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: null }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.getByText('ventasDiseno:quote.view.preview').closest('button')).toBeDisabled()
     expect(screen.getByText('ventasDiseno:quote.view.external').closest('button')).toBeDisabled()
@@ -1425,7 +1425,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.saveDraft.mockResolvedValue(emptyQuote())
     mockedApi.quotes.generate.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.generate'))
 
@@ -1442,7 +1442,7 @@ describe('QuotePage', () => {
       isAxiosError: true, response: { data: { valid: false, missing: ['Ítems'] } },
     })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.generate'))
 
@@ -1455,7 +1455,7 @@ describe('QuotePage', () => {
       isAxiosError: true, response: { data: { valid: false, missing: ['Cliente Master'] } },
     })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.generate'))
 
@@ -1471,7 +1471,7 @@ describe('QuotePage', () => {
       emptyQuote({ folio: 'COT-2026-0001', pipeline_card_id: 42, confirmed_at: '2026-08-05T10:00:00-04:00' }),
     )
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     const button = await screen.findByText('ventasDiseno:quote.returnToPipeline')
@@ -1489,7 +1489,7 @@ describe('QuotePage', () => {
   it('el botón Volver a Pipeline con cotización sin confirmar pide confirmación antes de navegar', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', pipeline_card_id: 42 }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     const button = await screen.findByText('ventasDiseno:quote.returnToPipeline')
@@ -1508,7 +1508,7 @@ describe('QuotePage', () => {
   it('el botón Volver a Pipeline con cotización sin confirmar: Cancelar permanece en la cotización', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', pipeline_card_id: 42 }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     const button = await screen.findByText('ventasDiseno:quote.returnToPipeline')
@@ -1524,7 +1524,7 @@ describe('QuotePage', () => {
   it('sin tarjeta vinculada no muestra el botón Volver a Pipeline', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', pipeline_card_id: null }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     await screen.findByText('ventasDiseno:quote.edit')
@@ -1537,7 +1537,7 @@ describe('QuotePage', () => {
   it('muestra el botón Guardar (no el badge Guardada) en Vista Previa cuando la cotización aún no está confirmada', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
 
@@ -1548,7 +1548,7 @@ describe('QuotePage', () => {
   it('muestra el badge Guardada (no el botón Guardar) cuando la cotización ya está confirmada', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-03T00:00:00Z' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
 
@@ -1559,7 +1559,7 @@ describe('QuotePage', () => {
   it('clic en Guardar abre el modal de confirmación; "Cancelar" lo cierra sin llamar a confirm()', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     fireEvent.click(await screen.findByText('ventasDiseno:quote.save'))
@@ -1575,7 +1575,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
     mockedApi.quotes.confirm.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-03T00:00:00Z' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     fireEvent.click(await screen.findByText('ventasDiseno:quote.save'))
@@ -1592,7 +1592,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
     mockedApi.quotes.confirm.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-03T00:00:00Z' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
     lastQueryClient.setQueryData(['ventas-diseno-pipeline-card', 42], { id: 42, delivery_dates: [] })
     lastQueryClient.setQueryData(['ventas-diseno-pipeline', 'own'], { data: [] })
     lastQueryClient.setQueryData(['ventas-diseno-pipeline-card-product-delivery-assignments', 42], [])
@@ -1620,7 +1620,7 @@ describe('QuotePage', () => {
       response: { data: { margin_warning: true, below_min_margin_items: [5], global_below_minimum: false } },
     })
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     fireEvent.click(await screen.findByText('ventasDiseno:quote.save'))
@@ -1639,7 +1639,7 @@ describe('QuotePage', () => {
     })
     mockedApi.quotes.confirm.mockResolvedValueOnce(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-05T00:00:00Z' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     fireEvent.click(await screen.findByText('ventasDiseno:quote.save'))
@@ -1658,7 +1658,7 @@ describe('QuotePage', () => {
   it('marca isDirty en el store al tocar un campo del formulario', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(useUnsavedQuoteGuard.getState().isDirty).toBe(false)
 
@@ -1672,7 +1672,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: null }))
     mockedApi.quotes.confirm.mockResolvedValue(emptyQuote({ folio: 'COT-2026-0001', confirmed_at: '2026-08-03T00:00:00Z' }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     fireEvent.click(screen.getByText('ventasDiseno:quote.view.preview'))
     await waitFor(() => expect(useUnsavedQuoteGuard.getState().isDirty).toBe(true))
@@ -1734,7 +1734,7 @@ describe('QuotePage', () => {
   it('no muestra el botón Configurar fórmulas sin el permiso pricing.configure', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.queryByText('ventasDiseno:quote.pricingConfig.toggle')).not.toBeInTheDocument()
   })
@@ -1810,7 +1810,7 @@ describe('QuotePage', () => {
   it('SCRUM-1121 — la cotización ya no tiene la sección «Asociados»', async () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     expect(screen.queryByTestId('associates-search')).not.toBeInTheDocument()
     expect(screen.queryByTestId('associates-section')).not.toBeInTheDocument()
@@ -1820,7 +1820,7 @@ describe('QuotePage', () => {
     mockedApi.quotes.get.mockResolvedValue(emptyQuote())
     mockedApi.architects.search.mockResolvedValue([] as never)
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     const architectInput = screen.getByText('ventasDiseno:quote.architect').parentElement!.querySelector('input') as HTMLInputElement
     fireEvent.focus(architectInput)
@@ -1850,7 +1850,7 @@ describe('QuotePage', () => {
       ] } },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     await createArchitectFromPicker('Otro Nombre')
 
@@ -1866,7 +1866,7 @@ describe('QuotePage', () => {
       response: { status: 409, data: { code: 'duplicate_similar', message: 'Hay un asociado con un nombre parecido.', duplicates: [] } },
     }))
     renderPage()
-    await screen.findByText('Designer Demo')
+    await screen.findByText('Vendedor Demo')
 
     await createArchitectFromPicker('Maria Fernandez')
 
