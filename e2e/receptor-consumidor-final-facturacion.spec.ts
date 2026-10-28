@@ -23,6 +23,35 @@ const PROYECTO = 'Proyecto Sintetico SCRUM1140'
 
 test.use({ baseURL: BASE })
 
+// En Atlantic ninguna cuenta trae concesiones por persona (el seeder de permisos especiales va vacío): el spec concede a la cuenta
+// «con permiso» los dos permisos adicionales de facturación como lo haría un superadmin (Seguridad > Usuarios) y los restaura al terminar.
+const PERMISOS_FACTURACION = ['admin_contab.edit.receptor_fiscal', 'admin_contab.edit.receptor_consumidor_final']
+let previos: string[] | null = null
+let usuarioId: number | null = null
+
+async function conSuperadmin(request: import('@playwright/test').APIRequestContext) {
+  const r = await request.post(`${BASE}/api/auth/login`, { data: { email: 'superadmin@test.com', password: process.env.E2E_SUPERADMIN_PASSWORD ?? 'superadmin@test.com' }, headers: { Accept: 'application/json' } })
+  return { Authorization: `Bearer ${(await r.json()).token}`, Accept: 'application/json' }
+}
+
+test.beforeAll(async ({ request }) => {
+  const h = await conSuperadmin(request)
+  const lista = await (await request.get(`${BASE}/api/users?search=${encodeURIComponent(CON_PERMISO)}`, { headers: h })).json()
+  const u = ((lista.data ?? lista) as { id: number; email: string; extra_permissions: string[] | null }[]).find(x => x.email === CON_PERMISO)
+  if (!u) throw new Error(`No existe la cuenta ${CON_PERMISO} en el entorno`)
+  usuarioId = u.id
+  previos = u.extra_permissions ?? []
+  const union = Array.from(new Set([...previos, ...PERMISOS_FACTURACION]))
+  const r = await request.put(`${BASE}/api/users/${u.id}`, { headers: h, data: { extra_permissions: union } })
+  if (r.status() >= 300) throw new Error(`No se pudo conceder el permiso adicional (${r.status()})`)
+})
+
+test.afterAll(async ({ request }) => {
+  if (usuarioId === null || previos === null) return
+  const h = await conSuperadmin(request)
+  await request.put(`${BASE}/api/users/${usuarioId}`, { headers: h, data: { extra_permissions: previos } })
+})
+
 test.beforeAll(() => {
   const host = new URL(BASE).hostname
   if (!['localhost', '127.0.0.1', ...(process.env.E2E_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)].includes(host)) {
