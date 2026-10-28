@@ -103,7 +103,7 @@ test('3. Reportes -> Catálogo navega y carga sin error; toggle de configuració
     await page.waitForTimeout(500)
     await page.screenshot({ path: 'e2e/.tmp/preqa-scrum741/03-reports-config-toggle.png', fullPage: true })
   } else {
-    console.log('[SCRUM-741] Toggle de configuración no visible para neil.quiel (esperado si su rol no tiene ventas_diseno.reports.configure) — no bloquea.')
+    console.log('[SCRUM-741] Toggle de configuración no visible para vendedor2 (esperado si su rol no tiene ventas_diseno.reports.configure) — no bloquea.')
   }
 })
 

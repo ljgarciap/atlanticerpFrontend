@@ -85,9 +85,9 @@ test('SCRUM-583 — proyecto compartido entre 2 vendedores visible en Comisiones
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(800)
 
-  const neilRow = page.locator('table tbody tr', { hasText: 'Vendedor Test 2' }).first()
-  await expect(neilRow).toBeVisible({ timeout: 5000 })
-  await neilRow.click()
+  const vendedor2Row = page.locator('table tbody tr', { hasText: 'Vendedor Test 2' }).first()
+  await expect(vendedor2Row).toBeVisible({ timeout: 5000 })
+  await vendedor2Row.click()
   await page.waitForTimeout(600)
   await expect(page.getByText(/↔/).first()).toBeVisible({ timeout: 5000 })
 })

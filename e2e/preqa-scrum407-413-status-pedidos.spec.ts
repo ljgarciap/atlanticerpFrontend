@@ -152,11 +152,11 @@ test('SCRUM-412 RN2 — vendedor ve SOLO sus propios pedidos, no los de otro ven
   await login(page, 'vendedor2@test.com')
   await page.goto('/bodega/pedidos/status')
   await page.waitForTimeout(1000)
-  await page.screenshot({ path: 'e2e/.tmp/scrum412-neil-own-orders.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/scrum412-vendedor2-own-orders.png', fullPage: true })
 
   await expect(page.locator('body')).toContainText('PREQA-FAM2')
   await expect(page.locator('body')).toContainText('PREQA-FAM3')
-  await expect(page.locator('body')).not.toContainText('PREQA-FEFI')
+  await expect(page.locator('body')).not.toContainText('PREQA-VENDEDOR3')
 })
 
 test('SCRUM-412 RN3 — solo consulta, sin ningún control de edición visible para Ventas & Diseño', async ({ page }) => {

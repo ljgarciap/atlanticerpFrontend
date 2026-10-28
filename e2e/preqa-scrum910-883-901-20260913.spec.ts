@@ -48,7 +48,7 @@ test('SCRUM-910 — Gerencia (Gerencia) viendo a Vendedor en modo Equipo ve el m
   // tiene una opción "Whole team"/"Todo el equipo" (value="").
   const select = page.locator('select').filter({ has: page.locator('option', { hasText: /whole team|todo el equipo/i }) })
   const options = await select.locator('option').allTextContents()
-  const idx = options.findIndex(o => /bonvini|fefi/i.test(o))
+  const idx = options.findIndex(o => /vendedor3|vendedor3/i.test(o))
   expect(idx, `no se encontró a Vendedor/Maria Vendedor entre las opciones: ${options.join(', ')}`).toBeGreaterThanOrEqual(0)
   await select.selectOption({ index: idx })
   await page.waitForTimeout(2500)

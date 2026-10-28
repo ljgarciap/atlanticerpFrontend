@@ -33,7 +33,7 @@ async function gotoReports(page: Page) {
 test('1. Vendedor (con Meta, $0 vendido) — barras + labels $ visibles, mes en curso ambar', async ({ page }) => {
   await login(page, 'vendedor2@test.com')
   await gotoReports(page)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-neil-meta-configurada.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/01-vendedor2-meta-configurada.png', fullPage: true })
 
   await expect(page.getByText(/sin meta configurada/i)).toHaveCount(0)
   // SCRUM-836 (2026-09-03) — el footnote "Mes en curso (parcial)" se reemplazó por un chip de
@@ -82,11 +82,11 @@ test('4. Vendedor — selector de periodo (Mes/Trimestre/Año) no rompe el panel
 
   await page.getByRole('button', { name: /trimestre/i }).click()
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/04a-neil-trimestre.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/04a-vendedor2-trimestre.png', fullPage: true })
 
   await page.getByRole('button', { name: /^año/i }).click()
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/04b-neil-anio.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/04b-vendedor2-anio.png', fullPage: true })
 })
 
 test('5. Vendedor — modo oscuro, labels $ (#475569 fijo) siguen legibles', async ({ page }) => {
@@ -101,7 +101,7 @@ test('5. Vendedor — modo oscuro, labels $ (#475569 fijo) siguen legibles', asy
     await page.waitForTimeout(800)
   }
   await expect(page.evaluate(() => document.documentElement.classList.contains('dark'))).resolves.toBe(true)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/05-neil-dark-mode.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/05-vendedor2-dark-mode.png', fullPage: true })
 
   // Dejar la cuenta de Vendedor como estaba (claro) al terminar, para no dejar un
   // side-effect de testing en un usuario real.
@@ -112,7 +112,7 @@ test('5. Vendedor — modo oscuro, labels $ (#475569 fijo) siguen legibles', asy
 test('6. Vendedor — valor grande (sembrado a mano) no corta ni superpone el label', async ({ page }) => {
   await login(page, 'vendedor2@test.com')
   await gotoReports(page)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/06-neil-valor-grande.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/06-vendedor2-valor-grande.png', fullPage: true })
 })
 
 test('7. Vendedor — reload (F5) hidrata el chart sin parpadeo/plugin roto en el primer render', async ({ page }) => {
@@ -120,7 +120,7 @@ test('7. Vendedor — reload (F5) hidrata el chart sin parpadeo/plugin roto en e
   await gotoReports(page)
   await page.reload()
   await page.waitForTimeout(1800)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/07-neil-reload.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/07-vendedor2-reload.png', fullPage: true })
   await expect(page.locator('canvas').first()).toBeVisible()
 })
 
@@ -137,6 +137,6 @@ test('8. Vendedor — tooltip on hover no choca visualmente con el label fijo de
     const y = box.y + box.height * 0.55
     await page.mouse.move(x, y)
     await page.waitForTimeout(600)
-    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/08-neil-tooltip-hover.png', fullPage: true })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum109/08-vendedor2-tooltip-hover.png', fullPage: true })
   }
 })

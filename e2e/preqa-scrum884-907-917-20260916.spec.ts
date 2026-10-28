@@ -46,9 +46,9 @@ test('SCRUM-884 — Vendedor crea un Lead solo; Creador y Responsable coinciden 
   const body = page.locator('body')
   await expect(body).toContainText('Creador')
   const ownerRow = page.getByText('Responsable', { exact: true }).locator('..')
-  await expect(ownerRow).toContainText(/Neil/i)
+  await expect(ownerRow).toContainText(/Vendedor2/i)
   const creatorRow = page.getByText('Creador', { exact: true }).locator('..')
-  await expect(creatorRow).toContainText(/Neil/i)
+  await expect(creatorRow).toContainText(/Vendedor2/i)
 })
 
 test('SCRUM-884 — Camino de ruptura: proyecto ya existente (pre-backfill) muestra Creador real, no "—"', async ({ page }) => {

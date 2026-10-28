@@ -147,7 +147,7 @@ test('SCRUM-217 — timeline de 3 pasos para proveedor local, primer paso rotula
 
 test('SCRUM-217 RN7 — usuario sin compras.edit ve el timeline pero nunca el botón de avance (gate de DOM)', async ({ page }) => {
   await login(page, SIN_COMPRAS)
-  // neil.quiel (vendedor) no tiene role_module_visibility para compras -- confirmar
+  // vendedor2 (vendedor) no tiene role_module_visibility para compras -- confirmar
   // primero que efectivamente no puede navegar al módulo por su cuenta (bandera ya conocida de la
   // auditoría anterior), y forzar la navegación directa a la URL de todas formas para ejercitar el
   // gate del botón específicamente, no la visibilidad del menú.
