@@ -1589,6 +1589,16 @@ export interface BodegaRutasDiaResponse {
   data: BodegaRutaDiaItem[]
 }
 
+export type WarehouseTipo = 'bodega' | 'exhibicion'
+
+/** Fase 8b — alta de un almacén. */
+export interface NewWarehouse {
+  name:                string
+  tipo?:               WarehouseTipo
+  permite_venta?:      boolean
+  excluye_disponible?: boolean
+}
+
 /** SCRUM-1196 — reglas de una bodega para ventas (panel de superadmin «Reglas de bodega»). */
 export interface WarehouseSaleRule {
   id:                   number
@@ -1599,4 +1609,11 @@ export interface WarehouseSaleRule {
   despacho_por_defecto: boolean
   /** Se excluye del «Disponible» que ven los vendedores (se muestra aparte). */
   excluye_disponible:   boolean
+  /** Fase 8 — `bodega` | `exhibicion`. */
+  tipo?:                WarehouseTipo
+  /** Fase 8 — función de sistema (`reserva_servicios`); un almacén de sistema no se desactiva ni se borra. */
+  funcion?:             string | null
+  /** Fase 8b — false = desactivado: fuera de selectores y de las ventas, con su historial. */
+  is_active?:           boolean
+  modo_detalle?:        'ubicacion_exacta' | 'pendiente' | 'cliente'
 }

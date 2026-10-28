@@ -913,12 +913,35 @@ export function useWarehouseSaleRules(enabled = true) {
   })
 }
 
+/** Fase 8b — los selectores de almacén (Bodega y Compras) dependen de qué almacenes existen y cuáles están activos. */
+function invalidateWarehouseLists(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ['bodega/settings/warehouses'] })
+  qc.invalidateQueries({ queryKey: ['bodega/warehouses'] })
+  qc.invalidateQueries({ queryKey: ['compras/warehouses'] })
+}
+
+export function useCreateWarehouse() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Parameters<typeof bodegaApi.warehouseRules.create>[0]) => bodegaApi.warehouseRules.create(data),
+    onSuccess: () => invalidateWarehouseLists(qc),
+  })
+}
+
+export function useDeleteWarehouse() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => bodegaApi.warehouseRules.remove(id),
+    onSuccess: () => invalidateWarehouseLists(qc),
+  })
+}
+
 export function useUpdateWarehouseSaleRule() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Parameters<typeof bodegaApi.warehouseRules.update>[1] }) => bodegaApi.warehouseRules.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['bodega/settings/warehouses'] })
+      invalidateWarehouseLists(qc)
       // El Disponible y la hoja de picking dependen de estas reglas: nada cacheado debe seguir mostrando lo anterior.
       qc.invalidateQueries({ queryKey: ['compras/inventory'] })
       qc.invalidateQueries({ queryKey: ['bodega/orders'] })

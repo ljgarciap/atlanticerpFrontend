@@ -28,6 +28,7 @@ import type {
   RegisterSignedGuidePayload, RegisterSignedGuideResponse,
   BodegaRutasDiaResponse,
   WarehouseSaleRule,
+  NewWarehouse,
 } from '@/types/bodega'
 
 // SCRUM-329 Batch B2 — parámetros de filtro de "Ver Inventario". Nombres verificados contra
@@ -333,8 +334,15 @@ export const bodegaApi = {
     list: (): Promise<WarehouseSaleRule[]> =>
       api.get<{ data: WarehouseSaleRule[] }>('/bodega/settings/warehouses').then(r => r.data.data),
 
-    update: (id: number, data: Partial<Pick<WarehouseSaleRule, 'permite_venta' | 'despacho_por_defecto' | 'excluye_disponible'>>): Promise<WarehouseSaleRule> =>
+    update: (id: number, data: Partial<Pick<WarehouseSaleRule, 'permite_venta' | 'despacho_por_defecto' | 'excluye_disponible' | 'name' | 'tipo' | 'is_active'>>): Promise<WarehouseSaleRule> =>
       api.put<WarehouseSaleRule>(`/bodega/settings/warehouses/${id}`, data).then(r => r.data),
+
+    // Fase 8b — administración de almacenes.
+    create: (data: NewWarehouse): Promise<WarehouseSaleRule> =>
+      api.post<WarehouseSaleRule>('/bodega/settings/warehouses', data).then(r => r.data),
+
+    remove: (id: number): Promise<void> =>
+      api.delete(`/bodega/settings/warehouses/${id}`).then(() => undefined),
   },
 
   // SCRUM-329 Batch B2 (REQ-344→362, SCRUM-414→432) — "Ver Inventario". Rutas verificadas contra

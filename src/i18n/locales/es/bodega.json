@@ -804,6 +804,44 @@
       },
       "saveError": "No se pudo guardar el cambio.",
       "saved": "Guardado."
+    },
+    "warehousesAdmin": {
+      "title": "Almacenes",
+      "help": "Crea, renombra o desactiva los almacenes de la empresa. Un almacén con existencias o historial no se borra: se desactiva (queda fuera de los selectores y de las ventas, y conserva sus movimientos). Los almacenes de sistema no se pueden desactivar.",
+      "loading": "Cargando almacenes…",
+      "new": {
+        "name": "Nombre del nuevo almacén",
+        "tipo": "Tipo",
+        "add": "Agregar almacén"
+      },
+      "tipos": {
+        "bodega": "Bodega",
+        "exhibicion": "Exhibición"
+      },
+      "columns": {
+        "name": "Nombre",
+        "tipo": "Tipo",
+        "state": "Estado",
+        "actions": "Acciones"
+      },
+      "state": {
+        "active": "Activo",
+        "inactive": "Desactivado",
+        "system": "De sistema"
+      },
+      "actions": {
+        "save": "Guardar nombre",
+        "deactivate": "Desactivar",
+        "activate": "Activar",
+        "delete": "Borrar",
+        "confirmDelete": "¿Borrar «{{name}}»? Solo se borra si está vacío y sin historial."
+      },
+      "aria": {
+        "name": "Nombre de {{name}}",
+        "tipo": "Tipo de {{name}}"
+      },
+      "saveError": "No se pudo guardar el cambio.",
+      "saved": "Guardado."
     }
   },
   "inventory": {
