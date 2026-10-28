@@ -14,7 +14,8 @@ import { test, expect, type APIRequestContext } from '@playwright/test'
 
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:8092'
 const API = `${BASE}/api`
-const ROLES = ['vendedor', 'gerencia', 'lidercompras', 'liderbodega', 'asistentebodega', 'auxiliarbodega', 'transporte', 'contabilidad', 'superadmin'] as const
+// `gerencia3` es el aprobador primario configurado en el demo (decide notas de crédito y anulaciones); `gerencia` no lo es.
+const ROLES = ['vendedor', 'gerencia', 'gerencia3', 'lidercompras', 'liderbodega', 'asistentebodega', 'auxiliarbodega', 'transporte', 'contabilidad', 'superadmin'] as const
 type Rol = (typeof ROLES)[number]
 
 const tokens: Partial<Record<Rol, string>> = {}
@@ -44,10 +45,10 @@ async function api(request: APIRequestContext, rol: Rol, method: string, path: s
   return { status: r.status(), body }
 }
 
-async function subir(request: APIRequestContext, rol: Rol, path: string, campos: Record<string, string>): Promise<Res> {
+async function subir(request: APIRequestContext, rol: Rol, path: string, campos: Record<string, string>, campoArchivo = 'file'): Promise<Res> {
   const r = await request.post(`${API}${path}`, {
     headers: { Authorization: `Bearer ${tokens[rol]}`, Accept: 'application/json' },
-    multipart: { ...campos, file: { name: 'flujo.pdf', mimeType: 'application/pdf', buffer: PDF } },
+    multipart: { ...campos, [campoArchivo]: { name: 'flujo.pdf', mimeType: 'application/pdf', buffer: PDF } },
   })
   return { status: r.status(), body: await r.json().catch(() => null) }
 }
@@ -292,6 +293,7 @@ test.describe('Flujo venta a cobro', () => {
     const intento = await api(request, 'contabilidad', 'POST', '/admin-contab/payments/cobro', { master_client_id: ctx.mc, monto_recibido: ctx.montoFactura, metodo_pago: 'transferencia', bank_account_id: banco, aplicaciones: [{ invoice_id: ctx.factura, monto: ctx.montoFactura }] })
     test.skip(intento.status === 422 && /todavía no está activo/.test(JSON.stringify(intento.body)), 'Falta encender el concepto nuevo de cobros: php artisan cobros:v2 on')
     expect(intento.status).toBe(201)
+    ctx.cobro = intento.body.id
     expect(intento.body.estado).toBe('esperando_confirmacion')
     expect(Number(intento.body.total_facturas)).toBeCloseTo(Number(ctx.montoFactura), 2)
 
@@ -309,5 +311,70 @@ test.describe('Flujo venta a cobro', () => {
     const saldo = (await api(request, 'contabilidad', 'GET', '/admin-contab/saldo-favor')).body
     const fila = (saldo.rows as { master_client_id: number; saldo_disponible?: number }[]).find(r => r.master_client_id === ctx.mc)
     expect(fila, 'el excedente aparece como saldo a favor del cliente').toBeTruthy()
+  })
+
+  test('8. notas de crédito: reglas de captura y aplicación inmediata bajo el umbral', async ({ request }) => {
+    const nota = (campos: Record<string, string>) => subir(request, 'contabilidad', '/admin-contab/notas-credito', {
+      master_client_id: String(ctx.mc), cliente: `[FLUJO] Cliente ${STAMP}`, factura_origen_id: String(ctx.factura), motivo: 'Nota de flujo', ...campos,
+    }, 'comprobante')
+
+    expect((await nota({ tipo: 'descuento_comercial', monto: '10' })).status, 'falta el resultado del excedente').toBe(422)
+    expect((await nota({ tipo: 'descuento_comercial', monto: '10', resultado: 'devuelto' })).status, 'devolver dinero exige la cuenta de salida').toBe(422)
+    expect((await nota({ tipo: 'descuento_comercial', monto: String(Number(ctx.montoFactura) + 100), resultado: 'saldo_favor' })).status, 'no se acredita más que la factura').toBe(422)
+
+    const sinComprobante = await api(request, 'contabilidad', 'POST', '/admin-contab/notas-credito', { master_client_id: ctx.mc, cliente: 'x', factura_origen_id: ctx.factura, tipo: 'descuento_comercial', monto: 10, motivo: 'x', resultado: 'saldo_favor' })
+    expect(sinComprobante.status, 'el comprobante es obligatorio').toBe(422)
+
+    const ok = await nota({ tipo: 'descuento_comercial', monto: '10', resultado: 'saldo_favor' })
+    expect(ok.status).toBe(201)
+    expect(ok.body.numero).toMatch(/^NC-\d{4}$/)
+    expect(ok.body.estado, 'por debajo del umbral se aplica sola').toBe('aplicada')
+    expect(redondear(Number(ok.body.subtotal) + Number(ok.body.itbms))).toBeCloseTo(10, 2)
+    ctx.ncDescuento = ok.body.id
+  })
+
+  test('9. anulación completa: siempre pendiente; solo el aprobador configurado decide', async ({ request }) => {
+    const anulacion = await subir(request, 'contabilidad', '/admin-contab/notas-credito', {
+      master_client_id: String(ctx.mc), cliente: `[FLUJO] Cliente ${STAMP}`, factura_origen_id: String(ctx.factura), motivo: 'Anulación de flujo',
+      tipo: 'anulacion_completa', subtipo_anulacion: 'cancelado', monto: '0.01', resultado: 'saldo_favor',
+    }, 'comprobante')
+    expect(anulacion.status).toBe(201)
+    expect(anulacion.body.estado, 'cualquier anulación completa espera la decisión del aprobador').toBe('pendiente_aprobacion')
+    expect(Number(anulacion.body.monto), 'el monto enviado se ignora: se acredita lo que falta').toBeCloseTo(Number(ctx.montoFactura) - 10, 2)
+    const id = anulacion.body.id as number
+
+    for (const rol of ['contabilidad', 'gerencia'] as const) {
+      expect((await api(request, rol, 'PUT', `/admin-contab/notas-credito/${id}/decision`, { approve: true })).status, `${rol} no es el aprobador`).toBe(403)
+    }
+    expect((await api(request, 'gerencia3', 'PUT', `/admin-contab/notas-credito/${id}/decision`, { approve: false })).status, 'rechazar exige motivo').toBe(422)
+    const aprobada = await api(request, 'gerencia3', 'PUT', `/admin-contab/notas-credito/${id}/decision`, { approve: true })
+    expect(aprobada.status).toBe(200)
+    expect(aprobada.body.estado).not.toBe('pendiente_aprobacion')
+    expect((await api(request, 'gerencia3', 'PUT', `/admin-contab/notas-credito/${id}/decision`, { approve: true })).status, 'no se decide dos veces').toBe(422)
+  })
+
+  test('10. anular un cobro: solicitud, decisión del aprobador y la factura se reabre', async ({ request }) => {
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/payments/${ctx.cobro}/anular`, {})).status, 'la anulación exige motivo').toBe(422)
+    const solicitud = await api(request, 'contabilidad', 'POST', `/admin-contab/payments/${ctx.cobro}/anular`, { motivo: 'Cobro duplicado de flujo' })
+    expect(solicitud.status).toBe(201)
+    expect(solicitud.body.estado).toBe('solicitada')
+    const id = solicitud.body.id as number
+
+    const cobroAntes = (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/${ctx.cobro}`)).body
+    expect(cobroAntes.estado, 'solicitar no cambia el cobro').toBe('confirmado')
+
+    expect((await api(request, 'contabilidad', 'PUT', `/admin-contab/reversal-requests/${id}/decision`, { aprobar: true })).status).toBe(403)
+    expect((await api(request, 'gerencia3', 'PUT', `/admin-contab/reversal-requests/${id}/decision`, { aprobar: false })).status, 'rechazar exige motivo').toBe(422)
+    const ejecutada = await api(request, 'gerencia3', 'PUT', `/admin-contab/reversal-requests/${id}/decision`, { aprobar: true })
+    expect(ejecutada.status).toBe(200)
+    expect(ejecutada.body.estado).toBe('ejecutada')
+
+    const cobro = (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/${ctx.cobro}`)).body
+    expect(cobro.estado).toBe('anulado')
+    const abiertas = (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/open-invoices?master_client_id=${ctx.mc}`)).body
+    const factura = (abiertas.invoices as { id: number; saldo_pendiente: number }[]).find(i => i.id === ctx.factura)
+    expect(factura, 'la factura vuelve a estar abierta').toBeTruthy()
+    expect(Number(factura!.saldo_pendiente)).toBeCloseTo(Number(ctx.montoFactura), 2)
+    expect(Number(abiertas.credit_balance), 'las notas de crédito quedan como saldo a favor para compensar').toBeGreaterThan(0)
   })
 })
