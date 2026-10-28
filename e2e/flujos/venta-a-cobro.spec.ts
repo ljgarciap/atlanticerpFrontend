@@ -287,6 +287,7 @@ test.describe('Flujo venta a cobro', () => {
       cuentas = [c.body]
     }
     const banco = cuentas[0].id
+    ctx.banco = banco
 
     const abiertas = async () => (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/open-invoices?master_client_id=${ctx.mc}`)).body
     expect((await abiertas()).invoices.map((i: { id: number }) => i.id)).toContain(ctx.factura)
@@ -356,6 +357,7 @@ test.describe('Flujo venta a cobro', () => {
     expect(final.status).toBe('finalizado')
     expect(final.credit_note_id).toBe(nota.body.id)
     ctx.acreditadoPorDevolucion = 10
+    ctx.ncDevolucion = nota.body.id
   })
 
   test('8. notas de crédito: reglas de captura y aplicación inmediata bajo el umbral', async ({ request }) => {
@@ -387,6 +389,7 @@ test.describe('Flujo venta a cobro', () => {
     expect(anulacion.body.estado, 'cualquier anulación completa espera la decisión del aprobador').toBe('pendiente_aprobacion')
     expect(Number(anulacion.body.monto), 'el monto enviado se ignora: se acredita lo que falta').toBeCloseTo(Number(ctx.montoFactura) - 10 - Number(ctx.acreditadoPorDevolucion), 2)
     const id = anulacion.body.id as number
+    ctx.ncAnulacion = id
 
     for (const rol of ['contabilidad', 'gerencia'] as const) {
       expect((await api(request, rol, 'PUT', `/admin-contab/notas-credito/${id}/decision`, { approve: true })).status, `${rol} no es el aprobador`).toBe(403)
@@ -421,5 +424,124 @@ test.describe('Flujo venta a cobro', () => {
     expect(factura, 'la factura vuelve a estar abierta').toBeTruthy()
     expect(Number(factura!.saldo_pendiente)).toBeCloseTo(Number(ctx.montoFactura), 2)
     expect(Number(abiertas.credit_balance), 'las notas de crédito quedan como saldo a favor para compensar').toBeGreaterThan(0)
+  })
+
+  test('11. compensación: el saldo a favor de las notas de crédito salda la factura, y se puede reversar', async ({ request }) => {
+    const abiertas = async () => ((await api(request, 'contabilidad', 'GET', `/admin-contab/payments/open-invoices?master_client_id=${ctx.mc}`)).body.invoices as { id: number; saldo_pendiente: number }[])
+    const restante = Number(ctx.montoFactura) - 20
+    const lineas = [
+      { source_type: 'nota_credito', source_id: ctx.ncAnulacion, invoice_id: ctx.factura, monto: restante },
+      { source_type: 'nota_credito', source_id: ctx.ncDescuento, invoice_id: ctx.factura, monto: 10 },
+      { source_type: 'nota_credito', source_id: ctx.ncDevolucion, invoice_id: ctx.factura, monto: 10 },
+    ]
+    const cuerpo = { master_client_id: ctx.mc, lines: lineas }
+    expect((await abiertas()).map(f => f.id), 'tras anular el cobro la factura está abierta').toContain(ctx.factura)
+
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/compensaciones/preview', { master_client_id: ctx.mc, lines: [{ ...lineas[0], monto: restante + 100 }] })).status, 'no se usa más de lo disponible de una fuente').toBe(422)
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/compensaciones/preview', { master_client_id: 1, lines: [lineas[0]] })).status, 'la fuente debe ser del cliente').toBe(422)
+    const vista = await api(request, 'contabilidad', 'POST', '/admin-contab/compensaciones/preview', cuerpo)
+    expect(vista.status).toBe(200)
+    expect(Number(vista.body.total_aplicado)).toBeCloseTo(Number(ctx.montoFactura), 2)
+    expect(Number(vista.body.facturas[0].pendiente_despues)).toBeCloseTo(0, 2)
+
+    expect((await api(request, 'vendedor', 'POST', '/admin-contab/compensaciones', cuerpo)).status).toBe(403)
+    const ok = await api(request, 'contabilidad', 'POST', '/admin-contab/compensaciones', cuerpo)
+    expect(ok.status).toBe(201)
+    expect(ok.body.estado).toBe('confirmado')
+    expect((await abiertas()).map(f => f.id), 'la factura queda saldada').not.toContain(ctx.factura)
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/compensaciones', cuerpo)).status, 'las fuentes ya no tienen saldo').toBe(422)
+
+    const id = ok.body.id as number
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, {})).status, 'reversar exige motivo').toBe(422)
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'Compensación de prueba' })).body.estado).toBe('reversado')
+    expect((await abiertas()).map(f => f.id), 'la factura se reabre').toContain(ctx.factura)
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'otra vez' })).status).toBe(422)
+  })
+
+  test('12. incobrable: se propone con motivo y solo lo decide el aprobador', async ({ request }) => {
+    const ruta = `/admin-contab/invoices/${ctx.pedido}`
+    expect((await api(request, 'contabilidad', 'POST', `${ruta}/mark-uncollectible`, {})).status, 'exige motivo').toBe(422)
+    expect((await api(request, 'vendedor', 'POST', `${ruta}/mark-uncollectible`, { motivo: 'x' })).status).toBe(403)
+    expect((await api(request, 'contabilidad', 'POST', `${ruta}/mark-uncollectible`, { motivo: 'Cliente en quiebra' })).status).toBe(200)
+    expect((await api(request, 'contabilidad', 'GET', `${ruta}/detail`)).body.motivo_incobrable).toBe('Cliente en quiebra')
+
+    for (const rol of ['contabilidad', 'gerencia'] as const) {
+      expect((await api(request, rol, 'PUT', `${ruta}/uncollectible-decision`, { approve: true })).status, `${rol} no es el aprobador`).toBe(403)
+    }
+    expect((await api(request, 'gerencia3', 'PUT', `${ruta}/uncollectible-decision`, { approve: true })).status).toBe(200)
+    const abiertas = (await api(request, 'contabilidad', 'GET', `/admin-contab/payments/open-invoices?master_client_id=${ctx.mc}`)).body.invoices as { id: number }[]
+    expect(abiertas.map(f => f.id), 'una factura incobrable sale de las abiertas').not.toContain(ctx.factura)
+    expect((await api(request, 'gerencia3', 'PUT', `${ruta}/uncollectible-decision`, { approve: true })).status, 'no hay propuesta pendiente').toBe(422)
+  })
+
+  test('13. los abonos heredados ya no se aceptan: se registran como cobros', async ({ request }) => {
+    const r = await subir(request, 'contabilidad', '/admin-contab/abonos', {
+      master_client_id: String(ctx.mc), monto_original: '100', metodo_pago: 'transferencia', cuenta_bancaria_id: String(ctx.banco), referencia: 'ABONO-FLUJO',
+    }, 'comprobante')
+    expect(r.status).toBe(422)
+    expect(JSON.stringify(r.body)).toMatch(/se registran ahora como cobros/)
+  })
+
+  test('14. caja chica: gasto con foto, un solo reporte por gasto y aprobación del aprobador', async ({ request }) => {
+    const usuarios = (await api(request, 'superadmin', 'GET', '/users?search=vendedor')).body
+    const solicitante = ((usuarios.data ?? usuarios) as { id: number; email: string }[]).find(u => u.email === 'vendedor@test.com')!.id
+    const gasto = (foto: boolean) => request.post(`${API}/admin-contab/petty-cash/expenses`, {
+      headers: { Authorization: `Bearer ${tokens.contabilidad}`, Accept: 'application/json' },
+      multipart: {
+        'lineas[0][fecha]': new Date().toISOString().slice(0, 10), 'lineas[0][solicitante_id]': String(solicitante), 'lineas[0][proveedor]': 'Ferretería Flujo',
+        'lineas[0][descripcion]': 'Tornillos', 'lineas[0][monto_bruto]': '20', 'lineas[0][itbms]': '1.4',
+        ...(foto ? { 'lineas[0][foto]': { name: 'factura.pdf', mimeType: 'application/pdf', buffer: PDF } } : {}),
+      },
+    })
+    expect((await gasto(false)).status(), 'la foto del comprobante es obligatoria').toBe(422)
+    const creado = await gasto(true)
+    expect(creado.status()).toBe(201)
+    const gastoId = ((await creado.json()).created as number[])[0]
+
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/petty-cash/reports', { expense_ids: [gastoId] })).status, 'la forma de pago es obligatoria').toBe(422)
+    const reporte = await api(request, 'contabilidad', 'POST', '/admin-contab/petty-cash/reports', { expense_ids: [gastoId], forma_pago: 'efectivo' })
+    expect(reporte.status).toBe(201)
+    const numero = reporte.body.numero as string
+    expect(numero).toMatch(/^\d{4}-\d{4}$/)
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/petty-cash/reports', { expense_ids: [gastoId], forma_pago: 'efectivo' })).status, 'un gasto va a un solo reporte').toBe(409)
+
+    for (const rol of ['contabilidad', 'gerencia'] as const) {
+      expect((await api(request, rol, 'PUT', `/admin-contab/petty-cash/reports/${numero}/approve`)).status, `${rol} no es el aprobador`).toBe(403)
+    }
+    expect((await api(request, 'gerencia3', 'PUT', `/admin-contab/petty-cash/reports/${numero}/reject`, {})).status, 'rechazar exige motivo').toBe(422)
+    const ok = await api(request, 'gerencia3', 'PUT', `/admin-contab/petty-cash/reports/${numero}/approve`)
+    expect(ok.status).toBe(200)
+    expect(ok.body.estado).toBe('finalizado')
+    expect((await api(request, 'gerencia3', 'PUT', `/admin-contab/petty-cash/reports/${numero}/approve`)).status, 'no se aprueba dos veces').toBe(409)
+  })
+
+  test('15. arqueo diario: se cierra una vez al día, queda inmutable y lo aprueba el aprobador', async ({ request }) => {
+    const hoy = () => api(request, 'contabilidad', 'GET', '/admin-contab/cash-position/daily-count')
+    let arqueo = (await hoy()).body
+    expect(arqueo.fecha).toBe(new Date().toISOString().slice(0, 10))
+    const mov = arqueo.cobros[0] as { movement_id: number }
+
+    expect((await api(request, 'vendedor', 'PUT', '/admin-contab/cash-position/daily-count/entries', { movement_type: 'payment', movement_id: mov.movement_id, observacion: 'x' })).status).toBe(403)
+    if (arqueo.estado === 'abierto') {
+      // primera corrida del día: se anota, se cierra y queda pendiente de aprobación
+      expect((await api(request, 'contabilidad', 'PUT', '/admin-contab/cash-position/daily-count/entries', { movement_type: 'payment', movement_id: mov.movement_id, observacion: 'Verificado' })).status).toBe(204)
+      expect((await api(request, 'contabilidad', 'PUT', '/admin-contab/cash-position/daily-count/general-observation', { observacion: 'Cuadre del día' })).status).toBe(204)
+      const cierre = await api(request, 'contabilidad', 'POST', '/admin-contab/cash-position/daily-count/close', {})
+      expect(cierre.status).toBe(200)
+      expect(cierre.body.estado).toBe('pendiente_aprobacion')
+      arqueo = (await hoy()).body
+    }
+    expect(arqueo.estado, 'el arqueo de hoy ya no está abierto').not.toBe('abierto')
+    expect((await api(request, 'contabilidad', 'POST', '/admin-contab/cash-position/daily-count/close', {})).status, 'se cierra una sola vez').toBe(409)
+    expect((await api(request, 'contabilidad', 'PUT', '/admin-contab/cash-position/daily-count/entries', { movement_type: 'payment', movement_id: mov.movement_id, observacion: 'cambio' })).status, 'cerrado no se edita').toBe(422)
+    expect(Number(arqueo.total_cobrado) - Number(arqueo.total_notas_credito) - Number(arqueo.total_reversos), 'el neto = cobrado − notas − reversos').toBeCloseTo(Number(arqueo.total_neto), 2)
+
+    const id = arqueo.id as number
+    for (const rol of ['contabilidad', 'gerencia'] as const) {
+      expect((await api(request, rol, 'POST', `/admin-contab/cash-position/history/${id}/approve`)).status, `${rol} no es el aprobador`).toBe(403)
+    }
+    const aprobado = await api(request, 'gerencia3', 'POST', `/admin-contab/cash-position/history/${id}/approve`)
+    expect([200, 409], 'aprobado ahora o en una corrida anterior del día').toContain(aprobado.status)
+    expect((await api(request, 'contabilidad', 'GET', `/admin-contab/cash-position/history/${id}`)).body.estado).toBe('aprobado')
   })
 })
