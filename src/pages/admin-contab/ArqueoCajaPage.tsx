@@ -51,20 +51,20 @@ export default function ArqueoCajaPage() {
   // Asistente y Operaciones: capturan operaciones (`operations.manage`) pero no tienen la supervisión (`oversight.manage`).
   const canOperate      = usePermission('admin_contab.operations.manage')
   const hasOversight    = usePermission('admin_contab.oversight.manage')
-  const isYaneth        = canOperate && !hasOversight
+  const isAsistente        = canOperate && !hasOversight
   // Aclarado por Luis 2026-08-25 (Pre-QA Batch 18): REQ-521 le veda a Asistente Administrativa el PANEL de detalle
   // (facturas/comisiones línea por línea) y la Vista real 30/90d — no los 3 totales agregados del
   // encabezado, que REQ-520 sí le da. `canProjectedReal` sigue gateando toggle/chips + ambos
   // paneles de detalle + la Vista real; el fetch de `projected` para las tarjetas ya no depende de
   // esta flag (ver abajo).
-  const canProjectedReal = !isYaneth
+  const canProjectedReal = !isAsistente
   const canDailyCount    = canOperate
   // REQ-528/529 — el historial (y su "Ver"/"Descargar resumen") es para los 4 roles del módulo,
   // a diferencia del Arqueo del día (`canDailyCount`), que excluye a Gerencia/Gerencia (`management`).
   const canViewHistorial = usePermission('admin_contab.records.manage')
 
-  const [view, setView]             = useState<'proyectado' | 'real'>(isYaneth ? 'real' : 'proyectado')
-  const [windowDays, setWindowDays] = useState<CashPositionWindowDays>(isYaneth ? 0 : 30)
+  const [view, setView]             = useState<'proyectado' | 'real'>(isAsistente ? 'real' : 'proyectado')
+  const [windowDays, setWindowDays] = useState<CashPositionWindowDays>(isAsistente ? 0 : 30)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
 
   const isDailyCountView = view === 'real' && windowDays === 0

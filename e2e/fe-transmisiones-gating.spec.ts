@@ -106,16 +106,16 @@ test('API: el detalle de una factura solo trae el flag y fe_detalle para Gerenci
 
   const contabilidad = await apiToken(request, CONTABILIDAD)
   const resMark = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${mark}` } })
-  const resFelix = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${contabilidad}` } })
+  const resContabilidad = await request.get(`/api/admin-contab/invoices/${fila!.order_id}/detail`, { headers: { Authorization: `Bearer ${contabilidad}` } })
   expect(resMark.status()).toBe(200)
-  expect(resFelix.status()).toBe(200)
+  expect(resContabilidad.status()).toBe(200)
   const conMark = await resMark.json()
-  const conFelix = await resFelix.json()
+  const conContabilidad = await resContabilidad.json()
 
   expect(conMark.puede_ver_fe_transmisiones).toBe(true)
-  expect(conFelix.puede_ver_fe_transmisiones ?? false).toBe(false)
+  expect(conContabilidad.puede_ver_fe_transmisiones ?? false).toBe(false)
   // Deny-by-default: el motivo del rechazo del PAC nunca llega a quien no es Gerencia.
-  expect(conFelix.fe_detalle ?? null).toBeNull()
+  expect(conContabilidad.fe_detalle ?? null).toBeNull()
 })
 
 test('UI: Gerencia ve el visor en una factura rechazada y el payload se muestra escapado (XSS)', async ({ page, request }) => {

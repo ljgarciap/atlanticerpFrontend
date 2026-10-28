@@ -115,9 +115,12 @@ function sha256(msg: string): string {
 
 function nombreDePersona(line: string): string | null {
   for (const w of line.match(/\p{L}+/gu) ?? []) {
-    if (w.length < 4) continue
-    const folded = w.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
-    if (NOMBRES_SHA256.has(sha256(folded))) return '[nombre de persona]'
+    // La palabra entera y, además, cada parte de un identificador en camelCase (loginAsNombre, tokenNombre).
+    for (const candidata of [w, ...(w.match(/\p{Lu}?\p{Ll}+|\p{Lu}+(?!\p{Ll})/gu) ?? [])]) {
+      if (candidata.length < 4) continue
+      const folded = candidata.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+      if (NOMBRES_SHA256.has(sha256(folded))) return '[nombre de persona]'
+    }
   }
   return null
 }
