@@ -23,7 +23,7 @@ test.describe.configure({ mode: 'serial' })
 // original: dropdown vacío con la app funcionando bien, causa real = 0 pedidos sembrados, no un
 // bug). beforeAll crea 2 pedidos con owners distintos + un 3er par que comparte sales_project_id
 // (regresión conocida de keyBy — feedback_quote_stage_keyby_shared_project.md) antes de cada corrida.
-let scrum854Fixture: { neilId: number; fefiId: number; orderAId: number; orderBId: number; orderC1Id: number; orderC2Id: number; masterClientId: number }
+let scrum854Fixture: { vendedor2Id: number; vendedor3Id: number; orderAId: number; orderBId: number; orderC1Id: number; orderC2Id: number; masterClientId: number }
 
 test.beforeAll(() => {
   const script = `<?php
@@ -48,32 +48,32 @@ foreach ($oldMasters as $m) {
     $m->delete();
 }
 
-$neil = User::where('email', 'vendedor2@test.com')->first();
-$fefi = User::where('email', 'vendedor3@test.com')->first();
+$vendedor2 = User::where('email', 'vendedor2@test.com')->first();
+$vendedor3 = User::where('email', 'vendedor3@test.com')->first();
 
 $master = MasterClient::create(['name' => 'PreQA SCRUM854 Cliente ' . uniqid()]);
 $sub    = SubClient::create(['master_client_id' => $master->id, 'business_name' => 'PreQA SCRUM854 Sub ' . uniqid(), 'tax_id' => '155-0000-9-' . random_int(1000, 9999)]);
 
 $projectA = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto A (Vendedor)']);
-$cardA = PipelineCard::create(['sales_project_id' => $projectA->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $neil?->id, 'amount' => 300.0, 'stage_changed_at' => Carbon::now()]);
+$cardA = PipelineCard::create(['sales_project_id' => $projectA->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $vendedor2?->id, 'amount' => 300.0, 'stage_changed_at' => Carbon::now()]);
 $orderA = Order::create(['order_number' => 'PED-2026-PREQA854A-' . random_int(100000, 999999), 'pipeline_card_id' => $cardA->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_ASIGNADO, 'customer_name' => $sub->business_name]);
 $orderA->items()->create(['qty_requested' => 3, 'reference_snapshot' => 'REF-A', 'description_snapshot' => 'Item A']);
 
 $projectB = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto B (Vendedor)']);
-$cardB = PipelineCard::create(['sales_project_id' => $projectB->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $fefi?->id, 'amount' => 200.0, 'stage_changed_at' => Carbon::now()]);
+$cardB = PipelineCard::create(['sales_project_id' => $projectB->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $vendedor3?->id, 'amount' => 200.0, 'stage_changed_at' => Carbon::now()]);
 $orderB = Order::create(['order_number' => 'PED-2026-PREQA854B-' . random_int(100000, 999999), 'pipeline_card_id' => $cardB->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_POR_DESPACHAR, 'customer_name' => $sub->business_name]);
 $orderB->items()->create(['qty_requested' => 2, 'reference_snapshot' => 'REF-B', 'description_snapshot' => 'Item B']);
 
 $projectC = SalesProject::create(['sub_client_id' => $sub->id, 'name' => 'PreQA SCRUM854 Proyecto C (compartido)']);
-$cardC1 = PipelineCard::create(['sales_project_id' => $projectC->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $neil?->id, 'amount' => 100.0, 'stage_changed_at' => Carbon::now()]);
+$cardC1 = PipelineCard::create(['sales_project_id' => $projectC->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $vendedor2?->id, 'amount' => 100.0, 'stage_changed_at' => Carbon::now()]);
 $orderC1 = Order::create(['order_number' => 'PED-2026-PREQA854C1-' . random_int(100000, 999999), 'pipeline_card_id' => $cardC1->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_EN_PICKING, 'customer_name' => $sub->business_name]);
 $orderC1->items()->create(['qty_requested' => 1, 'reference_snapshot' => 'REF-C1', 'description_snapshot' => 'Item C1']);
 
-$cardC2 = PipelineCard::create(['sales_project_id' => $projectC->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $fefi?->id, 'amount' => 150.0, 'stage_changed_at' => Carbon::now()]);
+$cardC2 = PipelineCard::create(['sales_project_id' => $projectC->id, 'stage' => 'approved', 'master_client_id' => $master->id, 'sub_client_id' => $sub->id, 'owner_id' => $vendedor3?->id, 'amount' => 150.0, 'stage_changed_at' => Carbon::now()]);
 $orderC2 = Order::create(['order_number' => 'PED-2026-PREQA854C2-' . random_int(100000, 999999), 'pipeline_card_id' => $cardC2->id, 'order_type' => Order::ORDER_TYPE_PEDIDO, 'stage' => Order::STAGE_PACKING, 'customer_name' => $sub->business_name]);
 $orderC2->items()->create(['qty_requested' => 1, 'reference_snapshot' => 'REF-C2', 'description_snapshot' => 'Item C2']);
 
-echo json_encode(['neilId' => $neil?->id, 'fefiId' => $fefi?->id, 'orderAId' => $orderA->id, 'orderBId' => $orderB->id, 'orderC1Id' => $orderC1->id, 'orderC2Id' => $orderC2->id, 'masterClientId' => $master->id]);
+echo json_encode(['vendedor2Id' => $vendedor2?->id, 'vendedor3Id' => $vendedor3?->id, 'orderAId' => $orderA->id, 'orderBId' => $orderB->id, 'orderC1Id' => $orderC1->id, 'orderC2Id' => $orderC2->id, 'masterClientId' => $master->id]);
 `
   const scriptPath = `${process.cwd()}/../atlanticerp-backend/storage/app/preqa-scrum854-seed.php`
   writeFileSync(scriptPath, script)
@@ -81,7 +81,7 @@ echo json_encode(['neilId' => $neil?->id, 'fefiId' => $fefi?->id, 'orderAId' => 
     `docker compose -f "${process.cwd()}/../atlanticerp-backend/infra/docker-compose.yml" exec -T laravel php artisan tinker /var/www/html/storage/app/preqa-scrum854-seed.php < /dev/null`,
     { stdio: 'pipe' },
   ).toString()
-  const start = out.indexOf('{"neilId"')
+  const start = out.indexOf('{"vendedor2Id"')
   if (start === -1) throw new Error('SCRUM-854 self-seed no devolvió el JSON esperado. Output crudo: ' + out)
   const end = out.indexOf('}', start)
   if (end === -1) throw new Error('SCRUM-854 self-seed devolvió JSON incompleto. Output crudo: ' + out)

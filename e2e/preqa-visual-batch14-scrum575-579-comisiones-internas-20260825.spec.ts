@@ -107,10 +107,10 @@ test('FELIX — encabezado, 4 tarjetas, banner, filtros, tabla, modal tramos, ex
 
   // Expandir la primera fila de vendedor con datos reales (columna "Total pedidos" != USD 0.00)
   // y confirmar el detalle a nivel de pedido
-  const idmarRow = page.getByRole('cell', { name: 'Vendedor Test 10' })
-  await idmarRow.scrollIntoViewIfNeeded()
+  const vendedor10Row = page.getByRole('cell', { name: 'Vendedor Test 10' })
+  await vendedor10Row.scrollIntoViewIfNeeded()
   await page.waitForTimeout(300)
-  await idmarRow.click({ timeout: 8000 })
+  await vendedor10Row.click({ timeout: 8000 })
   await page.waitForTimeout(700)
   await page.screenshot({ path: 'e2e/.tmp/b14-08-fila-expandida.png', fullPage: true })
   const expandedText = await page.textContent('body')

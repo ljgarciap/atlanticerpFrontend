@@ -154,7 +154,7 @@ test('REQ-620 — botones de navegación llevan a las pantallas reales', async (
   await gotoCatalog(page)
   await page.getByRole('button', { name: 'Inventario de Bodega' }).click()
   await page.waitForTimeout(1000)
-  // neil.quiel no tiene bodega.read -> debe rebotar (RequirePermission -> FALLBACK_ROUTE), no romper nada
+  // vendedor2 no tiene bodega.read -> debe rebotar (RequirePermission -> FALLBACK_ROUTE), no romper nada
   expect(page.url()).not.toContain('/bodega/inventario')
   const bodyText = await page.locator('body').innerText()
   expect(bodyText.length).toBeGreaterThan(0)
@@ -203,7 +203,7 @@ test('REQ-618 — ficha técnica: rechazo de tipo de archivo inválido es VISIBL
 
 test('Regresión — QuotePartCard (REQ-036/037, picker dentro de Cotización) sigue funcionando', async ({ page }) => {
   await login(page, SELLER_EMAIL)
-  // Cotización + parte sembradas por Pre-QA vía tinker (owner_id=23=neil.quiel) puntualmente
+  // Cotización + parte sembradas por Pre-QA vía tinker (owner_id=23=vendedor2) puntualmente
   // para poder ejercitar el picker sin scriptear todo el flujo de creación de cotización —
   // Senior Review ya confirmó por código que Batch E no tocó este componente, esto confirma
   // que sigue funcionando en runtime. Id acoplado al estado sembrado en esta sesión local (ver

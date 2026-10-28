@@ -287,8 +287,8 @@ test('SCRUM-884 — regresión: Gerencia sigue pudiendo quitar a un creador VEND
 
   // Agregar a otro vendedor (Vendedor, sí está en teamVendors) ANTES de quitar a Vendedor, para poder
   // guardar sin violar min:1 — a diferencia de Gerencia (Gerencia), Vendedor sí es una opción válida acá.
-  const neilRow = page.locator('li', { hasText: /neil/i }).first()
-  await neilRow.locator('input[type="checkbox"]').check()
+  const vendedor2Row = page.locator('li', { hasText: /vendedor2/i }).first()
+  await vendedor2Row.locator('input[type="checkbox"]').check()
   await page.waitForTimeout(200)
   await page.locator('div.fixed.inset-0.z-10').click()
   await page.waitForTimeout(300)

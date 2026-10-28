@@ -121,7 +121,7 @@ test('4. Gerencia (management) — select de estado DESHABILITADO pero visible',
 test('5. Vendedor (vendedor) — solo lectura + menú reducido a 3 tabs, sin Técnicos Externos', async ({ page }) => {
   await login(page, 'vendedor2@test.com')
   await gotoTickets(page)
-  await page.screenshot({ path: `${DL_DIR}/06-tabla-neil.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/06-tabla-vendedor2.png`, fullPage: true })
 
   const selects = page.locator('table tbody select')
   const count = await selects.count()
@@ -141,7 +141,7 @@ test('5. Vendedor (vendedor) — solo lectura + menú reducido a 3 tabs, sin Té
   await page.waitForTimeout(300)
   const dropdown = page.locator('text=Técnicos externos')
   await expect(dropdown).toHaveCount(0)
-  await page.screenshot({ path: `${DL_DIR}/07-neil-dropdown-tecnicos.png`, fullPage: true })
+  await page.screenshot({ path: `${DL_DIR}/07-vendedor2-dropdown-tecnicos.png`, fullPage: true })
 })
 
 test('6. Lider Servicios — comparación: menú completo con 5 pestañas + 2 opciones de Técnicos', async ({ page }) => {

@@ -25,7 +25,7 @@ import { test, expect, Page } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 const FELIX = 'contabilidad@test.com'
-const NEIL  = 'vendedor2@test.com'
+const VENDEDOR2  = 'vendedor2@test.com'
 
 async function login(page: Page, email: string) {
   await page.context().clearCookies()
@@ -52,7 +52,7 @@ function crearFacturaModal(page: Page) {
 }
 
 test('RBAC negativo -- vendedor no accede a /admin-contab/invoices*', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
 
   const apiResponse = page.waitForResponse(r => r.url().includes('/api/admin-contab/invoices'), { timeout: 8000 }).catch(() => null)
   await page.goto('/admin-contab/facturacion')

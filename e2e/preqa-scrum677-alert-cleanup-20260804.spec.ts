@@ -20,8 +20,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  * funcionó"): el login sugerido para este ticket en la memoria del proyecto era
  * vendedor10@test.com ("vendedor con data sembrada"), válido en dev.atlanticerp.ai. En el
  * Postgres LOCAL de esta sesión, VentasDisenoDemoSeeder resuelve el rol "designer" seedeado a
- * vendedor2@test.com (no a idmar, que localmente no tiene ninguna tarjeta propia
- * tras `tenants:artisan db:seed`). Se usó neil.quiel (Vendedor/Diseñador real) y
+ * vendedor2@test.com (no a vendedor10, que localmente no tiene ninguna tarjeta propia
+ * tras `tenants:artisan db:seed`). Se usó vendedor2 (Vendedor/Diseñador real) y
  * gerencia@test.com (Gerencia real, dueña de tarjetas en Cotización/Propuesta) —
  * ambas cuentas reales, no demo, password = mismo email, mismo patrón que el resto de
  * atlanticerp-frontend/e2e/.

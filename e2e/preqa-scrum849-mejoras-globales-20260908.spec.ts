@@ -24,18 +24,18 @@ import { execSync } from 'node:child_process'
 const BASE = process.env.PREQA_BASE_URL ?? 'https://dev.atlanticerp.ai'
 
 interface Fixture849 {
-  card1_lead_neil_valid: number
-  card2_design_fefi_unauthorized: number
-  card3_design_neil_no_skip_to_quote: number
-  card4_quote_neil_no_area: number
-  card5_proposal_neil_missing_signed_quote: number
+  card1_lead_vendedor2_valid: number
+  card2_design_vendedor3_unauthorized: number
+  card3_design_vendedor2_no_skip_to_quote: number
+  card4_quote_vendedor2_no_area: number
+  card5_proposal_vendedor2_missing_signed_quote: number
   quote_id: number
   part_id: number
   custom_item_id: number
   catalog_item_id: number
-  card8_multiassign_neil_fefi: number
-  neil_id: number
-  fefi_id: number
+  card8_multiassign_vendedor2_vendedor3: number
+  vendedor2_id: number
+  vendedor3_id: number
 }
 
 let fx: Fixture849
@@ -47,7 +47,7 @@ test.beforeAll(() => {
     `${sshBase} "docker cp /tmp/seed_scrum849.php \\$(cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml ps -q laravel):/tmp/seed_scrum849.php && cd /var/www/backend && docker compose -f infra/docker-compose.qa.yml exec -T laravel php artisan tinker /tmp/seed_scrum849.php < /dev/null"`,
     { stdio: 'pipe' },
   ).toString()
-  const start = out.indexOf('{"card1_lead_neil_valid"')
+  const start = out.indexOf('{"card1_lead_vendedor2_valid"')
   if (start === -1) throw new Error('SCRUM-849 self-seed no devolvió el JSON esperado. Output crudo: ' + out)
   const end = out.indexOf('}', start)
   if (end === -1) throw new Error('SCRUM-849 self-seed devolvió JSON incompleto. Output crudo: ' + out)
@@ -55,14 +55,14 @@ test.beforeAll(() => {
   console.log('SCRUM-849 fixture sembrado en dev.atlanticerp.ai:', JSON.stringify(fx))
 })
 
-const NEIL    = 'vendedor2@test.com'
-const FEFI    = 'vendedor3@test.com'
+const VENDEDOR2    = 'vendedor2@test.com'
+const VENDEDOR3    = 'vendedor3@test.com'
 const DANIELA = 'gerencia@test.com'
 
 // ⚠️ Hallazgo de credenciales (no es del código de SCRUM-849, documentado aparte en el reporte):
 // la contraseña que Luis dio para daniela (B1n4X_2026?) fue RECHAZADA en vivo por dev.atlanticerp.ai
 // (verificado con Hash::check() por SSH — false). El default real vigente HOY en dev es el email
-// como password (Hash::check() -> true), igual que neil/fefi. Se usa el default real acá.
+// como password (Hash::check() -> true), igual que vendedor2/vendedor3. Se usa el default real acá.
 async function login(page: Page, email: string): Promise<void> {
   await page.context().clearCookies()
   // Limpiar localStorage en la página TODAVÍA autenticada (antes de navegar) — si se limpia
@@ -99,7 +99,7 @@ async function login(page: Page, email: string): Promise<void> {
 // ---------------------------------------------------------------------------
 test('SCRUM-849.5 — CRITICO: Gerencia abre la cotización de otro diseñador y ve SU PROPIO nombre/teléfono, no el del dueño real', async ({ page }) => {
   await login(page, DANIELA)
-  await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`) // owned by neil (Vendedor Test 2)
+  await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`) // owned by vendedor2 (Vendedor Test 2)
   await page.waitForTimeout(1500)
 
   const designerLabel = page.locator('label:has-text("Diseñador a cargo"), label:has-text("Designer in charge")').locator('xpath=following-sibling::p[1]')
@@ -124,7 +124,7 @@ test('SCRUM-849.5 — CRITICO: Gerencia abre la cotización de otro diseñador y
 // depender de mutar el dato real de una persona solo para satisfacer el test.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.5 (control) — el propio diseñador ve su nombre correcto en su propia cotización', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`)
   await page.waitForTimeout(1500)
   const designerLabel = page.locator('label:has-text("Diseñador a cargo")').locator('xpath=following-sibling::p[1]')
@@ -136,11 +136,11 @@ test('SCRUM-849.5 (control) — el propio diseñador ve su nombre correcto en su
 // la tarjeta nunca "flota" en la columna nueva.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.1 — drag&drop válido (Lead->Diseño) persiste tras reload', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
 
-  const cardTestId = `pipeline-card-${fx.card1_lead_neil_valid}`
+  const cardTestId = `pipeline-card-${fx.card1_lead_vendedor2_valid}`
   const card = page.locator(`[data-testid="${cardTestId}"]`)
   const targetCol = page.locator('[data-testid="pipeline-stage-design"]')
   await expect(card).toBeVisible({ timeout: 10000 })
@@ -159,11 +159,11 @@ test('SCRUM-849.1 — drag&drop válido (Lead->Diseño) persiste tras reload', a
 })
 
 test('SCRUM-849.1 — drag&drop inválido (Diseño->Cotización, RN5) rechaza con toast y la tarjeta se queda en Diseño', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
 
-  const cardTestId = `pipeline-card-${fx.card3_design_neil_no_skip_to_quote}`
+  const cardTestId = `pipeline-card-${fx.card3_design_vendedor2_no_skip_to_quote}`
   const card = page.locator(`[data-testid="${cardTestId}"]`)
   const targetCol = page.locator('[data-testid="pipeline-stage-quote"]')
   await expect(card).toBeVisible({ timeout: 10000 })
@@ -188,7 +188,7 @@ test('SCRUM-849.1 — drag&drop inválido (Diseño->Cotización, RN5) rechaza co
 // 849.2 — columna PERDIDO: borde/fondo rojo, texto mayúscula rojo.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.2 — columna PERDIDO: borde/fondo rojo y label en mayúsculas, nunca gris', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/pipeline`)
   await page.waitForTimeout(1500)
 
@@ -213,8 +213,8 @@ test('SCRUM-849.2 — columna PERDIDO: borde/fondo rojo y label en mayúsculas, 
 // TODOS los asignados) para el resto.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve texto de solo lectura con TODOS los asignados', async ({ page }) => {
-  // card8: owner=neil, compartido_con=[fefi] (sembrado por el seed) — 2 asignados reales.
-  const cardParam = `?card=${fx.card8_multiassign_neil_fefi}`
+  // card8: owner=vendedor2, compartido_con=[vendedor3] (sembrado por el seed) — 2 asignados reales.
+  const cardParam = `?card=${fx.card8_multiassign_vendedor2_vendedor3}`
 
   // Como Gerencia (Gerencia): abrir la tarjeta compartida.
   await login(page, DANIELA)
@@ -232,19 +232,19 @@ test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve tex
 
   await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-4-gerencia-multiselect.png', fullPage: true })
 
-  // Como neil (dueño, no Gerencia): el mismo campo debe ser de solo lectura, listando a AMBOS
-  // asignados (Vendedor + Vendedor Test 3/fefi), sin ningún control interactivo.
-  await login(page, NEIL)
+  // Como vendedor2 (dueño, no Gerencia): el mismo campo debe ser de solo lectura, listando a AMBOS
+  // asignados (Vendedor + Vendedor Test 3/vendedor3), sin ningún control interactivo.
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/pipeline${cardParam}`)
   await page.waitForTimeout(1500)
-  const modalAsNeil = page.locator('div.fixed.inset-0.z-50')
-  await expect(modalAsNeil).toBeVisible({ timeout: 8000 })
-  const readonlyOwner = modalAsNeil.locator('label:has-text("Responsable"), label:has-text("Owner")').first().locator('xpath=following-sibling::p[1]')
+  const modalAsVendedor2 = page.locator('div.fixed.inset-0.z-50')
+  await expect(modalAsVendedor2).toBeVisible({ timeout: 8000 })
+  const readonlyOwner = modalAsVendedor2.locator('label:has-text("Responsable"), label:has-text("Owner")').first().locator('xpath=following-sibling::p[1]')
   await expect(readonlyOwner).toBeVisible({ timeout: 8000 })
   await expect(readonlyOwner).toContainText('Vendedor')
   await expect(readonlyOwner).toContainText('Vendedor')
-  await expect(modalAsNeil.locator('[aria-haspopup="listbox"]')).toHaveCount(0)
-  await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-4-neil-readonly-both-assignees.png', fullPage: true })
+  await expect(modalAsVendedor2.locator('[aria-haspopup="listbox"]')).toHaveCount(0)
+  await page.screenshot({ path: 'e2e/screenshots/SCRUM-849-4-vendedor2-readonly-both-assignees.png', fullPage: true })
 })
 
 // ---------------------------------------------------------------------------
@@ -252,12 +252,12 @@ test('SCRUM-849.4 — Gerencia ve/edita el multi-select; un vendedor solo ve tex
 // Catálogo real NO tiene ninguna opción de foto.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.6 — foto ad-hoc solo en ítem personalizado, miniatura sobrevive refresh, item de Catálogo sin opción de foto', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`)
   await page.waitForTimeout(1500)
 
   // Botón "Agregar foto"/"Add photo" visible para el ítem custom (REF-CUSTOM-849) — tolerante
-  // a idioma (Gerencia ya se vio en EN, neil en ES; no asumir uno fijo).
+  // a idioma (Gerencia ya se vio en EN, vendedor2 en ES; no asumir uno fijo).
   //
   // Gotcha real encontrado corriendo esto: page.locator('tr', {hasText: 'Producto ad-hoc...'})
   // NUNCA matchea — el texto vive dentro del VALUE de un <input>, que no cuenta como "texto"
@@ -297,7 +297,7 @@ test('SCRUM-849.6 — foto ad-hoc solo en ítem personalizado, miniatura sobrevi
 // 849.7 — duplicar partida: independencia real tras editar/borrar en la copia.
 // ---------------------------------------------------------------------------
 test('SCRUM-849.7 — Duplicar partida crea copia independiente; editar la copia no afecta el original', async ({ page }) => {
-  await login(page, NEIL)
+  await login(page, VENDEDOR2)
   await page.goto(`${BASE}/ventas-diseno/quotes/${fx.quote_id}`)
   await page.waitForTimeout(1500)
 

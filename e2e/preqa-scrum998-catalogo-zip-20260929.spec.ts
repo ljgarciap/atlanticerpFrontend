@@ -1,16 +1,16 @@
 import { test, expect, Page } from '@playwright/test'
 
 // SCRUM-998 — PDF de Catálogo grande generado en segundo plano (ZIP de volúmenes). Pre-QA 2026-09-29 contra `E2E_BASE_URL`
-// (por defecto dev.atlanticerp.ai) con el usuario real `fefi@` (Vendedor/Diseñador, password = correo en dev).
+// (por defecto dev.atlanticerp.ai) con el usuario real `vendedor3@` (Vendedor/Diseñador, password = correo en dev).
 //
-// Precondición: `E2E_EXPORT_ID` = una exportación YA TERMINADA de `fefi@` (se genera con la API real: POST
+// Precondición: `E2E_EXPORT_ID` = una exportación YA TERMINADA de `vendedor3@` (se genera con la API real: POST
 // /ventas-diseno/catalog/send-pdf con más productos que `catalog_pdf_max_single_products` y se espera a `done`; la corrida real
 // de Horizon + S3 la hace el Pre-QA). Sin esa variable el spec se salta: no fabrica datos por su cuenta.
 test.use({ baseURL: process.env.E2E_BASE_URL ?? 'https://dev.atlanticerp.ai' })
 test.describe.configure({ mode: 'serial' })
 
 const EXPORT_ID = process.env.E2E_EXPORT_ID ?? ''
-test.skip(!EXPORT_ID, 'requiere E2E_EXPORT_ID de una exportación terminada de fefi@')
+test.skip(!EXPORT_ID, 'requiere E2E_EXPORT_ID de una exportación terminada de vendedor3@')
 
 async function login(page: Page, email: string, password: string = email) {
   await page.goto('/login')

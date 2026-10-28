@@ -47,7 +47,7 @@ test('REQ-503/505 — Vendedor Test 2: NC visible con referencia, agrupacion por
   await row.click()
   await page.waitForTimeout(600)
 
-  await page.screenshot({ path: 'e2e/.tmp/b15-01-neil-expanded.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/b15-01-vendedor2-expanded.png', fullPage: true })
 
   const expandedRow = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
 
@@ -210,21 +210,21 @@ test.describe('REQ-506 — proyectos compartidos (fixture self-seed/cleanup)', (
     await page.waitForTimeout(900)
     await page.locator('td', { hasText: 'Vendedor Test 10' }).first().click()
     await page.waitForTimeout(600)
-    await page.screenshot({ path: 'e2e/.tmp/b15-02-idmar-shared.png', fullPage: true })
-    const expandedIdmar = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
-    await expect(expandedIdmar.getByText('Compartido con', { exact: false })).toBeVisible()
-    await expect(expandedIdmar.getByText('Vendedor Test 9', { exact: false })).toBeVisible()
-    await expect(expandedIdmar.getByText('549.27', { exact: false })).toBeVisible() // total del proyecto completo
-    await expect(expandedIdmar.getByText('274.64', { exact: false }).first()).toBeVisible() // su parte
+    await page.screenshot({ path: 'e2e/.tmp/b15-02-vendedor10-shared.png', fullPage: true })
+    const expandedVendedor10 = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
+    await expect(expandedVendedor10.getByText('Compartido con', { exact: false })).toBeVisible()
+    await expect(expandedVendedor10.getByText('Vendedor Test 9', { exact: false })).toBeVisible()
+    await expect(expandedVendedor10.getByText('549.27', { exact: false })).toBeVisible() // total del proyecto completo
+    await expect(expandedVendedor10.getByText('274.64', { exact: false }).first()).toBeVisible() // su parte
 
     await vendorSelect.selectOption({ label: 'Vendedor Test 9' })
     await page.waitForTimeout(900)
     await page.locator('td', { hasText: 'Vendedor Test 9' }).first().click()
     await page.waitForTimeout(600)
-    await page.screenshot({ path: 'e2e/.tmp/b15-03-bernardo-shared.png', fullPage: true })
-    const expandedBernardo = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
-    await expect(expandedBernardo.getByText('Compartido con', { exact: false })).toBeVisible()
-    await expect(expandedBernardo.getByText('Vendedor Test 10', { exact: false })).toBeVisible()
-    await expect(expandedBernardo.getByText('274.64', { exact: false }).first()).toBeVisible()
+    await page.screenshot({ path: 'e2e/.tmp/b15-03-vendedor9-shared.png', fullPage: true })
+    const expandedVendedor9 = page.locator('tr').filter({ has: page.locator('td[colspan="7"]') })
+    await expect(expandedVendedor9.getByText('Compartido con', { exact: false })).toBeVisible()
+    await expect(expandedVendedor9.getByText('Vendedor Test 10', { exact: false })).toBeVisible()
+    await expect(expandedVendedor9.getByText('274.64', { exact: false }).first()).toBeVisible()
   })
 })

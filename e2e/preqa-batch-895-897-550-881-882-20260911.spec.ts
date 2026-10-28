@@ -157,7 +157,7 @@ test('SCRUM-881.4 — Reportes: la tarjeta SIGUE visible para Contabilidad', asy
 test('SCRUM-882.1 — Vendedor: sidebar NO muestra Inicio/Facturación/Movimientos/Externas/Tesorería/Reportes', async ({ page }) => {
   await login(page, 'vendedor2@test.com')
   await page.waitForTimeout(1000)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-882-01-sidebar-neil-inicial.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-882-01-sidebar-vendedor2-inicial.png', fullPage: true })
 
   // El sidebar arranca colapsado (icon-only) -- expandirlo primero por el botón real
   // ("Expandir menú"), no por coordenadas fijas.
@@ -171,7 +171,7 @@ test('SCRUM-882.1 — Vendedor: sidebar NO muestra Inicio/Facturación/Movimient
     await adminContabEntry.click()
     await page.waitForTimeout(500)
   }
-  await page.screenshot({ path: 'e2e/.tmp/preqa-882-02-sidebar-neil-expandido.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-882-02-sidebar-vendedor2-expandido.png', fullPage: true })
 
   const bodyText = await page.locator('body').innerText()
   for (const label of ['Facturación', 'Movimientos', 'Comisiones Externas', 'Arqueo de Caja', 'Cuentas Bancarias', 'Caja chica', 'Reportes']) {
@@ -183,7 +183,7 @@ test('SCRUM-882.2 — Vendedor SIGUE viendo Comisiones Internas (solo su fila)',
   await login(page, 'vendedor2@test.com')
   await page.goto('/admin-contab/comisiones/internas')
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: 'e2e/.tmp/preqa-882-03-comisiones-internas-neil.png', fullPage: true })
+  await page.screenshot({ path: 'e2e/.tmp/preqa-882-03-comisiones-internas-vendedor2.png', fullPage: true })
   const rows = page.locator('table tbody tr')
   const count = await rows.count()
   // Solo su propia fila -> 1 (no 11+)

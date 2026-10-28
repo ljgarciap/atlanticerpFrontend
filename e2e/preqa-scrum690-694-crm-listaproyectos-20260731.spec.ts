@@ -45,7 +45,7 @@ test.describe('SCRUM-690/691 — alcance Mías/Equipo, sin fuga de datos', () =>
     // Vendedor — el desarrollo lo esconde por completo (can_view_team=false del backend).
     await expect(page.getByRole('button', { name: /^equipo$/i })).not.toBeVisible()
 
-    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/01-neil-solo-lo-suyo.png', fullPage: true })
+    await page.screenshot({ path: 'e2e/.tmp/preqa-scrum690/01-vendedor2-solo-lo-suyo.png', fullPage: true })
   })
 
   test('Gerencia (Gerencia) ve el toggle Inicio/Equipo y el filtro Responsable funcional', async ({ page }) => {
@@ -132,7 +132,7 @@ test.describe('SCRUM-693 — exportar CSV respeta alcance/filtros, 10 columnas e
       'Proyecto', 'Cliente', 'Etapa', 'Etiqueta', 'Responsable',
       'Valor', 'Superficie trabajada', 'Días en etapa', 'Fecha de entrega', 'Archivos',
     ])
-    // Solo las filas de Vendedor — nunca "Proyecto Gamma" (de Gerencia/Vanessa).
+    // Solo las filas de Vendedor — nunca "Proyecto Gamma" (de Gerencia/Vendedor4).
     expect(content).not.toContain('Proyecto Gamma')
     expect(content).not.toContain('RUC')
     expect(content).not.toContain('Teléfono')
