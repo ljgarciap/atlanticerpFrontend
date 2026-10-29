@@ -43,6 +43,7 @@ vi.mock('@/api/adminContabApi', () => ({
       history: vi.fn(),
       historyDetail: vi.fn(),
       approve: vi.fn(),
+      reopen: vi.fn(),
       exportDailyCount: vi.fn(),
       exportHistory: vi.fn(),
     },
@@ -406,6 +407,42 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
     fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.ver'))
     await screen.findByText('adminContab:arqueoCaja.historial.pendiente')
     expect(screen.queryByText('adminContab:arqueoCaja.historial.aprobar')).not.toBeInTheDocument()
+  })
+
+  it('Fase 13 (2.10): con puede_reabrir el detalle pide un motivo de al menos 10 caracteres y reabre el arqueo', async () => {
+    mockAuth(makeUser({ role: 'management' }))
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-02T15:00:00-05:00', realizado_por: 'Asistente Administrativa', cerrado_at: '2026-07-02T14:05:00-05:00' }],
+    }))
+    mockedApi.cashPosition.historyDetail.mockResolvedValue(makeDailyCount({
+      id: 5, numero: 2, estado: 'aprobado', fecha: '2026-07-02', puede_aprobar: false, puede_reabrir: true,
+    }))
+    mockedApi.cashPosition.reopen.mockResolvedValue(makeDailyCount({ id: 5, estado: 'abierto' }))
+    renderPage()
+    fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.ver'))
+    fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.reabrir'))
+
+    const confirmar = screen.getByText('adminContab:arqueoCaja.historial.reabrirConfirmar').closest('button') as HTMLButtonElement
+    expect(confirmar).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('adminContab:arqueoCaja.historial.reabrirMotivo'), { target: { value: 'corto' } })
+    expect(confirmar).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('adminContab:arqueoCaja.historial.reabrirMotivo'), { target: { value: 'Faltó registrar un cobro del día' } })
+    fireEvent.click(confirmar)
+    await waitFor(() => expect(mockedApi.cashPosition.reopen).toHaveBeenCalledWith(5, 'Faltó registrar un cobro del día'))
+  })
+
+  it('Fase 13 (2.10): sin puede_reabrir el detalle no ofrece reabrir', async () => {
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'pendiente_aprobacion', aprobado_por: null, aprobado_at: null, realizado_por: 'Asistente Administrativa', cerrado_at: '2026-07-02T14:05:00-05:00' }],
+    }))
+    mockedApi.cashPosition.historyDetail.mockResolvedValue(makeDailyCount({
+      id: 5, numero: 2, estado: 'pendiente_aprobacion', fecha: '2026-07-02', puede_reabrir: false,
+    }))
+    renderPage()
+    fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.ver'))
+    await screen.findByText('adminContab:arqueoCaja.historial.pendiente')
+    expect(screen.queryByText('adminContab:arqueoCaja.historial.reabrir')).not.toBeInTheDocument()
   })
 
   it('QA SCRUM-603 (2026-08-29 RN4): el historial muestra la hora de cierre junto a quién lo cerró', async () => {

@@ -1218,6 +1218,18 @@ export function useApproveDailyCashCount() {
   })
 }
 
+export function useReopenDailyCashCount() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, motivo }: { id: number; motivo: string }) => adminContabApi.cashPosition.reopen(id, motivo),
+    onSuccess: (_data, { id }) => {
+      qc.invalidateQueries({ queryKey: DAILY_CASH_COUNT_KEY })
+      qc.invalidateQueries({ queryKey: dailyCashCountHistoryDetailKey(id) })
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'cash-position', 'history'] })
+    },
+  })
+}
+
 export function useExportDailyCashCount() {
   return useMutation({
     mutationFn: (numero: number | null) => adminContabApi.cashPosition.exportDailyCount(numero),

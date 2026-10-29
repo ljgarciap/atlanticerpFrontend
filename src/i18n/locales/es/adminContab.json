@@ -1373,7 +1373,13 @@
       "detalleError": "No se pudo cargar el detalle de este arqueo.",
       "cerradoPor": "Cerrado por {{nombre}}",
       "aprobar": "Aprobar",
-      "aprobarError": "No se pudo aprobar el arqueo."
+      "aprobarError": "No se pudo aprobar el arqueo.",
+      "reabrir": "Reabrir arqueo",
+      "reabrirMotivo": "Motivo de la reapertura",
+      "reabrirAyuda": "Mínimo 10 caracteres. El arqueo vuelve a quedar abierto, se vuelve a cerrar y queda registrado quién lo reabrió y por qué.",
+      "reabrirConfirmar": "Reabrir",
+      "reabrirCancelar": "Cancelar",
+      "reabrirError": "No se pudo reabrir el arqueo."
     },
     "restricted": {
       "restrictedRole": "Tu rol solo tiene acceso al Arqueo del día. Las vistas Proyectada y Real (30/90 días) están disponibles para Contabilidad, el aprobador configurado y Gerencia.",
