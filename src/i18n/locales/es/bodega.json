@@ -1325,6 +1325,7 @@
       "rejectReasonPlaceholder": "¿Por qué se rechaza esta devolución?",
       "errors": {
         "invalidQuantity": "Escribe la cantidad real recibida de cada producto (0 o más).",
+        "exceedsRequested": "No puedes recibir más de lo solicitado ({{qty}}). Si el cliente trae más, registra otra devolución por la diferencia.",
         "warehouseRequired": "Selecciona a qué bodega entra.",
         "rejectReasonRequired": "Escribe el motivo del rechazo.",
         "confirmFailed": "No se pudo confirmar la recepción. Intenta de nuevo.",

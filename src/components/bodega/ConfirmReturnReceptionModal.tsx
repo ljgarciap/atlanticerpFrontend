@@ -67,6 +67,11 @@ export default function ConfirmReturnReceptionModal({ id, onClose }: Props) {
         setError(t('bodega:returns.receptionModal.errors.invalidQuantity'))
         return
       }
+      // Fase 13: lo recibido puede ser menor que lo solicitado, nunca mayor (el backend también lo exige).
+      if (qty > p.qty_requested) {
+        setError(t('bodega:returns.receptionModal.errors.exceedsRequested', { qty: p.qty_requested }))
+        return
+      }
       lines.push({ customer_return_line_id: p.id, qty_received: qty })
     }
 
@@ -146,6 +151,7 @@ export default function ConfirmReturnReceptionModal({ id, onClose }: Props) {
                         <input
                           type="number"
                           min={0}
+                          max={p.qty_requested}
                           value={quantities[p.id] ?? ''}
                           onChange={e => { setQuantities(q => ({ ...q, [p.id]: e.target.value })); setError(null) }}
                           className="w-20 px-2 py-1 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800"

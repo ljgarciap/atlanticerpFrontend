@@ -1325,6 +1325,7 @@
       "rejectReasonPlaceholder": "Why is this return being rejected?",
       "errors": {
         "invalidQuantity": "Enter the actual received quantity for every product (0 or more).",
+        "exceedsRequested": "You cannot receive more than requested ({{qty}}). If the customer brings more, register another return for the difference.",
         "warehouseRequired": "Select which warehouse it enters.",
         "rejectReasonRequired": "Write the reason for rejection.",
         "confirmFailed": "Could not confirm the reception. Try again.",
