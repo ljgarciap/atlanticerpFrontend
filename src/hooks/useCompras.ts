@@ -269,10 +269,10 @@ export function useGenerateReplacementOrder() {
 export function useDecideReplacementRequest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, decision }: { id: number; decision: 'approve' | 'reject' }) =>
+    mutationFn: ({ id, decision, motivo }: { id: number; decision: 'approve' | 'reject'; motivo?: string }) =>
       decision === 'approve'
         ? comprasApi.replacementRequests.approve(id)
-        : comprasApi.replacementRequests.reject(id),
+        : comprasApi.replacementRequests.reject(id, motivo ?? ''),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/replacement-requests'] }),
   })
 }
