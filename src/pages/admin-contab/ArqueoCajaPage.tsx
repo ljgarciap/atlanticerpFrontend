@@ -5,7 +5,7 @@ import { usePermission } from '@/hooks/usePermission'
 import {
   useCashPositionHeader, useCashPositionProjected, useCashPositionReal, useDailyCashCount,
   useUpdateDailyCashCountEntryObservation, useUpdateDailyCashCountGeneralObservation, useCashPositionExport,
-  useCloseDailyCashCount, useDailyCashCountHistory, useDailyCashCountHistoryDetail, useApproveDailyCashCount,
+  useCloseDailyCashCount, useDailyCashCountHistory, useDailyCashCountHistoryDetail, useApproveDailyCashCount, useReopenDailyCashCount,
   useExportDailyCashCount, useExportDailyCashCountHistory, useUploadRetentionAttachment,
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
@@ -786,7 +786,11 @@ function DetalleArqueoModal({ id, t, onClose }: { id: number; t: (key: string, o
   const { data: detail, isFetching } = useDailyCashCountHistoryDetail(id)
   const approveMutation = useApproveDailyCashCount()
   const exportMutation  = useExportDailyCashCountHistory()
+  const reopenMutation = useReopenDailyCashCount()
   const [approveError, setApproveError] = useState<string | null>(null)
+  const [reopening, setReopening] = useState(false)
+  const [motivo, setMotivo] = useState('')
+  const [reopenError, setReopenError] = useState<string | null>(null)
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -866,6 +870,45 @@ function DetalleArqueoModal({ id, t, onClose }: { id: number; t: (key: string, o
                 </div>
               )}
             </div>
+
+            {detail.puede_reabrir === true && (
+              <div className="rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                {!reopening ? (
+                  <Button variant="secondary" className="!text-xs" onClick={() => setReopening(true)}>
+                    {t('adminContab:arqueoCaja.historial.reabrir')}
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-300" htmlFor="reabrir-motivo">
+                      {t('adminContab:arqueoCaja.historial.reabrirMotivo')}
+                    </label>
+                    <textarea
+                      id="reabrir-motivo" rows={3} value={motivo} onChange={e => setMotivo(e.target.value)}
+                      className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-2 text-xs"
+                    />
+                    <p className="text-[11px] text-slate-400">{t('adminContab:arqueoCaja.historial.reabrirAyuda')}</p>
+                    {reopenError && <p className="text-xs text-red-500">{reopenError}</p>}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="primary" className="!text-xs" loading={reopenMutation.isPending} disabled={motivo.trim().length < 10}
+                        onClick={() => {
+                          setReopenError(null)
+                          reopenMutation.mutate({ id, motivo: motivo.trim() }, {
+                            onSuccess: onClose,
+                            onError: err => setReopenError(mutationErrorMessage(err, t('adminContab:arqueoCaja.historial.reabrirError'))),
+                          })
+                        }}
+                      >
+                        {t('adminContab:arqueoCaja.historial.reabrirConfirmar')}
+                      </Button>
+                      <Button variant="secondary" className="!text-xs" onClick={() => { setReopening(false); setMotivo(''); setReopenError(null) }}>
+                        {t('adminContab:arqueoCaja.historial.reabrirCancelar')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-700">
               <button

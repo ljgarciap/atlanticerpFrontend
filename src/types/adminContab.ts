@@ -2066,6 +2066,12 @@ export interface DailyCashCount {
    *  AdminCont — verificar con Backend Dev que el endpoint lo agregue. Ausente/`false` = no
    *  mostrar "Aprobar". */
   puede_aprobar?: boolean
+  /** Fase 13 (2.10) — server-side: arqueo cerrado y el usuario es el aprobador (o su suplente). */
+  puede_reabrir?: boolean
+  /** Última reapertura (quién, cuándo y por qué); `null` si nunca se reabrió. */
+  reabierto_por?: string | null
+  reabierto_at?: string | null
+  reabierto_motivo?: string | null
   /** Solo presente en el arqueo ACTIVO (`estado: 'abierto'`) — preview de lo que `numero`
    *  pasará a valer al cerrar (QA SCRUM-603, 2026-08-29 RN1). */
   numero_preview?: number

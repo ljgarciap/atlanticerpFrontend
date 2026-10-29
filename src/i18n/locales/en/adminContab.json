@@ -1320,7 +1320,13 @@
       "detalleError": "Could not load this cash count's detail.",
       "cerradoPor": "Closed by {{nombre}}",
       "aprobar": "Approve",
-      "aprobarError": "Could not approve the cash count."
+      "aprobarError": "Could not approve the cash count.",
+      "reabrir": "Reopen cash count",
+      "reabrirMotivo": "Reason for reopening",
+      "reabrirAyuda": "At least 10 characters. The cash count becomes open again, is closed again, and who reopened it and why is recorded.",
+      "reabrirConfirmar": "Reopen",
+      "reabrirCancelar": "Cancel",
+      "reabrirError": "Could not reopen the cash count."
     },
     "restricted": {
       "restrictedRole": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Accounting, the configured approver and Management.",

@@ -878,6 +878,10 @@ export const adminContabApi = {
     approve: (id: number): Promise<DailyCashCount> =>
       api.post<DailyCashCount>(`/admin-contab/cash-position/history/${id}/approve`).then(r => r.data),
 
+    // Fase 13 (2.10) — exclusivo del aprobador (o su suplente); el arqueo vuelve a `abierto` y el cierre se rehace.
+    reopen: (id: number, motivo: string): Promise<DailyCashCount> =>
+      api.post<DailyCashCount>(`/admin-contab/cash-position/history/${id}/reopen`, { motivo }).then(r => r.data),
+
     // REQ-529 Escenario 1 — resumen del arqueo activo, mismo gate que `daily-count` (Contabilidad+Asistente Administrativa,
     // ver ADR §9).
     exportDailyCount: async (numero: number | null): Promise<void> => {
