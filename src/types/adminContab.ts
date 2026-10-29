@@ -1011,6 +1011,15 @@ export interface CreatePaymentV2Payload {
 }
 
 /** SCRUM-1168 F4 — solicitud de anular un cobro (o de devolver dinero, F5): la piden Contabilidad o Asistente Administrativa y la decide Gerencia. */
+/** Fase 13 (2.4) — al aprobar una anulación: facturas reabiertas que el saldo a favor del cliente podría cubrir (solo informa). */
+export interface CompensationSuggestion {
+  master_client_id: number
+  saldo_a_favor: number
+  pendiente_total: number
+  compensable: number
+  facturas: { invoice_id: number; numero: string | null; pendiente: number }[]
+}
+
 export interface ReversalRequest {
   id: number
   tipo: 'anulacion' | 'devolucion' | 'reverso_compensacion'

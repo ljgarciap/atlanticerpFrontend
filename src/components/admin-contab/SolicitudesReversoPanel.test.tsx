@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import SolicitudesReversoPanel from './SolicitudesReversoPanel'
 import { adminContabApi } from '@/api/adminContabApi'
 import { useAuthStore } from '@/store/authStore'
@@ -44,7 +45,7 @@ function comoUsuario(role: string, markApprover?: boolean) {
 
 function renderPanel() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(<QueryClientProvider client={qc}><SolicitudesReversoPanel /></QueryClientProvider>)
+  return render(<MemoryRouter><QueryClientProvider client={qc}><SolicitudesReversoPanel /></QueryClientProvider></MemoryRouter>)
 }
 
 beforeEach(() => {
@@ -82,6 +83,35 @@ describe('SolicitudesReversoPanel', () => {
 
     await waitFor(() => expect(mockedApi.reversals.decide).toHaveBeenCalledWith(5, true, undefined))
     expect(await screen.findByTestId('solicitud-resultado')).toHaveTextContent('solicitudesReverso.descuentoComision')
+  })
+
+  // Fase 13 (2.4) — tras anular un cobro, si hay saldo a favor para cubrir las facturas reabiertas se sugiere compensar (solo informa).
+  it('Fase 13 — al aprobar una anulación con saldo a favor disponible sugiere compensar y enlaza a Compensaciones; sin sugerencia no muestra nada', async () => {
+    comoUsuario('management', true)
+    mockedApi.reversals.decide.mockResolvedValue({
+      ...solicitud({ estado: 'ejecutada' }),
+      sugerencia_compensacion: { master_client_id: 7, saldo_a_favor: 120, pendiente_total: 300, compensable: 120, facturas: [{ invoice_id: 9, numero: 'F-9', pendiente: 300 }] },
+    })
+    renderPanel()
+
+    fireEvent.click(await screen.findByText('solicitudesReverso.aprobar'))
+    fireEvent.click(screen.getByText('solicitudesReverso.confirmarSi'))
+
+    const caja = await screen.findByTestId('sugerencia-compensacion')
+    expect(caja).toHaveTextContent('solicitudesReverso.sugerenciaCompensacion')
+    expect(caja).toHaveTextContent('120.00')
+    expect(screen.getByText('solicitudesReverso.irACompensaciones').closest('a')).toHaveAttribute('href', '/admin-contab/compensaciones')
+  })
+
+  it('Fase 13 — una aprobación sin sugerencia no muestra el aviso de compensación', async () => {
+    comoUsuario('management', true)
+    mockedApi.reversals.decide.mockResolvedValue({ ...solicitud({ estado: 'ejecutada' }), sugerencia_compensacion: null })
+    renderPanel()
+
+    fireEvent.click(await screen.findByText('solicitudesReverso.aprobar'))
+    fireEvent.click(screen.getByText('solicitudesReverso.confirmarSi'))
+    await screen.findByTestId('solicitud-resultado')
+    expect(screen.queryByTestId('sugerencia-compensacion')).not.toBeInTheDocument()
   })
 
   // Fase 13 (2.3) — reversar una compensación se solicita y lo decide el aprobador (o un suplente, que carga la misma bandera).
