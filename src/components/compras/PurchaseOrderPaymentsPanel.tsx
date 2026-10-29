@@ -37,6 +37,8 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   const [showRegisterForm, setShowRegisterForm] = useState(false)
   const [amount, setAmount] = useState('')
   const [proof, setProof] = useState<File | null>(null)
+  // Fase 13 (2.7): aviso (no bloqueo) cuando el pago acumulado supera lo recibido.
+  const [paymentWarning, setPaymentWarning] = useState<string | null>(null)
 
   const [showAmountChangeForm, setShowAmountChangeForm] = useState(false)
   const [newAmount, setNewAmount] = useState('')
@@ -67,8 +69,12 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
 
   const handleRegister = () => {
     if (amount === '' || proof === null) return
+    setPaymentWarning(null)
     registerPayment.mutate({ amount: Number(amount), proof }, {
-      onSuccess: () => { setShowRegisterForm(false); setAmount(''); setProof(null) },
+      onSuccess: res => {
+        setShowRegisterForm(false); setAmount(''); setProof(null)
+        setPaymentWarning(res.warnings?.[0]?.message ?? null)
+      },
     })
   }
 
@@ -159,6 +165,12 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
           </Button>
         )}
       </div>
+
+      {paymentWarning !== null && (
+        <div role="status" className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {paymentWarning}
+        </div>
+      )}
 
       {showRegisterForm && (
         <div className="p-3 bg-slate-50 rounded-lg mb-3 flex flex-wrap gap-2 items-center">

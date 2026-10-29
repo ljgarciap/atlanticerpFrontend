@@ -114,6 +114,31 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     expect(screen.getByText('common:actions.save').closest('button')).toBeDisabled()
   })
 
+  // Fase 13 (2.7) — pagar por encima de lo recibido no se bloquea: el backend responde 201 con una advertencia y el panel la muestra.
+  it('Fase 13 — tras registrar un pago que supera lo recibido muestra el aviso del backend; sin advertencia no muestra nada', async () => {
+    mockedComprasApi.payments.register
+      .mockResolvedValueOnce({ id: 1, amount: 40, proof_url: 'x', registered_by: 1, registered_by_name: 'A', created_at: '2026-10-30', warnings: [] })
+      .mockResolvedValueOnce({
+        id: 2, amount: 40, proof_url: 'x', registered_by: 1, registered_by_name: 'A', created_at: '2026-10-30',
+        warnings: [{ code: 'pago_supera_recibido', message: 'El pago acumulado (80.00) supera lo recibido (40.00).' }],
+      })
+    renderPanel(makeOrder({ total_amount: 100, payable_total: 100, paid_amount: 0 }))
+    const abrir = async () => {
+      await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.registerPayment')).toBeInTheDocument())
+      fireEvent.click(screen.getByText('compras:orders.detail.payments.registerPayment'))
+      fireEvent.change(screen.getByPlaceholderText('compras:orders.detail.payments.amount'), { target: { value: '40' } })
+      fireEvent.change(document.querySelector('input[type="file"]') as HTMLInputElement, { target: { files: [new File(['x'], 'c.pdf', { type: 'application/pdf' })] } })
+      fireEvent.click(screen.getByText('common:actions.save'))
+    }
+
+    await abrir()
+    await waitFor(() => expect(mockedComprasApi.payments.register).toHaveBeenCalledTimes(1))
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+
+    await abrir()
+    expect(await screen.findByText('El pago acumulado (80.00) supera lo recibido (40.00).')).toBeInTheDocument()
+  })
+
   it('mientras hay un cambio de monto pendiente, "Enviar a pago" y "Registrar pago" quedan deshabilitados', async () => {
     renderPanel(makeOrder({ pending_amount_change: 150, amount_change_requested_by: 2, payment_requested_at: null }))
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.requestPayment')).toBeInTheDocument())
