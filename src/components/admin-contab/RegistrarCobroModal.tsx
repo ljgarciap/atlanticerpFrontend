@@ -66,6 +66,9 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
 
   const invoices      = openInvoicesResult?.invoices ?? []
   const creditBalance = openInvoicesResult?.credit_balance ?? 0
+  // Fase 13 (2.2): el resto del saldo a favor del cliente (no aplicable aquí) se muestra aparte para que ninguna cifra parezca contradecir a otra.
+  const creditCuenta = openInvoicesResult?.credit_balance_cuenta ?? 0
+  const creditReservado = openInvoicesResult?.credit_balance_reservado ?? 0
   const sinCuentaBancaria = PAYMENT_METHODS_SIN_CUENTA_BANCARIA.includes(metodoPago)
 
   // SCRUM-931 — opciones de cada select derivadas de `invoices`, acotadas por la selección
@@ -387,6 +390,16 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                     </p>
                   )}
                 </div>
+              )}
+
+              {creditCuenta + creditReservado > 0 && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400" data-testid="saldo-desglose">
+                  {t('cobros.registrarModal.saldoClienteDesglose', {
+                    total: formatCurrency(openInvoicesResult?.credit_balance_total ?? creditBalance + creditCuenta + creditReservado),
+                    cuenta: formatCurrency(creditCuenta),
+                    reservado: formatCurrency(creditReservado),
+                  })}
+                </p>
               )}
 
               {/* Monto recibido — autocalculado, RN3 REQ-465 */}
