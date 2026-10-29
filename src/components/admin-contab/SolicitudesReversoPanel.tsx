@@ -42,7 +42,7 @@ export default function SolicitudesReversoPanel() {
       onSuccess: r => {
         const descuentos = r.ajustes_comision ?? []
         setResultado(decidiendo.aprobar
-          ? (decidiendo.tipo === 'devolucion' ? t('solicitudesReverso.aprobadaDevolucion') : t('solicitudesReverso.aprobada')) + (descuentos.length > 0 ? ' ' + t('solicitudesReverso.descuentoComision', { monto: formatCurrency(descuentos.reduce((a, d) => a + d.monto, 0)) }) : '')
+          ? (decidiendo.tipo === 'devolucion' ? t('solicitudesReverso.aprobadaDevolucion') : decidiendo.tipo === 'reverso_compensacion' ? t('solicitudesReverso.aprobadaReverso') : t('solicitudesReverso.aprobada')) + (descuentos.length > 0 ? ' ' + t('solicitudesReverso.descuentoComision', { monto: formatCurrency(descuentos.reduce((a, d) => a + d.monto, 0)) }) : '')
           : t('solicitudesReverso.rechazada'))
         setDecidiendo(null)
         setMotivoRechazo('')
@@ -65,7 +65,7 @@ export default function SolicitudesReversoPanel() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <span className="font-semibold text-slate-800 dark:text-slate-100">
-                  {r.tipo === 'devolucion' ? t('solicitudesReverso.devolver') : t('solicitudesReverso.anular', { recibo: r.numero_recibo ?? `#${r.payment_id}` })}
+                  {r.tipo === 'devolucion' ? t('solicitudesReverso.devolver') : r.tipo === 'reverso_compensacion' ? t('solicitudesReverso.reversarCruce') : t('solicitudesReverso.anular', { recibo: r.numero_recibo ?? `#${r.payment_id}` })}
                 </span>
                 <span className="text-slate-500"> · {r.cliente}</span>
                 {r.monto != null && <span className="text-slate-500"> · {formatCurrency(r.monto)}</span>}

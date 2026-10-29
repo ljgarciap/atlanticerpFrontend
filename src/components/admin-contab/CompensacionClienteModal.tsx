@@ -143,7 +143,8 @@ export default function CompensacionClienteModal({ masterClientId, onClose }: Pr
   function ejecutarReverso() {
     if (!reverso || reversoMotivo.trim() === '') return
     setError(null)
-    const onSuccess = () => { setReversoResultado(t('compensaciones.reverso.hecho', { etiqueta: reverso.etiqueta })); setReverso(null); setReversoMotivo(''); setVistaPrevia(null) }
+    // Fase 13 (2.3): reversar un cruce se SOLICITA (lo decide el aprobador); desaplicar un movimiento sigue siendo directo.
+    const onSuccess = () => { setReversoResultado(t(reverso.kind === 'cruce' ? 'compensaciones.reverso.solicitado' : 'compensaciones.reverso.hecho', { etiqueta: reverso.etiqueta })); setReverso(null); setReversoMotivo(''); setVistaPrevia(null) }
     const onError = (err: unknown) => setError(mensaje(err, t('compensaciones.reverso.error')))
     if (reverso.kind === 'movimiento') unapplyMutation.mutate({ id: reverso.id, motivo: reversoMotivo.trim() }, { onSuccess, onError })
     else reverseMutation.mutate({ id: reverso.id, motivo: reversoMotivo.trim() }, { onSuccess, onError })
@@ -293,7 +294,7 @@ export default function CompensacionClienteModal({ masterClientId, onClose }: Pr
               {reverso && (
                 <div data-testid="reverso-form" className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-sm">
                   <p className="font-semibold">{reverso.kind === 'cruce' ? t('compensaciones.reverso.tituloCruce', { etiqueta: reverso.etiqueta }) : t('compensaciones.reverso.tituloMovimiento', { etiqueta: reverso.etiqueta })}</p>
-                  <p className="text-[11px] text-slate-500 mb-2">{t('compensaciones.reverso.ayuda')}</p>
+                  <p className="text-[11px] text-slate-500 mb-2">{t(reverso.kind === 'cruce' ? 'compensaciones.reverso.ayudaCruce' : 'compensaciones.reverso.ayuda')}</p>
                   <textarea value={reversoMotivo} onChange={e => setReversoMotivo(e.target.value)} rows={2} placeholder={t('compensaciones.reverso.motivo')}
                     className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm" />
                   <div className="mt-2 flex gap-2">

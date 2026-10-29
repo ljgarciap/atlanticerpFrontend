@@ -84,6 +84,22 @@ describe('SolicitudesReversoPanel', () => {
     expect(await screen.findByTestId('solicitud-resultado')).toHaveTextContent('solicitudesReverso.descuentoComision')
   })
 
+  // Fase 13 (2.3) — reversar una compensación se solicita y lo decide el aprobador (o un suplente, que carga la misma bandera).
+  it('Fase 13 — muestra la solicitud de reverso de una compensación y el aprobador (o suplente) la aprueba', async () => {
+    comoUsuario('management', true)
+    mockedApi.reversals.list.mockResolvedValue(lista([solicitud({ id: 8, tipo: 'reverso_compensacion', payment_id: null, source_type: 'compensacion' as never, source_id: 3, monto: 250, motivo: 'Cruce con el cliente equivocado', numero_recibo: null })]))
+    mockedApi.reversals.decide.mockResolvedValue(solicitud({ id: 8, tipo: 'reverso_compensacion', estado: 'ejecutada' }))
+    renderPanel()
+
+    expect(await screen.findByTestId('solicitud-8')).toHaveTextContent('solicitudesReverso.reversarCruce')
+    expect(screen.getByTestId('solicitud-8')).toHaveTextContent('Cruce con el cliente equivocado')
+
+    fireEvent.click(screen.getByText('solicitudesReverso.aprobar'))
+    fireEvent.click(screen.getByText('solicitudesReverso.confirmarSi'))
+    await waitFor(() => expect(mockedApi.reversals.decide).toHaveBeenCalledWith(8, true, undefined))
+    expect(await screen.findByTestId('solicitud-resultado')).toHaveTextContent('solicitudesReverso.aprobadaReverso')
+  })
+
   it('Gerencia rechaza solo con motivo', async () => {
     comoUsuario('management', true)
     mockedApi.reversals.decide.mockResolvedValue(solicitud({ estado: 'rechazada' }))

@@ -456,9 +456,17 @@ test.describe('Flujo venta a cobro', () => {
 
     const id = ok.body.id as number
     expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, {})).status, 'reversar exige motivo').toBe(422)
-    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'Compensación de prueba' })).body.estado).toBe('reversado')
+    // Fase 13 (2.3): el reverso reabre deuda, así que se SOLICITA y lo decide el aprobador (como la anulación de un cobro).
+    const solicitud = await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'Compensación de prueba' })
+    expect(solicitud.status).toBe(201)
+    expect(solicitud.body.tipo).toBe('reverso_compensacion')
+    expect((await abiertas()).map(f => f.id), 'solicitar no reabre nada todavía').not.toContain(ctx.factura)
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'otra vez' })).status, 'ya hay una solicitud pendiente').toBe(422)
+    const decision = `/admin-contab/reversal-requests/${solicitud.body.id}/decision`
+    expect((await api(request, 'gerencia', 'PUT', decision, { aprobar: true })).status, 'otra cuenta de Gerencia no decide').toBe(403)
+    expect((await api(request, 'gerencia3', 'PUT', decision, { aprobar: true })).body.estado).toBe('ejecutada')
     expect((await abiertas()).map(f => f.id), 'la factura se reabre').toContain(ctx.factura)
-    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'otra vez' })).status).toBe(422)
+    expect((await api(request, 'contabilidad', 'POST', `/admin-contab/compensaciones/${id}/reverse`, { motivo: 'ya reversada' })).status).toBe(422)
   })
 
   test('12. incobrable: se propone con motivo y solo lo decide el aprobador', async ({ request }) => {
