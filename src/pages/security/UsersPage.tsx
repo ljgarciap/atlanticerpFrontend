@@ -12,7 +12,7 @@ import ResetPasswordModal from '@/components/security/ResetPasswordModal'
 import ImpersonateUserModal from '@/components/security/ImpersonateUserModal'
 import BulkResetPasswordModal from '@/components/security/BulkResetPasswordModal'
 import { useToastStore } from '@/store/toastStore'
-import type { UserListItem } from '@/api/usersApi'
+import { usersApi, type UserListItem } from '@/api/usersApi'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoChevronLeft, IcoChevronRight } from '@/components/icons'
@@ -54,6 +54,14 @@ export default function UsersPage() {
 
   const { data, isFetching } = useUsers({ search: query, page, per_page: perPage, is_active: true, role_id: roleFilter || undefined })
   const toggleStatus         = useToggleUserStatus()
+  // Fase 12c — reenviar el enlace de activación a quien aún no eligió su contraseña.
+  const handleResendActivation = (user: UserListItem) => {
+    const name = `${user.first_name} ${user.last_name}`.trim()
+    usersApi.resendActivation(user.id).then(
+      () => useToastStore.getState().show(t('security:users.messages.activationResent', { name }), 'success'),
+      () => useToastStore.getState().show(t('security:users.messages.activationResendError'), 'error'),
+    )
+  }
   const resetMfa             = useResetUserMfa()
   const { data: roles = [] } = useQuery({ queryKey: ['roles'], queryFn: rolesApi.list })
 
@@ -182,6 +190,7 @@ export default function UsersPage() {
               onResetMfa={handleResetMfa}
               canResetPassword={canResetPasswords}
               onResetPassword={setResetPasswordUser}
+              onResendActivation={handleResendActivation}
               onVisibility={setVisibilityUser}
               canImpersonate={canImpersonate}
               actorId={authUser?.id}
@@ -278,6 +287,7 @@ export default function UsersPage() {
               onResetMfa={handleResetMfa}
               canResetPassword={canResetPasswords}
               onResetPassword={setResetPasswordUser}
+              onResendActivation={handleResendActivation}
               onVisibility={setVisibilityUser}
               canImpersonate={canImpersonate}
               actorId={authUser?.id}

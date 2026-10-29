@@ -108,7 +108,7 @@
       },
       "help": {
         "password_reset_free_per_hour": "How many individual resets an operator can do per hour without typing their password; past the limit it is required. 0 = always required.",
-        "password_reset_expiration_hours": "After this period an unchanged temporary password stops working and the account must be reset again.",
+        "password_reset_expiration_hours": "Hours the activation link of a new or reset account stays valid; after that another one must be requested.",
         "password_reset_enabled": "Off by default in production: turn it on only during the agreed window to reset passwords and turn it off afterwards.",
         "impersonation_max_minutes": "After this time the session ends on its own and is not renewed.",
         "impersonation_alert_sessions_per_day": "Above this number of sessions in a day, superadmins receive a security alert.",
@@ -117,7 +117,7 @@
       },
       "labels": {
         "password_reset_free_per_hour": "Resets per hour without operator password",
-        "password_reset_expiration_hours": "Lifetime of the temporary password after a reset (hours)",
+        "password_reset_expiration_hours": "Activation link lifetime (hours)",
         "password_reset_enabled": "Enable password resets",
         "impersonation_max_minutes": "Maximum length of a View as user session (minutes)",
         "impersonation_reason_min_length": "Minimum length of the View as user reason (characters)",

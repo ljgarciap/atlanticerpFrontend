@@ -1,7 +1,8 @@
+import { execSync } from 'node:child_process'
 import { test, expect, type APIRequestContext } from '@playwright/test'
 
 // Flujo ejecutable de los transversales (catálogo: atlanticerp-backend/docs/flujos/transversales.md): ciclo de vida de un usuario (alta, primer
-// ingreso con cambio obligatorio de clave, permisos adicionales, desactivación, reinicio), «Ver como usuario», niveles de seguridad y
+// activación por enlace, permisos adicionales, desactivación, reinicio), «Ver como usuario», niveles de seguridad y
 // notificaciones. Por la API real; crea sus propios datos (usuario y nivel «flujo») y los desactiva al terminar. UN worker (npm run e2e:flujos).
 
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:8092'
@@ -13,6 +14,17 @@ const tokens: Partial<Record<Rol, string>> = {}
 const ctx: Record<string, number | string> = {}
 const STAMP = String(Date.now())
 type Res = { status: number; body: any }
+
+// Fase 12c: una cuenta nueva o reiniciada no tiene clave utilizable; se activa con un enlace de un solo uso. En local el correo solo queda en el log,
+// así que el e2e pide el enlace con el comando de soporte (`users:activation-link`). `E2E_ACTIVATION_CMD` lo reemplaza ({email} = la cuenta).
+function tokenDeActivacion(email: string): string {
+  const cmd = (process.env.E2E_ACTIVATION_CMD
+    ?? 'docker compose -f ../atlanticerp-backend/infra/docker-compose.yml exec -T laravel php artisan users:activation-link atlantic {email}').replace('{email}', email)
+  const salida = execSync(cmd, { encoding: 'utf8' })
+  const token = salida.match(/#token=([0-9a-f]+)/)?.[1]
+  if (!token) throw new Error(`El comando de activación no devolvió un enlace: ${salida.slice(0, 200)}`)
+  return token
+}
 
 const claims = (token: string) => JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'))
 
@@ -68,27 +80,28 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     ctx.userId = ok.body.id
   })
 
-  test('2. primer ingreso: la clave inicial obliga a cambiarla antes de usar la API', async ({ request }) => {
-    const r = await entrar(request, email, email)
-    expect(r.status, 'la clave inicial es el propio correo').toBe(200)
-    const token = r.body.token as string
-    const bloqueado = await con(request, token, 'GET', '/ventas-diseno/home/summary')
-    expect(bloqueado.status).toBe(403)
-    expect(bloqueado.body.code).toBe('password_change_required')
-    expect((await con(request, token, 'GET', '/auth/me')).body.must_change_password, 'el perfil sí se puede leer').toBe(true)
+  test('2. activación: sin clave utilizable; el enlace deja elegirla una sola vez y vence con uno nuevo', async ({ request }) => {
+    expect((await entrar(request, email, email)).status, 'la clave ya no es el propio correo').toBe(401)
 
-    const cambiar = (nueva: string, confirmacion = nueva, actual = email) => con(request, token, 'PUT', '/auth/password', { current_password: actual, new_password: nueva, new_password_confirmation: confirmacion })
-    expect((await cambiar('Ab1!')).status, 'mínimo 8 caracteres').toBe(422)
-    expect((await cambiar('soloMinusculasLargas')).status, 'con mayúscula y número').toBe(422)
-    expect((await cambiar(clave, 'otra')).status, 'la confirmación coincide').toBe(422)
-    expect((await cambiar(email)).status, 'distinta de la actual').toBe(422)
-    expect((await cambiar(clave, clave, 'equivocada')).status, 'la actual debe ser correcta').toBe(422)
-    expect((await cambiar(clave)).status).toBe(204)
+    const enlace = tokenDeActivacion(email)
+    const elegir = (token: string, nueva: string, confirmacion = nueva) =>
+      request.post(`${API}/auth/reset-password`, { data: { token, password: nueva, password_confirmation: confirmacion }, headers: { Accept: 'application/json' } })
+    expect((await elegir(enlace, 'Ab1!')).status(), 'mínimo 8 caracteres').toBe(422)
+    expect((await elegir(enlace, 'soloMinusculasLargas')).status(), 'con mayúscula y número').toBe(422)
+    expect((await elegir(enlace, clave, 'otra')).status(), 'la confirmación coincide').toBe(422)
+    expect((await elegir(enlace, email)).status(), 'distinta del correo').toBe(422)
+    expect((await elegir('0'.repeat(64), clave)).status(), 'un enlace inventado no sirve').toBe(422)
 
-    expect((await entrar(request, email, email)).status, 'la clave vieja deja de servir').toBe(401)
+    // un enlace nuevo anula el anterior
+    const nuevoEnlace = tokenDeActivacion(email)
+    expect((await elegir(enlace, clave)).status(), 'el enlace anterior quedó anulado').toBe(422)
+    expect((await elegir(nuevoEnlace, clave)).status()).toBe(200)
+    expect((await elegir(nuevoEnlace, 'OtraClave99!x')).status(), 'el enlace sirve una sola vez').toBe(422)
+
     const nuevo = await entrar(request, email, clave)
     expect(nuevo.status).toBe(200)
-    expect((await con(request, nuevo.body.token, 'GET', '/ventas-diseno/home/summary')).status, 'con la clave cambiada la API responde').toBe(200)
+    expect((await con(request, nuevo.body.token, 'GET', '/auth/me')).body.must_change_password, 'al elegir su clave ya no queda cambio pendiente').toBe(false)
+    expect((await con(request, nuevo.body.token, 'GET', '/ventas-diseno/home/summary')).status, 'la API responde').toBe(200)
   })
 
   test('3. permisos adicionales: solo los asigna superadmin y viajan en el token', async ({ request }) => {
@@ -109,7 +122,7 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     expect(await guardado()).toEqual([])
   })
 
-  test('4. desactivar invalida el acceso al instante; reiniciar la clave la devuelve al correo', async ({ request }) => {
+  test('4. desactivar invalida el acceso al instante; reiniciar deja la cuenta sin clave hasta usar el enlace', async ({ request }) => {
     const token = (await entrar(request, email, clave)).body.token as string
     expect((await con(request, token, 'GET', '/auth/me')).status).toBe(200)
     expect((await api(request, 'gerencia', 'PATCH', `/users/${ctx.userId}/status`, { is_active: false })).status).toBe(200)
@@ -120,7 +133,11 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     expect((await api(request, 'gerencia', 'POST', `/users/${ctx.userId}/reset-password`, {})).status, 'reiniciar es solo de superadmin').toBe(403)
     expect((await api(request, 'superadmin', 'POST', `/users/${ctx.userId}/reset-password`, {})).status).toBe(200)
     expect((await entrar(request, email, clave)).status, 'la clave anterior ya no sirve').toBe(401)
-    expect((await entrar(request, email, email)).status, 'vuelve a la clave inicial').toBe(200)
+    expect((await entrar(request, email, email)).status, 'tampoco queda el correo como clave (Fase 12c)').toBe(401)
+    const enlace = tokenDeActivacion(email)
+    const elegida = await request.post(`${API}/auth/reset-password`, { data: { token: enlace, password: clave, password_confirmation: clave }, headers: { Accept: 'application/json' } })
+    expect(elegida.status(), 'con el enlace elige su clave de nuevo').toBe(200)
+    expect((await entrar(request, email, clave)).status).toBe(200)
   })
 
   test('5. «Ver como usuario»: solo lectura, con motivo y reautenticación, y queda auditado', async ({ request }) => {

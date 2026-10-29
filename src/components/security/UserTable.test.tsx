@@ -22,7 +22,7 @@ function makeUser(overrides: Partial<UserListItem> = {}): UserListItem {
   }
 }
 
-function renderTable(opts: { users?: UserListItem[]; actorHasSuperadmin?: boolean; canResetPassword?: boolean; canManage?: boolean; onResetPassword?: (u: UserListItem) => void } = {}) {
+function renderTable(opts: { onResendActivation?: (u: UserListItem) => void; users?: UserListItem[]; actorHasSuperadmin?: boolean; canResetPassword?: boolean; canManage?: boolean; onResetPassword?: (u: UserListItem) => void } = {}) {
   const onResetPassword = opts.onResetPassword ?? vi.fn()
   render(
     <UserTable
@@ -38,6 +38,7 @@ function renderTable(opts: { users?: UserListItem[]; actorHasSuperadmin?: boolea
       onResetMfa={vi.fn()}
       onResetPassword={onResetPassword}
       onVisibility={vi.fn()}
+      onResendActivation={opts.onResendActivation}
     />,
   )
   return { onResetPassword }
@@ -134,3 +135,20 @@ describe('UserTable — acción "Ver como"', () => {
   })
 })
 
+
+describe('UserTable — acción "Reenviar enlace" (Fase 12c)', () => {
+  it('solo aparece en las cuentas pendientes de activar y reenvía con ese usuario', () => {
+    const onResendActivation = vi.fn()
+    renderTable({ onResendActivation, users: [makeUser({ id: 1, pending_activation: true }), makeUser({ id: 2, email: 'b@x.test', pending_activation: false })] })
+
+    const botones = screen.getAllByText('security:users.actions.resendActivation')
+    expect(botones).toHaveLength(1)
+    fireEvent.click(botones[0])
+    expect(onResendActivation).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }))
+  })
+
+  it('no aparece sin permiso de gestión', () => {
+    renderTable({ canManage: false, onResendActivation: vi.fn(), users: [makeUser({ pending_activation: true })] })
+    expect(screen.queryByText('security:users.actions.resendActivation')).not.toBeInTheDocument()
+  })
+})
