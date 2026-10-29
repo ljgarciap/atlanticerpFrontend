@@ -216,6 +216,8 @@ export interface PurchaseOrderLineDetail {
   // REQ-145 (SCRUM-208) — Recepción por línea.
   received_quantity:        number
   reception_status:         ReceptionStatus
+  /** Fase 13 — línea de ajuste de un cambio de monto aprobado (sin producto; no se recibe, no se reclama ni se edita). */
+  is_adjustment?:           boolean
 }
 
 /** SCRUM-1127 — versión guardada de la orden en otro idioma (hoy solo inglés). */
