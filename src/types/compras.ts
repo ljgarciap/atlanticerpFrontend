@@ -424,6 +424,17 @@ export interface PurchaseOrderPayment {
   created_at:          string
 }
 
+/** Fase 13 (2.7) — advertencia informativa al registrar un pago (no bloquea): hoy solo `pago_supera_recibido`. */
+export interface PaymentWarning {
+  code:    string
+  message: string
+}
+
+/** Respuesta de registrar un pago: el pago y, si aplica, las advertencias. */
+export interface RegisteredPurchaseOrderPayment extends PurchaseOrderPayment {
+  warnings?: PaymentWarning[]
+}
+
 export interface PurchaseOrderListResponse {
   data: PurchaseOrderSummary[]
   meta: PaginationMeta

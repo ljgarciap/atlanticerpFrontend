@@ -8,7 +8,7 @@ import type {
   LiquidationAgency, LiquidationAgencyPayload, ProviderConfirmationValidation, ProviderBankExtraction,
   LiquidationAgencySummaryResponse, LiquidationAgencyDetail,
   LiquidationAgencyContact, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload,
-  PurchaseOrderPayment,
+  PurchaseOrderPayment, RegisteredPurchaseOrderPayment,
   PurchaseOrderClaimListResponse, PurchaseOrderClaimDetail, PurchaseOrderClaimPayload, PurchaseOrderClaimPhoto,
   ClaimListParams,
   ReplenishmentResponse, ReplacementRequest, ReplacementRequestListResponse, CreateReplacementRequestPayload, SubstituteSearchPoll,
@@ -191,11 +191,11 @@ export const comprasApi = {
       api.get<{ data: PurchaseOrderPayment[] }>(`/compras/orders/${orderId}/payments`).then(r => r.data),
 
     // REQ-189 Escenario 1 — comprobante obligatorio.
-    register: (orderId: number, amount: number, proof: File): Promise<PurchaseOrderPayment> => {
+    register: (orderId: number, amount: number, proof: File): Promise<RegisteredPurchaseOrderPayment> => {
       const form = new FormData()
       form.append('amount', String(amount))
       form.append('proof', proof)
-      return api.post<PurchaseOrderPayment>(`/compras/orders/${orderId}/payments`, form, {
+      return api.post<RegisteredPurchaseOrderPayment>(`/compras/orders/${orderId}/payments`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then(r => r.data)
     },
