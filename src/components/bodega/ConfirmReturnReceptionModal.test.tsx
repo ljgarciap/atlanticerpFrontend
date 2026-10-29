@@ -125,4 +125,23 @@ describe('ConfirmReturnReceptionModal', () => {
     expect(await screen.findByText('bodega:returns.receptionModal.errors.invalidQuantity')).toBeInTheDocument()
     expect(mockedApi.returns.confirmReception).not.toHaveBeenCalled()
   })
+
+  it('Fase 13 — no deja confirmar más de lo solicitado y el campo lo limita; menos sí', async () => {
+    mockedApi.returns.confirmReception.mockResolvedValue({} as CustomerReturnDetail)
+    const { onClose } = renderModal()
+    await screen.findByText('Producto colgante Nordic 40cm')
+
+    const campo = screen.getByRole('spinbutton')
+    expect(campo).toHaveAttribute('max', '3')
+
+    fireEvent.change(campo, { target: { value: '4' } })
+    fireEvent.click(screen.getByText('bodega:returns.receptionModal.save'))
+    expect(await screen.findByText('bodega:returns.receptionModal.errors.exceedsRequested:{"qty":3}')).toBeInTheDocument()
+    expect(mockedApi.returns.confirmReception).not.toHaveBeenCalled()
+
+    fireEvent.change(campo, { target: { value: '2' } })
+    fireEvent.click(screen.getByText('bodega:returns.receptionModal.save'))
+    await waitFor(() => expect(mockedApi.returns.confirmReception).toHaveBeenCalled())
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
+  })
 })
