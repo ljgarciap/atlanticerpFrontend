@@ -1013,7 +1013,7 @@ export interface CreatePaymentV2Payload {
 /** SCRUM-1168 F4 — solicitud de anular un cobro (o de devolver dinero, F5): la piden Contabilidad o Asistente Administrativa y la decide Gerencia. */
 export interface ReversalRequest {
   id: number
-  tipo: 'anulacion' | 'devolucion'
+  tipo: 'anulacion' | 'devolucion' | 'reverso_compensacion'
   estado: 'solicitada' | 'ejecutada' | 'rechazada'
   master_client_id: number
   payment_id: number | null

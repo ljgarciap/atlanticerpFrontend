@@ -1942,6 +1942,8 @@
       "tituloMovimiento": "Desaplicar {{etiqueta}}",
       "tituloCruce": "Reversar el cruce {{etiqueta}}",
       "ayuda": "El dinero vuelve al saldo a favor del cliente y la factura recupera su saldo pendiente. Queda en el historial con tu nombre y el motivo; no necesita aprobación.",
+      "ayudaCruce": "Reversar un cruce reabre la deuda de las facturas, así que lo decide el aprobador (o un suplente): se envía como solicitud y, mientras tanto, el cruce sigue vigente. Queda en el historial con tu nombre y el motivo.",
+      "solicitado": "Solicitud enviada para reversar {{etiqueta}}: la decide el aprobador.",
       "motivo": "Motivo (obligatorio)",
       "confirmar": "Confirmar reverso",
       "cancelar": "Cancelar",
@@ -1984,6 +1986,8 @@
     "referencia": "Referencia",
     "verComprobante": "Ver comprobante",
     "confirmarAprobarDevolucion": "¿Confirmas la devolución? El dinero sale de la cuenta o caja elegida hoy y se descuenta del saldo a favor del cliente.",
-    "aprobadaDevolucion": "Devolución registrada."
+    "aprobadaDevolucion": "Devolución registrada.",
+    "reversarCruce": "Reversar una compensación",
+    "aprobadaReverso": "Reverso aprobado: la compensación quedó reversada y las facturas recuperaron su saldo pendiente."
   }
 }

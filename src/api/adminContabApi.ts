@@ -667,9 +667,10 @@ export const adminContabApi = {
     confirm: (masterClientId: number, lines: CompensacionLinea[]): Promise<Compensacion> =>
       api.post<Compensacion>('/admin-contab/compensaciones', { master_client_id: masterClientId, lines }).then(r => r.data),
 
-    // SCRUM-1168 F4 — reversos: desaplicar una aplicación o un cruce completo (sin aprobación; queda en el libro con motivo y autor).
-    reverse: (id: number, motivo: string): Promise<Compensacion> =>
-      api.post<Compensacion>(`/admin-contab/compensaciones/${id}/reverse`, { motivo }).then(r => r.data),
+    // SCRUM-1168 F4 — desaplicar una aplicación (sin aprobación; queda en el libro con motivo y autor). Fase 13 (2.3): reversar un cruce completo
+    // se SOLICITA y lo decide el aprobador, así que la respuesta es la solicitud (`tipo = reverso_compensacion`), no la compensación.
+    reverse: (id: number, motivo: string): Promise<{ id: number; tipo: string; estado: string }> =>
+      api.post<{ id: number; tipo: string; estado: string }>(`/admin-contab/compensaciones/${id}/reverse`, { motivo }).then(r => r.data),
 
     unapply: (movementId: number, motivo: string): Promise<{ id: number }> =>
       api.post<{ id: number }>(`/admin-contab/movimientos/${movementId}/desaplicar`, { motivo }).then(r => r.data),
