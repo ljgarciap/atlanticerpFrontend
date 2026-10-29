@@ -21,6 +21,9 @@ type Rol = (typeof ROLES)[number]
 const tokens: Partial<Record<Rol, string>> = {}
 const ids: Record<string, number> = {}
 const ctx: Record<string, number | string> = {}
+// «Hoy» según la zona de la empresa (por defecto Panamá), no la del servidor de pruebas: pasada la medianoche UTC son días distintos.
+const hoyEmpresa = () => new Date().toLocaleDateString('en-CA', { timeZone: process.env.E2E_TENANT_TZ ?? 'America/Panama' })
+
 const STAMP = String(Date.now())
 const PDF = Buffer.from('%PDF-1.4\n%flujo\n')
 
@@ -488,7 +491,7 @@ test.describe('Flujo venta a cobro', () => {
     const gasto = (foto: boolean) => request.post(`${API}/admin-contab/petty-cash/expenses`, {
       headers: { Authorization: `Bearer ${tokens.contabilidad}`, Accept: 'application/json' },
       multipart: {
-        'lineas[0][fecha]': new Date().toISOString().slice(0, 10), 'lineas[0][solicitante_id]': String(solicitante), 'lineas[0][proveedor]': 'Ferretería Flujo',
+        'lineas[0][fecha]': hoyEmpresa(), 'lineas[0][solicitante_id]': String(solicitante), 'lineas[0][proveedor]': 'Ferretería Flujo',
         'lineas[0][descripcion]': 'Tornillos', 'lineas[0][monto_bruto]': '20', 'lineas[0][itbms]': '1.4',
         ...(foto ? { 'lineas[0][foto]': { name: 'factura.pdf', mimeType: 'application/pdf', buffer: PDF } } : {}),
       },
@@ -518,7 +521,7 @@ test.describe('Flujo venta a cobro', () => {
   test('15. arqueo diario: se cierra una vez al día, queda inmutable y lo aprueba el aprobador', async ({ request }) => {
     const hoy = () => api(request, 'contabilidad', 'GET', '/admin-contab/cash-position/daily-count')
     let arqueo = (await hoy()).body
-    expect(arqueo.fecha).toBe(new Date().toISOString().slice(0, 10))
+    expect(arqueo.fecha).toBe(hoyEmpresa())
     const mov = arqueo.cobros[0] as { movement_id: number }
 
     expect((await api(request, 'vendedor', 'PUT', '/admin-contab/cash-position/daily-count/entries', { movement_type: 'payment', movement_id: mov.movement_id, observacion: 'x' })).status).toBe(403)

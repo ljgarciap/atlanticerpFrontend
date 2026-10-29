@@ -13,6 +13,8 @@ export interface UserListItem {
   manager:          { id: number; name: string } | null
   is_active:        boolean
   mfa_enabled:      boolean
+  /** Fase 12c — cuenta activa que aún no eligió su contraseña (se le puede reenviar el enlace de activación). */
+  pending_activation?: boolean
   notes:            string | null
   department:        { id: number; name: string } | null
   extra_permissions: string[]
@@ -98,6 +100,10 @@ export interface UserModuleVisibilityResponse {
 }
 
 export const usersApi = {
+  /** Fase 12c — reenvía el enlace de activación a una cuenta que aún no eligió su contraseña. */
+  resendActivation: (id: number): Promise<void> =>
+    api.post(`/users/${id}/activation-link`).then(() => undefined),
+
   list: (params?: { search?: string; page?: number; per_page?: number; is_active?: boolean; role_id?: number }): Promise<UserListResponse> =>
     api.get('/users', { params }).then(r => r.data as UserListResponse),
 

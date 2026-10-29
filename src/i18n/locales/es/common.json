@@ -108,7 +108,7 @@
       },
       "help": {
         "password_reset_free_per_hour": "Cuántos restablecimientos individuales puede hacer un operador por hora sin escribir su contraseña; pasado el tope, la pide. 0 = siempre la pide.",
-        "password_reset_expiration_hours": "Pasado este plazo, una contraseña temporal sin cambiar deja de funcionar y hay que restablecerla de nuevo.",
+        "password_reset_expiration_hours": "Horas que dura el enlace de activación que recibe una cuenta nueva o reiniciada; pasado el plazo hay que pedir otro.",
         "password_reset_enabled": "En producción está apagado por defecto: enciéndelo solo durante la ventana acordada para restablecer contraseñas y apágalo al terminar.",
         "impersonation_max_minutes": "Pasado este plazo la sesión termina sola y no se renueva.",
         "impersonation_alert_sessions_per_day": "Al superar este número de sesiones en un día, los superadmins reciben una alerta de seguridad.",
@@ -117,7 +117,7 @@
       },
       "labels": {
         "password_reset_free_per_hour": "Restablecimientos por hora sin contraseña del operador",
-        "password_reset_expiration_hours": "Vigencia de la contraseña temporal tras un restablecimiento (horas)",
+        "password_reset_expiration_hours": "Vigencia del enlace de activación (horas)",
         "password_reset_enabled": "Habilitar el restablecimiento de contraseñas",
         "impersonation_max_minutes": "Duración máxima de una sesión de Ver como usuario (minutos)",
         "impersonation_reason_min_length": "Largo mínimo del motivo de Ver como usuario (caracteres)",

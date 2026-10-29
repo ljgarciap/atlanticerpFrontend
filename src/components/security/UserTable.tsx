@@ -31,9 +31,11 @@ interface Props {
   canImpersonate?:    boolean
   actorId?:           number
   onImpersonate?:     (user: UserListItem) => void
+  /** Fase 12c — «Reenviar enlace» en las cuentas que aún no eligieron su contraseña. */
+  onResendActivation?: (user: UserListItem) => void
 }
 
-export default function UserTable({ users, roles, loading, canManage, actorLevel, actorHasSuperadmin, canResetPassword, onEdit, onToggleStatus, onResetMfa, onResetPassword, onVisibility, canImpersonate = false, actorId, onImpersonate }: Props) {
+export default function UserTable({ users, roles, loading, canManage, actorLevel, actorHasSuperadmin, canResetPassword, onEdit, onToggleStatus, onResetMfa, onResetPassword, onVisibility, canImpersonate = false, actorId, onImpersonate, onResendActivation }: Props) {
   const { t } = useTranslation(['common', 'security'])
   const roleName = (id: number | null) => roles.find(r => r.id === id)?.name
 
@@ -189,9 +191,18 @@ export default function UserTable({ users, roles, loading, canManage, actorLevel
                           {t('security:users.actions.resetMfa')}
                         </Button>
                       )}
-                      {/* Reset de contraseña — solo superadmin.all. La contraseña pasa a ser el
-                          correo de la persona y debe cambiarla al ingresar. Un usuario inactivo
-                          no se restablece (el backend responde 422). */}
+                      {/* Fase 12c — cuenta que aún no eligió su contraseña: reenviar el enlace de activación. */}
+                      {canManage && onResendActivation && user.pending_activation && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => onResendActivation(user)}
+                          className="!text-xs !px-2.5 !py-1">
+                          {t('security:users.actions.resendActivation')}
+                        </Button>
+                      )}
+                      {/* Reset de contraseña — solo superadmin.all. La cuenta queda sin clave y la persona recibe un enlace de
+                          activación para elegir la suya (Fase 12c). Un usuario inactivo no se restablece (el backend responde 422). */}
                       {canResetPassword && (
                         <Button
                           type="button"
