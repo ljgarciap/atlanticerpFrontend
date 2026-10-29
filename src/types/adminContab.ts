@@ -798,6 +798,10 @@ export interface SaldoFavorRow {
   monto_usado: number
   monto_disponible: number
   estado: SaldoFavorEstado
+  /** Fase 13 (2.2) — de dónde sale el saldo (lo que la compensación exige por línea) y a qué nivel sirve. */
+  source_type?: 'abono' | 'cobro' | 'nota_credito'
+  source_id?: number
+  nivel?: 'cliente' | 'proyecto' | 'factura'
 }
 
 export interface SaldoFavorFilters {
@@ -822,6 +826,10 @@ export interface SaldoFavorResult {
     // Siempre sobre el total real, nunca sobre la página actual (regla ya existente, §3.1).
     saldo_disponible_total: number
     clientes_con_saldo: number
+    // Fase 13 (2.2) — el total desglosado por nivel, para no mezclar niveles sin decirlo.
+    saldo_aplicable_cliente?: number
+    saldo_a_cuenta?: number
+    saldo_reservado?: number
   }
   rows: SaldoFavorRow[]
   // SCRUM-947 — mismo shape que expone `Pagination::meta()` en el backend.
@@ -849,7 +857,12 @@ export interface OpenInvoice {
 
 export interface OpenInvoicesResult {
   invoices: OpenInvoice[]
+  /** Lo que un cobro puede aplicar de inmediato (abonos nivel Cliente y notas de crédito). */
   credit_balance: number
+  /** Fase 13 (2.2) — el resto del saldo a favor del cliente: cobros a cuenta, reservado a un proyecto o factura, y el total. */
+  credit_balance_cuenta?: number
+  credit_balance_reservado?: number
+  credit_balance_total?: number
   /** REQ-462 RN2 — presente cuando el formulario llega preseleccionado desde Facturación. */
   master_client_name: string | null
 }

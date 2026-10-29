@@ -89,6 +89,15 @@ export default function SaldoFavorPage() {
           {indicadores && (
             <div className="text-[11px] text-slate-400 mt-1">{t('saldoFavor.kpiTotalNote', { count: indicadores.clientes_con_saldo })}</div>
           )}
+          {indicadores?.saldo_aplicable_cliente !== undefined && (
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1" data-testid="kpi-desglose">
+              {t('saldoFavor.kpiDesglose', {
+                aplicable: formatCurrency(indicadores.saldo_aplicable_cliente),
+                cuenta: formatCurrency(indicadores.saldo_a_cuenta ?? 0),
+                reservado: formatCurrency(indicadores.saldo_reservado ?? 0),
+              })}
+            </div>
+          )}
         </Card>
         <Card variant="panel" className="p-3.5">
           <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5">{t('saldoFavor.kpiClientes')}</div>

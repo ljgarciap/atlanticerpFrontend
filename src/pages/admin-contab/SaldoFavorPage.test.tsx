@@ -71,6 +71,18 @@ beforeEach(() => {
 })
 
 describe('SaldoFavorPage', () => {
+  it('Fase 13 — el total se muestra desglosado por nivel cuando el backend lo informa', async () => {
+    mockedApi.saldoFavor.list.mockResolvedValue({
+      ...makeResult(),
+      indicadores: { saldo_disponible_total: 850, clientes_con_saldo: 1, saldo_aplicable_cliente: 100, saldo_a_cuenta: 700, saldo_reservado: 50 },
+    })
+    renderPage()
+    const desglose = await screen.findByTestId('kpi-desglose')
+    expect(desglose).toHaveTextContent(/aplicable=USD 100\.00/)
+    expect(desglose).toHaveTextContent(/cuenta=USD 700\.00/)
+    expect(desglose).toHaveTextContent(/reservado=USD 50\.00/)
+  })
+
   it('muestra los indicadores y las filas de saldo con su origen', async () => {
     renderPage()
     expect(await screen.findByText('Vitrio Construcciones, S.A.')).toBeInTheDocument()

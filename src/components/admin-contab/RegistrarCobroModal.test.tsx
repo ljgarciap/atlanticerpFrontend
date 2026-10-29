@@ -183,6 +183,31 @@ describe('RegistrarCobroModal — SCRUM-931 filtro cruzado Proyecto/# Cotizació
   })
 })
 
+describe('RegistrarCobroModal — Fase 13 (2.2) desglose del saldo a favor', () => {
+  it('con saldo a cuenta o reservado muestra el desglose; sin ellos no muestra nada', async () => {
+    mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({
+      credit_balance: 100, credit_balance_cuenta: 700, credit_balance_reservado: 50, credit_balance_total: 850,
+    }))
+    renderModal()
+    await selectClient()
+    fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
+
+    const desglose = await screen.findByTestId('saldo-desglose')
+    expect(desglose).toHaveTextContent(/total=USD 850\.00/)
+    expect(desglose).toHaveTextContent(/cuenta=USD 700\.00/)
+    expect(desglose).toHaveTextContent(/reservado=USD 50\.00/)
+  })
+
+  it('un cliente sin saldo a cuenta ni reservado no muestra el desglose', async () => {
+    mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({ credit_balance: 500 }))
+    renderModal()
+    await selectClient()
+    fireEvent.click(await screen.findByRole('checkbox', { name: /F-0001/ }))
+    await screen.findByLabelText(/saldoClienteLabel/)
+    expect(screen.queryByTestId('saldo-desglose')).not.toBeInTheDocument()
+  })
+})
+
 describe('RegistrarCobroModal — SCRUM-902 §4.4 saldo a favor a nivel Cliente master', () => {
   it('Escenario 9 — aplicar $500 de saldo cliente sobre $6,200 de facturas deja el monto recibido en $5,700', async () => {
     mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({ credit_balance: 500 }))
