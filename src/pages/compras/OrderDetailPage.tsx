@@ -47,7 +47,8 @@ function apiErrorMessage(err: unknown, fallback: string): string {
 
 function draftFromOrder(order: PurchaseOrderDetail): OrderDraft {
   return {
-    lines: order.lines.map(l => ({
+    // Fase 13: las líneas de ajuste de un cambio de monto no se editan; el backend las conserva al guardar.
+    lines: order.lines.filter(l => !l.is_adjustment).map(l => ({
       key: `line-${l.id}`,
       catalogProductId: l.catalog_product_id,
       newProduct: null,
@@ -590,7 +591,7 @@ export default function OrderDetailPage() {
               {order.lines.map(l => (
                 <tr key={l.id}>
                   <td className="py-2">
-                    <div className="font-medium text-slate-800">{l.description}</div>
+                    <div className={l.is_adjustment ? 'font-medium text-slate-600 italic' : 'font-medium text-slate-800'}>{l.description}</div>
                   </td>
                   <td className="py-2 text-slate-600">{l.factory_reference ?? '—'}</td>
                   <td className="py-2 text-slate-600">{l.reference ?? '—'}</td>
@@ -599,8 +600,8 @@ export default function OrderDetailPage() {
                   {!moneyHidden && <td className="py-2 font-semibold text-slate-800">${formatMoney(l.subtotal)}</td>}
                   <td className="py-2 text-slate-600">{l.sales_project_name ?? t('compras:newOrder.lines.projectNone')}</td>
                   <td className="py-2">
-                    <ReceptionBadge status={l.reception_status} t={t} />
-                    {l.reception_status === 'parcial' && (
+                    {l.is_adjustment ? <span className="text-slate-400">—</span> : <ReceptionBadge status={l.reception_status} t={t} />}
+                    {!l.is_adjustment && l.reception_status === 'parcial' && (
                       <span className="ml-1.5 text-xs text-slate-400">
                         {t('compras:reception.receivedOf', { received: l.received_quantity, expected: l.quantity })}
                       </span>

@@ -148,7 +148,7 @@ export default function NewClaimModal({ onClose, onCreated }: Props) {
 
             <p className="text-xs font-semibold text-slate-500 uppercase mb-2">{t('compras:claims.new.products')}</p>
             <ul className="flex flex-col gap-1.5 mb-4">
-              {order?.lines.map(l => {
+              {order?.lines.filter(l => !l.is_adjustment).map(l => {
                 const qty = Number(selectedLines[l.id] || 0)
                 const disputedAmount = qty * l.unit_cost
 

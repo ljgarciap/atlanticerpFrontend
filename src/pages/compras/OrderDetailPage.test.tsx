@@ -140,6 +140,25 @@ describe('OrderDetailPage', () => {
     expect(screen.getByText('$500.00')).toBeInTheDocument()
   })
 
+  // Fase 13 (2.1) — la línea de ajuste de un cambio de monto aprobado aparece en el detalle, pero no es mercancía.
+  it('Fase 13 — muestra la línea de ajuste sin estado de recepción', async () => {
+    const detail = makeDetail()
+    detail.lines.push({
+      id: 2, catalog_product_id: null, reference: null, factory_reference: null, description: 'Ajuste de monto aprobado',
+      quantity: 1, unit_cost: 200, subtotal: 200, additional_cost_percent: null,
+      additional_cost_amount: null, additional_cost_type: null,
+      sales_project_id: null, sales_project_name: null,
+      received_quantity: 0, reception_status: 'pendiente', is_adjustment: true,
+    })
+    mockedComprasApi.orders.get.mockResolvedValue(detail)
+    renderPage()
+
+    expect(await screen.findByText('Ajuste de monto aprobado')).toBeInTheDocument()
+    expect(screen.getAllByText('$200.00').length).toBeGreaterThan(0)
+    // una sola insignia de recepción: la del producto, no la del ajuste
+    expect(screen.getAllByText('compras:reception.status.pendiente')).toHaveLength(1)
+  })
+
   // SCRUM-956 — valores monetarios deben llevar separador de miles, no solo decimales.
   it('formatea costo unitario, subtotal, total y costo de envío con separador de miles', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
