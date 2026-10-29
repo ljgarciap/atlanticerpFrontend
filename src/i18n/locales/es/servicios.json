@@ -750,7 +750,8 @@
       "schedule": "Agendar",
       "reschedule": "Reagendar",
       "cancelTicket": "Cancelar ticket",
-      "print": "Ver/Imprimir"
+      "print": "Ver/Imprimir",
+      "reopenTicket": "Reabrir ticket"
     },
     "requirements": {
       "catalog": {
@@ -814,7 +815,7 @@
     },
     "cancelModal": {
       "title": "Cancelar ticket {{numero}}",
-      "warning": "Esta acción se puede revertir después cambiando el estado manualmente.",
+      "warning": "Un ticket cancelado es final: solo se puede reabrir con un motivo.",
       "motivoLabel": "Motivo de cancelación",
       "motivoPlaceholder": "Explica por qué se cancela este ticket",
       "motivoRequired": "El motivo de cancelación es obligatorio",
@@ -905,6 +906,16 @@
         "closed": "Cerrado",
         "cancelled": "Cancelado"
       }
+    },
+    "reopenModal": {
+      "title": "Reabrir ticket {{numero}}",
+      "warning": "El ticket vuelve a «Reportado» y queda registrado el motivo.",
+      "motivoLabel": "Motivo de la reapertura",
+      "motivoPlaceholder": "Explica por qué se reabre este ticket",
+      "motivoRequired": "El motivo es obligatorio (mínimo 10 caracteres).",
+      "confirm": "Reabrir",
+      "cancel": "Volver",
+      "error": "No se pudo reabrir el ticket"
     }
   },
   "settings": {

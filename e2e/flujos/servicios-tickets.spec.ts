@@ -140,5 +140,31 @@ test.describe('Flujo de Servicios', () => {
     expect(ok.body.estado).toBe('cancelled')
     expect(ok.body.cancellation_reason).toBe('Cliente desistió')
     expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${id}/cancelar`, { motivo: 'otra vez' })).status, 'ya cancelado').toBe(422)
+    ctx.cancelado = id
+  })
+
+  test('6. matriz de estados: no se salta ni se vuelve atrás; cerrado y cancelado se reabren con motivo', async ({ request }) => {
+    // reported no salta a closed ni a on_site
+    const t = await api(request, 'liderservicios', 'POST', '/servicios/tickets', { tipo: 'installation', subtipo: 'installation', tipo_instalacion: 'internal', descripcion: `[FLUJO] Matriz ${STAMP}`, contacto: 'Contacto Flujo', telefono: '6000-0000', direccion: 'Calle Flujo' })
+    expect(t.status).toBe(201)
+    const id = t.body.id as number
+    for (const estado of ['closed', 'resolved', 'on_site']) {
+      expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${id}/estado`, { estado })).status, `reported → ${estado}`).toBe(422)
+    }
+    // un ticket abierto no se reabre; uno cerrado no vuelve atrás por /estado
+    expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${id}/reabrir`, { motivo: 'No corresponde reabrir' })).status).toBe(422)
+    expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${ctx.instalacion}/estado`, { estado: 'reported' })).status, 'closed es final').toBe(422)
+
+    // reapertura: permiso y motivo (mínimo 10 caracteres)
+    const cerrado = ctx.instalacion
+    expect((await api(request, 'tecnico', 'PATCH', `/servicios/tickets/${cerrado}/reabrir`, { motivo: 'Intento no autorizado' })).status).toBe(403)
+    expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${cerrado}/reabrir`, { motivo: 'corto' })).status).toBe(422)
+    const ok = await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${cerrado}/reabrir`, { motivo: 'Faltó una pieza por instalar' })
+    expect(ok.status).toBe(200)
+    expect(ok.body.estado).toBe('reported')
+
+    // un cancelado también se reabre así, no moviéndolo de estado
+    expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${ctx.cancelado}/estado`, { estado: 'reported' })).status).toBe(422)
+    expect((await api(request, 'liderservicios', 'PATCH', `/servicios/tickets/${ctx.cancelado}/reabrir`, { motivo: 'El cliente retomó el proyecto' })).status).toBe(200)
   })
 })

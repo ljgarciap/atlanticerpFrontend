@@ -15,6 +15,7 @@ import { IcoClose, IcoPaperclip, IcoPlus, IcoSearch } from '@/components/icons'
 import { InspectionReportIndicator, ClaimSheetIndicator, QuoteIndicator } from './TicketIndicators'
 import TicketScheduleModal from './TicketScheduleModal'
 import TicketCancelModal from './TicketCancelModal'
+import TicketReopenModal from './TicketReopenModal'
 import InspectionReportModal from './InspectionReportModal'
 import ClaimSheetModal from './ClaimSheetModal'
 import ServiceQuoteModal from './ServiceQuoteModal'
@@ -114,6 +115,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
   const [draft, setDraft]   = useState<EditDraft | null>(null)
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [cancelOpen, setCancelOpen]     = useState(false)
+  const [reopenOpen, setReopenOpen]     = useState(false)
   const [inspectionReportOpen, setInspectionReportOpen] = useState(initialDoc === 'inspection_report')
   const [claimSheetOpen, setClaimSheetOpen] = useState(initialDoc === 'claim_sheet')
   const [serviceQuoteOpen, setServiceQuoteOpen] = useState(initialDoc === 'quote')
@@ -306,6 +308,11 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
             {mode === 'view' && ticket && (
               <Button variant="secondary" onClick={() => void downloadPdf()} loading={downloadingPdf}>
                 {t('tickets.actions.print')}
+              </Button>
+            )}
+            {mode === 'view' && canEdit && ticket && (ticket.estado === 'closed' || ticket.estado === 'cancelled') && (
+              <Button variant="secondary" onClick={() => setReopenOpen(true)}>
+                {t('tickets.actions.reopenTicket')}
               </Button>
             )}
             {mode === 'view' && canEdit && ticket && ticket.estado !== 'cancelled' && (
@@ -682,6 +689,18 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
           onClose={() => setScheduleOpen(false)}
           onScheduled={() => {
             setScheduleOpen(false)
+            invalidateTicketLists()
+          }}
+        />
+      )}
+
+      {reopenOpen && ticket && (
+        <TicketReopenModal
+          ticketId={ticket.id}
+          numero={ticket.numero}
+          onClose={() => setReopenOpen(false)}
+          onReopened={() => {
+            setReopenOpen(false)
             invalidateTicketLists()
           }}
         />

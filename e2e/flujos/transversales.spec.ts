@@ -97,9 +97,9 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     expect((await api(request, 'superadmin', 'PUT', `/users/${ctx.userId}`, { extra_permissions: ['no.existe'] })).status, 'solo claves del catálogo').toBe(422)
     expect((await api(request, 'vendedor', 'PUT', `/users/${ctx.userId}`, { extra_permissions: [permiso] })).status).toBe(403)
 
-    // gerencia puede editar usuarios pero la asignación de permisos adicionales se descarta (protección contra escalada de privilegios)
-    await api(request, 'gerencia', 'PUT', `/users/${ctx.userId}`, { extra_permissions: [permiso] })
-    expect(await guardado(), 'lo asignado por una cuenta que no es superadmin no se guarda').toEqual([])
+    // gerencia puede editar usuarios pero NO asignar permisos adicionales: responde 403 (antes se descartaba en silencio; Fase 12a)
+    expect((await api(request, 'gerencia', 'PUT', `/users/${ctx.userId}`, { extra_permissions: [permiso] })).status, 'una cuenta que no es superadmin recibe 403').toBe(403)
+    expect(await guardado(), 'y no se guarda nada').toEqual([])
 
     expect((await api(request, 'superadmin', 'PUT', `/users/${ctx.userId}`, { extra_permissions: [permiso] })).status).toBe(200)
     expect(await guardado()).toEqual([permiso])
