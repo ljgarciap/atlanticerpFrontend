@@ -25,7 +25,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/serviciosApi', () => ({
   serviciosApi: {
     tickets: {
-      get: vi.fn(), update: vi.fn(), cancel: vi.fn(), downloadPdf: vi.fn(), attachmentUrl: vi.fn(),
+      get: vi.fn(), update: vi.fn(), cancel: vi.fn(), reopen: vi.fn(), downloadPdf: vi.fn(), attachmentUrl: vi.fn(),
       addProduct: vi.fn(), updateProductQuantity: vi.fn(), removeProduct: vi.fn(), uploadAttachment: vi.fn(),
     },
     technicians: { internalOptions: vi.fn() },
@@ -445,6 +445,45 @@ describe('TicketDetailModal — Cancelar ticket (REQ-227)', () => {
 
     fireEvent.click(confirmBtn)
     await waitFor(() => expect(mockedApi.tickets.cancel).toHaveBeenCalledWith(1, 'No se necesita más'))
+  })
+})
+
+// Fase 12a — cerrado y cancelado son finales: se reabren con permiso y motivo (mínimo 10 caracteres).
+describe('TicketDetailModal — Reabrir ticket (Fase 12a)', () => {
+  it('el botón aparece solo en un ticket cerrado o cancelado y solo con canEdit', async () => {
+    mockedApi.tickets.get.mockResolvedValue(makeDetail({ estado: 'reported' }))
+    const abierto = renderModal({ canEdit: true })
+    await waitFor(() => expect(screen.getByText('Ticket INS-2026-0001')).toBeInTheDocument())
+    expect(screen.queryByText('tickets.actions.reopenTicket')).not.toBeInTheDocument()
+    abierto.unmount()
+
+    mockedApi.tickets.get.mockResolvedValue(makeDetail({ estado: 'closed' }))
+    const sinPermiso = renderModal({ canEdit: false })
+    await waitFor(() => expect(screen.getByText('Ticket INS-2026-0001')).toBeInTheDocument())
+    expect(screen.queryByText('tickets.actions.reopenTicket')).not.toBeInTheDocument()
+    sinPermiso.unmount()
+
+    renderModal({ canEdit: true })
+    await waitFor(() => expect(screen.getByText('tickets.actions.reopenTicket')).toBeInTheDocument())
+  })
+
+  it('exige un motivo de 10 caracteres y llama a reopen() con el motivo recortado', async () => {
+    mockedApi.tickets.get.mockResolvedValue(makeDetail({ estado: 'cancelled', cancellation_reason: 'Antes' }))
+    mockedApi.tickets.reopen.mockResolvedValue(makeDetail({ estado: 'reported' }))
+    renderModal({ canEdit: true })
+
+    await waitFor(() => expect(screen.getByText('tickets.actions.reopenTicket')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('tickets.actions.reopenTicket'))
+
+    const confirmBtn = await screen.findByText('tickets.reopenModal.confirm')
+    const textarea = screen.getByPlaceholderText('tickets.reopenModal.motivoPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'corto' } })
+    expect(confirmBtn.closest('button')).toBeDisabled()
+    fireEvent.change(textarea, { target: { value: '  El cliente retomó el proyecto  ' } })
+    expect(confirmBtn.closest('button')).not.toBeDisabled()
+
+    fireEvent.click(confirmBtn)
+    await waitFor(() => expect(mockedApi.tickets.reopen).toHaveBeenCalledWith(1, 'El cliente retomó el proyecto'))
   })
 })
 

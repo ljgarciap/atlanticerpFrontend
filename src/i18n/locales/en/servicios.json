@@ -750,7 +750,8 @@
       "schedule": "Schedule",
       "reschedule": "Reschedule",
       "cancelTicket": "Cancel ticket",
-      "print": "View/Print"
+      "print": "View/Print",
+      "reopenTicket": "Reopen ticket"
     },
     "requirements": {
       "catalog": {
@@ -814,7 +815,7 @@
     },
     "cancelModal": {
       "title": "Cancel ticket {{numero}}",
-      "warning": "This action can be reverted later by changing the status manually.",
+      "warning": "A cancelled ticket is final: it can only be reopened with a reason.",
       "motivoLabel": "Cancellation reason",
       "motivoPlaceholder": "Explain why this ticket is being cancelled",
       "motivoRequired": "Cancellation reason is required",
@@ -905,6 +906,16 @@
         "closed": "Closed",
         "cancelled": "Cancelled"
       }
+    },
+    "reopenModal": {
+      "title": "Reopen ticket {{numero}}",
+      "warning": "The ticket goes back to “Reported” and the reason is recorded.",
+      "motivoLabel": "Reason for reopening",
+      "motivoPlaceholder": "Explain why this ticket is reopened",
+      "motivoRequired": "A reason is required (at least 10 characters).",
+      "confirm": "Reopen",
+      "cancel": "Back",
+      "error": "Could not reopen the ticket"
     }
   },
   "settings": {

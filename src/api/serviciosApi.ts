@@ -100,6 +100,10 @@ export const serviciosApi = {
     cancel: (id: number, motivo: string): Promise<TicketDetail> =>
       api.patch<TicketDetail>(`/servicios/tickets/${id}/cancelar`, { motivo }).then(r => r.data),
 
+    // Fase 12a — reabrir un ticket cerrado o cancelado (vuelve a «reported»); motivo obligatorio.
+    reopen: (id: number, motivo: string): Promise<TicketDetail> =>
+      api.patch<TicketDetail>(`/servicios/tickets/${id}/reabrir`, { motivo }).then(r => r.data),
+
     // REQ-228 — Ver/Imprimir PDF. Mismo patrón blob que catalogApi.sendPdf()/projects.exportCsv().
     downloadPdf: async (id: number, numero: string): Promise<void> => {
       const res = await api.get(`/servicios/tickets/${id}/pdf`, { responseType: 'blob' })
