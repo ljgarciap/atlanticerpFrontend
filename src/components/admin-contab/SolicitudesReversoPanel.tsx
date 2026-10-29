@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { isAxiosError } from 'axios'
 import { useReversalRequests, useDecideReversal } from '@/hooks/useAdminContab'
 import { useAuthStore } from '@/store/authStore'
@@ -8,6 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { formatDateShort } from '@/utils/dates'
 import { getRegion } from '@/lib/region'
+import type { CompensationSuggestion } from '@/types/adminContab'
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
@@ -31,6 +33,8 @@ export default function SolicitudesReversoPanel() {
   const [motivoRechazo, setMotivoRechazo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [resultado, setResultado] = useState<string | null>(null)
+  // Fase 13 (2.4): tras anular un cobro, si el cliente tiene saldo a favor para cubrir las facturas reabiertas se sugiere compensarlas.
+  const [sugerencia, setSugerencia] = useState<CompensationSuggestion | null>(null)
 
   const rows = data?.rows ?? []
   if (rows.length === 0 && resultado === null) return null
@@ -44,6 +48,7 @@ export default function SolicitudesReversoPanel() {
         setResultado(decidiendo.aprobar
           ? (decidiendo.tipo === 'devolucion' ? t('solicitudesReverso.aprobadaDevolucion') : decidiendo.tipo === 'reverso_compensacion' ? t('solicitudesReverso.aprobadaReverso') : t('solicitudesReverso.aprobada')) + (descuentos.length > 0 ? ' ' + t('solicitudesReverso.descuentoComision', { monto: formatCurrency(descuentos.reduce((a, d) => a + d.monto, 0)) }) : '')
           : t('solicitudesReverso.rechazada'))
+        setSugerencia(decidiendo.aprobar ? (r.sugerencia_compensacion ?? null) : null)
         setDecidiendo(null)
         setMotivoRechazo('')
       },
@@ -57,6 +62,14 @@ export default function SolicitudesReversoPanel() {
       <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{puedeDecidir ? t('solicitudesReverso.ayudaAprobador') : t('solicitudesReverso.ayudaOtros')}</p>
 
       {resultado && <p role="status" data-testid="solicitud-resultado" className="text-sm text-emerald-700 dark:text-emerald-300 mb-2">{resultado}</p>}
+      {sugerencia && (
+        <div role="status" data-testid="sugerencia-compensacion" className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {t('solicitudesReverso.sugerenciaCompensacion', {
+            saldo: formatCurrency(sugerencia.saldo_a_favor), pendiente: formatCurrency(sugerencia.pendiente_total), compensable: formatCurrency(sugerencia.compensable),
+          })}{' '}
+          <Link to="/admin-contab/compensaciones" className="font-semibold underline">{t('solicitudesReverso.irACompensaciones')}</Link>
+        </div>
+      )}
       {error && <p role="alert" className="text-sm text-red-600 mb-2">{error}</p>}
 
       <div className="flex flex-col gap-2">

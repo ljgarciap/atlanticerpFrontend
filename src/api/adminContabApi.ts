@@ -14,7 +14,7 @@ import type {
   PaymentHistorialFilters, PaymentHistorialResult, PaymentDetail, PaymentAttachmentDetail, ConfirmacionAjustes,
   PaymentsConfig, CreatePaymentV2Payload,
   CompensacionesFilters, CompensacionesResult, CompensacionClienteDetalle, CompensacionLinea, CompensacionVistaPrevia, Compensacion,
-  ReversalRequest, ReversalRequestsResult,
+  ReversalRequest, CompensationSuggestion, ReversalRequestsResult,
   AccountStatementClientOption, AccountStatementProjectOption, AccountStatement, AccountStatementFilters,
   NotaCreditoResumenMes, NotaCreditoItbmsRateOption, NotaCreditoFacturaOrigen,
   CreateNotaCreditoPayload, NotaCredito,
@@ -649,7 +649,7 @@ export const adminContabApi = {
     list: (params: { estado?: string; tipo?: string; page?: number; per_page?: number | 'all' }): Promise<ReversalRequestsResult> =>
       api.get<ReversalRequestsResult>('/admin-contab/reversal-requests', { params }).then(r => r.data),
 
-    decide: (id: number, aprobar: boolean, motivoRechazo?: string): Promise<ReversalRequest & { ajustes_comision?: { vendedor_id: number; pedido_id: number; monto: number }[] }> =>
+    decide: (id: number, aprobar: boolean, motivoRechazo?: string): Promise<ReversalRequest & { ajustes_comision?: { vendedor_id: number; pedido_id: number; monto: number }[]; sugerencia_compensacion?: CompensationSuggestion | null }> =>
       api.put(`/admin-contab/reversal-requests/${id}/decision`, { aprobar, motivo_rechazo: motivoRechazo ?? null }).then(r => r.data),
   },
 
