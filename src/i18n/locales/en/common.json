@@ -57,7 +57,8 @@
       "crm": "CRM",
       "salesCommissions": "Sales commission",
       "catalogs": "Catalogs",
-      "global": "Global"
+      "global": "Global",
+      "approvers": "Approvers"
     },
     "catalogsTab": {
       "title": "Vocabulary catalogs",
@@ -241,5 +242,21 @@
     "readOnlyToast": "Read-only mode: changes are not saved while you view the app as another person.",
     "endedToast": "The View as session has ended. You are back in your own account.",
     "originLostToast": "The View as session has ended and your original session is no longer available. Please sign in again."
+  },
+  "approversTab": {
+    "title": "Substitute approvers",
+    "subtitle": "Besides each module's primary approver, these accounts can decide the same things (credit notes, voids, purchase orders, inventory adjustments, petty cash, cash counts and commissions) when the primary approver is away. Superadmin only.",
+    "titularCompras": "Purchasing primary approver",
+    "titularAdminContab": "Admin & Accounting primary approver",
+    "none": "Not configured",
+    "listLabel": "Substitutes",
+    "empty": "No substitutes: only the primary approver decides.",
+    "remove": "Remove",
+    "addLabel": "Add substitute",
+    "choose": "Choose a person…",
+    "add": "Add",
+    "loading": "Loading…",
+    "loadError": "Could not load the approvers.",
+    "saveError": "Could not save."
   }
 }

@@ -57,7 +57,8 @@
       "crm": "CRM",
       "salesCommissions": "Comisión de vendedores",
       "catalogs": "Catálogos",
-      "global": "Global"
+      "global": "Global",
+      "approvers": "Aprobadores"
     },
     "catalogsTab": {
       "title": "Catálogos de vocabulario",
@@ -241,5 +242,21 @@
     "readOnlyToast": "Modo solo lectura: no se guardan cambios mientras ves la app como otra persona.",
     "endedToast": "La sesión de Ver como terminó. Volviste a tu cuenta.",
     "originLostToast": "La sesión de Ver como terminó y tu sesión original ya no está disponible. Inicia sesión de nuevo."
+  },
+  "approversTab": {
+    "title": "Aprobadores suplentes",
+    "subtitle": "Además del aprobador titular de cada módulo, estas cuentas pueden decidir lo mismo (notas de crédito, anulaciones, órdenes de compra, ajustes de inventario, caja chica, arqueos y comisiones) cuando el titular no está. Solo superadmin.",
+    "titularCompras": "Titular de Compras",
+    "titularAdminContab": "Titular de Admin & Contab",
+    "none": "Sin configurar",
+    "listLabel": "Suplentes",
+    "empty": "Sin suplentes: solo decide el titular.",
+    "remove": "Quitar",
+    "addLabel": "Agregar suplente",
+    "choose": "Elige una persona…",
+    "add": "Agregar",
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar los aprobadores.",
+    "saveError": "No se pudo guardar."
   }
 }
