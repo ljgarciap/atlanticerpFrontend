@@ -2035,6 +2035,13 @@ export interface DailyCashCountRetencion {
  *  de uno cerrado) devuelven el mismo shape — ver ADR §2/§5. `es_atrasado`/`fecha_real_hoy` solo
  *  tienen sentido en el arqueo activo (REQ-527); en el detalle de un arqueo del historial vienen
  *  `es_atrasado: false` (ya no aplica, es un registro fijo del pasado). */
+/** Fase 14h — una reapertura de un arqueo cerrado: quién, cuándo y por qué. */
+export interface DailyCashCountReopening {
+  por:    string | null
+  at:     string | null
+  motivo: string | null
+}
+
 export interface DailyCashCount {
   id: number
   numero: number | null
@@ -2076,6 +2083,8 @@ export interface DailyCashCount {
   reabierto_por?: string | null
   reabierto_at?: string | null
   reabierto_motivo?: string | null
+  /** Fase 14h — TODAS las reaperturas, la más reciente primero (de la auditoría); vacío si nunca se reabrió. */
+  reaperturas?: DailyCashCountReopening[]
   /** Solo presente en el arqueo ACTIVO (`estado: 'abierto'`) — preview de lo que `numero`
    *  pasará a valer al cerrar (QA SCRUM-603, 2026-08-29 RN1). */
   numero_preview?: number
@@ -2093,6 +2102,8 @@ export interface DailyCashCountHistoryRow {
   realizado_por: string | null
   /** QA SCRUM-603 (2026-08-29 RN4) — hora de cierre junto a `realizado_por`. */
   cerrado_at: string | null
+  /** Fase 14h — el día se reabrió al menos una vez (el detalle lista cuántas y por qué). */
+  reabierto?: boolean
 }
 
 export interface DailyCashCountHistoryResult {

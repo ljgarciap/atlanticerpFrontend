@@ -445,6 +445,58 @@ describe('ArqueoCajaPage — Batch 19 (SCRUM-602→606, REQ-525→529)', () => {
     expect(screen.queryByText('adminContab:arqueoCaja.historial.reabrir')).not.toBeInTheDocument()
   })
 
+  it('Fase 14h: el listado marca los días reabiertos y el detalle lista todas las reaperturas con quién y por qué', async () => {
+    mockAuth(makeUser({ role: 'management' }))
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [
+        { id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-02T15:00:00-05:00', realizado_por: 'Asistente Administrativa', cerrado_at: '2026-07-02T14:05:00-05:00', reabierto: true },
+        { id: 6, numero: 3, fecha: '2026-07-03', total_neto: 900, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-03T15:00:00-05:00', realizado_por: 'Asistente Administrativa', cerrado_at: '2026-07-03T14:05:00-05:00', reabierto: false },
+      ],
+    }))
+    mockedApi.cashPosition.historyDetail.mockResolvedValue(makeDailyCount({
+      id: 5, numero: 2, estado: 'aprobado', fecha: '2026-07-02', puede_reabrir: false,
+      reaperturas: [
+        { por: 'Gerencia', at: '2026-07-04T10:00:00-05:00', motivo: 'Un depósito entró con la fecha equivocada' },
+        { por: 'Gerencia', at: '2026-07-03T09:00:00-05:00', motivo: 'Faltó registrar un cobro del día' },
+      ],
+    }))
+    renderPage()
+
+    // Solo el día reabierto lleva la marca.
+    expect(await screen.findAllByText('adminContab:arqueoCaja.historial.reabiertoMarca')).toHaveLength(1)
+
+    fireEvent.click((await screen.findAllByText('adminContab:arqueoCaja.historial.ver'))[0])
+    const bloque = await screen.findByTestId('reaperturas')
+    expect(bloque).toHaveTextContent('Un depósito entró con la fecha equivocada')
+    expect(bloque).toHaveTextContent('Faltó registrar un cobro del día')
+  })
+
+  it('Fase 14h: un día nunca reabierto no muestra el bloque de reaperturas', async () => {
+    mockAuth(makeUser({ role: 'management' }))
+    mockedApi.cashPosition.history.mockResolvedValue(makeHistory({
+      data: [{ id: 5, numero: 2, fecha: '2026-07-02', total_neto: 18420, estado: 'aprobado', aprobado_por: 'Gerencia', aprobado_at: '2026-07-02T15:00:00-05:00', realizado_por: 'Asistente Administrativa', cerrado_at: '2026-07-02T14:05:00-05:00', reabierto: false }],
+    }))
+    mockedApi.cashPosition.historyDetail.mockResolvedValue(makeDailyCount({ id: 5, numero: 2, estado: 'aprobado', fecha: '2026-07-02', reaperturas: [] }))
+    renderPage()
+
+    fireEvent.click(await screen.findByText('adminContab:arqueoCaja.historial.ver'))
+    await screen.findByText('adminContab:arqueoCaja.historial.aprobadoPor', { exact: false })
+    expect(screen.queryByTestId('reaperturas')).not.toBeInTheDocument()
+    expect(screen.queryByText('adminContab:arqueoCaja.historial.reabiertoMarca')).not.toBeInTheDocument()
+  })
+
+  it('Fase 14h: el arqueo activo reabierto avisa quién lo reabrió y por qué', async () => {
+    mockAuth(makeUser({ role: 'lider_admin_contab' }))
+    mockedApi.cashPosition.dailyCount.mockResolvedValue(makeDailyCount({
+      estado: 'abierto', reabierto_por: 'Gerencia', reabierto_at: '2026-07-04T10:00:00-05:00', reabierto_motivo: 'Faltó registrar un cobro del día',
+    }))
+    renderPage()
+    await screen.findByText(/28,740\.00/)
+    goToDailyCount()
+
+    expect(await screen.findByText(/reabiertoAviso.*nombre=Gerencia.*motivo=Faltó registrar un cobro del día/)).toBeInTheDocument()
+  })
+
   it('QA SCRUM-603 (2026-08-29 RN4): el historial muestra la hora de cierre junto a quién lo cerró', async () => {
     mockAuth(makeUser({ role: 'lider_admin_contab' }))
     mockedApi.cashPosition.history.mockResolvedValue(makeHistory({

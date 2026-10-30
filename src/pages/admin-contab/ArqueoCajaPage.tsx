@@ -431,6 +431,20 @@ function ArqueoDelDiaView(
         </div>
       )}
 
+      {/* Fase 14h — un arqueo abierto que ya se cerró y se reabrió dice por qué (la reapertura más reciente). */}
+      {isAbierto && dailyCount.reabierto_at && (
+        <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 mb-3">
+          <IcoAlertTriangle size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          <p className="text-[11.5px] text-amber-800 dark:text-amber-300">
+            {t('adminContab:arqueoCaja.arqueoDelDia.reabiertoAviso', {
+              nombre: dailyCount.reabierto_por ?? t('adminContab:arqueoCaja.historial.reaperturaSinNombre'),
+              fecha: `${formatDateShort(dailyCount.reabierto_at)} ${formatTimeShort(dailyCount.reabierto_at)}`,
+              motivo: dailyCount.reabierto_motivo ?? '—',
+            })}
+          </p>
+        </div>
+      )}
+
       {!isAbierto && (
         <div className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5 mb-3">
           <IcoClock size={14} className="text-slate-400 flex-shrink-0" />
@@ -748,6 +762,14 @@ function HistorialArqueosPanel({ t }: { t: (key: string, opts?: Record<string, u
                         <IcoClock size={10} /> {t('adminContab:arqueoCaja.historial.pendiente')}
                       </span>
                     )}
+                    {row.reabierto && (
+                      <span
+                        className="ml-1 inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9.5px] font-medium text-slate-600 dark:text-slate-300"
+                        title={t('adminContab:arqueoCaja.historial.reabiertoMarcaAyuda')}
+                      >
+                        {t('adminContab:arqueoCaja.historial.reabiertoMarca')}
+                      </span>
+                    )}
                   </td>
                   <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">
                     {row.realizado_por ?? '—'}
@@ -843,6 +865,27 @@ function DetalleArqueoModal({ id, t, onClose }: { id: number; t: (key: string, o
             <div className="text-[11px] text-slate-500 dark:text-slate-400">
               {detail.cerrado_por && t('adminContab:arqueoCaja.historial.cerradoPor', { nombre: detail.cerrado_por })}
             </div>
+
+            {(detail.reaperturas ?? []).length > 0 && (
+              <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-900/10 p-3" data-testid="reaperturas">
+                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-1.5">
+                  {t('adminContab:arqueoCaja.historial.reaperturasTitulo', { count: detail.reaperturas?.length ?? 0 })}
+                </p>
+                <ul className="space-y-1.5">
+                  {(detail.reaperturas ?? []).map((r, i) => (
+                    <li key={`${r.at ?? i}-${i}`} className="text-[11.5px] text-slate-600 dark:text-slate-300">
+                      <span className="font-medium">
+                        {t('adminContab:arqueoCaja.historial.reaperturaItem', {
+                          nombre: r.por ?? t('adminContab:arqueoCaja.historial.reaperturaSinNombre'),
+                          fecha: r.at ? `${formatDateShort(r.at)} ${formatTimeShort(r.at)}` : '—',
+                        })}
+                      </span>
+                      {r.motivo && <span className="block text-slate-500 dark:text-slate-400">{r.motivo}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {detail.retenciones.length > 0 && <RetencionesSection retenciones={detail.retenciones} t={t} />}
 

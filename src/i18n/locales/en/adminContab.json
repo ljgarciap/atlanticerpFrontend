@@ -1272,6 +1272,7 @@
       "conciliacionNote": "Bank reconciliation is handled in Bank Accounts, not here.",
       "descargarResumen": "Download summary",
       "atrasadoAviso": "The {{fecha}} cash count was never closed — close it before you can work on today's ({{fechaHoy}}).",
+      "reabiertoAviso": "Cash count reopened by {{nombre}} on {{fecha}}: {{motivo}}",
       "cerradoAviso": "This cash count is already {{estado}} — its notes and movements can no longer be edited.",
       "cerrar": {
         "boton": "Close daily cash count",
@@ -1329,7 +1330,12 @@
       "reabrirAyuda": "At least 10 characters. The cash count becomes open again, is closed again, and who reopened it and why is recorded.",
       "reabrirConfirmar": "Reopen",
       "reabrirCancelar": "Cancel",
-      "reabrirError": "Could not reopen the cash count."
+      "reabrirError": "Could not reopen the cash count.",
+      "reaperturasTitulo": "Reopenings ({{count}})",
+      "reaperturaItem": "{{nombre}} · {{fecha}}",
+      "reaperturaSinNombre": "Someone",
+      "reabiertoMarca": "Reopened",
+      "reabiertoMarcaAyuda": "This day was reopened after closing; open the detail to see who and why."
     },
     "restricted": {
       "restrictedRole": "Your role only has access to the Daily cash count. The Projected and Real (30/90 day) views are available to Accounting, the configured approver and Management.",
