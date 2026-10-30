@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useAbonos } from '@/hooks/useAdminContab'
-import { PAYMENT_METHODS } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { AbonoEstado, PaymentMethod } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -30,6 +30,7 @@ const ESTADO_PILL_CLASSES: Record<string, string> = {
  */
 export default function AbonosPage() {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
   // SCRUM-1128 — "Pasar a Pedido" redirige acá con el proyecto aprobado en `location.state` y abre
   // el formulario de abono nuevo ya precargado.
   const location = useLocation()
@@ -110,11 +111,11 @@ export default function AbonosPage() {
               {clientesOptions.map(([id, nombre]) => <option key={id} value={id}>{nombre}</option>)}
             </select>
             <select
-              value={metodoPago} onChange={e => { setMetodoPago(e.target.value as PaymentMethod | ''); setPage(1) }}
+              value={metodoPago} onChange={e => { setMetodoPago(e.target.value); setPage(1) }}
               className="rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               <option value="">{t('abonos.buscador.filtroMetodo')}</option>
-              {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
+              {metodosPago.methods.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
             </select>
             <select
               value={estado} onChange={e => { setEstado(e.target.value as AbonoEstado | ''); setPage(1) }}

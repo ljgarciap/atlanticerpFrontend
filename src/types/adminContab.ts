@@ -652,17 +652,14 @@ export interface HomeVencidosPorVencer {
 
 // Batch 5 del cuerpo principal (SCRUM-539→544, REQ-462→467) — Cobros.
 
-export type PaymentMethod =
-  | 'transferencia' | 'cheque' | 'efectivo' | 'tarjeta' | 'deposito' | 'yappy'
-  | 'link_pago' | 'retencion_impuestos' | 'ajuste_cuenta'
+/** Fase 14b — clave de una forma de pago del catálogo `payment_method` (ya no es una lista cerrada). */
+export type PaymentMethod = string
 
+/** Las de siempre: respaldo de `usePaymentMethods` mientras el catálogo carga o si falla. */
 export const PAYMENT_METHODS: PaymentMethod[] = [
   'transferencia', 'cheque', 'efectivo', 'tarjeta', 'deposito', 'yappy',
   'link_pago', 'retencion_impuestos', 'ajuste_cuenta',
 ]
-
-// REQ-466 RN4 — estos 2 nunca representan dinero entrando a una cuenta bancaria real.
-export const PAYMENT_METHODS_SIN_CUENTA_BANCARIA: PaymentMethod[] = ['retencion_impuestos', 'ajuste_cuenta']
 
 export type PaymentEstado = 'confirmado' | 'esperando_confirmacion' | 'anulado'
 
@@ -2109,9 +2106,8 @@ export interface UploadRetentionAttachmentResult {
 // está implementado todavía — `estado` de línea puede en teoría llegar como 'rechazado_temporal'/
 // 'reabierto' (la columna ya existe en backend), pero ningún flujo genera esos valores aún; hoy
 // toda línea nueva llega como 'pendiente'.
-export type PettyCashFormaPago = 'transferencia' | 'efectivo' | 'cheque' | 'yappy'
+export type PettyCashFormaPago = string
 
-export const PETTY_CASH_FORMAS_PAGO: PettyCashFormaPago[] = ['transferencia', 'efectivo', 'cheque', 'yappy']
 
 // 'rechazado_permanente' — línea con intentos_rechazo >= 2 (backend, fix Senior Review Batch 21:
 // `estado()` caía mal a 'pendiente' para este caso). No tiene lugar propio en la UI todavía (las

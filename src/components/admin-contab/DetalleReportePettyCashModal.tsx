@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import { isAxiosError } from 'axios'
 import {
   usePettyCashReportDetail, useApprovePettyCashReport, useDownloadPettyCashReportPdf,
@@ -31,6 +32,7 @@ interface Props {
  *  funcionar tanto pendiente de aprobación como finalizado). */
 export default function DetalleReportePettyCashModal({ numero, onClose, onSelectLinea, onDisuelto }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
   const { data: detail, isFetching } = usePettyCashReportDetail(numero)
   const approveMutation  = useApprovePettyCashReport()
   const downloadMutation = useDownloadPettyCashReportPdf()
@@ -129,7 +131,7 @@ export default function DetalleReportePettyCashModal({ numero, onClose, onSelect
           <div className="space-y-3">
             <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3 space-y-1 text-xs text-slate-600 dark:text-slate-300">
               <div>{t('cajaChica.detalleReporteModal.realizadoPor', { nombre: detail.realizado_por_nombre })}</div>
-              <div>{t('cajaChica.detalleReporteModal.formaPago', { formaPago: t(`cajaChica.formasPago.${detail.forma_pago}`) })}</div>
+              <div>{t('cajaChica.detalleReporteModal.formaPago', { formaPago: metodosPago.label(detail.forma_pago) })}</div>
               {detail.estado === 'finalizado' && detail.aprobado_por_nombre && (
                 <div>
                   {t('cajaChica.detalleReporteModal.aprobadoPor', {

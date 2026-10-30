@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios'
 import {
   usePaymentClients, useOpenInvoices, useDefaultBankAccount, useBankAccounts, useRegisterPayment,
 } from '@/hooks/useAdminContab'
-import { PAYMENT_METHODS, PAYMENT_METHODS_SIN_CUENTA_BANCARIA } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { PaymentMethod, PaymentClientOption } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -28,6 +28,7 @@ interface Props {
 // Batch 5 del cuerpo principal (SCRUM-539→544, REQ-462→467) — formulario "Registrar nuevo cobro".
 export default function RegistrarCobroModal({ initialMasterClientId, onClose, onRegistered }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
 
   const [clientQuery, setClientQuery]   = useState('')
   const [clientOpen, setClientOpen]     = useState(false)
@@ -69,7 +70,7 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
   // Fase 13 (2.2): el resto del saldo a favor del cliente (no aplicable aquí) se muestra aparte para que ninguna cifra parezca contradecir a otra.
   const creditCuenta = openInvoicesResult?.credit_balance_cuenta ?? 0
   const creditReservado = openInvoicesResult?.credit_balance_reservado ?? 0
-  const sinCuentaBancaria = PAYMENT_METHODS_SIN_CUENTA_BANCARIA.includes(metodoPago)
+  const sinCuentaBancaria = metodosPago.sinCuentaBancaria(metodoPago)
 
   // SCRUM-931 — opciones de cada select derivadas de `invoices`, acotadas por la selección
   // VIGENTE del otro campo (filtrado cruzado real, no solo padre→hijo).
@@ -417,10 +418,10 @@ export default function RegistrarCobroModal({ initialMasterClientId, onClose, on
                 </span>
                 <select
                   value={metodoPago}
-                  onChange={e => setMetodoPago(e.target.value as PaymentMethod)}
+                  onChange={e => setMetodoPago(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
                 >
-                  {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
+                  {metodosPago.methods.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
                 </select>
               </label>
 

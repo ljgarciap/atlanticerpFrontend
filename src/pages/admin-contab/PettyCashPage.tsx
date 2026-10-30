@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import { usePettyCashSummary, usePettyCashPending, usePettyCashReports, usePettyCashRejected } from '@/hooks/useAdminContab'
 import type { PettyCashEstadoLinea } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
@@ -228,6 +229,7 @@ function ReportesPanel(
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
   const { data, isFetching } = usePettyCashReports(page, perPage)
+  const metodosPago = usePaymentMethods()
 
   if (!data) return <p className="text-xs text-slate-400 text-center py-8">{isFetching ? '…' : null}</p>
   if (data.data.length === 0) return <p className="text-xs text-slate-400 text-center py-8">{t('cajaChica.reportesPanel.vacio')}</p>
@@ -263,7 +265,7 @@ function ReportesPanel(
                     {t(`cajaChica.estadosReporte.${r.estado}`)}
                   </span>
                 </td>
-                <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{t(`cajaChica.formasPago.${r.forma_pago}`)}</td>
+                <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{metodosPago.label(r.forma_pago)}</td>
                 <td className="py-2 pr-3 text-slate-600 dark:text-slate-300">{r.realizado_por_nombre}</td>
                 <td className="py-2 pr-3">
                   <button type="button" onClick={() => onSelect(r.numero)} className="text-primary-dark hover:underline">

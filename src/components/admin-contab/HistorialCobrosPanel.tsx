@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePaymentHistorial } from '@/hooks/useAdminContab'
-import { PAYMENT_METHODS } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { PaymentEstado, PaymentMethod } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
@@ -42,6 +42,7 @@ interface Props {
  */
 export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
 
   const [search, setSearch]   = useState('')
 
@@ -99,9 +100,9 @@ export default function HistorialCobrosPanel({ onSelectPayment, initialEstado }:
             <option value="">{t('cobros.historial.filtroCliente')}</option>
             {clientesOptions.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <select value={metodo} onChange={e => { setMetodo(e.target.value as PaymentMethod | ''); setPage(1) }} className={selectClass}>
+          <select value={metodo} onChange={e => { setMetodo(e.target.value); setPage(1) }} className={selectClass}>
             <option value="">{t('cobros.historial.filtroMetodo')}</option>
-            {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
+            {metodosPago.methods.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
           <select value={estado} onChange={e => { setEstado(e.target.value as PaymentEstado | ''); setPage(1) }} className={selectClass}>
             <option value="">{t('cobros.historial.filtroEstado')}</option>
