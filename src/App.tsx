@@ -65,8 +65,6 @@ import FacturacionPage   from '@/pages/admin-contab/FacturacionPage'
 import EstadoCuentaPage from '@/pages/admin-contab/EstadoCuentaPage'
 import CobrosPage from '@/pages/admin-contab/CobrosPage'
 import NotasCreditoPage from '@/pages/admin-contab/NotasCreditoPage'
-import AbonosPage from '@/pages/admin-contab/AbonosPage'
-import SaldoFavorPage from '@/pages/admin-contab/SaldoFavorPage'
 import CompensacionesPage from '@/pages/admin-contab/CompensacionesPage'
 import ComisionesInternasPage from '@/pages/admin-contab/ComisionesInternasPage'
 import ComisionesExternasPage from '@/pages/admin-contab/ComisionesExternasPage'
@@ -597,26 +595,11 @@ export default function App() {
                 </RequirePermission>
               </RequirePermission>
             } />
-            {/* SCRUM-902/903 — mismo gate que Cobros/Notas Crédito, mismo nivel del menú Movimientos. */}
-            <Route path="/admin-contab/abonos" element={
-              <RequirePermission permission="admin_contab.view">
-                <RequirePermission permission={GUARD.ADMIN_CONTAB}>
-                  <AbonosPage />
-                </RequirePermission>
-              </RequirePermission>
-            } />
-            {/* SCRUM-1168 F3 — Compensaciones (concepto nuevo de cobros): mismo gate que Cobros y Saldo a favor. */}
+            {/* SCRUM-1168 F3 — Compensaciones (concepto nuevo de cobros): mismo gate que Cobros. */}
             <Route path="/admin-contab/compensaciones" element={
               <RequirePermission permission="admin_contab.view">
                 <RequirePermission permission={GUARD.ADMIN_CONTAB}>
                   <CompensacionesPage />
-                </RequirePermission>
-              </RequirePermission>
-            } />
-            <Route path="/admin-contab/saldo-favor" element={
-              <RequirePermission permission="admin_contab.view">
-                <RequirePermission permission={GUARD.ADMIN_CONTAB}>
-                  <SaldoFavorPage />
                 </RequirePermission>
               </RequirePermission>
             } />

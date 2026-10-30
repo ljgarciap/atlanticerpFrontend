@@ -34,9 +34,6 @@ vi.mock('./InvoiceDetailModal', () => ({
 vi.mock('./DetalleNotaCreditoModal', () => ({
   default: ({ notaId }: { notaId: number }) => <div data-testid="nota-modal">nota:{notaId}</div>,
 }))
-vi.mock('./RegistrarAbonoModal', () => ({
-  default: ({ abonoId }: { abonoId: number }) => <div data-testid="abono-modal">abono:{abonoId}</div>,
-}))
 vi.mock('@/components/QuoteViewerModal', () => ({
   default: ({ quoteId }: { quoteId: number }) => <div data-testid="quote-modal">quote:{quoteId}</div>,
 }))
@@ -358,17 +355,6 @@ describe('DetalleCobroModal — SCRUM-931 Cotización/Guía de Entrega/Abonos/No
 
     fireEvent.click(await screen.findByText('PED-0055-G'))
     expect(await screen.findByTestId('guia-modal')).toHaveTextContent('guia:55')
-  })
-
-  it('Abonos: uno por id, "Abono #{id}" abre RegistrarAbonoModal en modo detalle', async () => {
-    mockedApi.payments.detail.mockResolvedValue(makeDetail({ abonos: [42, 43] }))
-    renderModal()
-    await screen.findByText('F-0001')
-
-    const chips = await screen.findAllByText('cobros.detalle.abonoNumero')
-    expect(chips).toHaveLength(2)
-    fireEvent.click(chips[0])
-    expect(await screen.findByTestId('abono-modal')).toHaveTextContent('abono:42')
   })
 
   it('Notas de Crédito: cada una con su número real, abre DetalleNotaCreditoModal con su nota_id', async () => {

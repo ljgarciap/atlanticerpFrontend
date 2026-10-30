@@ -479,15 +479,9 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
       { id: 'admin-contab-movimientos-menu', label: tAdminContab('nav.movimientosMenu'), icon: <IcoFileText />, children: [
         { id: 'admin-contab-cobros', label: tAdminContab('nav.cobros'), href: '/admin-contab/cobros', icon: <IcoDollarSign /> },
         { id: 'admin-contab-notas-credito', label: tAdminContab('nav.notasCredito'), href: '/admin-contab/notas-credito', icon: <IcoBan /> },
-        // SCRUM-913 — orden corregido: Cobros, Notas crédito, Registrar abono, Saldo a favor
-        // (el orden anterior, de SCRUM-902/903, tenía Saldo a favor antes que Registrar abono).
-        // SCRUM-1168 — con el concepto nuevo de cobros ya no se registran abonos (el dinero que entra sin factura es un cobro) y aparece
-        // «Compensaciones», la vista por cliente para aplicar ese dinero a sus facturas. `cobros_v2` viaja en el JWT (dato visual).
-        ...(user?.flags?.cobros_v2 === true
-          ? [{ id: 'admin-contab-compensaciones', label: tAdminContab('nav.compensaciones'), href: '/admin-contab/compensaciones', icon: <IcoDollarSign /> }]
-          : [{ id: 'admin-contab-registrar-abono', label: tAdminContab('nav.registrarAbono'), href: '/admin-contab/abonos', icon: <IcoDollarSign /> }]),
-        // F5 — con el concepto nuevo el saldo a favor se ve y se usa desde Compensaciones (la pantalla sigue en la ruta, solo sale del menú).
-        ...(user?.flags?.cobros_v2 === true ? [] : [{ id: 'admin-contab-saldo-favor', label: tAdminContab('nav.saldoFavor'), href: '/admin-contab/saldo-favor', icon: <IcoTrendingUp /> }]),
+        // SCRUM-1168 / Fase 15a — el concepto de cobros es uno solo: el dinero que entra sin factura es un cobro y «Compensaciones» es la vista por cliente
+        // para aplicarlo a sus facturas (ya no hay abonos ni pantalla de saldo a favor aparte).
+        { id: 'admin-contab-compensaciones', label: tAdminContab('nav.compensaciones'), href: '/admin-contab/compensaciones', icon: <IcoDollarSign /> },
       ] },
     ] : []),
     // Batch 14 (SCRUM-575→579) — Comisiones Internas. RN3 — sin cambios de contenido, ya era un

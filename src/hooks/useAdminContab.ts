@@ -16,7 +16,6 @@ import type {
   PettyCashNewExpenseLine, CreatePettyCashReportPayload, UpdatePettyCashExpensePayload,
   ReportsPeriodo, ClientCollectionReportParams,
   InvoiceBookReportParams, PaymentMethodSalesReportParams,
-  AbonoFilters, AbonoPayload, SaldoFavorFilters,
 } from '@/types/adminContab'
 
 const FISCAL_SETTINGS_KEY  = ['admin-contab', 'fiscal-settings']
@@ -525,108 +524,6 @@ export function useConfirmPaymentPreview() {
 }
 
 // SCRUM-902 — Registrar Abono (4O).
-
-const ABONOS_LIST_KEY   = (filters: AbonoFilters) => ['admin-contab', 'abonos', 'list', filters]
-const abonoDetailKey    = (id: number | null) => ['admin-contab', 'abonos', 'detail', id ?? -1]
-const abonoSubClientesKey = (masterClientId: number | null) => ['admin-contab', 'abonos', 'sub-clientes', masterClientId ?? -1]
-const abonoProyectosKey   = (subClientId: number | null) => ['admin-contab', 'abonos', 'proyectos', subClientId ?? -1]
-const abonoFacturasKey    = (salesProjectId: number | null) => ['admin-contab', 'abonos', 'facturas', salesProjectId ?? -1]
-const abonoInvoicesForSubClientKey = (subClientId: number | null) => ['admin-contab', 'abonos', 'facturas-por-subcliente', subClientId ?? -1]
-
-export function useAbonos(filters: AbonoFilters) {
-  return useQuery({
-    queryKey: ABONOS_LIST_KEY(filters),
-    queryFn:  () => adminContabApi.abonos.list(filters),
-  })
-}
-
-export function useAbonoDetail(id: number | null) {
-  return useQuery({
-    queryKey: abonoDetailKey(id),
-    queryFn:  () => adminContabApi.abonos.detail(id as number),
-    enabled:  id !== null,
-  })
-}
-
-export function useAbonoSubClientes(masterClientId: number | null) {
-  return useQuery({
-    queryKey: abonoSubClientesKey(masterClientId),
-    queryFn:  () => adminContabApi.abonos.subClientes(masterClientId as number),
-    enabled:  masterClientId !== null,
-  })
-}
-
-export function useAbonoProyectos(subClientId: number | null) {
-  return useQuery({
-    queryKey: abonoProyectosKey(subClientId),
-    queryFn:  () => adminContabApi.abonos.proyectos(subClientId as number),
-    enabled:  subClientId !== null,
-  })
-}
-
-export function useAbonoFacturas(salesProjectId: number | null) {
-  return useQuery({
-    queryKey: abonoFacturasKey(salesProjectId),
-    queryFn:  () => adminContabApi.abonos.facturas(salesProjectId as number),
-    enabled:  salesProjectId !== null,
-  })
-}
-
-/** SCRUM-933 — reemplaza, para el buscador cruzado Proyecto↔# Cotización de "Registrar Abono",
- *  las 2 llamadas de arriba (proyectos+facturas) con una sola lista ya enriquecida. */
-export function useAbonoInvoicesForSubClient(subClientId: number | null) {
-  return useQuery({
-    queryKey: abonoInvoicesForSubClientKey(subClientId),
-    queryFn:  () => adminContabApi.abonos.invoicesForSubClient(subClientId as number),
-    enabled:  subClientId !== null,
-  })
-}
-
-function invalidateAbonos(qc: ReturnType<typeof useQueryClient>, id?: number) {
-  qc.invalidateQueries({ queryKey: ['admin-contab', 'abonos', 'list'] })
-  qc.invalidateQueries({ queryKey: ['admin-contab', 'saldo-favor'] })
-  if (id !== undefined) qc.invalidateQueries({ queryKey: abonoDetailKey(id) })
-}
-
-export function useRegisterAbono() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: AbonoPayload) => adminContabApi.abonos.register(payload),
-    onSuccess: () => invalidateAbonos(qc),
-  })
-}
-
-export function useUpdateAbono() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: AbonoPayload }) => adminContabApi.abonos.update(id, payload),
-    onSuccess: (abono) => invalidateAbonos(qc, abono.id),
-  })
-}
-
-export function useConfirmAbono() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => adminContabApi.abonos.confirm(id),
-    onSuccess: (abono) => invalidateAbonos(qc, abono.id),
-  })
-}
-
-// SCRUM-955 — mismo patrón que useDownloadPaymentReceipt().
-export function useDownloadAbonoReceipt() {
-  return useMutation({
-    mutationFn: ({ id, numeroRecibo }: { id: number; numeroRecibo: string }) =>
-      adminContabApi.abonos.downloadReceiptPdf(id, numeroRecibo),
-  })
-}
-
-// SCRUM-903 — Saldo a Favor de Clientes (4N), solo lectura.
-export function useSaldoFavor(filters: SaldoFavorFilters) {
-  return useQuery({
-    queryKey: ['admin-contab', 'saldo-favor', filters],
-    queryFn:  () => adminContabApi.saldoFavor.list(filters),
-  })
-}
 
 // SCRUM-1168 F3 — Compensaciones.
 

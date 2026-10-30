@@ -52,10 +52,6 @@ vi.mock('@/components/GuiaEntregaModal', () => ({
 vi.mock('@/components/admin-contab/DetalleCobroModal', () => ({
   default: ({ paymentId }: { paymentId: number }) => <div data-testid="cobro-modal">cobro:{paymentId}</div>,
 }))
-vi.mock('@/components/admin-contab/RegistrarAbonoModal', () => ({
-  default: ({ abonoId }: { abonoId: number }) => <div data-testid="abono-modal">abono:{abonoId}</div>,
-}))
-
 const mockedApi = vi.mocked(adminContabApi, true)
 
 const CLIENT: AccountStatementClientOption = { id: 7, name: 'Torres Pacífico' }
@@ -522,22 +518,6 @@ describe('EstadoCuentaPage — SCRUM-930 documentos clickeables (F3)', () => {
     fireEvent.click(await screen.findByText('REC-0055'))
 
     expect(await screen.findByTestId('cobro-modal')).toHaveTextContent('cobro:55')
-  })
-
-  it('Cobro clickeable (recibo tipo abono) abre RegistrarAbonoModal con su id', async () => {
-    mockedApi.accountStatement.generate.mockResolvedValue(makeStatement({
-      movimientos: [makeMovement({
-        numero_factura: 'F-9', tipo: 'cobro', credito: 100,
-        recibo: { tipo: 'abono', id: 12, numero_recibo: 'ABN-0012' },
-      })],
-    }))
-    renderPage()
-    await selectClient()
-    fireEvent.click(screen.getByText('estadoCuenta.busqueda.buscar'))
-
-    fireEvent.click(await screen.findByText('ABN-0012'))
-
-    expect(await screen.findByTestId('abono-modal')).toHaveTextContent('abono:12')
   })
 
   // SCRUM-1168 F3 — un cruce desde un abono histórico o una nota de crédito figura como «Compensación» con su folio CMP; al hacer clic se

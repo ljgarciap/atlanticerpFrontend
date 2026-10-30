@@ -19,7 +19,6 @@ export interface UserFlags {
    */
   primary_approver?:        boolean
   /** SCRUM-1168 — este entorno tiene el concepto nuevo de cobros (cobro con o sin factura, compensaciones). Solo visual: el menú ofrece «Compensaciones». */
-  cobros_v2?:            boolean
 }
 
 /**
