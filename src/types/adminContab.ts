@@ -1624,6 +1624,13 @@ export interface NotaCreditoComprobanteDetail {
 /** `TRAMO_COMISION_INTERNA` — solo lectura desde esta pantalla salvo `admin_contab.edit` (CRUD,
  *  agregado en este mismo batch aunque no estaba en el mockup — regla dura de no hardcodear
  *  umbrales de negocio). `monto_maximo` nulo únicamente en el último tramo. */
+/** Fase 14g — `GET /commissions/internal/tiers/vs-sales`: ¿la escala de comisiones de Admin & Contab coincide con la de Ventas? */
+export interface CommissionScaleComparison {
+  coinciden: boolean
+  admin:  { monto_minimo: number; porcentaje: number }[]
+  ventas: { monto_minimo: number; porcentaje: number }[]
+}
+
 export interface CommissionTier {
   id: number
   monto_minimo: number

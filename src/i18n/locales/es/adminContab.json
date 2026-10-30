@@ -1127,6 +1127,7 @@
       "menosDe": "Menos de {{monto}}",
       "desde": "Desde {{monto}}",
       "desdeHasta": "Desde {{desde}} hasta menos de {{hasta}}",
+      "difiereDeVentas": "Esta escala difiere de la de Ventas y Diseño: el mismo total puede dar otro porcentaje en cada módulo. Revisa los cortes si no es intencional.",
       "masDe": "Más de {{monto}}",
       "rango": "{{desde}} – {{hasta}}",
       "vacio": "Sin tramos configurados todavía.",

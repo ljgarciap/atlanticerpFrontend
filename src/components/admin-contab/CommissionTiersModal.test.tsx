@@ -20,7 +20,7 @@ vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
     commissionsInternal: {
       tiers: {
-        list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(),
+        list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), vsSales: vi.fn(),
       },
     },
   },
@@ -43,6 +43,7 @@ function renderModal(editable = true, onClose = vi.fn()) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockedApi.commissionsInternal.tiers.vsSales.mockResolvedValue({ coinciden: true, admin: [], ventas: [] })
 })
 
 describe('CommissionTiersModal — SCRUM-575', () => {
@@ -81,5 +82,25 @@ describe('CommissionTiersModal — SCRUM-575', () => {
     expect(await screen.findByText('adminContab:comisionesInternas.tramos.menosDe')).toBeInTheDocument()
     expect(screen.getByText('adminContab:comisionesInternas.tramos.desdeHasta')).toBeInTheDocument()
     expect(screen.getByText('adminContab:comisionesInternas.tramos.desde')).toBeInTheDocument()
+  })
+})
+
+describe('CommissionTiersModal — Fase 14g', () => {
+  it('avisa cuando la escala difiere de la de Ventas', async () => {
+    mockedApi.commissionsInternal.tiers.list.mockResolvedValue([makeTier()])
+    mockedApi.commissionsInternal.tiers.vsSales.mockResolvedValue({
+      coinciden: false, admin: [{ monto_minimo: 81001, porcentaje: 4.5 }], ventas: [{ monto_minimo: 80000, porcentaje: 4.5 }],
+    })
+    renderModal()
+
+    expect(await screen.findByText('adminContab:comisionesInternas.tramos.difiereDeVentas')).toBeInTheDocument()
+  })
+
+  it('no avisa cuando coinciden', async () => {
+    mockedApi.commissionsInternal.tiers.list.mockResolvedValue([makeTier()])
+    renderModal()
+
+    await waitFor(() => expect(mockedApi.commissionsInternal.tiers.vsSales).toHaveBeenCalled())
+    expect(screen.queryByText('adminContab:comisionesInternas.tramos.difiereDeVentas')).toBeNull()
   })
 })

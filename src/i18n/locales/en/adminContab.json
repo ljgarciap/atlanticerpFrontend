@@ -1082,6 +1082,7 @@
       "menosDe": "Less than {{monto}}",
       "desde": "From {{monto}}",
       "desdeHasta": "From {{desde}} up to less than {{hasta}}",
+      "difiereDeVentas": "This scale differs from the Sales & Design one: the same total can yield a different percentage in each module. Review the cutoffs if that is not intended.",
       "masDe": "More than {{monto}}",
       "rango": "{{desde}} – {{hasta}}",
       "vacio": "No tiers configured yet.",

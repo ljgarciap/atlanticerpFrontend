@@ -927,6 +927,14 @@ export function useCommissionTiers() {
   })
 }
 
+/** Fase 14g — ¿la escala de comisiones coincide con la de Ventas? Si falla, la pantalla simplemente no avisa. */
+export function useCommissionScaleVsSales() {
+  return useQuery({
+    queryKey: [...COMMISSION_TIERS_KEY, 'vs-sales'],
+    queryFn:  () => adminContabApi.commissionsInternal.tiers.vsSales(),
+  })
+}
+
 export function useCreateCommissionTier() {
   const qc = useQueryClient()
   return useMutation({

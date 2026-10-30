@@ -21,7 +21,7 @@ import type {
   PreviewCorreccionPayload, PreviewCorreccionResponse, RegisterCorreccionPayload,
   NotaCreditoHistorialFilters, NotaCreditoHistorialResult, NotaCreditoDetalle,
   NotaCreditoDevolucionDetail, NotaCreditoDecisionPayload, NotaCreditoComprobanteDetail,
-  CommissionTier, CreateCommissionTierPayload, CommissionInternalSummary, CommissionInternalFilters,
+  CommissionTier, CommissionScaleComparison, CreateCommissionTierPayload, CommissionInternalSummary, CommissionInternalFilters,
   CommissionVendorOption, CommissionExportFormat, CommissionAccountStatement,
   CommissionExternalSummary, CommissionExternalFilters, ArchitectOption, ArchitectFiscalProfilePayload,
   BankAccountOption, ProposePercentPayload, DecidePercentPayload, UpdateCuentaPagoPayload,
@@ -703,6 +703,10 @@ export const adminContabApi = {
 
       remove: (id: number): Promise<void> =>
         api.delete(`/admin-contab/commissions/internal/tiers/${id}`).then(() => undefined),
+
+      // Fase 14g — compara con la escala de Ventas (solo lectura).
+      vsSales: (): Promise<CommissionScaleComparison> =>
+        api.get<CommissionScaleComparison>('/admin-contab/commissions/internal/tiers/vs-sales').then(r => r.data),
     },
 
     summary: (filters: CommissionInternalFilters): Promise<CommissionInternalSummary> =>
