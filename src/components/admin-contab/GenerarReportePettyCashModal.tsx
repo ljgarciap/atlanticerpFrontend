@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import { usePettyCashPending, useGeneratePettyCashReport } from '@/hooks/useAdminContab'
-import { PETTY_CASH_FORMAS_PAGO } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { PettyCashFormaPago } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -25,6 +25,7 @@ interface Props {
  */
 export default function GenerarReportePettyCashModal({ onClose, onGenerated }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
   const { data: pending } = usePettyCashPending()
   const generateMutation = useGeneratePettyCashReport()
 
@@ -118,11 +119,11 @@ export default function GenerarReportePettyCashModal({ onClose, onGenerated }: P
                 {t('cajaChica.generarReporteModal.formaPagoLabel')}
               </span>
               <select
-                value={formaPago} onChange={e => setFormaPago(e.target.value as PettyCashFormaPago)}
+                value={formaPago} onChange={e => setFormaPago(e.target.value)}
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm"
               >
                 <option value="">{t('cajaChica.generarReporteModal.formaPagoPlaceholder')}</option>
-                {PETTY_CASH_FORMAS_PAGO.map(m => <option key={m} value={m}>{t(`cajaChica.formasPago.${m}`)}</option>)}
+                {metodosPago.cajaChica.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
               </select>
             </label>
           )}

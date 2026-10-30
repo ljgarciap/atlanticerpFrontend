@@ -150,7 +150,7 @@ describe('PettyCashPage — REQ-539/540 detalle de reporte', () => {
     renderPage()
     fireEvent.click(await screen.findByText('cajaChica.tabs.reportes'))
     expect(await screen.findByText('cajaChica.reportesPanel.columnas.formaPago')).toBeInTheDocument()
-    expect(await screen.findByText('cajaChica.formasPago.transferencia')).toBeInTheDocument()
+    expect(await screen.findByText('cobros.metodos.transferencia')).toBeInTheDocument()
   })
 
   it('al ver un reporte pendiente con puede_aprobar=true muestra el botón Aprobar', async () => {

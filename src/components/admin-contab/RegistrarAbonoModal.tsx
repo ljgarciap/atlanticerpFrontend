@@ -6,7 +6,7 @@ import {
   useAbonoDetail, useAbonoSubClientes, useAbonoInvoicesForSubClient,
   useRegisterAbono, useUpdateAbono, useConfirmAbono, useDownloadAbonoReceipt,
 } from '@/hooks/useAdminContab'
-import { PAYMENT_METHODS, PAYMENT_METHODS_SIN_CUENTA_BANCARIA } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { PaymentMethod, AbonoPayload } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -71,6 +71,7 @@ interface Props {
  */
 export default function RegistrarAbonoModal({ abonoId, prefill, onClose, onSaved }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
   const isNew = abonoId === null
 
   const { data: abono, isLoading: loadingAbono } = useAbonoDetail(abonoId)
@@ -111,7 +112,7 @@ export default function RegistrarAbonoModal({ abonoId, prefill, onClose, onSaved
 
   // REQ-466 RN4 (mismo criterio que RegistrarCobroModal) — estos 2 métodos nunca representan
   // dinero entrando a una cuenta bancaria real.
-  const sinCuentaBancaria = PAYMENT_METHODS_SIN_CUENTA_BANCARIA.includes(metodoPago)
+  const sinCuentaBancaria = metodosPago.sinCuentaBancaria(metodoPago)
 
   // SCRUM-933 — opciones de Proyecto/Cotización derivadas de `invoicesForSubClient`, acotadas por
   // la selección VIGENTE del otro campo (cruce real) y por el texto tipeado (mismo criterio "buscar
@@ -532,10 +533,10 @@ export default function RegistrarAbonoModal({ abonoId, prefill, onClose, onSaved
                   </span>
                   <select
                     value={metodoPago} disabled={!editing}
-                    onChange={e => setMetodoPago(e.target.value as PaymentMethod)}
+                    onChange={e => setMetodoPago(e.target.value)}
                     className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-3 py-2 text-sm disabled:bg-slate-50 disabled:dark:bg-slate-800 disabled:text-slate-400"
                   >
-                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
+                    {metodosPago.methods.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
                   </select>
                 </label>
                 <label className="text-sm">

@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios'
 import {
   usePaymentClients, useOpenInvoices, useDefaultBankAccount, useBankAccounts, useRegisterPaymentV2,
 } from '@/hooks/useAdminContab'
-import { PAYMENT_METHODS, PAYMENT_METHODS_SIN_CUENTA_BANCARIA } from '@/types/adminContab'
+import { usePaymentMethods } from '@/hooks/usePaymentMethods'
 import type { PaymentMethod, PaymentClientOption } from '@/types/adminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +14,6 @@ import { getRegion } from '@/lib/region'
 const COMPROBANTE_MAX_BYTES = 10 * 1024 * 1024
 const COMPROBANTE_ACCEPTED  = ['image/jpeg', 'image/png', 'application/pdf']
 /** Métodos que no se aplican a facturas hasta que alguien confirma que el dinero entró al banco. */
-const METODOS_CONFIRMACION_INMEDIATA: PaymentMethod[] = ['efectivo', 'retencion_impuestos', 'ajuste_cuenta']
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat(getRegion().locale, { style: 'currency', currency: getRegion().currency }).format(value)
@@ -40,6 +39,7 @@ interface Props {
  */
 export default function RegistrarCobroV2Modal({ initialMasterClientId, onClose, onRegistered }: Props) {
   const { t } = useTranslation('adminContab')
+  const metodosPago = usePaymentMethods()
 
   const [clientQuery, setClientQuery]   = useState('')
   const [clientOpen, setClientOpen]     = useState(false)
@@ -62,8 +62,8 @@ export default function RegistrarCobroV2Modal({ initialMasterClientId, onClose, 
   const registerMutation = useRegisterPaymentV2()
 
   const invoices = openInvoicesResult?.invoices ?? []
-  const sinCuentaBancaria = PAYMENT_METHODS_SIN_CUENTA_BANCARIA.includes(metodoPago)
-  const confirmacionDiferida = !METODOS_CONFIRMACION_INMEDIATA.includes(metodoPago)
+  const sinCuentaBancaria = metodosPago.sinCuentaBancaria(metodoPago)
+  const confirmacionDiferida = !metodosPago.inmediato(metodoPago)
 
   const montoRecibido = parseMonto(monto)
   const totalAplicado = useMemo(
@@ -197,8 +197,8 @@ export default function RegistrarCobroV2Modal({ initialMasterClientId, onClose, 
                 </label>
                 <label className="text-sm">
                   <span className={labelClass}>{t('cobros.registrarModal.metodoPagoLabel')}</span>
-                  <select value={metodoPago} onChange={e => setMetodoPago(e.target.value as PaymentMethod)} className={inputClass}>
-                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{t(`cobros.metodos.${m}`)}</option>)}
+                  <select value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className={inputClass}>
+                    {metodosPago.methods.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
                   </select>
                 </label>
               </div>
