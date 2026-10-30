@@ -312,17 +312,6 @@ export default function OrderLinesEditor({ providerId, draft, onChange, errorMes
 
           <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-100">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">{t('compras:newOrder.modality.label')}</label>
-              <select
-                value={draft.modality}
-                onChange={e => onChange({ ...draft, modality: e.target.value as Modality })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
-                <option value="directo">{t('compras:newOrder.modality.directo')}</option>
-                <option value="zona_libre">{t('compras:newOrder.modality.zonaLibre')}</option>
-              </select>
-            </div>
-            <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">{t('compras:newOrder.shipping.estimatedArrival')}</label>
               <input
                 type="date"

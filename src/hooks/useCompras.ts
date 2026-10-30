@@ -829,22 +829,3 @@ export function useComprasHomeSummary() {
     staleTime: 10_000,
   })
 }
-
-// SCRUM-440 (REQ-370) — invalida la misma queryKey que `useZonaLibreRequests` (useBodega.ts):
-// la bandeja es la misma pantalla para Bodega y Compras, aprobar/rechazar debe refrescar esa fila.
-export function useApproveZonaLibreRequest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => comprasApi.zonaLibre.approve(id),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests'] }),
-  })
-}
-
-export function useRejectZonaLibreRequest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, rejectionReason }: { id: number; rejectionReason: string }) =>
-      comprasApi.zonaLibre.reject(id, rejectionReason),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests'] }),
-  })
-}

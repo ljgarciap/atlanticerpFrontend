@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { bodegaApi, type BodegaInventoryListParams } from '@/api/bodegaApi'
 import type {
   AdjustmentRequestLineDraft, BodegaConfirmArrivalPayload, BodegaSettings, OrderBoardFilters,
-  RelocationEstadoFilter, RelocationRequestPayload, ZonaLibreRequestPayload, ZonaLibreStatusFilter,
+  RelocationEstadoFilter, RelocationRequestPayload, 
   GeneralCountChip, GeneralCountCreatePayload, GeneralCountEvaluatePayload,
   CustomerReturnStatusFilter, CreateCustomerReturnPayload, ConfirmReturnReceptionPayload,
   PickingSheetItemPayload, InventoryReviewDecisionPayload,
@@ -610,79 +610,6 @@ export function useConfirmPhysicalArrival() {
   })
 }
 
-/** SCRUM-437 (REQ-367) — modal "Ver bodegas" del buscador de Zona Libre (3C), producto-scoped. */
-export function useZonaLibreProductWarehouseBreakdown(catalogProductId: number | null) {
-  return useQuery({
-    queryKey: ['bodega/inventory', catalogProductId, 'warehouse-breakdown'],
-    queryFn:  () => bodegaApi.inventory.warehouseBreakdown(catalogProductId as number),
-    enabled:  catalogProductId !== null,
-  })
-}
-
-// Batch B3 (SCRUM-433→445, REQ-363→375) — "Zona Libre de Colón".
-
-/** REQ-363 — proveedor fijo, leído de `compras_settings.zona_libre_provider_id` (nunca
- * hardcodeado en el frontend). `staleTime` largo: no cambia durante una sesión de trabajo. */
-export function useZonaLibreProvider() {
-  return useQuery({
-    queryKey:  ['bodega/zona-libre/provider'],
-    queryFn:   () => bodegaApi.zonaLibre.provider(),
-    staleTime: 300_000,
-    retry:     false,
-  })
-}
-
-/** REQ-372/373 — bandeja (3D), filtrada server-side vía `?status=` (RN1 de REQ-373: el chip
- * activo es la única fuente de verdad del filtro, sin filtrado adicional client-side). */
-export function useZonaLibreRequests(status: ZonaLibreStatusFilter, page = 1, perPage: number | 'all' = 20) {
-  return useQuery({
-    queryKey: ['bodega/zona-libre/requests', status, page, perPage],
-    queryFn:  () => bodegaApi.zonaLibre.requests.list({ status, page, per_page: perPage }),
-  })
-}
-
-/** REQ-370 Escenario 1 — detalle on-demand para el modal "Ver motivo" de una solicitud rechazada. */
-export function useZonaLibreRequestDetail(id: number | null) {
-  return useQuery({
-    queryKey: ['bodega/zona-libre/requests', id],
-    queryFn:  () => bodegaApi.zonaLibre.requests.get(id as number),
-    enabled:  id !== null,
-  })
-}
-
-/** REQ-369 — "Guardar orden de compra" (3C). */
-export function useCreateZonaLibreRequest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: ZonaLibreRequestPayload) => bodegaApi.zonaLibre.requests.create(payload),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests'] }),
-  })
-}
-
-/** SCRUM-797 (revierte SCRUM-440) — "Editar" una solicitud mientras siga `pendiente`, disponible
- * para Líder de Bodega o Líder de Compras (gate real vive en el backend, ver
- * `BodegaZonaLibreRequestController::update()`). */
-export function useUpdateZonaLibreRequest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: ZonaLibreRequestPayload }) =>
-      bodegaApi.zonaLibre.requests.update(id, payload),
-    onSuccess: (_data, { id }) => {
-      qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests'] })
-      qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests', id] })
-    },
-  })
-}
-
-/** REQ-375 — botón "Recordar" de una solicitud `pendiente` (3D). */
-export function useRemindZonaLibreRequest() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => bodegaApi.zonaLibre.requests.remind(id),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: ['bodega/zona-libre/requests'] }),
-  })
-}
-
 // Bloque B5 (SCRUM-460→466, REQ-390→396) — "Inventario general".
 
 /** Bandeja "Conteos generales" — `estado: undefined` = "Todas" (sin filtrar), mismo criterio que
@@ -776,7 +703,7 @@ export function useDeleteGeneralCount() {
 // Bloque B6 (SCRUM-473→489, REQ-403→419) — "Devoluciones".
 
 /** Bandeja (3J) — filtrado server-side vía `?status=`, mismo criterio que
- * `useZonaLibreRequests`/`useAdjustmentRequests`. */
+ * `useAdjustmentRequests`. */
 export function useCustomerReturns(status: CustomerReturnStatusFilter, page = 1, perPage: number | 'all' = 20) {
   return useQuery({
     queryKey: ['bodega/returns', status, page, perPage],
@@ -785,7 +712,7 @@ export function useCustomerReturns(status: CustomerReturnStatusFilter, page = 1,
 }
 
 /** REQ-415 — buscador de guías de entrega (3K), solo pide con texto (mismo criterio que el
- * buscador de "Ver motivo" de Zona Libre: search-as-you-type por diseño, sin debounce). */
+ * buscador de guías de entrega: search-as-you-type por diseño, sin debounce). */
 export function useSearchReturnOrders(q: string) {
   return useQuery({
     queryKey: ['bodega/returns/search-orders', q],

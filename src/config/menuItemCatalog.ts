@@ -54,7 +54,6 @@ export const MENU_ITEM_CATALOG: Record<string, MenuItemCatalogEntry[]> = {
     { key: 'pedidos',            label: 'Pedidos' },
     { key: 'inventario_ver',     label: 'Ver inventario' },
     { key: 'ajustes',            label: 'Solicitud de ajuste' },
-    { key: 'zona_libre',         label: 'Órdenes Zona Libre' },
     { key: 'inventario_general', label: 'Inventario general' },
     { key: 'devoluciones',       label: 'Devoluciones' },
     { key: 'bodegas',            label: 'Bodegas' },

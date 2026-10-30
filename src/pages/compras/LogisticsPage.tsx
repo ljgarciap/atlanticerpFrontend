@@ -315,11 +315,8 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
         </div>
       </div>
 
-      {/* Etiquetas: modalidad, tipo de envío, estado actual, recepción — las 4 al mismo nivel. */}
+      {/* Etiquetas: tipo de envío, estado actual, recepción. */}
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
-        <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
-          {t(`compras:newOrder.modality.${order.modality === 'zona_libre' ? 'zonaLibre' : 'directo'}`)}
-        </span>
         <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
           {order.shipping_type
             ? t(`compras:newOrder.shipping.type${order.shipping_type.charAt(0).toUpperCase()}${order.shipping_type.slice(1)}`)

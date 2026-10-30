@@ -129,9 +129,9 @@ describe('BodegasPage', () => {
 
   // Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — rebote sobre el comportamiento anterior
   // (Visual Review 2026-07-24): antes esta celda mostraba "Ver detalle" deshabilitado en bodegas
-  // modo "pendiente" (Zona Libre); ahora no debe existir NINGUNA acción, ni "Reubicar" ni
+  // modo "pendiente"; ahora no debe existir NINGUNA acción, ni "Reubicar" ni
   // "Ver detalle" — celda vacía.
-  // SCRUM-990 — Zona Libre ya no usa esta tabla (es de solo consulta, ver el describe de abajo); la regla de SCRUM-752 sigue
+  // SCRUM-990 — una bodega de solo consulta ya no usa esta tabla (ver el describe de abajo); la regla de SCRUM-752 sigue
   // vigente para cualquier bodega OPERATIVA en modo 'pendiente'.
   it('no muestra ninguna acción (ni Reubicar ni Ver detalle) en una bodega operativa modo pendiente', async () => {
     const pendienteOperativa: PhysicalWarehouse = WAREHOUSES[1]
@@ -140,7 +140,7 @@ describe('BodegasPage', () => {
       warehouse: pendienteOperativa,
       data: [{
         stock_id: 3, catalog_product_id: 77, factory_reference: null, reference: 'PENDIENTE-1',
-        ubicacion: null, description: 'Producto en Zona Libre', categoria: null,
+        ubicacion: null, description: 'Producto en bodega pendiente', categoria: null,
         unidades_en_bodega: 5, disponible: 5,
         por_servir: 0, stock_total: 5, por_ingresar: 0, en_camino: 0, stock_minimo: null,
         estado: 'disponible', proveedor: null,
@@ -250,7 +250,7 @@ describe('BodegasPage', () => {
 
     expect(await screen.findByText('bodega:warehouses.relocateModal.title')).toBeInTheDocument()
     // Bodega Central (id 1, la bodega activa) no debe aparecer como opción de destino.
-    // Mejora SCRUM-752 RN1 — Bodega Zona Libre ('pendiente') tampoco, en ningún caso.
+    // Mejora SCRUM-752 RN1 — Bodega pendiente ('pendiente') tampoco, en ningún caso.
     const destinationSelect = screen.getByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
     expect(within(destinationSelect).queryByText('Bodega Central')).not.toBeInTheDocument()
     expect(within(destinationSelect).queryByText('Bodega Pendiente')).not.toBeInTheDocument()
@@ -279,7 +279,7 @@ describe('BodegasPage', () => {
 
     await screen.findByText('bodega:warehouses.relocateModal.title')
 
-    // Mejora SCRUM-752 RN1 — destino '2' (Bodega Zona Libre) ya no existe como opción, se usa
+    // Mejora SCRUM-752 RN1 — destino '2' (Bodega pendiente) ya no existe como opción, se usa
     // '3' (Exhibición en cliente) como destino válido en su lugar.
     const destinationSelect = screen.getByDisplayValue('bodega:warehouses.relocateModal.selectDestination')
     fireEvent.change(destinationSelect, { target: { value: '3' } })

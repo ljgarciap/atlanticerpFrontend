@@ -62,7 +62,6 @@ const MENU_ITEM_KEYS: Record<string, { module: string; key: string }> = {
   'bodega-pedidos':             { module: 'bodega', key: 'pedidos' },
   'bodega-inventario-ver':     { module: 'bodega', key: 'inventario_ver' },
   'bodega-ajustes':             { module: 'bodega', key: 'ajustes' },
-  'bodega-zona-libre':         { module: 'bodega', key: 'zona_libre' },
   'bodega-inventario-general': { module: 'bodega', key: 'inventario_general' },
   'bodega-devoluciones':       { module: 'bodega', key: 'devoluciones' },
   'bodega-bodegas':             { module: 'bodega', key: 'bodegas' },
@@ -627,15 +626,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
           // SCRUM-329 Oleada A / Batch A3 (REQ-305→335) — tablero "Pedidos", primera pantalla
           // real del flujo Kanban de Bodega. Mismo gate `bodega.read` que el resto del módulo.
           { id: 'bodega-pedidos', label: t('nav.pedidos'), href: '/bodega/pedidos', icon: <IcoShoppingBag /> },
-          // SCRUM-363 (REQ-293, RN1) — submenú "Inventario" con 5 opciones (Ver inventario,
-          // Solicitud de ajuste, Órdenes Zona Libre, Inventario general, Devoluciones). Solo
-          // "Devoluciones" (Bloque B6) sigue en placeholder "próximamente" — el resto ya tiene
-          // pantalla real (Ver inventario B2, Solicitud de ajuste, Órdenes Zona Libre B3,
-          // Inventario general B5).
+          // SCRUM-363 (REQ-293, RN1) — submenú "Inventario" (Ver inventario, Solicitud de ajuste,
+          // Inventario general, Devoluciones).
           { id: 'bodega-inventario-menu', label: t('nav.inventario'), icon: <IcoBox />, children: [
             { id: 'bodega-inventario-ver', label: t('nav.verInventario'), href: '/bodega/inventario', icon: <IcoBox /> },
             { id: 'bodega-ajustes', label: t('nav.ajustes'), href: '/bodega/solicitud-ajuste', icon: <IcoFileText /> },
-            { id: 'bodega-zona-libre', label: t('nav.ordenesZonaLibre'), href: '/bodega/ordenes-zona-libre', icon: <IcoGlobe /> },
             { id: 'bodega-inventario-general', label: t('nav.inventarioGeneral'), href: '/bodega/inventario-general', icon: <IcoBarChart /> },
             { id: 'bodega-devoluciones', label: t('nav.devoluciones'), href: '/bodega/devoluciones', icon: <IcoList /> },
           ] },

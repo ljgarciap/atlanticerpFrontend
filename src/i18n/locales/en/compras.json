@@ -159,7 +159,6 @@
     },
     "category": {
       "locales": "Local",
-      "zona_libre": "Colon Free Zone",
       "china": "China",
       "europa": "Europe",
       "online": "Online",
@@ -257,8 +256,7 @@
     },
     "modality": {
       "label": "Modality",
-      "directo": "Direct",
-      "zonaLibre": "Free Trade Zone"
+      "directo": "Direct"
     },
     "shipping": {
       "type": "Shipping type",
@@ -318,8 +316,7 @@
     },
     "chips": {
       "all": "All",
-      "critical": "Critical",
-      "zonaLibre": "Free Trade Zone"
+      "critical": "Critical"
     },
     "table": {
       "id": "Order",
@@ -351,7 +348,6 @@
       "por_aprobar": "Pending approval",
       "pendiente_liquidar": "Pending settlement",
       "pendienteLiquidarDirecto": "Pending",
-      "pendienteLiquidarZonaLibre": "Pending settlement",
       "ordenado": "Ordered",
       "en_transito": "In transit",
       "en_aduana": "In customs",
@@ -650,9 +646,6 @@
     "invalid": "Enter a number between 0 and 100.",
     "saveError": "Could not save the setting. Try again.",
     "criticalDaysPorAprobar": "\"Pending approval\" days before an order is critical",
-    "zonaLibreProvider": "Free Trade Zone supplier",
-    "zonaLibreProviderNone": "No supplier configured",
-    "zonaLibreProviderHelp": "Fixed supplier for Free Trade Zone requests. Without one, the flow cannot create requests.",
     "rules": {
       "title": "Order approval rules",
       "subtitle": "They decide when a purchase order needs the primary approver's approval. The first active rule, in order, that matches wins; if none matches, no approval is required. The amount is the total payable to the supplier.",

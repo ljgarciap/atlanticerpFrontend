@@ -107,7 +107,7 @@ export type ShippingType = 'aereo' | 'maritimo' | 'terrestre'
 // SCRUM-197 (REQ-134, 2026-07-30) — el mockup solo contempla Cliente/Atlantic, "proveedor"
 // no existía en el requerimiento.
 export type WhoPaysShipping = 'atlantic' | 'cliente'
-export type Modality = 'directo' | 'zona_libre'
+export type Modality = 'directo'
 
 /** REQ-117/141 — las 7 etapas, en el orden que sigue un proveedor internacional. */
 export const ORDER_STATUSES = [
@@ -235,7 +235,7 @@ export interface PurchaseOrderDetail extends PurchaseOrderSummary {
   translations?: { en: OrderTranslationStatus }
   // shipping_type/shipping_cost ya vienen de PurchaseOrderSummary (REQ-140/SCRUM-203).
   who_pays_shipping:   WhoPaysShipping | null
-  // SCRUM-210 (REQ-147, alcance reducido) — solo relevante para órdenes Zona Libre.
+  // SCRUM-210 (REQ-147, alcance reducido) — solo relevante para órdenes de proveedores internacionales.
   liquidation_agency_id:   number | null
   liquidation_agency_name: string | null
   // actual_arrival_date ya viene de PurchaseOrderSummary (REQ-154) — no repetirlo acá.
@@ -554,8 +554,6 @@ export interface ComprasSettings {
   low_rating_threshold: number
   // SCRUM-206 — quién es "Gerencia" para el gate de aprobación (REQ-143), configurable.
   primary_approver_user_id: number | null
-  /** Fase 5a — proveedor fijo de las solicitudes de Zona Libre; null = el flujo no tiene proveedor configurado. */
-  zona_libre_provider_id: number | null
   // SCRUM-257 (REQ-194) — días "En revisión" antes de marcar un reclamo con la bandera de atención.
   claim_attention_days: number
   /** REQ-139 RN2 — días «Por aprobar» a partir de los cuales una orden es crítica (default 3). */
@@ -573,7 +571,7 @@ export interface ComprasSettings {
 }
 
 /**
- * SCRUM-210 (REQ-147, alcance reducido) — agencia de liquidación Zona Libre.
+ * SCRUM-210 (REQ-147, alcance reducido) — agencia de liquidación aduanal.
  * SCRUM-254 (REQ-191) — `pending_payment_amount`/`paid_amount`/`last_payment_date`/
  * `next_payment_date` son carga MANUAL de Compras (mock sin RN aprobada, ver nota de alcance en
  * LiquidationAgencyController::class) — no un historial de pagos con comprobante.

@@ -35,7 +35,6 @@ function fmtFull(n: number): string {
 function buildContextUrl(item: { type: string; id: number; action_url: string }): string {
   switch (item.type) {
     case 'purchase_order': return `/compras/ordenes?order=${item.id}`
-    case 'zona_libre':     return `/bodega/ordenes-zona-libre?zl=${item.id}`
     case 'relocation':     return `/bodega/bodegas?relocation=${item.id}`   // SCRUM-1154: la bandeja vive en Bodegas, no en Inventario
     case 'adjustment':     return `/bodega/solicitud-ajuste?ajuste=${item.id}`
     case 'general_count':  return `/bodega/inventario-general?count=${item.id}`
@@ -44,7 +43,7 @@ function buildContextUrl(item: { type: string; id: number; action_url: string })
 }
 
 function moduleLabel(type: string): string {
-  return type === 'purchase_order' || type === 'zona_libre' ? 'Compras' : 'Bodega'
+  return type === 'purchase_order' ? 'Compras' : 'Bodega'
 }
 
 function todayStr(): string {

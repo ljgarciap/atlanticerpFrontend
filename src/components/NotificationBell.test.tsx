@@ -117,7 +117,7 @@ describe('NotificationBell', () => {
   it('navega al enlace de la notificación y la marca como leída', async () => {
     mockedApi.list.mockResolvedValue({
       data: [
-        { id: 7, content: { subject: 'Recordatorio Zona Libre', body: 'x' }, link_url: '/bodega/ordenes-zona-libre', is_read: false, read_at: null, created_at: '2026-07-01T00:00:00Z' },
+        { id: 7, content: { subject: 'Recordatorio de pedido', body: 'x' }, link_url: '/bodega/pedidos', is_read: false, read_at: null, created_at: '2026-07-01T00:00:00Z' },
         { id: 8, content: { subject: 'Aviso sin enlace', body: 'x' }, link_url: null, is_read: true, read_at: '2026-07-02', created_at: '2026-07-02T00:00:00Z' },
       ],
       meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
@@ -135,14 +135,14 @@ describe('NotificationBell', () => {
     fireEvent.click(screen.getByTitle('Notifications'))
     expect(await screen.findByText('Aviso sin enlace')).toBeInTheDocument()
     expect(screen.getByText('Aviso sin enlace').closest('button')).toHaveAttribute('data-has-link', 'false')
-    expect(screen.getByText('Recordatorio Zona Libre').closest('button')).toHaveAttribute('data-has-link', 'true')
+    expect(screen.getByText('Recordatorio de pedido').closest('button')).toHaveAttribute('data-has-link', 'true')
 
     fireEvent.click(screen.getByText('Aviso sin enlace'))
     expect(screen.getByTestId('location')).toHaveTextContent('/inicio')
 
-    fireEvent.click(screen.getByText('Recordatorio Zona Libre'))
+    fireEvent.click(screen.getByText('Recordatorio de pedido'))
     await waitFor(() => expect(mockedApi.markRead).toHaveBeenCalledWith(7))
-    expect(screen.getByTestId('location')).toHaveTextContent('/bodega/ordenes-zona-libre')
+    expect(screen.getByTestId('location')).toHaveTextContent('/bodega/pedidos')
   })
 
   it('marca todas como leídas al hacer click en el botón', async () => {

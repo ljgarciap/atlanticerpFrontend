@@ -14,8 +14,7 @@ import type {
   AssignPickerResponse, StartPickingResponse, OrderPickingSheetResponse, PickingSheetItemPayload,
   UpdatePickingSheetResponse, CompletePickingResponse,
   InventoryReviewDecisionPayload, ResolveInventoryReviewResponse,
-  ZonaLibreProvider, ZonaLibreRequestListResponse, ZonaLibreRequestDetail, ZonaLibreRequestPayload,
-  ZonaLibreStatusFilter, ZonaLibreProductWarehouseBreakdownResponse,
+  ProductWarehouseBreakdownResponse,
   GeneralCountChip, GeneralCountCreatePayload, GeneralCountCreateResponse, GeneralCountDetail,
   GeneralCountEvaluatePayload, GeneralCountListResponse, GeneralCountRow,
   CustomerReturnStatusFilter, CustomerReturnListResponse, CustomerReturnDetail,
@@ -388,40 +387,9 @@ export const bodegaApi = {
     confirmArrival: (id: number, payload: BodegaConfirmArrivalPayload): Promise<BodegaConfirmArrivalResponse> =>
       api.post<BodegaConfirmArrivalResponse>(`/bodega/inventory/${id}/confirm-arrival`, payload).then(r => r.data),
 
-    // SCRUM-437 (REQ-367) — modal "Ver bodegas" del buscador de Zona Libre (3C). Producto-scoped,
-    // no depende de que exista una orden — mismo endpoint que usaría cualquier otra pantalla de
-    // Bodega que necesite desglose por bodega de un producto puntual.
-    warehouseBreakdown: (catalogProductId: number): Promise<ZonaLibreProductWarehouseBreakdownResponse> =>
-      api.get<ZonaLibreProductWarehouseBreakdownResponse>(`/bodega/inventory/${catalogProductId}/warehouse-breakdown`).then(r => r.data),
-  },
-
-  // Batch B3 (SCRUM-433→445, REQ-363→375) — "Zona Libre de Colón". Rutas verificadas contra
-  // `routes/bodega.php` + los controllers/DTOs reales, ya pusheados a `dev` (backend completo,
-  // 1251 tests verdes, PHPStan level 8 limpio) — ver `types/bodega.ts` para el detalle de contrato.
-  zonaLibre: {
-    provider: (): Promise<ZonaLibreProvider> =>
-      api.get<ZonaLibreProvider>('/bodega/zona-libre/provider').then(r => r.data),
-
-
-    requests: {
-      list: (params?: { status?: ZonaLibreStatusFilter; page?: number; per_page?: number | 'all' }): Promise<ZonaLibreRequestListResponse> =>
-        api.get<ZonaLibreRequestListResponse>('/bodega/zona-libre/requests', { params }).then(r => r.data),
-
-      create: (payload: ZonaLibreRequestPayload): Promise<ZonaLibreRequestDetail> =>
-        api.post<ZonaLibreRequestDetail>('/bodega/zona-libre/requests', payload).then(r => r.data),
-
-      get: (id: number): Promise<ZonaLibreRequestDetail> =>
-        api.get<ZonaLibreRequestDetail>(`/bodega/zona-libre/requests/${id}`).then(r => r.data),
-
-      // SCRUM-797 (revierte SCRUM-440) — solo mientras la solicitud siga `pendiente`; 422/403 si no.
-      update: (id: number, payload: ZonaLibreRequestPayload): Promise<ZonaLibreRequestDetail> =>
-        api.put<ZonaLibreRequestDetail>(`/bodega/zona-libre/requests/${id}`, payload).then(r => r.data),
-
-      // SCRUM-445 (REQ-375) — dispara un email real server-side (`NotificationService`); 422 si la
-      // solicitud ya no está `pendiente` (ver mensaje estructurado que el frontend surface-ea).
-      remind: (id: number): Promise<{ message: string }> =>
-        api.post<{ message: string }>(`/bodega/zona-libre/requests/${id}/remind`).then(r => r.data),
-    },
+    // Desglose por bodega de un producto puntual (producto-scoped, no depende de que exista una orden).
+    warehouseBreakdown: (catalogProductId: number): Promise<ProductWarehouseBreakdownResponse> =>
+      api.get<ProductWarehouseBreakdownResponse>(`/bodega/inventory/${catalogProductId}/warehouse-breakdown`).then(r => r.data),
   },
 
   // Bloque B5 (SCRUM-460→466, REQ-390→396) — "Inventario general". Rutas verificadas contra

@@ -299,7 +299,7 @@ export default function BodegasPage() {
                     <td className="px-4 py-3 text-slate-600">{row.proveedor ?? '—'}</td>
                     <td className="px-4 py-3">
                       {/* Mejora SCRUM-752 RN2 (Gerencia Test 2026-08-13) — antes esta celda mostraba
-                          un "Ver detalle" deshabilitado en bodegas modo "pendiente" (Zona Libre); el
+                          un "Ver detalle" deshabilitado en bodegas modo "pendiente"; el
                           rebote pide que no exista NINGUNA acción ahí, ni "Reubicar" ni "Ver
                           detalle" — celda vacía. */}
                       {data?.warehouse.modo_detalle !== 'pendiente' && !soloConsultaPorPermiso && (
@@ -690,8 +690,7 @@ function RelocationRequestsModal({ onClose, initialChip = 'todas', highlightId =
 }
 
 /** SCRUM-459 (REQ-389, rebote de Gerencia Test 2026-08-13) — el motivo ya viaja en la propia fila
- * (`RelocationRequest.motivo_rechazo`), sin necesidad de un fetch aparte (a diferencia de
- * `ReasonModal` de `BodegaOrdenesZonaLibrePage.tsx`, que sí lo pide por id). */
+ * (`RelocationRequest.motivo_rechazo`), sin necesidad de un fetch aparte  */
 function RelocationReasonModal({ reason, onClose }: { reason: string; onClose: () => void }) {
   const { t } = useTranslation(['common', 'bodega'])
   return (

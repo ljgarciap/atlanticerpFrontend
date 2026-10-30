@@ -335,19 +335,6 @@ describe('OrdersPage — etiqueta de estado por modalidad (SCRUM-204)', () => {
     // <option> del filtro.
     expect(screen.getByText('compras:orders.status.pendienteLiquidarDirecto')).toBeInTheDocument()
   })
-
-  it('pendiente_liquidar en modalidad zona_libre muestra "Por liquidar"', async () => {
-    mockedComprasApi.orders.list.mockResolvedValue({
-      data: [makeSummary({ status: 'pendiente_liquidar', modality: 'zona_libre' })],
-      filters: { creators: [] },
-      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
-    })
-
-    renderPage()
-
-    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
-    expect(screen.getByText('compras:orders.status.pendienteLiquidarZonaLibre')).toBeInTheDocument()
-  })
 })
 
 describe('OrdersPage — "+ Nueva orden" exige compras.write (SCRUM-773 CA1)', () => {

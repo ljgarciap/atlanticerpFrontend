@@ -98,12 +98,6 @@ test('SCRUM-754 — Inventario / Familias pagina con default 20', async ({ page 
   await expectPaginationDefault20(page)
 })
 
-test('SCRUM-754 — Órdenes Zona Libre pagina con default 20', async ({ page }) => {
-  await login(page)
-  await page.goto('/bodega/ordenes-zona-libre')
-  await expectPaginationDefault20(page)
-})
-
 test('SCRUM-754 — Devoluciones pagina con default 20', async ({ page }) => {
   await login(page)
   await page.goto('/bodega/devoluciones')

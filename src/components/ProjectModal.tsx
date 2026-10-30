@@ -244,7 +244,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
               </div>
               <div>
                 <label className="label-sm">{t('crm:project.despacho')}</label>
-                <AutocompleteInput value={despacho} onChange={setDespacho} fetchOptions={fetchDespacho} placeholder="Panamá, Zona Libre..." />
+                <AutocompleteInput value={despacho} onChange={setDespacho} fetchOptions={fetchDespacho} placeholder="Ciudad o zona de despacho" />
               </div>
               <div>
                 <label className="label-sm">{t('crm:project.ubicacion')}</label>

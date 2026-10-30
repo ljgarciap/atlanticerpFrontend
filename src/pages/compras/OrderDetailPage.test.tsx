@@ -315,7 +315,6 @@ describe('OrderDetailPage', () => {
     mockAuthState(['compras.read'])
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
       status: 'por_aprobar', next_status: 'ordenado', pending_remainder_status: 'ordenado',
-      modality: 'zona_libre',
     }))
     renderPage()
 
@@ -539,16 +538,6 @@ describe('OrderDetailPage', () => {
     expect(screen.queryByText('compras:orders.status.pendiente_liquidar')).toBeNull()
   })
 
-  it('estado pendiente_liquidar en modalidad zona_libre muestra la etiqueta "Por liquidar"', async () => {
-    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
-      status: 'pendiente_liquidar', next_status: 'ordenado', modality: 'zona_libre',
-    }))
-    renderPage()
-
-    await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
-    expect(screen.getByText('compras:orders.status.pendienteLiquidarZonaLibre')).toBeInTheDocument()
-  })
-
   /**
    * Pre-QA en vivo (2026-07-17): al probar el gate de SCRUM-206 contra dev.atlanticerp.ai con un
    * usuario que no es Gerencia, el backend devolvió 403 correcto pero la UI no mostraba nada — se
@@ -573,17 +562,17 @@ describe('OrderDetailPage', () => {
 
   // ── SCRUM-210 (REQ-147, alcance reducido) ────────────────────────────────────────────────
 
-  it('no muestra la sección de liquidación para órdenes que no son Zona Libre', async () => {
-    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ modality: 'directo' }))
+  it('no muestra la sección de liquidación para órdenes de proveedores locales', async () => {
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ provider_origin: 'local' }))
     renderPage()
 
     await waitFor(() => expect(screen.getByText('Producto XL')).toBeInTheDocument())
     expect(screen.queryByText('compras:orders.detail.liquidationAgency')).not.toBeInTheDocument()
   })
 
-  it('permite buscar y asignar una agencia de liquidación en una orden Zona Libre', async () => {
+  it('permite buscar y asignar una agencia de liquidación en una orden de un proveedor internacional', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
-      modality: 'zona_libre', liquidation_agency_id: null, liquidation_agency_name: null,
+      provider_origin: 'internacional', liquidation_agency_id: null, liquidation_agency_name: null,
     }))
     mockedComprasApi.liquidationAgencies.search.mockResolvedValue({
       data: [{
@@ -592,7 +581,7 @@ describe('OrderDetailPage', () => {
       }],
     })
     mockedComprasApi.orders.liquidate.mockResolvedValue(makeDetail({
-      modality: 'zona_libre', liquidation_agency_id: 5, liquidation_agency_name: 'Agencia Aduanal Istmo',
+      provider_origin: 'internacional', liquidation_agency_id: 5, liquidation_agency_name: 'Agencia Aduanal Istmo',
     }))
     renderPage()
 
@@ -608,14 +597,14 @@ describe('OrderDetailPage', () => {
 
   it('permite registrar una agencia nueva desde el picker de liquidación', async () => {
     mockedComprasApi.orders.get.mockResolvedValue(makeDetail({
-      modality: 'zona_libre', liquidation_agency_id: null, liquidation_agency_name: null,
+      provider_origin: 'internacional', liquidation_agency_id: null, liquidation_agency_name: null,
     }))
     mockedComprasApi.liquidationAgencies.create.mockResolvedValue({
       id: 9, name: 'Agencia Nueva', contact_name: null, phone: null, email: null, notes: null,
       pending_payment_amount: 0, paid_amount: 0, last_payment_date: null, next_payment_date: null,
     })
     mockedComprasApi.orders.liquidate.mockResolvedValue(makeDetail({
-      modality: 'zona_libre', liquidation_agency_id: 9, liquidation_agency_name: 'Agencia Nueva',
+      provider_origin: 'internacional', liquidation_agency_id: 9, liquidation_agency_name: 'Agencia Nueva',
     }))
     renderPage()
 
