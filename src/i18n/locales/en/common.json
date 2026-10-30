@@ -71,6 +71,8 @@
       "add": "Add",
       "newKey": "Key (e.g. wholesaler)",
       "newLabel": "Display name",
+      "labelIn": "Label ({{lang}})",
+      "labelInHint": "Empty = the base label is shown",
       "saveError": "Could not save.",
       "deleteError": "Could not delete.",
       "loadError": "Could not load the catalogs.",

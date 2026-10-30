@@ -12,10 +12,10 @@ export const catalogsApi = {
 
   adminList: (domain: string): Promise<CatalogEntry[]> => api.get<CatalogEntry[]>(`/admin/catalogs/${domain}`).then(r => r.data),
 
-  create: (domain: string, body: { key: string, label: string, sort_order?: number, props?: CatalogEntry['props'] }): Promise<CatalogEntry> =>
+  create: (domain: string, body: { key: string, label: string, labels?: Record<string, string>, sort_order?: number, props?: CatalogEntry['props'] }): Promise<CatalogEntry> =>
     api.post<CatalogEntry>(`/admin/catalogs/${domain}`, body).then(r => r.data),
 
-  update: (domain: string, id: number, body: Partial<Pick<CatalogEntry, 'label' | 'sort_order' | 'is_active' | 'props'>>): Promise<CatalogEntry> =>
+  update: (domain: string, id: number, body: Partial<Pick<CatalogEntry, 'label' | 'labels' | 'sort_order' | 'is_active' | 'props'>>): Promise<CatalogEntry> =>
     api.put<CatalogEntry>(`/admin/catalogs/${domain}/${id}`, body).then(r => r.data),
 
   remove: (domain: string, id: number): Promise<void> => api.delete(`/admin/catalogs/${domain}/${id}`).then(() => undefined),

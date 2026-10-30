@@ -61,17 +61,20 @@ function PropField({ name, def, value, onChange, label, locked = false, hideValu
   )
 }
 
-function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [] }: {
-  domain: string, entry: CatalogEntry, defs: CatalogDomain['props'], propLabel: (name: string) => string, lockedWhenSystem?: string[]
+function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [], extraLanguages = [] }: {
+  domain: string, entry: CatalogEntry, defs: CatalogDomain['props'], propLabel: (name: string) => string, lockedWhenSystem?: string[],
+  /** Fase 14i — idiomas adicionales a la base (`label`): cada uno tiene su campo. */
+  extraLanguages?: string[]
 }) {
   const { t } = useTranslation('common')
   const qc = useQueryClient()
   const [label, setLabel] = useState(entry.label)
+  const [labels, setLabels] = useState<Record<string, string>>(entry.labels ?? {})
   const [sort, setSort] = useState(String(entry.sort_order))
   const [props, setProps] = useState(entry.props ?? {})
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => { setLabel(entry.label); setSort(String(entry.sort_order)); setProps(entry.props ?? {}) }, [entry])
+  useEffect(() => { setLabel(entry.label); setLabels(entry.labels ?? {}); setSort(String(entry.sort_order)); setProps(entry.props ?? {}) }, [entry])
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ['catalog-admin', domain] })
@@ -93,6 +96,10 @@ function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [] }: {
       <div className="flex flex-wrap items-center gap-2">
         <code className="text-[11px] text-slate-400 w-28 truncate" title={entry.key}>{entry.key}</code>
         <input aria-label={t('globalSettings.catalogsTab.label')} className={`${inputCls} flex-1 min-w-[10rem]`} value={label} onChange={e => setLabel(e.target.value)} />
+        {extraLanguages.map(lang => (
+          <input key={lang} aria-label={t('globalSettings.catalogsTab.labelIn', { lang: lang.toUpperCase() })} placeholder={t('globalSettings.catalogsTab.labelInHint')}
+            className={`${inputCls} flex-1 min-w-[9rem]`} value={labels[lang] ?? ''} onChange={e => setLabels(l => ({ ...l, [lang]: e.target.value }))} />
+        ))}
         <input aria-label={t('globalSettings.catalogsTab.order')} className={`${inputCls} w-16`} type="number" min={0} value={sort}
           disabled={entry.is_system && lockedWhenSystem.includes('sort_order')} onChange={e => setSort(e.target.value)} />
         {Object.entries(defs).map(([name, def]) => (
@@ -105,7 +112,7 @@ function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [] }: {
           {t('globalSettings.catalogsTab.active')}
         </label>
         <Button variant="outline" className="!px-2.5 !py-1 !text-xs" disabled={save.isPending}
-          onClick={() => save.mutate({ label, sort_order: Number(sort) || 0, props })}>
+          onClick={() => save.mutate({ label, ...(extraLanguages.length > 0 ? { labels: Object.fromEntries(extraLanguages.map(l => [l, labels[l] ?? ''])) } : {}), sort_order: Number(sort) || 0, props })}>
           {t('globalSettings.catalogsTab.save')}
         </Button>
         {entry.is_system
@@ -117,18 +124,19 @@ function EntryRow({ domain, entry, defs, propLabel, lockedWhenSystem = [] }: {
   )
 }
 
-function NewEntryForm({ domain, defs, propLabel }: { domain: string, defs: CatalogDomain['props'], propLabel: (name: string) => string }) {
+function NewEntryForm({ domain, defs, propLabel, extraLanguages = [] }: { domain: string, defs: CatalogDomain['props'], propLabel: (name: string) => string, extraLanguages?: string[] }) {
   const { t } = useTranslation('common')
   const qc = useQueryClient()
   const [key, setKey] = useState('')
   const [label, setLabel] = useState('')
+  const [labels, setLabels] = useState<Record<string, string>>({})
   const [props, setProps] = useState<CatalogEntry['props']>({})
   const [error, setError] = useState<string | null>(null)
 
   const create = useMutation({
-    mutationFn: () => catalogsApi.create(domain, { key, label, props }),
+    mutationFn: () => catalogsApi.create(domain, { key, label, ...(extraLanguages.length > 0 ? { labels: Object.fromEntries(Object.entries(labels).filter(([l, v]) => extraLanguages.includes(l) && v.trim() !== '')) } : {}), props }),
     onSuccess: () => {
-      setKey(''); setLabel(''); setProps({}); setError(null)
+      setKey(''); setLabel(''); setLabels({}); setProps({}); setError(null)
       void qc.invalidateQueries({ queryKey: ['catalog-admin', domain] })
       void qc.invalidateQueries({ queryKey: catalogQueryKey(domain) })
     },
@@ -139,6 +147,10 @@ function NewEntryForm({ domain, defs, propLabel }: { domain: string, defs: Catal
     <form className="mt-4 flex flex-wrap items-center gap-2" onSubmit={e => { e.preventDefault(); create.mutate() }}>
       <input aria-label={t('globalSettings.catalogsTab.newKey')} placeholder={t('globalSettings.catalogsTab.newKey')} className={`${inputCls} w-36`} value={key} onChange={e => setKey(e.target.value)} />
       <input aria-label={t('globalSettings.catalogsTab.newLabel')} placeholder={t('globalSettings.catalogsTab.newLabel')} className={`${inputCls} flex-1 min-w-[10rem]`} value={label} onChange={e => setLabel(e.target.value)} />
+      {extraLanguages.map(lang => (
+        <input key={lang} aria-label={t('globalSettings.catalogsTab.labelIn', { lang: lang.toUpperCase() })} placeholder={t('globalSettings.catalogsTab.labelIn', { lang: lang.toUpperCase() })}
+          className={`${inputCls} flex-1 min-w-[9rem]`} value={labels[lang] ?? ''} onChange={e => setLabels(l => ({ ...l, [lang]: e.target.value }))} />
+      ))}
       {Object.entries(defs).map(([name, def]) => (
         <PropField key={name} name={name} def={def} label={propLabel(name)} value={props[name]} onChange={v => setProps(p => ({ ...p, [name]: v }))}
           hideValues={def.type === 'enum' ? def.system_only : undefined} />
@@ -168,6 +180,7 @@ export default function CatalogsPanel() {
   })
 
   const propLabel = (name: string) => t(`globalSettings.catalogsTab.props.${name}`, { defaultValue: name })
+  const extraLanguages = (def?.languages ?? []).slice(1)
 
   return (
     <Card variant="panel" className="p-4 mb-3">
@@ -185,9 +198,9 @@ export default function CatalogsPanel() {
       {active && def && (
         <>
           <ul>
-            {(entries.data ?? []).map(e => <EntryRow key={e.id} domain={active} entry={e} defs={def.props} propLabel={propLabel} lockedWhenSystem={def.locked_when_system} />)}
+            {(entries.data ?? []).map(e => <EntryRow key={e.id} domain={active} entry={e} defs={def.props} propLabel={propLabel} lockedWhenSystem={def.locked_when_system} extraLanguages={extraLanguages} />)}
           </ul>
-          <NewEntryForm domain={active} defs={def.props} propLabel={propLabel} />
+          <NewEntryForm domain={active} defs={def.props} propLabel={propLabel} extraLanguages={extraLanguages} />
         </>
       )}
     </Card>

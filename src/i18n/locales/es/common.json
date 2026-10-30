@@ -71,6 +71,8 @@
       "add": "Agregar",
       "newKey": "Clave (ej. mayorista)",
       "newLabel": "Nombre visible",
+      "labelIn": "Etiqueta ({{lang}})",
+      "labelInHint": "Vacío = se muestra la etiqueta base",
       "saveError": "No se pudo guardar.",
       "deleteError": "No se pudo borrar.",
       "loadError": "No se pudieron cargar los catálogos.",
