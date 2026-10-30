@@ -69,4 +69,17 @@ describe('CommissionTiersModal — SCRUM-575', () => {
 
     await waitFor(() => expect(mockedApi.commissionsInternal.tiers.remove).toHaveBeenCalledWith(1))
   })
+
+  it('Fase 14d (3.5): rotula los tramos por su límite inferior (menos de / desde-hasta / desde), no por el máximo', async () => {
+    mockedApi.commissionsInternal.tiers.list.mockResolvedValue([
+      makeTier({ id: 1, monto_minimo: 0, monto_maximo: 20000, orden: 1 }),
+      makeTier({ id: 2, monto_minimo: 20001, monto_maximo: 35000, porcentaje: 2, orden: 2 }),
+      makeTier({ id: 3, monto_minimo: 35001, monto_maximo: null, porcentaje: 3, orden: 3 }),
+    ])
+    renderModal(false)
+
+    expect(await screen.findByText('adminContab:comisionesInternas.tramos.menosDe')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:comisionesInternas.tramos.desdeHasta')).toBeInTheDocument()
+    expect(screen.getByText('adminContab:comisionesInternas.tramos.desde')).toBeInTheDocument()
+  })
 })
