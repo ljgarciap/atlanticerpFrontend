@@ -1080,6 +1080,8 @@
         "porcentaje": "% commission"
       },
       "menosDe": "Less than {{monto}}",
+      "desde": "From {{monto}}",
+      "desdeHasta": "From {{desde}} up to less than {{hasta}}",
       "masDe": "More than {{monto}}",
       "rango": "{{desde}} – {{hasta}}",
       "vacio": "No tiers configured yet.",

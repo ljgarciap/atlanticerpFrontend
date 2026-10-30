@@ -40,7 +40,7 @@ function makeResumen(overrides: Partial<NotaCreditoResumenMes> = {}): NotaCredit
     pendientes_aprobacion_cantidad: 1,
     devoluciones_por_generar: 1,
     nota_promedio: 217,
-    primary_approval_threshold: 5000,
+    credit_note_approval_threshold: 5000,
     ...overrides,
   }
 }

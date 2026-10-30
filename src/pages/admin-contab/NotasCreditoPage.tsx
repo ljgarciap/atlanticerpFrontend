@@ -155,7 +155,7 @@ export default function NotasCreditoPage() {
         <div className={correccionPreview !== null ? 'hidden' : ''}>
           <RegistrarNotaCreditoModal
             devolucionPrecargada={devolucionPreview}
-            primaryApprovalThreshold={resumen?.primary_approval_threshold}
+            creditNoteApprovalThreshold={resumen?.credit_note_approval_threshold}
             onClose={() => setModalOpen(false)}
             onRegistered={() => setModalOpen(false)}
             onRequestCorreccionPreview={setCorreccionPreview}

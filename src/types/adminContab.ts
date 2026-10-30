@@ -1230,7 +1230,7 @@ export interface NotaCreditoResumenMes {
   /** REQ-482 RN2/RN3 — umbral configurable ($5,000 por defecto, Configuración Fiscal) a partir del
    *  cual una nota queda pendiente de aprobación de Gerencia. Viaja acá para que el formulario nunca lo
    *  hardcodee. */
-  primary_approval_threshold: number
+  credit_note_approval_threshold: number
 }
 
 // Batch 11 (SCRUM-559→564, REQ-482→487) — submit real del formulario: factura de origen, monto/
@@ -1411,7 +1411,7 @@ export interface PreviewCorreccionResponse {
   tarjetas: PreviewCorreccionTarjetas
   factura_preview: PreviewCorreccionFactura
   monto: number
-  /** `monto > primaryApprovalThreshold()` — RN1 REQ-490. Determina el mensaje de confirmación
+  /** `monto > creditNoteApprovalThreshold()` — RN1 REQ-490. Determina el mensaje de confirmación
    *  ("se generó la factura nueva" vs "queda pendiente de aprobación de Gerencia, la original sigue
    *  activa"). */
   requiere_aprobacion: boolean

@@ -40,6 +40,14 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
 
   const sorted = [...(tiers ?? [])].sort((a, b) => a.orden - b.orden)
 
+  // Fase 14d (3.5): el tramo que se aplica es el de mayor mínimo que no supera el total (límite inferior inclusivo), así que se muestra
+  // «desde» el mínimo hasta menos de lo que empieza el siguiente — no con un máximo que el cálculo no usa.
+  function tierLabel(tier: CommissionTier, next?: CommissionTier): string {
+    if (!next) return t('adminContab:comisionesInternas.tramos.desde', { monto: formatCurrency(tier.monto_minimo) })
+    if (tier.monto_minimo === 0) return t('adminContab:comisionesInternas.tramos.menosDe', { monto: formatCurrency(next.monto_minimo) })
+    return t('adminContab:comisionesInternas.tramos.desdeHasta', { desde: formatCurrency(tier.monto_minimo), hasta: formatCurrency(next.monto_minimo) })
+  }
+
   function startEdit(tier: CommissionTier) {
     setEditingId(tier.id)
     setAdding(false)
@@ -96,16 +104,10 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map(tier => (
+            {sorted.map((tier, idx) => (
               <tr key={tier.id} className="border-b border-slate-50 dark:border-slate-800">
                 <td className="py-2 pr-2 text-slate-800 dark:text-slate-100">
-                  {tier.monto_maximo === null
-                    ? t('adminContab:comisionesInternas.tramos.masDe', { monto: formatCurrency(tier.monto_minimo) })
-                    : tier.monto_minimo === 0
-                      ? t('adminContab:comisionesInternas.tramos.menosDe', { monto: formatCurrency(tier.monto_maximo) })
-                      : t('adminContab:comisionesInternas.tramos.rango', {
-                          desde: formatCurrency(tier.monto_minimo), hasta: formatCurrency(tier.monto_maximo),
-                        })}
+                  {tierLabel(tier, sorted[idx + 1])}
                 </td>
                 <td className="py-2 pr-2 font-semibold text-primary-dark">{tier.porcentaje}%</td>
                 {editable && (

@@ -46,7 +46,7 @@ interface Props {
    *  approval_threshold`, Configuración Fiscal). `undefined` mientras el resumen del mes no cargó
    *  todavía — el banner y el gate de comprobante obligatorio quedan inactivos hasta entonces
    *  (nunca asumen un umbral por defecto en el frontend). */
-  primaryApprovalThreshold?: number
+  creditNoteApprovalThreshold?: number
   onClose: () => void
   onRegistered: () => void
   /** Batch 12 (REQ-488/489) — "Corrección de datos" no registra directo: pide revisión previa +
@@ -70,7 +70,7 @@ function montoSugeridoDevolucion(d: Pick<NotaCreditoDevolucionPrecargada, 'produ
   return round2(neto * (1 + (d.factura_itbms_percentage ?? 0) / 100))
 }
 
-export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primaryApprovalThreshold, onClose, onRegistered, onRequestCorreccionPreview }: Props) {
+export default function RegistrarNotaCreditoModal({ devolucionPrecargada, creditNoteApprovalThreshold, onClose, onRegistered, onRequestCorreccionPreview }: Props) {
   const { t } = useTranslation('adminContab')
   const esDevolucion = devolucionPrecargada != null
 
@@ -315,7 +315,7 @@ export default function RegistrarNotaCreditoModal({ devolucionPrecargada, primar
   const hayExcedente = excedente > 0
 
   // REQ-482 RN2/RN3 — umbral parejo para los 3 tipos, recalculado en tiempo real con el monto.
-  const superaUmbral = primaryApprovalThreshold !== undefined && monto > primaryApprovalThreshold
+  const superaUmbral = creditNoteApprovalThreshold !== undefined && monto > creditNoteApprovalThreshold
 
   // SCRUM-865 punto 3 (REQ-495) — el comprobante es obligatorio para CUALQUIER tipo de nota,
   // incluida Devolución de mercancía. El ticket es explícito ("de cualquier tipo") y el backend
