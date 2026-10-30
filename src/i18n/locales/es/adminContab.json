@@ -1325,6 +1325,7 @@
       "conciliacionNote": "La conciliación contra el banco se gestiona en Cuentas Bancarias, no aquí.",
       "descargarResumen": "Descargar resumen",
       "atrasadoAviso": "El arqueo del {{fecha}} no quedó cerrado — ciérralo antes de poder trabajar el de hoy ({{fechaHoy}}).",
+      "reabiertoAviso": "Arqueo reabierto por {{nombre}} el {{fecha}}: {{motivo}}",
       "cerradoAviso": "Este arqueo ya está {{estado}} — sus observaciones y movimientos no se pueden editar.",
       "cerrar": {
         "boton": "Cerrar arqueo del día",
@@ -1382,7 +1383,12 @@
       "reabrirAyuda": "Mínimo 10 caracteres. El arqueo vuelve a quedar abierto, se vuelve a cerrar y queda registrado quién lo reabrió y por qué.",
       "reabrirConfirmar": "Reabrir",
       "reabrirCancelar": "Cancelar",
-      "reabrirError": "No se pudo reabrir el arqueo."
+      "reabrirError": "No se pudo reabrir el arqueo.",
+      "reaperturasTitulo": "Reaperturas ({{count}})",
+      "reaperturaItem": "{{nombre}} · {{fecha}}",
+      "reaperturaSinNombre": "Alguien",
+      "reabiertoMarca": "Reabierto",
+      "reabiertoMarcaAyuda": "Este día se reabrió después de cerrarse; abre el detalle para ver quién y por qué."
     },
     "restricted": {
       "restrictedRole": "Tu rol solo tiene acceso al Arqueo del día. Las vistas Proyectada y Real (30/90 días) están disponibles para Contabilidad, el aprobador configurado y Gerencia.",
