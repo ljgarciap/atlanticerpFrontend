@@ -652,7 +652,52 @@
     "criticalDaysPorAprobar": "\"Pending approval\" days before an order is critical",
     "zonaLibreProvider": "Free Trade Zone supplier",
     "zonaLibreProviderNone": "No supplier configured",
-    "zonaLibreProviderHelp": "Fixed supplier for Free Trade Zone requests. Without one, the flow cannot create requests."
+    "zonaLibreProviderHelp": "Fixed supplier for Free Trade Zone requests. Without one, the flow cannot create requests.",
+    "rules": {
+      "title": "Order approval rules",
+      "subtitle": "They decide when a purchase order needs the primary approver's approval. The first active rule, in order, that matches wins; if none matches, no approval is required. The amount is the total payable to the supplier.",
+      "loading": "Loading rules…",
+      "loadError": "The rules could not be loaded.",
+      "listLabel": "Approval rules",
+      "empty": "No rules: no order requires approval.",
+      "inactive": "inactive",
+      "any": "Any",
+      "noShipping": "No shipping",
+      "shipping": {
+        "aereo": "Air",
+        "maritimo": "Sea",
+        "terrestre": "Ground"
+      },
+      "payer": {
+        "atlantic": "The company",
+        "proveedor": "The supplier"
+      },
+      "summary": "Shipping: {{shipping}} · Pays: {{payer}} · Amount: {{amount}} → {{result}}",
+      "resultRequires": "Requires approval",
+      "resultNotRequires": "Does not require approval",
+      "add": "Add rule",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete the rule “{{name}}”?",
+      "name": "Name",
+      "order": "Order",
+      "active": "Active",
+      "shippingType": "Shipping type",
+      "payerLabel": "Who pays shipping",
+      "minAmount": "Minimum amount",
+      "maxAmount": "Maximum amount",
+      "result": "Result",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saveError": "The operation could not be completed.",
+      "previewTitle": "Preview",
+      "previewAmount": "Total payable",
+      "previewRun": "Test",
+      "previewYes": "With the active rules, this order DOES require approval.",
+      "previewNo": "With the active rules, this order does NOT require approval.",
+      "previewByRule": "Decided by the rule “{{name}}”.",
+      "previewNoRule": "No rule matches."
+    }
   },
   "inventory": {
     "providersPicker": {

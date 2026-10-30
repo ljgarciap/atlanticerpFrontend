@@ -652,7 +652,52 @@
     "criticalDaysPorAprobar": "Días «Por aprobar» para considerar crítica una orden",
     "zonaLibreProvider": "Proveedor de Zona Libre",
     "zonaLibreProviderNone": "Sin proveedor configurado",
-    "zonaLibreProviderHelp": "Proveedor fijo de las solicitudes de Zona Libre. Sin proveedor, el flujo no puede crear solicitudes."
+    "zonaLibreProviderHelp": "Proveedor fijo de las solicitudes de Zona Libre. Sin proveedor, el flujo no puede crear solicitudes.",
+    "rules": {
+      "title": "Reglas de aprobación de órdenes",
+      "subtitle": "Deciden cuándo una orden de compra necesita la aprobación del aprobador primario. Gana la primera regla activa, por orden, que coincide; si ninguna coincide, no se requiere aprobación. El monto es el total a pagar al proveedor.",
+      "loading": "Cargando reglas…",
+      "loadError": "No se pudieron cargar las reglas.",
+      "listLabel": "Reglas de aprobación",
+      "empty": "No hay reglas: ninguna orden requiere aprobación.",
+      "inactive": "inactiva",
+      "any": "Cualquiera",
+      "noShipping": "Sin envío",
+      "shipping": {
+        "aereo": "Aéreo",
+        "maritimo": "Marítimo",
+        "terrestre": "Terrestre"
+      },
+      "payer": {
+        "atlantic": "La empresa",
+        "proveedor": "El proveedor"
+      },
+      "summary": "Envío: {{shipping}} · Paga: {{payer}} · Monto: {{amount}} → {{result}}",
+      "resultRequires": "Requiere aprobación",
+      "resultNotRequires": "No requiere aprobación",
+      "add": "Agregar regla",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Eliminar la regla «{{name}}»?",
+      "name": "Nombre",
+      "order": "Orden",
+      "active": "Activa",
+      "shippingType": "Tipo de envío",
+      "payerLabel": "Quién paga el envío",
+      "minAmount": "Monto mínimo",
+      "maxAmount": "Monto máximo",
+      "result": "Resultado",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saveError": "No se pudo completar la operación.",
+      "previewTitle": "Vista previa",
+      "previewAmount": "Total a pagar",
+      "previewRun": "Probar",
+      "previewYes": "Con las reglas activas, esta orden SÍ requiere aprobación.",
+      "previewNo": "Con las reglas activas, esta orden NO requiere aprobación.",
+      "previewByRule": "Decide la regla «{{name}}».",
+      "previewNoRule": "Ninguna regla coincide."
+    }
   },
   "inventory": {
     "providersPicker": {
