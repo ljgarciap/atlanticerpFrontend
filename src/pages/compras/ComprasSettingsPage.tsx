@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { usePermission } from '@/hooks/usePermission'
 import ComprasSettingsPanel from '@/components/ComprasSettingsPanel'
+import PurchaseApprovalRulesPanel from '@/components/PurchaseApprovalRulesPanel'
 import { IcoSettings } from '@/components/icons'
 
 /**
@@ -15,6 +16,8 @@ import { IcoSettings } from '@/components/icons'
 export default function ComprasSettingsPage() {
   const { t } = useTranslation(['common', 'compras'])
   const canConfigureSettings = usePermission('compras.settings.configure')
+  // Fase 14a — las reglas de aprobación son datos de la empresa: solo las administra el superadmin (el backend lo exige).
+  const isSuperadmin = usePermission('superadmin.all')
 
   if (!canConfigureSettings) {
     return (
@@ -33,6 +36,7 @@ export default function ComprasSettingsPage() {
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">{t('compras:settings.subtitle')}</p>
 
       <ComprasSettingsPanel />
+      {isSuperadmin && <PurchaseApprovalRulesPanel />}
     </div>
   )
 }
