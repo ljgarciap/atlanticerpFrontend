@@ -374,7 +374,6 @@
     "compras.settings.configure",
     "compras.view",
     "compras.write",
-    "compras.zona-libre.approve",
     "ventas_diseno.orders.access"
    ]
   },

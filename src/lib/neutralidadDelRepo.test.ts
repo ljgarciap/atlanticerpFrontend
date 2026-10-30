@@ -15,6 +15,8 @@ const ENTIDADES = [
   'automotriz rey', 'ocean view', 'grupo melo', 'gelabert', 'farallon', 'illuminations',
   // Fase 8 — nombres de almacén del cliente anterior (los almacenes son configurables).
   'showrooms?', 'obarrio',
+  // Fase 14f — la zona franca de Colón (Panamá) salió del núcleo.
+  'zona.?libre',
 ]
 const SECTOR_CI = [
   'iluminaci', 'iluminacon', 'luminaria', 'l[aá]mpara', 'lamparas', 'downlight', 'candelabro', 'bombill', 'chandelier', 'luminaire', 'dialux',
