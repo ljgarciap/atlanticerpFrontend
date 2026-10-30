@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import { useToastStore } from '@/store/toastStore'
 import type { InternalTechnician, InternalTechnicianSpecialty } from '@/types/servicios'
+import { useTechnicianSpecialties } from '@/hooks/useFixedLists'
 
 interface Props {
   onClose:   () => void
@@ -31,6 +32,7 @@ const INPUT_CLASSES = 'w-full rounded-lg border border-slate-200 dark:border-sla
 // opcionales. RN2/RN3/RN4 (iniciales, color único, estado inicial) las resuelve el backend.
 export default function InternalTechnicianCreateModal({ onClose, onCreated, technician }: Props) {
   const { t }   = useTranslation('servicios')
+  const { options: specialties } = useTechnicianSpecialties()
   const toast   = useToastStore(s => s.show)
   const isEdit  = technician !== undefined
   const [form, setForm] = useState<FormState>(technician ? {
@@ -89,8 +91,7 @@ export default function InternalTechnicianCreateModal({ onClose, onCreated, tech
               onChange={e => set('especialidad', e.target.value as InternalTechnicianSpecialty)}
               className={INPUT_CLASSES}
             >
-              <option value="general">{t('technicians.internal.specialty.general')}</option>
-              <option value="warranty">{t('technicians.internal.specialty.warranty')}</option>
+              {specialties.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
             </select>
           </label>
           <label className="text-sm block">

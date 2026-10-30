@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
 import type { CustomerReturnReason } from '@/types/bodega'
 import { formatDateTimeShort } from '@/utils/dates'
+import { useReturnReasons } from '@/hooks/useFixedLists'
 
 interface Props {
   id: number
@@ -115,9 +116,9 @@ export default function CustomerReturnDetailModal({ id, onClose }: Props) {
 }
 
 export function ReasonLabel({ reason, detail }: { reason: CustomerReturnReason; detail?: string | null }) {
-  const { t } = useTranslation('bodega')
+  const { label } = useReturnReasons()
   if (reason === 'otra' && detail) return <>{detail}</>
-  return <>{t(`returns.reasons.${reason}`)}</>
+  return <>{label(reason)}</>
 }
 
 function Th({ children }: { children: React.ReactNode }) {

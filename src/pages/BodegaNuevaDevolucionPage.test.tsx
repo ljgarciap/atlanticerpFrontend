@@ -6,6 +6,10 @@ import BodegaNuevaDevolucionPage from './BodegaNuevaDevolucionPage'
 import { bodegaApi } from '@/api/bodegaApi'
 import type { CreateCustomerReturnResponse, ReturnSearchOrderResult } from '@/types/bodega'
 
+// Fase 14c: las listas de motivos salen de un catálogo; sin él (falla la consulta) rige el respaldo con las traducciones de siempre.
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn().mockRejectedValue(new Error('sin catálogo')) } }))
+
+
 const navigateMock = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoClose } from '@/components/icons'
-import { ADJUSTMENT_MOTIVOS } from '@/types/bodega'
+import { useAdjustmentReasons } from '@/hooks/useFixedLists'
 import { formatDateFromTimestamp } from '@/utils/dates'
 import type {
   AdjustmentDuplicateWarning, AdjustmentEstado, AdjustmentMotivo, AdjustmentRequestLine, AdjustmentRequestLineDraft, AdjustmentTipo, ProductSearchResult,
@@ -273,6 +273,7 @@ function RejectModal({ lineId, onClose }: { lineId: number; onClose: () => void 
  * para `Rechazada`. */
 function DetailModal({ line, onClose }: { line: AdjustmentRequestLine; onClose: () => void }) {
   const { t } = useTranslation(['common', 'bodega'])
+  const { label: reasonLabel } = useAdjustmentReasons()
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -323,7 +324,7 @@ function DetailModal({ line, onClose }: { line: AdjustmentRequestLine; onClose: 
 
           <div>
             <p className="text-slate-400 uppercase tracking-wide text-xs mb-0.5">{t('bodega:adjustments.detailModal.reason')}</p>
-            <p className="text-sm text-slate-700">{t(`bodega:adjustments.newModal.reasons.${line.motivo}`, line.motivo)}</p>
+            <p className="text-sm text-slate-700">{reasonLabel(line.motivo)}</p>
           </div>
 
           {line.estado === 'Rechazada' && (
@@ -375,6 +376,7 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
   initialProduct?: ProductSearchResult | null
 }) {
   const { t } = useTranslation(['common', 'bodega'])
+  const { options: reasonOptions } = useAdjustmentReasons()
   const { data: warehousesData } = useWarehousesList()
   const warehouses = warehousesData?.data ?? []
   const create = useCreateAdjustmentRequest()
@@ -557,8 +559,8 @@ export function NewAdjustmentRequestModal({ onClose, initialProduct = null }: {
               className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm mb-2 bg-white"
             >
               <option value="">{t('bodega:adjustments.newModal.reasonPlaceholder')}</option>
-              {ADJUSTMENT_MOTIVOS.map(m => (
-                <option key={m} value={m}>{t(`bodega:adjustments.newModal.reasons.${m}`)}</option>
+              {reasonOptions.map(m => (
+                <option key={m.key} value={m.key}>{m.label}</option>
               ))}
             </select>
 

@@ -183,7 +183,8 @@ export const ADJUSTMENT_MOTIVOS = [
   'CONTEO_FISICO_NO_COINCIDE', 'PRODUCTO_DANADO_ROTO', 'PRODUCTO_VENCIDO_OBSOLETO',
   'ERROR_DE_REGISTRO', 'ROBO_O_PERDIDA', 'OTRO_ESPECIFICAR',
 ] as const
-export type AdjustmentMotivo = typeof ADJUSTMENT_MOTIVOS[number]
+/** Fase 14c — clave de un catálogo por empresa (`adjustment_reason`); `OTRO_ESPECIFICAR` pide detalle. */
+export type AdjustmentMotivo = string
 
 export interface AdjustmentRequestLine {
   id:              number
@@ -1340,13 +1341,8 @@ export interface GeneralCountEvaluatePayload {
 export type CustomerReturnStatus = 'pendiente' | 'esperando_nota_credito' | 'finalizado' | 'rechazada'
 export type CustomerReturnStatusFilter = CustomerReturnStatus | 'todas'
 
-export type CustomerReturnReason =
-  | 'danado_defectuoso'
-  | 'no_corresponde'
-  | 'cliente_cambio_opinion'
-  | 'excedente'
-  | 'error_instalacion'
-  | 'otra'
+/** Fase 14c — clave de un catálogo por empresa (`return_reason`); las de siempre son `RETURN_REASON_KEYS`. `otra` pide detalle. */
+export type CustomerReturnReason = string
 
 /** Línea de producto de una devolución — ya viene con todo el detalle en `CustomerReturnRow.products`
  * (a diferencia de `ZonaLibreRequestRow`, que solo trae un resumen calculado server-side), lo que

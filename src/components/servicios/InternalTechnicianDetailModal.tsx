@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useTechnicianSpecialties } from '@/hooks/useFixedLists'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
@@ -12,6 +13,7 @@ interface Props {
 // REQ-255 RN5 — clic en nombre/avatar de la tarjeta abre teléfono/correo/especialidad.
 export default function InternalTechnicianDetailModal({ technician: t, onClose }: Props) {
   const { t: translate } = useTranslation('servicios')
+  const { label: specialtyLabel } = useTechnicianSpecialties()
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
@@ -27,7 +29,7 @@ export default function InternalTechnicianDetailModal({ technician: t, onClose }
               {translate('technicians.internal.detailModal.especialidad')}
             </span>
             <span className="text-slate-800 dark:text-slate-100">
-              {translate(`technicians.internal.specialty.${t.especialidad}`)}
+              {specialtyLabel(t.especialidad)}
             </span>
           </div>
           <div>

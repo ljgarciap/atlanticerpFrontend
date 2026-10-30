@@ -389,7 +389,8 @@ export interface ExternalTechnicianDeactivationConfirmationResponse {
 
 // Fase 4 — Servicios, Batch 6 (REQ-255→260). Técnico interno.
 export type InternalTechnicianStatus = 'available' | 'en_route' | 'on_site' | 'off'
-export type InternalTechnicianSpecialty = 'general' | 'warranty'
+/** Fase 14c — clave de un catálogo por empresa (`technician_specialty`); `warranty` es de sistema. */
+export type InternalTechnicianSpecialty = string
 
 // REQ-255 — tarjeta de Vista Equipo. `herramientas_asignadas`/`pct_resuelto_primera_visita`/
 // `tiempo_promedio_minutos` son placeholders del backend (null/0) hasta Batch 13 / REQ-211.
