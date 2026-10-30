@@ -123,3 +123,34 @@ describe('CatalogsPanel', () => {
     expect(Array.from(categorias[2].options).map(o => o.value)).toEqual(['abierta'])
   })
 })
+
+describe('CatalogsPanel — Fase 14i (etiquetas por idioma)', () => {
+  it('muestra un campo por idioma adicional, lo guarda junto a la base y vaciarlo envía texto vacío', async () => {
+    api.domains.mockResolvedValue([{ domain: 'payment_method', label: 'Formas de pago', props: {}, languages: ['es', 'en'] }])
+    api.adminList.mockResolvedValue([
+      { id: 3, domain: 'payment_method', key: 'deposito', label: 'Depósito bancario', labels: { en: 'Bank deposit' }, sort_order: 5, is_active: true, is_system: false, props: {} },
+    ])
+    api.update.mockResolvedValue({} as never)
+    renderPanel()
+
+    const en = await screen.findByDisplayValue('Bank deposit')
+    fireEvent.change(en, { target: { value: '' } })
+    fireEvent.click(screen.getByText('globalSettings.catalogsTab.save'))
+
+    await waitFor(() => expect(api.update).toHaveBeenCalledWith('payment_method', 3, expect.objectContaining({ label: 'Depósito bancario', labels: { en: '' } })))
+  })
+
+  it('al crear envía solo las traducciones escritas', async () => {
+    api.domains.mockResolvedValue([{ domain: 'payment_method', label: 'Formas de pago', props: {}, languages: ['es', 'en'] }])
+    api.adminList.mockResolvedValue([])
+    api.create.mockResolvedValue({} as never)
+    renderPanel()
+
+    fireEvent.change(await screen.findByLabelText('globalSettings.catalogsTab.newKey'), { target: { value: 'ventanilla' } })
+    fireEvent.change(screen.getByLabelText('globalSettings.catalogsTab.newLabel'), { target: { value: 'Ventanilla bancaria' } })
+    fireEvent.change(screen.getByLabelText('globalSettings.catalogsTab.labelIn'), { target: { value: 'Bank counter' } })
+    fireEvent.click(screen.getByText('globalSettings.catalogsTab.add'))
+
+    await waitFor(() => expect(api.create).toHaveBeenCalledWith('payment_method', expect.objectContaining({ key: 'ventanilla', label: 'Ventanilla bancaria', labels: { en: 'Bank counter' } })))
+  })
+})

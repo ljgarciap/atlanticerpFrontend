@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { catalogsApi } from '@/api/catalogsApi'
 import type { CatalogEntry } from '@/types/catalogs'
 
@@ -9,8 +10,10 @@ export const catalogQueryKey = (domain: string) => ['catalog', domain] as const
  * carga o si falla: quien lo usa debe tener un respaldo (los valores de siempre) para que la pantalla no quede vacía.
  */
 export function useCatalog(domain: string) {
+  // Fase 14i: el servidor devuelve `label` en el idioma del usuario, así que el idioma forma parte de la clave (cambiarlo vuelve a pedir el catálogo).
+  const { i18n } = useTranslation()
   return useQuery<CatalogEntry[]>({
-    queryKey: catalogQueryKey(domain),
+    queryKey: [...catalogQueryKey(domain), i18n?.language ?? ''],
     queryFn:  () => catalogsApi.list(domain),
     staleTime: 5 * 60 * 1000,
   })

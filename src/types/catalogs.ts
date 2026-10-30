@@ -9,6 +9,8 @@ export interface CatalogEntry {
   /** El código todavía usa esta clave: se puede renombrar y reordenar, no borrar ni desactivar. */
   is_system:  boolean
   props:      Record<string, CatalogPropValue>
+  /** Fase 14i — traducciones por idioma (`{ en: '…' }`). En la lectura general `label` ya viene en el idioma del usuario; en la de administración, `label` es la base. */
+  labels?:    Record<string, string>
 }
 
 /** Valor de una propiedad de comportamiento (Fase 7b sumó texto, entero y lista de textos). */
@@ -25,6 +27,8 @@ export type CatalogPropDef =
 export interface CatalogDomain {
   domain: string
   label:  string
+  /** Fase 14i — idiomas con etiqueta por entrada; el primero es la base. */
+  languages?: string[]
   props:  Record<string, CatalogPropDef>
   /** Propiedades (y `sort_order`) que una entrada de SISTEMA no puede cambiar: el código depende de ellas. */
   locked_when_system?: string[]
