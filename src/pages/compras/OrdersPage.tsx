@@ -19,7 +19,7 @@ import AutocompleteInput from '@/components/AutocompleteInput'
 import { fetchOrderSuggestions } from '@/utils/searchSuggestionsCompras'
 import { formatMoney } from '@/lib/money'
 
-type Chip = 'all' | 'critical' | 'zona_libre'
+type Chip = 'all' | 'critical'
 type SortField = 'created_at' | 'status' | 'total_amount' | 'estimated_arrival_date'
 
 export default function OrdersPage() {
@@ -29,7 +29,7 @@ export default function OrdersPage() {
 
   // REQ-112 (Inicio de Compras) — "Productos retrasados" navega acá con ?chip=critical ya
   // aplicado, mismo patrón que InventarioPage con ?chip=en_atencion.
-  const initialChip: Chip = (['all', 'critical', 'zona_libre'] as Chip[])
+  const initialChip: Chip = (['all', 'critical'] as Chip[])
     .includes(searchParams.get('chip') as Chip)
     ? (searchParams.get('chip') as Chip)
     : 'all'
@@ -216,7 +216,7 @@ export default function OrdersPage() {
       </div>
 
       <div className="flex gap-2 mb-4">
-        {(['all', 'critical', 'zona_libre'] as Chip[]).map(c => (
+        {(['all', 'critical'] as Chip[]).map(c => (
           <Button
             key={c}
             variant="outline"
@@ -225,7 +225,7 @@ export default function OrdersPage() {
             className="!text-xs !px-3 !py-1.5"
             onClick={() => { setChip(c); setPage(1) }}
           >
-            {t(`compras:orders.chips.${c === 'zona_libre' ? 'zonaLibre' : c}`)}
+            {t(`compras:orders.chips.${c}`)}
           </Button>
         ))}
       </div>
@@ -246,9 +246,6 @@ export default function OrdersPage() {
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                 {t('compras:orders.table.provider')}
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                {t('compras:orders.table.modality')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                 {t('compras:orders.table.shippingType')}
@@ -323,7 +320,6 @@ export default function OrdersPage() {
                     <OriginBadge originModule={o.origin_module} t={t} />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-slate-600">{t(`compras:newOrder.modality.${o.modality === 'zona_libre' ? 'zonaLibre' : 'directo'}`)}</td>
                 <td className="px-4 py-3 text-slate-600">
                   {o.shipping_type ? t(`compras:newOrder.shipping.type${o.shipping_type.charAt(0).toUpperCase()}${o.shipping_type.slice(1)}`) : '—'}
                 </td>

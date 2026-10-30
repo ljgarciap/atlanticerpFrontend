@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { isAxiosError } from 'axios'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   useBodegaInventory, useBodegaInventoryFamily, useBodegaInventoryFamiliesList, useBodegaPorServir,
@@ -63,7 +63,6 @@ const ESTADOS: BodegaInventoryEstado[] = ['disponible', 'bajo_stock', 'sin_stock
 
 export default function BodegaInventarioPage() {
   const { t } = useTranslation(['common', 'bodega'])
-  const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('products')
 
   return (
@@ -77,27 +76,6 @@ export default function BodegaInventarioPage() {
           <p className="text-[12px] text-slate-500">{t('bodega:inventory.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/*
-            SCRUM-415 (REQ-345) — "Ir a ver Órdenes" debe llevar al listado de Órdenes Zona
-            Libre, el único flujo de compra que Bodega puede iniciar (Bodega no tiene
-            `compras.write` para el flujo general de Compras). Antes navegaba por error a
-            /bodega/pedidos (tablero Kanban de Pedidos, una pantalla completamente distinta) —
-            hallazgo de QA (qa.qa, 2026-07-24).
-          */}
-          <Button variant="outline" onClick={() => navigate('/bodega/ordenes-zona-libre')}>
-            {t('bodega:inventory.actions.goToOrders')}
-          </Button>
-          {/*
-            SCRUM-433 (REQ-345, rebote de Gerencia Test 2026-08-13, con video) — "+ Nueva orden de
-            compra" navegaba a la BANDEJA de Órdenes Zona Libre (`/bodega/ordenes-zona-libre`),
-            una parada intermedia: el usuario tenía que volver a pulsar el botón propio de esa
-            bandeja para recién ahí llegar al formulario real. RN1: debe ir DIRECTO al formulario
-            de creación (`/bodega/ordenes-zona-libre/nueva`), en un solo clic — mismo destino al
-            que ya navega el botón "+ Nueva orden de compra" DENTRO de la bandeja (ese no cambia).
-          */}
-          <Button onClick={() => navigate('/bodega/ordenes-zona-libre/nueva')}>
-            {t('bodega:inventory.actions.newPurchaseOrder')}
-          </Button>
         </div>
       </div>
 

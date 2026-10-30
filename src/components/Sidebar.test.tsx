@@ -19,7 +19,7 @@ const LABELS: Record<string, Record<string, string>> = {
     'nav.bodega': 'Bodega', 'nav.bodegas': 'Bodegas', 'nav.kardex': 'Movimientos',
     'nav.ajustes': 'Solicitud de ajuste',
     'nav.bodegaHome': 'Inicio Bodega', 'nav.verInventario': 'Ver inventario',
-    'nav.ordenesZonaLibre': 'Órdenes Zona Libre', 'nav.inventarioGeneral': 'Inventario general',
+    'nav.inventarioGeneral': 'Inventario general',
     'nav.devoluciones': 'Devoluciones',
     'nav.settings': 'Configuración', 'nav.security': 'Seguridad',
     'nav.configuracionGlobal': 'Configuración global',
@@ -300,13 +300,11 @@ describe('Sidebar — Inicio + dropdown Inventario de Bodega (SCRUM-363)', () =>
     fireEvent.click(screen.getAllByText('Bodega')[0])
 
     expect(screen.queryByText('Ver inventario')).not.toBeInTheDocument()
-    expect(screen.queryByText('Órdenes Zona Libre')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getAllByText('Inventario')[0])
 
     expect(screen.getAllByText('Ver inventario').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Solicitud de ajuste').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Órdenes Zona Libre').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Inventario general').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Devoluciones').length).toBeGreaterThan(0)
   })
@@ -1034,7 +1032,7 @@ describe('Sidebar — override de visibilidad de ítems de menú por usuario (SC
     useAuthStore.setState({ user: baseUser({
       modules: { bodega: noModule({ view: true }) },
       menuVisibility: { bodega: {
-        inventario_ver: false, ajustes: false, zona_libre: false, inventario_general: false, devoluciones: false,
+        inventario_ver: false, ajustes: false, inventario_general: false, devoluciones: false,
       } },
     }) })
     renderSidebar()

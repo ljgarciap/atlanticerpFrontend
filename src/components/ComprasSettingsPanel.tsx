@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
-import { useComprasSettings, useProviders, useUpdateComprasSettings } from '@/hooks/useCompras'
+import { useComprasSettings, useUpdateComprasSettings } from '@/hooks/useCompras'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
@@ -42,9 +42,6 @@ export default function ComprasSettingsPanel() {
   const [weightMargin, setWeightMargin] = useState('')
   const [otherCategoryPenalty, setOtherCategoryPenalty] = useState('')
   const [minThreshold, setMinThreshold] = useState('')
-  // Fase 5a — proveedor fijo de Zona Libre (antes solo lo escribía un seeder). '' = sin proveedor.
-  const [zonaLibreProviderId, setZonaLibreProviderId] = useState('')
-  const { data: zlProviders } = useProviders({ category: 'zona_libre', per_page: 'all' })
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -58,7 +55,6 @@ export default function ComprasSettingsPanel() {
     setWeightMargin(String(settings.similarity_weight_margin))
     setOtherCategoryPenalty(String(settings.similarity_other_category_penalty))
     setMinThreshold(String(settings.similarity_min_threshold))
-    setZonaLibreProviderId(settings.zona_libre_provider_id != null ? String(settings.zona_libre_provider_id) : '')
   }, [settings])
 
   const dirty = settings != null && (
@@ -71,7 +67,6 @@ export default function ComprasSettingsPanel() {
     || weightMargin !== String(settings.similarity_weight_margin)
     || otherCategoryPenalty !== String(settings.similarity_other_category_penalty)
     || minThreshold !== String(settings.similarity_min_threshold)
-    || zonaLibreProviderId !== (settings.zona_libre_provider_id != null ? String(settings.zona_libre_provider_id) : '')
   )
 
   const parsed = Number(threshold)
@@ -104,7 +99,6 @@ export default function ComprasSettingsPanel() {
   const weightsSum = parsedWeightText + parsedWeightPrice + parsedWeightMargin
   const weightsSumOffBy100 = !similarityInvalid && Math.round(weightsSum) !== 100
 
-  const zonaLibreChanged = settings != null && zonaLibreProviderId !== (settings.zona_libre_provider_id != null ? String(settings.zona_libre_provider_id) : '')
 
   const handleSave = () => {
     if (invalid || daysInvalid || criticalInvalid || marginInvalid || similarityInvalid) {
@@ -120,7 +114,6 @@ export default function ComprasSettingsPanel() {
       similarity_other_category_penalty: parsedOtherCategoryPenalty,
       similarity_min_threshold: parsedMinThreshold,
       // Solo viaja si cambió: el resto de los guardados no toca el proveedor.
-      ...(zonaLibreChanged ? { zona_libre_provider_id: zonaLibreProviderId === '' ? null : Number(zonaLibreProviderId) } : {}),
     }, {
       onError: (err: unknown) => setError(mutationErrorMessage(err, t('compras:settings.saveError'))),
     })
@@ -228,25 +221,6 @@ export default function ComprasSettingsPanel() {
         {weightsSumOffBy100 && (
           <p className="text-[11px] text-amber-600 mt-2">{t('compras:settings.similarityWeightsSumWarning', { sum: weightsSum })}</p>
         )}
-      </div>
-
-      <div className="max-w-xs mb-3">
-        <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1" htmlFor="zona-libre-provider">
-          {t('compras:settings.zonaLibreProvider')}
-        </label>
-        <select
-          id="zona-libre-provider"
-          value={zonaLibreProviderId}
-          onChange={e => { setZonaLibreProviderId(e.target.value); setError(null) }}
-          className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-        >
-          <option value="">{t('compras:settings.zonaLibreProviderNone')}</option>
-          {settings?.zona_libre_provider_id != null && !(zlProviders?.data ?? []).some(p => p.id === settings.zona_libre_provider_id) && (
-            <option value={String(settings.zona_libre_provider_id)}>{`#${settings.zona_libre_provider_id}`}</option>
-          )}
-          {(zlProviders?.data ?? []).map(p => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
-        </select>
-        <p className="text-[11px] text-slate-400 mt-1">{t('compras:settings.zonaLibreProviderHelp')}</p>
       </div>
 
       {dirty && (

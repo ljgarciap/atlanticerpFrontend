@@ -43,8 +43,6 @@ import KardexPage        from '@/pages/KardexPage'
 import SolicitudAjustePage from '@/pages/SolicitudAjustePage'
 import BodegaSettingsPage from '@/pages/BodegaSettingsPage'
 import BodegaInventarioPage from '@/pages/BodegaInventarioPage'
-import BodegaOrdenesZonaLibrePage from '@/pages/BodegaOrdenesZonaLibrePage'
-import BodegaNuevaOrdenZonaLibrePage from '@/pages/BodegaNuevaOrdenZonaLibrePage'
 import BodegaInventarioGeneralPage from '@/pages/BodegaInventarioGeneralPage'
 import BodegaDevolucionesPage from '@/pages/BodegaDevolucionesPage'
 import BodegaNuevaDevolucionPage from '@/pages/BodegaNuevaDevolucionPage'
@@ -254,7 +252,7 @@ export default function App() {
                 acceso a algún tipo de aprobación del módulo (decisión de Luis) — ve el Home
                 completo de Compras, no solo la tarjeta. */}
             <Route path="/compras/inicio" element={
-              <RequirePermission permission={['compras.read', 'compras.edit', 'compras.approve', 'compras.zona-libre.approve', 'compras.sustitutos.manage', 'ventas_diseno.edit']}>
+              <RequirePermission permission={['compras.read', 'compras.edit', 'compras.approve', 'compras.sustitutos.manage', 'ventas_diseno.edit']}>
                 <ComprasHomePage />
               </RequirePermission>
             } />
@@ -384,7 +382,7 @@ export default function App() {
               </RequirePermission>
             } />
             <Route path="/bodega/bodegas" element={
-              // SCRUM-1021 — bodega.warehouses.view: el vendedor consulta las bodegas (Zona Libre incluida)
+              // SCRUM-1021 — bodega.warehouses.view: el vendedor consulta las bodegas
               // sin el resto del módulo Bodega.
               <RequirePermission permission={["bodega.read", "bodega.warehouses.view"]}>
                 <BodegasPage />
@@ -406,28 +404,6 @@ export default function App() {
             <Route path="/bodega/inventario" element={
               <RequirePermission permission="bodega.read">
                 <BodegaInventarioPage />
-              </RequirePermission>
-            } />
-            {/* SCRUM-329 Batch B3 (REQ-363→375, SCRUM-433→445) — "Zona Libre de Colón": bandeja
-                (3D) real, reemplaza el placeholder "próximamente". "Nueva orden" (3C) gateada
-                igual que el resto de Bodega (bodega.read a nivel de ruta, mismo criterio ya usado
-                en Solicitud de Ajuste) — el backend enforcea bodega.write en el POST real. */}
-            <Route path="/bodega/ordenes-zona-libre" element={
-              <RequirePermission permission="bodega.read">
-                <BodegaOrdenesZonaLibrePage />
-              </RequirePermission>
-            } />
-            <Route path="/bodega/ordenes-zona-libre/nueva" element={
-              <RequirePermission permission="bodega.read">
-                <BodegaNuevaOrdenZonaLibrePage />
-              </RequirePermission>
-            } />
-            {/* SCRUM-797 (revierte SCRUM-440) — reusa la misma pantalla en modo edición (detecta
-                `:id` vía useParams); el gate real de quién puede editar y hasta qué estado vive en
-                el backend (`BodegaZonaLibreRequestController::update()`), acá solo bodega.read. */}
-            <Route path="/bodega/ordenes-zona-libre/:id/editar" element={
-              <RequirePermission permission="bodega.read">
-                <BodegaNuevaOrdenZonaLibrePage />
               </RequirePermission>
             } />
             {/* Bloque B5 (SCRUM-460→466, REQ-390→396) — "Inventario general" real, reemplaza el

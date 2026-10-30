@@ -8,7 +8,7 @@ import type { OrderStage, BodegaPendienteItem, BodegaPendienteTipo, BodegaDespac
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import CountBadge from '@/components/ui/CountBadge'
-import { IcoAlertTriangle, IcoClock, IcoGlobe, IcoClose, IcoChevronRight } from '@/components/icons'
+import { IcoAlertTriangle, IcoClock, IcoClose, IcoChevronRight } from '@/components/icons'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
 import ShowMoreListModal from '@/components/ShowMoreListModal'
@@ -200,15 +200,9 @@ export default function BodegaHomePage() {
       <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">{row.estimated_arrival_date ?? '—'}</td>
       <td className="py-1.5 pr-2 text-slate-600 dark:text-slate-300">
         {row.provider_name ?? '—'}
-        {row.is_zona_libre && (
-          <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-            <IcoGlobe size={10} /> {t('bodega:home.porRecibir.freeZoneBadge')}
-          </span>
-        )}
       </td>
       <td className="py-1.5">
-        {/* REQ-301 RN3 — "Zona Libre" es la misma orden de Compras (`PurchaseOrder.modality`),
-            no un recurso separado, así que "Ver orden" siempre va a Compras. */}
+        {/* REQ-301 RN3 — "Ver orden" siempre va a la orden de Compras. */}
         <button
           className="text-primary font-semibold hover:underline"
           onClick={() => navigate(`/compras/ordenes/${row.purchase_order_id}`)}
@@ -226,7 +220,6 @@ export default function BodegaHomePage() {
         <div className="text-slate-400">{row.factory_reference ?? '—'} · {t('bodega:home.porRecibir.table.quantity')}: {row.quantity} · {row.estimated_arrival_date ?? '—'}</div>
         <div className="text-slate-500">
           {row.provider_name ?? '—'}
-          {row.is_zona_libre && <span className="ml-1.5 text-primary">({t('bodega:home.porRecibir.freeZoneBadge')})</span>}
         </div>
       </div>
       <button

@@ -82,23 +82,23 @@ describe('ProviderFormDrawer — categoría (REQ-126, SCRUM-189)', () => {
 
     const select = document.querySelector('select') as HTMLSelectElement
     const values = Array.from(select.options).map(o => o.value).filter(Boolean)
-    expect(values).toEqual(['locales', 'zona_libre', 'china', 'europa', 'online', 'latinoamerica'])
+    expect(values).toEqual(['locales', 'china', 'europa', 'online', 'latinoamerica'])
   })
 
   it('envía la categoría elegida al crear', async () => {
-    mockedComprasApi.providers.create.mockResolvedValue(makeProvider({ category: 'zona_libre' }))
+    mockedComprasApi.providers.create.mockResolvedValue(makeProvider({ category: 'china' }))
     renderDrawer(null)
 
     await screen.findByText('compras:providerForm.titleCreate')
     fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: 'Nuevo Proveedor' } })
     const select = document.querySelector('select') as HTMLSelectElement
-    fireEvent.change(select, { target: { value: 'zona_libre' } })
+    fireEvent.change(select, { target: { value: 'china' } })
     fireEvent.change(document.querySelector('input[name="country"]') as HTMLInputElement, { target: { value: 'Panamá' } })
     fireEvent.change(document.querySelector('input[name="email"]') as HTMLInputElement, { target: { value: 'x@x.com' } })
     fireEvent.click(screen.getByText('compras:providerForm.actions.save'))
 
     await waitFor(() => expect(mockedComprasApi.providers.create).toHaveBeenCalledWith(
-      expect.objectContaining({ category: 'zona_libre' }),
+      expect.objectContaining({ category: 'china' }),
     ))
   })
 

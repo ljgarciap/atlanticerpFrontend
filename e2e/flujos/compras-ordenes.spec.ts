@@ -82,9 +82,9 @@ test.describe('Flujo de Compras', () => {
     expect(adv.body.status).toBe('pendiente_liquidar')
   })
 
-  test('2. pagos a proveedor: tope = total + envío, estado parcial y liquidación solo de Zona Libre', async ({ request }) => {
+  test('2. pagos a proveedor: tope = total + envío, estado parcial y liquidación que exige una agencia', async ({ request }) => {
     const id = ctx.aerea
-    expect((await api(request, 'lidercompras', 'PATCH', `/compras/orders/${id}/liquidate`)).status, 'liquidar es solo de Zona Libre').toBe(422)
+    expect((await api(request, 'lidercompras', 'PATCH', `/compras/orders/${id}/liquidate`)).status, 'liquidar exige una agencia (sin agency_id responde 422)').toBe(422)
     expect((await api(request, 'lidercompras', 'PATCH', `/compras/orders/${id}/request-payment`)).status).toBe(200)
 
     const orden = (await api(request, 'lidercompras', 'GET', `/compras/orders/${id}`)).body

@@ -303,19 +303,18 @@ describe('BodegaHomePage', () => {
     expect(await screen.findByText('Proyecto Alfa', { exact: false })).toBeInTheDocument()
   })
 
-  it('Por recibir marca Zona Libre y navega al detalle de la orden en Compras (REQ-301)', async () => {
+  it('Por recibir navega al detalle de la orden en Compras (REQ-301)', async () => {
     mockedApi.home.summary.mockResolvedValue(makeSummary({
       por_recibir: [
         {
           purchase_order_id: 77, factory_reference: 'REF-1', reference: 'CAND-1', description: 'Modelo',
-          quantity: 10, status: 'en_transito', estimated_arrival_date: '2026-06-29', provider_name: 'Proveedor Demo A', is_zona_libre: true,
+          quantity: 10, status: 'en_transito', estimated_arrival_date: '2026-06-29', provider_name: 'Proveedor Demo A',
         },
       ],
     }))
     renderPage()
 
-    expect(await screen.findByText('bodega:home.porRecibir.freeZoneBadge')).toBeInTheDocument()
-    fireEvent.click(screen.getByText('bodega:home.porRecibir.viewOrder'))
+    fireEvent.click(await screen.findByText('bodega:home.porRecibir.viewOrder'))
     expect(navigateMock).toHaveBeenCalledWith('/compras/ordenes/77')
   })
 

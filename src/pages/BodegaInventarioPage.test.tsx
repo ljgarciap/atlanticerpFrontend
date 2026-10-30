@@ -130,22 +130,6 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     expect(screen.getAllByText('3')).toHaveLength(2)
   })
 
-  it('SCRUM-415 (REQ-345) — "Ir a ver Órdenes" navega al listado de Órdenes Zona Libre, no a Pedidos', async () => {
-    renderPage()
-    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
-
-    fireEvent.click(screen.getByText('bodega:inventory.actions.goToOrders'))
-    expect(navigateMock).toHaveBeenCalledWith('/bodega/ordenes-zona-libre')
-  })
-
-  it('SCRUM-433 (REQ-345, rebote 2026-08-13) — "+ Nueva orden de compra" navega DIRECTO al formulario, sin pasar por la bandeja', async () => {
-    renderPage()
-    await waitFor(() => expect(screen.getByText('REF-1')).toBeInTheDocument())
-
-    fireEvent.click(screen.getByText('bodega:inventory.actions.newPurchaseOrder'))
-    expect(navigateMock).toHaveBeenCalledWith('/bodega/ordenes-zona-libre/nueva')
-  })
-
   it('combina buscador + categoría + estado + rotación + bodega + marca en una sola query', async () => {
     renderPage()
     await waitFor(() => expect(mockedApi.inventory.list).toHaveBeenCalled())
@@ -278,7 +262,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
       warehouses: [
         { warehouse_id: 1, name: 'Bodega Central', quantity: 200 },
         { warehouse_id: 2, name: 'Sala de exhibición 1', quantity: 100 },
-        { warehouse_id: 3, name: 'Bodega Zona Libre', quantity: 0 },
+        { warehouse_id: 3, name: 'Bodega Auxiliar', quantity: 0 },
         { warehouse_id: 4, name: 'Sala de exhibición 2', quantity: 0 },
         { warehouse_id: 5, name: 'Exhibición en cliente', quantity: 0 },
         { warehouse_id: 6, name: 'Merma', quantity: 0 },
@@ -295,7 +279,7 @@ describe('BodegaInventarioPage — Productos (SCRUM-414→432)', () => {
     const modal = modalTitle.closest('[class*="rounded-2xl"]') as HTMLElement
     await waitFor(() => expect(within(modal).getByText('Bodega Central')).toBeInTheDocument())
     expect(within(modal).getByText('Sala de exhibición 1')).toBeInTheDocument()
-    expect(within(modal).queryByText('Bodega Zona Libre')).not.toBeInTheDocument()
+    expect(within(modal).queryByText('Bodega Auxiliar')).not.toBeInTheDocument()
     expect(within(modal).queryByText('Sala de exhibición 2')).not.toBeInTheDocument()
     expect(within(modal).queryByText('Exhibición en cliente')).not.toBeInTheDocument()
     expect(within(modal).queryByText('Merma')).not.toBeInTheDocument()

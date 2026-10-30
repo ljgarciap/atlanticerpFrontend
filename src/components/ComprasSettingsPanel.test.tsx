@@ -28,7 +28,6 @@ function makeSettings(overrides: Partial<ComprasSettings> = {}): ComprasSettings
     replacement_margin_threshold: 15,
     similarity_weight_text: 50, similarity_weight_price: 30, similarity_weight_margin: 20,
     similarity_other_category_penalty: 30, similarity_min_threshold: 25,
-    zona_libre_provider_id: null,
     ...overrides,
   }
 }
@@ -45,35 +44,9 @@ function renderPanel() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockedApi.settings.get.mockResolvedValue(makeSettings())
-  mockedApi.providers.list.mockResolvedValue({ data: [{ id: 7, name: 'Proveedor ZL' }] } as never)
 })
 
 describe('ComprasSettingsPanel', () => {
-  it('Fase 5a — elige el proveedor de Zona Libre y solo lo envía cuando cambió', async () => {
-    mockedApi.settings.update.mockResolvedValue(makeSettings({ zona_libre_provider_id: 7 }))
-    renderPanel()
-    await screen.findByDisplayValue('40')
-    await screen.findByRole('option', { name: 'Proveedor ZL' })
-
-    fireEvent.change(screen.getByLabelText('compras:settings.zonaLibreProvider'), { target: { value: '7' } })
-    fireEvent.click(screen.getByText('common:actions.save'))
-
-    await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith(expect.objectContaining({ zona_libre_provider_id: 7 })))
-  })
-
-  it('Fase 5a — «sin proveedor» envía null para limpiar el ajuste', async () => {
-    mockedApi.settings.get.mockResolvedValue(makeSettings({ zona_libre_provider_id: 7 }))
-    mockedApi.settings.update.mockResolvedValue(makeSettings())
-    renderPanel()
-    await screen.findByDisplayValue('40')
-    await screen.findByRole('option', { name: 'Proveedor ZL' })
-
-    fireEvent.change(screen.getByLabelText('compras:settings.zonaLibreProvider'), { target: { value: '' } })
-    fireEvent.click(screen.getByText('common:actions.save'))
-
-    await waitFor(() => expect(mockedApi.settings.update).toHaveBeenCalledWith(expect.objectContaining({ zona_libre_provider_id: null })))
-  })
-
   it('carga el umbral configurado', async () => {
     renderPanel()
 

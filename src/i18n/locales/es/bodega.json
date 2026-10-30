@@ -659,7 +659,6 @@
     "porRecibir": {
       "title": "Por recibir",
       "empty": "No hay mercancía en camino.",
-      "freeZoneBadge": "Zona Libre",
       "viewOrder": "Ver orden",
       "table": {
         "factoryRef": "Ref. fábrica",
@@ -693,7 +692,6 @@
   },
   "placeholders": {
     "verInventario": "Ver inventario",
-    "ordenesZonaLibre": "Órdenes Zona Libre",
     "devoluciones": "Devoluciones"
   },
   "orderStatusPage": {
@@ -961,148 +959,6 @@
       "awaitingCompras": "Ya confirmaste la llegada física — esperando que Compras finalice el ingreso al inventario.",
       "awaitingComprasDetail": "Llegada física confirmada: {{count}} unidad por {{user}} — esperando que Compras finalice el ingreso al inventario.",
       "awaitingComprasDetail_other": "Llegada física confirmada: {{count}} unidades por {{user}} — esperando que Compras finalice el ingreso al inventario."
-    }
-  },
-  "zonaLibre": {
-    "warehousesModal": {
-      "subtitle": "Disponibilidad por bodega",
-      "empty": "Sin stock registrado en ninguna bodega."
-    },
-    "newOrder": {
-      "title": "Nueva Orden — Zona Libre",
-      "subtitle": "Selecciona los productos y genera la orden — queda pendiente por aprobar de Compras",
-      "providerRestrictionNotice": "Bodega solo puede generar órdenes del proveedor {{provider}} — para cualquier otro proveedor, la orden debe crearse desde Compras.",
-      "providerMissing": "No hay un proveedor de Zona Libre de Colón configurado. Contacta a un administrador.",
-      "steps": {
-        "provider": "Proveedor",
-        "products": "Productos",
-        "lines": "Productos en esta orden"
-      },
-      "provider": {
-        "fixedBadge": "Proveedor fijo"
-      },
-      "products": {
-        "searchPlaceholder": "Buscar por ref. fábrica, ref. pública o nombre...",
-        "noResults": "Ningún producto de este proveedor coincide con la búsqueda.",
-        "allAdded": "Ya agregaste todos los productos disponibles de este proveedor.",
-        "noProducts": "Este proveedor todavía no tiene productos en el catálogo.",
-        "table": {
-          "factoryRef": "Ref. fábrica",
-          "publicRef": "Ref. pública",
-          "product": "Producto",
-          "available": "Disponible",
-          "warehouses": "Bodegas",
-          "unitCost": "Costo unitario",
-          "quantity": "Cantidad a pedir"
-        },
-        "viewWarehouses": "Ver bodegas",
-        "add": "Agregar a la orden",
-        "empty": "No se encontraron productos disponibles de este proveedor.",
-        "errors": {
-          "zeroQuantity": "Escribe una cantidad mayor a 0 antes de agregarlo a la orden."
-        }
-      },
-      "lines": {
-        "product": "Producto",
-        "factoryRef": "Ref. fábrica",
-        "publicRef": "Referencia pública",
-        "quantity": "Cantidad",
-        "unitCost": "Costo",
-        "subtotal": "Subtotal",
-        "remove": "Quitar",
-        "total": "Monto total",
-        "errors": {
-          "invalidQuantity": "Escribe una cantidad válida, mayor a 0."
-        }
-      },
-      "shipping": {
-        "modality": "Modalidad de ingreso",
-        "modalityValue": "Zona Libre",
-        "type": "Tipo de envío",
-        "terrestre": "Terrestre",
-        "aereo": "Aéreo",
-        "maritimo": "Marítimo",
-        "estimatedArrival": "Llegada estimada"
-      },
-      "actions": {
-        "submit": "Guardar orden de compra",
-        "submitEdit": "Guardar cambios"
-      },
-      "errors": {
-        "generic": "No se pudo guardar la orden. Intenta de nuevo."
-      },
-      "success": {
-        "title": "Orden #{{number}} creada",
-        "status": "Estado",
-        "pendingLabel": "Pendiente por aprobar de Lider Compras (Compras)",
-        "note": "Bodega generó esta orden, pero necesita la aprobación de Compras antes de convertirse en una orden de compra formal y seguir su flujo normal (pago, logística, ingreso).",
-        "goToOrders": "Ir a Ver Órdenes",
-        "another": "¿Necesitas otra orden?",
-        "createNew": "Crear una nueva"
-      },
-      "editTitle": "Editar Orden — Zona Libre #{{number}}",
-      "editSubtitle": "Modifica los productos y datos de envío — solo mientras la orden esté pendiente de aprobar",
-      "editBlocked": "Esta orden ya fue {{status}} y no se puede modificar."
-    },
-    "orders": {
-      "title": "Órdenes de Zona Libre",
-      "subtitle": "Órdenes generadas por Bodega, pendientes por aprobar de Compras",
-      "newOrder": "+ Nueva orden de compra",
-      "chips": {
-        "todas": "Todas",
-        "pendiente": "Por aprobar",
-        "aprobada": "Aprobadas",
-        "rechazada": "Rechazadas"
-      },
-      "table": {
-        "orderNumber": "N° orden",
-        "provider": "Proveedor",
-        "createdAt": "Fecha creada",
-        "products": "Productos",
-        "amount": "Monto",
-        "estimatedArrival": "Llegada estimada",
-        "status": "Estado",
-        "action": "Acción"
-      },
-      "status": {
-        "pendiente": "Por aprobar",
-        "aprobada": "Aprobada",
-        "rechazada": "Rechazada"
-      },
-      "actions": {
-        "remind": "Recordar",
-        "reminderSent": "Recordatorio enviado a Compras.",
-        "reminderError": "No se pudo enviar el recordatorio. Intenta de nuevo.",
-        "viewReason": "Ver motivo",
-        "followsNormalFlow": "Sigue el flujo normal de Compras",
-        "approve": "Aprobar",
-        "approveError": "No se pudo aprobar la orden. Intenta de nuevo.",
-        "reject": "Rechazar",
-        "rejectError": "No se pudo rechazar la orden. Intenta de nuevo.",
-        "edit": "Editar",
-        "viewDetail": "Ver detalle"
-      },
-      "rejectModal": {
-        "title": "Rechazar orden",
-        "reasonLabel": "Motivo del rechazo",
-        "reasonRequired": "El motivo es obligatorio."
-      },
-      "empty": "No hay órdenes con este estado.",
-      "detailModal": {
-        "title": "Orden #{{number}}",
-        "requestedBy": "Solicitado por",
-        "createdAt": "Fecha de creación",
-        "shippingType": "Tipo de envío",
-        "estimatedArrival": "Llegada estimada",
-        "notes": "Notas",
-        "notesEmpty": "Sin notas.",
-        "notFound": "No se encontró la solicitud de Zona Libre.",
-        "lines": "Productos",
-        "total": "Monto total",
-        "approvedBy": "Aprobado por",
-        "rejectedBy": "Rechazado por",
-        "rejectionReason": "Motivo de rechazo"
-      }
     }
   },
   "generalCounts": {

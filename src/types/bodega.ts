@@ -596,9 +596,7 @@ export interface BodegaEstadoPedidos {
 }
 
 /** REQ-301 — panel "Por recibir" (no cambia con el toggle). Una fila por línea de la orden de
- * compra, no por orden — `is_zona_libre` es la `PurchaseOrder.modality`, no un recurso separado
- * (ver reporte de la tarea: "Órdenes Zona Libre" es la MISMA entidad `PurchaseOrder`, así que "Ver
- * orden" navega siempre a Compras, con o sin ese distintivo). */
+ * compra, no por orden ("Ver orden" navega siempre a Compras). */
 export interface BodegaPorRecibirRow {
   purchase_order_id:       number
   factory_reference:       string | null
@@ -608,7 +606,6 @@ export interface BodegaPorRecibirRow {
   status:                  string
   estimated_arrival_date:  string | null
   provider_name:           string | null
-  is_zona_libre:           boolean
 }
 
 /** REQ-303 — panel "Mayor rotación" (no cambia con el toggle). El array ya viene limitado a un
@@ -901,7 +898,7 @@ export interface BodegaPorServirResponse {
  * SCRUM-424 (REQ-355) — modal "En camino": proveedor + fecha real de la orden, para un producto
  * puntual (`InventoryKpiService::enCaminoDetail()`, verificado contra el backend real 2026-07-23).
  * Shape propio, NO `BodegaPorRecibirRow` — ese tipo trae columnas de producto (`reference`,
- * `description`, `status`, `is_zona_libre`) que no aplican acá, ya filtrado a un solo producto.
+ * `description`, `status`) que no aplican acá, ya filtrado a un solo producto.
  */
 export interface BodegaEnCaminoLine {
   purchase_order_id:      number
@@ -1138,96 +1135,12 @@ export interface ResolveInventoryReviewResponse {
   new_order: { id: number; stage: OrderStage } | null
 }
 
-// ── Batch B3 (SCRUM-433→445, REQ-363→375) — "Zona Libre de Colón" ────────────────────────────
-//
-// Bodega genera órdenes de compra directas al proveedor fijo "Zona Libre de Colón"; Compras
-// (Lider Compras) las aprueba o rechaza por fuera de este alcance
-// (`POST /compras/zona-libre/requests/{id}/approve|reject`, ver
-// `atlanticerp-backend/docs/adr/ADR-SCRUM433-445-zona-libre-colon.md`). Contrato verificado contra el
-// backend ya implementado y pusheado a `dev` (commits e2e1b83/ea82918/1f72ce4, 1251 tests verdes)
-// — no especulativo, a diferencia de otros bloques de este mismo épico.
-
-export type ZonaLibreShippingType = 'aereo' | 'maritimo' | 'terrestre'
-export type ZonaLibreStatus       = 'pendiente' | 'aprobada' | 'rechazada'
-export type ZonaLibreStatusFilter = ZonaLibreStatus | 'todas'
-
-/** `GET /bodega/zona-libre/provider` — 422 si `compras_settings.zona_libre_provider_id` no está
- * configurado (el proveedor vive en tabla paramétrica, nunca hardcodeado — ver ADR § 2). El 422
- * se propaga como error de la query, ver `BodegaNuevaOrdenZonaLibrePage.tsx`. */
-export interface ZonaLibreProvider {
-  id:   number
-  name: string
-}
-
-/** Fila de la bandeja (3D) — también la base de `ZonaLibreRequestDetail`. */
-export interface ZonaLibreRequestRow {
-  id:                      number
-  order_number:            string
-  provider_name:           string
-  created_at:              string
-  /** Nombre del producto si la solicitud tiene 1 sola línea, "N productos" si son varias — ya
-   * calculado server-side (REQ-372), no se recalcula acá. */
-  products_summary:        string
-  total_amount:            number
-  estimated_arrival_date:  string | null
-  shipping_type:           ZonaLibreShippingType | null
-  status:                  ZonaLibreStatus
-  requested_by_name:       string | null
-  /** FK al `PurchaseOrder` real, solo poblado una vez `aprobada` — sin pantalla propia en este
-   * batch (Bodega solo consulta el resultado, REQ-370 RN1/Escenario 2, sin acción de
-   * aprobar/rechazar acá). */
-  generated_order_id:      number | null
-}
-
-export interface ZonaLibreRequestLine {
-  id:                  number
-  catalog_product_id:  number
-  reference:           string | null
-  /** SCRUM-797 — el formulario de "Editar" precarga el carrito desde estas líneas. */
-  factory_reference:   string | null
-  description:         string | null
-  quantity:            number
-  unit_cost_snapshot:  number
-  subtotal:            number
-}
-
-/** `GET /bodega/zona-libre/requests/{id}` — detalle, incluye motivo de rechazo (REQ-370
- * Escenario 1) — pedido on-demand desde la bandeja, no viaja en `ZonaLibreRequestRow`. */
-export interface ZonaLibreRequestDetail extends ZonaLibreRequestRow {
-  notes:             string | null
-  rejection_reason:  string | null
-  approved_by_name:  string | null
-  rejected_by_name:  string | null
-  lines:              ZonaLibreRequestLine[]
-}
-
-export interface ZonaLibreRequestListResponse {
-  data: ZonaLibreRequestRow[]
-  // SCRUM-754 (2026-08-18) — mismo shape que PaginationMeta (components/ui/Pagination.tsx).
-  meta: { total: number; per_page: number; current_page: number; last_page: number }
-}
-
-export interface ZonaLibreRequestLinePayload {
-  catalog_product_id: number
-  quantity:            number
-}
-
-/** `POST /bodega/zona-libre/requests` — 422 si `lines` viene vacío (REQ-369 RN1), replicado
- * también client-side (el botón "Guardar orden" nunca se renderiza con el carrito vacío) antes de
- * disparar el request. */
-export interface ZonaLibreRequestPayload {
-  shipping_type?:           ZonaLibreShippingType
-  estimated_arrival_date?:  string
-  notes?:                    string
-  lines:                      ZonaLibreRequestLinePayload[]
-}
-
 /** `GET /bodega/inventory/{catalog_product_id}/warehouse-breakdown` (SCRUM-437/REQ-367) — mismo
  * shape por fila que `ProductWarehouseStockRow` (warehouse_id/name/quantity), pero envuelto en
  * `data`, no en `{por_servir, warehouses}` como `ProductWarehouseStockResponse` (endpoint
  * distinto, sin concepto de "por servir" acá, producto-scoped y NO depende de que exista una
  * orden) — ya viene filtrado a quantity > 0 en el backend (RN1). */
-export interface ZonaLibreProductWarehouseBreakdownResponse {
+export interface ProductWarehouseBreakdownResponse {
   data: ProductWarehouseStockRow[]
 }
 
@@ -1345,7 +1258,7 @@ export type CustomerReturnStatusFilter = CustomerReturnStatus | 'todas'
 export type CustomerReturnReason = string
 
 /** Línea de producto de una devolución — ya viene con todo el detalle en `CustomerReturnRow.products`
- * (a diferencia de `ZonaLibreRequestRow`, que solo trae un resumen calculado server-side), lo que
+ * (a diferencia de una fila de bandeja, que solo trae un resumen calculado server-side), lo que
  * permite armar la fila expandida de SCRUM-474 sin una llamada extra. `reason_detail` — corregido
  * 2026-07-26 (hallazgo de Senior Reviewer): el backend ahora separa el código de motivo del texto
  * libre en `CustomerReturnController::formatLine()`/`CustomerReturnLine::reasonDetail()`, siempre

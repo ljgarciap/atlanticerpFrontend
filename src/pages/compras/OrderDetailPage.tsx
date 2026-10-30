@@ -243,9 +243,6 @@ export default function OrderDetailPage() {
               )
             )}
           </SummaryField>
-          <SummaryField label={t('compras:orders.detail.summary.modality')}>
-            {t(`compras:newOrder.modality.${order.modality === 'zona_libre' ? 'zonaLibre' : 'directo'}`)}
-          </SummaryField>
           <SummaryField label={t('compras:orders.detail.summary.shippingType')}>
             {order.shipping_type ? (
               <>
@@ -448,8 +445,8 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        {/* SCRUM-210 (REQ-147, alcance reducido) — solo aplica a órdenes Zona Libre. */}
-        {order.modality === 'zona_libre' && (
+        {/* SCRUM-210 (REQ-147) / Fase 14f — la agencia de liquidación aplica a las órdenes de proveedores internacionales. */}
+        {order.provider_origin === 'internacional' && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between">
               {/* SCRUM-736 — "Agencia de liquidación" → "Liquidando con: [Agencia]" (mockup),

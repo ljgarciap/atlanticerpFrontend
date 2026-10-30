@@ -108,7 +108,7 @@ export interface SaludModulos {
 
 export interface AprobacionItem {
   id:          number
-  type:        'purchase_order' | 'relocation' | 'adjustment' | 'general_count' | 'zona_libre'
+  type:        'purchase_order' | 'relocation' | 'adjustment' | 'general_count'
   module:      'compras' | 'bodega'
   reference:   string
   description: string

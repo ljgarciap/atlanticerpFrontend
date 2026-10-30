@@ -159,7 +159,6 @@
     },
     "category": {
       "locales": "Locales",
-      "zona_libre": "Zona Libre",
       "china": "China",
       "europa": "Europa",
       "online": "Online",
@@ -257,8 +256,7 @@
     },
     "modality": {
       "label": "Modalidad",
-      "directo": "Directo",
-      "zonaLibre": "Zona Libre"
+      "directo": "Directo"
     },
     "shipping": {
       "type": "Tipo de envío",
@@ -318,8 +316,7 @@
     },
     "chips": {
       "all": "Todas",
-      "critical": "Críticas",
-      "zonaLibre": "Zona Libre"
+      "critical": "Críticas"
     },
     "table": {
       "id": "Orden",
@@ -351,7 +348,6 @@
       "por_aprobar": "Por aprobar",
       "pendiente_liquidar": "Pendiente por liquidar",
       "pendienteLiquidarDirecto": "Pendiente",
-      "pendienteLiquidarZonaLibre": "Por liquidar",
       "ordenado": "Ordenado",
       "en_transito": "En tránsito",
       "en_aduana": "En aduana",
@@ -650,9 +646,6 @@
     "invalid": "Ingresa un número entre 0 y 100.",
     "saveError": "No se pudo guardar el ajuste. Intentá de nuevo.",
     "criticalDaysPorAprobar": "Días «Por aprobar» para considerar crítica una orden",
-    "zonaLibreProvider": "Proveedor de Zona Libre",
-    "zonaLibreProviderNone": "Sin proveedor configurado",
-    "zonaLibreProviderHelp": "Proveedor fijo de las solicitudes de Zona Libre. Sin proveedor, el flujo no puede crear solicitudes.",
     "rules": {
       "title": "Reglas de aprobación de órdenes",
       "subtitle": "Deciden cuándo una orden de compra necesita la aprobación del aprobador primario. Gana la primera regla activa, por orden, que coincide; si ninguna coincide, no se requiere aprobación. El monto es el total a pagar al proveedor.",

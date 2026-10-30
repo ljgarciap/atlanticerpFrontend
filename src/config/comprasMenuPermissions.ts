@@ -7,7 +7,7 @@
  * Un id ausente del mapa no se filtra (ej. «Pedidos de venta» y «Configuración» ya traen su propio gate).
  */
 export const COMPRAS_ROUTE_PERMISSIONS: Record<string, readonly string[]> = {
-  'compras-inicio':       ['compras.read', 'compras.edit', 'compras.approve', 'compras.zona-libre.approve', 'compras.sustitutos.manage', 'ventas_diseno.edit'],
+  'compras-inicio':       ['compras.read', 'compras.edit', 'compras.approve', 'compras.sustitutos.manage', 'ventas_diseno.edit'],
   'compras-ordenes':      ['compras.read', 'compras.limited.view'],
   'compras-nueva-orden':  ['compras.write'],
   'compras-reposicion':   ['compras.write'],

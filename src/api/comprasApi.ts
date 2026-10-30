@@ -41,9 +41,9 @@ export interface PurchaseOrderListParams {
   status?:            string
   created_by?:        number
   sales_project_id?:  number
-  // REQ-139: 'critical' | 'zona_libre' — REQ-138 dice "Todas" cuando no se manda chip.
+  // REQ-139: 'critical' — REQ-138 dice "Todas" cuando no se manda chip.
   // REQ-152 (Logística) reusa 'critical' como "Retrasados", mismo criterio.
-  chip?:               'critical' | 'zona_libre'
+  chip?:               'critical'
   // REQ-151 — solo envíos "en movimiento" (Ordenado→Recibido), usado por la pantalla Logística.
   active_shipments?:    boolean
   // REQ-187 (SCRUM-250, hallazgo de Gerencia Test) — pantalla Pagos a Proveedores. 'pendiente' se
@@ -165,7 +165,7 @@ export const comprasApi = {
     updateShippingInfo: (id: number, data: ShippingInfoPayload): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/shipping-info`, data).then(r => r.data),
 
-    // SCRUM-210 (REQ-147, alcance reducido) — solo órdenes Zona Libre (el backend lo valida).
+    // SCRUM-210 (REQ-147, alcance reducido) — solo órdenes de proveedores internacionales (el backend lo valida).
     liquidate: (id: number, agencyId: number): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/liquidate`, { agency_id: agencyId }).then(r => r.data),
 
@@ -582,14 +582,4 @@ export const comprasApi = {
       api.get<{ data: OutlookCalendarEvent[]; source_unavailable: boolean }>('/compras/calendar', { params: filters }).then(r => r.data),
   },
 
-  // SCRUM-440 (REQ-370) — decisión de Lider Compras sobre una solicitud de Zona Libre generada por
-  // Bodega. La bandeja (`/bodega/ordenes-zona-libre`) es la misma para Bodega y Compras — el
-  // permiso `compras.zona-libre.approve` decide si se ven estos botones o el "Recordar" de Bodega.
-  zonaLibre: {
-    approve: (id: number): Promise<{ order_id: number }> =>
-      api.post<{ order_id: number }>(`/compras/zona-libre/requests/${id}/approve`).then(r => r.data),
-
-    reject: (id: number, rejectionReason: string): Promise<{ message: string }> =>
-      api.post<{ message: string }>(`/compras/zona-libre/requests/${id}/reject`, { rejection_reason: rejectionReason }).then(r => r.data),
-  },
 }

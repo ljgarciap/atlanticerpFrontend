@@ -25,7 +25,7 @@ const PHONE_REGEX = /^\+?[0-9\s-]{7,20}$/
 // Exportado — reusado por ProviderDetailModal.tsx (SCRUM-186), que también arma un form de
 // edición de proveedor pero con flujo de solo-lectura → editar, en vez de un drawer siempre editable.
 // SCRUM-820 — "latinoamerica" agregada 2026-08-31 a pedido de Gerencia Test.
-export const PROVIDER_CATEGORIES = ['locales', 'zona_libre', 'china', 'europa', 'online', 'latinoamerica'] as const
+export const PROVIDER_CATEGORIES = ['locales', 'china', 'europa', 'online', 'latinoamerica'] as const
 
 /**
  * Fase 7a — categorías de proveedor de la empresa (catálogo `provider_category`, editable en Configuración → Catálogos). Mientras el
