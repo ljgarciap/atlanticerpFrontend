@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useTechnicianSpecialties } from '@/hooks/useFixedLists'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import type { InternalTechnician } from '@/types/servicios'
@@ -37,6 +38,7 @@ export default function InternalTechnicianCard({
   onViewCommissionResult, canViewCommissionResult, onEdit, onDelete,
 }: Props) {
   const { i18n } = useTranslation('servicios')
+  const { label: specialtyLabel } = useTechnicianSpecialties()
 
   return (
     <Card variant="panel" className="p-4 flex flex-col gap-3">
@@ -57,7 +59,7 @@ export default function InternalTechnicianCard({
             <span className={`inline-block w-2 h-2 rounded-full ${STATUS_DOT[t.estado]}`} />
             {i18n.t(`servicios:technicians.internal.status.${t.estado}`)}
             {' · '}
-            {i18n.t(`servicios:technicians.internal.specialty.${t.especialidad}`)}
+            {specialtyLabel(t.especialidad)}
           </span>
         </span>
       </button>

@@ -6,6 +6,10 @@ import SolicitudAjustePage from './SolicitudAjustePage'
 import { bodegaApi } from '@/api/bodegaApi'
 import type { AdjustmentRequestListResponse, PhysicalWarehouse } from '@/types/bodega'
 
+// Fase 14c: las listas de motivos salen de un catálogo; sin él (falla la consulta) rige el respaldo con las traducciones de siempre.
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn().mockRejectedValue(new Error('sin catálogo')) } }))
+
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => opts ? `${key}:${JSON.stringify(opts)}` : key }),
 }))

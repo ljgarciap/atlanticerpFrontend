@@ -7,10 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import type { CustomerReturnReason, ReturnSearchOrderItem, ReturnSearchOrderResult } from '@/types/bodega'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
-
-const REASONS: CustomerReturnReason[] = [
-  'danado_defectuoso', 'no_corresponde', 'cliente_cambio_opinion', 'excedente', 'error_instalacion', 'otra',
-]
+import { useReturnReasons } from '@/hooks/useFixedLists'
 
 interface LineDraft {
   included:     boolean
@@ -28,6 +25,7 @@ interface LineDraft {
  */
 export default function BodegaNuevaDevolucionPage() {
   const { t } = useTranslation(['common', 'bodega'])
+  const { options: reasonOptions } = useReturnReasons()
   const navigate = useNavigate()
 
   const [search, setSearch] = useState('')
@@ -49,7 +47,7 @@ export default function BodegaNuevaDevolucionPage() {
     setSelectedOrder(order)
     setLines(Object.fromEntries(order.items.map(item => [
       item.order_item_id,
-      { included: false, quantity: String(item.qty_delivered), reason: REASONS[0], reasonDetail: '' } satisfies LineDraft,
+      { included: false, quantity: String(item.qty_delivered), reason: reasonOptions[0]?.key ?? 'otra', reasonDetail: '' } satisfies LineDraft,
     ])))
     setContactName('')
     setContactPhone('')
@@ -301,6 +299,7 @@ function ProductLineRow({ item, draft, onChange }: {
   onChange: (patch: Partial<LineDraft>) => void
 }) {
   const { t } = useTranslation('bodega')
+  const { options: reasonOptions } = useReturnReasons()
   if (!draft) return null
 
   return (
@@ -334,7 +333,7 @@ function ProductLineRow({ item, draft, onChange }: {
           onChange={e => onChange({ reason: e.target.value as CustomerReturnReason })}
           className="px-2 py-1 border border-slate-200 dark:border-slate-600 rounded text-sm disabled:bg-slate-50 dark:disabled:bg-slate-900 bg-white dark:bg-slate-800"
         >
-          {REASONS.map(r => <option key={r} value={r}>{t(`returns.reasons.${r}`)}</option>)}
+          {reasonOptions.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
         </select>
         {draft.included && draft.reason === 'otra' && (
           <input
