@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  useCommissionTiers, useCreateCommissionTier, useUpdateCommissionTier, useDeleteCommissionTier,
+  useCommissionTiers, useCommissionScaleVsSales, useCreateCommissionTier, useUpdateCommissionTier, useDeleteCommissionTier,
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -31,6 +31,7 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
   const createTier = useCreateCommissionTier()
   const updateTier = useUpdateCommissionTier()
   const deleteTier = useDeleteCommissionTier()
+  const { data: vsSales } = useCommissionScaleVsSales()
 
   const [editingId, setEditingId] = useState<number | null>(null)
   const [adding, setAdding] = useState(false)
@@ -94,6 +95,11 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
         <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4">
           {t('adminContab:comisionesInternas.tramos.subtitle')}
         </p>
+        {vsSales && !vsSales.coinciden && (
+          <p role="status" className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-2 py-1.5 mb-3">
+            {t('adminContab:comisionesInternas.tramos.difiereDeVentas')}
+          </p>
+        )}
 
         <table className="w-full text-sm mb-3">
           <thead>
