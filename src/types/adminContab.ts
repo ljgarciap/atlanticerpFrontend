@@ -988,9 +988,8 @@ export interface ConfirmacionAjustes {
   facturas: { numero: string; solicitado: number; aplicado: number }[]
 }
 
-/** SCRUM-1168 F2 — qué concepto de cobros está activo en este entorno y la ventana de «movimiento reciente» de Compensaciones. */
+/** La ventana de «movimiento reciente» de Compensaciones. */
 export interface PaymentsConfig {
-  v2: boolean
   compensaciones_dias_movimiento: number
 }
 

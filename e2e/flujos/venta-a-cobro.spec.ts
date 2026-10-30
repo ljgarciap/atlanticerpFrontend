@@ -9,7 +9,6 @@ import { test, expect, type APIRequestContext } from '@playwright/test'
 //
 // Prerrequisitos del entorno local (ver docs/flujos/README.md):
 //   - STORAGE_DRIVER=local en el .env del backend (subida de archivos del pipeline y guía firmada);
-//   - php artisan cobros:v2 on (concepto nuevo de cobros);
 //   - cuentas demo con contraseña = su correo; la cuenta bancaria la crea el propio flujo si no hay ninguna.
 
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:8092'
@@ -296,7 +295,6 @@ test.describe('Flujo venta a cobro', () => {
     expect((await abiertas()).invoices.map((i: { id: number }) => i.id)).toContain(ctx.factura)
 
     const intento = await api(request, 'contabilidad', 'POST', '/admin-contab/payments/cobro', { master_client_id: ctx.mc, monto_recibido: ctx.montoFactura, metodo_pago: 'transferencia', bank_account_id: banco, aplicaciones: [{ invoice_id: ctx.factura, monto: ctx.montoFactura }] })
-    test.skip(intento.status === 422 && /todavía no está activo/.test(JSON.stringify(intento.body)), 'Falta encender el concepto nuevo de cobros: php artisan cobros:v2 on')
     expect(intento.status).toBe(201)
     ctx.cobro = intento.body.id
     expect(intento.body.estado).toBe('esperando_confirmacion')
@@ -485,12 +483,11 @@ test.describe('Flujo venta a cobro', () => {
     expect((await api(request, 'gerencia3', 'PUT', `${ruta}/uncollectible-decision`, { approve: true })).status, 'no hay propuesta pendiente').toBe(422)
   })
 
-  test('13. los abonos heredados ya no se aceptan: se registran como cobros', async ({ request }) => {
+  test('13. los abonos ya no existen: el dinero sin factura se registra como cobro', async ({ request }) => {
     const r = await subir(request, 'contabilidad', '/admin-contab/abonos', {
       master_client_id: String(ctx.mc), monto_original: '100', metodo_pago: 'transferencia', cuenta_bancaria_id: String(ctx.banco), referencia: 'ABONO-FLUJO',
     }, 'comprobante')
-    expect(r.status).toBe(422)
-    expect(JSON.stringify(r.body)).toMatch(/se registran ahora como cobros/)
+    expect(r.status).toBe(404)
   })
 
   test('14. caja chica: gasto con foto, un solo reporte por gasto y aprobación del aprobador', async ({ request }) => {

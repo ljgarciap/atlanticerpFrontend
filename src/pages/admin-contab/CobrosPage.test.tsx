@@ -105,7 +105,7 @@ describe('CobrosPage — REQ-462 apertura del formulario', () => {
   it('el botón "+ Registrar cobro" abre el modal sin cliente preseleccionado', async () => {
     renderPage()
     fireEvent.click(await screen.findByText('cobros.registrarButton'))
-    expect(await screen.findByText('cobros.registrarModal.title')).toBeInTheDocument()
+    expect(await screen.findByTestId('registrar-cobro-v2')).toBeInTheDocument()
     expect(mockedApi.payments.openInvoices).not.toHaveBeenCalled()
   })
 
@@ -113,13 +113,13 @@ describe('CobrosPage — REQ-462 apertura del formulario', () => {
     mockedApi.payments.openInvoices.mockResolvedValue(makeOpenInvoices({ master_client_name: 'Vitrio Retail, S.A.' }))
     renderPage(['/admin-contab/cobros?master_client_id=42&accion=nuevo-cobro'])
 
-    expect(await screen.findByText('cobros.registrarModal.title')).toBeInTheDocument()
+    expect(await screen.findByTestId('registrar-cobro-v2')).toBeInTheDocument()
     await waitFor(() => expect(mockedApi.payments.openInvoices).toHaveBeenCalledWith(42))
   })
 })
 
-// SCRUM-1168 F2 — el formulario depende de la bandera del concepto nuevo del entorno.
-describe('CobrosPage — SCRUM-1168 F2 formulario según la bandera cobros_v2', () => {
+// Fase 15a — el concepto de cobros es uno solo: «Registrar cobro» siempre abre el formulario con o sin factura.
+describe('CobrosPage — Fase 15a un solo formulario de cobro', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockedApi.payments.summary.mockResolvedValue(makeSummary())
@@ -130,24 +130,12 @@ describe('CobrosPage — SCRUM-1168 F2 formulario según la bandera cobros_v2', 
     mockedApi.bankAccounts.list.mockResolvedValue([makeBankAccount()])
   })
 
-  it('con el concepto nuevo activo, «Registrar cobro» abre el formulario con o sin factura', async () => {
-    mockedApi.payments.config.mockResolvedValue({ v2: true, compensaciones_dias_movimiento: 30 })
+  it('«Registrar cobro» abre el formulario con o sin factura, sin consultar ninguna bandera', async () => {
     renderPage()
-    await waitFor(() => expect(mockedApi.payments.config).toHaveBeenCalled())
 
     fireEvent.click(screen.getByText('cobros.registrarButton'))
 
     expect(await screen.findByTestId('registrar-cobro-v2')).toBeInTheDocument()
-  })
-
-  it('con el concepto nuevo apagado, abre el formulario de siempre', async () => {
-    mockedApi.payments.config.mockResolvedValue({ v2: false, compensaciones_dias_movimiento: 30 })
-    renderPage()
-    await waitFor(() => expect(mockedApi.payments.config).toHaveBeenCalled())
-
-    fireEvent.click(screen.getByText('cobros.registrarButton'))
-
-    expect(await screen.findByText('cobros.registrarModal.title')).toBeInTheDocument()
-    expect(screen.queryByTestId('registrar-cobro-v2')).not.toBeInTheDocument()
+    expect(mockedApi.payments.config).not.toHaveBeenCalled()
   })
 })

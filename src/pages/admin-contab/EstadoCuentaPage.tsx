@@ -16,7 +16,6 @@ import {
 import InvoiceDetailModal from '@/components/admin-contab/InvoiceDetailModal'
 import DetalleNotaCreditoModal from '@/components/admin-contab/DetalleNotaCreditoModal'
 import DetalleCobroModal from '@/components/admin-contab/DetalleCobroModal'
-import RegistrarAbonoModal from '@/components/admin-contab/RegistrarAbonoModal'
 import QuoteViewerModal from '@/components/QuoteViewerModal'
 import GuiaEntregaModal from '@/components/GuiaEntregaModal'
 import { Pagination } from '@/components/ui/Pagination'
@@ -51,7 +50,6 @@ export default function EstadoCuentaPage() {
   const [guiaOrderId, setGuiaOrderId] = useState<number | null>(null)
   // SCRUM-955 §5 — recibo de Cobro o de Abono asociado a una fila (columna "Cobro").
   const [reciboPaymentId, setReciboPaymentId] = useState<number | null>(null)
-  const [reciboAbonoId, setReciboAbonoId]     = useState<number | null>(null)
 
   const [clientQuery, setClientQuery] = useState('')
   const [clientOpen, setClientOpen]   = useState(false)
@@ -360,7 +358,6 @@ export default function EstadoCuentaPage() {
                 if (recibo.tipo === 'cobro') setReciboPaymentId(recibo.id)
                 // SCRUM-1168 F3 — una compensación no tiene modal propio: su documento con folio CMP se descarga.
                 else if (recibo.tipo === 'compensacion') void adminContabApi.compensaciones.downloadPdf(recibo.id, recibo.numero_recibo)
-                else setReciboAbonoId(recibo.id)
               }}
             />
 
@@ -384,12 +381,8 @@ export default function EstadoCuentaPage() {
       {notaId !== null && <DetalleNotaCreditoModal notaId={notaId} onClose={() => setNotaId(null)} />}
       {quoteId !== null && <QuoteViewerModal quoteId={quoteId} onClose={() => setQuoteId(null)} />}
       {guiaOrderId !== null && <GuiaEntregaModal orderId={guiaOrderId} onClose={() => setGuiaOrderId(null)} />}
-      {/* SCRUM-955 §5 — columna "Cobro": recibo de Cobro (modal ya existente) o de Abono (mismo
-          componente que Registrar Abono, que también cubre el detalle bloqueado). */}
+      {/* SCRUM-955 §5 — columna "Cobro": recibo de Cobro (modal ya existente). */}
       {reciboPaymentId !== null && <DetalleCobroModal paymentId={reciboPaymentId} onClose={() => setReciboPaymentId(null)} />}
-      {reciboAbonoId !== null && (
-        <RegistrarAbonoModal abonoId={reciboAbonoId} onClose={() => setReciboAbonoId(null)} onSaved={() => setReciboAbonoId(null)} />
-      )}
     </div>
   )
 }

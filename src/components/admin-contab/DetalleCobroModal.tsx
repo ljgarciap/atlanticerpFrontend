@@ -8,7 +8,6 @@ import { IcoClose, IcoPaperclip, IcoPrinter, IcoCheck } from '@/components/icons
 import VerComprobanteModal from './VerComprobanteModal'
 import InvoiceDetailModal from './InvoiceDetailModal'
 import DetalleNotaCreditoModal from './DetalleNotaCreditoModal'
-import RegistrarAbonoModal from './RegistrarAbonoModal'
 import QuoteViewerModal from '@/components/QuoteViewerModal'
 import GuiaEntregaModal from '@/components/GuiaEntregaModal'
 import { formatDateShort } from '@/utils/dates'
@@ -65,7 +64,6 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
   const [detailInvoiceId, setDetailInvoiceId] = useState<number | null>(null)
   const [quoteId, setQuoteId]     = useState<number | null>(null)
   const [guiaOrderId, setGuiaOrderId] = useState<number | null>(null)
-  const [abonoId, setAbonoId]     = useState<number | null>(null)
   const [notaId, setNotaId]       = useState<number | null>(null)
 
   // SCRUM-931 — un cobro cubre N facturas, cada una con su propia Cotización/Guía; se deduplican
@@ -331,13 +329,6 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
                   ))}
                 </DetalleSection>
               )}
-              {payment.abonos.length > 0 && (
-                <DetalleSection label={t('cobros.detalle.abonos')}>
-                  {payment.abonos.map(id => (
-                    <DocChip key={id} label={t('cobros.detalle.abonoNumero', { id })} onClick={() => setAbonoId(id)} />
-                  ))}
-                </DetalleSection>
-              )}
               {payment.notas_credito.length > 0 && (
                 <DetalleSection label={t('cobros.detalle.notasCredito')}>
                   {payment.notas_credito.map(n => (
@@ -391,7 +382,6 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
       )}
       {quoteId !== null && <QuoteViewerModal quoteId={quoteId} onClose={() => setQuoteId(null)} />}
       {guiaOrderId !== null && <GuiaEntregaModal orderId={guiaOrderId} onClose={() => setGuiaOrderId(null)} />}
-      {abonoId !== null && <RegistrarAbonoModal abonoId={abonoId} onClose={() => setAbonoId(null)} onSaved={() => setAbonoId(null)} />}
       {notaId !== null && <DetalleNotaCreditoModal notaId={notaId} onClose={() => setNotaId(null)} />}
     </div>
   )

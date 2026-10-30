@@ -8,9 +8,6 @@ import type {
   InvoiceSummary, InvoiceListFilters, InvoiceListResult, InvoicePreviewResponse, CreateInvoicePayload, CorrectReceptorPayload, ReceptorValidacion,
   CreateInvoiceResult, InvoiceExportFormat, InvoiceDetail, InvoiceAgingResult, InvoiceModo, InvoicePendingResult,
   PaymentSummary, PaymentClientOption, OpenInvoicesResult, CreatePaymentPayload, Payment, PaymentMethod,
-  Abono, AbonoFilters, AbonoListResponse, AbonoPayload, AbonoSubClienteOption, AbonoProyectoOption, AbonoFacturaOption,
-  AbonoInvoiceForSubClient,
-  SaldoFavorFilters, SaldoFavorResult,
   PaymentHistorialFilters, PaymentHistorialResult, PaymentDetail, PaymentAttachmentDetail, ConfirmacionAjustes,
   PaymentsConfig, CreatePaymentV2Payload,
   CompensacionesFilters, CompensacionesResult, CompensacionClienteDetalle, CompensacionLinea, CompensacionVistaPrevia, Compensacion,
@@ -573,73 +570,6 @@ export const adminContabApi = {
     },
   },
 
-  // SCRUM-902 — Registrar Abono (4O). Endpoints propios de admin-contab (mismo criterio que
-  // `payments.searchClients` — este módulo no depende de `ventas_diseno.read`, así que la
-  // cascada Cliente→Sub-cliente→Proyecto→Factura tiene sus propios endpoints acá en vez de
-  // reusar `/ventas-diseno/sub-clients`).
-  abonos: {
-    // SCRUM-947 — pagina server-side (antes devolvía el array completo).
-    list: (filters: AbonoFilters): Promise<AbonoListResponse> =>
-      api.get<AbonoListResponse>('/admin-contab/abonos', { params: filters }).then(r => r.data),
-
-    detail: (id: number): Promise<Abono> =>
-      api.get<Abono>(`/admin-contab/abonos/${id}`).then(r => r.data),
-
-    // Corregido contra el backend real: viven bajo /abonos/cascada/*, y "Proyecto" es
-    // `sales_project_id` (modelo `SalesProject`, no `PipelineCard`).
-    subClientes: (masterClientId: number): Promise<AbonoSubClienteOption[]> =>
-      api.get<{ data: AbonoSubClienteOption[] }>('/admin-contab/abonos/cascada/sub-clientes', { params: { master_client_id: masterClientId } })
-        .then(r => r.data.data),
-
-    proyectos: (subClientId: number): Promise<AbonoProyectoOption[]> =>
-      api.get<{ data: AbonoProyectoOption[] }>('/admin-contab/abonos/cascada/proyectos', { params: { sub_client_id: subClientId } })
-        .then(r => r.data.data),
-
-    facturas: (salesProjectId: number): Promise<AbonoFacturaOption[]> =>
-      api.get<{ data: AbonoFacturaOption[] }>('/admin-contab/abonos/cascada/facturas', { params: { sales_project_id: salesProjectId } })
-        .then(r => r.data.data),
-
-    // SCRUM-933 — reemplaza, para el buscador cruzado Proyecto↔# Cotización de "Registrar Abono",
-    // los 2 pasos de arriba (proyectos()+facturas()) con una sola lista ya enriquecida.
-    invoicesForSubClient: (subClientId: number): Promise<AbonoInvoiceForSubClient[]> =>
-      api.get<{ data: AbonoInvoiceForSubClient[] }>('/admin-contab/abonos/cascada/facturas-por-subcliente', { params: { sub_client_id: subClientId } })
-        .then(r => r.data.data),
-
-    // Multipart siempre (mismo criterio que `payments.register`/`notasCredito.register` — un solo
-    // camino de serialización aunque no traiga comprobante).
-    register: (payload: AbonoPayload): Promise<Abono> => abonoForm(payload, form => api.post<Abono>('/admin-contab/abonos', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }).then(r => r.data)),
-
-    update: (id: number, payload: AbonoPayload): Promise<Abono> => abonoForm(payload, form => {
-      form.append('_method', 'PUT')
-      return api.post<Abono>(`/admin-contab/abonos/${id}`, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }).then(r => r.data)
-    }),
-
-    confirm: (id: number): Promise<Abono> =>
-      api.post<Abono>(`/admin-contab/abonos/${id}/confirm`).then(r => r.data),
-
-    // SCRUM-955 — mismo patrón blob que payments.downloadReceiptPdf() — el endpoint exige el JWT
-    // en header, no se puede abrir con un <a href> plano.
-    downloadReceiptPdf: async (id: number, numeroRecibo: string): Promise<void> => {
-      const res = await api.get(`/admin-contab/abonos/${id}/pdf`, { responseType: 'blob' })
-      const url = URL.createObjectURL(res.data as Blob)
-      const a   = document.createElement('a')
-      a.href     = url
-      a.download = `recibo-${numeroRecibo}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-    },
-  },
-
-  // SCRUM-903 — Saldo a Favor de Clientes (4N), 100% solo lectura.
-  saldoFavor: {
-    list: (filters: SaldoFavorFilters): Promise<SaldoFavorResult> =>
-      api.get<SaldoFavorResult>('/admin-contab/saldo-favor', { params: filters }).then(r => r.data),
-  },
-
   // SCRUM-1168 F4 — solicitudes de anulación (y de devolución, F5): listado y decisión de Gerencia.
   reversals: {
     /** F5 — solicita devolver dinero del saldo a favor del cliente (multipart: lleva el comprobante). */
@@ -1112,15 +1042,6 @@ export const adminContabApi = {
 
 // SCRUM-902 — misma serialización multipart que `payments.register`/`notasCredito.register`
 // (booleano '1'/'0', `null`/`undefined` omitidos).
-function abonoForm<T>(payload: AbonoPayload, send: (form: FormData) => Promise<T>): Promise<T> {
-  const form = new FormData()
-  for (const [key, value] of Object.entries(payload)) {
-    if (value === null || value === undefined) continue
-    if (key === 'comprobante') { form.append('comprobante', value as File); continue }
-    form.append(key, String(value))
-  }
-  return send(form)
-}
 
 // Batch 23 Grupo 2 (SCRUM-651→660, REQ-574→583) — "Mensual por cliente" (día) y "Acumulado"
 // (año-mes). `master_client_id=todos` combina todos los clientes (RN2 REQ-574/579).

@@ -1301,11 +1301,10 @@ describe('Sidebar — Contabilidad: Pipeline solo lectura (SCRUM-1128)', () => {
 
 // SCRUM-1168 — con el concepto nuevo de cobros (flag `cobros_v2` del login) el menú Movimientos ofrece «Compensaciones» y deja de ofrecer
 // «Registrar abono» (el dinero que entra sin factura ahora es un cobro). Sin el flag, todo sigue como siempre.
-describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1168)', () => {
-  const contabilidad = (cobrosV2: boolean | undefined) => baseUser({
+describe('Sidebar — Compensaciones (concepto único de cobros, Fase 15a)', () => {
+  const contabilidad = () => baseUser({
     role: 'lider_admin_contab',
     modules: { admin_contab: noModule({ view: true }) },
-    flags: { approve_large_amounts: false, manage_users: false, ...(cobrosV2 === undefined ? {} : { cobros_v2: cobrosV2 }) },
   })
   const abrirMovimientos = () => {
     fireEvent.click(screen.getAllByText('Admin. & Contab.')[0])
@@ -1313,23 +1312,14 @@ describe('Sidebar — Compensaciones según el concepto nuevo de cobros (SCRUM-1
   }
   const visible = (text: string) => screen.queryAllByText(text).length > 0
 
-  it('con cobros_v2 ve «Compensaciones» y no «Registrar abono»', () => {
-    useAuthStore.setState({ user: contabilidad(true) })
+  it('ve «Compensaciones» y no «Registrar abono» ni «Saldo a favor» (ya no existen)', () => {
+    useAuthStore.setState({ user: contabilidad() })
     renderSidebar()
     abrirMovimientos()
     expect(visible('nav.compensaciones')).toBe(true)
     expect(visible('nav.registrarAbono')).toBe(false)
-    expect(visible('nav.saldoFavor')).toBe(false)   // F5 — el saldo a favor se usa desde Compensaciones
+    expect(visible('nav.saldoFavor')).toBe(false)
     expect(visible('Cobros')).toBe(true)
-  })
-
-  it.each([false, undefined])('sin el concepto nuevo (flag %s) ve «Registrar abono» y no «Compensaciones»', flag => {
-    useAuthStore.setState({ user: contabilidad(flag) })
-    renderSidebar()
-    abrirMovimientos()
-    expect(visible('nav.registrarAbono')).toBe(true)
-    expect(visible('nav.saldoFavor')).toBe(true)
-    expect(visible('nav.compensaciones')).toBe(false)
   })
 })
 
