@@ -7,6 +7,20 @@
   "brandSubtitle": "CRM · Sistema de seguimiento comercial",
   "poweredBy": "Powered by AtlanticERP",
   "module": "CRM",
+  "setupChecklist": {
+    "title": "Primera puesta en marcha",
+    "intro": "Faltan {{count}} de {{total}} pasos para que la empresa pueda operar de punta a punta.",
+    "go": "Ir",
+    "steps": {
+      "perfil_empresa": "Completar el perfil de la empresa",
+      "cuenta_bancaria": "Registrar una cuenta bancaria activa (sin ella no se registran cobros)",
+      "almacenamiento": "Configurar el almacenamiento de archivos (sin él no se aprueban proyectos)",
+      "almacen_despacho": "Definir el almacén de despacho por defecto",
+      "aprobador_primario": "Elegir el aprobador primario",
+      "catalogo_productos": "Cargar el catálogo de productos",
+      "existencias": "Registrar existencias (vía una compra o un ajuste)"
+    }
+  },
   "home": {
     "approvalsPending": {
       "title": "Aprobaciones Pendientes"

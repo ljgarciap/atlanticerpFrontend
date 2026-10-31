@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card'
 import CalendarModal from '@/components/CalendarModal'
 import MiniCalendarCard from '@/components/MiniCalendarCard'
 import GerenciaAprobacionesPanel from '@/components/gerencia/GerenciaAprobacionesPanel'
+import SetupChecklistCard from '@/components/gerencia/SetupChecklistCard'
 import ApprovalsPendingCard from '@/components/ApprovalsPendingCard'
 import { rangeForPill, type CalendarPill } from '@/lib/dateGrid'
 import { firstNameOnly } from '@/lib/greeting'
@@ -272,6 +273,8 @@ export default function GerenciaPage() {
 
   return (
     <div className="p-6 space-y-5 max-w-screen-2xl mx-auto">
+
+      <SetupChecklistCard />
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
