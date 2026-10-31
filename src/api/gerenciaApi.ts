@@ -1,9 +1,12 @@
 import api from './authApi'
-import type { AprobacionItem, GerenciaFilters, GerenciaHomeResponse, ReglaAprobacion, SaveReglaAprobacionPayload } from '@/types/gerencia'
+import type { AprobacionItem, GerenciaFilters, GerenciaHomeResponse, ReglaAprobacion, SaveReglaAprobacionPayload, SetupChecklist } from '@/types/gerencia'
 import type { OutlookCalendarEvent } from '@/types/calendar'
 import type { ApprovalPendingItem } from '@/lib/homeCards'
 
 export const gerenciaApi = {
+  setupChecklist: (): Promise<SetupChecklist> =>
+    api.get<SetupChecklist>('/gerencia/setup-checklist').then(r => r.data),
+
   home: (filters?: GerenciaFilters): Promise<GerenciaHomeResponse> =>
     api.get<GerenciaHomeResponse>('/gerencia/home', { params: filters }).then(r => r.data),
 

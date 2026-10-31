@@ -181,3 +181,15 @@ export interface GerenciaHomeResponse {
   salud_modulos:  SaludModulos
   agendas:        GerenciaAgendas
 }
+
+// Fase 16 (5.1) — lista de verificación de primera puesta en marcha.
+export interface SetupChecklistStep {
+  clave:    string
+  completo: boolean
+  ruta:     string
+}
+
+export interface SetupChecklist {
+  completo: boolean
+  pasos:    SetupChecklistStep[]
+}

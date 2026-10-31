@@ -33,3 +33,11 @@ export function useGerenciaExport() {
       gerenciaApi.exportHome(filters, format),
   })
 }
+
+export function useSetupChecklist() {
+  return useQuery({
+    queryKey: ['gerencia/setup-checklist'],
+    queryFn: () => gerenciaApi.setupChecklist(),
+    staleTime: 60_000,
+  })
+}

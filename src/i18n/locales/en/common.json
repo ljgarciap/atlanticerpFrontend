@@ -7,6 +7,20 @@
   "brandSubtitle": "CRM · Commercial Tracking System",
   "poweredBy": "Powered by AtlanticERP",
   "module": "CRM",
+  "setupChecklist": {
+    "title": "First-time setup",
+    "intro": "{{count}} of {{total}} steps left before the company can operate end to end.",
+    "go": "Go",
+    "steps": {
+      "perfil_empresa": "Complete the company profile",
+      "cuenta_bancaria": "Register an active bank account (payments cannot be recorded without one)",
+      "almacenamiento": "Configure file storage (projects cannot be approved without it)",
+      "almacen_despacho": "Set the default dispatch warehouse",
+      "aprobador_primario": "Choose the primary approver",
+      "catalogo_productos": "Load the product catalog",
+      "existencias": "Register stock (through a purchase or an adjustment)"
+    }
+  },
   "home": {
     "approvalsPending": {
       "title": "Pending Approvals"
