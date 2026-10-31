@@ -326,6 +326,23 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       setPassToOrderError(message ?? fallback)
     },
   })
+  // Fase 16 (5.3) — quien no puede ejecutar el pase (el vendedor) pide que Gerencia lo haga, con una nota opcional.
+  const [showRequestForm, setShowRequestForm] = useState(false)
+  const [requestNote, setRequestNote] = useState('')
+  const [requestError, setRequestError] = useState<string | null>(null)
+  const requestPassToOrderMutation = useMutation({
+    mutationFn: () => ventasDisenoApi.pipeline.requestPassToOrder(cardId, requestNote.trim() || undefined),
+    onSuccess: () => {
+      setRequestError(null)
+      setShowRequestForm(false)
+      setRequestNote('')
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card', cardId] })
+    },
+    onError: (err: unknown) => {
+      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
+      setRequestError(message ?? t('ventasDiseno:modal.passToOrder.requestError'))
+    },
+  })
   closePassToOrderDialogRef.current = showPassToOrderDialog && !passToOrderMutation.isPending
     ? () => { setPassToOrderError(null); setShowPassToOrderDialog(false) }
     : null
@@ -1236,6 +1253,37 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                   >
                     {t('ventasDiseno:modal.passToOrder.button')}
                   </Button>
+                )}
+                {pipelineStages.isWon(card?.stage) && card?.order_status === 'pending' && card.can_request_pass_to_order === true && !showRequestForm && (
+                  <Button variant="accent" onClick={() => { setRequestError(null); setShowRequestForm(true) }} data-testid="request-pass-to-order-btn">
+                    {t('ventasDiseno:modal.passToOrder.requestButton')}
+                  </Button>
+                )}
+                {showRequestForm && (
+                  <div className="flex items-center gap-2" data-testid="request-pass-to-order-form">
+                    <input
+                      type="text"
+                      value={requestNote}
+                      maxLength={500}
+                      onChange={e => setRequestNote(e.target.value)}
+                      placeholder={t('ventasDiseno:modal.passToOrder.requestNotePlaceholder')}
+                      className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      data-testid="request-pass-to-order-note"
+                    />
+                    <Button onClick={() => requestPassToOrderMutation.mutate()} disabled={requestPassToOrderMutation.isPending} loading={requestPassToOrderMutation.isPending} data-testid="request-pass-to-order-send">
+                      {t('ventasDiseno:modal.passToOrder.requestSend')}
+                    </Button>
+                    <Button variant="secondary" onClick={() => setShowRequestForm(false)} disabled={requestPassToOrderMutation.isPending}>
+                      {t('common:actions.cancel')}
+                    </Button>
+                  </div>
+                )}
+                {requestError && <p className="text-[12px] text-red-600 self-center" role="alert">{requestError}</p>}
+                {card?.order_status === 'pending' && card.order_request && (
+                  <div className="text-[12px] text-slate-600 dark:text-slate-300 leading-tight self-center" data-testid="pass-to-order-request-info">
+                    <p>{t('ventasDiseno:modal.passToOrder.requestPending', { name: card.order_request.requested_by?.name ?? '—', date: formatDateTimeShort(card.order_request.requested_at) })}</p>
+                    {card.order_request.note && <p className="italic">{card.order_request.note}</p>}
+                  </div>
                 )}
                 {pipelineStages.isWon(card?.stage) && card?.order_status === 'approved' && card.order_approved_by && (
                   <div className="text-[12px] text-slate-600 dark:text-slate-300 leading-tight self-center" data-testid="pass-to-order-info">

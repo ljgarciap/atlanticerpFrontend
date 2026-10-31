@@ -32,6 +32,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       update: vi.fn(),
       changeStage: vi.fn(),
       passToOrder: vi.fn(),
+      requestPassToOrder: vi.fn(),
       uploadFile: vi.fn(),
       fileUrl: vi.fn(),
       deleteFile: vi.fn(),
@@ -1452,5 +1453,47 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
     renderModal()
     await screen.findByText('Proyecto Alfa')
     expect(screen.queryByText('common:actions.edit')).not.toBeInTheDocument()
+  })
+})
+
+// Fase 16 (5.3) — solicitud de pase a Pedido del vendedor.
+describe('PipelineCardModal — Solicitar pase a Pedido (Fase 16, 5.3)', () => {
+  const pendiente = (o: Partial<PipelineCardDetail> = {}) =>
+    makeDetail({ stage: 'approved', can_edit: false, order_status: 'pending', can_pass_to_order: false, can_request_pass_to_order: true, latest_quote_id: 7, latest_quote_folio: 'COT-0007', ...o })
+
+  beforeEach(() => {
+    mockedStore.mockReturnValue({ user: { id: 5, role: 'vendedor', permissions: [] } } as never)
+  })
+
+  it('el vendedor envía la solicitud con una nota y no ve el botón de ejecutar el pase', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(pendiente())
+    mockedApi.pipeline.requestPassToOrder.mockResolvedValue(pendiente({ can_request_pass_to_order: false }))
+    renderModal()
+
+    fireEvent.click(await screen.findByTestId('request-pass-to-order-btn'))
+    expect(screen.queryByText('ventasDiseno:modal.passToOrder.button')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByTestId('request-pass-to-order-note'), { target: { value: 'Cliente firmó' } })
+    fireEvent.click(screen.getByTestId('request-pass-to-order-send'))
+
+    await waitFor(() => expect(mockedApi.pipeline.requestPassToOrder).toHaveBeenCalledWith(expect.any(Number), 'Cliente firmó'))
+    await waitFor(() => expect(screen.queryByTestId('request-pass-to-order-form')).not.toBeInTheDocument())
+  })
+
+  it('con una solicitud pendiente muestra quién la envió y su nota, sin ofrecer otra', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(pendiente({
+      can_request_pass_to_order: false,
+      order_request: { requested_by: { id: 5, name: 'Vendedor Test' }, requested_at: '2026-10-30T15:00:00Z', note: 'Urge' },
+    }))
+    renderModal()
+
+    expect(await screen.findByTestId('pass-to-order-request-info')).toHaveTextContent('Urge')
+    expect(screen.queryByTestId('request-pass-to-order-btn')).not.toBeInTheDocument()
+  })
+
+  it('no ofrece solicitar cuando el backend no lo permite (proyecto sin aprobar o ya con pedido)', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(pendiente({ can_request_pass_to_order: false }))
+    renderModal()
+    await screen.findByText('Proyecto Alfa')
+    expect(screen.queryByTestId('request-pass-to-order-btn')).not.toBeInTheDocument()
   })
 })
