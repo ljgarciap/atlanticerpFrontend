@@ -486,7 +486,7 @@
       "print": "Imprimir",
       "warehouse": {
         "fromCentral": "Sale de {{name}}",
-        "available": "Disponible: {{count}}",
+        "reservedForOrder": "Reservado para este pedido: {{count}} · En bodega: {{stock}}",
         "takeFromOther": "Tomar de otra bodega",
         "removeOther": "Quitar",
         "otherWarehouse": "Otra bodega",

@@ -530,7 +530,7 @@ function WarehouseCell({ item, row, editable, onToggleExtra, onExtraWarehouse, o
       {defaultOpt && (
         <div className={over ? 'text-red-600' : 'text-slate-700 dark:text-slate-200'}>
           <span className="font-semibold">{defaultOpt.name}</span>: {fromDefault}
-          <span className="text-slate-400"> · {t('bodega:pedidos.pickingSheetModal.warehouse.available', { count: defaultOpt.available })}</span>
+          <span className="text-slate-400"> · {t('bodega:pedidos.pickingSheetModal.warehouse.reservedForOrder', { count: defaultOpt.available, stock: defaultOpt.stock })}</span>
         </div>
       )}
       {over && defaultOpt && (

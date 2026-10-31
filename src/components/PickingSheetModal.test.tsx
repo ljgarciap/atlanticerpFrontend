@@ -341,6 +341,8 @@ describe('PickingSheetModal', () => {
     const cell = screen.getByTestId('picking-warehouse-cell-100')
     expect(cell).toHaveTextContent('Bodega Central')
     expect(cell).toHaveTextContent('10')
+    // Fase 16 (5.2): la cifra es lo reservado para ESTE pedido; el saldo de la bodega va aparte
+    expect(cell).toHaveTextContent('warehouse.reservedForOrder:{"count":10,"stock":10}')
     // pidió 11 pero solo hay 10 reservados: arranca en 10, no en 11 (alistar más es imposible)
     expect(screen.getByTestId('picking-alistada-locked-100')).toHaveTextContent('10')
     expect(screen.queryByTestId('picking-warehouse-over-100')).not.toBeInTheDocument()
