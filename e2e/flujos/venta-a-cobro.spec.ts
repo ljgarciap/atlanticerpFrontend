@@ -311,9 +311,10 @@ test.describe('Flujo venta a cobro', () => {
     expect(Number(aCuenta.body.saldo_sin_aplicar)).toBe(extra)
     expect((await api(request, 'contabilidad', 'PUT', `/admin-contab/payments/${aCuenta.body.id}/confirm`)).status).toBe(200)
 
-    const saldo = (await api(request, 'contabilidad', 'GET', '/admin-contab/saldo-favor')).body
-    const fila = (saldo.rows as { master_client_id: number; saldo_disponible?: number }[]).find(r => r.master_client_id === ctx.mc)
-    expect(fila, 'el excedente aparece como saldo a favor del cliente').toBeTruthy()
+    // Desde la Fase 15a el saldo a favor se lee del cliente (la ruta `saldo-favor` ya no existe).
+    const saldo = await abiertas()
+    expect(Number(saldo.credit_balance_cuenta), 'el excedente queda como saldo a favor «a cuenta» del cliente').toBeGreaterThanOrEqual(extra)
+    expect(Number(saldo.credit_balance_total)).toBeGreaterThanOrEqual(extra)
   })
 
   test('7b. devolución de un cliente: recepción en bodega acotada a lo entregado y nota de crédito vinculada', async ({ request }) => {
@@ -542,7 +543,7 @@ test.describe('Flujo venta a cobro', () => {
     expect(arqueo.estado, 'el arqueo de hoy ya no está abierto').not.toBe('abierto')
     expect((await api(request, 'contabilidad', 'POST', '/admin-contab/cash-position/daily-count/close', {})).status, 'se cierra una sola vez').toBe(409)
     expect((await api(request, 'contabilidad', 'PUT', '/admin-contab/cash-position/daily-count/entries', { movement_type: 'payment', movement_id: mov.movement_id, observacion: 'cambio' })).status, 'cerrado no se edita').toBe(422)
-    expect(Number(arqueo.total_cobrado) - Number(arqueo.total_notas_credito) - Number(arqueo.total_reversos), 'el neto = cobrado − notas − reversos').toBeCloseTo(Number(arqueo.total_neto), 2)
+    expect(Number(arqueo.total_cobrado) - Number(arqueo.total_notas_credito) - Number(arqueo.total_comisiones) - Number(arqueo.total_reversos), 'el neto = cobrado − notas − comisiones − reversos').toBeCloseTo(Number(arqueo.total_neto), 2)
 
     const id = arqueo.id as number
     for (const rol of ['contabilidad', 'gerencia'] as const) {
