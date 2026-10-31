@@ -71,9 +71,6 @@
       "approve": "Aprobar",
       "passedBy": "Pasado a pedido por",
       "approvedAt": "Fecha de aprobación",
-      "abonoQuestion": "¿Desea registrar el cobro de este proyecto?",
-      "abonoRegister": "Registrar cobro",
-      "abonoLater": "No registrar aún",
       "error": "No se pudo pasar el proyecto a pedido.",
       "errorForbidden": "No tienes permiso para pasar este proyecto a pedido.",
       "errorNotApproved": "El proyecto debe estar en estado Aprobado para pasar a pedido."

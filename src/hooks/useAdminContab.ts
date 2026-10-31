@@ -523,8 +523,6 @@ export function useConfirmPaymentPreview() {
   return useMutation({ mutationFn: (id: number) => adminContabApi.payments.confirmPreview(id) })
 }
 
-// SCRUM-902 — Registrar Abono (4O).
-
 // SCRUM-1168 F3 — Compensaciones.
 
 export function useCompensacionClientes(filters: CompensacionesFilters) {

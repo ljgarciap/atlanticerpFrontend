@@ -265,7 +265,7 @@ export default function DetalleCobroModal({ paymentId, onClose }: Props) {
               )}
               {anularError && <p role="alert" className="text-red-600 text-sm mt-2">{anularError}</p>}
 
-              {payment.cobros_v2 && payment.saldo_sin_aplicar != null && payment.saldo_sin_aplicar > 0 && (
+              {payment.saldo_sin_aplicar != null && payment.saldo_sin_aplicar > 0 && (
                 <div data-testid="cobro-saldo-sin-aplicar" className="mt-3 rounded-lg bg-primary-soft/60 dark:bg-slate-700/40 px-3 py-2 flex items-center justify-between text-sm">
                   <span className="font-medium text-slate-700 dark:text-slate-200">{t('cobros.detalle.saldoSinAplicar')}</span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(payment.saldo_sin_aplicar)}</span>

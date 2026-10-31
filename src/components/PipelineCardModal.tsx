@@ -292,8 +292,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   // vuelve a validar permiso e idempotencia — esto solo decide qué se muestra.
   const canPassToOrder = user?.permissions?.includes('ventas_diseno.pass_to_order') ?? false
   const [showPassToOrderDialog, setShowPassToOrderDialog] = useState(false)
-  const [showAbonoAsk, setShowAbonoAsk] = useState(false)
-  dialogOpenRef.current = showPassToOrderDialog || showAbonoAsk
+  dialogOpenRef.current = showPassToOrderDialog
   const [passToOrderError, setPassToOrderError] = useState<string | null>(null)
   // Candado síncrono: `isPending` de la mutation se actualiza con un render de retraso y dos clics
   // seguidos alcanzarían a disparar dos requests (el backend igual es idempotente).
@@ -303,7 +302,6 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
     onSuccess: () => {
       setPassToOrderError(null)
       setShowPassToOrderDialog(false)
-      setShowAbonoAsk(true)
       qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline-card', cardId] })
       qc.invalidateQueries({ queryKey: ['ventas-diseno-pipeline'] })
     },
@@ -331,25 +329,6 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
   closePassToOrderDialogRef.current = showPassToOrderDialog && !passToOrderMutation.isPending
     ? () => { setPassToOrderError(null); setShowPassToOrderDialog(false) }
     : null
-
-  function handleRegisterAbono() {
-    if (!card) return
-    setShowAbonoAsk(false)
-    // La decisión de registrar o no el abono nunca revierte el pedido ya generado.
-    navigate('/admin-contab/abonos', {
-      state: {
-        abonoPrefill: {
-          masterClientId:   card.master_client?.id ?? null,
-          masterClientName: card.master_client?.name ?? '',
-          subClientId:      card.sub_client?.id ?? null,
-          salesProjectId:   card.sales_project.id,
-          projectName:      card.sales_project.name,
-          quoteId:          card.latest_quote_id ?? null,
-          quoteFolio:       card.latest_quote_folio ?? '',
-        },
-      },
-    })
-  }
 
   const [uploadFileError, setUploadFileError] = useState<string | null>(null)
   const uploadFileMutation = useMutation({
@@ -617,21 +596,6 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 }}
               >
                 {t('ventasDiseno:modal.passToOrder.approve')}
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
-      {showAbonoAsk && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" data-testid="abono-ask-dialog">
-          <Card variant="modal" className="w-full max-w-md p-5">
-            <p className="text-sm text-slate-700 dark:text-slate-200 mb-4">{t('ventasDiseno:modal.passToOrder.abonoQuestion')}</p>
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setShowAbonoAsk(false)}>
-                {t('ventasDiseno:modal.passToOrder.abonoLater')}
-              </Button>
-              <Button variant="accent" onClick={handleRegisterAbono}>
-                {t('ventasDiseno:modal.passToOrder.abonoRegister')}
               </Button>
             </div>
           </Card>

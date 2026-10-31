@@ -599,8 +599,6 @@
       "facturasAplicadas": "Applied invoice(s)",
       "cotizaciones": "Quote(s)",
       "guiasEntrega": "Delivery Guide(s)",
-      "abonos": "Advance payment(s)",
-      "abonoNumero": "Advance #{{id}}",
       "notasCredito": "Credit note(s)",
       "cerrar": "Close",
       "error": "Could not load the payment detail.",

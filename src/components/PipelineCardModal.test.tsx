@@ -1253,7 +1253,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(mockedApi.pipeline.passToOrder).not.toHaveBeenCalled()
   })
 
-  it('Aprobar llama una sola vez aunque se haga clic repetido, y luego pregunta por el abono', async () => {
+  it('Aprobar llama una sola vez aunque se haga clic repetido, ', async () => {
     asUser(['ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved())
     let resolve!: (v: PipelineCardDetail) => void
@@ -1267,39 +1267,9 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     await waitFor(() => expect(mockedApi.pipeline.passToOrder).toHaveBeenCalled())
     expect(mockedApi.pipeline.passToOrder).toHaveBeenCalledTimes(1)
     resolve(approved({ order_status: 'approved' }))
-    expect(await screen.findByTestId('abono-ask-dialog')).toHaveTextContent('ventasDiseno:modal.passToOrder.abonoQuestion')
   })
 
-  it('"No registrar aún" cierra sin navegar; "Registrar abono" navega con el proyecto precargado', async () => {
-    asUser(['ventas_diseno.pass_to_order'])
-    mockedApi.pipeline.get.mockResolvedValue(approved())
-    mockedApi.pipeline.passToOrder.mockResolvedValue(approved({ order_status: 'approved' }))
-    renderModal()
-    fireEvent.click(await screen.findByText('ventasDiseno:modal.passToOrder.button'))
-    fireEvent.click(within(await screen.findByTestId('pass-to-order-dialog')).getByText('ventasDiseno:modal.passToOrder.approve'))
-    const ask = await screen.findByTestId('abono-ask-dialog')
-    fireEvent.click(within(ask).getByText('ventasDiseno:modal.passToOrder.abonoLater'))
-    expect(screen.queryByTestId('abono-ask-dialog')).not.toBeInTheDocument()
-    expect(mockNavigate).not.toHaveBeenCalled()
-  })
-
-  it('Registrar abono redirige a Abonos con Cliente Master, Subcliente, Proyecto y Cotización', async () => {
-    asUser(['ventas_diseno.pass_to_order'])
-    mockedApi.pipeline.get.mockResolvedValue(approved())
-    mockedApi.pipeline.passToOrder.mockResolvedValue(approved({ order_status: 'approved' }))
-    renderModal()
-    fireEvent.click(await screen.findByText('ventasDiseno:modal.passToOrder.button'))
-    fireEvent.click(within(await screen.findByTestId('pass-to-order-dialog')).getByText('ventasDiseno:modal.passToOrder.approve'))
-    fireEvent.click(within(await screen.findByTestId('abono-ask-dialog')).getByText('ventasDiseno:modal.passToOrder.abonoRegister'))
-    expect(mockNavigate).toHaveBeenCalledWith('/admin-contab/abonos', {
-      state: { abonoPrefill: {
-        masterClientId: 1, masterClientName: 'Grupo Delta', subClientId: 1,
-        salesProjectId: 1, projectName: 'Proyecto Alfa', quoteId: 7, quoteFolio: 'COT-0007',
-      } },
-    })
-  })
-
-  it('muestra el error del backend en el diálogo y no pregunta por el abono', async () => {
+  it('muestra el error del backend en el diálogo', async () => {
     asUser(['ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved())
     mockedApi.pipeline.passToOrder.mockRejectedValue(new Error('boom'))
@@ -1307,7 +1277,6 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     fireEvent.click(await screen.findByText('ventasDiseno:modal.passToOrder.button'))
     fireEvent.click(within(await screen.findByTestId('pass-to-order-dialog')).getByText('ventasDiseno:modal.passToOrder.approve'))
     expect(await screen.findByRole('alert')).toHaveTextContent('ventasDiseno:modal.passToOrder.error')
-    expect(screen.queryByTestId('abono-ask-dialog')).not.toBeInTheDocument()
   })
   it('no muestra el botón si el backend dice can_pass_to_order=false aunque haya permiso (Contabilidad sin permiso efectivo)', async () => {
     asUser(['ventas_diseno.pass_to_order'])
@@ -1325,7 +1294,7 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(screen.queryByText('common:actions.edit')).not.toBeInTheDocument()
   })
 
-  it('409 (ya pasó a pedido): no muestra error, cierra el diálogo, refresca y no pregunta por el abono', async () => {
+  it('409 (ya pasó a pedido): no muestra error, cierra el diálogo, refresca', async () => {
     asUser(['ventas_diseno.pass_to_order'])
     mockedApi.pipeline.get.mockResolvedValue(approved())
     mockedApi.pipeline.passToOrder.mockRejectedValue(Object.assign(new Error('conflict'), {
@@ -1341,7 +1310,6 @@ describe('PipelineCardModal — Pasar a Pedido (SCRUM-1128)', () => {
     expect(await screen.findByTestId('pass-to-order-info')).toHaveTextContent('Contabilidad Test')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.queryByTestId('pass-to-order-dialog')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('abono-ask-dialog')).not.toBeInTheDocument()
   })
 
   it('403 y 422 sin mensaje del backend muestran un texto claro', async () => {

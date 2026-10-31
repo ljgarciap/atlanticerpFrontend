@@ -677,172 +677,13 @@ export interface PaymentClientOption {
   name: string
 }
 
-// ===== SCRUM-902 — Registrar Abono (4O) =====
-// Reusa `PaymentMethod`/`PAYMENT_METHODS` (mismo vocabulario de 9 métodos que Cobros — mismo
-// criterio de cuenta bancaria sugerida, mismo `defaultBankAccount()`) en vez de un enum paralelo.
-
-export type AbonoNivelAsociacion = 'cliente' | 'proyecto' | 'factura'
-export type AbonoEstado = 'por_confirmar' | 'confirmado'
-
-/** "Proyecto" en este módulo es `SalesProject` (mismo modelo que `AccountStatementProjectOption`
- *  en Estado de Cuenta) — no `PipelineCard`. */
-export interface Abono {
-  id: number
-  fecha_registro: string
-  master_client_id: number
-  cliente: string
-  sub_client_id: number | null
-  sub_cliente: string | null
-  sales_project_id: number | null
-  proyecto: string | null
-  invoice_id: number | null
-  factura: string | null
-  /** Calculado en backend — nunca elegido/enviado por el frontend. */
-  nivel_asociacion: AbonoNivelAsociacion
-  monto_original: number
-  monto_usado: number
-  monto_disponible: number
-  /** Disponible/Usado parcialmente/Agotado — no confundir con `estado` (por_confirmar/confirmado). */
-  estado_saldo: SaldoFavorEstado
-  metodo_pago: PaymentMethod
-  /** `null` cuando el método es retención de impuestos/ajuste de cuenta (RN4, ver PAYMENT_METHODS_SIN_CUENTA_BANCARIA) — se muestra como "Otros" en vez de una cuenta real. */
-  cuenta_bancaria_id: number | null
-  referencia: string
-  comprobante_url: string | null
-  estado: AbonoEstado
-  registrado_por: string | null
-  confirmado_por: string | null
-  fecha_confirmacion: string | null
-  /** Trazabilidad del excedente (§4.5) — no nulo solo en el abono nuevo generado a nivel Cliente. */
-  abono_origen_id: number | null
-  /** SCRUM-955 — folio propio del recibo de abono (prefijo distinto al REC-XXX de cobros), `null` hasta que el backend lo genere en el registro. */
-  numero_recibo: string | null
-}
-
-export interface AbonoFilters {
-  search?: string
-  master_client_id?: number
-  estado?: AbonoEstado
-  // SCRUM-948 — mismos criterios de búsqueda que Historial de cobros (metodo_pago, rango de fechas).
-  metodo_pago?: PaymentMethod
-  desde?: string
-  hasta?: string
-  // SCRUM-947 — paginación estándar (Pagination::params()/ofArray() en el backend).
-  page?: number
-  per_page?: number | 'all'
-}
-
-/** SCRUM-947 — mismo shape que expone `Pagination::meta()` en el backend. */
-export interface AbonoListResponse {
-  data: Abono[]
-  meta: { total: number; per_page: number; current_page: number; last_page: number }
-}
-
-/** `POST /admin-contab/abonos` y `PUT /admin-contab/abonos/{id}`. */
-export interface AbonoPayload {
-  master_client_id: number
-  sub_client_id?: number | null
-  sales_project_id?: number | null
-  invoice_id?: number | null
-  monto_original: number
-  metodo_pago: PaymentMethod
-  /** `null` cuando el método es retención de impuestos/ajuste de cuenta (RN4). */
-  cuenta_bancaria_id: number | null
-  referencia: string
-  comprobante?: File | null
-}
-
-export interface AbonoSubClienteOption { id: number; name: string }
-export interface AbonoProyectoOption { id: number; name: string }
-export interface AbonoFacturaOption { id: number; numero: string }
-
-/** SCRUM-933 — fila de `GET /admin-contab/abonos/cascada/facturas-por-subcliente`: TODAS las
- *  facturas de un sub-cliente de una sola vez, para el buscador cruzado Proyecto↔# Cotización
- *  (reemplaza, para ese buscador, los pasos `proyectos()`+`facturas()` de arriba). Cotización
- *  resuelta vía `Order::linkedQuote()`, mismo criterio que Cobros/Notas de Crédito/Estado de Cuenta. */
-export interface AbonoInvoiceForSubClient {
-  id: number
-  numero: string
-  sales_project_id: number | null
-  proyecto: string | null
-  quote_id: number | null
-  cotizacion_folio: string | null
-  /** SCRUM-955 — monto total de la factura, para mostrarlo y validar el tope del abono contra él. */
-  monto: number
-}
-
-// ===== SCRUM-903 — Saldo a Favor de Clientes (4N), solo lectura =====
-
-export type SaldoFavorEstado = 'disponible' | 'usado_parcialmente' | 'agotado'
-// Coincide con `SaldoFavorService::ORIGEN_*` en el backend — singular, no confundir con las keys
-// de i18n `saldoFavor.origenes.*` (esas sí están en plural, son solo el label mostrado).
-export type SaldoFavorOrigen = 'abono' | 'devolucion' | 'descuento' | 'anulacion'
-
-export interface SaldoFavorRow {
-  origen_tipo: SaldoFavorOrigen
-  /** Label ya resuelto por el backend (ej. "Abono de más", "Descuento comercial"). */
-  origen: string
-  master_client_id: number
-  cliente: string
-  sales_project_id: number | null
-  proyecto: string | null
-  invoice_id: number | null
-  factura: string | null
-  asociado_a: string
-  referencia: string
-  fecha: string
-  monto_original: number
-  monto_usado: number
-  monto_disponible: number
-  estado: SaldoFavorEstado
-  /** Fase 13 (2.2) — de dónde sale el saldo (lo que la compensación exige por línea) y a qué nivel sirve. */
-  source_type?: 'abono' | 'cobro' | 'nota_credito'
-  source_id?: number
-  nivel?: 'cliente' | 'proyecto' | 'factura'
-}
-
-export interface SaldoFavorFilters {
-  search?: string
-  // SCRUM-947 — nuevos: texto "contiene", antes filtraban 100% client-side sobre la página
-  // completa cargada (roto por diseño una vez que el backend pagina de verdad).
-  cliente?: string
-  proyecto?: string
-  factura?: string
-  master_client_id?: number
-  sales_project_id?: number
-  invoice_id?: number
-  estado?: SaldoFavorEstado
-  origen?: SaldoFavorOrigen
-  // SCRUM-947 — paginación estándar.
-  page?: number
-  per_page?: number | 'all'
-}
-
-export interface SaldoFavorResult {
-  indicadores: {
-    // Siempre sobre el total real, nunca sobre la página actual (regla ya existente, §3.1).
-    saldo_disponible_total: number
-    clientes_con_saldo: number
-    // Fase 13 (2.2) — el total desglosado por nivel, para no mezclar niveles sin decirlo.
-    saldo_aplicable_cliente?: number
-    saldo_a_cuenta?: number
-    saldo_reservado?: number
-  }
-  rows: SaldoFavorRow[]
-  // SCRUM-947 — mismo shape que expone `Pagination::meta()` en el backend.
-  meta: { total: number; per_page: number; current_page: number; last_page: number }
-}
-
-/** `GET /admin-contab/payments/open-invoices?master_client_id=` — REQ-464 RN1. SCRUM-902 §4.2/4.3
- *  — `abono_obligatorio` no nulo (nivel Factura, o Proyecto ya re-asociado a esta factura) obliga
- *  a mostrar el monto de esta factura ya reducido y BLOQUEADO — nunca editable/opcional. */
+/** `GET /admin-contab/payments/open-invoices?master_client_id=` — REQ-464 RN1. */
 export interface OpenInvoice {
   id: number
   numero: string
   monto: number
   saldo_pendiente: number
-  abono_obligatorio: { abono_id: number; monto: number } | null
-  /** `saldo_pendiente - abono_obligatorio.monto` cuando aplica — ya lo calcula el backend. */
+  /** Lo que queda por cobrar de la factura (igual al saldo pendiente). */
   neto_a_cobrar: number
   /** SCRUM-931 — para el filtro cruzado Proyecto↔Cotización de "Registrar Cobro" (ver
    *  ADR-SCRUM931), resuelto local sobre esta misma lista, sin request nueva. */
@@ -854,7 +695,7 @@ export interface OpenInvoice {
 
 export interface OpenInvoicesResult {
   invoices: OpenInvoice[]
-  /** Lo que un cobro puede aplicar de inmediato (abonos nivel Cliente y notas de crédito). */
+  /** Lo que un cobro puede aplicar de inmediato (notas de crédito con saldo a favor). */
   credit_balance: number
   /** Fase 13 (2.2) — el resto del saldo a favor del cliente: cobros a cuenta, reservado a un proyecto o factura, y el total. */
   credit_balance_cuenta?: number
@@ -944,10 +785,8 @@ export interface PaymentHistorialResult {
 export interface PaymentDetailFactura {
   invoice_id: number
   numero: string | null
-  /** Monto original de la factura, antes de cualquier abono — SCRUM-902 Escenario 5. */
+  /** Monto original de la factura. */
   monto_original: number
-  /** Abono (Factura/Proyecto obligatorio, o Cliente opcional aplicado en este cobro) ya restado. */
-  monto_abono_aplicado: number
   monto_aplicado: number
   /** SCRUM-931 — para enlazar esta factura a su Cotización/Guía de Entrega desde el detalle del
    *  cobro (mismos nombres/semántica que `AccountStatementMovement`, SCRUM-930). `order_id` es el
@@ -1051,9 +890,7 @@ export interface PaymentDetail extends Payment {
   anulado_at?: string | null
   motivo_anulacion?: string | null
   solicitud_anulacion?: { id: number; estado: ReversalRequest['estado']; motivo: string; motivo_rechazo: string | null; created_at: string | null } | null
-  /** SCRUM-1168 F2 — cobro del concepto nuevo. */
-  cobros_v2?: boolean
-  /** SCRUM-1168 F2 — dinero del cobro que NO se aplicó a facturas (saldo a favor del cliente); null en cobros del flujo anterior. */
+  /** SCRUM-1168 F2 — dinero del cobro que NO se aplicó a facturas (saldo a favor del cliente);  */
   saldo_sin_aplicar?: number | null
   /** Solo en la respuesta de confirmar un cobro (SCRUM-1168 F0). */
   ajustes_confirmacion?: ConfirmacionAjustes | null
@@ -1066,10 +903,6 @@ export interface PaymentDetail extends Payment {
   total_facturas: number
   facturas: PaymentDetailFactura[]
   confirmacion: PaymentConfirmation | null
-  /** SCRUM-931 — ids únicos de Abono aplicados en alguna línea de este cobro (el pivote es por
-   *  factura, no hay un solo abono "del cobro") — sin folio de negocio propio, se muestra
-   *  "Abono #{id}". */
-  abonos: number[]
   /** SCRUM-931 — Notas de Crédito asociadas transitivamente vía las facturas de este cobro. */
   notas_credito: PaymentDetailNotaCredito[]
 }
@@ -1118,10 +951,10 @@ export interface AccountStatementFilters {
 }
 
 /** SCRUM-955 §5 — identifica el recibo asociado a una fila del Estado de Cuenta y distingue si es
- *  de Cobro o de Abono (numeración/folio independientes, ver ADR de la migración de `abonos`). */
+ *  un Cobro o una Compensación. */
 export interface AccountStatementMovementRecibo {
-  /** SCRUM-1168 F3 — `compensacion`: cruce de dinero de un abono histórico o de una nota de crédito, con su folio CMP-XXX. */
-  tipo: 'cobro' | 'abono' | 'compensacion'
+  /** SCRUM-1168 F3 — `compensacion`: cruce de dinero de un cobro o de una nota de crédito, con su folio CMP-XXX. */
+  tipo: 'cobro' | 'compensacion'
   id: number
   numero_recibo: string
 }
@@ -2564,16 +2397,16 @@ export interface HomePendientes {
   items: HomePendientesAlert[]
 }
 
-// SCRUM-1168 F3 — Compensaciones: aplicar el dinero disponible de un cliente (cobros a cuenta, abonos históricos, saldo de notas de crédito) a
+// SCRUM-1168 F3 — Compensaciones: aplicar el dinero disponible de un cliente (cobros a cuenta y saldo de notas de crédito) a
 // sus facturas pendientes. Vista aparte, por cliente.
 
 export type CompensacionSigno = 'positivo' | 'negativo' | 'cero'
-export type CompensacionSourceType = 'cobro' | 'abono' | 'nota_credito'
+export type CompensacionSourceType = 'cobro' | 'nota_credito'
 
 export interface CompensacionClienteRow {
   master_client_id: number
   cliente: string
-  /** Dinero disponible sin aplicar (cobros a cuenta + abonos históricos + saldo de notas). */
+  /** Dinero disponible sin aplicar (cobros a cuenta + saldo de notas). */
   saldo_a_favor: number
   /** Facturas pendientes de cobro (lo que debe). */
   pendiente: number
