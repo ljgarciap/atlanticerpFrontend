@@ -135,6 +135,10 @@ export interface PipelineCardDetail extends PipelineCard {
   latest_quote_id:       number | null
   // SCRUM-1128 — el backend ya resolvió: aprobada + sin pedido + usuario con permiso.
   can_pass_to_order?:    boolean
+  /** Fase 16 (5.3) — quien no puede ejecutar el pase puede pedirlo (aprobado, sin pedido, sin solicitud pendiente). */
+  can_request_pass_to_order?: boolean
+  /** Fase 16 (5.3) — solicitud de pase a pedido pendiente, o null. */
+  order_request?: { requested_by: { id: number; name: string } | null; requested_at: string; note: string | null } | null
   /** SCRUM-1115 — folio de esa misma cotización (para ofrecer "Partir de COT-xxxx" al crear una cotización). */
   latest_quote_folio?:   string | null
 }

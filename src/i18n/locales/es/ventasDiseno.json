@@ -66,6 +66,11 @@
   },
   "modal": {
     "passToOrder": {
+      "requestButton": "Solicitar pase a Pedido",
+      "requestNotePlaceholder": "Nota para Gerencia (opcional)",
+      "requestSend": "Enviar solicitud",
+      "requestPending": "Solicitud de pase a Pedido enviada por {{name}} el {{date}}",
+      "requestError": "No se pudo enviar la solicitud.",
       "button": "Pasar a Pedido",
       "confirmMessage": "¿Está seguro de que existe la información necesaria para pasar este proyecto a pedido para entrega en Bodega?",
       "approve": "Aprobar",

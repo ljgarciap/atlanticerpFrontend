@@ -158,6 +158,10 @@ export const ventasDisenoApi = {
     passToOrder: (id: number): Promise<PipelineCardDetail> =>
       api.post<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/pass-to-order`).then(r => r.data),
 
+    // Fase 16 (5.3) — el vendedor pide que Gerencia pase el proyecto a Pedido.
+    requestPassToOrder: (id: number, note?: string): Promise<PipelineCardDetail> =>
+      api.post<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/request-pass-to-order`, note ? { note } : {}).then(r => r.data),
+
     uploadFile: (id: number, type: PipelineFileType, file: File): Promise<PipelineCardFile> => {
       const form = new FormData()
       form.append('type', type)

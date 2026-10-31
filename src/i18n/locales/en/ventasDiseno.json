@@ -66,6 +66,11 @@
   },
   "modal": {
     "passToOrder": {
+      "requestButton": "Request pass to Order",
+      "requestNotePlaceholder": "Note for Management (optional)",
+      "requestSend": "Send request",
+      "requestPending": "Pass-to-Order request sent by {{name}} on {{date}}",
+      "requestError": "Could not send the request.",
       "button": "Move to Order",
       "confirmMessage": "Are you sure the necessary information exists to move this project to an order for delivery from the warehouse?",
       "approve": "Approve",
