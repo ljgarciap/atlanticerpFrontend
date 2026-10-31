@@ -34,9 +34,9 @@ const CORRIENTE: BankAccount = { id: 1, banco: 'Banco Demo A', tipo_cuenta: 'cor
 function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvoicesResult {
   return {
     invoices: [
-      { id: 1, numero: 'F-0001', monto: 100, saldo_pendiente: 100, abono_obligatorio: null, neto_a_cobrar: 100, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
-      { id: 2, numero: 'F-0002', monto: 50, saldo_pendiente: 50, abono_obligatorio: null, neto_a_cobrar: 50, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
-      { id: 3, numero: 'F-0003', monto: 25, saldo_pendiente: 25, abono_obligatorio: null, neto_a_cobrar: 25, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
+      { id: 1, numero: 'F-0001', monto: 100, saldo_pendiente: 100, neto_a_cobrar: 100, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
+      { id: 2, numero: 'F-0002', monto: 50, saldo_pendiente: 50, neto_a_cobrar: 50, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
+      { id: 3, numero: 'F-0003', monto: 25, saldo_pendiente: 25, neto_a_cobrar: 25, sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null },
     ],
     credit_balance: 0,
     master_client_name: null,

@@ -603,8 +603,6 @@
       "facturasAplicadas": "Factura(s) aplicada(s)",
       "cotizaciones": "Cotización(es)",
       "guiasEntrega": "Guía(s) de Entrega",
-      "abonos": "Abono(s)",
-      "abonoNumero": "Abono #{{id}}",
       "notasCredito": "Nota(s) de Crédito",
       "cerrar": "Cerrar",
       "error": "No se pudo cargar el detalle del cobro.",

@@ -53,16 +53,16 @@ function makeDetail(overrides: Partial<PaymentDetail> = {}): PaymentDetail {
     total_facturas: 6200, confirmacion: null,
     facturas: [
       {
-        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_abono_aplicado: 0, monto_aplicado: 4000,
+        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_aplicado: 4000,
         quote_id: null, cotizacion_folio: null, order_id: null, guia_entrega_numero: null, guia_entrega_order_id: null,
       },
       {
-        invoice_id: 2, numero: 'F-0002', monto_original: 2200, monto_abono_aplicado: 0, monto_aplicado: 2200,
+        invoice_id: 2, numero: 'F-0002', monto_original: 2200, monto_aplicado: 2200,
         quote_id: null, cotizacion_folio: null, order_id: null, guia_entrega_numero: null, guia_entrega_order_id: null,
       },
     ],
     // SCRUM-931
-    abonos: [], notas_credito: [],
+    notas_credito: [],
     ...overrides,
   }
 }
@@ -190,7 +190,7 @@ describe('DetalleCobroModal — REQ-473/475 (Batch 7)', () => {
 
   // SCRUM-1168 F2 — un cobro del concepto nuevo puede no aplicarse a ninguna factura: lo que no se aplicó es saldo a favor del cliente.
   it('SCRUM-1168 — un cobro sin facturas lo dice y muestra el saldo a favor sin aplicar', async () => {
-    mockedApi.payments.detail.mockResolvedValue({ ...makeDetail({ estado: 'confirmado' }), facturas: [], cobros_v2: true, saldo_sin_aplicar: 700 })
+    mockedApi.payments.detail.mockResolvedValue({ ...makeDetail({ estado: 'confirmado' }), facturas: [], saldo_sin_aplicar: 700 })
     renderModal()
 
     expect(await screen.findByTestId('cobro-sin-facturas')).toBeInTheDocument()
@@ -302,7 +302,7 @@ describe('DetalleCobroModal — SCRUM-931 Cotización/Guía de Entrega/Abonos/No
   it('factura con order_id/invoice_id es clickeable y abre InvoiceDetailModal con esos ids', async () => {
     mockedApi.payments.detail.mockResolvedValue(makeDetail({
       facturas: [{
-        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_abono_aplicado: 0, monto_aplicado: 4000,
+        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_aplicado: 4000,
         quote_id: null, cotizacion_folio: null, order_id: 55, guia_entrega_numero: null, guia_entrega_order_id: null,
       }],
     }))
@@ -324,11 +324,11 @@ describe('DetalleCobroModal — SCRUM-931 Cotización/Guía de Entrega/Abonos/No
     mockedApi.payments.detail.mockResolvedValue(makeDetail({
       facturas: [
         {
-          invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_abono_aplicado: 0, monto_aplicado: 4000,
+          invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_aplicado: 4000,
           quote_id: 100, cotizacion_folio: 'COT-2026-0100', order_id: 55, guia_entrega_numero: 'PED-0055-G', guia_entrega_order_id: 55,
         },
         {
-          invoice_id: 2, numero: 'F-0002', monto_original: 2200, monto_abono_aplicado: 0, monto_aplicado: 2200,
+          invoice_id: 2, numero: 'F-0002', monto_original: 2200, monto_aplicado: 2200,
           quote_id: 100, cotizacion_folio: 'COT-2026-0100', order_id: 56, guia_entrega_numero: 'PED-0055-G', guia_entrega_order_id: 55,
         },
       ],
@@ -347,7 +347,7 @@ describe('DetalleCobroModal — SCRUM-931 Cotización/Guía de Entrega/Abonos/No
   it('Guía de Entrega clickeable abre GuiaEntregaModal con su order_id (no el de la factura)', async () => {
     mockedApi.payments.detail.mockResolvedValue(makeDetail({
       facturas: [{
-        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_abono_aplicado: 0, monto_aplicado: 4000,
+        invoice_id: 1, numero: 'F-0001', monto_original: 4000, monto_aplicado: 4000,
         quote_id: null, cotizacion_folio: null, order_id: 9, guia_entrega_numero: 'PED-0055-G', guia_entrega_order_id: 55,
       }],
     }))

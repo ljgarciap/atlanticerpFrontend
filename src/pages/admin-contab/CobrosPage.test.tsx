@@ -44,11 +44,11 @@ function makeOpenInvoices(overrides: Partial<OpenInvoicesResult> = {}): OpenInvo
   return {
     invoices: [
       {
-        id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000, abono_obligatorio: null, neto_a_cobrar: 4000,
+        id: 1, numero: 'F-0001', monto: 4000, saldo_pendiente: 4000, neto_a_cobrar: 4000,
         sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
       },
       {
-        id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200, abono_obligatorio: null, neto_a_cobrar: 2200,
+        id: 2, numero: 'F-0002', monto: 2200, saldo_pendiente: 2200, neto_a_cobrar: 2200,
         sales_project_id: null, proyecto: null, quote_id: null, cotizacion_folio: null,
       },
     ],

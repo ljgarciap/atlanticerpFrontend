@@ -197,7 +197,7 @@ describe('CompensacionClienteModal — cruce de un cliente', () => {
     mockedApi.compensaciones.cliente.mockResolvedValue(detalle({
       saldo_a_favor: 120,
       fuentes: [
-        { source_type: 'abono', source_id: 5, etiqueta: 'Abono ABN-005', referencia: null, fecha: '2026-08-01T00:00:00Z', disponible: 40, factura_sugerida_id: null },
+        { source_type: 'cobro', source_id: 5, etiqueta: 'Cobro REC-005', referencia: null, fecha: '2026-08-01T00:00:00Z', disponible: 40, factura_sugerida_id: null },
         { source_type: 'cobro', source_id: 11, etiqueta: 'Cobro REC-011', referencia: null, fecha: '2026-10-17T00:00:00Z', disponible: 80, factura_sugerida_id: null },
       ],
     }))
@@ -208,7 +208,7 @@ describe('CompensacionClienteModal — cruce de un cliente', () => {
     fireEvent.click(screen.getByText('compensaciones.modal.revisar'))
 
     await waitFor(() => expect(mockedApi.compensaciones.preview).toHaveBeenCalledWith(7, [
-      { source_type: 'abono', source_id: 5, invoice_id: 1, monto: 40 },
+      { source_type: 'cobro', source_id: 5, invoice_id: 1, monto: 40 },
       { source_type: 'cobro', source_id: 11, invoice_id: 1, monto: 60 },
     ]))
   })

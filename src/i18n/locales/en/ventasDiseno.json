@@ -71,9 +71,6 @@
       "approve": "Approve",
       "passedBy": "Moved to order by",
       "approvedAt": "Approval date",
-      "abonoQuestion": "Do you want to register the payment for this project?",
-      "abonoRegister": "Register payment",
-      "abonoLater": "Not yet",
       "error": "The project could not be moved to an order.",
       "errorForbidden": "You do not have permission to move this project to an order.",
       "errorNotApproved": "The project must be in Approved status to move to an order."
