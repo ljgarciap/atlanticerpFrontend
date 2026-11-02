@@ -131,7 +131,8 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     expect((await api(request, 'gerencia', 'PATCH', `/users/${ctx.userId}/status`, { is_active: true })).status).toBe(200)
 
     expect((await api(request, 'gerencia', 'POST', `/users/${ctx.userId}/reset-password`, {})).status, 'reiniciar es solo de superadmin').toBe(403)
-    expect((await api(request, 'superadmin', 'POST', `/users/${ctx.userId}/reset-password`, {})).status).toBe(200)
+    // Pasado el tope de reinicios gratuitos por hora (5 por defecto, R3-1) el servidor pide la contraseña del operador: se envía siempre para que el flujo se pueda repetir.
+    expect((await api(request, 'superadmin', 'POST', `/users/${ctx.userId}/reset-password`, { operator_password: process.env.E2E_DEMO_PASSWORD ?? 'superadmin@test.com' })).status).toBe(200)
     expect((await entrar(request, email, clave)).status, 'la clave anterior ya no sirve').toBe(401)
     expect((await entrar(request, email, email)).status, 'tampoco queda el correo como clave (Fase 12c)').toBe(401)
     const enlace = tokenDeActivacion(email)
