@@ -42,16 +42,20 @@ export async function subirArchivo(request: APIRequestContext, tokens: Tokens, r
   return { status: r.status(), body: await r.json().catch(() => null) }
 }
 
-export type VentaCobrada = { masterClient: number; subClient: number; card: number; pedido: number; invoiceId: number; monto: number; clienteNombre: string }
+export type Pedido = { masterClient: number; subClient: number; card: number; pedido: number; pedidoNumero: string; prod: number; bodegaCentral: number; clienteNombre: string; unidades: number }
+export type VentaCobrada = Pedido & { invoiceId: number; monto: number }
 
-/** Roles que la cadena usa: vendedor, gerencia, lidercompras, liderbodega, asistentebodega, auxiliarbodega, transporte, contabilidad, superadmin. */
-export async function crearVentaCobrada(request: APIRequestContext, tokens: Tokens, etiqueta: string): Promise<VentaCobrada> {
+export async function idDeUsuario(request: APIRequestContext, tokens: Tokens, rol: string): Promise<number> {
+  const u = data((await llamar(request, tokens, 'superadmin', 'GET', `/users?search=${rol}`)).body) as { id: number; email: string }[]
+  return u.find(x => x.email === `${rol}@test.com`)!.id
+}
+
+/**
+ * Cliente → cotización → proyecto aprobado → pedido, con existencias suficientes en Bodega Central. Roles: vendedor, gerencia, lidercompras, liderbodega.
+ * `fechaEntrega` (AAAA-MM-DD) es la fecha comprometida del pedido; por defecto, dentro de 20 días.
+ */
+export async function crearPedido(request: APIRequestContext, tokens: Tokens, etiqueta: string, fechaEntrega?: string): Promise<Pedido> {
   const api = (rol: string, method: string, path: string, payload?: unknown) => llamar(request, tokens, rol, method, path, payload)
-  const ids: Record<string, number> = {}
-  for (const rol of ['auxiliarbodega', 'transporte']) {
-    const u = data((await api('superadmin', 'GET', `/users?search=${rol}`)).body) as { id: number; email: string }[]
-    ids[rol] = u.find(x => x.email === `${rol}@test.com`)!.id
-  }
   const clienteNombre = `[FLUJO] Sub ${etiqueta} S.A.`
   const mc = await api('vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${etiqueta}` })
   const sc = await api('vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: mc.body.id, business_name: clienteNombre, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
@@ -66,7 +70,7 @@ export async function crearVentaCobrada(request: APIRequestContext, tokens: Toke
   const parte = await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/parts`, { name: 'Única' })
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/parts/${parte.body.id}/items`, { catalog_product_id: prod, quantity: 2 })).status).toBe(201)
   await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/contacts`, { sub_client_contact_id: ct.body.id })
-  const fecha = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10)
+  const fecha = fechaEntrega ?? new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10)
   const up = await api('vendedor', 'PUT', `/ventas-diseno/quotes/${q.body.id}`, { description: 'Cotización de flujo', delivery_type: 'single', delivery_dates: [fecha], price_type: 'project' })
   expect(up.status, JSON.stringify(up.body).slice(0, 200)).toBe(200)
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/generate`)).status).toBe(200)
@@ -91,7 +95,17 @@ export async function crearVentaCobrada(request: APIRequestContext, tokens: Toke
   }
 
   const lista = (await api('liderbodega', 'GET', `/bodega/orders?per_page=50&search=${encodeURIComponent(`[FLUJO] Proyecto ${etiqueta}`)}`)).body
-  const pedido = (lista.cards as { id: number; order_type: string }[]).find(c => c.order_type === 'pedido')!
+  const pedido = (lista.cards as { id: number; order_type: string; order_number: string }[]).find(c => c.order_type === 'pedido')!
+  return { masterClient: mc.body.id, subClient: sc.body.id, card: card.body.id, pedido: pedido.id, pedidoNumero: pedido.order_number, prod, bodegaCentral: central.warehouse_id, clienteNombre, unidades: 2 }
+}
+
+/** Picking, entrega firmada, factura completa y cobro por transferencia de un pedido ya creado. Roles: asistentebodega, auxiliarbodega, liderbodega, transporte, contabilidad, superadmin. */
+export async function entregarYCobrar(request: APIRequestContext, tokens: Tokens, p: Pedido): Promise<VentaCobrada> {
+  const api = (rol: string, method: string, path: string, payload?: unknown) => llamar(request, tokens, rol, method, path, payload)
+  const ids = { auxiliarbodega: await idDeUsuario(request, tokens, 'auxiliarbodega'), transporte: await idDeUsuario(request, tokens, 'transporte') }
+  const pedido = { id: p.pedido }
+  const central = { warehouse_id: p.bodegaCentral }
+  const mc = { body: { id: p.masterClient } }
   expect((await api('asistentebodega', 'POST', `/bodega/orders/${pedido.id}/assign-picker`, { picker_id: ids.auxiliarbodega })).status).toBe(200)
   expect((await api('auxiliarbodega', 'POST', `/bodega/orders/${pedido.id}/start-picking`)).status).toBe(200)
   const hoja = (await api('auxiliarbodega', 'GET', `/bodega/orders/${pedido.id}/picking-sheet`)).body
@@ -114,5 +128,10 @@ export async function crearVentaCobrada(request: APIRequestContext, tokens: Toke
   expect(intento.status).toBe(201)
   expect((await api('contabilidad', 'PUT', `/admin-contab/payments/${intento.body.id}/confirm`)).status).toBe(200)
 
-  return { masterClient: mc.body.id, subClient: sc.body.id, card: card.body.id, pedido: pedido.id, invoiceId: factura.id, monto, clienteNombre }
+  return { ...p, invoiceId: factura.id, monto }
+}
+
+/** Roles que la cadena usa: vendedor, gerencia, lidercompras, liderbodega, asistentebodega, auxiliarbodega, transporte, contabilidad, superadmin. */
+export async function crearVentaCobrada(request: APIRequestContext, tokens: Tokens, etiqueta: string): Promise<VentaCobrada> {
+  return entregarYCobrar(request, tokens, await crearPedido(request, tokens, etiqueta))
 }
