@@ -57,7 +57,8 @@ test.describe('Flujo de comisiones externas', () => {
   })
 
   const filaDelProyecto = async (request: APIRequestContext) => {
-    const resumen = (await api(request, 'contabilidad', 'GET', '/admin-contab/commissions/external')).body
+    // El resumen pagina de a 20 por nombre y cada corrida suma un arquitecto «[FLUJO]»: se filtra por el propio.
+    const resumen = (await api(request, 'contabilidad', 'GET', `/admin-contab/commissions/external?architect_id=${ctx.arq}`)).body
     const arq = (resumen.arquitectos as { architect_id: number; proyectos: Record<string, any>[] }[]).find(a => a.architect_id === ctx.arq)
     return { resumen, arq, proyecto: arq?.proyectos.find(p => p.pipeline_card_id === ctx.card) }
   }

@@ -52,9 +52,9 @@ export async function idDeUsuario(request: APIRequestContext, tokens: Tokens, ro
 
 /**
  * Cliente → cotización → proyecto aprobado → pedido, con existencias suficientes en Bodega Central. Roles: vendedor, gerencia, lidercompras, liderbodega.
- * `fechaEntrega` (AAAA-MM-DD) es la fecha comprometida del pedido; por defecto, dentro de 20 días.
+ * `fechaEntrega` (AAAA-MM-DD) es la fecha comprometida del pedido; por defecto, dentro de 20 días. `indiceProducto` elige el producto del catálogo.
  */
-export async function crearPedido(request: APIRequestContext, tokens: Tokens, etiqueta: string, fechaEntrega?: string): Promise<Pedido> {
+export async function crearPedido(request: APIRequestContext, tokens: Tokens, etiqueta: string, fechaEntrega?: string, indiceProducto = 0): Promise<Pedido> {
   const api = (rol: string, method: string, path: string, payload?: unknown) => llamar(request, tokens, rol, method, path, payload)
   const clienteNombre = `[FLUJO] Sub ${etiqueta} S.A.`
   const mc = await api('vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${etiqueta}` })
@@ -65,7 +65,7 @@ export async function crearPedido(request: APIRequestContext, tokens: Tokens, et
   expect(card.status).toBe(201)
 
   const prods = data((await api('vendedor', 'GET', '/ventas-diseno/catalog-products?per_page=5')).body) as { id: number }[]
-  const prod = prods[0].id
+  const prod = prods[indiceProducto].id
   const q = await api('vendedor', 'POST', '/ventas-diseno/quotes', { from_pipeline_card_id: card.body.id })
   const parte = await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/parts`, { name: 'Única' })
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/parts/${parte.body.id}/items`, { catalog_product_id: prod, quantity: 2 })).status).toBe(201)
