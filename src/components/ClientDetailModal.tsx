@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { segmentLabel, useClientSegmentOptions } from '@/hooks/useClientSegments'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -13,7 +14,6 @@ import ClientProjectsModal from '@/components/ClientProjectsModal'
 import EditSubClientTaxDataModal from '@/components/EditSubClientTaxDataModal'
 import { usePermission } from '@/hooks/usePermission'
 
-const CATEGORIES: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
 
 interface Props {
   clientId: number
@@ -22,6 +22,11 @@ interface Props {
 
 function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const catalogSegments = useClientSegmentOptions(t)
+  // Un segmento desactivado del que aún hay clientes se sigue mostrando (con su etiqueta), aunque ya no se ofrezca para asignar.
+  const segments = subClient.category && !catalogSegments.some(s => s.key === subClient.category)
+    ? [...catalogSegments, { key: subClient.category, label: segmentLabel(catalogSegments, subClient.category) }]
+    : catalogSegments
   const qc = useQueryClient()
   const navigate = useNavigate()
 
@@ -116,8 +121,8 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
             className="rounded-md border border-slate-300 px-2 py-1 text-xs"
           >
             <option value="">{t('ventasDiseno:category.none')}</option>
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>{t(`ventasDiseno:category.${c}`)}</option>
+            {segments.map(c => (
+              <option key={c.key} value={c.key}>{c.label}</option>
             ))}
           </select>
           <Button

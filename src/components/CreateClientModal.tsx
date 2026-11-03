@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useClientSegmentOptions } from '@/hooks/useClientSegments'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
@@ -13,7 +14,6 @@ import { dvPattern, useFiscalId } from '@/hooks/useFiscalId'
 import { fiscalIdText } from '@/lib/region'
 import ReceptorTipoSelect from '@/components/ReceptorTipoSelect'
 
-const CATEGORIES: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
 const PRICE_TYPES: PriceType[] = ['public', 'project', 'special', 'partner', 'premium']
 
 interface ContactDraft {
@@ -42,6 +42,7 @@ type Props =
 
 export default function CreateClientModal(props: Props) {
   const { t } = useTranslation(['common', 'ventasDiseno'])
+  const segments = useClientSegmentOptions(t)
   const qc = useQueryClient()
   const canSelectPartnerPrice = usePermission('ventas_diseno.select_partner_price')
   // Decisión de Luis (2026-09-30): marcar un Consumidor Final es solo de Gerencia y Contabilidad.
@@ -219,8 +220,8 @@ export default function CreateClientModal(props: Props) {
               </label>
               <select value={category} onChange={e => setCategory(e.target.value as SubClientCategory | '')} className={inputClass}>
                 <option value="">{t('ventasDiseno:category.none')}</option>
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{t(`ventasDiseno:category.${c}`)}</option>
+                {segments.map(c => (
+                  <option key={c.key} value={c.key}>{c.label}</option>
                 ))}
               </select>
             </div>

@@ -231,7 +231,8 @@ export const PIPELINE_STAGES: { id: KnownPipelineStage; color: string }[] = [
 
 // ── Grupo 2 — pantalla Clientes (REQ-063 a REQ-070) ──────────────────────────
 
-export type SubClientCategory = 'a_walkin' | 'b_architect_designer' | 'c_bidding' | 'd_referred'
+/** Fase 18 — clave de un segmento del catálogo `client_segment` (los 4 de sistema más los propios de la empresa). */
+export type SubClientCategory = string
 
 export type PriceType = 'public' | 'project' | 'special' | 'partner' | 'premium'
 

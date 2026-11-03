@@ -1051,7 +1051,7 @@
     "sinRegimen": "Sin régimen",
     "sinProyectos": "Sin proyectos registrados todavía.",
     "vacio": "Sin asociados para este filtro.",
-    "footnote": "Cada asociado y proyecto nace automáticamente cuando un proyecto tipo \"Arquitecto o Diseñador\" llega a Aprobado en Pipeline. La comisión externa no existe como deuda hasta que el cliente paga. Una vez el cliente paga, queda \"Pendiente Cuenta de cobro\" — necesita subir su cuenta de cobro antes de poder marcarse como pagada.",
+    "footnote": "Cada asociado y proyecto nace automáticamente cuando un proyecto con un asociado que origina comisión llega a Aprobado en Pipeline. La comisión externa no existe como deuda hasta que el cliente paga. Una vez el cliente paga, queda \"Pendiente Cuenta de cobro\" — necesita subir su cuenta de cobro antes de poder marcarse como pagada.",
     "detalle": {
       "proyecto": "Proyecto",
       "cliente": "Cliente",

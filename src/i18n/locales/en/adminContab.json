@@ -1047,7 +1047,7 @@
     "sinRegimen": "No regime",
     "sinProyectos": "No projects registered yet.",
     "vacio": "No associates for this filter.",
-    "footnote": "Each associate and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending collection account\" — the architect's collection account must be uploaded before it can be marked paid.",
+    "footnote": "Each associate and project is created automatically once a project with a commissioning associate reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending collection account\" — the associate's collection account must be uploaded before it can be marked paid.",
     "detalle": {
       "cliente": "Client",
       "pedido": "Order #",

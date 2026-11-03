@@ -161,15 +161,11 @@
     }
   },
   "category": {
-    "a_walkin": "A · WalkIn",
-    "b_architect_designer": "B · Architect or Designer",
+    "a_walkin": "A · Walk-in",
+    "b_architect_designer": "B · Prescriber",
     "c_bidding": "C · Bidding",
     "d_referred": "D · Referred",
-    "none": "Not set",
-    "codeA": "A",
-    "codeB": "B",
-    "codeC": "C",
-    "codeD": "D"
+    "none": "Not set"
   },
   "catalog": {
     "pageTitle": "Catalog",
