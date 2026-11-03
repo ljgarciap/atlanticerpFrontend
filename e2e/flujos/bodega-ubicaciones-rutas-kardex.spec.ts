@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { iniciarSesion, llamar, crearPedido, entregarYCobrar, type Tokens, type Pedido } from './apoyo/venta-cobrada'
+import { hoyDeLaEmpresa, iniciarSesion, llamar, crearPedido, entregarYCobrar, type Tokens, type Pedido } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable de Bodega: ubicaciones físicas (CRUD y chip «Espacio libre»), rutas de entrega del día y Kardex (catálogo:
 // atlanticerp-backend/docs/flujos/bodega-ubicaciones-rutas-kardex.md). Por la API real y con la cuenta de cada rol. Las ubicaciones no se
@@ -7,7 +7,7 @@ import { iniciarSesion, llamar, crearPedido, entregarYCobrar, type Tokens, type 
 
 const ROLES = ['vendedor', 'gerencia', 'lidercompras', 'liderbodega', 'asistentebodega', 'auxiliarbodega', 'transporte', 'contabilidad', 'superadmin'] as const
 const STAMP = String(Date.now())
-const HOY = new Date().toISOString().slice(0, 10)
+const HOY = hoyDeLaEmpresa()
 let tokens: Tokens
 let central: number
 let sala: number

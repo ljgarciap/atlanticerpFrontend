@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { API, iniciarSesion, llamar, crearVentaCobrada, type Tokens, type VentaCobrada } from './apoyo/venta-cobrada'
+import { API, hoyDeLaEmpresa, iniciarSesion, llamar, crearVentaCobrada, type Tokens, type VentaCobrada } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable de los Reportes de Admin & Contab (catálogo: atlanticerp-backend/docs/flujos/admin-contab-reportes.md): con una venta
 // propia cobrada por transferencia, cada reporte debe reflejarla (por cliente: medio de pago, mensual y acumulado; globales: libro de facturas,
@@ -7,7 +7,7 @@ import { API, iniciarSesion, llamar, crearVentaCobrada, type Tokens, type VentaC
 
 const ROLES = ['vendedor', 'gerencia', 'gerencia3', 'lidercompras', 'liderbodega', 'asistentebodega', 'auxiliarbodega', 'transporte', 'contabilidad', 'asistenteadministrativa', 'superadmin'] as const
 const STAMP = String(Date.now())
-const HOY = new Date().toISOString().slice(0, 10)
+const HOY = hoyDeLaEmpresa()
 let tokens: Tokens
 let venta: VentaCobrada
 let sinDatos: number
