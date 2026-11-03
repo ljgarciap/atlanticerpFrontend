@@ -14,6 +14,13 @@ export const hoyDeLaEmpresa = (): string => new Intl.DateTimeFormat('en-CA', { t
 
 export type Tokens = Record<string, string>
 
+let secuenciaRuc = 0
+/** Identificación fiscal única por llamada (el tenant no admite dos clientes con la misma, Fase 17a): `155-<marca>-<n>` y DV `12`. */
+export function rucUnico(): { tax_id: string; tax_id_dv: string } {
+  secuenciaRuc += 1
+  return { tax_id: `155-${String(Date.now()).slice(-7)}-${secuenciaRuc}${Math.floor(Math.random() * 90 + 10)}`, tax_id_dv: '12' }
+}
+
 export async function iniciarSesion(request: APIRequestContext, roles: readonly string[]): Promise<Tokens> {
   const tokens: Tokens = {}
   for (const rol of roles) {
@@ -61,7 +68,7 @@ export async function crearPedido(request: APIRequestContext, tokens: Tokens, et
   const api = (rol: string, method: string, path: string, payload?: unknown) => llamar(request, tokens, rol, method, path, payload)
   const clienteNombre = `[FLUJO] Sub ${etiqueta} S.A.`
   const mc = await api('vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${etiqueta}` })
-  const sc = await api('vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: mc.body.id, business_name: clienteNombre, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
+  const sc = await api('vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: mc.body.id, business_name: clienteNombre, ...rucUnico(), receptor_tipo: '01' })
   expect(sc.status).toBe(201)
   const ct = await api('vendedor', 'POST', `/ventas-diseno/sub-clients/${sc.body.id}/contacts`, { name: 'Contacto Flujo', role: 'client', email: 'contacto.flujo@example.test', phone: '6000-0000' })
   const card = await api('vendedor', 'POST', '/ventas-diseno/pipeline', { type: 'design', name: `[FLUJO] Proyecto ${etiqueta}`, sub_client_id: sc.body.id })

@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
-import { API, data, iniciarSesion, llamar, type Tokens } from './apoyo/venta-cobrada'
+import { API, data, iniciarSesion, llamar, rucUnico, type Tokens } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable de Ventas & Diseño fuera de la cadena venta → cobro (catálogo: atlanticerp-backend/docs/flujos/ventas-diseno.md): quién ve qué,
 // clientes y sus contactos, arquitectos y asociados, alcance «Mías / Equipo», catálogo (búsqueda, PDF, ficha técnica), calendario, Inicio, tablero,
@@ -59,7 +59,7 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect(Object.keys(vacio.body.errors)).toEqual(expect.arrayContaining(['name', 'business_name', 'tax_id', 'contacts']))
     expect((await api('tecnico', 'POST', `${VD}/clients`, {})).status, 'sin acceso al módulo').toBe(403)
 
-    const ruc = `155-${STAMP.slice(-6, -3)}-${STAMP.slice(-4)}`
+    const { tax_id: ruc } = rucUnico()
     const alta = await api('vendedor', 'POST', `${VD}/clients`, {
       name: `[F11A] Cliente ${STAMP}`, business_name: `[F11A] Sub ${STAMP} S.A.`, tax_id: ruc, tax_id_dv: '12', receptor_tipo: '01',
       contacts: [{ name: 'Contacto Uno', role: 'client', email: `uno.${STAMP}@example.test` }],
@@ -69,12 +69,21 @@ test.describe('Flujo de Ventas & Diseño', () => {
     ctx.sc = alta.body.sub_clients[0].id
     ctx.contacto = alta.body.sub_clients[0].contacts[0].id
 
-    // El mismo RUC en otro cliente se acepta (no hay control de duplicados) — ver el catálogo.
+    // Una identificación fiscal por tenant: el mismo número, con o sin formato, se rechaza con el cliente existente; con otro DV se acepta.
     const dup = await api('vendedor', 'POST', `${VD}/clients`, {
-      name: `[F11A] Cliente dup ${STAMP}`, business_name: `[F11A] Dup ${STAMP} S.A.`, tax_id: ruc, tax_id_dv: '12', receptor_tipo: '01',
+      name: `[F11A] Cliente dup ${STAMP}`, business_name: `[F11A] Dup ${STAMP} S.A.`, tax_id: ruc.replace(/-/g, ''), tax_id_dv: '12', receptor_tipo: '01',
       contacts: [{ name: 'Contacto Dup', role: 'client', email: `dup.${STAMP}@example.test` }],
     })
-    expect(dup.status, 'el mismo RUC se acepta en otro cliente').toBe(201)
+    expect(dup.status, 'la misma identificación se rechaza aunque cambie el formato').toBe(409)
+    expect(dup.body.code).toBe('duplicate_tax_id')
+    expect(dup.body.existing.sub_client_id).toBe(ctx.sc)
+    expect(dup.body.existing.master_client_id).toBe(ctx.mc)
+    const otroDv = await api('vendedor', 'POST', `${VD}/clients`, {
+      name: `[F11A] Cliente dv ${STAMP}`, business_name: `[F11A] Dv ${STAMP} S.A.`, tax_id: ruc, tax_id_dv: '13', receptor_tipo: '01',
+      contacts: [{ name: 'Contacto Dv', role: 'client', email: `dv.${STAMP}@example.test` }],
+    })
+    expect(otroDv.status, 'otro DV es otra identificación').toBe(201)
+    ctx.scDv = otroDv.body.sub_clients[0].id
 
     const lista = await api('vendedor2', 'GET', `${VD}/clients?search=${encodeURIComponent(`[F11A] Cliente ${STAMP}`)}`)
     expect(lista.status).toBe(200)
@@ -106,6 +115,11 @@ test.describe('Flujo de Ventas & Diseño', () => {
     })
     expect(fiscal.status, JSON.stringify(fiscal.body).slice(0, 200)).toBe(200)
     expect(fiscal.body.business_name).toContain('Editada')
+    const choque = await api('vendedor', 'PATCH', `${VD}/clients/sub-clients/${ctx.scDv}/tax-data`, {
+      business_name: `[F11A] Dv ${STAMP} S.A.`, tax_id: sc.tax_id, tax_id_dv: sc.tax_id_dv, receptor_tipo: '01',
+    })
+    expect(choque.status, 'editar los datos fiscales hacia una identificación ajena también se rechaza').toBe(409)
+    expect(choque.body.existing.sub_client_id).toBe(ctx.sc)
 
     const validar = await api('vendedor', 'POST', `${VD}/clients/validate-tax-id`, { tax_id: sc.tax_id, tax_id_dv: sc.tax_id_dv })
     expect(validar.status).toBe(200)
