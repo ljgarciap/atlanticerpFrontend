@@ -33,6 +33,9 @@ function contactsValid(contacts: ContactDraft[]): boolean {
   return contacts.length > 0 && contacts.every(c => c.name.trim() !== '' && (c.phone.trim() !== '' || c.email.trim() !== ''))
 }
 
+/** Cuerpo del 409 `duplicate_tax_id` de las altas de cliente/subcliente. */
+interface DuplicateTaxId { sub_client_id: number; master_client_id: number; business_name: string }
+
 type Props =
   | { mode: 'client'; initialText?: string; fromQuoteContext?: boolean; onClose: () => void; onCreated: (client: ClientDetail) => void }
   | { mode: 'sub-client'; masterClientId: number; masterClientName: string; initialText?: string; fromQuoteContext?: boolean; onClose: () => void; onCreated: (subClient: SubClientDetail) => void }
@@ -58,6 +61,8 @@ export default function CreateClientModal(props: Props) {
   const [priceType, setPriceType]           = useState<PriceType | ''>('')
   const [contacts, setContacts]             = useState<ContactDraft[]>([emptyContact()])
   const [error, setError]                   = useState<string | null>(null)
+  // Fase 17a — la identificación fiscal ya pertenece a otro cliente (409 duplicate_tax_id): se ofrece usar el existente.
+  const [duplicate, setDuplicate]             = useState<DuplicateTaxId | null>(null)
 
   // SCRUM-1003 — Consumidor Final no manda RUC ni DV.
   const fiscalPayload = () => receptorTipo === '02'
@@ -67,6 +72,24 @@ export default function CreateClientModal(props: Props) {
   const contactsPayload = () => contacts.map(c => ({
     name: c.name, role: c.role, phone: c.phone || null, email: c.email || null,
   }))
+
+  function handleCreateError(err: unknown) {
+    const data = isAxiosError<{ message?: string; code?: string; existing?: DuplicateTaxId }>(err) ? err.response?.data : undefined
+    if (data?.code === 'duplicate_tax_id' && data.existing) setDuplicate(data.existing)
+    setError(data?.message ?? t('ventasDiseno:modal.createError'))
+  }
+
+  const existingMutation = useMutation({
+    mutationFn: (existing: DuplicateTaxId) => ventasDisenoApi.clients.get(existing.master_client_id).then(client => ({ client, existing })),
+    onSuccess: ({ client, existing }) => {
+      if (props.mode === 'client') {
+        props.onCreated(client)
+        return
+      }
+      const sub = client.sub_clients.find(sc => sc.id === existing.sub_client_id)
+      if (sub) props.onCreated(sub)
+    },
+  })
 
   const createClientMutation = useMutation({
     mutationFn: () => ventasDisenoApi.clients.create({
@@ -83,10 +106,7 @@ export default function CreateClientModal(props: Props) {
       qc.invalidateQueries({ queryKey: ['ventas-diseno-clients'] })
       if (props.mode === 'client') props.onCreated(client)
     },
-    onError: (err: unknown) => {
-      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
-      setError(message ?? t('ventasDiseno:modal.createError'))
-    },
+    onError: handleCreateError,
   })
 
   const createSubClientMutation = useMutation({
@@ -103,16 +123,14 @@ export default function CreateClientModal(props: Props) {
       qc.invalidateQueries({ queryKey: ['ventas-diseno-client', props.mode === 'sub-client' ? props.masterClientId : undefined] })
       if (props.mode === 'sub-client') props.onCreated(subClient)
     },
-    onError: (err: unknown) => {
-      const message = isAxiosError<{ message?: string }>(err) ? err.response?.data.message : undefined
-      setError(message ?? t('ventasDiseno:modal.createError'))
-    },
+    onError: handleCreateError,
   })
 
   const isSaving = createClientMutation.isPending || createSubClientMutation.isPending
 
   function handleSave() {
     setError(null)
+    setDuplicate(null)
     if (props.mode === 'client') {
       createClientMutation.mutate()
     } else {
@@ -274,6 +292,14 @@ export default function CreateClientModal(props: Props) {
           <p className="text-[11px] text-slate-400 mb-3">{t('ventasDiseno:clients.createModal.requiredNote')}</p>
 
           {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
+          {duplicate && (props.mode === 'client' || duplicate.master_client_id === props.masterClientId) && (
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+              <span>{t('ventasDiseno:clients.createModal.duplicateTaxId', { name: duplicate.business_name })}</span>
+              <Button variant="secondary" onClick={() => existingMutation.mutate(duplicate)} loading={existingMutation.isPending}>
+                {t('ventasDiseno:clients.createModal.useExisting')}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-100 dark:border-slate-700 shrink-0">

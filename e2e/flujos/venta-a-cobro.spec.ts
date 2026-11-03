@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
+import { rucUnico } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable «venta a cobro» (catálogo: atlanticerp-backend/docs/flujos/cadena-venta-a-cobro.md).
 // Recorre por la API real y con la cuenta de cada rol: cliente → cotización → pipeline y compuertas → pase a pedido → compra y
@@ -77,7 +78,7 @@ test.describe('Flujo venta a cobro', () => {
     const sinRuc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.` })
     expect(sinRuc.status, 'sin RUC o cédula no se crea').toBe(422)
 
-    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
+    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, ...rucUnico(), receptor_tipo: '01' })
     expect(sc.status).toBe(201)
     ctx.sc = sc.body.id
 

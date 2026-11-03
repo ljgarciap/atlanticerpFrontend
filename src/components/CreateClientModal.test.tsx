@@ -1,4 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { AxiosError, type AxiosResponse } from 'axios'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -26,7 +27,7 @@ vi.mock('@/hooks/usePermission', () => ({
 
 vi.mock('@/api/ventasDisenoApi', () => ({
   ventasDisenoApi: {
-    clients: { create: vi.fn(), addSubClient: vi.fn() },
+    clients: { create: vi.fn(), addSubClient: vi.fn(), get: vi.fn() },
   },
 }))
 
@@ -291,5 +292,55 @@ describe('CreateClientModal — modo subcliente', () => {
     expect(screen.getByText('ventasDiseno:clients.createModal.saveSubClient')).not.toBeDisabled()
     fireEvent.change(dvInput, { target: { value: '9' } })
     expect(screen.getByText('ventasDiseno:clients.createModal.saveSubClient')).not.toBeDisabled()
+  })
+})
+
+// Fase 17a — la identificación fiscal ya pertenece a otro cliente del tenant.
+function duplicateTaxIdError(existing: { sub_client_id: number; master_client_id: number; business_name: string }) {
+  const response = { status: 409, data: { code: 'duplicate_tax_id', message: 'Ya existe un cliente con la misma identificación fiscal.', existing } } as AxiosResponse
+  return new AxiosError('Conflict', 'ERR_BAD_REQUEST', undefined, undefined, response)
+}
+
+describe('CreateClientModal — identificación fiscal duplicada (Fase 17a)', () => {
+  it('ante el 409 ofrece usar el cliente existente y lo entrega a onCreated', async () => {
+    const existente: ClientDetail = { id: 9, name: 'Cliente Previo', default_price_type: null, sub_clients: [] }
+    mockedApi.clients.create.mockRejectedValue(duplicateTaxIdError({ sub_client_id: 4, master_client_id: 9, business_name: 'Previo S.A.' }))
+    mockedApi.clients.get.mockResolvedValue(existente)
+    const onCreated = vi.fn()
+    renderClientModal(onCreated)
+
+    const [masterInput, businessInput, , taxIdInput, dvInput] = screen.getAllByRole('textbox')
+    fireEvent.change(masterInput, { target: { value: 'Cliente Nuevo' } })
+    fireEvent.change(businessInput, { target: { value: 'Nuevo S.A.' } })
+    fireEvent.change(taxIdInput, { target: { value: '155-0000-1-2026' } })
+    fireEvent.change(dvInput, { target: { value: '81' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.contactName'), { target: { value: 'Ana Pérez' } })
+    fireEvent.change(screen.getByPlaceholderText('common:labels.phone'), { target: { value: '6000-0000' } })
+    fireEvent.click(screen.getByText('ventasDiseno:clients.createModal.saveClient'))
+
+    expect(await screen.findByText('ventasDiseno:clients.createModal.duplicateTaxId:Previo S.A.')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('ventasDiseno:clients.createModal.useExisting'))
+
+    await waitFor(() => expect(mockedApi.clients.get).toHaveBeenCalledWith(9))
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(existente))
+  })
+
+  it('en modo subcliente no ofrece usarlo si el existente es de otro cliente (solo avisa)', async () => {
+    mockedApi.clients.addSubClient.mockRejectedValue(duplicateTaxIdError({ sub_client_id: 4, master_client_id: 99, business_name: 'Ajeno S.A.' }))
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CreateClientModal mode="sub-client" masterClientId={3} masterClientName="Grupo Delta" onClose={vi.fn()} onCreated={vi.fn()} />
+      </QueryClientProvider>,
+    )
+    const [businessInput, , taxIdInput] = screen.getAllByRole('textbox')
+    fireEvent.change(businessInput, { target: { value: 'Subcliente Adicional' } })
+    fireEvent.change(taxIdInput, { target: { value: '155-1-1' } })
+    fireEvent.change(screen.getByPlaceholderText('ventasDiseno:modal.contactName'), { target: { value: 'Beto Ruiz' } })
+    fireEvent.change(screen.getByPlaceholderText('common:labels.email'), { target: { value: 'beto@example.com' } })
+    fireEvent.click(screen.getByText('ventasDiseno:clients.createModal.saveSubClient'))
+
+    expect(await screen.findByText('Ya existe un cliente con la misma identificación fiscal.')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:clients.createModal.useExisting')).not.toBeInTheDocument()
   })
 })

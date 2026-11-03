@@ -337,6 +337,8 @@
       "priceType": "Tipo de precio",
       "contacts": "Contactos",
       "addAnotherContact": "+ Agregar otro contacto",
+      "duplicateTaxId": "Ya existe el cliente «{{name}}» con esa identificación fiscal.",
+      "useExisting": "Usar el existente",
       "requiredNote": "Estos campos son obligatorios y deben tener al menos un teléfono o correo por contacto. Sin esto no se puede guardar.",
       "saveClient": "Guardar cliente",
       "saveSubClient": "Guardar subcliente",

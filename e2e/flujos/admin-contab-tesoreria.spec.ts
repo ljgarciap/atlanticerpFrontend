@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
+import { rucUnico } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable de Tesorería (catálogo: atlanticerp-backend/docs/flujos/admin-contab-tesoreria.md): una comisión externa pagada SIN cuenta de pago
 // deja una salida de caja «Sin cuenta asignada»; quién la asigna, qué cuentas acepta, cómo afecta el saldo de bancos y qué pasa al desactivar la cuenta.
@@ -74,7 +75,7 @@ test.describe('Flujo de tesorería (movimientos bancarios)', () => {
     ctx.arq = arq.body.id
     const mc = await api(request, 'vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${STAMP}` })
     ctx.mc = mc.body.id
-    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
+    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, ...rucUnico(), receptor_tipo: '01' })
     expect(sc.status).toBe(201)
     ctx.sc = sc.body.id
     const ct = await api(request, 'vendedor', 'POST', `/ventas-diseno/sub-clients/${ctx.sc}/contacts`, { name: 'Contacto Flujo', role: 'client', email: 'contacto.flujo@example.test', phone: '6000-0000' })

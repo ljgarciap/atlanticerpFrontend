@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
+import { rucUnico } from './apoyo/venta-cobrada'
 
 // Flujo ejecutable de Comisiones Externas (catálogo: atlanticerp-backend/docs/flujos/admin-contab-comisiones-externas.md): un proyecto
 // referido por un arquitecto genera comisión solo cuando está TOTALMENTE facturado y cobrado; luego datos fiscales, cuenta de cobro,
@@ -70,7 +71,7 @@ test.describe('Flujo de comisiones externas', () => {
 
     const mc = await api(request, 'vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${STAMP}` })
     ctx.mc = mc.body.id
-    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, tax_id: '155-123-4567', tax_id_dv: '12', receptor_tipo: '01' })
+    const sc = await api(request, 'vendedor', 'POST', '/ventas-diseno/sub-clients', { master_client_id: ctx.mc, business_name: `[FLUJO] Sub ${STAMP} S.A.`, ...rucUnico(), receptor_tipo: '01' })
     expect(sc.status).toBe(201)
     ctx.sc = sc.body.id
     const ct = await api(request, 'vendedor', 'POST', `/ventas-diseno/sub-clients/${ctx.sc}/contacts`, { name: 'Contacto Flujo', role: 'client', email: 'contacto.flujo@example.test', phone: '6000-0000' })
