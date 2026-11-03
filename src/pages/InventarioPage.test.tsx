@@ -1701,6 +1701,69 @@ describe('InventarioPage — Familias (SCRUM-243, rediseño Lote 4 2026-08-17)',
     expect(await screen.findByText('compras:inventory.families.generated count=2')).toBeInTheDocument()
   })
 
+  /** Fase 20b — «Generar compra» lista los productos que no compró y por qué (respuesta 201). */
+  it('muestra los productos omitidos con su motivo al generar la compra (Fase 20b)', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.families.list.mockResolvedValue({
+      restricted: false, can_manage: true,
+      data: [{ id: 1, name: 'Kit Baño', description: null, product_count: 1, total_value: 50 }],
+      meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.families.get.mockResolvedValue({
+      id: 1, name: 'Kit Baño', description: null, restricted: false, can_manage: true, total_value: 50, product_count: 1,
+      products: [makeProduct({ id: 1, reference: 'FAM-A', description: 'Producto A' })],
+    })
+    mockedComprasApi.families.generatePurchase.mockResolvedValue({
+      order_ids: [10],
+      omitidos: [{ product_id: 2, name: 'Grifo', motivo: 'sin_proveedor' }, { product_id: 3, name: 'Tubo', motivo: 'ya_en_camino' }],
+    })
+
+    renderPage()
+    fireEvent.click(screen.getByText('compras:inventory.tabs.families'))
+    await waitFor(() => expect(screen.getByText('Kit Baño')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('compras:inventory.families.generatePurchase'))
+
+    const panel = await screen.findByTestId('family-purchase-omitted')
+    expect(panel.textContent).toContain('compras:inventory.families.omitted count=2')
+    expect(panel.textContent).toContain('Grifo — compras:inventory.families.omittedReason.sin_proveedor')
+    expect(panel.textContent).toContain('Tubo — compras:inventory.families.omittedReason.ya_en_camino')
+  })
+
+  /** Fase 20b — si nada hace falta, el 422 trae el mensaje y el desglose, y la pantalla muestra ambos. */
+  it('muestra el mensaje y el desglose cuando la familia no necesita compra (422)', async () => {
+    mockedComprasApi.inventory.list.mockResolvedValue({
+      fuzzy: false, restricted: false, can_manage: true,
+      kpis: { total_products: 0, with_stock: 0, low_stock: 0, out_of_stock: 0, in_attention: 0, total_value: 0 },
+      data: [], meta: { total: 0, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.families.list.mockResolvedValue({
+      restricted: false, can_manage: true,
+      data: [{ id: 1, name: 'Kit Baño', description: null, product_count: 1, total_value: 50 }],
+      meta: { total: 1, per_page: 20, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.families.get.mockResolvedValue({
+      id: 1, name: 'Kit Baño', description: null, restricted: false, can_manage: true, total_value: 50, product_count: 1,
+      products: [makeProduct({ id: 1, reference: 'FAM-A', description: 'Producto A' })],
+    })
+    mockedComprasApi.families.generatePurchase.mockRejectedValue(Object.assign(new Error('422'), {
+      isAxiosError: true,
+      response: { status: 422, data: { message: 'La familia no necesita compra ahora.', omitidos: [{ product_id: 2, name: 'Grifo', motivo: 'sin_necesidad' }] } },
+    }))
+
+    renderPage()
+    fireEvent.click(screen.getByText('compras:inventory.tabs.families'))
+    await waitFor(() => expect(screen.getByText('Kit Baño')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('compras:inventory.families.generatePurchase'))
+
+    expect(await screen.findByText('La familia no necesita compra ahora.')).toBeInTheDocument()
+    const panel = await screen.findByTestId('family-purchase-omitted')
+    expect(panel.textContent).toContain('Grifo — compras:inventory.families.omittedReason.sin_necesidad')
+  })
+
   it('oculta "Generar compra" y el valor total en modo restringido (RN REQ-180, SCRUM-243)', async () => {
     mockedComprasApi.inventory.list.mockResolvedValue({
       fuzzy: false, restricted: true, can_manage: false,

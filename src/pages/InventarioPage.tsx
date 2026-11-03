@@ -9,7 +9,7 @@ import {
   useConfirmPendingInventory, useUploadInventoryTechnicalSheet, useInventoryTechnicalSheetUrl,
   useUploadInventoryProductPhoto,
 } from '@/hooks/useCompras'
-import { comprasApi } from '@/api/comprasApi'
+import { comprasApi, type FamilyPurchaseOmitted } from '@/api/comprasApi'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -41,6 +41,12 @@ function createProductErrorMessage(err: unknown, fallback: string): string {
   const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
   const firstFieldError = data?.errors ? Object.values(data.errors)[0]?.[0] : undefined
   return firstFieldError ?? data?.message ?? fallback
+}
+
+/** Fase 20b — productos que «Generar compra» omitió, venga la lista en la respuesta 201 o en el cuerpo del 422. */
+function omittedProducts(data: { omitidos?: FamilyPurchaseOmitted[] } | undefined, err: unknown): FamilyPurchaseOmitted[] {
+  if (data?.omitidos) return data.omitidos
+  return isAxiosError<{ omitidos?: FamilyPurchaseOmitted[] }>(err) ? (err.response?.data?.omitidos ?? []) : []
 }
 
 /** SCRUM-1126 — proveedores del producto; cae al único `provider_id`/`provider_name` si el backend no manda `providers`. */
@@ -1622,6 +1628,19 @@ function FamiliesTab({ previewVentas }: { previewVentas: boolean }) {
                       {createProductErrorMessage(generatePurchase.error, t('compras:inventory.families.generateError'))}
                     </p>
                   )}
+                  {isExpanded && (generatePurchase.isSuccess || generatePurchase.isError) && (() => {
+                    const omitted = omittedProducts(generatePurchase.data, generatePurchase.error)
+                    return omitted.length > 0 ? (
+                      <div className="text-xs text-slate-600 px-4 pt-2" data-testid="family-purchase-omitted">
+                        <p className="font-medium">{t('compras:inventory.families.omitted', { count: omitted.length })}</p>
+                        <ul className="list-disc pl-5">
+                          {omitted.map(o => (
+                            <li key={o.product_id}>{o.name} — {t(`compras:inventory.families.omittedReason.${o.motivo}`)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null
+                  })()}
                   {detail && detail.id === f.id ? (
                     <InventoryProductsTable
                       products={detail.products}

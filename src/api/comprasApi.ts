@@ -74,6 +74,13 @@ export interface InventoryListParams {
 }
 
 // SCRUM-183→196 (REQ-120→133) — mismo patrón anidado por sub-recurso que ventasDisenoApi.
+/** Fase 20b — producto que «Generar compra» de una familia no compró, con su motivo. */
+export interface FamilyPurchaseOmitted {
+  product_id: number
+  name: string
+  motivo: 'sin_proveedor' | 'sin_necesidad' | 'ya_en_camino'
+}
+
 export const comprasApi = {
   providers: {
     list: (params: ProviderListParams = {}): Promise<ProviderListResponse> =>
@@ -519,8 +526,9 @@ export const comprasApi = {
       api.post<{ id: number; name: string; description: string | null }>('/compras/families', { name }).then(r => r.data),
 
     // SCRUM-243 (REQ-180) — crea 1 orden "Por aprobar" por proveedor distinto de la familia.
-    generatePurchase: (id: number): Promise<{ order_ids: number[] }> =>
-      api.post<{ order_ids: number[] }>(`/compras/families/${id}/generate-purchase`).then(r => r.data),
+    // Fase 20b — solo compra la necesidad real (reorden − existencias − en camino − por ingresar) y lista lo que omitió.
+    generatePurchase: (id: number): Promise<{ order_ids: number[]; omitidos?: FamilyPurchaseOmitted[] }> =>
+      api.post<{ order_ids: number[]; omitidos?: FamilyPurchaseOmitted[] }>(`/compras/families/${id}/generate-purchase`).then(r => r.data),
   },
 
   // SCRUM-220→230 (REQ-157/159/162→167) — Ingreso de Mercancía.

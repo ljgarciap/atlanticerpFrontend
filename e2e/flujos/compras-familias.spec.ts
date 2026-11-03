@@ -28,7 +28,7 @@ test.describe('Flujo de Compras: familias de producto', () => {
 
   test.afterAll(async () => {
     // devuelve los productos del demo a su familia y punto de reorden originales
-    for (const p of ctx.prods ?? []) await api('lidercompras', 'PUT', `/compras/inventory/${p.id}`, { family_id: p.familiaOriginal ?? null, reorder_point: p.reorden ?? 0 })
+    for (const p of [...(ctx.prods ?? []), ...(ctx.extras ?? [])]) await api('lidercompras', 'PUT', `/compras/inventory/${p.id}`, { family_id: p.familiaOriginal ?? null, reorder_point: p.reorden ?? 0 })
     await req.dispose()
   })
 
@@ -84,7 +84,7 @@ test.describe('Flujo de Compras: familias de producto', () => {
     expect(fila.product_count).toBe(2)
   })
 
-  test('4. generar compra: una orden por proveedor, cantidad hasta el punto de reorden', async () => {
+  test('4. generar compra: solo la necesidad real, una orden por proveedor y lo omitido con su motivo', async () => {
     const url = `/compras/families/${ctx.familia}/generate-purchase`
     const vacia = (await api('lidercompras', 'POST', '/compras/families', { name: `[FLUJO] Vacía ${STAMP}` })).body.id
     const sinProductos = await api('lidercompras', 'POST', `/compras/families/${vacia}/generate-purchase`)
@@ -93,16 +93,27 @@ test.describe('Flujo de Compras: familias de producto', () => {
     expect((await api('lidercompras', 'POST', '/compras/families/99999999/generate-purchase')).status).toBe(404)
     for (const rol of ['vendedor', 'liderbodega', 'contabilidad']) expect((await api(rol, 'POST', url)).status, `${rol} no genera compras`).toBe(403)
 
-    // un producto bajo su punto de reorden (faltan 7) y otro con reorden en 0
+    // dos productos con proveedores distintos a los que les faltan 7 y 4 unidades (sumando lo que ya viene en camino de corridas anteriores),
+    // uno con proveedor y sin necesidad (reorden 0) y uno sin proveedor
+    const fila = async (id: number) => (await api('lidercompras', 'GET', `/compras/inventory/${id}`)).body as { stock_quantity: number; en_camino: number; por_ingresar: number }
     const [a, b] = ctx.prods
-    expect((await api('lidercompras', 'PUT', `/compras/inventory/${a.id}`, { reorder_point: a.stock + 7 })).status).toBe(200)
-    expect((await api('lidercompras', 'PUT', `/compras/inventory/${b.id}`, { reorder_point: 0 })).status).toBe(200)
+    const inv = data((await api('lidercompras', 'GET', '/compras/inventory?per_page=100')).body) as { id: number; provider_id: number | null; reorder_point: number | null; family_id: number | null }[]
+    const ocupados = new Set([a.id, b.id])
+    const c = inv.find(p => p.provider_id && !ocupados.has(p.id))!
+    const d = inv.find(p => !p.provider_id && !ocupados.has(p.id) && p.id !== c.id)!
+    ctx.extras = [c, d].map(p => ({ id: p.id, reorden: p.reorder_point, familiaOriginal: p.family_id }))
+    for (const p of [c, d]) expect((await api('lidercompras', 'PUT', `/compras/inventory/${p.id}`, { family_id: ctx.familia })).status).toBe(200)
+    expect((await api('lidercompras', 'PUT', `/compras/inventory/${c.id}`, { reorder_point: 0 })).status).toBe(200)
+    expect((await api('lidercompras', 'PUT', `/compras/inventory/${d.id}`, { reorder_point: 999999 })).status).toBe(200)
+    for (const [p, falta] of [[a, 7], [b, 4]] as const) {
+      const f = await fila(p.id)
+      expect((await api('lidercompras', 'PUT', `/compras/inventory/${p.id}`, { reorder_point: f.stock_quantity + f.en_camino + f.por_ingresar + falta })).status).toBe(200)
+    }
 
     const generado = await api('lidercompras', 'POST', url)
     expect(generado.status).toBe(201)
     const ids = generado.body.order_ids as number[]
-    expect(ids, 'una orden por proveedor distinto').toHaveLength(2)
-    ctx.ordenes = ids
+    expect(ids, 'una orden por proveedor distinto, solo con los productos que lo necesitan').toHaveLength(2)
 
     const lineas: { catalog_product_id: number; quantity: number }[] = []
     for (const id of ids) {
@@ -111,11 +122,19 @@ test.describe('Flujo de Compras: familias de producto', () => {
       expect(['pendiente_liquidar', 'por_aprobar']).toContain(o.status)
       lineas.push(...o.lines)
     }
-    expect(lineas.find(l => l.catalog_product_id === a.id)!.quantity, 'cantidad = punto de reorden − existencias').toBe(7)
-    expect(lineas.find(l => l.catalog_product_id === b.id)!.quantity, 'sin necesidad real igual pide 1').toBe(1)
+    expect(lineas.map(l => l.catalog_product_id).sort(), 'ni el de reorden 0 ni el sin proveedor entran en una orden').toEqual([a.id, b.id].sort())
+    expect(lineas.find(l => l.catalog_product_id === a.id)!.quantity, 'cantidad = reorden − existencias − en camino').toBe(7)
+    expect(lineas.find(l => l.catalog_product_id === b.id)!.quantity).toBe(4)
+
+    const omitidos = new Map((generado.body.omitidos as { product_id: number; motivo: string }[]).map(o => [o.product_id, o.motivo]))
+    expect(omitidos.get(c.id), 'con proveedor y reorden 0: no necesita compra').toBe('sin_necesidad')
+    expect(omitidos.get(d.id), 'sin proveedor se informa, ya no se omite en silencio').toBe('sin_proveedor')
 
     const otra = await api('lidercompras', 'POST', url)
-    expect(otra.status, 'repetir crea otra orden igual, sin avisar de las pendientes').toBe(201)
-    ctx.ordenes.push(...(otra.body.order_ids as number[]))
+    expect(otra.status, 'repetir no duplica: lo ya pedido está en camino').toBe(422)
+    expect(otra.body.message).toMatch(/no necesita compra ahora/)
+    const repetidos = new Map((otra.body.omitidos as { product_id: number; motivo: string }[]).map(o => [o.product_id, o.motivo]))
+    expect(repetidos.get(a.id)).toBe('ya_en_camino')
+    expect(repetidos.get(b.id)).toBe('ya_en_camino')
   })
 })
