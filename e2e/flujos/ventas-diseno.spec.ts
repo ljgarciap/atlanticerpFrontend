@@ -348,4 +348,26 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect(auditoria.status).toBe(200)
     expect((data(auditoria.body) as { action: string }[]).some(a => a.action === 'ventas_diseno.pipeline_card.created'), 'la creación de la tarjeta quedó auditada').toBe(true)
   })
+
+  test('11. segmentos de cliente: catálogo por empresa, uno propio se asigna y se retira', async () => {
+    const lista = (await api('vendedor', 'GET', '/catalogs/client_segment')).body
+    const claves = (data(lista) as { key: string; label: string }[]).map(e => e.key)
+    expect(claves).toEqual(expect.arrayContaining(['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']))
+    expect((data(lista) as { key: string; label: string }[]).find(e => e.key === 'b_architect_designer')!.label, 'las etiquetas de sistema ya no nombran un oficio').not.toMatch(/arquitecto/i)
+
+    const clave = `flujo_${STAMP}`
+    const alta = await api('superadmin', 'POST', '/admin/catalogs/client_segment', { key: clave, label: `Z · Flujo ${STAMP}` })
+    expect(alta.status).toBe(201)
+    expect((await api('vendedor', 'POST', '/admin/catalogs/client_segment', { key: `x_${STAMP}`, label: 'x' })).status, 'solo el superadmin edita el catálogo').toBe(403)
+
+    expect((await api('vendedor', 'PATCH', `${VD}/clients/sub-clients/${ctx.sc}/category`, { category: clave })).body.category).toBe(clave)
+    expect((await api('vendedor', 'PATCH', `${VD}/clients/sub-clients/${ctx.sc}/category`, { category: 'no_existe' })).status).toBe(422)
+    const filtro = await api('vendedor', 'GET', `${VD}/clients?category[]=${clave}`)
+    expect((data(filtro.body) as { id: number }[]).map(c => c.id), 'el filtro de la lista acepta el segmento propio').toContain(ctx.mc)
+
+    // En uso no se borra; liberado, sí.
+    expect((await api('superadmin', 'DELETE', `/admin/catalogs/client_segment/${alta.body.id}`)).status).toBe(422)
+    expect((await api('vendedor', 'PATCH', `${VD}/clients/sub-clients/${ctx.sc}/category`, { category: null })).status).toBe(200)
+    expect((await api('superadmin', 'DELETE', `/admin/catalogs/client_segment/${alta.body.id}`)).status).toBe(204)
+  })
 })

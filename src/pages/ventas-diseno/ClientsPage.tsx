@@ -11,11 +11,8 @@ import CreateClientModal from '@/components/CreateClientModal'
 import ClientDetailModal from '@/components/ClientDetailModal'
 import ClientProjectsModal from '@/components/ClientProjectsModal'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { segmentInitial, segmentLabel, useClientSegmentOptions } from '@/hooks/useClientSegments'
 
-const CATEGORY_CHIPS: SubClientCategory[] = ['a_walkin', 'b_architect_designer', 'c_bidding', 'd_referred']
-const CATEGORY_CODE: Record<SubClientCategory, string> = {
-  a_walkin: 'codeA', b_architect_designer: 'codeB', c_bidding: 'codeC', d_referred: 'codeD',
-}
 
 // SCRUM-718 (complemento REQ-063) — "Sin contacto +60 días" es una dimensión de filtro
 // distinta a la categoría (A-D), pero los 5 chips son miembros intercambiables del mismo
@@ -28,6 +25,7 @@ type FilterChip = SubClientCategory | typeof STALE_FILTER
 export default function VentasDisenoClientsPage() {
   const { t } = useTranslation(['common', 'ventasDiseno'])
   const navigate = useNavigate()
+  const segments = useClientSegmentOptions(t)
 
   // SCRUM-718 — los 5 chips (A/B/C/D + "sin contacto +60 días") son miembros de un mismo
   // conjunto de filtros activos, combinables entre sí sin restricción (AND lógico). "Todos"
@@ -120,7 +118,7 @@ export default function VentasDisenoClientsPage() {
         >
           {t('ventasDiseno:filters.all')}
         </button>
-        {CATEGORY_CHIPS.map(c => (
+        {segments.map(({ key: c, label }) => (
           <button
             key={c}
             onClick={() => toggleFilter(c)}
@@ -129,7 +127,7 @@ export default function VentasDisenoClientsPage() {
               activeFilters.includes(c) ? 'bg-[#5BA5A0] border-[#5BA5A0] text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50',
             ].join(' ')}
           >
-            {t(`ventasDiseno:category.${c}`)}
+            {label}
           </button>
         ))}
         {/* SCRUM-718 — mismo estilo de "seleccionado" que los chips de categoría (criterio 5:
@@ -179,10 +177,10 @@ export default function VentasDisenoClientsPage() {
                       {row.categories.map(c => (
                         <span
                           key={c}
-                          title={t(`ventasDiseno:category.${c}`)}
+                          title={segmentLabel(segments, c)}
                           className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-[#E3F0EE] text-[#3D7E7A] dark:bg-slate-800 dark:text-[#5BA5A0]"
                         >
-                          {t(`ventasDiseno:category.${CATEGORY_CODE[c]}`)}
+                          {segmentInitial(segmentLabel(segments, c))}
                         </span>
                       ))}
                     </div>

@@ -161,15 +161,11 @@
     }
   },
   "category": {
-    "a_walkin": "A · WalkIn",
-    "b_architect_designer": "B · Arquitecto o Diseñador",
+    "a_walkin": "A · Visita directa",
+    "b_architect_designer": "B · Prescriptor",
     "c_bidding": "C · Licitación",
     "d_referred": "D · Referido",
-    "none": "Sin definir",
-    "codeA": "A",
-    "codeB": "B",
-    "codeC": "C",
-    "codeD": "D"
+    "none": "Sin definir"
   },
   "catalog": {
     "pageTitle": "Catálogo",
