@@ -39,7 +39,7 @@
       "fields": {
         "razonSocial": "Razón social",
         "nombreComercial": "Nombre comercial",
-        "ruc": "RUC",
+        "ruc": "{{fiscalId}}",
         "dv": "DV",
         "direccionFiscal": "Dirección fiscal",
         "regimenTributario": "Régimen tributario",
@@ -342,16 +342,16 @@
       },
       "restanteDespues": "Después de esta factura quedan {{monto}} por facturar del pedido.",
       "receptor": {
-        "titulo": "El RUC del cliente no está validado",
-        "tituloAviso": "RUC sin validar",
+        "titulo": "El {{fiscalId}} del cliente no está validado",
+        "tituloAviso": "{{fiscalId}} sin validar",
         "razonSocial": "Razón social",
-        "ruc": "RUC / Cédula",
+        "ruc": "{{fiscalIdFull}}",
         "dv": "DV",
         "usarDgi": "Usar los datos de la DGI",
         "validarGuardar": "Validar y guardar",
-        "errorGuardar": "No se pudo validar el RUC",
+        "errorGuardar": "No se pudo validar el {{fiscalId}}",
         "edicionBloqueada": "Este cliente ya tiene facturas o notas de crédito certificadas ante la DGI, por eso no se puede corregir desde acá.",
-        "sinPermiso": "Pedí a quien tenga el permiso de corregir datos fiscales que actualice el RUC de este cliente.",
+        "sinPermiso": "Pedí a quien tenga el permiso de corregir datos fiscales que actualice el {{fiscalId}} de este cliente.",
         "tituloNombreDistinto": "La razón social difiere de la de la DGI",
         "nombreEnAtlanticERP": "En AtlanticERP:",
         "nombreEnDgi": "En la DGI:",
@@ -359,7 +359,7 @@
         "consumidorFinal": {
           "facturar": "Facturar como consumidor final",
           "titulo": "Esta factura se emitirá a consumidor final",
-          "detalle": "Sale sin RUC ni DV. El cliente conserva su documento y la decisión queda registrada.",
+          "detalle": "Sale sin {{fiscalId}} ni DV. El cliente conserva su documento y la decisión queda registrada.",
           "quitar": "Facturar con el documento del cliente"
         }
       }
@@ -1071,7 +1071,7 @@
     },
     "detalleModal": {
       "cobroCliente": "Cobro del cliente",
-      "ruc": "RUC",
+      "ruc": "{{fiscalId}}",
       "completar": "Completar",
       "porcentajeComision": "% de comisión",
       "editarPorcentaje": "Editar %",
@@ -1111,7 +1111,7 @@
       "title": "Completar datos fiscales",
       "subtitle": "Aplica a todos los proyectos de este arquitecto, presentes y futuros.",
       "empresaLabel": "Empresa / estudio",
-      "rucLabel": "RUC",
+      "rucLabel": "{{fiscalId}}",
       "regimenLabel": "Régimen fiscal",
       "regimenPlaceholder": "Seleccionar régimen",
       "error": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
@@ -1549,7 +1549,7 @@
       "totalPeriodo": "Total del período",
       "columnas": {
         "fecha": "Fecha",
-        "ruc": "RUC",
+        "ruc": "{{fiscalId}}",
         "cliente": "Cliente",
         "tipo": "Tipo",
         "motivo": "Motivo",
@@ -1718,12 +1718,12 @@
   },
   "clientesFiscal": {
     "title": "Datos fiscales de clientes",
-    "subtitle": "Valida y corrige la razón social, el RUC y el DV con los que se factura electrónicamente a cada subcliente.",
-    "buscar": "Buscar por razón social, RUC o cliente",
+    "subtitle": "Valida y corrige la razón social, el {{fiscalId}} y el DV con los que se factura electrónicamente a cada subcliente.",
+    "buscar": "Buscar por razón social, {{fiscalId}} o cliente",
     "columnas": {
       "razonSocial": "Razón social",
       "cliente": "Cliente",
-      "ruc": "RUC",
+      "ruc": "{{fiscalId}}",
       "dv": "DV",
       "itbms": "{{tax}}"
     },

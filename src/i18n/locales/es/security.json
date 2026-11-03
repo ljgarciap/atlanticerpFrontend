@@ -161,7 +161,7 @@
         "security.levels": "Seguridad — Niveles",
         "settings.global": "Configuración global",
         "superadmin.all":  "Superadmin — Todo",
-        "admin_contab.edit.receptor_fiscal": "Facturación — Corregir RUC y razón social del cliente",
+        "admin_contab.edit.receptor_fiscal": "Facturación — Corregir {{fiscalId}} y razón social del cliente",
         "admin_contab.edit.receptor_consumidor_final": "Facturación — Facturar a Consumidor final"
       }
     },

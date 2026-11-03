@@ -39,7 +39,7 @@
       "fields": {
         "razonSocial": "Legal name",
         "nombreComercial": "Trade name",
-        "ruc": "RUC",
+        "ruc": "{{fiscalId}}",
         "dv": "DV",
         "direccionFiscal": "Fiscal address",
         "regimenTributario": "Tax regime",
@@ -1100,7 +1100,7 @@
       "title": "Complete fiscal data",
       "subtitle": "Applies to all of this architect's projects, present and future.",
       "empresaLabel": "Company / studio",
-      "rucLabel": "Tax ID (RUC)",
+      "rucLabel": "Tax ID ({{fiscalId}})",
       "regimenLabel": "Tax regime",
       "regimenPlaceholder": "Select regime",
       "error": "Could not save. Check the data and try again.",

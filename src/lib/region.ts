@@ -58,3 +58,22 @@ export const DEFAULT_FISCAL_ID: FiscalId = { label: 'RUC', uses_dv: true, dv_max
 export function fiscalIdText(panamaText: string, fiscalId: FiscalId): string {
   return fiscalId.label === DEFAULT_FISCAL_ID.label ? panamaText : fiscalId.label
 }
+
+/**
+ * Fase 17b — la etiqueta de la identificación fiscal en los textos traducidos: `{{fiscalId}}` = «RUC» / «NIT» / «EIN / Tax ID» según el país de la
+ * empresa; `{{fiscalIdFull}}` = el texto largo de un campo («RUC / Cédula» en Panamá, solo la etiqueta en otro país; mismo criterio que `fiscalIdText`).
+ * Se publica desde `user.fiscal_id` (ver `authStore`) y se lee en cada traducción, así que cambia con la sesión. Sin sesión rige Panamá.
+ */
+let fiscalIdLabel = DEFAULT_FISCAL_ID.label
+
+export function setFiscalIdLabel(label: string | null | undefined): void {
+  fiscalIdLabel = label && label.trim() !== '' ? label : DEFAULT_FISCAL_ID.label
+}
+
+export function getFiscalIdLabel(): string {
+  return fiscalIdLabel
+}
+
+export function getFiscalIdFullLabel(): string {
+  return fiscalIdText('RUC / Cédula', { ...DEFAULT_FISCAL_ID, label: fiscalIdLabel })
+}

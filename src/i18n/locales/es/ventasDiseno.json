@@ -107,7 +107,7 @@
     "notEditableApproved": "Solo un usuario con permiso especial puede editar un proyecto ya Aprobado.",
     "createNew": "+ Crear \"{{query}}\"",
     "createError": "No se pudo crear. Revisá los datos e intentá de nuevo.",
-    "subClientTaxId": "RUC",
+    "subClientTaxId": "{{fiscalId}}",
     "subClientTaxIdDv": "DV",
     "reactivate": "Reactivar (mover a Lead)",
     "moveToNext": "Mover a {{stage}}",
@@ -315,7 +315,7 @@
       "newSubClient": "+ Nuevo subcliente",
       "viewProjects": "Ver proyectos",
       "category": "Categoría",
-      "taxId": "RUC",
+      "taxId": "{{fiscalId}}",
       "taxIdDv": "DV",
       "deliveryAddress": "Dirección de entrega",
       "contacts": "Contactos",
@@ -331,7 +331,7 @@
       "masterClient": "Cliente Master",
       "businessName": "Subcliente (Razón Social)",
       "deliveryAddress": "Dirección de entrega",
-      "taxId": "RUC",
+      "taxId": "{{fiscalId}}",
       "taxIdDv": "DV",
       "category": "Categoría",
       "priceType": "Tipo de precio",
@@ -353,7 +353,7 @@
       "empty": "Sin proyectos"
     },
     "taxIdValidation": {
-      "validar": "Validar RUC",
+      "validar": "Validar {{fiscalId}}",
       "validando": "Validando…",
       "validadoHoy": "Validado con la DGI hoy {{hora}} (hora de Panamá)",
       "nombreOficial": "Razón social oficial",
@@ -362,7 +362,7 @@
       "nombreDifiere": "La razón social ingresada es distinta a la oficial.",
       "usarOficiales": "Usar datos oficiales",
       "coincide": "Coincide con lo ingresado.",
-      "noEncontrado": "El RUC/Cédula no figura en la DGI. Revisa el número; puedes guardar igual.",
+      "noEncontrado": "El {{fiscalIdFull}} no figura en la DGI. Revisa el número; puedes guardar igual.",
       "noDisponible": {
         "apagado": "Validación no disponible: la facturación electrónica está apagada.",
         "sinCredenciales": "Validación no disponible: falta configurar las credenciales del proveedor.",
@@ -378,15 +378,15 @@
       "guardar": "Guardar cambios",
       "guardando": "Guardando…",
       "errorGenerico": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
-      "avisoExento": "Este cliente está exento de {{tax}} (documento: {{documento}}). Si cambias su RUC, DV o tipo, Administración debe revisar la exención.",
-      "exencionARevisar": "Se guardaron los cambios. Este cliente sigue marcado como exento de {{tax}}: avisa a Administración para que revise si la exención aplica con el nuevo RUC o tipo.",
+      "avisoExento": "Este cliente está exento de {{tax}} (documento: {{documento}}). Si cambias su {{fiscalId}}, DV o tipo, Administración debe revisar la exención.",
+      "exencionARevisar": "Se guardaron los cambios. Este cliente sigue marcado como exento de {{tax}}: avisa a Administración para que revise si la exención aplica con el nuevo {{fiscalId}} o tipo.",
       "entendido": "Entendido"
     },
     "receptorTipo": {
       "label": "Tipo de cliente ante la DGI",
-      "contribuyente": "Contribuyente (con RUC)",
+      "contribuyente": "Contribuyente (con {{fiscalId}})",
       "consumidorFinal": "Consumidor final",
-      "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin RUC ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
+      "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin {{fiscalId}} ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
       "soloGerenciaContabilidad": "Solo Gerencia y Contabilidad pueden marcar un cliente como Consumidor final."
     }
   },
@@ -461,7 +461,7 @@
     }
   },
   "quote": {
-    "ruc": "RUC / Cédula",
+    "ruc": "{{fiscalIdFull}}",
     "project": "Proyecto",
     "description": "Descripción",
     "designer": "Diseñador a cargo",
@@ -544,7 +544,7 @@
       "field": {
         "masterClient": "Cliente Master: es obligatorio",
         "subClient": "Subcliente: es obligatorio",
-        "ruc": "RUC / Cédula: es obligatorio",
+        "ruc": "{{fiscalIdFull}}: es obligatorio",
         "salesProject": "Proyecto: es obligatorio",
         "description": "Descripción: es obligatoria",
         "deliveryDates": "Fecha de entrega: es obligatoria (o elige \"Por definir\")",

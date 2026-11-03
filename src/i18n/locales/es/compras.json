@@ -129,7 +129,7 @@
     },
     "fields": {
       "name": "Nombre",
-      "taxId": "RUC / Identificación fiscal",
+      "taxId": "{{fiscalId}} / Identificación fiscal",
       "taxIdDv": "DV",
       "category": "Categoría",
       "currency": "Moneda",
