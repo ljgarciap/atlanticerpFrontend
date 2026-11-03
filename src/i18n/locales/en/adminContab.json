@@ -96,7 +96,7 @@
     "retencion": {
       "title": "Provider withholdings",
       "toggleLabel": "Automatic withholding for professional service providers (3.5%)",
-      "helpNote": "Different from the external architect commission withholding (External Commissions) — applies only to Purchasing provider payments."
+      "helpNote": "Different from the external associate commission withholding (External Commissions) — applies only to Purchasing provider payments."
     }
   },
   "empresa": {
@@ -1013,7 +1013,7 @@
   },
   "comisionesExternas": {
     "title": "External Commissions",
-    "subtitle": "10% commission on architect-referred projects, fed automatically from Sales & Design",
+    "subtitle": "10% commission on associate-referred projects, fed automatically from Sales & Design",
     "stats": {
       "comisionGenerada": "Commission generated",
       "comisionGeneradaSub": "clients who already paid",
@@ -1027,15 +1027,15 @@
       "aunNoGeneradaSub": "referred clients who haven't paid"
     },
     "filtros": {
-      "buscarPlaceholder": "Search architect, client or project",
+      "buscarPlaceholder": "Search associate, client or project",
       "todosMeses": "All months",
-      "todosArquitectos": "All architects",
+      "todosArquitectos": "All associates",
       "todosEstados": "All statuses",
       "limpiar": "Clear filters"
     },
-    "resultCount": "Showing {{count}} architect(s)",
+    "resultCount": "Showing {{count}} associate(s)",
     "columnas": {
-      "arquitecto": "Architect",
+      "arquitecto": "Associate",
       "empresa": "Company",
       "generada": "Generated",
       "pagada": "Paid",
@@ -1046,8 +1046,8 @@
     "proyectosReferidos": "{{count}} referred project(s)",
     "sinRegimen": "No regime",
     "sinProyectos": "No projects registered yet.",
-    "vacio": "No architects for this filter.",
-    "footnote": "Each architect and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending collection account\" — the architect's collection account must be uploaded before it can be marked paid.",
+    "vacio": "No associates for this filter.",
+    "footnote": "Each associate and project is created automatically once an \"Architect or Designer\" project reaches Approved in Pipeline. The external commission doesn't exist as a debt until the client pays. Once the client pays, it becomes \"Pending collection account\" — the architect's collection account must be uploaded before it can be marked paid.",
     "detalle": {
       "cliente": "Client",
       "pedido": "Order #",
@@ -1075,14 +1075,14 @@
       "propuestaPendiente": "{{porcentaje}}% proposal pending the configured approver's approval — {{motivo}}",
       "aprobar": "Approve",
       "rechazar": "Reject",
-      "faltanDatosFiscales": "The architect's fiscal data is missing to calculate tax and total.",
+      "faltanDatosFiscales": "The associate's fiscal data is missing to calculate tax and total.",
       "cuentaPago": "Payment account",
       "comprobanteRetencion": "Withholding receipt",
       "recordar": "Remind",
       "marcarPagado": "Gerencia as paid",
       "confirmarPago": "Confirm marking this commission as paid for {{monto}}?",
       "bloqueoPorcentajePendiente": "There's a % change pending the configured approver's approval — resolve it first.",
-      "bloqueoDatosFiscales": "The architect's fiscal data is missing.",
+      "bloqueoDatosFiscales": "The associate's fiscal data is missing.",
       "bloqueoCuentaCobro": "The invoice / receipt hasn't been uploaded yet.",
       "bloqueoComprobanteRetencion": "The withholding receipt hasn't been uploaded yet."
     },
@@ -1098,7 +1098,7 @@
     },
     "datosFiscales": {
       "title": "Complete fiscal data",
-      "subtitle": "Applies to all of this architect's projects, present and future.",
+      "subtitle": "Applies to all of this associate's projects, present and future.",
       "empresaLabel": "Company / studio",
       "rucLabel": "Tax ID ({{fiscalId}})",
       "regimenLabel": "Tax regime",

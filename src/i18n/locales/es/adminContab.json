@@ -96,7 +96,7 @@
     "retencion": {
       "title": "Retenciones a proveedores",
       "toggleLabel": "Retención automática a proveedores de servicios profesionales (3.5%)",
-      "helpNote": "Distinto a la retención de comisión de arquitectos externos (Comisiones Externas) — aplica solo a pagos a proveedores en Compras."
+      "helpNote": "Distinto a la retención de comisión de asociados externos (Comisiones Externas) — aplica solo a pagos a proveedores en Compras."
     }
   },
   "empresa": {
@@ -1017,7 +1017,7 @@
   },
   "comisionesExternas": {
     "title": "Comisiones Externas",
-    "subtitle": "Comisión de 10% por proyectos referidos por arquitectos, alimentada automáticamente desde Ventas & Diseño",
+    "subtitle": "Comisión de 10% por proyectos referidos por asociados, alimentada automáticamente desde Ventas & Diseño",
     "stats": {
       "comisionGenerada": "Comisión generada",
       "comisionGeneradaSub": "clientes que ya pagaron",
@@ -1031,15 +1031,15 @@
       "aunNoGeneradaSub": "clientes referidos que no han pagado"
     },
     "filtros": {
-      "buscarPlaceholder": "Buscar arquitecto, cliente o proyecto",
+      "buscarPlaceholder": "Buscar asociado, cliente o proyecto",
       "todosMeses": "Todos los meses",
-      "todosArquitectos": "Todos los arquitectos",
+      "todosArquitectos": "Todos los asociados",
       "todosEstados": "Todos los estados",
       "limpiar": "Limpiar filtros"
     },
-    "resultCount": "Mostrando {{count}} arquitecto(s)",
+    "resultCount": "Mostrando {{count}} asociado(s)",
     "columnas": {
-      "arquitecto": "Arquitecto",
+      "arquitecto": "Asociado",
       "empresa": "Empresa",
       "generada": "Generada",
       "pagada": "Pagada",
@@ -1050,8 +1050,8 @@
     "proyectosReferidos": "{{count}} proyecto(s) referido(s)",
     "sinRegimen": "Sin régimen",
     "sinProyectos": "Sin proyectos registrados todavía.",
-    "vacio": "Sin arquitectos para este filtro.",
-    "footnote": "Cada arquitecto y proyecto nace automáticamente cuando un proyecto tipo \"Arquitecto o Diseñador\" llega a Aprobado en Pipeline. La comisión externa no existe como deuda hasta que el cliente paga. Una vez el cliente paga, queda \"Pendiente Cuenta de cobro\" — necesita subir su cuenta de cobro antes de poder marcarse como pagada.",
+    "vacio": "Sin asociados para este filtro.",
+    "footnote": "Cada asociado y proyecto nace automáticamente cuando un proyecto tipo \"Arquitecto o Diseñador\" llega a Aprobado en Pipeline. La comisión externa no existe como deuda hasta que el cliente paga. Una vez el cliente paga, queda \"Pendiente Cuenta de cobro\" — necesita subir su cuenta de cobro antes de poder marcarse como pagada.",
     "detalle": {
       "proyecto": "Proyecto",
       "cliente": "Cliente",
@@ -1081,14 +1081,14 @@
       "propuestaPendiente": "Propuesta de {{porcentaje}}% pendiente de aprobación del aprobador configurado — {{motivo}}",
       "aprobar": "Aprobar",
       "rechazar": "Rechazar",
-      "faltanDatosFiscales": "Faltan datos fiscales del arquitecto para calcular impuesto y total.",
+      "faltanDatosFiscales": "Faltan datos fiscales del asociado para calcular impuesto y total.",
       "cuentaPago": "Cuenta de pago",
       "comprobanteRetencion": "Comprobante de retención",
       "recordar": "Recordar",
       "marcarPagado": "Marcar como pagado",
       "confirmarPago": "¿Confirmás marcar esta comisión como pagada por {{monto}}?",
       "bloqueoPorcentajePendiente": "Hay un cambio de % pendiente de aprobación del aprobador configurado — resolvelo primero.",
-      "bloqueoDatosFiscales": "Faltan los datos fiscales del arquitecto.",
+      "bloqueoDatosFiscales": "Faltan los datos fiscales del asociado.",
       "bloqueoCuentaCobro": "Falta subir la cuenta de cobro.",
       "bloqueoComprobanteRetencion": "Falta subir el comprobante de retención."
     },
@@ -1109,7 +1109,7 @@
     },
     "datosFiscales": {
       "title": "Completar datos fiscales",
-      "subtitle": "Aplica a todos los proyectos de este arquitecto, presentes y futuros.",
+      "subtitle": "Aplica a todos los proyectos de este asociado, presentes y futuros.",
       "empresaLabel": "Empresa / estudio",
       "rucLabel": "{{fiscalId}}",
       "regimenLabel": "Régimen fiscal",
