@@ -175,7 +175,7 @@ test.describe('Flujo de Servicios: técnicos, herramientas e insumos', () => {
     expect((await api(request, 'liderservicios', 'POST', '/internal-technicians', { ...ficha, nombre: '' })).status).toBe(422)
     const alta = await api(request, 'liderservicios', 'POST', '/internal-technicians', ficha)
     expect(alta.status, JSON.stringify(alta.body).slice(0, 160)).toBe(201)
-    expect(alta.body.estado).toBe('available')
+    expect(['available', 'off'], 'el estado inicial depende de la hora: fuera de jornada es «off»').toContain(alta.body.estado)
     const id = alta.body.id as number
 
     // La edición es un PUT completo: lo que no se reenvía se pierde.

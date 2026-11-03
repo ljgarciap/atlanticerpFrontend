@@ -9,6 +9,9 @@ export const API = `${BASE}/api`
 export type Res = { status: number; body: any }
 export const data = (b: any) => (b && typeof b === 'object' && 'data' in b ? b.data : b)
 
+/** Fecha de hoy (AAAA-MM-DD) en la zona de la empresa, no en UTC: pasadas las 19:00 en Panamá la fecha UTC ya es la de mañana. `E2E_TZ` la cambia. */
+export const hoyDeLaEmpresa = (): string => new Intl.DateTimeFormat('en-CA', { timeZone: process.env.E2E_TZ ?? 'America/Panama' }).format(new Date())
+
 export type Tokens = Record<string, string>
 
 export async function iniciarSesion(request: APIRequestContext, roles: readonly string[]): Promise<Tokens> {
