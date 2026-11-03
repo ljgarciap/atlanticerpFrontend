@@ -4,7 +4,7 @@
     "home": "Inicio",
     "pipeline": "Pipeline",
     "clients": "Clientes",
-    "architects": "Arquitectos",
+    "architects": "Asociados",
     "quote": "Cotización",
     "quotesList": "Cotizaciones",
     "pedidos": "Pedidos",
@@ -54,7 +54,7 @@
   },
   "contactRole": {
     "client": "Cliente",
-    "architect": "Arquitecto",
+    "architect": "Asociado",
     "other": "Otro"
   },
   "fileType": {
@@ -102,7 +102,7 @@
     "contacts": "Contactos",
     "noContacts": "Sin contactos registrados",
     "contactName": "Nombre",
-    "missingArchitect": "Falta contacto Arquitecto",
+    "missingArchitect": "Falta contacto del asociado",
     "notEditableLost": "Este proyecto está en Perdido — no es editable. Usa Reactivar (mover a Lead) desde el tablero.",
     "notEditableApproved": "Solo un usuario con permiso especial puede editar un proyecto ya Aprobado.",
     "createNew": "+ Crear \"{{query}}\"",
@@ -391,17 +391,17 @@
     }
   },
   "architects": {
-    "title": "Arquitectos",
-    "subtitle": "{{count}} arquitectos",
+    "title": "Asociados",
+    "subtitle": "{{count}} asociados",
     "table": {
       "name": "Nombre",
       "phone": "Teléfono",
       "email": "Correo",
       "view": "Ver",
-      "empty": "Sin arquitectos"
+      "empty": "Sin asociados"
     },
     "detail": {
-      "title": "Detalle del arquitecto",
+      "title": "Detalle del asociado",
       "name": "Nombre",
       "phone": "Teléfono",
       "email": "Correo",
@@ -465,8 +465,8 @@
     "project": "Proyecto",
     "description": "Descripción",
     "designer": "Diseñador a cargo",
-    "architect": "Arquitecto",
-    "architectHint": "(incluir arquitecto si va a comisionar)",
+    "architect": "Asociado",
+    "architectHint": "(incluir asociado si va a comisionar)",
     "addExistingContact": "Agregar contacto existente",
     "addNewContact": "+ Agregar contacto nuevo",
     "saveBeforeContacts": "Guarda la cotización antes de agregar contactos — el Subcliente todavía no está guardado.",
@@ -757,7 +757,7 @@
       "go": "Ir",
       "text": {
         "no_contact": "{{client}} sin contactar hace {{days}} días",
-        "missing_architect": "Falta contacto Arquitecto — {{client}}"
+        "missing_architect": "Falta contacto del asociado — {{client}}"
       }
     },
     "finalStage": {
@@ -806,7 +806,7 @@
       "quote": "Cotización",
       "quote_part": "Partida",
       "quote_item": "Ítem",
-      "architect": "Arquitecto"
+      "architect": "Asociado"
     },
     "pagination": {
       "page": "Página {{current}} de {{last}}",

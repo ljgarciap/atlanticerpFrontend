@@ -4,7 +4,7 @@
     "home": "Home",
     "pipeline": "Pipeline",
     "clients": "Clients",
-    "architects": "Architects",
+    "architects": "Associates",
     "quote": "Quote",
     "quotesList": "Quotes",
     "pedidos": "Orders",
@@ -54,7 +54,7 @@
   },
   "contactRole": {
     "client": "Client",
-    "architect": "Architect",
+    "architect": "Associate",
     "other": "Other"
   },
   "fileType": {
@@ -102,7 +102,7 @@
     "contacts": "Contacts",
     "noContacts": "No contacts registered",
     "contactName": "Name",
-    "missingArchitect": "Missing Architect contact",
+    "missingArchitect": "Missing associate contact",
     "notEditableLost": "This project is Lost — not editable. Use Reactivate (move to Lead) from the board.",
     "notEditableApproved": "Only a user with special permission can edit an already Approved project.",
     "createNew": "+ Create \"{{query}}\"",
@@ -391,17 +391,17 @@
     }
   },
   "architects": {
-    "title": "Architects",
-    "subtitle": "{{count}} architects",
+    "title": "Associates",
+    "subtitle": "{{count}} associates",
     "table": {
       "name": "Name",
       "phone": "Phone",
       "email": "Email",
       "view": "View",
-      "empty": "No architects"
+      "empty": "No associates"
     },
     "detail": {
-      "title": "Architect detail",
+      "title": "Associate detail",
       "name": "Name",
       "phone": "Phone",
       "email": "Email",
@@ -464,8 +464,8 @@
     "project": "Project",
     "description": "Description",
     "designer": "Designer in charge",
-    "architect": "Architect",
-    "architectHint": "(include architect if they will earn commission)",
+    "architect": "Associate",
+    "architectHint": "(include associate if they will earn commission)",
     "addExistingContact": "Add existing contact",
     "addNewContact": "+ Add new contact",
     "saveBeforeContacts": "Save the quote before adding contacts — the Sub Client hasn't been saved yet.",
@@ -755,7 +755,7 @@
       "go": "Go",
       "text": {
         "no_contact": "{{client}} not contacted for {{days}} days",
-        "missing_architect": "Missing Architect contact — {{client}}"
+        "missing_architect": "Missing associate contact — {{client}}"
       }
     },
     "finalStage": {
@@ -804,7 +804,7 @@
       "quote": "Quote",
       "quote_part": "Part",
       "quote_item": "Item",
-      "architect": "Architect"
+      "architect": "Associate"
     },
     "pagination": {
       "page": "Page {{current}} of {{last}}",
