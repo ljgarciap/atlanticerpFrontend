@@ -36,17 +36,18 @@ test.describe('Flujo del CRM', () => {
     await req.dispose()
   })
 
-  test('1. matriz de acceso: quién entra a cada pantalla del CRM', async () => {
+  test('1. matriz de acceso: solo los roles con el módulo CRM entran', async () => {
     // [ruta, vendedor, gerencia, contabilidad, lidercompras, tecnico, superadmin]
+    // Fase 19: el CRM es un módulo propio; solo lo ven los roles con `crm.view` (Vendedor y Gerencia, copiado de Ventas & Diseño) y el superadmin.
     const matriz: [string, ...number[]][] = [
-      ['/projects', 200, 200, 200, 200, 200, 200],
-      ['/contacts', 200, 200, 200, 200, 200, 200],
-      ['/dashboard/kpis', 200, 200, 200, 200, 200, 200],
-      ['/dashboard/reminders', 200, 200, 200, 200, 200, 200],
-      ['/reports/monthly', 200, 200, 200, 403, 200, 200],
-      ['/reports/team', 403, 200, 200, 403, 403, 200],
+      ['/projects', 200, 200, 403, 403, 403, 200],
+      ['/contacts', 200, 200, 403, 403, 403, 200],
+      ['/dashboard/kpis', 200, 200, 403, 403, 403, 200],
+      ['/dashboard/reminders', 200, 200, 403, 403, 403, 200],
+      ['/reports/monthly', 200, 200, 403, 403, 403, 200],
+      ['/reports/team', 403, 200, 403, 403, 403, 200],
       ['/settings', 403, 403, 403, 403, 403, 200],
-      ['/directory?type=encargado', 200, 200, 200, 200, 200, 200],
+      ['/directory?type=encargado', 200, 200, 403, 403, 403, 200],
     ]
     const orden = ['vendedor', 'gerencia', 'contabilidad', 'lidercompras', 'tecnico', 'superadmin'] as const
     for (const [ruta, ...esperados] of matriz) {
@@ -78,7 +79,8 @@ test.describe('Flujo del CRM', () => {
     expect((await api('vendedor', 'GET', `${CRM}/projects/${ctx.p}`)).status).toBe(200)
     expect((await api('vendedor2', 'GET', `${CRM}/projects/${ctx.p}`)).status, 'otro vendedor no').toBe(403)
     expect((await api('tecnico', 'GET', `${CRM}/projects/${ctx.p}`)).status).toBe(403)
-    expect((await api('contabilidad', 'GET', `${CRM}/projects/${ctx.p}`)).status, 'Contabilidad ve al equipo').toBe(200)
+    expect((await api('contabilidad', 'GET', `${CRM}/projects/${ctx.p}`)).status, 'Contabilidad no tiene el módulo CRM').toBe(403)
+    expect((await api('tecnico', 'POST', `${CRM}/projects`, { nombre: '[F11CRM] tec', tipo: 'diseno' })).status, 'ni el Técnico crea proyectos (sin módulo)').toBe(403)
 
     const mios = (data((await api('vendedor', 'GET', `${CRM}/projects?search=${encodeURIComponent(`F11CRM] Asignado ${STAMP}`)}`)).body) as { id: number }[]).map(p => p.id)
     expect(mios).toEqual([ctx.p])
@@ -119,7 +121,7 @@ test.describe('Flujo del CRM', () => {
     expect((await api('vendedor', 'DELETE', `${rem}/99999999`)).status).toBe(404)
   })
 
-  test('5. contactos: directorio global compartido por todos, sin dueño', async () => {
+  test('5. contactos: directorio global compartido por quienes tienen el CRM, sin dueño', async () => {
     expect((await api('vendedor', 'POST', `${CRM}/contacts`, {})).status).toBe(422)
     expect((await api('vendedor', 'GET', `${CRM}/contacts?type=zzz`)).status).toBe(422)
     const c = await api('vendedor', 'POST', `${CRM}/contacts`, { nombre: `[F11CRM] Contacto ${STAMP}`, tipo: 'encargado', email: `c.${STAMP}@example.test`, empresa: 'Empresa' })
@@ -129,8 +131,9 @@ test.describe('Flujo del CRM', () => {
     for (const rol of ['vendedor', 'vendedor2', 'gerencia'] as const) {
       expect(((await api(rol, 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.entries as unknown[]).length, `${rol} lo ve`).toBe(1)
     }
-    // Cualquier rol con `crm.delete` (hoy también el Técnico) borra cualquier contacto, sea o no suyo.
-    expect((await api('tecnico', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'un contacto lo borra otro rol, incluido uno sin módulo CRM').toBe(204)
+    // Sin el módulo CRM no se borra (el Técnico traía `crm.delete` en su nivel); con él, cualquier usuario del CRM borra cualquier contacto, sea o no suyo.
+    expect((await api('tecnico', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'un rol sin módulo CRM no borra contactos').toBe(403)
+    expect((await api('vendedor2', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'otro vendedor sí borra el contacto de otro').toBe(204)
     expect((await api('vendedor', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status).toBe(404)
   })
 
