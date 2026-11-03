@@ -117,6 +117,8 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const clearQuoteDirty = useUnsavedQuoteGuard(s => s.setDirty)
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const canSeeAuditLog = usePermission('ventas_diseno.audit')
+  // Fase 19 — el CRM es un módulo propio: sus dos pantallas (Dashboard y Lista de Proyectos) solo se ofrecen con `crm.view`.
+  const canSeeCrm = usePermission('crm.view')
   // SCRUM-711 — Seguridad se mueve del tab superior a Configuración > Seguridad.
   // SCRUM-739 (UAT-2) — 'configuracion'/'root' es el ítem sintético que usa la
   // máscara global de rollout para este menú (no es parte de ModuleCatalog, así
@@ -555,11 +557,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
       ? [{
           section: tCrm('nav.module'),
           items: [
-            ...(isGerencia
+            ...(isGerencia && canSeeCrm
               ? [{ id: 'crm-dashboard', label: tCrm('nav.dashboard'), href: '/crm/dashboard', icon: <IcoBarChart /> }]
               : []),
             { id: 'crm-pipeline',  label: tVentasDiseno('nav.pipeline'), href: '/ventas-diseno/pipeline', icon: <IcoPipeline /> },
-            { id: 'crm-projects',  label: tCrm('nav.projectList'),      href: '/crm/projects',           icon: <IcoList /> },
+            ...(canSeeCrm ? [{ id: 'crm-projects',  label: tCrm('nav.projectList'),      href: '/crm/projects',           icon: <IcoList /> }] : []),
             { id: 'crm-clients',   label: tVentasDiseno('nav.clients'),  href: '/ventas-diseno/clients',  icon: <IcoUsers /> },
             // SCRUM-907 — directorio de arquitectos, justo debajo de Clientes (RN del ticket).
             { id: 'crm-architects', label: tVentasDiseno('nav.architects'), href: '/ventas-diseno/architects', icon: <IcoUserCheck /> },

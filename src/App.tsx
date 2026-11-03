@@ -160,16 +160,21 @@ export default function App() {
                 que va a rebotar — cae a Pipeline, la primera pantalla de CRM a la que todos con
                 acceso a CRM sí llegan. */}
             <Route path="/crm" element={<Navigate to="/ventas-diseno/pipeline" replace />} />
+            {/* Fase 19 — el CRM es un módulo propio: sus pantallas exigen `crm.view` (visibilidad del módulo `crm` por rol), además del permiso que ya tenían. */}
             <Route path="/crm/dashboard" element={
-              <RequirePermission permission="ventas_diseno.read">
-                <RequirePermission permission={GUARD.GERENCIA_O_ALCANCE}>
-                  <CrmDashboardPage />
+              <RequirePermission permission="crm.view">
+                <RequirePermission permission="ventas_diseno.read">
+                  <RequirePermission permission={GUARD.GERENCIA_O_ALCANCE}>
+                    <CrmDashboardPage />
+                  </RequirePermission>
                 </RequirePermission>
               </RequirePermission>
             } />
             <Route path="/crm/projects" element={
-              <RequirePermission permission="ventas_diseno.read">
-                <CrmProjectsListPage />
+              <RequirePermission permission="crm.view">
+                <RequirePermission permission="ventas_diseno.read">
+                  <CrmProjectsListPage />
+                </RequirePermission>
               </RequirePermission>
             } />
 
