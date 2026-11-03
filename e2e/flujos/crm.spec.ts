@@ -55,7 +55,7 @@ test.describe('Flujo del CRM', () => {
     expect((await api('vendedor', 'GET', `${CRM}/directory`)).status, 'el directorio exige el tipo').toBe(422)
   })
 
-  test('2. proyecto: alta, validaciones y quién lo ve (el acceso es por asignación, no por autoría)', async () => {
+  test('2. proyecto: alta, validaciones y quién lo ve (el acceso es por asignación; el creador queda asignado)', async () => {
     expect((await api('vendedor', 'POST', `${CRM}/projects`, { nombre: 'x', tipo: 'zzz' })).status).toBe(422)
     expect((await api('vendedor', 'POST', `${CRM}/projects`, { tipo: 'diseno' })).status, 'el nombre es obligatorio').toBe(422)
 
@@ -64,9 +64,12 @@ test.describe('Flujo del CRM', () => {
     ctx.proyectos.push(sin.body.id)
     expect(sin.body.etapa, 'nace en Lead').toBe('lead')
     expect(sin.body.created_by).toBe(ctx.vendedorId)
-    expect(sin.body.assignees).toEqual([])
-    expect((await api('vendedor', 'GET', `${CRM}/projects/${sin.body.id}`)).status, 'quien lo crea sin asignarse NO lo puede abrir').toBe(403)
-    expect((await api('gerencia', 'GET', `${CRM}/projects/${sin.body.id}`)).status, 'Gerencia (equipo) sí').toBe(200)
+    expect(sin.body.assignees.map((a: { id: number }) => a.id), 'el creador sin alcance de equipo queda asignado solo').toEqual([ctx.vendedorId])
+    expect((await api('vendedor', 'GET', `${CRM}/projects/${sin.body.id}`)).status, 'y puede abrir su propio proyecto').toBe(200)
+    expect((await api('gerencia', 'GET', `${CRM}/projects/${sin.body.id}`)).status, 'Gerencia (equipo) también').toBe(200)
+    const deGerencia = await api('gerencia', 'POST', `${CRM}/projects`, { nombre: `[F11CRM] De gerencia ${STAMP}`, tipo: 'diseno' })
+    ctx.proyectos.push(deGerencia.body.id)
+    expect(deGerencia.body.assignees, 'quien ve al equipo no se asigna al crear').toEqual([])
 
     const asignado = await api('vendedor', 'POST', `${CRM}/projects`, { nombre: `[F11CRM] Asignado ${STAMP}`, tipo: 'ambos', assignee_ids: [ctx.vendedorId], valor: 900 })
     expect(asignado.status).toBe(201)
