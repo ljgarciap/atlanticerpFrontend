@@ -42,7 +42,7 @@ test.describe('Flujo de Servicios: hoja de reclamo y reportes', () => {
     expect(vacia.body).toMatchObject({ estado: 'pending', id: null, diagnostico: null })
     expect(vacia.body.reclamante.contacto, 'el reclamante sale del ticket').toBe('Contacto Flujo')
 
-    const hoja = { descripcion_problema: 'La luminaria parpadea', fecha_reclamo: '2026-11-01', diagnostico: 'defectuoso', firma_responsable: 'Firma Flujo' }
+    const hoja = { descripcion_problema: 'El equipo se apaga solo', fecha_reclamo: '2026-11-01', diagnostico: 'defectuoso', firma_responsable: 'Firma Flujo' }
     ctx.hoja = hoja
     const url = `/servicios/tickets/${ctx.reclamo}/claim-sheet`
     expect((await api('vendedor', 'PUT', url, hoja)).status).toBe(403)
