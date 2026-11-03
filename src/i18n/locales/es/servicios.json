@@ -634,6 +634,7 @@
       "attachFile": "+ Adjuntar archivo (PDF o imagen)",
       "save": "Guardar informe",
       "saveError": "No se pudo guardar el informe. Intenta de nuevo.",
+      "signedLocked": "Este informe ya fue firmado por el cliente y no puede modificarse.",
       "printBlank": "Ver plantilla en blanco",
       "printFull": "Ver / Imprimir",
       "pdfError": "No se pudo generar el PDF. Intenta de nuevo.",

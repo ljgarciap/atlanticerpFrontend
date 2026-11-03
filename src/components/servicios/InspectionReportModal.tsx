@@ -64,7 +64,7 @@ export function fieldKey(field: InspectionReportField): string {
 // Fase 4 — Servicios, Batch 8 (REQ-238→243). El catálogo de campos dinámicos (REQ-239) viene
 // SIEMPRE del backend (`serviciosApi.inspectionReports.fields`, InspectionReportService::
 // fieldsForTicket()) — el frontend nunca reimplementa la matriz RN1-RN3, solo la renderiza.
-export default function InspectionReportModal({ ticketId, ticketTipo, productos, ticketTechnicianId, ticketNumero, ticketCliente, ticketProyecto, ticketDireccion, canEdit, canDownloadBlank, onClose, onSaved }: Props) {
+export default function InspectionReportModal({ ticketId, ticketTipo, productos, ticketTechnicianId, ticketNumero, ticketCliente, ticketProyecto, ticketDireccion, canEdit: canEditProp, canDownloadBlank, onClose, onSaved }: Props) {
   const { t }    = useTranslation('servicios')
   const qc       = useQueryClient()
   const toast    = useToastStore(s => s.show)
@@ -101,6 +101,10 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
     queryKey: ['servicios-inspection-report', ticketId],
     queryFn:  () => serviciosApi.inspectionReports.get(ticketId),
   })
+
+  // Fase 20a — con la firma del cliente confirmada el informe queda congelado (el backend responde 409 a cualquier edición).
+  const firmado = existing?.firma_cliente_imagen_url != null
+  const canEdit = canEditProp && !firmado
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['servicios-technicians-internal-options', ticketTipo],
@@ -339,6 +343,11 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
         </div>
 
         <div className="overflow-y-auto px-5 py-4 flex-1 flex flex-col gap-4">
+          {firmado && canEditProp && (
+            <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+              {t('tickets.inspectionReport.signedLocked')}
+            </p>
+          )}
           {canEdit && (
             <button
               type="button"
