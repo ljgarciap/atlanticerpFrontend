@@ -26,7 +26,7 @@ test.describe('Flujo de Ventas & Diseño', () => {
   test.afterAll(async () => { await req.dispose() })
 
   test('1. matriz de acceso: qué rol entra a cada pantalla', async () => {
-    // [ruta, vendedor, gerencia, contabilidad, lidercompras, tecnico, superadmin]. Fase 21: Contabilidad solo crea y vincula (Pipeline y alta de clientes por sus rutas angostas), no lee el resto del módulo.
+    // [ruta, vendedor, gerencia, contabilidad, lidercompras, tecnico, superadmin]. Fase 23: Gerencia lee los ajustes de precios, Pedidos, tramos y metas. Fase 21: Contabilidad solo crea y vincula (Pipeline y alta de clientes por sus rutas angostas), no lee el resto del módulo.
     const matriz: [string, ...number[]][] = [
       ['/clients', 200, 200, 403, 403, 403, 200],
       ['/architects', 200, 200, 403, 403, 403, 200],
@@ -39,11 +39,11 @@ test.describe('Flujo de Ventas & Diseño', () => {
       ['/dashboard/summary', 403, 200, 403, 403, 403, 200],
       ['/orders', 403, 200, 403, 200, 403, 200],
       ['/audit-log', 403, 403, 403, 403, 403, 200],
-      ['/pricing-settings', 403, 403, 403, 403, 403, 200],
-      ['/orders-settings', 403, 403, 403, 403, 403, 200],
+      ['/pricing-settings', 403, 200, 403, 403, 403, 200],
+      ['/orders-settings', 403, 200, 403, 403, 403, 200],
       ['/quote-conditions-settings', 403, 403, 403, 403, 403, 200],
-      ['/sales-commission-tiers', 403, 403, 403, 403, 403, 200],
-      ['/reports/goals', 403, 403, 403, 403, 403, 200],
+      ['/sales-commission-tiers', 403, 200, 403, 403, 403, 200],
+      ['/reports/goals', 403, 200, 403, 403, 403, 200],
     ]
     const orden = ['vendedor', 'gerencia', 'contabilidad', 'lidercompras', 'tecnico', 'superadmin'] as const
     for (const [ruta, ...esperados] of matriz) {
@@ -137,9 +137,11 @@ test.describe('Flujo de Ventas & Diseño', () => {
     const ed = await api('vendedor', 'PUT', `${VD}/sub-clients/${ctx.sc}/contacts/${c2.body.id}`, { name: 'Contacto Dos Editado', role: 'architect', phone: '6000-2222' })
     expect(ed.status, JSON.stringify(ed.body).slice(0, 200)).toBe(200)
     expect((await api('vendedor', 'DELETE', `${VD}/sub-clients/${ctx.sc}/contacts/${c2.body.id}`)).status).toBe(204)
-    // Se puede borrar el último contacto aunque el alta exija uno.
-    expect((await api('vendedor', 'DELETE', `${VD}/sub-clients/${ctx.sc}/contacts/${ctx.contacto}`)).status).toBe(204)
-    expect(data((await api('vendedor', 'GET', `${VD}/sub-clients/${ctx.sc}/contacts`)).body)).toHaveLength(0)
+    // Fase 23 (#2): el último contacto no se borra (el alta exige uno).
+    const ultimo = await api('vendedor', 'DELETE', `${VD}/sub-clients/${ctx.sc}/contacts/${ctx.contacto}`)
+    expect(ultimo.status).toBe(422)
+    expect(ultimo.body.code).toBe('last_contact')
+    expect(data((await api('vendedor', 'GET', `${VD}/sub-clients/${ctx.sc}/contacts`)).body)).toHaveLength(1)
     expect((await api('lidercompras', 'GET', `${VD}/sub-clients/${ctx.sc}/contacts`)).status).toBe(403)
   })
 
@@ -234,13 +236,19 @@ test.describe('Flujo de Ventas & Diseño', () => {
     const ids = (b: any) => (data(b) as { id: number }[]).map(c => c.id)
     expect(ids(await total('vendedor', '')), 'el dueño la ve').toContain(ctx.card)
     expect(ids(await total('vendedor2', '')), 'otro vendedor no').not.toContain(ctx.card)
-    expect(ids(await total('vendedor2', '&scope=team')), 'pedir «equipo» sin permiso de equipo lo reduce a lo propio').not.toContain(ctx.card)
+    expect(ids(await total('vendedor2', '&scope=team')), 'en el Pipeline pedir «equipo» sin permiso de equipo lo reduce a lo propio (ahí el alcance de equipo lo dan también otros permisos)').not.toContain(ctx.card)
     expect(ids(await total('gerencia', '&scope=team'))).toContain(ctx.card)
     expect(ids(await total('gerencia', '')), 'Gerencia sin pedir equipo ve solo lo suyo').not.toContain(ctx.card)
     expect(ids(await total('contabilidad', '&scope=team')), 'Contabilidad lee el equipo').toContain(ctx.card)
 
     // Los reportes y el Inicio obedecen el mismo alcance.
-    const propio = (await api('vendedor2', 'GET', `${VD}/reports/summary?scope=team`)).body
+    // Fase 23 (#8): en Inicio, Reportes, cotizaciones, proyectos, comisiones y calendario, pedir «equipo» sin verlo es 403 (antes se degradaba en silencio).
+    for (const ruta of ['reports/summary', 'reports/commissions', 'home/summary', 'quotes', 'projects', 'calendar-events']) {
+      const r = await api('vendedor2', 'GET', `${VD}/${ruta}?scope=team`)
+      expect(r.status, ruta).toBe(403)
+      expect(r.body.code).toBe('team_scope_forbidden')
+    }
+    const propio = (await api('vendedor2', 'GET', `${VD}/reports/summary`)).body
     expect(propio.scope).toBe('own')
     expect(propio).not.toHaveProperty('top_vendors')
     const equipo = (await api('gerencia', 'GET', `${VD}/reports/summary?scope=team`)).body
@@ -265,9 +273,9 @@ test.describe('Flujo de Ventas & Diseño', () => {
 
     const com = (await api('vendedor', 'GET', `${VD}/reports/commissions`)).body
     expect(Object.keys(com)).toEqual(expect.arrayContaining(['paid', 'pending', 'final_stage', 'cohorts']))
-    // Pagar una comisión de vendedor exige un permiso que ningún rol del demo trae, ni Gerencia.
-    for (const rol of ['vendedor', 'gerencia', 'contabilidad'] as const) expect((await api(rol, 'PATCH', `${VD}/reports/commissions/999999/mark-paid`, {})).status, `${rol} no paga comisiones`).toBe(403)
-    expect((await api('superadmin', 'PATCH', `${VD}/reports/commissions/999999/mark-paid`, {})).status, 'el superadmin sí llega (cohorte inexistente)').toBe(404)
+    // Fase 23 (#10): pagar la comisión de vendedores es de Gerencia (por nivel de seguridad) y del superadmin.
+    for (const rol of ['vendedor', 'contabilidad'] as const) expect((await api(rol, 'PATCH', `${VD}/reports/commissions/999999/mark-paid`, {})).status, `${rol} no paga comisiones`).toBe(403)
+    for (const rol of ['gerencia', 'superadmin'] as const) expect((await api(rol, 'PATCH', `${VD}/reports/commissions/999999/mark-paid`, {})).status, `${rol} sí llega (cohorte inexistente)`).toBe(404)
 
     const proyectos = await api('vendedor', 'GET', `${VD}/projects?per_page=5`)
     expect(proyectos.status).toBe(200)
@@ -310,7 +318,7 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect(Buffer.from(await ok.arrayBuffer()).subarray(0, 5).toString()).toBe('%PDF-')
     expect((await pdf({ mode: 'completo' })).status).toBe(200)
 
-    // Ficha técnica: la sube y la baja cualquiera que lea el catálogo (no hay borrado).
+    // Ficha técnica: la suben y la quitan quienes editan Ventas & Diseño (Fase 23, #7); la baja cualquiera que lea el catálogo.
     const prueba = await api('vendedor', 'POST', `${VD}/catalog/${ctx.prod}/technical-sheet`, {})
     expect(prueba.status, 'sin archivo').toBe(422)
     const sube = await fetch(`${API}${VD}/catalog/${ctx.prod}/technical-sheet`, {
@@ -324,6 +332,12 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect(url.body.url).toMatch(/signature=/)
     expect((await api('tecnico', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status).toBe(403)
     expect((await api('contabilidad', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status, 'Contabilidad ya no entra al catálogo (Fase 21)').toBe(403)
+
+    // Quitarla: sin permiso de edición 403; con él 204; ya no queda ficha y repetir da 404. Se deja el producto como estaba.
+    expect((await api('tecnico', 'DELETE', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status).toBe(403)
+    expect((await api('vendedor', 'DELETE', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status).toBe(204)
+    expect((await api('vendedor', 'DELETE', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status, 'ya no tiene').toBe(404)
+    expect((await api('gerencia', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status).toBe(404)
   })
 
   test('9. calendario: sin Outlook configurado responde vacío y avisa; el CRUD interno no se usa', async () => {
@@ -339,7 +353,14 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect((await api('vendedor', 'GET', `${VD}/calendar-events`)).status).toBe(200)
   })
 
-  test('10. ajustes: solo el superadmin, y con límites', async () => {
+  test('10. ajustes: Gerencia y el superadmin, y con límites', async () => {
+    // Fase 23 (#9): Gerencia ve y edita precios, margen de Pedidos, tramos y metas; el vendedor y Contabilidad no.
+    for (const ruta of ['pricing-settings', 'orders-settings', 'sales-commission-tiers', 'reports/goals']) {
+      expect((await api('gerencia', 'GET', `${VD}/${ruta}`)).status, `Gerencia lee ${ruta}`).toBe(200)
+      for (const rol of ['vendedor', 'contabilidad'] as const) expect((await api(rol, 'GET', `${VD}/${ruta}`)).status, `${rol} no lee ${ruta}`).toBe(403)
+    }
+    expect((await api('gerencia', 'PUT', `${VD}/pricing-settings`, { project_discount_percent: 150 })).status, 'Gerencia edita, con los mismos límites').toBe(422)
+
     // Lecturas y validaciones; nada se modifica.
     const precios = (await api('superadmin', 'GET', `${VD}/pricing-settings`)).body
     expect(Object.keys(precios)).toEqual(expect.arrayContaining(['project_discount_percent', 'special_additional_discount_percent', 'partner_divisor', 'premium_divisor', 'min_margin_percent']))

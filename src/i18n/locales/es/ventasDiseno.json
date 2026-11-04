@@ -10,7 +10,8 @@
     "pedidos": "Pedidos",
     "statusPedidos": "Status de Pedidos",
     "reports": "Reportes",
-    "auditLog": "Historial"
+    "auditLog": "Historial",
+    "settings": "Ajustes"
   },
   "scope": {
     "own": "Inicio",
@@ -255,7 +256,12 @@
       "viewDocumentError": "No se pudo abrir el documento.",
       "missingWarning": "Este producto no tiene ficha técnica cargada. Es obligatoria antes de poder ofrecerlo formalmente.",
       "uploadButton": "+ Cargar ficha técnica",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "deleteDocument": "Quitar ficha",
+      "deleteConfirm": "¿Quitar la ficha técnica de este producto? El archivo se borra.",
+      "deleteError": "No se pudo quitar la ficha técnica.",
+      "deleted": "Ficha técnica eliminada.",
+      "missingNoPermission": "Pídele a quien edita Ventas & Diseño que la cargue."
     },
     "upload": {
       "title": "Cargar ficha técnica",
@@ -958,5 +964,15 @@
     },
     "addError": "No se pudo agregar el asociado.",
     "removeError": "No se pudo quitar el asociado."
+  },
+  "settingsScreen": {
+    "title": "Ajustes de Ventas & Diseño",
+    "subtitle": "Precios, umbral de margen de Pedidos, tramos de comisión y metas. Los cambios aplican a toda la empresa.",
+    "tabs": {
+      "pricing": "Precios",
+      "orders": "Pedidos",
+      "tiers": "Tramos de comisión",
+      "goals": "Metas y forecast"
+    }
   }
 }

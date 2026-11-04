@@ -518,6 +518,10 @@ export const ventasDisenoApi = {
       }).then(r => r.data)
     },
 
+    // Fase 23 (#7) — quita la ficha técnica (204).
+    deleteTechnicalSheet: (id: number): Promise<void> =>
+      api.delete(`/ventas-diseno/catalog/${id}/technical-sheet`).then(() => undefined),
+
     // RN2 (REQ-621): ejemplo fijo, no conectado a la selección real — descarga directa, mismo
     // patrón que projects.exportCsv().
     // SCRUM-702 (REQ-622): mecanismo real de "enviar catálogo" — genera un PDF dinámico en el

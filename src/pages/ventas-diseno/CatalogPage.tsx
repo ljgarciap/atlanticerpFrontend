@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { useToastStore } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { hasGerenciaScope } from '@/lib/gerenciaScope'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
 import type { CatalogItem, CatalogPdfExportStatus } from '@/types/ventasDiseno'
@@ -511,6 +512,23 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
   const showToast = useToastStore(s => s.show)
   const [showUpload, setShowUpload] = useState(false)
   const [viewing, setViewing] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  // Fase 23 (#7) — subir y quitar la ficha exige poder editar Ventas & Diseño (el backend responde 403 al resto).
+  const canEditSheet = usePermission('ventas_diseno.edit')
+
+  async function handleRemoveDocument() {
+    if (!window.confirm(t('ventasDiseno:catalogScreen.detail.deleteConfirm'))) return
+    setRemoving(true)
+    try {
+      await ventasDisenoApi.catalog.deleteTechnicalSheet(item.id)
+      showToast(t('ventasDiseno:catalogScreen.detail.deleted'), 'success')
+      onUploaded()
+    } catch {
+      showToast(t('ventasDiseno:catalogScreen.detail.deleteError'), 'error')
+    } finally {
+      setRemoving(false)
+    }
+  }
 
   async function handleViewDocument() {
     setViewing(true)
@@ -573,6 +591,11 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
             <Button variant="secondary" className="!text-xs shrink-0" loading={viewing} onClick={handleViewDocument}>
               {t('ventasDiseno:catalogScreen.detail.viewDocument')}
             </Button>
+            {canEditSheet && (
+              <Button variant="outline" className="!text-xs shrink-0" loading={removing} onClick={handleRemoveDocument}>
+                {t('ventasDiseno:catalogScreen.detail.deleteDocument')}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="bg-red-50 dark:bg-red-950/20 rounded-xl p-3.5 text-center">
@@ -581,9 +604,13 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
               {t('ventasDiseno:catalogScreen.detail.missingWarning')}
             </p>
             <div>
-              <Button variant="secondary" className="!text-xs" onClick={() => setShowUpload(true)}>
-                {t('ventasDiseno:catalogScreen.detail.uploadButton')}
-              </Button>
+              {canEditSheet ? (
+                <Button variant="secondary" className="!text-xs" onClick={() => setShowUpload(true)}>
+                  {t('ventasDiseno:catalogScreen.detail.uploadButton')}
+                </Button>
+              ) : (
+                <p className="text-[11.5px] text-slate-500">{t('ventasDiseno:catalogScreen.detail.missingNoPermission')}</p>
+              )}
             </div>
           </div>
         )}

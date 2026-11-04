@@ -30,6 +30,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       get: vi.fn(),
       technicalSheetUrl: vi.fn(),
       uploadTechnicalSheet: vi.fn(),
+      deleteTechnicalSheet: vi.fn(),
       sendPdf: vi.fn(),
       pdfExport: vi.fn(),
     },
@@ -379,7 +380,10 @@ describe('VentasDisenoCatalogPage', () => {
     expect(screen.getByText('ventasDiseno:catalogScreen.actions.inventoryCompras')).toBeInTheDocument()
   })
 
+  const conEdicion = () => useAuthStore.setState({ user: { id: 1, first_name: 'V', last_name: 'D', email: 'v@t.com', role: 'vendedor', permissions: ['ventas_diseno.edit'], modules: {} } })
+
   it('clic en un producto abre el detalle con aviso de ficha faltante', async () => {
+    conEdicion()
     renderPage()
     fireEvent.click(await screen.findByText('IL-DEC-1410A · 770 Lights'))
 
@@ -401,7 +405,29 @@ describe('VentasDisenoCatalogPage', () => {
     await waitFor(() => expect(openSpy).toHaveBeenCalledWith('https://s3.example/presigned', '_blank', 'noopener'))
   })
 
+  it('Fase 23 (#7) — sin permiso de edición no se ofrece subir la ficha', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByText('IL-DEC-1410A · 770 Lights'))
+
+    expect(await screen.findByText('ventasDiseno:catalogScreen.detail.missingNoPermission')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:catalogScreen.detail.uploadButton')).not.toBeInTheDocument()
+  })
+
+  it('Fase 23 (#7) — con permiso de edición se puede quitar la ficha cargada', async () => {
+    conEdicion()
+    mockedApi.catalog.list.mockResolvedValue(makeResult({ data: [makeItem({ has_technical_sheet: true, technical_sheet_filename: 'ficha.pdf' })] }))
+    mockedApi.catalog.deleteTechnicalSheet.mockResolvedValue(undefined)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderPage()
+    fireEvent.click(await screen.findByText('IL-DEC-1410A · 770 Lights'))
+    fireEvent.click(await screen.findByText('ventasDiseno:catalogScreen.detail.deleteDocument'))
+
+    await waitFor(() => expect(mockedApi.catalog.deleteTechnicalSheet).toHaveBeenCalledWith(1))
+  })
+
   it('REQ-618 RN4 — subir ficha técnica exitosa actualiza el badge sin recargar', async () => {
+    conEdicion()
     mockedApi.catalog.uploadTechnicalSheet.mockResolvedValue({
       id: 1, has_technical_sheet: true, technical_sheet_filename: 'nueva-ficha.pdf', technical_sheet_uploaded_at: '2026-07-31T00:00:00Z',
     })
