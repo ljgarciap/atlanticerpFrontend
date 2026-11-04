@@ -26,16 +26,16 @@ test.describe('Flujo de Ventas & Diseño', () => {
   test.afterAll(async () => { await req.dispose() })
 
   test('1. matriz de acceso: qué rol entra a cada pantalla', async () => {
-    // [ruta, vendedor, gerencia, contabilidad, lidercompras, tecnico, superadmin]
+    // [ruta, vendedor, gerencia, contabilidad, lidercompras, tecnico, superadmin]. Fase 21: Contabilidad solo crea y vincula (Pipeline y alta de clientes por sus rutas angostas), no lee el resto del módulo.
     const matriz: [string, ...number[]][] = [
-      ['/clients', 200, 200, 200, 403, 403, 200],
-      ['/architects', 200, 200, 200, 403, 403, 200],
-      ['/catalog', 200, 200, 200, 403, 403, 200],
-      ['/calendar', 200, 200, 200, 403, 403, 200],
-      ['/home/summary', 200, 200, 200, 403, 403, 200],
-      ['/reports/summary', 200, 200, 200, 403, 403, 200],
-      ['/reports/commissions', 200, 200, 200, 403, 403, 200],
-      ['/projects', 200, 200, 200, 403, 403, 200],
+      ['/clients', 200, 200, 403, 403, 403, 200],
+      ['/architects', 200, 200, 403, 403, 403, 200],
+      ['/catalog', 200, 200, 403, 403, 403, 200],
+      ['/calendar', 200, 200, 403, 403, 403, 200],
+      ['/home/summary', 200, 200, 403, 403, 403, 200],
+      ['/reports/summary', 200, 200, 403, 403, 403, 200],
+      ['/reports/commissions', 200, 200, 403, 403, 403, 200],
+      ['/projects', 200, 200, 403, 403, 403, 200],
       ['/dashboard/summary', 403, 200, 403, 403, 403, 200],
       ['/orders', 403, 200, 403, 200, 403, 200],
       ['/audit-log', 403, 403, 403, 403, 403, 200],
@@ -170,7 +170,7 @@ test.describe('Flujo de Ventas & Diseño', () => {
 
     expect(data((await api('vendedor', 'GET', `${VD}/architects?search=${encodeURIComponent(`F11A] Arq ${STAMP}`)}`)).body)).toHaveLength(1)
     expect(data((await api('vendedor', 'GET', `${VD}/architects?type=designer&search=${STAMP}`)).body), 'el filtro por tipo excluye al arquitecto').toHaveLength(0)
-    expect((await api('contabilidad', 'POST', `${VD}/architects`, {})).status, 'Contabilidad también puede dar de alta (llega a la validación)').toBe(422)
+    expect((await api('contabilidad', 'POST', `${VD}/architects`, {})).status, 'Contabilidad ya no da de alta asociados (Fase 21)').toBe(403)
     expect((await api('tecnico', 'GET', `${VD}/architects`)).status).toBe(403)
   })
 
@@ -219,10 +219,13 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect((await api('vendedor2', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: 'ajena' })).status).toBe(403)
     expect((await api('vendedor2', 'GET', `${VD}/pipeline/${ctx.card}`)).status, 'ni la ve').toBe(403)
     expect((await api('contabilidad', 'GET', `${VD}/pipeline/${ctx.card}`)).status, 'Contabilidad la ve').toBe(200)
-    // El permiso `pipeline.edit` de Contabilidad le da alcance de equipo dentro del Pipeline: mueve y edita tarjetas de cualquier vendedor.
-    const mueve = await api('contabilidad', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'design' })
-    expect(mueve.status, 'Contabilidad también mueve la tarjeta de otro vendedor').toBe(200)
-    expect(mueve.body.stage).toBe('design')
+    // Fase 21 (B1): Contabilidad ve todo el Pipeline (`pipeline.read_all`) pero solo edita lo que ella creó (`pipeline.edit`): la tarjeta de otro vendedor es de lectura.
+    expect((await api('contabilidad', 'GET', `${VD}/pipeline/${ctx.card}`)).body.can_edit, 'la tarjeta ajena no es editable para Contabilidad').toBe(false)
+    expect((await api('contabilidad', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'design' })).status, 'Contabilidad no mueve la tarjeta de otro vendedor').toBe(403)
+    expect((await api('contabilidad', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: 'ajena' })).status).toBe(403)
+    const propia = await api('contabilidad', 'POST', `${VD}/pipeline`, { type: 'lead', name: `[F11A] Lead Contabilidad ${STAMP}`, sub_client_id: ctx.sc })
+    expect(propia.status, 'Contabilidad crea su propio proyecto').toBe(201)
+    expect((await api('contabilidad', 'PUT', `${VD}/pipeline/${propia.body.id}`, { name: `[F11A] Lead Contabilidad ${STAMP} editado` })).status, 'y edita el que creó').toBe(200)
     expect((await api('gerencia', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: `[F11A] Lead ${STAMP} Gerencia` })).status, 'Gerencia sí edita la de otro').toBe(200)
   })
 
@@ -316,10 +319,11 @@ test.describe('Flujo de Ventas & Diseño', () => {
     })
     expect(sube.status).toBe(200)
     expect((await sube.json()).has_technical_sheet).toBe(true)
-    const url = await api('contabilidad', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)
+    const url = await api('gerencia', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)
     expect(url.status, 'otro rol con acceso al catálogo la descarga').toBe(200)
     expect(url.body.url).toMatch(/signature=/)
     expect((await api('tecnico', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status).toBe(403)
+    expect((await api('contabilidad', 'GET', `${VD}/catalog/${ctx.prod}/technical-sheet`)).status, 'Contabilidad ya no entra al catálogo (Fase 21)').toBe(403)
   })
 
   test('9. calendario: sin Outlook configurado responde vacío y avisa; el CRUD interno no se usa', async () => {
