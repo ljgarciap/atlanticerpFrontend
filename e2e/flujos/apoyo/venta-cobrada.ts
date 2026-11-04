@@ -62,9 +62,9 @@ export async function idDeUsuario(request: APIRequestContext, tokens: Tokens, ro
 
 /**
  * Cliente → cotización → proyecto aprobado → pedido, con existencias suficientes en Bodega Central. Roles: vendedor, gerencia, lidercompras, liderbodega.
- * `fechaEntrega` (AAAA-MM-DD) es la fecha comprometida del pedido; por defecto, dentro de 20 días. `indiceProducto` elige el producto del catálogo.
+ * `fechaEntrega` (AAAA-MM-DD) es la fecha comprometida del pedido; por defecto, dentro de 20 días. `indiceProducto` elige el producto del catálogo; `architectId` pone un asociado en la cotización (genera comisión externa).
  */
-export async function crearPedido(request: APIRequestContext, tokens: Tokens, etiqueta: string, fechaEntrega?: string, indiceProducto = 0): Promise<Pedido> {
+export async function crearPedido(request: APIRequestContext, tokens: Tokens, etiqueta: string, fechaEntrega?: string, indiceProducto = 0, architectId?: number): Promise<Pedido> {
   const api = (rol: string, method: string, path: string, payload?: unknown) => llamar(request, tokens, rol, method, path, payload)
   const clienteNombre = `[FLUJO] Sub ${etiqueta} S.A.`
   const mc = await api('vendedor', 'POST', '/ventas-diseno/master-clients', { name: `[FLUJO] Cliente ${etiqueta}` })
@@ -81,7 +81,7 @@ export async function crearPedido(request: APIRequestContext, tokens: Tokens, et
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/parts/${parte.body.id}/items`, { catalog_product_id: prod, quantity: 2 })).status).toBe(201)
   await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/contacts`, { sub_client_contact_id: ct.body.id })
   const fecha = fechaEntrega ?? new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10)
-  const up = await api('vendedor', 'PUT', `/ventas-diseno/quotes/${q.body.id}`, { description: 'Cotización de flujo', delivery_type: 'single', delivery_dates: [fecha], price_type: 'project' })
+  const up = await api('vendedor', 'PUT', `/ventas-diseno/quotes/${q.body.id}`, { description: 'Cotización de flujo', delivery_type: 'single', delivery_dates: [fecha], price_type: 'project', ...(architectId ? { architect_id: architectId } : {}) })
   expect(up.status, JSON.stringify(up.body).slice(0, 200)).toBe(200)
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/generate`)).status).toBe(200)
   expect((await api('vendedor', 'POST', `/ventas-diseno/quotes/${q.body.id}/confirm`)).status).toBe(200)
