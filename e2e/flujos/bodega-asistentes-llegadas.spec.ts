@@ -93,7 +93,7 @@ test.describe('Flujo de Bodega: asistentes y llegada de mercancía', () => {
     expect(JSON.stringify(filtrado)).toContain(`Asistente B ${STAMP}`)
   })
 
-  test('4. llegada física: Bodega reporta lo contado, Compras factura al inventario', async () => {
+  test('4. llegada física: Bodega cuenta, Compras factura solo lo contado y el resto queda por llegar', async () => {
     const prod = ctx.pedido1.prod as number
     const stock = async () => ((await api('liderbodega', 'GET', `/bodega/adjustment-requests/products/${prod}/warehouse-stock`)).body.warehouses as { warehouse_id: number; quantity: number }[]).find(w => w.warehouse_id === ctx.pedido1.bodegaCentral)!.quantity
     ctx.stockInicial = await stock()
@@ -130,14 +130,24 @@ test.describe('Flujo de Bodega: asistentes y llegada de mercancía', () => {
     expect(estado).toMatch(/"confirmed_quantity":6/)
 
     const otra = await api('liderbodega', 'POST', url, { cantidad_entregada: 4 })
-    expect(otra.status, 'lo reportado no se puede completar después').toBe(422)
+    expect(otra.status, 'antes de que Compras confirme, lo ya reportado no se vuelve a reportar').toBe(422)
     expect(otra.body.message).toMatch(/no tiene unidades "Por ingresar" pendientes de reportar/)
 
-    const conf = await api('lidercompras', 'POST', `/compras/goods-receipts/lines/${ctx.linea}/confirm`)
-    expect(conf.status, 'Compras factura al inventario').toBe(200)
-    ctx.stockFinal = await stock()
-    ctx.sumo = ctx.stockFinal - ctx.stockInicial
-    expect(ctx.sumo, 'el stock sube al confirmar Compras: suma lo ingresado, no lo que Bodega contó').toBe(10)
+    // Fase 20c: dos confirmaciones simultáneas de Compras; solo una entra al inventario (la línea se bloquea) y entra lo que Bodega contó
+    const confirmar = () => api('lidercompras', 'POST', `/compras/goods-receipts/lines/${ctx.linea}/confirm`)
+    const resultados = await Promise.all([confirmar(), confirmar()])
+    expect(resultados.map(r => r.status).sort(), 'una confirma y la otra ya la encuentra confirmada').toEqual([200, 422])
+    expect(await stock() - ctx.stockInicial, 'entran las 6 unidades contadas, una sola vez').toBe(6)
+    expect(JSON.stringify(data((await api('liderbodega', 'GET', `/bodega/inventory/${prod}`)).body))).toMatch(/"pending_bodega_action":true/)
+
+    // el resto (4) queda «Por ingresar» y se puede reportar y confirmar cuando llegue
+    const resto = await api('liderbodega', 'POST', url, { cantidad_entregada: 4 })
+    expect(resto.status, 'las 4 unidades que faltaban ya se pueden reportar').toBe(200)
+    expect(resto.body).toMatchObject({ confirmed_quantity: 4 })
+    const lineaResto = resto.body.confirmed_lines[0] as number
+    expect(lineaResto).not.toBe(ctx.linea)
+    expect((await api('lidercompras', 'POST', `/compras/goods-receipts/lines/${lineaResto}/confirm`)).status).toBe(200)
+    expect(await stock() - ctx.stockInicial, 'al final entran las 10, no más').toBe(10)
     expect(JSON.stringify(data((await api('liderbodega', 'GET', `/bodega/inventory/${prod}`)).body))).toMatch(/"awaiting_compras":false/)
   })
 })
