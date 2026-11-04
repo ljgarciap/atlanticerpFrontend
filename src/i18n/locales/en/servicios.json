@@ -634,6 +634,7 @@
       "attachFile": "+ Attach file (PDF or image)",
       "save": "Save report",
       "saveError": "Could not save the report. Please try again.",
+      "signedLocked": "The client has already signed this report and it can no longer be modified.",
       "printBlank": "View blank template",
       "printFull": "View / Print",
       "pdfError": "Could not generate the PDF. Please try again.",

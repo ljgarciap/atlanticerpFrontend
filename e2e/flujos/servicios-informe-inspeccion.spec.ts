@@ -166,6 +166,14 @@ test.describe('Flujo de Servicios: informe de inspección y documentos de la cot
 
     const otra = await subir('liderservicios', url, { payload: payload(), firma_cliente_imagen: firma })
     expect(otra.status, 'una firma confirmada no se reemplaza, ni el Líder').toBe(409)
+
+    // Fase 20a: lo firmado no se reescribe desde escritorio ni subiendo un archivo; las fotos sí se siguen agregando
+    const editar = await api('liderservicios', 'PUT', `/servicios/tickets/${ctx.movil}/inspection-report`, { conclusion: 'Otra conclusión.' })
+    expect(editar.status, 'el formulario de escritorio no pisa un informe firmado').toBe(409)
+    expect(editar.body.message).toMatch(/ya fue firmado por el cliente/)
+    expect((await subir('liderservicios', `/servicios/tickets/${ctx.movil}/inspection-report/upload`, { archivo: { name: 'x.pdf', mimeType: 'application/pdf', buffer: PDF } })).status, 'tampoco el modo archivo').toBe(409)
+    expect((await subir('liderservicios', `/servicios/tickets/${ctx.movil}/inspection-report/photos`, { categoria: 'despues', file: { name: 'f.png', mimeType: 'image/png', buffer: PNG } })).status, 'las fotos se siguen agregando').toBe(201)
+    expect((await api('vendedor', 'GET', `/servicios/tickets/${ctx.movil}/inspection-report`)).body.conclusion, 'la conclusión firmada no cambió').toBe('Revisión móvil completa.')
   })
 
   test('6. PDF del informe (lleno y en blanco) y documentos de la cotización', async () => {
