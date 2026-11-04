@@ -119,9 +119,11 @@
         "documents": "Documents",
         "notifications": "Notifications",
         "audit_logs": "Audit",
-        "impersonation": "View as user"
+        "impersonation": "View as user",
+        "compras": "Purchasing"
       },
       "help": {
+        "purchase_approval_no_rule": "What happens to a purchase order that no approval rule covers. Off: it does not need approval (as before). On: it requires approval. Amount ranges without a rule are shown in Purchasing settings.",
         "password_reset_free_per_hour": "How many individual resets an operator can do per hour without typing their password; past the limit it is required. 0 = always required.",
         "password_reset_expiration_hours": "Hours the activation link of a new or reset account stays valid; after that another one must be requested.",
         "password_reset_enabled": "Off by default in production: turn it on only during the agreed window to reset passwords and turn it off afterwards.",
@@ -131,6 +133,7 @@
         "impersonation_alert_blocked_writes_per_session": "Above this number of blocked write attempts within a single session, superadmins receive a security alert (a sign of a script)."
       },
       "labels": {
+        "purchase_approval_no_rule": "Require approval for orders no rule covers",
         "password_reset_free_per_hour": "Resets per hour without operator password",
         "password_reset_expiration_hours": "Activation link lifetime (hours)",
         "password_reset_enabled": "Enable password resets",

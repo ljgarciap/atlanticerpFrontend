@@ -24,6 +24,7 @@ test.describe('Flujo transversal: administración de la plataforma', () => {
     // limpia lo que el flujo dejó, aunque un paso haya fallado a medias
     if (ctx.rol) await api('superadmin', 'DELETE', `/roles/${ctx.rol}`)
     if (ctx.reglaAprobacion) await api('superadmin', 'DELETE', `/admin/purchase-approval-rules/${ctx.reglaAprobacion}`)
+    for (const id of ctx.reglasSolape ?? []) await api('superadmin', 'DELETE', `/admin/purchase-approval-rules/${id}`)
     if (ctx.reglaNotificacion) await api('superadmin', 'DELETE', `/admin/notification-rules/${ctx.reglaNotificacion}`)
     if (ctx.perfilOriginal) await api('gerencia3', 'PUT', '/admin-contab/company-profile', { descripcion_corta: ctx.perfilOriginal })
     if (ctx.departamento) await api('gerencia', 'PATCH', `/departments/${ctx.departamento}/status`, { is_active: false })
@@ -115,6 +116,26 @@ test.describe('Flujo transversal: administración de la plataforma', () => {
     expect((await api('superadmin', 'DELETE', `/admin/purchase-approval-rules/${ctx.reglaAprobacion}`)).status).toBe(200)
     ctx.reglaAprobacion = null
     expect((await api('superadmin', 'PUT', '/admin/purchase-approval-rules/99999999', regla)).status).toBe(404)
+  })
+
+  test('3b. reglas de aprobación sin huecos: avisa de solapes y señala los montos que ninguna regla cubre', async () => {
+    const base = { sort_order: 900, is_active: true, shipping_type: 'terrestre', requires_approval: false }
+    const a = await api('superadmin', 'POST', '/admin/purchase-approval-rules', { ...base, name: `[FLUJO] Solape A ${STAMP}`, min_amount: 0, max_amount: 10 })
+    const b = await api('superadmin', 'POST', '/admin/purchase-approval-rules', { ...base, name: `[FLUJO] Solape B ${STAMP}`, min_amount: 5, max_amount: 20 })
+    ctx.reglasSolape = [a.body.id, b.body.id]
+    expect(a.status).toBe(201)
+    expect(b.status, 'un solape avisa pero no bloquea').toBe(201)
+    expect((b.body.warnings as { rule_id: number }[]).map(w => w.rule_id)).toContain(a.body.id)
+
+    const cobertura = await api('superadmin', 'GET', '/admin/purchase-approval-rules/coverage')
+    expect(cobertura.status).toBe(200)
+    expect(cobertura.body).toMatchObject({ no_rule_requires_approval: false })
+    const terrestre = (cobertura.body.combos as { shipping_type: string; gaps: { from: number; to: number | null }[] }[]).find(c => c.shipping_type === 'terrestre')!
+    expect(terrestre.gaps, 'lo que queda por encima de 20 no lo cubre ninguna regla terrestre de esta prueba').toContainEqual({ from: 20.01, to: null })
+    expect((await api('lidercompras', 'GET', '/admin/purchase-approval-rules/coverage')).status).toBe(403)
+
+    for (const id of ctx.reglasSolape) expect((await api('superadmin', 'DELETE', `/admin/purchase-approval-rules/${id}`)).status).toBe(200)
+    ctx.reglasSolape = []
   })
 
   test('4. reglas de notificación: solo el superadmin, modelo y evento de una lista, destinatarios obligatorios', async () => {

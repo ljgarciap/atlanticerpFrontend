@@ -689,7 +689,14 @@
       "previewYes": "Con las reglas activas, esta orden SÍ requiere aprobación.",
       "previewNo": "Con las reglas activas, esta orden NO requiere aprobación.",
       "previewByRule": "Decide la regla «{{name}}».",
-      "previewNoRule": "Ninguna regla coincide."
+      "previewNoRule": "Ninguna regla coincide.",
+      "coverageTitle": "Montos sin regla",
+      "coverageIntro": "Estas órdenes no coinciden con ninguna regla activa:",
+      "coverageGap": "{{shipping}} · {{payer}}: de {{from}} a {{to}}",
+      "coverageGapOpen": "{{shipping}} · {{payer}}: desde {{from}} sin tope",
+      "coverageNoRuleOn": "Esas órdenes exigen aprobación (ajuste global).",
+      "coverageNoRuleOff": "Esas órdenes NO piden aprobación. Puedes cambiarlo en Ajustes globales › Compras.",
+      "overlapTitle": "La regla se guardó, pero se solapa:"
     }
   },
   "inventory": {
