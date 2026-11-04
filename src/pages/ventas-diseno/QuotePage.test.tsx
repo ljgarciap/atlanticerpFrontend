@@ -1855,7 +1855,7 @@ describe('QuotePage', () => {
     await createArchitectFromPicker('Otro Nombre')
 
     expect(await screen.findByText('6000-7777')).toBeInTheDocument()
-    expect(screen.getAllByDisplayValue('Arq. Ya Existente').length).toBeGreaterThan(0)
+    expect((await screen.findAllByDisplayValue('Arq. Ya Existente')).length).toBeGreaterThan(0)
   })
 
   it('SCRUM-1121 — nombre parecido al crear el Arquitecto: muestra el aviso del servidor y no lo crea', async () => {
