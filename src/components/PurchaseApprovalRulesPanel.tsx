@@ -4,12 +4,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import {
   purchaseApprovalRulesApi,
-  type ApprovalPreview, type PurchaseApprovalRule, type PurchaseApprovalRuleInput, type ShippingPayer, type ShippingType,
+  type ApprovalPreview, type PurchaseApprovalRule, type RuleWarning, type PurchaseApprovalRuleInput, type ShippingPayer, type ShippingType,
 } from '@/api/purchaseApprovalRulesApi'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
 const KEY = ['admin/purchase-approval-rules'] as const
+const COVERAGE_KEY = ['admin/purchase-approval-rules/coverage'] as const
 
 function errorMessage(err: unknown, fallback: string): string {
   if (isAxiosError(err)) {
@@ -47,7 +48,7 @@ const inputCls = 'border border-slate-200 dark:border-slate-600 rounded-md px-2 
 
 /**
  * Fase 14a — reglas que deciden cuándo una orden de compra necesita la aprobación del aprobador primario (antes fijo en el código: envío
- * aéreo pagado por la empresa). Gana la primera regla activa, por orden, que coincide; sin coincidencia no se requiere aprobación. Solo superadmin.
+ * aéreo pagado por la empresa). Gana la primera regla activa, por orden, que coincide; sin coincidencia decide el ajuste global «purchase_approval_no_rule» (por defecto, no se requiere). Solo superadmin.
  */
 export default function PurchaseApprovalRulesPanel() {
   const { t } = useTranslation('compras')
@@ -56,15 +57,18 @@ export default function PurchaseApprovalRulesPanel() {
   const [draft, setDraft] = useState<Draft>(EMPTY)
   const [pv, setPv] = useState({ shipping_type: 'aereo', who_pays_shipping: 'atlantic', amount: '3000' })
   const [pvResult, setPvResult] = useState<ApprovalPreview | null>(null)
+  const [warnings, setWarnings] = useState<RuleWarning[]>([])
 
   const { data: rules = [], isLoading, error } = useQuery({ queryKey: KEY, queryFn: purchaseApprovalRulesApi.list })
 
-  const refresh = () => { setPvResult(null); return qc.invalidateQueries({ queryKey: KEY }) }
+  const { data: coverage } = useQuery({ queryKey: COVERAGE_KEY, queryFn: purchaseApprovalRulesApi.coverage })
+
+  const refresh = () => { setPvResult(null); return Promise.all([qc.invalidateQueries({ queryKey: KEY }), qc.invalidateQueries({ queryKey: COVERAGE_KEY })]) }
   const save = useMutation({
     mutationFn: () => editing === 'new'
       ? purchaseApprovalRulesApi.create(toInput(draft))
       : purchaseApprovalRulesApi.update(editing as number, toInput(draft)),
-    onSuccess: () => { setEditing(null); return refresh() },
+    onSuccess: saved => { setEditing(null); setWarnings(saved.warnings ?? []); return refresh() },
   })
   const remove = useMutation({ mutationFn: (id: number) => purchaseApprovalRulesApi.remove(id), onSuccess: refresh })
   const preview = useMutation({
@@ -77,7 +81,7 @@ export default function PurchaseApprovalRulesPanel() {
   })
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft(d => ({ ...d, [k]: v }))
-  const open = (r: PurchaseApprovalRule | null) => { save.reset(); setDraft(r ? toDraft(r) : EMPTY); setEditing(r ? r.id : 'new') }
+  const open = (r: PurchaseApprovalRule | null) => { save.reset(); setWarnings([]); setDraft(r ? toDraft(r) : EMPTY); setEditing(r ? r.id : 'new') }
 
   const shippingLabel = (v: string | null) => v ? t(`settings.rules.shipping.${v}`) : t('settings.rules.any')
   const payerLabel = (v: string | null) => v ? t(`settings.rules.payer.${v}`) : t('settings.rules.any')
@@ -96,6 +100,29 @@ export default function PurchaseApprovalRulesPanel() {
         <h3 className="text-[15px] font-bold text-slate-900 dark:text-slate-100">{t('settings.rules.title')}</h3>
         <p className="text-[12px] text-slate-400">{t('settings.rules.subtitle')}</p>
       </div>
+
+      {coverage?.has_gaps && (
+        <div role="alert" data-testid="rules-coverage-gaps" className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+          <div className="font-bold">{t('settings.rules.coverageTitle')}</div>
+          <p>{t('settings.rules.coverageIntro')}</p>
+          <ul className="list-disc pl-5">
+            {coverage.combos.flatMap(c => c.gaps.map(g => (
+              <li key={`${c.shipping_type}-${c.who_pays_shipping}-${g.from}`}>
+                {t(g.to === null ? 'settings.rules.coverageGapOpen' : 'settings.rules.coverageGap', {
+                  shipping: shippingLabel(c.shipping_type), payer: payerLabel(c.who_pays_shipping), from: g.from, to: g.to,
+                })}
+              </li>
+            )))}
+          </ul>
+          <p className="mt-1">{coverage.no_rule_requires_approval ? t('settings.rules.coverageNoRuleOn') : t('settings.rules.coverageNoRuleOff')}</p>
+        </div>
+      )}
+      {warnings.length > 0 && (
+        <div role="alert" data-testid="rules-overlap-warnings" className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+          <div className="font-bold">{t('settings.rules.overlapTitle')}</div>
+          <ul className="list-disc pl-5">{warnings.map(w => <li key={w.rule_id}>{w.message}</li>)}</ul>
+        </div>
+      )}
 
       <ul className="flex flex-col gap-1" aria-label={t('settings.rules.listLabel')}>
         {rules.length === 0 && <li className="text-xs text-slate-400">{t('settings.rules.empty')}</li>}

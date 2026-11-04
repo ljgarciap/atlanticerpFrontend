@@ -689,7 +689,14 @@
       "previewYes": "With the active rules, this order DOES require approval.",
       "previewNo": "With the active rules, this order does NOT require approval.",
       "previewByRule": "Decided by the rule “{{name}}”.",
-      "previewNoRule": "No rule matches."
+      "previewNoRule": "No rule matches.",
+      "coverageTitle": "Amounts without a rule",
+      "coverageIntro": "Orders like these match no active rule:",
+      "coverageGap": "{{shipping}} · {{payer}}: from {{from}} to {{to}}",
+      "coverageGapOpen": "{{shipping}} · {{payer}}: from {{from}}, no upper limit",
+      "coverageNoRuleOn": "Those orders require approval (global setting).",
+      "coverageNoRuleOff": "Those orders do NOT need approval. You can change it in Global settings › Purchasing.",
+      "overlapTitle": "The rule was saved, but it overlaps:"
     }
   },
   "inventory": {

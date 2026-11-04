@@ -119,9 +119,11 @@
         "documents": "Documentos",
         "notifications": "Notificaciones",
         "audit_logs": "Auditoría",
-        "impersonation": "Ver como usuario"
+        "impersonation": "Ver como usuario",
+        "compras": "Compras"
       },
       "help": {
+        "purchase_approval_no_rule": "Qué pasa con una orden de compra que ninguna regla de aprobación cubre. Apagado: no pide aprobación (como hasta ahora). Encendido: exige aprobación. Los rangos sin regla se ven en Ajustes de Compras.",
         "password_reset_free_per_hour": "Cuántos restablecimientos individuales puede hacer un operador por hora sin escribir su contraseña; pasado el tope, la pide. 0 = siempre la pide.",
         "password_reset_expiration_hours": "Horas que dura el enlace de activación que recibe una cuenta nueva o reiniciada; pasado el plazo hay que pedir otro.",
         "password_reset_enabled": "En producción está apagado por defecto: enciéndelo solo durante la ventana acordada para restablecer contraseñas y apágalo al terminar.",
@@ -131,6 +133,7 @@
         "impersonation_alert_blocked_writes_per_session": "Al superar este número de intentos de escritura bloqueados dentro de una sola sesión, los superadmins reciben una alerta de seguridad (señal de un script)."
       },
       "labels": {
+        "purchase_approval_no_rule": "Exigir aprobación a las órdenes que ninguna regla cubre",
         "password_reset_free_per_hour": "Restablecimientos por hora sin contraseña del operador",
         "password_reset_expiration_hours": "Vigencia del enlace de activación (horas)",
         "password_reset_enabled": "Habilitar el restablecimiento de contraseñas",

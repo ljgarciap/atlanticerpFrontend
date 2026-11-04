@@ -9,7 +9,7 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 vi.mock('@/api/purchaseApprovalRulesApi', () => ({
-  purchaseApprovalRulesApi: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), preview: vi.fn() },
+  purchaseApprovalRulesApi: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), preview: vi.fn(), coverage: vi.fn() },
 }))
 
 const api = vi.mocked(purchaseApprovalRulesApi, true)
@@ -27,6 +27,7 @@ function renderPanel() {
 beforeEach(() => {
   vi.clearAllMocks()
   api.list.mockResolvedValue([regla()])
+  api.coverage.mockResolvedValue({ no_rule_requires_approval: false, has_gaps: false, combos: [] })
 })
 
 describe('PurchaseApprovalRulesPanel (Fase 14a)', () => {
@@ -71,5 +72,34 @@ describe('PurchaseApprovalRulesPanel (Fase 14a)', () => {
     fireEvent.click(screen.getByText('settings.rules.delete'))
 
     await waitFor(() => expect(api.remove).toHaveBeenCalledWith(1))
+  })
+
+  it('muestra los rangos sin regla y qué pasa con esas órdenes (Fase 20d)', async () => {
+    api.coverage.mockResolvedValue({
+      no_rule_requires_approval: false, has_gaps: true,
+      combos: [{ shipping_type: 'maritimo', who_pays_shipping: null, gaps: [{ from: 999.01, to: 4999.99 }, { from: 8000, to: null }] }],
+    })
+    renderPanel()
+    const aviso = await screen.findByTestId('rules-coverage-gaps')
+    expect(aviso).toHaveTextContent('settings.rules.coverageGap')
+    expect(aviso).toHaveTextContent('settings.rules.coverageGapOpen')
+    expect(aviso).toHaveTextContent('settings.rules.coverageNoRuleOff')
+  })
+
+  it('no muestra aviso de huecos si las reglas cubren todo', async () => {
+    renderPanel()
+    await screen.findByText(/Aéreo pagado/)
+    expect(screen.queryByTestId('rules-coverage-gaps')).not.toBeInTheDocument()
+  })
+
+  it('al guardar una regla que se solapa muestra el aviso del servidor sin bloquear (Fase 20d)', async () => {
+    api.create.mockResolvedValue({ ...regla({ id: 2 }), warnings: [{ rule_id: 1, name: 'Pequeñas', message: 'Se solapa con la regla «Pequeñas»' }] })
+    renderPanel()
+    await screen.findByText(/Aéreo pagado/)
+    fireEvent.click(screen.getByText('settings.rules.add'))
+    fireEvent.change(screen.getByLabelText('settings.rules.name'), { target: { value: 'Medianas' } })
+    fireEvent.click(screen.getByText('settings.rules.save'))
+
+    expect(await screen.findByTestId('rules-overlap-warnings')).toHaveTextContent('Se solapa con la regla «Pequeñas»')
   })
 })
