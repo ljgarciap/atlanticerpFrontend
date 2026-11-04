@@ -888,6 +888,12 @@
       "generatePurchase": "Generate purchase",
       "generated": "{{count}} orders were created, one per provider.",
       "generateError": "Could not generate the purchase. Please try again.",
+      "omitted": "Products that were not purchased ({{count}}):",
+      "omittedReason": {
+        "sin_proveedor": "No supplier assigned",
+        "sin_necesidad": "No purchase needed (stock above the reorder point)",
+        "ya_en_camino": "A purchase is already on the way"
+      },
       "empty": "This family has no products.",
       "emptyList": "No families created yet."
     },

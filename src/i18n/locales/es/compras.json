@@ -888,6 +888,12 @@
       "generatePurchase": "Generar compra",
       "generated": "Se crearon {{count}} órdenes, una por proveedor.",
       "generateError": "No se pudo generar la compra. Intentá de nuevo.",
+      "omitted": "Productos que no se compraron ({{count}}):",
+      "omittedReason": {
+        "sin_proveedor": "Sin proveedor asignado",
+        "sin_necesidad": "No necesita compra (existencias sobre el punto de reorden)",
+        "ya_en_camino": "Ya hay una compra en camino"
+      },
       "empty": "Esta familia no tiene productos.",
       "emptyList": "No hay familias creadas todavía."
     },
