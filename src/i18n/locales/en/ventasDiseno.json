@@ -10,7 +10,8 @@
     "pedidos": "Orders",
     "statusPedidos": "Order Status",
     "reports": "Reports",
-    "auditLog": "History"
+    "auditLog": "History",
+    "settings": "Settings"
   },
   "scope": {
     "own": "Home",
@@ -255,7 +256,12 @@
       "viewDocumentError": "Could not open the document.",
       "missingWarning": "This product has no technical sheet uploaded. It's required before offering it formally.",
       "uploadButton": "+ Upload technical sheet",
-      "close": "Close"
+      "close": "Close",
+      "deleteDocument": "Remove sheet",
+      "deleteConfirm": "Remove this product’s technical sheet? The file is deleted.",
+      "deleteError": "The technical sheet could not be removed.",
+      "deleted": "Technical sheet removed.",
+      "missingNoPermission": "Ask someone who can edit Sales & Design to upload it."
     },
     "upload": {
       "title": "Upload technical sheet",
@@ -956,5 +962,15 @@
     },
     "addError": "The associate could not be added.",
     "removeError": "The associate could not be removed."
+  },
+  "settingsScreen": {
+    "title": "Sales & Design settings",
+    "subtitle": "Prices, Orders margin threshold, commission tiers and goals. Changes apply company-wide.",
+    "tabs": {
+      "pricing": "Prices",
+      "orders": "Orders",
+      "tiers": "Commission tiers",
+      "goals": "Goals & forecast"
+    }
   }
 }

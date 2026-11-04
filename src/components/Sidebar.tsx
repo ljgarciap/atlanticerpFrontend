@@ -117,6 +117,10 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const clearQuoteDirty = useUnsavedQuoteGuard(s => s.setDirty)
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const canSeeAuditLog = usePermission('ventas_diseno.audit')
+  // Fase 23 (#9) — ajustes de Ventas & Diseño (precios/Pedidos y tramos/metas), cada uno con su permiso; los hooks se llaman siempre.
+  const canConfigurePricing = usePermission('ventas_diseno.pricing.configure')
+  const canConfigureReports = usePermission('ventas_diseno.reports.configure')
+  const canSeeVentasSettings = canConfigurePricing || canConfigureReports
   // Fase 19 — el CRM es un módulo propio: sus dos pantallas (Dashboard y Lista de Proyectos) solo se ofrecen con `crm.view`.
   const canSeeCrm = usePermission('crm.view')
   // SCRUM-711 — Seguridad se mueve del tab superior a Configuración > Seguridad.
@@ -598,6 +602,9 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             { id: 'ventas-diseno-reports',  label: tVentasDiseno('nav.reports'),  href: '/ventas-diseno/reports',  icon: <IcoBarChart /> },
             ...(canSeeAuditLog
               ? [{ id: 'ventas-diseno-audit-log', label: tVentasDiseno('nav.auditLog'), href: '/ventas-diseno/audit-log', icon: <IcoClock /> }]
+              : []),
+            ...(canSeeVentasSettings
+              ? [{ id: 'ventas-diseno-ajustes', label: tVentasDiseno('nav.settings'), href: '/ventas-diseno/ajustes', icon: <IcoSettings /> }]
               : []),
           ],
         }]

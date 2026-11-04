@@ -85,6 +85,7 @@ import VentasDisenoClientsPage  from '@/pages/ventas-diseno/ClientsPage'
 import VentasDisenoArchitectsPage from '@/pages/ventas-diseno/ArchitectsPage'
 import VentasDisenoQuotePage    from '@/pages/ventas-diseno/QuotePage'
 import VentasDisenoReportsPage  from '@/pages/ventas-diseno/ReportsPage'
+import VentasDisenoAjustesPage  from '@/pages/ventas-diseno/AjustesPage'
 import VentasDisenoQuotesListPage from '@/pages/ventas-diseno/QuotesListPage'
 import VentasDisenoAuditLogPage from '@/pages/ventas-diseno/AuditLogPage'
 import VentasDisenoCatalogPage  from '@/pages/ventas-diseno/CatalogPage'
@@ -205,6 +206,12 @@ export default function App() {
             <Route path="/ventas-diseno/reports" element={
               <RequirePermission permission="ventas_diseno.read">
                 <VentasDisenoReportsPage />
+              </RequirePermission>
+            } />
+            {/* Fase 23 (#9) — ajustes de Ventas & Diseño para Gerencia (precios, Pedidos, tramos y metas). */}
+            <Route path="/ventas-diseno/ajustes" element={
+              <RequirePermission permission={['ventas_diseno.pricing.configure', 'ventas_diseno.reports.configure']}>
+                <VentasDisenoAjustesPage />
               </RequirePermission>
             } />
             {/* Grupo 5 (Cotizaciones — listado, REQ-079 a 085) */}
