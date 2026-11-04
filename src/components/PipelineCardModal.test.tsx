@@ -410,15 +410,43 @@ describe('PipelineCardModal', () => {
     await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(1, 'design'))
   })
 
-  it('muestra Reactivar para una tarjeta Perdida y la mueve a Lead', async () => {
-    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
+  it('muestra Reactivar a quien puede decidirlo, pide el motivo y mueve la tarjeta a Lead (Fase 21)', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false, can_reactivate: true }))
     mockedApi.pipeline.changeStage.mockResolvedValue(makeDetail({ stage: 'lead' }))
     renderModal()
     await screen.findByText('ventasDiseno:modal.reactivate')
 
     fireEvent.click(screen.getByText('ventasDiseno:modal.reactivate'))
+    const confirmar = await screen.findByText('ventasDiseno:modal.confirmReactivate')
+    expect(confirmar.closest('button'), 'sin motivo no se puede confirmar').toBeDisabled()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'El cliente volvió a escribir' } })
+    fireEvent.click(confirmar)
 
-    await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(1, 'lead'))
+    await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(1, 'lead', 'El cliente volvió a escribir'))
+  })
+
+  it('quien no es el aprobador ve la tarjeta perdida con su motivo pero sin el botón Reactivar (Fase 21)', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false, can_reactivate: false, lost_reason: 'Se fue con la competencia' }))
+    renderModal()
+    expect(await screen.findByTestId('lost-reason')).toBeInTheDocument()
+    expect(screen.queryByText('ventasDiseno:modal.reactivate')).not.toBeInTheDocument()
+  })
+
+  it('«Marcar como Perdido» pide un motivo de al menos 10 caracteres y lo envía (Fase 21)', async () => {
+    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'proposal', can_edit: true }))
+    mockedApi.pipeline.changeStage.mockResolvedValue(makeDetail({ stage: 'lost' }))
+    renderModal()
+    await screen.findByText('Proyecto Alfa')
+
+    fireEvent.click(screen.getByText('ventasDiseno:modal.markAsLost'))
+    expect(mockedApi.pipeline.changeStage, 'abrir el formulario no cambia nada').not.toHaveBeenCalled()
+    const confirmar = (await screen.findByText('ventasDiseno:modal.confirmLost')).closest('button')!
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'corto' } })
+    expect(confirmar).toBeDisabled()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Se fue con la competencia' } })
+    fireEvent.click(confirmar)
+
+    await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(1, 'lost', 'Se fue con la competencia'))
   })
 
   // REQ-597 RN3 / REQ-603 RN2 (Epic CRM Batch B) — Aprobado es terminal, sin ningún botón de
@@ -1370,7 +1398,7 @@ describe('PipelineCardModal — solo lectura de Contabilidad (SCRUM-1128)', () =
   })
 
   it('el resto de roles sí conserva Reactivar y "Asignar productos a entrega"', async () => {
-    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
+    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false, can_reactivate: true }))
     const { unmount } = renderModal()
     expect(await screen.findByText('ventasDiseno:modal.reactivate')).toBeInTheDocument()
     unmount()
@@ -1441,7 +1469,7 @@ describe('PipelineCardModal — Contabilidad con edición del Pipeline (SCRUM-11
 
   it('en una tarjeta Perdida ofrece Reactivar (es un cambio de etapa del propio Pipeline)', async () => {
     asContabilidadEditor()
-    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false }))
+    mockedApi.pipeline.get.mockResolvedValue(makeDetail({ stage: 'lost', can_edit: false, can_reactivate: true }))
     renderModal()
     await screen.findByText('Proyecto Alfa')
     expect(screen.getByText('ventasDiseno:modal.reactivate')).toBeInTheDocument()

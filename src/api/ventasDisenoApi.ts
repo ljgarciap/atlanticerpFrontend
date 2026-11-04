@@ -151,8 +151,9 @@ export const ventasDisenoApi = {
     update: (id: number, data: PipelineCardUpdatePayload): Promise<PipelineCardDetail> =>
       api.put<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}`, data).then(r => r.data),
 
-    changeStage: (id: number, stage: PipelineStage): Promise<PipelineCardDetail> =>
-      api.patch<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/stage`, { stage }).then(r => r.data),
+    /** `motivo` es obligatorio al pasar a «Perdido» y al reactivar una tarjeta perdida (Fase 21). */
+    changeStage: (id: number, stage: PipelineStage, motivo?: string): Promise<PipelineCardDetail> =>
+      api.patch<PipelineCardDetail>(`/ventas-diseno/pipeline/${id}/stage`, motivo === undefined ? { stage } : { stage, motivo }).then(r => r.data),
 
     // SCRUM-1128 — aprobación explícita de Gerencia/Contabilidad; el backend genera el pedido una sola vez.
     passToOrder: (id: number): Promise<PipelineCardDetail> =>

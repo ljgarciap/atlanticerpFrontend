@@ -45,7 +45,7 @@ test.describe('Flujo de Compras: familias de producto', () => {
     expect(repetida.body.id).toBe(ctx.familia)
   })
 
-  test('2. listado y detalle: Compras ve costos, Ventas y Contabilidad solo la estructura, Bodega no entra', async () => {
+  test('2. listado y detalle: Compras ve costos, Ventas solo la estructura; Bodega y Contabilidad no entran', async () => {
     const lista = await api('lidercompras', 'GET', '/compras/families?per_page=100')
     expect(lista.status).toBe(200)
     expect(lista.body).toMatchObject({ restricted: false, can_manage: true })
@@ -58,8 +58,7 @@ test.describe('Flujo de Compras: familias de producto', () => {
     expect(ventas.body).toMatchObject({ restricted: true, can_manage: false })
     expect((data(ventas.body) as { total_value: number | null }[]).every(f => f.total_value === null), 'sin valores').toBe(true)
     const conta = await api('contabilidad', 'GET', '/compras/families?per_page=100')
-    expect(conta.status, 'Contabilidad también ve la estructura').toBe(200)
-    expect(conta.body).toMatchObject({ restricted: true, can_manage: false })
+    expect(conta.status, 'Contabilidad ya no ve las familias (Fase 21: no lee Ventas & Diseño completo)').toBe(403)
     expect((await api('liderbodega', 'GET', '/compras/families')).status, 'Bodega no entra').toBe(403)
 
     const detalle = await api('lidercompras', 'GET', `/compras/families/${ctx.familia}`)

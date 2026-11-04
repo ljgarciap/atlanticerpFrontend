@@ -269,10 +269,17 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
 
   const editDraftValid = editDraft.name.trim() !== '' && (editDraft.phone.trim() !== '' || editDraft.email.trim() !== '')
 
+  // Fase 21 — perder una tarjeta y reactivar una perdida piden un motivo escrito.
+  const [reasonFor, setReasonFor] = useState<'lost' | 'reactivate' | null>(null)
+  const [reason, setReason] = useState('')
+  const reasonValid = reason.trim().length >= 10
+
   const changeStageMutation = useMutation({
-    mutationFn: (stage: PipelineStage) => ventasDisenoApi.pipeline.changeStage(cardId, stage),
+    mutationFn: ({ stage, motivo }: { stage: PipelineStage; motivo?: string }) => motivo === undefined ? ventasDisenoApi.pipeline.changeStage(cardId, stage) : ventasDisenoApi.pipeline.changeStage(cardId, stage, motivo),
     onSuccess: () => {
       setStageError(null)
+      setReasonFor(null)
+      setReason('')
       // SCRUM-677 — un cambio de etapa exitoso (ej. el auto-avance disparado desde
       // uploadFileMutation) también resuelve cualquier quoteGateError pendiente de
       // un intento previo de "Crear cotización".
@@ -364,7 +371,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
       // mutation falla igual que un clic manual y stageError ya lo muestra.
       const nextStage = pipelineStages.next(card?.stage)
       if (type === 'signed_quote' && card?.stage === 'quote' && nextStage) {
-        changeStageMutation.mutate(nextStage)
+        changeStageMutation.mutate({ stage: nextStage })
       } else if (type === 'approval_proof' && nextStage === 'approved') {
         // SCRUM-909 (criterio 4) — defensa en profundidad en frontend: si el proyecto es
         // Entrega Parcial y falta asignar fecha a algún producto, ni siquiera se intenta el
@@ -373,7 +380,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
         if (hasUnassignedProductDelivery) {
           setStageError(t('ventasDiseno:modal.deliveryAssignmentIncomplete'))
         } else {
-          changeStageMutation.mutate('approved')
+          changeStageMutation.mutate({ stage: 'approved' })
         }
       }
     },
@@ -1170,12 +1177,11 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
             )}
             {/* SCRUM-1128 — `can_edit` es false en Perdido para todos los roles, así que no sirve
                 de gate: Reactivar se oculta explícitamente al acceso de solo lectura (Contabilidad). */}
-            {pipelineStages.isLost(card?.stage) && !readsPipelineReadOnly && (
+            {pipelineStages.isLost(card?.stage) && !readsPipelineReadOnly && card?.can_reactivate && (
               <Button
                 variant="accent"
-                onClick={() => changeStageMutation.mutate('lead')}
+                onClick={() => { setReason(''); setReasonFor('reactivate') }}
                 disabled={changeStageMutation.isPending}
-                loading={changeStageMutation.isPending}
               >
                 {t('ventasDiseno:modal.reactivate')}
               </Button>
@@ -1200,7 +1206,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                         setStageError(t('ventasDiseno:modal.deliveryAssignmentIncomplete'))
                         return
                       }
-                      changeStageMutation.mutate(nextStageForCard)
+                      changeStageMutation.mutate({ stage: nextStageForCard })
                     }}
                     disabled={changeStageMutation.isPending || deliveryAssignmentBlocksApproval}
                     loading={changeStageMutation.isPending}
@@ -1223,7 +1229,7 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
                 )}
                 <Button
                   variant="danger"
-                  onClick={() => changeStageMutation.mutate('lost')}
+                  onClick={() => { setReason(''); setReasonFor('lost') }}
                   disabled={changeStageMutation.isPending}
                 >
                   {t('ventasDiseno:modal.markAsLost')}
@@ -1231,6 +1237,38 @@ export default function PipelineCardModal({ cardId, onClose }: Props) {
               </>
             )}
           </div>
+
+          {/* Fase 21 — por qué se pierde o se reactiva: queda guardado en la tarjeta y en la auditoría. */}
+          {reasonFor !== null && (
+            <div data-testid="stage-reason-form" className="mb-2 p-3 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+              <label className="text-[12px] font-bold text-slate-500">
+                {t(reasonFor === 'lost' ? 'ventasDiseno:modal.lostReasonLabel' : 'ventasDiseno:modal.reactivateReasonLabel')}
+                <textarea
+                  className="mt-1 w-full border border-slate-200 dark:border-slate-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-slate-800"
+                  rows={2}
+                  maxLength={1000}
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                />
+              </label>
+              <p className="text-[11px] text-slate-400">{t('ventasDiseno:modal.reasonHint')}</p>
+              <div className="flex gap-2">
+                <Button
+                  variant={reasonFor === 'lost' ? 'danger' : 'accent'}
+                  disabled={!reasonValid || changeStageMutation.isPending}
+                  loading={changeStageMutation.isPending}
+                  onClick={() => changeStageMutation.mutate({ stage: reasonFor === 'lost' ? 'lost' : 'lead', motivo: reason.trim() })}
+                >
+                  {t(reasonFor === 'lost' ? 'ventasDiseno:modal.confirmLost' : 'ventasDiseno:modal.confirmReactivate')}
+                </Button>
+                <Button variant="outline" onClick={() => { setReasonFor(null); setReason('') }}>{t('ventasDiseno:modal.cancelReason')}</Button>
+              </div>
+            </div>
+          )}
+
+          {pipelineStages.isLost(card?.stage) && card?.lost_reason && (
+            <p data-testid="lost-reason" className="mb-2 text-[12px] text-slate-500">{t('ventasDiseno:modal.lostBecause', { reason: card.lost_reason })}</p>
+          )}
 
           {saveError && (
             <div className="mb-2 px-3 py-2 rounded-lg border text-[12px] font-medium bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300">
