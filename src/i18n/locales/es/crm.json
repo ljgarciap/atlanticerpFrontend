@@ -70,6 +70,12 @@
     "resultCount_other": "{{count}} proyectos"
   },
   "project": {
+    "changeStage": "Cambiar etapa",
+    "stageReason": "Motivo del cambio (obligatorio)",
+    "stageReasonHint": "Mínimo 10 caracteres. Quedará registrado en el proyecto.",
+    "onlyApproverReactivates": "Solo el aprobador configurado o un suplente puede reactivar un proyecto perdido.",
+    "stageChangeFailed": "No se pudo cambiar la etapa. Revisa el motivo o tus permisos.",
+    "lostReasonShown": "Motivo de la pérdida: {{reason}}",
     "nombre": "Nombre del Proyecto *",
     "contacto": "Nombre de contacto",
     "email": "Email",

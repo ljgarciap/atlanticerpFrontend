@@ -89,12 +89,19 @@ test.describe('Flujo del CRM', () => {
     expect((await api('gerencia', 'PUT', `${CRM}/projects/${ctx.p}`, { notas: 'de gerencia' })).status, 'Gerencia edita el de cualquiera').toBe(200)
   })
 
-  test('3. etapas: libres (sin compuertas) y reabribles', async () => {
-    const mover = (rol: Rol, etapa: string) => api(rol, 'PATCH', `${CRM}/projects/${ctx.p}/stage`, { etapa })
+  test('3. etapas: libres salvo perder (motivo) y reactivar (solo el aprobador o el superadmin, con motivo)', async () => {
+    const mover = (rol: Rol, etapa: string, motivo?: string) => api(rol, 'PATCH', `${CRM}/projects/${ctx.p}/stage`, motivo ? { etapa, motivo } : { etapa })
     expect((await mover('vendedor', 'zzz')).status).toBe(422)
     expect((await mover('vendedor', 'cerrado')).body.etapa, 'de Lead a Cerrado sin pasar por nada').toBe('cerrado')
-    expect((await mover('vendedor', 'perdido')).body.etapa).toBe('perdido')
-    expect((await mover('vendedor', 'lead')).body.etapa, 'un proyecto perdido o cerrado se reabre sin aprobación').toBe('lead')
+    expect((await mover('vendedor', 'lead')).body.etapa, 'un proyecto cerrado se reabre sin aprobación').toBe('lead')
+
+    expect((await mover('vendedor', 'perdido')).status, 'perder exige motivo').toBe(422)
+    const perdido = await mover('vendedor', 'perdido', 'El cliente eligió a otro proveedor')
+    expect(perdido.body).toMatchObject({ etapa: 'perdido', lost_reason: 'El cliente eligió a otro proveedor', can_reactivate: false })
+    expect((await mover('vendedor', 'lead', 'Quiero retomarlo, por favor')).status, 'el vendedor no es el aprobador: no reactiva').toBe(403)
+    expect((await mover('superadmin', 'lead')).status, 'reactivar también exige motivo').toBe(422)
+    const reabierto = await mover('superadmin', 'lead', 'El cliente volvió a pedir cotización')
+    expect(reabierto.body).toMatchObject({ etapa: 'lead', reopened_reason: 'El cliente volvió a pedir cotización' })
     expect((await mover('vendedor2', 'diseno')).status).toBe(403)
     expect((await mover('gerencia', 'diseno')).body.etapa).toBe('diseno')
   })
@@ -121,7 +128,7 @@ test.describe('Flujo del CRM', () => {
     expect((await api('vendedor', 'DELETE', `${rem}/99999999`)).status).toBe(404)
   })
 
-  test('5. contactos: directorio global compartido por quienes tienen el CRM, sin dueño', async () => {
+  test('5. contactos: directorio compartido; editar y borrar solo su creador o quien ve al equipo', async () => {
     expect((await api('vendedor', 'POST', `${CRM}/contacts`, {})).status).toBe(422)
     expect((await api('vendedor', 'GET', `${CRM}/contacts?type=zzz`)).status).toBe(422)
     const c = await api('vendedor', 'POST', `${CRM}/contacts`, { nombre: `[F11CRM] Contacto ${STAMP}`, tipo: 'encargado', email: `c.${STAMP}@example.test`, empresa: 'Empresa' })
@@ -131,9 +138,15 @@ test.describe('Flujo del CRM', () => {
     for (const rol of ['vendedor', 'vendedor2', 'gerencia'] as const) {
       expect(((await api(rol, 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.entries as unknown[]).length, `${rol} lo ve`).toBe(1)
     }
-    // Sin el módulo CRM no se borra (el Técnico traía `crm.delete` en su nivel); con él, cualquier usuario del CRM borra cualquier contacto, sea o no suyo.
+    // Fase 22 (B4): el contacto guarda quién lo creó; sin el módulo CRM no se toca, y con él solo su creador o quien ve al equipo.
+    const fila = ((await api('gerencia', 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.entries as { created_by: number, created_by_name: string }[])[0]
+    expect(fila.created_by).toBe(ctx.vendedorId)
+    expect(fila.created_by_name).toBeTruthy()
     expect((await api('tecnico', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'un rol sin módulo CRM no borra contactos').toBe(403)
-    expect((await api('vendedor2', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'otro vendedor sí borra el contacto de otro').toBe(204)
+    expect((await api('vendedor2', 'PUT', `${CRM}/contacts/${ctx.contacto}`, { empresa: 'Ajena' })).status, 'otro vendedor no edita el contacto de otro').toBe(403)
+    expect((await api('vendedor2', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'ni lo borra').toBe(403)
+    expect((await api('gerencia', 'PUT', `${CRM}/contacts/${ctx.contacto}`, { empresa: 'De gerencia' })).status, 'Gerencia (equipo) sí').toBe(200)
+    expect((await api('gerencia', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status).toBe(204)
     expect((await api('vendedor', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status).toBe(404)
   })
 

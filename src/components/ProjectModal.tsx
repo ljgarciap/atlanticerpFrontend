@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Project, Etapa, TipoSolicitud, TipoActividad } from '@/types/project'
-import { STAGES, ACTIVITY_META, AREA_OPTS } from '@/types/project'
+import { ACTIVITY_META, AREA_OPTS } from '@/types/project'
+import { useCrmStages } from '@/hooks/useCrmStages'
 import { projectsApi } from '@/api/projectsApi'
 import { autocompleteApi } from '@/api/autocompleteApi'
 import { usePermission } from '@/hooks/usePermission'
@@ -30,6 +31,8 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const canEdit   = usePermission('crm.edit')
   const canDelete = usePermission('crm.delete')
   const canAI     = usePermission('ai.use')
+  const { stages, isLost } = useCrmStages()
+  const [stageReason, setStageReason] = useState('')
 
   const [nombre,       setNombre]       = useState('')
   const [contacto,     setContacto]     = useState('')
@@ -140,6 +143,22 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
     },
   })
 
+  // Fase 22 (B3): perder y reactivar piden motivo; reactivar solo lo decide el aprobador (el servidor lo confirma).
+  const stageChanged = !isNew && project != null && etapa !== project.etapa
+  const needsReason  = stageChanged && isLost(etapa) !== isLost(project!.etapa)
+  const reactivating = stageChanged && isLost(project!.etapa) && !isLost(etapa)
+  const blockedReactivation = reactivating && (detail ?? project)?.can_reactivate === false
+  const stageMutation = useMutation({
+    mutationFn: () => projectsApi.changeStage(project!.id, etapa, needsReason ? stageReason.trim() : undefined),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['projects'] })
+      qc.invalidateQueries({ queryKey: ['project', project?.id] })
+      qc.invalidateQueries({ queryKey: ['kpis'] })
+      setStageReason('')
+      onSaved()
+    },
+  })
+
   const deleteMutation = useMutation({
     mutationFn: () => projectsApi.delete(project!.id),
     onSuccess:  () => { qc.invalidateQueries({ queryKey: ['projects'] }); onSaved() },
@@ -223,9 +242,29 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
 
               <div>
                 <label className="label-sm">{t('crm:project.stage')}</label>
-                <select className="input-field" value={etapa} onChange={e => setEtapa(e.target.value as Etapa)}>
-                  {STAGES.map(s => <option key={s.id} value={s.id}>{t(`crm:stages.${s.id}`)}</option>)}
+                <select className="input-field" value={etapa} onChange={e => { setEtapa(e.target.value); setStageReason('') }}>
+                  {stages.filter(s => !isNew || s.category !== 'perdida').map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
+                {!isNew && project && isLost(project.etapa) && (detail ?? project).lost_reason && (
+                  <p className="text-xs text-slate-500 mt-1" data-testid="lost-reason">{t('crm:project.lostReasonShown', { reason: (detail ?? project).lost_reason })}</p>
+                )}
+                {stageChanged && (
+                  <div className="mt-2 flex flex-col gap-2" data-testid="stage-change">
+                    {needsReason && (
+                      <>
+                        <textarea className="input-field" rows={2} value={stageReason} onChange={e => setStageReason(e.target.value)}
+                          placeholder={t('crm:project.stageReason')} data-testid="stage-reason" />
+                        <p className="text-xs text-slate-500">{t('crm:project.stageReasonHint')}</p>
+                      </>
+                    )}
+                    {blockedReactivation && <p className="text-xs text-amber-600" data-testid="reactivate-blocked">{t('crm:project.onlyApproverReactivates')}</p>}
+                    {stageMutation.isError && <p className="text-xs text-red-600">{t('crm:project.stageChangeFailed')}</p>}
+                    <Button type="button" variant="secondary" onClick={() => stageMutation.mutate()}
+                      disabled={stageMutation.isPending || blockedReactivation || (needsReason && stageReason.trim().length < 10)}>
+                      {t('crm:project.changeStage')}
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="label-sm">{t('crm:project.fechaEntrega')}</label>

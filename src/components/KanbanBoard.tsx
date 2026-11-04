@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
 import { useTranslation } from 'react-i18next'
 import type { Project } from '@/types/project'
-import { STAGES } from '@/types/project'
+import { useCrmStages } from '@/hooks/useCrmStages'
 import ProjectCard from './ProjectCard'
 
 interface Props {
@@ -14,9 +14,10 @@ interface Props {
 
 export default function KanbanBoard({ projects, onCardClick, onStageChange }: Props) {
   const { t } = useTranslation(['crm'])
+  const { stages } = useCrmStages()
 
   const [selectedStage, setSelectedStage] = useState<string>(() => {
-    return STAGES.find(s => projects.some(p => p.etapa === s.id))?.id ?? 'lead'
+    return stages.find(s => projects.some(p => p.etapa === s.id))?.id ?? 'lead'
   })
 
   function handleDragEnd(result: DropResult) {
@@ -31,7 +32,7 @@ export default function KanbanBoard({ projects, onCardClick, onStageChange }: Pr
     onStageChange(project.id, newEtapa)
   }
 
-  const activeStage      = STAGES.find(s => s.id === selectedStage)
+  const activeStage      = stages.find(s => s.id === selectedStage)
   const mobileProjects   = projects.filter(p => p.etapa === selectedStage)
 
   return (
@@ -41,9 +42,9 @@ export default function KanbanBoard({ projects, onCardClick, onStageChange }: Pr
         <DragDropContext onDragEnd={handleDragEnd}>
           <div
             className="grid gap-3 overflow-x-auto pb-2"
-            style={{ gridTemplateColumns: `repeat(${STAGES.length}, minmax(220px, 1fr))` }}
+            style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(220px, 1fr))` }}
           >
-            {STAGES.map(stage => {
+            {stages.map(stage => {
               const cols = projects.filter(p => p.etapa === stage.id)
               return (
                 <div key={stage.id} className="bg-slate-100 rounded-xl p-2.5 min-h-[200px] flex flex-col">
@@ -52,7 +53,7 @@ export default function KanbanBoard({ projects, onCardClick, onStageChange }: Pr
                     <div className="flex items-center gap-1.5">
                       <span className="inline-block w-2 h-2 rounded-full" style={{ background: stage.color }} />
                       <span className="text-xs font-medium" style={{ color: stage.color }}>
-                        {t(`crm:stages.${stage.id}`)}
+                        {stage.label}
                       </span>
                     </div>
                     <span
@@ -111,7 +112,7 @@ export default function KanbanBoard({ projects, onCardClick, onStageChange }: Pr
         {/* Pills de selección de etapa */}
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
-            {STAGES.map(stage => {
+            {stages.map(stage => {
               const count    = projects.filter(p => p.etapa === stage.id).length
               const isActive = selectedStage === stage.id
               return (
@@ -127,7 +128,7 @@ export default function KanbanBoard({ projects, onCardClick, onStageChange }: Pr
                     color:           isActive ? 'white' : '#475569', /* slate-600 */
                   }}
                 >
-                  <span>{t(`crm:stages.${stage.id}`)}</span>
+                  <span>{stage.label}</span>
                   <span
                     className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
                     style={{

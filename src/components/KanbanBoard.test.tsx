@@ -4,6 +4,9 @@ import type { Project } from '@/types/project'
 import { STAGES } from '@/types/project'
 import KanbanBoard from './KanbanBoard'
 
+// Fase 22 (B5): las etapas salen del catálogo; en estos tests rigen las 6 de siempre (sin catálogo cargado).
+vi.mock('@/hooks/useCatalog', () => ({ useCatalog: () => ({ data: undefined }) }))
+
 // ── Mock react-i18next ────────────────────────────────────────────────────
 const STAGE_LABELS_ES: Record<string, string> = {
   lead: 'Lead', diseno: 'En Diseño', cotizacion: 'En Cotización',
