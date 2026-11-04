@@ -70,6 +70,12 @@
     "resultCount_other": "{{count}} projects"
   },
   "project": {
+    "changeStage": "Change stage",
+    "stageReason": "Reason for the change (required)",
+    "stageReasonHint": "At least 10 characters. It will be recorded on the project.",
+    "onlyApproverReactivates": "Only the configured approver or a substitute can reactivate a lost project.",
+    "stageChangeFailed": "The stage could not be changed. Check the reason or your permissions.",
+    "lostReasonShown": "Reason it was lost: {{reason}}",
     "nombre": "Project Name *",
     "contacto": "Contact name",
     "email": "Email",

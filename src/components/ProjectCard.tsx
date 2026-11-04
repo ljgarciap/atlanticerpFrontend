@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { Project } from '@/types/project'
-import { STAGES } from '@/types/project'
+import { useCrmStages } from '@/hooks/useCrmStages'
 import { getFreshnessClass, daysUntil } from '@/utils/urgencyUtils'
 import AssigneeAvatarStack from './AssigneeAvatarStack'
 
@@ -25,7 +25,7 @@ function TipoTag({ tipo }: { tipo: string }) {
 
 export default function ProjectCard({ project, onClick }: Props) {
   const { t } = useTranslation('crm')
-  const stage = STAGES.find(s => s.id === project.etapa)
+  const stage = useCrmStages().stages.find(s => s.id === project.etapa)
   const days  = daysUntil(project.fecha_entrega)
 
   return (

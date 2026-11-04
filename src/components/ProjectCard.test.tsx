@@ -3,6 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import ProjectCard from './ProjectCard'
 import type { Project } from '@/types/project'
 
+// Fase 22 (B5): las etapas salen del catálogo; en estos tests rigen las 6 de siempre (sin catálogo cargado).
+vi.mock('@/hooks/useCatalog', () => ({ useCatalog: () => ({ data: undefined }) }))
+
 // ── Mock react-i18next ────────────────────────────────────────────────────
 const MESSAGES: Record<string, string> = {
   'crm:tipoBadge.diseno':     'Diseño',

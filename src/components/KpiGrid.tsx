@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import type { KpiData } from '@/types/project'
-import { STAGES } from '@/types/project'
+import { useCrmStages } from '@/hooks/useCrmStages'
 
 interface Props { kpis: KpiData }
 
 export default function KpiGrid({ kpis }: Props) {
   const { t } = useTranslation(['crm'])
-  const stageKpis = STAGES.map(s => ({
-    label: t(`crm:stages.${s.id}`),
+  const { stages } = useCrmStages()
+  const stageKpis = stages.map(s => ({
+    label: s.label,
     value: kpis.counts_by_stage[s.id] ?? 0,
     color: s.color,
   }))

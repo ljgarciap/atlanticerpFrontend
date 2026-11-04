@@ -1,4 +1,5 @@
-export type Etapa = 'lead' | 'diseno' | 'cotizacion' | 'propuesta' | 'cerrado' | 'perdido'
+// Fase 22 (B5): las etapas son un catálogo por empresa; las 6 de siempre son las de sistema.
+export type Etapa = string
 export type TipoSolicitud = 'diseno' | 'cotizacion' | 'ambos'
 export type TipoActividad = 'llamada' | 'email' | 'reunion' | 'whatsapp' | 'visita' | 'otro'
 export type Urgency  = 'ok' | 'proximo' | 'vencido'
@@ -117,6 +118,11 @@ export interface Project {
   despacho:        string | null
   ubicacion:       string | null
   etapa:           Etapa
+  lost_reason?:     string | null
+  lost_at?:         string | null
+  reopened_reason?: string | null
+  reopened_at?:     string | null
+  can_reactivate?:  boolean
   fecha_entrega:   string | null
   valor:           number | null
   notas:           string | null
@@ -172,7 +178,7 @@ export interface KpiData {
 
 // SCRUM-29 BUG-15/16/17/19/20: `label` se eliminó a propósito — resolver siempre
 // vía t(`crm:stages.${id}`) en el componente, nunca un string fijo aquí.
-export const STAGES: { id: Etapa; color: string }[] = [
+export const STAGES: { id: string; color: string }[] = [
   { id: 'lead',       color: '#eab308' },
   { id: 'diseno',     color: '#3b82f6' },
   { id: 'cotizacion', color: '#a855f7' },

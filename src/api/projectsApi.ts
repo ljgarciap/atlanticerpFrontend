@@ -34,8 +34,8 @@ export const projectsApi = {
   update: (id: number, data: Record<string, unknown>): Promise<Project> =>
     api.put<Project>(`/crm/projects/${id}`, data).then(r => r.data),
 
-  changeStage: (id: number, etapa: string): Promise<Project> =>
-    api.patch<Project>(`/crm/projects/${id}/stage`, { etapa }).then(r => r.data),
+  changeStage: (id: number, etapa: string, motivo?: string): Promise<Project> =>
+    api.patch<Project>(`/crm/projects/${id}/stage`, motivo ? { etapa, motivo } : { etapa }).then(r => r.data),
 
   delete: (id: number): Promise<void> =>
     api.delete(`/crm/projects/${id}`).then(() => undefined),
