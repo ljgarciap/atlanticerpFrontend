@@ -122,6 +122,8 @@ describe('ConfirmReturnReceptionModal', () => {
   it('guardar sin cantidad válida muestra error y no llama al backend', async () => {
     renderModal()
     await screen.findByText('Producto colgante Nordic 40cm')
+    // el almacén se elige solo cuando termina de cargar la lista; sin esperarlo, «guardar» responde «falta el almacén» en vez de «cantidad inválida»
+    await waitFor(() => expect((screen.getByRole('combobox') as HTMLSelectElement).value).not.toBe(''))
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '' } })
     fireEvent.click(screen.getByText('bodega:returns.receptionModal.save'))
