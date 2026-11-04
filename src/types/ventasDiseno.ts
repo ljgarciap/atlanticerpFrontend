@@ -129,6 +129,13 @@ export interface PipelineCardDetail extends PipelineCard {
   contacts:               PipelineCardContact[]
   has_architect_contact: boolean
   can_edit:               boolean
+  /** Fase 21 — por qué se perdió y, si se reactivó, quién lo decidió y por qué. */
+  lost_reason?:           string | null
+  lost_at?:               string | null
+  reopened_reason?:       string | null
+  reopened_at?:           string | null
+  /** Fase 21 — solo el aprobador (o un suplente) puede reactivar una tarjeta perdida. */
+  can_reactivate?:        boolean
   files:                  PipelineCardFile[]
   // SCRUM-734 — id de la cotización confirmada más reciente del proyecto, o null
   // si nunca hubo ninguna. Gate + destino de "Ver cotizaciones de este proyecto".

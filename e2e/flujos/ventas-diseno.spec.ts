@@ -7,7 +7,7 @@ import { API, data, iniciarSesion, llamar, rucUnico, type Tokens } from './apoyo
 // `venta-a-cobro.spec.ts`. Los clientes, arquitectos y tarjetas que crea llevan «[F11A]» y NO se pueden borrar (la API no ofrece baja); solo el
 // aislamiento por STAMP evita choques entre corridas. Correr con UN worker (npm run e2e:flujos).
 
-const ROLES = ['vendedor', 'vendedor2', 'gerencia', 'contabilidad', 'lidercompras', 'tecnico', 'superadmin'] as const
+const ROLES = ['vendedor', 'vendedor2', 'gerencia', 'gerencia3', 'contabilidad', 'lidercompras', 'tecnico', 'superadmin'] as const
 const STAMP = String(Date.now())
 const VD = '/ventas-diseno'
 const ctx: Record<string, any> = {}
@@ -202,9 +202,17 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect(pedir.status).toBe(422)
     expect(pedir.body.message).toMatch(/Aprobado/)
 
-    // «Perdido» se alcanza sin motivo y se deshace con otro cambio de etapa.
-    expect((await api('vendedor', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'lost' })).body.stage).toBe('lost')
-    expect((await api('vendedor', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'lead' })).body.stage, 'un proyecto perdido se reabre sin aprobación').toBe('lead')
+    // «Perdido» exige un motivo (mínimo 10 caracteres) que queda guardado; reactivarlo lo decide el aprobador primario (o un suplente), también con motivo.
+    const url = `${VD}/pipeline/${ctx.card}/stage`
+    expect((await api('vendedor', 'PATCH', url, { stage: 'lost' })).status, 'perder sin motivo').toBe(422)
+    expect((await api('vendedor', 'PATCH', url, { stage: 'lost', motivo: 'corto' })).status, 'motivo de menos de 10 caracteres').toBe(422)
+    const perdida = await api('vendedor', 'PATCH', url, { stage: 'lost', motivo: 'Se fue con la competencia' })
+    expect(perdida.body).toMatchObject({ stage: 'lost', lost_reason: 'Se fue con la competencia', can_reactivate: false })
+    expect((await api('vendedor', 'PATCH', url, { stage: 'lead', motivo: 'Quiero retomarlo, por favor' })).status, 'el dueño de la tarjeta no la reactiva').toBe(403)
+    expect((await api('gerencia', 'PATCH', url, { stage: 'lead', motivo: 'Gerencia sin ser el aprobador' })).status, 'Gerencia tampoco, si no es el aprobador configurado').toBe(403)
+    expect((await api('gerencia3', 'PATCH', url, { stage: 'lead' })).status, 'el aprobador también debe dar un motivo').toBe(422)
+    const reabierta = await api('gerencia3', 'PATCH', url, { stage: 'lead', motivo: 'El cliente volvió a escribir' })
+    expect(reabierta.body).toMatchObject({ stage: 'lead', reopened_reason: 'El cliente volvió a escribir', lost_reason: 'Se fue con la competencia' })
 
     // Quién puede tocarla.
     expect((await api('vendedor2', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'design' })).status, 'otro vendedor no mueve la tarjeta').toBe(403)

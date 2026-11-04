@@ -69,6 +69,11 @@ export default function VentasDisenoPipelinePage() {
     setDraggedCardId(null)
     if (cardId === null) return
     const card = allCards.find(c => c.id === cardId)
+    // Fase 21 — perder o reactivar pide un motivo: se hace desde el detalle de la tarjeta, no arrastrando.
+    if (card && card.stage !== targetStage && (pipelineStages.isLost(targetStage) || pipelineStages.isLost(card.stage))) {
+      toast(t('ventasDiseno:modal.lostNeedsReason'), 'error')
+      return
+    }
     if (card && card.stage !== targetStage) {
       dropMutation.mutate({ id: cardId, stage: targetStage })
     }

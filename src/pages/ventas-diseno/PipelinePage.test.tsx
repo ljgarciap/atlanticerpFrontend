@@ -304,6 +304,18 @@ describe('VentasDisenoPipelinePage', () => {
       await waitFor(() => expect(mockedApi.pipeline.changeStage).toHaveBeenCalledWith(7, 'design'))
     })
 
+    it('arrastrar a Perdido no llama al endpoint: perder pide un motivo y se hace desde el detalle (Fase 21)', async () => {
+      const showSpy = mockToast()
+      mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
+      renderPage()
+
+      await screen.findByText('Proyecto Alfa')
+      dragCardToColumn(7, 'lost')
+
+      expect(mockedApi.pipeline.changeStage).not.toHaveBeenCalled()
+      expect(showSpy).toHaveBeenCalledWith('ventasDiseno:modal.lostNeedsReason', 'error')
+    })
+
     it('soltar en la misma columna de origen no llama al endpoint (no-op)', async () => {
       mockedApi.pipeline.list.mockResolvedValue([makeCard({ id: 7, stage: 'lead' })])
       renderPage()
