@@ -326,7 +326,7 @@ export default function OrdersPage() {
                 <td className="px-4 py-3 text-slate-600">{formatDateFromTimestamp(o.created_at)}</td>
                 <td className="px-4 py-3 text-slate-600">{o.estimated_arrival_date ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">{o.last_payment_date ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">${formatMoney(o.total_amount)}</td>
+                <td className="px-4 py-3 text-slate-600">{(o.total_amount as number | null) === null ? '—' : `$${formatMoney(o.total_amount)}`}</td>
                 <td className="px-4 py-3 text-slate-600">{o.shipping_cost != null ? `$${formatMoney(o.shipping_cost)}` : '—'}</td>
                 <td className="px-4 py-3">
                   <ReceptionBadge status={o.reception_status} t={t} />

@@ -21,6 +21,8 @@ const RUTAS = [
   '/', '/settings', '/configuracion/global', '/ventas-diseno/home', '/ventas-diseno/catalog', '/compras/configuracion',
   '/bodega/home', '/bodega/inventario', '/bodega/configuracion', '/inventario', '/servicios/ajustes',
   '/admin-contab/fiscal', '/admin-contab/empresa', '/admin-contab/datos-fiscales-clientes', '/crm/dashboard',
+  // Fase 27: la lista de órdenes y Logística recibían montos en nulo para Operaciones y la primera se rompía sin que nada lo viera
+  '/compras/ordenes', '/compras/logistica',
 ]
 
 // Vocabulario de otro sector que el contrato de neutralidad prohíbe en el repo; se arma por fragmentos para que este archivo no lo nombre.
