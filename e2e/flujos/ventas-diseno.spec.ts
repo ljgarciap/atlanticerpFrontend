@@ -221,13 +221,11 @@ test.describe('Flujo de Ventas & Diseño', () => {
     expect((await api('vendedor2', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: 'ajena' })).status).toBe(403)
     expect((await api('vendedor2', 'GET', `${VD}/pipeline/${ctx.card}`)).status, 'ni la ve').toBe(403)
     expect((await api('contabilidad', 'GET', `${VD}/pipeline/${ctx.card}`)).status, 'Contabilidad la ve').toBe(200)
-    // Fase 21 (B1): Contabilidad ve todo el Pipeline (`pipeline.read_all`) pero solo edita lo que ella creó (`pipeline.edit`): la tarjeta de otro vendedor es de lectura.
-    expect((await api('contabilidad', 'GET', `${VD}/pipeline/${ctx.card}`)).body.can_edit, 'la tarjeta ajena no es editable para Contabilidad').toBe(false)
-    expect((await api('contabilidad', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'design' })).status, 'Contabilidad no mueve la tarjeta de otro vendedor').toBe(403)
+    // Fase 26b: Contabilidad ve todo el Pipeline (`pipeline.read_all`) en SOLO LECTURA: no crea, no edita ni mueve tarjetas (ni ajenas ni propias).
+    expect((await api('contabilidad', 'GET', `${VD}/pipeline/${ctx.card}`)).body.can_edit, 'la tarjeta no es editable para Contabilidad').toBe(false)
+    expect((await api('contabilidad', 'PATCH', `${VD}/pipeline/${ctx.card}/stage`, { stage: 'design' })).status, 'Contabilidad no mueve la tarjeta').toBe(403)
     expect((await api('contabilidad', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: 'ajena' })).status).toBe(403)
-    const propia = await api('contabilidad', 'POST', `${VD}/pipeline`, { type: 'lead', name: `[F11A] Lead Contabilidad ${STAMP}`, sub_client_id: ctx.sc })
-    expect(propia.status, 'Contabilidad crea su propio proyecto').toBe(201)
-    expect((await api('contabilidad', 'PUT', `${VD}/pipeline/${propia.body.id}`, { name: `[F11A] Lead Contabilidad ${STAMP} editado` })).status, 'y edita el que creó').toBe(200)
+    expect((await api('contabilidad', 'POST', `${VD}/pipeline`, { type: 'lead', name: `[F11A] Lead Contabilidad ${STAMP}`, sub_client_id: ctx.sc })).status, 'Contabilidad no crea proyectos').toBe(403)
     expect((await api('gerencia', 'PUT', `${VD}/pipeline/${ctx.card}`, { name: `[F11A] Lead ${STAMP} Gerencia` })).status, 'Gerencia sí edita la de otro').toBe(200)
   })
 
