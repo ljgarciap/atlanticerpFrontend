@@ -252,6 +252,20 @@ describe('OrdersPage — columnas faltantes de REQ-140 (SCRUM-203)', () => {
     // responsable) — todas caen al mismo placeholder "—", consistente con el mockup.
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(4)
   })
+
+  // Fase 24: Operaciones recibe los montos en nulo; la lista no debe romperse (antes fallaba con «toLocaleString» de null).
+  it('con los montos ocultos (total nulo) muestra "—" en vez de romper', async () => {
+    mockedComprasApi.orders.list.mockResolvedValue({
+      data: [makeSummary({ total_amount: null as unknown as number, shipping_cost: null })],
+      filters: { creators: [] },
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('Proveedor Demo A')).toBeInTheDocument())
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
+  })
 })
 
 // Pre-QA 2026-08-13 (Servicios, REQ-274 RN3, SCRUM-344) — gap real encontrado en vivo: el backend
