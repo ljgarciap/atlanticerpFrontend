@@ -1,5 +1,5 @@
 {
- "_generado": "2026-10-25 con effectivePermissions() real sobre los usuarios del seed, ya con el catálogo de roles genérico de la Fase 3. Regenerar si cambian roles/niveles. Fase 19 (2026-11-03): añadidos `crm.view`/`crm.view_team` a Vendedor y Gerencia (el módulo `crm` copia la visibilidad de `ventas_diseno`).",
+ "_generado": "2026-10-25 con effectivePermissions() real sobre los usuarios del seed, ya con el catálogo de roles genérico de la Fase 3. Regenerar si cambian roles/niveles. Fase 19 (2026-11-03): añadidos `crm.view`/`crm.view_team` a Vendedor y Gerencia (el módulo `crm` copia la visibilidad de `ventas_diseno`). Fase 23 (2026-11-04): Gerencia (nivel 9) recibe ventas_diseno.pricing.configure, reports.configure y commissions.mark_paid.",
  "identities": [
   {
    "email": "superadmin@test.com",
@@ -87,10 +87,13 @@
     "servicios.write",
     "settings.global",
     "ventas_diseno.approve",
+    "ventas_diseno.commissions.mark_paid",
     "ventas_diseno.edit",
     "ventas_diseno.orders.access",
     "ventas_diseno.pass_to_order",
+    "ventas_diseno.pricing.configure",
     "ventas_diseno.read",
+    "ventas_diseno.reports.configure",
     "ventas_diseno.view",
     "ventas_diseno.view_team",
     "ventas_diseno.write"
@@ -162,11 +165,14 @@
     "servicios.write",
     "settings.global",
     "ventas_diseno.approve",
+    "ventas_diseno.commissions.mark_paid",
     "ventas_diseno.edit",
     "ventas_diseno.orders.access",
     "ventas_diseno.override_min_margin",
     "ventas_diseno.pass_to_order",
+    "ventas_diseno.pricing.configure",
     "ventas_diseno.read",
+    "ventas_diseno.reports.configure",
     "ventas_diseno.view",
     "ventas_diseno.view_team",
     "ventas_diseno.write"
@@ -241,6 +247,7 @@
     "servicios.write",
     "settings.global",
     "ventas_diseno.approve",
+    "ventas_diseno.commissions.mark_paid",
     "ventas_diseno.edit",
     "ventas_diseno.edit.approved",
     "ventas_diseno.edit.client_tax_data",
@@ -248,7 +255,9 @@
     "ventas_diseno.orders.access",
     "ventas_diseno.override_min_margin",
     "ventas_diseno.pass_to_order",
+    "ventas_diseno.pricing.configure",
     "ventas_diseno.read",
+    "ventas_diseno.reports.configure",
     "ventas_diseno.select_partner_price",
     "ventas_diseno.view",
     "ventas_diseno.view_team",
