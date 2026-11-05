@@ -1,5 +1,5 @@
 {
- "_generado": "2026-10-25 con effectivePermissions() real sobre los usuarios del seed, ya con el catálogo de roles genérico de la Fase 3. Regenerar si cambian roles/niveles. Fase 19 (2026-11-03): añadidos `crm.view`/`crm.view_team` a Vendedor y Gerencia (el módulo `crm` copia la visibilidad de `ventas_diseno`). Fase 23 (2026-11-04): Gerencia (nivel 9) recibe ventas_diseno.pricing.configure, reports.configure y commissions.mark_paid.",
+ "_generado": "2026-10-25 con effectivePermissions() real sobre los usuarios del seed, ya con el catálogo de roles genérico de la Fase 3. Regenerar si cambian roles/niveles. Fase 19 (2026-11-03): añadidos `crm.view`/`crm.view_team` a Vendedor y Gerencia (el módulo `crm` copia la visibilidad de `ventas_diseno`). Fase 23 (2026-11-04): Gerencia (nivel 9) recibe ventas_diseno.pricing.configure, reports.configure y commissions.mark_paid. Fase 26b (2026-11-04): Contabilidad pierde ventas_diseno.pipeline.edit (solo ver, no mover).",
  "identities": [
   {
    "email": "superadmin@test.com",
@@ -358,7 +358,6 @@
     "ventas_diseno.gerencia_scope",
     "ventas_diseno.override_min_margin",
     "ventas_diseno.pass_to_order",
-    "ventas_diseno.pipeline.edit",
     "ventas_diseno.pipeline.read_all",
     "ventas_diseno.read",
     "ventas_diseno.select_partner_price",
