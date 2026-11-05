@@ -5,16 +5,12 @@ import { projectsApi } from '@/api/projectsApi'
 import { settingsApi } from '@/api/settingsApi'
 import type { Document, DocumentCategoria, DocumentVersion } from '@/types/project'
 import ShareLinkModal from './ShareLinkModal'
+import { useCrmList } from '@/hooks/useCrmLists'
 import { Button } from '@/components/ui/Button'
 import {
   IcoFile, IcoFileText, IcoFileCad, IcoImage, IcoArchive, IcoBarChart, IcoBox,
   IcoGlobe, IcoDownload, IcoLink, IcoClose, IcoChevronDown, IcoChevronRight,
 } from '@/components/icons'
-
-const CATEGORIAS: DocumentCategoria[] = [
-  'cotizacion', 'diseno', 'presentacion', 'plano',
-  'render', 'ficha', 'modelo_3d', 'otro',
-]
 
 const ACCEPT_EXTENSIONS = [
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv', '.ppt', '.pptx',
@@ -51,10 +47,13 @@ interface Props {
 
 export default function DocumentSection({ projectId, canWrite, canDelete }: Props) {
   const { t }  = useTranslation(['crm', 'common'])
+  const { options: categorias, labelOf: categoriaLabel } = useCrmList('crm_document_category')
   const qc     = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [categoria,     setCategoria]     = useState<DocumentCategoria>('otro')
+  const [categoriaSel,  setCategoriaSel]  = useState<DocumentCategoria>('otro')
+  // la elegida puede haberse desactivado en Ajustes: se usa la primera vigente
+  const categoria = categorias.some(c => c.key === categoriaSel) ? categoriaSel : (categorias[0]?.key ?? categoriaSel)
   const [uploadPct,     setUploadPct]     = useState<number | null>(null)
   const [uploadError,   setUploadError]   = useState<string | null>(null)
   const [actionError,   setActionError]   = useState<string | null>(null)
@@ -155,11 +154,11 @@ export default function DocumentSection({ projectId, canWrite, canDelete }: Prop
           <div className="flex items-center gap-2">
             <select
               value={categoria}
-              onChange={e => setCategoria(e.target.value as DocumentCategoria)}
+              onChange={e => setCategoriaSel(e.target.value)}
               className="text-[11px] border border-slate-200 rounded-lg px-2 py-1 text-slate-600 focus:outline-none focus:border-[#5BA5A0]"
             >
-              {CATEGORIAS.map(c => (
-                <option key={c} value={c}>{t(`crm:document.categorias.${c}`)}</option>
+              {categorias.map(c => (
+                <option key={c.key} value={c.key}>{c.label}</option>
               ))}
             </select>
             <Button
@@ -228,7 +227,7 @@ export default function DocumentSection({ projectId, canWrite, canDelete }: Prop
                 </span>
               )}
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 shrink-0">
-                {t(`crm:document.categorias.${doc.categoria}`)}
+                {categoriaLabel(doc.categoria)}
               </span>
               {doc.storage_zone === 'public' && (
                 <span className="p-0.5 rounded bg-green-100 text-green-600 shrink-0" title="Público">
@@ -304,7 +303,7 @@ export default function DocumentSection({ projectId, canWrite, canDelete }: Prop
                       </p>
                     </div>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-400 shrink-0">
-                      {t(`crm:document.categorias.${doc.categoria}`)}
+                      {categoriaLabel(doc.categoria)}
                     </span>
                     <Button
                       variant="icon"

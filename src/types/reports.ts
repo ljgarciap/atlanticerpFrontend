@@ -10,14 +10,8 @@ export interface MonthlyKpis {
   documentos:    number
 }
 
-export interface ActivityBreakdown {
-  llamada:  number
-  email:    number
-  reunion:  number
-  whatsapp: number
-  visita:   number
-  otro:     number
-}
+// Fase 25: un conteo por cada tipo de actividad del catálogo de la empresa.
+export type ActivityBreakdown = Record<string, number>
 
 export interface TeamMemberMonthly {
   user_id:       number

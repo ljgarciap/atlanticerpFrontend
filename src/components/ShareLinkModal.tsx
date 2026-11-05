@@ -30,6 +30,7 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
   const [justCreated, setJustCreated] = useState<CreatedShareLink | null>(null)
   const [copied,      setCopied]      = useState(false)
   const [revokingId,  setRevokingId]  = useState<number | null>(null)
+  const [destinatario, setDestinatario] = useState('')
 
   const queryKey = ['share-links', projectId, doc.id]
 
@@ -39,9 +40,10 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
   })
 
   const createMutation = useMutation({
-    mutationFn: () => projectsApi.createShareLink(projectId, doc.id),
+    mutationFn: () => projectsApi.createShareLink(projectId, doc.id, destinatario.trim() || undefined),
     onSuccess: (created) => {
       setJustCreated(created)
+      setDestinatario('')
       setCopied(false)
       qc.invalidateQueries({ queryKey })
     },
@@ -93,6 +95,18 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
         </div>
 
         <div className="px-4 sm:px-6 py-5 space-y-4 flex-1 overflow-y-auto">
+          <div>
+            <label className="text-xs text-slate-500 block mb-1" htmlFor="share-destinatario">{t('crm:shareLink.recipientLabel')}</label>
+            <input
+              id="share-destinatario"
+              type="text"
+              maxLength={120}
+              value={destinatario}
+              onChange={e => setDestinatario(e.target.value)}
+              placeholder={t('crm:shareLink.recipientPlaceholder')}
+              className="input-field py-2 text-sm"
+            />
+          </div>
           <Button
             loading={createMutation.isPending}
             onClick={() => createMutation.mutate()}
@@ -143,6 +157,16 @@ export default function ShareLinkModal({ projectId, document: doc, onClose }: Pr
                         {t('crm:shareLink.expiresAt', { date: formatDateFromTimestamp(link.expires_at) })}
                       </p>
                     </div>
+                    {link.destinatario && (
+                      <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 break-words">
+                        {t('crm:shareLink.sharedWith', { name: link.destinatario })}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-slate-400" data-testid={`share-opens-${link.id}`}>
+                      {link.access_count === 0
+                        ? t('crm:shareLink.neverOpened')
+                        : t('crm:shareLink.opens', { count: link.access_count, date: link.last_accessed_at ? formatDateFromTimestamp(link.last_accessed_at) : '' })}
+                    </p>
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-[10px] text-slate-400">
                         {link.created_by.first_name} {link.created_by.last_name}

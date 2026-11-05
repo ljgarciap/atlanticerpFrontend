@@ -136,10 +136,10 @@ test.describe('Flujo del CRM', () => {
     ctx.contacto = c.body.id
     expect((await api('vendedor', 'PUT', `${CRM}/contacts/${ctx.contacto}`, { nombre: `[F11CRM] Editado ${STAMP}`, tipo: 'encargado' })).status).toBe(200)
     for (const rol of ['vendedor', 'vendedor2', 'gerencia'] as const) {
-      expect(((await api(rol, 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.entries as unknown[]).length, `${rol} lo ve`).toBe(1)
+      expect(((await api(rol, 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.data as unknown[]).length, `${rol} lo ve`).toBe(1)
     }
     // Fase 22 (B4): el contacto guarda quién lo creó; sin el módulo CRM no se toca, y con él solo su creador o quien ve al equipo.
-    const fila = ((await api('gerencia', 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.entries as { created_by: number, created_by_name: string }[])[0]
+    const fila = ((await api('gerencia', 'GET', `${CRM}/contacts?q=${encodeURIComponent(`F11CRM] Editado ${STAMP}`)}`)).body.data as { created_by: number, created_by_name: string }[])[0]
     expect(fila.created_by).toBe(ctx.vendedorId)
     expect(fila.created_by_name).toBeTruthy()
     expect((await api('tecnico', 'DELETE', `${CRM}/contacts/${ctx.contacto}`)).status, 'un rol sin módulo CRM no borra contactos').toBe(403)
@@ -170,11 +170,16 @@ test.describe('Flujo del CRM', () => {
     expect((await api('vendedor', 'GET', `${CRM}/documents/${v2.body.id}/url`)).body.url).toMatch(/signature=/)
     expect((await api('vendedor2', 'GET', `${CRM}/documents/${v2.body.id}/url`)).status).toBe(403)
 
-    const enlace = await api('vendedor', 'POST', `${docs}/${v2.body.id}/share-links`, {})
+    expect((await api('vendedor', 'POST', `${docs}/${v2.body.id}/share-links`, { destinatario: 'x'.repeat(121) })).status, 'el destinatario tiene tope').toBe(422)
+    const enlace = await api('vendedor', 'POST', `${docs}/${v2.body.id}/share-links`, { destinatario: `Cliente ${STAMP}` })
     expect(enlace.status).toBe(201)
+    expect(enlace.body.destinatario).toBe(`Cliente ${STAMP}`)
     expect(enlace.body.url).toContain('/public/share/')
     const publico = await fetch(enlace.body.url, { redirect: 'manual' })
     expect(publico.status, 'el enlace público no pide sesión y redirige al archivo firmado').toBe(302)
+    const abierto = (await api('vendedor', 'GET', `${docs}/${v2.body.id}/share-links`)).body.find((l: { id: number }) => l.id === enlace.body.id)
+    expect(abierto, 'el listado cuenta las aperturas y dice a quién se compartió').toMatchObject({ destinatario: `Cliente ${STAMP}`, access_count: 1 })
+    expect(abierto.last_accessed_at).not.toBeNull()
     expect((await fetch(`${BASE}/public/share/token-falso`, { redirect: 'manual' })).status).toBe(404)
     const listado = (await api('vendedor', 'GET', `${docs}/${v2.body.id}/share-links`)).body
     expect(JSON.stringify(listado), 'el token solo se ve al crearlo').not.toContain(enlace.body.url.split('/').pop())
@@ -207,6 +212,24 @@ test.describe('Flujo del CRM', () => {
 
     expect(data((await api('vendedor', 'GET', `${CRM}/autocomplete/users?q=vend`)).body).length).toBeGreaterThan(0)
     expect((await api('vendedor', 'GET', `${CRM}/autocomplete/fields?field=encargado&q=Enc`)).status).toBe(200)
+  })
+
+  test('7b. listas del CRM como catálogo: un tipo propio se usa, el que está en uso no se borra y se limpia', async () => {
+    const clave = `f25_${STAMP}`.slice(0, 40)
+    const nueva = await api('superadmin', 'POST', '/admin/catalogs/crm_activity_type', { key: clave, label: `Capacitación ${STAMP}` })
+    expect(nueva.status).toBe(201)
+    expect(((await api('vendedor', 'GET', '/catalogs/crm_activity_type')).body as { key: string }[]).map(e => e.key), 'cualquier rol lo ve').toContain(clave)
+
+    const act = `${CRM}/projects/${ctx.p}/activities`
+    const a = await api('vendedor', 'POST', act, { tipo: clave, fecha: '2026-11-03', notas: 'Tipo propio' })
+    expect(a.status, 'el tipo propio se acepta').toBe(201)
+    expect((await api('superadmin', 'DELETE', `/admin/catalogs/crm_activity_type/${nueva.body.id}`)).status, 'en uso no se borra').toBe(422)
+    expect((await api('vendedor', 'DELETE', `${act}/${a.body.id}`)).status).toBe(204)
+    expect((await api('superadmin', 'DELETE', `/admin/catalogs/crm_activity_type/${nueva.body.id}`)).status, 'sin uso se borra').toBe(204)
+    expect((await api('vendedor', 'POST', act, { tipo: clave, fecha: '2026-11-03' })).status, 'ya no existe').toBe(422)
+
+    const kpis = (await api('vendedor', 'GET', `${CRM}/dashboard/kpis`)).body
+    expect(Object.keys(kpis.counts_by_tipo), 'el tablero cuenta los tipos del catálogo').toEqual(expect.arrayContaining(['diseno', 'cotizacion', 'ambos']))
   })
 
   test('8. ajustes (solo superadmin) y baja de proyectos (solo Gerencia)', async () => {

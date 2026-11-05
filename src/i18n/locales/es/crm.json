@@ -425,6 +425,12 @@
     "statusExpired": "Expirado",
     "newLinkReady": "Link generado — cópialo ahora",
     "copyNowWarning": "Por seguridad, no vas a poder volver a verlo una vez que cierres este modal.",
+    "recipientLabel": "Compartido con (opcional)",
+    "recipientPlaceholder": "Nombre o empresa de quien lo recibe",
+    "sharedWith": "Compartido con {{name}}",
+    "neverOpened": "Aún no se ha abierto",
+    "opens_one": "Abierto 1 vez · última: {{date}}",
+    "opens_other": "Abierto {{count}} veces · última: {{date}}",
     "noLinks": "Todavía no generaste ningún link para este documento.",
     "close": "Cerrar"
   },

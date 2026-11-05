@@ -18,14 +18,15 @@ export interface Contact {
   ultima_actividad: string | null
 }
 
+// Fase 25: misma forma `{data, meta}` que el resto de los listados (`meta` trae los totales).
 export interface ContactsResponse {
-  stats: {
+  data: Contact[]
+  meta: {
     total:          number
     total_projects: number
     total_valor:    number
     total_cerrado:  number
   }
-  entries: Contact[]
 }
 
 export interface ContactPayload {
