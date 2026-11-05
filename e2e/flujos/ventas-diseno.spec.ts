@@ -236,7 +236,7 @@ test.describe('Flujo de Ventas & Diseño', () => {
     const ids = (b: any) => (data(b) as { id: number }[]).map(c => c.id)
     expect(ids(await total('vendedor', '')), 'el dueño la ve').toContain(ctx.card)
     expect(ids(await total('vendedor2', '')), 'otro vendedor no').not.toContain(ctx.card)
-    expect(ids(await total('vendedor2', '&scope=team')), 'en el Pipeline pedir «equipo» sin permiso de equipo lo reduce a lo propio (ahí el alcance de equipo lo dan también otros permisos)').not.toContain(ctx.card)
+    expect((await api('vendedor2', 'GET', `${VD}/pipeline?scope=team`)).status, 'pedir «equipo» sin permiso de equipo responde 403').toBe(403)
     expect(ids(await total('gerencia', '&scope=team'))).toContain(ctx.card)
     expect(ids(await total('gerencia', '')), 'Gerencia sin pedir equipo ve solo lo suyo').not.toContain(ctx.card)
     expect(ids(await total('contabilidad', '&scope=team')), 'Contabilidad lee el equipo').toContain(ctx.card)
