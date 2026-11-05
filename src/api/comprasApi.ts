@@ -4,7 +4,7 @@ import type {
   ProviderListResponse, ProviderDetail, ProviderPayload,
   PurchaseOrderListResponse, PurchaseOrderDetail, PurchaseOrderPayload, OrderTranslationStatus, OrderDocLang,
   ApprovedProject, ComprasSettings, ComprasCatalogProduct, ComprasCatalogProductPage,
-  ShippingInfoPayload, PurchaseOrderDocument, DocumentCategory,
+  ShippingInfoPayload, ShippingHistoryEntry, PurchaseOrderDocument, DocumentCategory,
   LiquidationAgency, LiquidationAgencyPayload, ProviderConfirmationValidation, ProviderBankExtraction,
   LiquidationAgencySummaryResponse, LiquidationAgencyDetail,
   LiquidationAgencyContact, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload,
@@ -172,6 +172,10 @@ export const comprasApi = {
     updateShippingInfo: (id: number, data: ShippingInfoPayload): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/shipping-info`, data).then(r => r.data),
 
+    // Fase 24b — historial de cambios de contenedor y transportista (quién, cuándo, antes y después).
+    shippingHistory: (id: number): Promise<{ data: ShippingHistoryEntry[] }> =>
+      api.get<{ data: ShippingHistoryEntry[] }>(`/compras/orders/${id}/shipping-history`).then(r => r.data),
+
     // SCRUM-210 (REQ-147, alcance reducido) — solo órdenes de proveedores internacionales (el backend lo valida).
     liquidate: (id: number, agencyId: number): Promise<PurchaseOrderDetail> =>
       api.patch<PurchaseOrderDetail>(`/compras/orders/${id}/liquidate`, { agency_id: agencyId }).then(r => r.data),
@@ -254,6 +258,10 @@ export const comprasApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then(r => r.data)
     },
+
+    // Fase 24a — baja lógica con motivo (≥10 caracteres); el archivo se conserva.
+    remove: (orderId: number, documentId: number, motivo: string): Promise<void> =>
+      api.delete(`/compras/orders/${orderId}/documents/${documentId}`, { data: { motivo } }).then(() => undefined),
 
     // SCRUM-211 (ADR-SCRUM211) — validación con IA del documento de confirmación de proveedor.
     validate: (orderId: number, documentId: number): Promise<{ job_id: string }> =>

@@ -485,7 +485,9 @@
     "shippingInfo": {
       "container": "Número de contenedor",
       "carrier": "Naviera / transportista",
-      "actualArrival": "Llegada real"
+      "actualArrival": "Llegada real",
+      "history": "Ver historial de cambios",
+      "historyEmpty": "Sin cambios registrados"
     },
     "documents": {
       "title": "Documentos del envío",
@@ -499,7 +501,11 @@
         "confirmacion_proveedor": "Confirmación del proveedor",
         "otro": "Otro"
       },
-      "alreadyUploaded": "{{category}} (subido)"
+      "alreadyUploaded": "{{category}} (subido)",
+      "remove": "Quitar",
+      "removeReason": "Motivo (mín. 10 caracteres)",
+      "removeConfirm": "Quitar",
+      "removeCancel": "Cancelar"
     },
     "providerConfirmation": {
       "validate": "Validar",
@@ -525,7 +531,9 @@
     "empty": "No hay envíos en movimiento",
     "errors": {
       "shippingInfoGeneric": "No se pudo guardar el dato del envío.",
-      "documentGeneric": "No se pudo subir el documento."
+      "documentGeneric": "No se pudo subir el documento.",
+      "shippingGeneric": "No se pudo guardar los datos del envío.",
+      "documentRemoveGeneric": "No se pudo quitar el documento."
     }
   },
   "reception": {

@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 import {
   usePurchaseOrders, usePurchaseOrder, useProviders, useAdvancePurchaseOrder,
   useAdvanceRemainderPurchaseOrder, useConfirmPendingOrderReceipts, useUpdateShippingInfo,
-  usePurchaseOrderDocuments, useUploadPurchaseOrderDocument,
+  usePurchaseOrderDocuments, useUploadPurchaseOrderDocument, useRemovePurchaseOrderDocument, useShippingHistory,
 } from '@/hooks/useCompras'
 import { usePermission } from '@/hooks/usePermission'
 import { comprasApi } from '@/api/comprasApi'
@@ -254,6 +254,12 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
   const { data: detail } = usePurchaseOrder(order.id)
   const { data: documentsData } = usePurchaseOrderDocuments(order.id)
   const uploadDocument = useUploadPurchaseOrderDocument()
+  const removeDocument = useRemovePurchaseOrderDocument()
+  // Fase 24a — quitar un documento pide un motivo (≥10 caracteres); Fase 24b — historial del envío, a demanda.
+  const [removingId, setRemovingId] = useState<number | null>(null)
+  const [removeReason, setRemoveReason] = useState('')
+  const [showHistory, setShowHistory] = useState(false)
+  const { data: historyData } = useShippingHistory(order.id, showHistory)
 
   const [containerNumber, setContainerNumber] = useState('')
   const [carrier, setCarrier] = useState('')
@@ -413,6 +419,23 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
             className={`w-full mt-0.5 px-2 py-1.5 border border-slate-200 rounded text-xs ${canAdvance ? '' : 'bg-slate-50 text-slate-600 cursor-default focus:outline-none'}`}
           />
         </label>
+        {updateShipping.isError && (
+          <p className="text-xs text-red-600">{apiErrorMessage(updateShipping.error, t('compras:logistics.errors.shippingGeneric'))}</p>
+        )}
+        <button type="button" onClick={() => setShowHistory(v => !v)} className="text-[11px] text-primary hover:underline">
+          {t('compras:logistics.shippingInfo.history')}
+        </button>
+        {showHistory && (
+          <ul className="space-y-0.5 text-[11px] text-slate-500">
+            {(historyData?.data ?? []).map((h, i) => (
+              <li key={i}>
+                {t(`compras:logistics.shippingInfo.${h.field === 'carrier' ? 'carrier' : 'container'}`)}: {h.old ?? '—'} → {h.new ?? '—'}
+                {' · '}{h.changed_by ?? '—'}{' · '}{new Date(h.changed_at).toLocaleString()}
+              </li>
+            ))}
+            {historyData && historyData.data.length === 0 && <li>{t('compras:logistics.shippingInfo.historyEmpty')}</li>}
+          </ul>
+        )}
       </div>
 
       {order.blocked_by_primary_approval ? (
@@ -503,7 +526,34 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
                   <IcoFile size={12} />
                   {t(`compras:logistics.documents.category.${doc.category}`)}
                 </a>
+                {canAdvance && removingId !== doc.id && (
+                  <button type="button" onClick={() => { setRemovingId(doc.id); setRemoveReason('') }} className="text-[11px] text-red-600 hover:underline">
+                    {t('compras:logistics.documents.remove')}
+                  </button>
+                )}
               </div>
+              {canAdvance && removingId === doc.id && (
+                <div className="mt-1 flex gap-1.5">
+                  <input
+                    type="text"
+                    value={removeReason}
+                    onChange={e => setRemoveReason(e.target.value)}
+                    placeholder={t('compras:logistics.documents.removeReason')}
+                    className="flex-1 px-2 py-1 border border-slate-200 rounded text-xs"
+                  />
+                  <button
+                    type="button"
+                    disabled={removeReason.trim().length < 10 || removeDocument.isPending}
+                    onClick={() => removeDocument.mutate({ orderId: order.id, documentId: doc.id, motivo: removeReason.trim() }, { onSuccess: () => setRemovingId(null) })}
+                    className="px-2 py-1 border border-red-200 text-red-600 rounded text-xs disabled:opacity-50"
+                  >
+                    {t('compras:logistics.documents.removeConfirm')}
+                  </button>
+                  <button type="button" onClick={() => setRemovingId(null)} className="px-2 py-1 border border-slate-200 rounded text-xs">
+                    {t('compras:logistics.documents.removeCancel')}
+                  </button>
+                </div>
+              )}
               {/* SCRUM-773 — el panel de validación IA dispara su propia acción de escritura
                   (validate.mutate → PATCH .../documents/{id}/validate, compras.edit); ver el
                   documento en sí (el <a> de arriba) sigue siendo "consultar información". */}
@@ -542,6 +592,9 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
               <input type="file" className="hidden" onChange={handleFileChange} />
             </label>
           </div>
+        )}
+        {removeDocument.isError && (
+          <p className="text-xs text-red-600 mt-1">{apiErrorMessage(removeDocument.error, t('compras:logistics.errors.documentRemoveGeneric'))}</p>
         )}
         {uploadDocument.isError && (
           <p className="text-xs text-red-600 mt-1">{t('compras:logistics.errors.documentGeneric')}</p>

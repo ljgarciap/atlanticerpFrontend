@@ -677,6 +677,15 @@ export type DocumentCategory =
   | 'confirmacion_proveedor' | 'otro'
 
 /** REQ-155 — checklist de documentos del envío. */
+/** Fase 24b — un cambio de contenedor o transportista, tomado de la auditoría de la orden. */
+export interface ShippingHistoryEntry {
+  field:      'container_number' | 'carrier'
+  old:        string | null
+  new:        string | null
+  changed_by: string | null
+  changed_at: string
+}
+
 export interface PurchaseOrderDocument {
   id:                  number
   category:            DocumentCategory

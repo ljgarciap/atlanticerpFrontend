@@ -485,7 +485,9 @@
     "shippingInfo": {
       "container": "Container number",
       "carrier": "Carrier",
-      "actualArrival": "Actual arrival"
+      "actualArrival": "Actual arrival",
+      "history": "View change history",
+      "historyEmpty": "No changes recorded"
     },
     "documents": {
       "title": "Shipment documents",
@@ -499,7 +501,11 @@
         "confirmacion_proveedor": "Provider confirmation",
         "otro": "Other"
       },
-      "alreadyUploaded": "{{category}} (uploaded)"
+      "alreadyUploaded": "{{category}} (uploaded)",
+      "remove": "Remove",
+      "removeReason": "Reason (min. 10 characters)",
+      "removeConfirm": "Remove",
+      "removeCancel": "Cancel"
     },
     "providerConfirmation": {
       "validate": "Validate",
@@ -525,7 +531,9 @@
     "empty": "No shipments in motion",
     "errors": {
       "shippingInfoGeneric": "Could not save the shipment data.",
-      "documentGeneric": "Could not upload the document."
+      "documentGeneric": "Could not upload the document.",
+      "shippingGeneric": "Could not save the shipping data.",
+      "documentRemoveGeneric": "Could not remove the document."
     }
   },
   "reception": {
