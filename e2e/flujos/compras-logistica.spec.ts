@@ -48,12 +48,14 @@ test.describe('Flujo de Compras: logística y documentos', () => {
     expect((await api('lidercompras', 'GET', '/compras/orders/no-es-un-id')).status, 'un id no numérico es 404, no 500').toBe(404)
   })
 
-  test('2. el vendedor nunca ve costos ni montos; Compras y Operaciones sí', async () => {
+  test('2. el vendedor y Operaciones nunca ven costos ni montos; Compras sí', async () => {
     const compras = (await api('lidercompras', 'GET', `/compras/orders/${ctx.orden}`)).body
     expect(Number(compras.total_amount)).toBe(150)
     expect(Number(compras.lines[0].unit_cost)).toBe(25)
+    // Fase 24c: Operaciones ve la logística como el vendedor, sin montos
     const operaciones = (await api('lideroperaciones', 'GET', `/compras/orders/${ctx.orden}`)).body
-    expect(Number(operaciones.total_amount), 'Operaciones ve los montos').toBe(150)
+    expect(operaciones.total_amount, 'Operaciones no ve los montos').toBeNull()
+    expect(operaciones.lines[0].unit_cost).toBeNull()
 
     const vend = (await api('vendedor', 'GET', `/compras/orders/${ctx.orden}`)).body
     expect(vend.total_amount).toBeNull()
@@ -71,10 +73,23 @@ test.describe('Flujo de Compras: logística y documentos', () => {
     const url = `/compras/orders/${ctx.orden}/shipping-info`
     for (const rol of ['vendedor', 'lideroperaciones', 'liderbodega', 'contabilidad']) expect((await api(rol, 'PATCH', url, { container_number: 'X' })).status, `${rol} no edita el envío`).toBe(403)
     expect((await api('lidercompras', 'PATCH', url, { container_number: 'x'.repeat(101) })).status, 'contenedor de más de 100 caracteres').toBe(422)
-    const ok = await api('lidercompras', 'PATCH', url, { container_number: 'CONT-FLUJO-1', carrier: 'Transportista Flujo' })
+    // Fase 24b: formato ISO 6346 (4 letras + 7 números), transportista que no sea solo números
+    expect((await api('lidercompras', 'PATCH', url, { container_number: 'CONT-FLUJO-1' })).status, 'contenedor con formato inválido').toBe(422)
+    expect((await api('lidercompras', 'PATCH', url, { carrier: '12345' })).status, 'transportista solo con números').toBe(422)
+    const ok = await api('lidercompras', 'PATCH', url, { container_number: 'msku-123 4567', carrier: 'Transportista Flujo' })
     expect(ok.status).toBe(200)
-    expect(ok.body).toMatchObject({ container_number: 'CONT-FLUJO-1', carrier: 'Transportista Flujo' })
-    expect((await api('vendedor', 'GET', `/compras/orders/${ctx.orden}`)).body.container_number, 'el vendedor ve el dato de envío').toBe('CONT-FLUJO-1')
+    expect(ok.body, 'el contenedor se normaliza').toMatchObject({ container_number: 'MSKU1234567', carrier: 'Transportista Flujo' })
+    expect((await api('vendedor', 'GET', `/compras/orders/${ctx.orden}`)).body.container_number, 'el vendedor ve el dato de envío').toBe('MSKU1234567')
+    expect((await api('lidercompras', 'PATCH', url, { container_number: 'TGHU7654321' })).status).toBe(200)
+    // historial: quién, cuándo y el valor anterior; lo ve también el vendedor
+    for (const rol of ['lidercompras', 'vendedor']) {
+      const h = data((await api(rol, 'GET', `/compras/orders/${ctx.orden}/shipping-history`)).body) as { field: string; old: string | null; new: string | null; changed_by: string | null }[]
+      const cambio = h.find(x => x.field === 'container_number' && x.new === 'TGHU7654321')
+      expect(cambio, `${rol} ve el cambio de contenedor`).toBeTruthy()
+      expect(cambio!.old).toBe('MSKU1234567')
+      expect(cambio!.changed_by).toBeTruthy()
+    }
+    expect((await api('contabilidad', 'GET', `/compras/orders/${ctx.orden}/shipping-history`)).status).toBe(403)
   })
 
   test('4. envíos en movimiento: el filtro excluye lo que aún no se ordenó y el buscador de proyectos responde', async () => {
@@ -116,8 +131,18 @@ test.describe('Flujo de Compras: logística y documentos', () => {
     expect(compras.map(d => d.category).sort()).toEqual(['bl', 'factura_comercial'])
     const vend = data((await api('vendedor', 'GET', url)).body) as { category: string }[]
     expect(vend.map(d => d.category), 'el vendedor solo ve los documentos sin precios').toEqual(['bl'])
-    expect((data((await api('lideroperaciones', 'GET', url)).body) as any[]).length, 'Operaciones ve todos').toBe(2)
+    expect((data((await api('lideroperaciones', 'GET', url)).body) as any[]).map(d => d.category), 'Operaciones, como el vendedor, solo ve los documentos sin precios').toEqual(['bl'])
     expect((await api('contabilidad', 'GET', url)).status).toBe(403)
+
+    // Fase 24a: baja lógica con motivo; solo Compras; reemplazar = subir uno nuevo y quitar el anterior
+    const docs = data((await api('lidercompras', 'GET', url)).body) as { id: number; category: string }[]
+    const idFactura = docs.find(d => d.category === 'factura_comercial')!.id
+    for (const rol of ['vendedor', 'lideroperaciones', 'contabilidad']) expect((await api(rol, 'DELETE', `${url}/${idFactura}`, { motivo: 'Motivo de prueba largo' })).status, `${rol} no quita documentos`).toBe(403)
+    expect((await api('lidercompras', 'DELETE', `${url}/${idFactura}`, { motivo: 'corto' })).status, 'el motivo es obligatorio').toBe(422)
+    expect((await api('lidercompras', 'DELETE', `${url}/${idFactura}`, { motivo: 'Se subió la factura equivocada' })).status).toBe(200)
+    expect((data((await api('lidercompras', 'GET', url)).body) as any[]).map(d => d.category), 'ya no cuenta en el checklist').toEqual(['bl'])
+    expect((await api('lidercompras', 'DELETE', `${url}/${idFactura}`, { motivo: 'Se subió la factura equivocada' })).status, 'quitar dos veces').toBe(404)
+    expect((await subir('lidercompras', ctx.orden, 'factura_comercial')).status, 'la factura correcta se sube de nuevo').toBe(201)
 
     // la confirmación del proveedor no se adjunta mientras la orden espera aprobación
     const aerea = await api('lidercompras', 'POST', '/compras/orders', { provider_id: ctx.provider, modality: 'directo', shipping_type: 'aereo', who_pays_shipping: 'atlantic', shipping_cost: 50, lines: [{ catalog_product_id: ctx.product, quantity: 1, unit_cost: 10 }] })

@@ -556,6 +556,26 @@ export function useUploadPurchaseOrderDocument() {
   })
 }
 
+/** Fase 24a — baja lógica de un documento del checklist. */
+export function useRemovePurchaseOrderDocument() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, documentId, motivo }: { orderId: number; documentId: number; motivo: string }) =>
+      comprasApi.documents.remove(orderId, documentId, motivo),
+    onSuccess: (_data, { orderId }) =>
+      qc.invalidateQueries({ queryKey: ['compras/orders', orderId, 'documents'] }),
+  })
+}
+
+/** Fase 24b — historial de cambios de contenedor y transportista. */
+export function useShippingHistory(orderId: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['compras/orders', orderId, 'shipping-history'],
+    queryFn:  () => comprasApi.orders.shippingHistory(orderId as number),
+    enabled:  orderId !== null && enabled,
+  })
+}
+
 /** SCRUM-211 (ADR-SCRUM211) — dispara la validación con IA del documento de confirmación. */
 export function useValidateProviderConfirmation() {
   const qc = useQueryClient()

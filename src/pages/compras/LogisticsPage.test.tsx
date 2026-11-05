@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+import { AxiosError } from 'axios'
 import LogisticsPage from './LogisticsPage'
 
 const navigateMock = vi.fn()
@@ -46,8 +47,8 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/comprasApi', () => ({
   comprasApi: {
     providers: { list: vi.fn() },
-    orders: { list: vi.fn(), get: vi.fn(), updateShippingInfo: vi.fn(), advance: vi.fn(), advanceRemainder: vi.fn(), confirmPendingReceipts: vi.fn() },
-    documents: { list: vi.fn(), upload: vi.fn(), validate: vi.fn(), getValidation: vi.fn() },
+    orders: { list: vi.fn(), get: vi.fn(), updateShippingInfo: vi.fn(), shippingHistory: vi.fn(), advance: vi.fn(), advanceRemainder: vi.fn(), confirmPendingReceipts: vi.fn() },
+    documents: { list: vi.fn(), upload: vi.fn(), remove: vi.fn(), validate: vi.fn(), getValidation: vi.fn() },
   },
 }))
 
@@ -727,5 +728,70 @@ describe('LogisticsPage — solo consulta sin compras.edit (SCRUM-1013 rebote)',
     const container = (await screen.findByDisplayValue('CONT-123')) as HTMLInputElement
     expect(container.readOnly).toBe(false)
     expect((screen.getByDisplayValue('Maersk') as HTMLInputElement).readOnly).toBe(false)
+  })
+})
+
+describe('LogisticsPage — Fase 24: quitar documentos e historial del envío', () => {
+  function prepare(permissions: string[]) {
+    mockAuthState(permissions)
+    mockedComprasApi.orders.list.mockResolvedValue({
+      data: [makeSummary()], filters: { creators: [] },
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail())
+    mockedComprasApi.documents.list.mockResolvedValue({ data: [makeDocument({ id: 9, category: 'bl' })] })
+  }
+
+  it('quitar un documento exige un motivo de al menos 10 caracteres y manda el motivo', async () => {
+    prepare(['compras.read', 'compras.edit'])
+    mockedComprasApi.documents.remove.mockResolvedValue(undefined)
+    renderPage()
+
+    fireEvent.click(await screen.findByText('compras:logistics.documents.remove'))
+    const confirmar = screen.getByText('compras:logistics.documents.removeConfirm')
+    expect(confirmar).toBeDisabled()
+    fireEvent.change(screen.getByPlaceholderText('compras:logistics.documents.removeReason'), { target: { value: 'Archivo equivocado' } })
+    expect(confirmar).not.toBeDisabled()
+    fireEvent.click(confirmar)
+
+    await waitFor(() => expect(mockedComprasApi.documents.remove).toHaveBeenCalledWith(42, 9, 'Archivo equivocado'))
+  })
+
+  it('sin compras.edit no aparece el botón de quitar', async () => {
+    prepare(['compras.read'])
+    renderPage()
+    await screen.findByText('compras:logistics.documents.category.bl')
+    expect(screen.queryByText('compras:logistics.documents.remove')).not.toBeInTheDocument()
+  })
+
+  it('el historial del envío se pide solo al abrirlo y lista quién y cuándo', async () => {
+    prepare(['compras.read'])
+    mockedComprasApi.orders.shippingHistory.mockResolvedValue({
+      data: [{ field: 'container_number', old: null, new: 'MSKU1234567', changed_by: 'Ana Test', changed_at: '2026-11-05T10:00:00Z' }],
+    })
+    renderPage()
+
+    const abrir = await screen.findByText('compras:logistics.shippingInfo.history')
+    expect(mockedComprasApi.orders.shippingHistory).not.toHaveBeenCalled()
+    fireEvent.click(abrir)
+
+    expect(await screen.findByText(/MSKU1234567/)).toBeInTheDocument()
+    expect(screen.getByText(/Ana Test/)).toBeInTheDocument()
+    expect(mockedComprasApi.orders.shippingHistory).toHaveBeenCalledWith(42)
+  })
+
+  it('si el backend rechaza el contenedor, muestra el mensaje del servidor', async () => {
+    prepare(['compras.read', 'compras.edit'])
+    const error = new AxiosError('422')
+    error.response = { status: 422, data: { message: 'El número de contenedor debe tener 4 letras y 7 números (ej. MSKU1234567).' } } as never
+    mockedComprasApi.orders.updateShippingInfo.mockRejectedValue(error)
+    mockedComprasApi.orders.get.mockResolvedValue(makeDetail({ container_number: 'MSKU1234567' }))
+    renderPage()
+
+    const input = await screen.findByDisplayValue('MSKU1234567')
+    fireEvent.change(input, { target: { value: 'abc' } })
+    fireEvent.blur(input)
+
+    expect(await screen.findByText(/4 letras y 7 números/)).toBeInTheDocument()
   })
 })
