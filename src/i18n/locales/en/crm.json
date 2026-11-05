@@ -425,6 +425,12 @@
     "statusExpired": "Expired",
     "newLinkReady": "Link generated — copy it now",
     "copyNowWarning": "For security, you won't be able to see it again once you close this modal.",
+    "recipientLabel": "Shared with (optional)",
+    "recipientPlaceholder": "Name or company of the recipient",
+    "sharedWith": "Shared with {{name}}",
+    "neverOpened": "Not opened yet",
+    "opens_one": "Opened once · last: {{date}}",
+    "opens_other": "Opened {{count}} times · last: {{date}}",
     "noLinks": "You haven't generated any link for this document yet.",
     "close": "Close"
   },

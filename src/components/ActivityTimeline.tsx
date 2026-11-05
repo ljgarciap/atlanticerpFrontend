@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Activity, TipoActividad } from '@/types/project'
-import { ACTIVITY_META } from '@/types/project'
+import { activityMeta } from '@/types/project'
+import { useCrmList } from '@/hooks/useCrmLists'
 import { Button } from '@/components/ui/Button'
 import { ICONS_BY_NAME, IcoClose } from '@/components/icons'
 
@@ -12,18 +13,18 @@ interface Props {
   onDelete:     (id: number) => void
 }
 
-const TIPOS: TipoActividad[] = ['llamada', 'email', 'reunion', 'whatsapp', 'visita', 'otro']
-
 export default function ActivityTimeline({ activities, canWrite = false, onAdd, onDelete }: Props) {
   const { t } = useTranslation(['crm', 'common'])
-  const [tipo,     setTipo]     = useState<TipoActividad>('llamada')
+  const { options: tipos, labelOf } = useCrmList('crm_activity_type')
+  const [tipo,     setTipo]     = useState<TipoActividad>('')
   const [fecha,    setFecha]    = useState(new Date().toISOString().slice(0, 10))
   const [siguiente,setSiguiente]= useState('')
   const [notas,    setNotas]    = useState('')
+  const tipoElegido = tipo || tipos[0]?.key || ''
 
   const handleAdd = () => {
     if (!notas.trim()) return
-    onAdd({ tipo, fecha, notas, siguiente: siguiente || undefined })
+    onAdd({ tipo: tipoElegido, fecha, notas, siguiente: siguiente || undefined })
     setNotas(''); setSiguiente('')
   }
 
@@ -39,20 +40,20 @@ export default function ActivityTimeline({ activities, canWrite = false, onAdd, 
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-4">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2">{t('crm:activity.logNew')}</p>
           <div className="grid grid-cols-3 gap-2 mb-2">
-            {TIPOS.map(tp => {
-              const m = ACTIVITY_META[tp]
+            {tipos.map(({ key: tp, label }) => {
+              const m = activityMeta(tp)
               return (
                 <button key={tp} type="button"
                   onClick={() => setTipo(tp)}
                   className={`py-1.5 text-[11px] font-semibold rounded-lg border-2 transition-all ${
-                    tipo === tp
+                    tipoElegido === tp
                       ? ''
                       : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600'
                   }`}
-                  style={tipo === tp
+                  style={tipoElegido === tp
                     ? { background: m.color, color: 'white', borderColor: m.color }
                     : undefined}>
-                  {t(`crm:activityTypes.${tp}`)}
+                  {label}
                 </button>
               )
             })}
@@ -88,7 +89,7 @@ export default function ActivityTimeline({ activities, canWrite = false, onAdd, 
       <div className="relative pl-7 space-y-3.5">
         <div className="absolute left-[11px] top-1 bottom-1 w-[2px] bg-slate-200" />
         {activities.map(act => {
-          const m = ACTIVITY_META[act.tipo]
+          const m = activityMeta(act.tipo)
           const Icon = ICONS_BY_NAME[m.icon]
           return (
             <div key={act.id} className="relative">
@@ -99,7 +100,7 @@ export default function ActivityTimeline({ activities, canWrite = false, onAdd, 
               <div className="bg-white border border-slate-200 rounded-lg p-2.5"
                 style={{ borderLeftWidth: 3, borderLeftColor: m.color }}>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: m.color }}>{t(`crm:activityTypes.${act.tipo}`)}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: m.color }}>{labelOf(act.tipo)}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] text-slate-400">{act.fecha}</span>
                     {canWrite && (

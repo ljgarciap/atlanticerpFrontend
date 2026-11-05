@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Project, Etapa, TipoSolicitud, TipoActividad } from '@/types/project'
-import { ACTIVITY_META, AREA_OPTS } from '@/types/project'
+import type { Project, Etapa, TipoSolicitud } from '@/types/project'
+import { activityMeta, AREA_OPTS } from '@/types/project'
+import { useCrmList } from '@/hooks/useCrmLists'
 import { useCrmStages } from '@/hooks/useCrmStages'
 import { projectsApi } from '@/api/projectsApi'
 import { autocompleteApi } from '@/api/autocompleteApi'
@@ -32,6 +33,8 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const canDelete = usePermission('crm.delete')
   const canAI     = usePermission('ai.use')
   const { stages, isLost } = useCrmStages()
+  const { options: tipoOpciones, labelOf: tipoLabel } = useCrmList('crm_project_type')
+  const { options: recordatorioTipos } = useCrmList('crm_reminder_type')
   const [stageReason, setStageReason] = useState('')
 
   const [nombre,       setNombre]       = useState('')
@@ -42,6 +45,8 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const [developer,    setDeveloper]    = useState('')
   const [arquitecto,   setArquitecto]   = useState('')
   const [tipo,         setTipo]         = useState<TipoSolicitud>('ambos')
+  // un proyecto cuyo tipo se desactivó en Ajustes lo sigue mostrando (y conservando) en su propio formulario
+  const tiposProyecto = isNew || tipoOpciones.some(o => o.key === tipo) ? tipoOpciones : [...tipoOpciones, { key: tipo, label: tipoLabel(tipo) }]
   const [requires_technical_study,       setRequiresTechnicalStudy]       = useState(false)
   const [despacho,     setDespacho]     = useState('')
   const [ubicacion,    setUbicacion]    = useState('')
@@ -57,6 +62,11 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
   const [remTipo,  setRemTipo]  = useState('')
   const [remFecha, setRemFecha] = useState('')
   const [remNota,  setRemNota]  = useState('')
+
+  // un proyecto nuevo arranca con «Ambos»; si esa opción ya no está vigente, con la primera de la lista
+  useEffect(() => {
+    if (isNew && tipoOpciones.length > 0 && !tipoOpciones.some(o => o.key === tipo)) setTipo(tipoOpciones[0].key)
+  }, [isNew, tipoOpciones, tipo])
 
   useEffect(() => {
     if (isNew || !project) {
@@ -227,10 +237,10 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
               <div className="col-span-2">
                 <label className="label-sm">{t('crm:project.tipo')}</label>
                 <div className="flex gap-4 pt-1">
-                  {(['diseno','cotizacion','ambos'] as TipoSolicitud[]).map(tp => (
+                  {tiposProyecto.map(({ key: tp, label }) => (
                     <label key={tp} className="flex items-center gap-1.5 cursor-pointer text-sm font-medium text-slate-600">
                       <input type="radio" name="tipo" checked={tipo === tp} onChange={() => setTipo(tp)} className="w-auto" />
-                      {t(`crm:project.tipoRadio.${tp}`)}
+                      {label}
                     </label>
                   ))}
                 </div>
@@ -391,7 +401,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
                 {reminders.filter(r => !r.completado).map(r => (
                   <li key={r.id} className="flex items-center gap-2 text-sm text-slate-700 bg-amber-50 rounded-lg px-3 py-2">
                     <span className="text-amber-500">
-                      {(() => { const Icon = ICONS_BY_NAME[ACTIVITY_META[r.tipo as TipoActividad]?.icon] ?? IcoClock; return <Icon size={13} /> })()}
+                      {(() => { const Icon = ICONS_BY_NAME[activityMeta(r.tipo).icon] ?? IcoClock; return <Icon size={13} /> })()}
                     </span>
                     <span className="font-semibold text-xs">{r.fecha}</span>
                     <span className="flex-1 text-slate-600 text-xs">{r.nota ?? r.tipo}</span>
@@ -408,14 +418,7 @@ export default function ProjectModal({ project, isNew, onClose, onSaved }: Props
                 <label className="label-sm">{t('crm:reminder.tipo')}</label>
                 <select className="input-field py-2 text-sm" value={remTipo} onChange={e => setRemTipo(e.target.value)}>
                   <option value="">{t('crm:reminder.types.none')}</option>
-                  <option value="llamada">{t('crm:reminder.types.llamada')}</option>
-                  <option value="email">{t('crm:reminder.types.email')}</option>
-                  <option value="whatsapp">{t('crm:reminder.types.whatsapp')}</option>
-                  <option value="reunion">{t('crm:reminder.types.reunion')}</option>
-                  <option value="visita">{t('crm:reminder.types.visita')}</option>
-                  <option value="cotizacion">{t('crm:reminder.types.cotizacion')}</option>
-                  <option value="diseno">{t('crm:reminder.types.diseno')}</option>
-                  <option value="otro">{t('crm:reminder.types.otro')}</option>
+{recordatorioTipos.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
                 </select>
               </div>
               <div className="w-full sm:w-auto">

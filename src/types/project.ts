@@ -1,7 +1,8 @@
 // Fase 22 (B5): las etapas son un catálogo por empresa; las 6 de siempre son las de sistema.
 export type Etapa = string
-export type TipoSolicitud = 'diseno' | 'cotizacion' | 'ambos'
-export type TipoActividad = 'llamada' | 'email' | 'reunion' | 'whatsapp' | 'visita' | 'otro'
+// Fase 25: estas listas son catálogos de la empresa (claves libres); los valores de siempre son solo el respaldo de `useCrmList`.
+export type TipoSolicitud = string
+export type TipoActividad = string
 export type Urgency  = 'ok' | 'proximo' | 'vencido'
 export type Freshness = 'recent' | 'stale' | 'cold'
 
@@ -64,9 +65,7 @@ export interface DashboardReminder {
   nota:           string | null
 }
 
-export type DocumentCategoria =
-  | 'cotizacion' | 'diseno' | 'presentacion' | 'plano'
-  | 'render' | 'ficha' | 'modelo_3d' | 'otro'
+export type DocumentCategoria = string
 
 export interface Document {
   id:             number
@@ -91,6 +90,7 @@ export interface DocumentVersion extends Document {
 // url/token (ver ShareLink::createFor() en el backend).
 export interface ShareLink {
   id:                 number
+  destinatario:       string | null
   expires_at:         string
   revoked_at:         string | null
   access_count:       number
@@ -164,7 +164,7 @@ export interface AlertColdProject {
 
 export interface KpiData {
   counts_by_stage:          Record<Etapa, number>
-  counts_by_tipo:           Record<TipoSolicitud, number>
+  counts_by_tipo:           Record<string, number>
   pipeline_activo:          number
   pipeline_cerrado:         number
   alerts_vencidos:          number
@@ -190,7 +190,7 @@ export const STAGES: { id: string; color: string }[] = [
 // Idem — resolver label vía t(`crm:activityTypes.${tipo}`).
 // `icon` referencia el nombre de un componente de '@/components/icons' (no un glyph
 // literal) — se resuelve en el componente que lo consume, ver ACTIVITY_ICONS ahí.
-export const ACTIVITY_META: Record<TipoActividad, { color: string; icon: string }> = {
+export const ACTIVITY_META: Record<string, { color: string; icon: string }> = {
   llamada:  { color: '#3b82f6', icon: 'IcoPhone' },
   email:    { color: '#a855f7', icon: 'IcoMail' },
   reunion:  { color: '#16a34a', icon: 'IcoCalendar' },
@@ -198,6 +198,9 @@ export const ACTIVITY_META: Record<TipoActividad, { color: string; icon: string 
   visita:   { color: '#f59e0b', icon: 'IcoMapPin' },
   otro:     { color: '#64748b', icon: 'IcoClock' },
 }
+
+/** Color e ícono de un tipo de actividad; los tipos propios de la empresa usan el neutro. */
+export const activityMeta = (tipo: string) => ACTIVITY_META[tipo] ?? ACTIVITY_META.otro
 
 /** SCRUM-944/945 — umbrales de días configurables de CRM, ver `App\Modules\CRM\Services\CrmSettingsService`. */
 export interface CrmSettings {

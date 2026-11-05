@@ -142,8 +142,8 @@ export const projectsApi = {
   listShareLinks: (projectId: number, docId: number): Promise<ShareLink[]> =>
     api.get<ShareLink[]>(`/crm/projects/${projectId}/documents/${docId}/share-links`).then(r => r.data),
 
-  createShareLink: (projectId: number, docId: number): Promise<CreatedShareLink> =>
-    api.post<CreatedShareLink>(`/crm/projects/${projectId}/documents/${docId}/share-links`).then(r => r.data),
+  createShareLink: (projectId: number, docId: number, destinatario?: string): Promise<CreatedShareLink> =>
+    api.post<CreatedShareLink>(`/crm/projects/${projectId}/documents/${docId}/share-links`, destinatario ? { destinatario } : {}).then(r => r.data),
 
   revokeShareLink: (id: number): Promise<void> =>
     api.delete(`/crm/share-links/${id}`).then(() => undefined),
