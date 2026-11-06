@@ -11,6 +11,7 @@ import { invalidateDemoModeAffectedQueries } from '@/hooks/useDemoMode'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Toggle } from '@/components/ui/Toggle'
+import { MfaDisableForm } from '@/components/MfaDisableForm'
 
 const LANGUAGES = [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }]
 const THEMES    = [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]
@@ -294,10 +295,7 @@ function MfaPersonalSection() {
     onSuccess: (res) => { setChallengeId(res.mfa_challenge_id); setCode(''); setCodeError('') },
   })
 
-  const disable = useMutation({
-    mutationFn: authApi.mfaDisable,
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['mfa-personal-status'] }),
-  })
+  const [disabledNow, setDisabledNow] = useState(false)
 
   if (isLoading || !status) return null
 
@@ -417,17 +415,8 @@ function MfaPersonalSection() {
         {/* Disable button — only when optional and enabled */}
         {!isRequired && isEnabled && (
           <div className="space-y-2">
-            <Button
-              type="button"
-              variant="danger"
-              disabled={disable.isPending}
-              loading={disable.isPending}
-              onClick={() => disable.mutate()}
-              className="!px-4 !py-2 !text-xs"
-            >
-              {t('auth:mfa.disable')}
-            </Button>
-            {disable.isSuccess && (
+            <MfaDisableForm onDisabled={() => { setDisabledNow(true); void qc.invalidateQueries({ queryKey: ['mfa-personal-status'] }) }} />
+            {disabledNow && (
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('auth:mfa.disableSuccess')}</p>
             )}
             {confirmEnable.isSuccess && (

@@ -159,8 +159,15 @@ test.describe('Flujo: MFA y recuperación de clave', () => {
     expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reenvio.body.mfa_challenge_id, code: codigo })).status, 'un código usado no vuelve a servir').toBe(422)
     ctx.token = ok.body.token as string
 
-    // Desactivarlo uno mismo no pide clave ni código (basta la sesión); se vuelve a activar para el paso siguiente.
-    const baja = await conToken(request, ctx.token, 'POST', '/auth/mfa/disable')
+    // Desactivarlo uno mismo pide la clave y un código del correo (Fase 27a): la sesión sola no basta; se vuelve a activar para el paso siguiente.
+    expect((await conToken(request, ctx.token, 'POST', '/auth/mfa/disable')).status, 'sin clave').toBe(422)
+    expect((await conToken(request, ctx.token, 'POST', '/auth/mfa/disable', { password: 'Incorrecta1!' })).status, 'clave incorrecta').toBe(422)
+    const antesBaja = ultimos(CODIGO)
+    const pedirBaja = await conToken(request, ctx.token, 'POST', '/auth/mfa/disable', { password: CLAVE })
+    expect(pedirBaja.status).toBe(200)
+    const codigoBaja = await esperarNuevo(CODIGO, antesBaja)
+    expect((await conToken(request, ctx.token, 'POST', '/auth/mfa/disable/confirm', { mfa_challenge_id: pedirBaja.body.mfa_challenge_id, code: '000000' })).status, 'código incorrecto').toBe(422)
+    const baja = await conToken(request, ctx.token, 'POST', '/auth/mfa/disable/confirm', { mfa_challenge_id: pedirBaja.body.mfa_challenge_id, code: codigoBaja })
     expect(baja.status).toBe(200)
     expect(baja.body).toMatchObject({ mfa_enabled: false })
     const nuevo = await pedirCodigoDeActivacion(request, ctx.token)
@@ -180,10 +187,10 @@ test.describe('Flujo: MFA y recuperación de clave', () => {
     expect((await publico(request, 'POST', '/auth/mfa/resend', { mfa_challenge_id: reto })).status).toBe(200)
   })
 
-  test('5. reiniciar el MFA de otra persona: solo superadmin; el tope por usuario sigue vigente', async ({ request }) => {
-    // Con el tope por usuario agotado del paso anterior, el reinicio por admin es la vía de recuperación; la cuenta vuelve a entrar sin código.
-    expect((await llamar(request, tokens, 'gerencia', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status, 'Gerencia no reinicia el MFA').toBe(403)
-    expect((await llamar(request, tokens, 'superadmin', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status).toBe(200)
+  test('5. reiniciar el MFA de otra persona: Gerencia y superadmin; el reinicio limpia los topes', async ({ request }) => {
+    // Fase 27a: Gerencia también reinicia (no el de un superadmin ni el suyo) y la cuenta puede volver a activar de inmediato.
+    expect((await llamar(request, tokens, 'vendedor', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status, 'el vendedor no reinicia el MFA').toBe(403)
+    expect((await llamar(request, tokens, 'gerencia', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status, 'Gerencia sí reinicia').toBe(200)
     expect((await llamar(request, tokens, 'superadmin', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status, 'ya no tiene MFA').toBe(422)
     expect((await llamar(request, tokens, 'superadmin', 'POST', '/admin/security/users/99999999/mfa/reset')).status).toBe(404)
     const sesion = await entrar(request, email, CLAVE)
@@ -191,13 +198,11 @@ test.describe('Flujo: MFA y recuperación de clave', () => {
     expect(sesion.body.requires_mfa, 'sin MFA vuelve a entrar directo').toBeUndefined()
     ctx.token = sesion.body.token as string
 
-    // El reinicio por admin NO limpia el tope por usuario del paso anterior: volver a activar el MFA se bloquea hasta que venza la ventana.
-    const antes = ultimos(CODIGO)
-    const reto = await conToken(request, ctx.token, 'POST', '/auth/mfa/enable', { password: CLAVE })
-    const codigo = await esperarNuevo(CODIGO, antes)
-    const bloqueado = await conToken(request, ctx.token, 'POST', '/auth/mfa/enable/confirm', { mfa_challenge_id: reto.body.mfa_challenge_id, code: codigo })
-    expect(bloqueado.status, 'el tope por usuario sigue vigente').toBe(429)
-    expect(bloqueado.body.retry_after).toBeGreaterThan(0)
+    // El reinicio limpia el tope por usuario del paso anterior: volver a activar el MFA ya no se bloquea.
+    const nuevo = await pedirCodigoDeActivacion(request, ctx.token)
+    const reactivado = await conToken(request, ctx.token, 'POST', '/auth/mfa/enable/confirm', { mfa_challenge_id: nuevo.retoId, code: nuevo.codigo })
+    expect(reactivado.status, 'el tope no sobrevive al reinicio').toBe(200)
+    expect((await llamar(request, tokens, 'superadmin', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status).toBe(200)
   })
 
   test('6. modo global: «obligatorio» exige código a quien no lo activó; solo Gerencia y superadmin lo cambian', async ({ request }) => {

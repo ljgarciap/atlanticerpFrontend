@@ -203,8 +203,13 @@ export const authApi = {
     api.post('/auth/mfa/enable/confirm', { mfa_challenge_id: challengeId, code })
       .then(r => r.data as { mfa_enabled: boolean }),
 
-  mfaDisable: (): Promise<{ mfa_enabled: boolean }> =>
-    api.post('/auth/mfa/disable').then(r => r.data as { mfa_enabled: boolean }),
+  /** Fase 27a: desactivar pide la clave vigente (envía un código al correo) y luego el código. */
+  mfaDisable: (password: string): Promise<{ mfa_challenge_id: string }> =>
+    api.post('/auth/mfa/disable', { password }).then(r => r.data as { mfa_challenge_id: string }),
+
+  mfaConfirmDisable: (challengeId: string, code: string): Promise<{ mfa_enabled: boolean }> =>
+    api.post('/auth/mfa/disable/confirm', { mfa_challenge_id: challengeId, code })
+      .then(r => r.data as { mfa_enabled: boolean }),
 }
 
 export default api

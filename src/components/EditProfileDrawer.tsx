@@ -7,6 +7,7 @@ import type { TFunction } from 'i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/api/authApi'
 import { useAuthStore } from '@/store/authStore'
+import { MfaDisableForm } from '@/components/MfaDisableForm'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose, IcoCheck } from '@/components/icons'
@@ -147,14 +148,6 @@ export default function EditProfileDrawer({ onClose }: Props) {
     },
   })
 
-  const disableMutation = useMutation({
-    mutationFn: authApi.mfaDisable,
-    onSuccess: () => {
-      void refetchMfa()
-      void queryClient.invalidateQueries({ queryKey: ['mfa/status'] })
-      setMfaSuccess(t('auth:mfa.disableSuccess'))
-    },
-  })
 
   const inputCls = (hasError: boolean) =>
     `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition
@@ -278,14 +271,15 @@ export default function EditProfileDrawer({ onClose }: Props) {
                     {mfaMode === 'required' && (
                       <p className="text-xs text-slate-400 mb-2">{t('auth:mfa.requiredByAdmin')}</p>
                     )}
-                    <Button
-                      type="button"
-                      variant="danger-text"
-                      disabled={mfaMode === 'required' || disableMutation.isPending}
-                      onClick={() => { setMfaSuccess(''); disableMutation.mutate() }}
-                    >
-                      {disableMutation.isPending ? t('auth:mfa.disabling') : t('auth:mfa.disable')}
-                    </Button>
+                    {mfaMode !== 'required' && (
+                      <MfaDisableForm
+                        onDisabled={() => {
+                          void refetchMfa()
+                          void queryClient.invalidateQueries({ queryKey: ['mfa/status'] })
+                          setMfaSuccess(t('auth:mfa.disableSuccess'))
+                        }}
+                      />
+                    )}
                   </div>
                 ) : mfaChallengeId ? (
                   /* ── Confirm enrollment code ── */
