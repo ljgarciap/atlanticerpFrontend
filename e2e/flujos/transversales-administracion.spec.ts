@@ -76,8 +76,13 @@ test.describe('Flujo transversal: administración de la plataforma', () => {
     expect(Array.isArray(vis)).toBe(true)
     expect((await api('superadmin', 'PUT', `/admin/roles/${ctx.rol}/visibility`, { rows: [{ module: 'modulo_inexistente', can_view: 1, can_view_team: false }] })).status).toBe(422)
     expect((await api('superadmin', 'PUT', `/admin/roles/${ctx.rol}/visibility`, { rows: [{ module: modulos[0], can_view: 7, can_view_team: false }] })).status, 'el nivel de vista es 0, 1 o 2').toBe(422)
+    // Fase 27b: un rol que no ve ningún módulo se guarda, pero con aviso.
+    const vacia = await api('superadmin', 'PUT', `/admin/roles/${ctx.rol}/visibility`, { rows: [{ module: modulos[0], can_view: 0, can_view_team: false }] })
+    expect(vacia.status).toBe(200)
+    expect((vacia.body as any).warnings[0].code).toBe('rol_sin_visibilidad')
     const guardada = await api('superadmin', 'PUT', `/admin/roles/${ctx.rol}/visibility`, { rows: [{ module: modulos[0], can_view: 2, can_view_team: true }] })
     expect(guardada.status).toBe(200)
+    expect((guardada.body as any).warnings).toEqual([])
     expect(((await api('superadmin', 'GET', `/admin/roles/${ctx.rol}/visibility`)).body as any[]).find(v => v.module === modulos[0])).toMatchObject({ can_view: 2, can_view_team: true })
     expect((await api('gerencia', 'PUT', `/admin/roles/${ctx.rol}/visibility`, { rows: [] })).status).toBe(403)
 

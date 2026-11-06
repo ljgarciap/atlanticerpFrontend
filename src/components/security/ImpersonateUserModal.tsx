@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useStartImpersonation } from '@/hooks/useImpersonation'
+import { useCatalog } from '@/hooks/useCatalog'
 import { useAuthStore } from '@/store/authStore'
 import type { UserListItem } from '@/api/usersApi'
 import { parseAuthError } from '@/lib/authErrors'
@@ -26,6 +27,11 @@ export default function ImpersonateUserModal({ user, onClose }: Props) {
   const { t }    = useTranslation(['common', 'security', 'auth'])
   const navigate = useNavigate()
   const start    = useStartImpersonation()
+  // Fase 27b — los motivos son un catálogo por empresa; sin entradas (o sin red) se cae al texto libre de siempre.
+  const reasons  = useCatalog('impersonation_reason').data ?? []
+  const [reasonKey, setReasonKey] = useState('')
+  const chosen = reasons.find(r => r.key === reasonKey)
+  const needsText = reasons.length === 0 || chosen?.props?.requiere_texto === true
 
   const [reason, setReason]           = useState('')
   const [password, setPassword]       = useState('')
@@ -36,7 +42,9 @@ export default function ImpersonateUserModal({ user, onClose }: Props) {
   const passwordRef = useRef<HTMLInputElement>(null)
   const name = `${user.first_name} ${user.last_name}`.trim()
 
-  const canConfirm = !start.isPending && reason.trim() !== '' && password !== ''
+  const canConfirm = !start.isPending && password !== ''
+    && (reasons.length === 0 || reasonKey !== '')
+    && (!needsText || reason.trim() !== '')
 
   useEffect(() => { reasonRef.current?.focus() }, [])
   useEffect(() => {
@@ -53,7 +61,7 @@ export default function ImpersonateUserModal({ user, onClose }: Props) {
   const handleConfirm = () => {
     if (!canConfirm) return
     setError(null); setReasonError(null); setPasswordError(null)
-    start.mutate({ userId: user.id, reason: reason.trim(), operatorPassword: password }, {
+    start.mutate({ userId: user.id, reason: reason.trim(), reasonKey: reasonKey || undefined, operatorPassword: password }, {
       onSuccess: result => {
         setPassword('')
         // Sin el bloque `impersonation` no habría banner: se entraría a otra cuenta sin ninguna señal. No se entra.
@@ -75,7 +83,7 @@ export default function ImpersonateUserModal({ user, onClose }: Props) {
           passwordRef.current?.focus()
         } else if (parsed.status === 422) {
           const validation = parseApiValidationError(err)
-          const reasonMsg  = validation?.fields.reason?.[0]
+          const reasonMsg  = validation?.fields.reason?.[0] ?? validation?.fields.reason_key?.[0]
           if (reasonMsg) { setReasonError(reasonMsg); reasonRef.current?.focus() }
           else setError(validation?.message ?? parsed.message ?? t('security:impersonate.errors.invalid'))
         } else if (parsed.status === 429) {
@@ -114,9 +122,27 @@ export default function ImpersonateUserModal({ user, onClose }: Props) {
               {t('security:impersonate.readOnlyNote')}
             </div>
 
+            {reasons.length > 0 && (
+              <div>
+                <label htmlFor="impersonate-reason-key" className="block text-xs font-semibold text-slate-600 mb-1">
+                  {t('security:impersonate.reasonKeyLabel')}
+                </label>
+                <select
+                  id="impersonate-reason-key"
+                  value={reasonKey}
+                  disabled={start.isPending}
+                  onChange={e => { setReasonKey(e.target.value); if (reasonError) setReasonError(null) }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="">{t('security:impersonate.reasonKeyPlaceholder')}</option>
+                  {reasons.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
+                </select>
+              </div>
+            )}
+
             <div>
               <label htmlFor="impersonate-reason" className="block text-xs font-semibold text-slate-600 mb-1">
-                {t('security:impersonate.reasonLabel')}
+                {reasons.length > 0 && !needsText ? t('security:impersonate.reasonDetailLabel') : t('security:impersonate.reasonLabel')}
               </label>
               <textarea
                 id="impersonate-reason"

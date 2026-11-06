@@ -10,6 +10,8 @@ import type { UserInfo } from '@/types/auth'
  */
 export interface StartImpersonationPayload {
   reason:           string
+  /** Fase 27b — clave del catálogo `impersonation_reason`; sin ella el motivo es texto libre. */
+  reasonKey?:       string
   operatorPassword: string
 }
 
@@ -53,8 +55,8 @@ export interface ImpersonationSessionsQuery {
 }
 
 export const impersonationApi = {
-  start: (userId: number, { reason, operatorPassword }: StartImpersonationPayload): Promise<StartImpersonationResult> =>
-    api.post(`/users/${userId}/impersonate`, { reason, operator_password: operatorPassword }).then(r => {
+  start: (userId: number, { reason, reasonKey, operatorPassword }: StartImpersonationPayload): Promise<StartImpersonationResult> =>
+    api.post(`/users/${userId}/impersonate`, { reason, ...(reasonKey ? { reason_key: reasonKey } : {}), operator_password: operatorPassword }).then(r => {
       const data = r.data as { token: string; expires_in_ms: number; user: UserInfo }
       return { accessToken: data.token, expiresInMs: data.expires_in_ms, user: data.user }
     }),
