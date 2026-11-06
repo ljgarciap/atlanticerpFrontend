@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AnyLoginResponse, LoginResponse } from '@/types/auth'
-import { isMfaRequiredResponse } from '@/types/auth'
+import { isMfaRequiredResponse, type MfaMethod } from '@/types/auth'
 import { useAuthStore, restoredFromImpersonationWithin } from '@/store/authStore'
 import { useToastStore } from '@/store/toastStore'
 import i18n from '@/i18n'
@@ -145,6 +145,28 @@ const mapLoginResponse = (data: Record<string, unknown>): LoginResponse => ({
   user:         data.user as LoginResponse['user'],
 })
 
+export interface MfaStatus {
+  mfa_enabled: boolean
+  mfa_mode: string
+  /** Fase 27c: método vigente (null si el MFA está apagado). */
+  mfa_method?: MfaMethod | null
+  /** Respaldos sin gastar (solo con aplicación autenticadora). */
+  backup_codes_remaining?: number | null
+}
+
+export interface MfaProof {
+  method: MfaMethod
+  /** Solo con método `email`. */
+  mfa_challenge_id?: string
+}
+
+export interface MfaTotpSetupResponse {
+  secret: string
+  otpauth_uri: string
+  /** PNG en data URI; null si el servidor no pudo dibujarlo (se muestra el secreto para teclearlo). */
+  qr: string | null
+}
+
 export const authApi = {
   login: (email: string, password: string): Promise<AnyLoginResponse> =>
     api.post('/auth/login', { email, password }).then(r => {
@@ -193,8 +215,8 @@ export const authApi = {
   getDepartments: (): Promise<{ data: { id: number; name: string }[] }> =>
     api.get('/auth/departments').then(r => r.data as { data: { id: number; name: string }[] }),
 
-  mfaStatus: (): Promise<{ mfa_enabled: boolean; mfa_mode: string }> =>
-    api.get('/auth/mfa/status').then(r => r.data as { mfa_enabled: boolean; mfa_mode: string }),
+  mfaStatus: (): Promise<MfaStatus> =>
+    api.get('/auth/mfa/status').then(r => r.data as MfaStatus),
 
   mfaEnable: (password: string): Promise<{ mfa_challenge_id: string }> =>
     api.post('/auth/mfa/enable', { password }).then(r => r.data as { mfa_challenge_id: string }),
@@ -204,12 +226,29 @@ export const authApi = {
       .then(r => r.data as { mfa_enabled: boolean }),
 
   /** Fase 27a: desactivar pide la clave vigente (envía un código al correo) y luego el código. */
-  mfaDisable: (password: string): Promise<{ mfa_challenge_id: string }> =>
-    api.post('/auth/mfa/disable', { password }).then(r => r.data as { mfa_challenge_id: string }),
+  /** Primer paso de desactivar: con correo envía el código y devuelve el reto; con aplicación autenticadora solo responde `method: totp`. */
+  mfaDisable: (password: string): Promise<MfaProof> =>
+    api.post('/auth/mfa/disable', { password }).then(r => r.data as MfaProof),
 
-  mfaConfirmDisable: (challengeId: string, code: string): Promise<{ mfa_enabled: boolean }> =>
-    api.post('/auth/mfa/disable/confirm', { mfa_challenge_id: challengeId, code })
+  /** Mismo paso para cambiar de método (la prueba del método vigente). */
+  mfaProof: (password: string): Promise<MfaProof> =>
+    api.post('/auth/mfa/proof', { password }).then(r => r.data as MfaProof),
+
+  mfaConfirmDisable: (challengeId: string | null, code: string): Promise<{ mfa_enabled: boolean }> =>
+    api.post('/auth/mfa/disable/confirm', { ...(challengeId ? { mfa_challenge_id: challengeId } : {}), code })
       .then(r => r.data as { mfa_enabled: boolean }),
+
+  /** Alta de la aplicación autenticadora, paso 1: devuelve el secreto (una sola vez) y el QR. Con el correo activo exige la prueba del método vigente. */
+  mfaTotpSetup: (body: { password: string; mfa_challenge_id?: string; code?: string }): Promise<MfaTotpSetupResponse> =>
+    api.post('/auth/mfa/totp/setup', body).then(r => r.data as MfaTotpSetupResponse),
+
+  /** Paso 2: con el primer código de la aplicación se activa y llegan los 10 códigos de respaldo (se muestran una sola vez). */
+  mfaTotpConfirm: (code: string): Promise<{ mfa_enabled: boolean; mfa_method: 'totp'; backup_codes: string[] }> =>
+    api.post('/auth/mfa/totp/confirm', { code }).then(r => r.data as { mfa_enabled: boolean; mfa_method: 'totp'; backup_codes: string[] }),
+
+  /** Códigos de respaldo nuevos (invalidan los anteriores): clave + código de la aplicación o un respaldo. */
+  mfaRegenerateBackupCodes: (password: string, code: string): Promise<{ backup_codes: string[] }> =>
+    api.post('/auth/mfa/backup-codes/regenerate', { password, code }).then(r => r.data as { backup_codes: string[] }),
 }
 
 export default api

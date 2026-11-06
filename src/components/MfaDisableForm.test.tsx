@@ -75,3 +75,25 @@ describe('MfaDisableForm (Fase 27a)', () => {
     expect(onDisabled).not.toHaveBeenCalled()
   })
 })
+
+describe('MfaDisableForm con aplicación autenticadora (Fase 27c)', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('no envía ningún reto: pide el código de la aplicación (o un respaldo) y lo confirma sin reto', async () => {
+    mfaDisable.mockResolvedValue({ method: 'totp' })
+    mfaConfirmDisable.mockResolvedValue({ mfa_enabled: false })
+    const onDisabled = setup()
+
+    fireEvent.click(screen.getByText('auth:mfa.disable'))
+    fireEvent.change(screen.getByPlaceholderText('auth:labels.password'), { target: { value: 'Clave123!' } })
+    fireEvent.click(screen.getByText('auth:mfa.disable'))
+
+    expect(await screen.findByText('auth:mfa.disableTotpHint')).toBeTruthy()
+    expect(screen.queryByText('auth:mfa.resend')).toBeNull()
+
+    fireEvent.change(screen.getByPlaceholderText('auth:mfa.codeOrBackupPlaceholder'), { target: { value: 'ABCDE-FGHJK' } })
+    fireEvent.click(screen.getByText('auth:mfa.disable'))
+    await waitFor(() => expect(mfaConfirmDisable).toHaveBeenCalledWith(null, 'ABCDE-FGHJK'))
+    await waitFor(() => expect(onDisabled).toHaveBeenCalledTimes(1))
+  })
+})
