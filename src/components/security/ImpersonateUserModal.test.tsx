@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ImpersonateUserModal from './ImpersonateUserModal'
 import { impersonationApi } from '@/api/impersonationApi'
+import { catalogsApi } from '@/api/catalogsApi'
 import { useAuthStore } from '@/store/authStore'
 import type { UserListItem } from '@/api/usersApi'
 import type { UserInfo } from '@/types/auth'
@@ -16,8 +17,13 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 vi.mock('@/api/impersonationApi', () => ({ impersonationApi: { start: vi.fn() } }))
+vi.mock('@/api/catalogsApi', () => ({ catalogsApi: { list: vi.fn() } }))
 
 const start = vi.mocked(impersonationApi.start)
+const listCatalog = vi.mocked(catalogsApi.list)
+
+const motivo = (key: string, label: string, requiereTexto = false) =>
+  ({ id: 1, domain: 'impersonation_reason', key, label, sort_order: 1, is_active: true, is_system: false, props: { requiere_texto: requiereTexto } })
 
 const PASSWORD = 'Operador-123'
 
@@ -65,6 +71,8 @@ function fill(reason = 'SCRUM-1200 no le aparece el pipeline', password = PASSWO
 
 beforeEach(() => {
   start.mockReset()
+  listCatalog.mockReset()
+  listCatalog.mockResolvedValue([])
   useAuthStore.getState().clearAuth()
   sessionStorage.clear(); localStorage.clear()
   useAuthStore.getState().setAuth(
@@ -163,5 +171,36 @@ describe('ImpersonateUserModal', () => {
     const { onClose } = renderModal()
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalled()
+  })
+
+  describe('motivos del catálogo (Fase 27b)', () => {
+    beforeEach(() => {
+      listCatalog.mockResolvedValue([motivo('soporte', 'Soporte a la persona'), motivo('otro', 'Otro (explicar)', true)])
+    })
+
+    it('con un motivo del catálogo basta la clave: el detalle es opcional y viaja la clave', async () => {
+      start.mockResolvedValueOnce({ accessToken: 'imp-access', expiresInMs: 1_800_000, user: observedUser() })
+      renderModal()
+
+      const select = await screen.findByLabelText('security:impersonate.reasonKeyLabel')
+      fireEvent.change(passwordInput(), { target: { value: PASSWORD } })
+      expect(confirmBtn()).toBeDisabled()
+      fireEvent.change(select, { target: { value: 'soporte' } })
+      expect(confirmBtn()).toBeEnabled()
+      fireEvent.click(confirmBtn())
+
+      await waitFor(() => expect(start).toHaveBeenCalledWith(77, { reason: '', reasonKey: 'soporte', operatorPassword: PASSWORD }))
+    })
+
+    it('«Otro» exige texto: sin él no se puede confirmar', async () => {
+      renderModal()
+
+      const select = await screen.findByLabelText('security:impersonate.reasonKeyLabel')
+      fireEvent.change(passwordInput(), { target: { value: PASSWORD } })
+      fireEvent.change(select, { target: { value: 'otro' } })
+      expect(confirmBtn()).toBeDisabled()
+      fireEvent.change(reasonInput(), { target: { value: 'Revisar un tablero puntual' } })
+      expect(confirmBtn()).toBeEnabled()
+    })
   })
 })

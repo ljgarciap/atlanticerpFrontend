@@ -17,6 +17,8 @@ export default function RoleVisibilityModal({ role, onClose }: Props) {
   const { t }  = useTranslation(['common', 'security'])
   const qc     = useQueryClient()
   const [rows, setRows] = useState<Record<string, RoleVisibilityRow>>({})
+  // Fase 27b (b3): el guardado nunca se bloquea, pero un rol que no ve ningún módulo deja una aplicación vacía: se avisa y el modal sigue abierto.
+  const [warning, setWarning] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['roles', role.id, 'visibility'],
@@ -34,8 +36,10 @@ export default function RoleVisibilityModal({ role, onClose }: Props) {
 
   const mutation = useMutation({
     mutationFn: () => rolesApi.updateVisibility(role.id, Object.values(rows)),
-    onSuccess: () => {
+    onSuccess: result => {
       qc.invalidateQueries({ queryKey: ['roles', role.id, 'visibility'] })
+      const emptyRole = result.warnings.find(w => w.code === 'rol_sin_visibilidad')
+      if (emptyRole) { setWarning(emptyRole.message); return }
       onClose()
     },
   })
@@ -112,6 +116,12 @@ export default function RoleVisibilityModal({ role, onClose }: Props) {
             </div>
           )}
 
+          {warning && (
+            <div role="alert" className="mt-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs">
+              {warning}
+            </div>
+          )}
+
           {mutation.isError && (
             <div className="mt-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs">
               {t('common:messages.saveError')}
@@ -121,9 +131,9 @@ export default function RoleVisibilityModal({ role, onClose }: Props) {
 
         <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
           <Button type="button" variant="secondary" onClick={onClose}>
-            {t('common:actions.cancel')}
+            {warning ? t('common:actions.close') : t('common:actions.cancel')}
           </Button>
-          <Button type="button" disabled={mutation.isPending || isLoading} onClick={() => mutation.mutate()}>
+          <Button type="button" disabled={mutation.isPending || isLoading} onClick={() => { setWarning(null); mutation.mutate() }}>
             {mutation.isPending ? '…' : t('common:actions.save')}
           </Button>
         </div>

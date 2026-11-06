@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,6 +9,7 @@ import { levelsApi, type SecurityLevelItem, type PermissionCatalogEntry } from '
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
+import { parseApiValidationError } from '@/lib/apiValidationError'
 
 function buildSchema(t: TFunction) {
   return z.object({
@@ -34,8 +35,10 @@ export default function SecurityLevelFormModal({ level, onClose }: Props) {
     queryFn:  levelsApi.catalog,
   })
 
+  const [nameServerError, setNameServerError] = useState<string | null>(null)
   const mutation = useMutation({
-    mutationFn: (data: FormData) => levelsApi.update(level.id, data),
+    mutationFn: (data: FormData) => { setNameServerError(null); return levelsApi.update(level.id, data) },
+    onError: (err: unknown) => { setNameServerError(parseApiValidationError(err)?.fields.name?.[0] ?? null) },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['security-levels'] })
       onClose()
@@ -112,6 +115,8 @@ export default function SecurityLevelFormModal({ level, onClose }: Props) {
               <label className="block text-xs font-semibold text-slate-600 mb-1">{t('security:levels.form.name')}</label>
               <input {...register('name')} disabled={isSuperAdmin} className={inputCls(!!errors.name)} />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+              {/* Fase 27b (b1): el servidor rechaza un nombre que ya tiene otro nivel. */}
+              {!errors.name && nameServerError && <p role="alert" className="text-red-500 text-xs mt-1">{nameServerError}</p>}
             </div>
 
             <div>

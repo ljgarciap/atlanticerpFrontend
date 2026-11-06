@@ -5,8 +5,8 @@ import { impersonationApi, type ImpersonationSessionsQuery } from '@/api/imperso
 export function useStartImpersonation() {
   return useMutation({
     gcTime: 0,
-    mutationFn: ({ userId, reason, operatorPassword }: { userId: number; reason: string; operatorPassword: string }) =>
-      impersonationApi.start(userId, { reason, operatorPassword }),
+    mutationFn: ({ userId, reason, reasonKey, operatorPassword }: { userId: number; reason: string; reasonKey?: string; operatorPassword: string }) =>
+      impersonationApi.start(userId, { reason, reasonKey, operatorPassword }),
   })
 }
 

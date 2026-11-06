@@ -47,6 +47,7 @@ export const rolesApi = {
   visibility: (id: number): Promise<RoleVisibilityRow[]> =>
     api.get(`/admin/roles/${id}/visibility`).then(r => r.data as RoleVisibilityRow[]),
 
-  updateVisibility: (id: number, rows: RoleVisibilityRow[]): Promise<RoleVisibilityRow[]> =>
-    api.put(`/admin/roles/${id}/visibility`, { rows }).then(r => r.data as RoleVisibilityRow[]),
+  /** Fase 27b (b3): la respuesta trae `warnings` (p. ej. `rol_sin_visibilidad`); no bloquean el guardado. */
+  updateVisibility: (id: number, rows: RoleVisibilityRow[]): Promise<{ data: RoleVisibilityRow[]; warnings: { code: string; message: string }[] }> =>
+    api.put(`/admin/roles/${id}/visibility`, { rows }).then(r => r.data as { data: RoleVisibilityRow[]; warnings: { code: string; message: string }[] }),
 }

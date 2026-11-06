@@ -162,16 +162,29 @@ test.describe('Flujo transversal: usuarios, acceso y observación', () => {
     expect((await con(request, token, 'POST', '/auth/impersonation/stop', {})).status).toBe(204)
     expect((await con(request, token, 'GET', '/auth/me')).status, 'detener invalida el token de observación').toBe(401)
 
+    // Fase 27b: el motivo es un catálogo por empresa («Otro» exige texto) y la sesión guarda la clave.
+    const clave = process.env.E2E_DEMO_PASSWORD ?? 'superadmin@test.com'
+    expect((await api(request, 'superadmin', 'POST', ruta, { reason_key: 'inventado', operator_password: clave })).status, 'una clave fuera del catálogo').toBe(422)
+    expect((await api(request, 'superadmin', 'POST', ruta, { reason_key: 'otro', operator_password: clave })).status, '«Otro» sin texto').toBe(422)
+    const delCatalogo = await api(request, 'superadmin', 'POST', ruta, { reason_key: 'soporte', operator_password: clave })
+    expect(delCatalogo.status, 'un motivo del catálogo no necesita texto').toBe(201)
+    expect((await con(request, delCatalogo.body.token as string, 'POST', '/auth/impersonation/stop', {})).status).toBe(204)
+
     const auditoria = data((await api(request, 'superadmin', 'GET', '/admin/security/impersonations')).body) as { target: { id: number }; reason: string }[]
     expect(auditoria.some(s => s.target.id === ctx.userId && /Revisión de permisos/.test(s.reason)), 'la sesión queda registrada con su motivo').toBe(true)
+    expect((auditoria as { target: { id: number }; reason_key?: string }[]).some(s => s.target.id === ctx.userId && s.reason_key === 'soporte'), 'y con la clave del catálogo').toBe(true)
   })
 
   test('6. niveles de seguridad y notificaciones', async ({ request }) => {
-    const nivel = { name: `Nivel flujo ${STAMP.slice(-5)}`, level: 50 }
+    const nivel = { name: `Nivel flujo ${STAMP.slice(-5)}`, level: 2000 + (Number(STAMP) % 30000) }
     expect((await api(request, 'vendedor', 'POST', '/security-levels', nivel)).status).toBe(403)
     const creado = await api(request, 'gerencia', 'POST', '/security-levels', nivel)
     expect(creado.status).toBe(201)
     ctx.levelId = creado.body.id
+    expect(creado.body.level, 'el número pedido se respeta').toBe(nivel.level)
+    // Fase 27b: nombre único (sin distinguir mayúsculas) y número libre.
+    expect((await api(request, 'gerencia', 'POST', '/security-levels', { name: nivel.name.toUpperCase() })).status, 'nombre repetido').toBe(422)
+    expect((await api(request, 'gerencia', 'POST', '/security-levels', { name: `${nivel.name} otro`, level: nivel.level })).status, 'número ocupado').toBe(422)
     expect((await api(request, 'gerencia', 'PATCH', `/security-levels/${ctx.levelId}/status`, { is_active: false })).status).toBe(200)
 
     const lista = await api(request, 'contabilidad', 'GET', '/notifications')
