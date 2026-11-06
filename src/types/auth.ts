@@ -80,9 +80,13 @@ export interface LoginResponse {
   user:         UserInfo
 }
 
+export type MfaMethod = 'email' | 'totp'
+
 export interface MfaRequiredResponse {
   requires_mfa:     true
   mfa_challenge_id: string
+  /** Fase 27c: cómo se entrega el segundo factor. Sin el campo (backend viejo) es `email`. */
+  mfa_method?:      MfaMethod
 }
 
 export type AnyLoginResponse = LoginResponse | MfaRequiredResponse

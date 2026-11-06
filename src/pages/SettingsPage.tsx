@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Toggle } from '@/components/ui/Toggle'
 import { MfaDisableForm } from '@/components/MfaDisableForm'
+import { MfaTotpSetup } from '@/components/MfaTotpSetup'
+import { MfaBackupRegenerate } from '@/components/MfaBackupRegenerate'
 
 const LANGUAGES = [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }]
 const THEMES    = [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]
@@ -296,6 +298,7 @@ function MfaPersonalSection() {
   })
 
   const [disabledNow, setDisabledNow] = useState(false)
+  const [totpOpen, setTotpOpen] = useState(false)
 
   if (isLoading || !status) return null
 
@@ -314,6 +317,8 @@ function MfaPersonalSection() {
 
   const isEnabled  = status.mfa_enabled
   const isRequired = status.mfa_mode === 'required'
+  const isTotp     = isEnabled && status.mfa_method === 'totp'
+  const refreshStatus = () => { void qc.invalidateQueries({ queryKey: ['mfa-personal-status'] }) }
 
   return (
     <Card variant="panel" shadow className="overflow-hidden">
@@ -332,6 +337,11 @@ function MfaPersonalSection() {
           >
             {isEnabled ? t('auth:mfa.statusEnabled') : t('auth:mfa.statusDisabled')}
           </span>
+          {isEnabled && (
+            <span className="text-xs text-slate-500" data-testid="mfa-method">
+              {isTotp ? t('auth:mfa.methodTotp') : t('auth:mfa.methodEmail')}
+            </span>
+          )}
           {isRequired && (
             <span className="text-xs text-amber-600 font-medium">
               {t('auth:mfa.requiredByAdmin')}
@@ -385,7 +395,7 @@ function MfaPersonalSection() {
         )}
 
         {/* Enable form — only when optional and not yet enabled */}
-        {!isRequired && !isEnabled && !challengeId && (
+        {!isRequired && !isEnabled && !challengeId && !totpOpen && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500">{t('auth:mfa.passwordHint')}</p>
             <div className="flex gap-2">
@@ -409,6 +419,30 @@ function MfaPersonalSection() {
             {passwordError && (
               <p className="text-xs text-red-500">{t('auth:validation.passwordRequired')}</p>
             )}
+          </div>
+        )}
+
+        {/* Fase 27c — aplicación autenticadora: alta o cambio de método */}
+        {!isTotp && !challengeId && (
+          totpOpen
+            ? <MfaTotpSetup emailActive={isEnabled} onCancel={() => setTotpOpen(false)} onActivated={() => { setTotpOpen(false); refreshStatus() }} />
+            : (
+              <Button type="button" variant="outline" className="!px-3 !py-1.5 !text-xs" onClick={() => setTotpOpen(true)}>
+                {isEnabled ? t('auth:mfa.totpSwitch') : t('auth:mfa.totpUse')}
+              </Button>
+            )
+        )}
+
+        {/* Fase 27c — con aplicación activa: respaldos que quedan y su regeneración */}
+        {isTotp && (
+          <div className="space-y-2">
+            <p className="text-xs text-slate-500" data-testid="mfa-backup-remaining">
+              {t('auth:mfa.backupRemaining', { count: status.backup_codes_remaining ?? 0 })}
+            </p>
+            {(status.backup_codes_remaining ?? 0) <= 2 && (
+              <p className="text-xs text-amber-600 font-medium">{t('auth:mfa.backupLow')}</p>
+            )}
+            <MfaBackupRegenerate onChanged={refreshStatus} />
           </div>
         )}
 

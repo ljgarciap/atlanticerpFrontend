@@ -10,7 +10,7 @@ import { useRetryCountdown, describeWait } from '@/hooks/useRetryCountdown'
 import { useAuthStore } from '@/store/authStore'
 import { getHomeRoute } from '@/lib/homeRoute'
 import { returnPathFor } from '@/lib/returnPath'
-import { isMfaRequiredResponse } from '@/types/auth'
+import { isMfaRequiredResponse, type MfaMethod } from '@/types/auth'
 import AppLogo from '@/components/AppLogo'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -25,8 +25,9 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 // ── MFA form ──────────────────────────────────────────────────────────────────
 
+// 6 dígitos (correo o aplicación) o un código de respaldo (10 caracteres, con guion opcional). El servidor exige el formato según el método.
 const mfaSchema = z.object({
-  code: z.string().regex(/^\d{6}$/),
+  code: z.string().regex(/^(\d{6}|[A-Za-z0-9]{5}-?[A-Za-z0-9]{5})$/),
 })
 type MfaFormData = z.infer<typeof mfaSchema>
 
@@ -65,7 +66,9 @@ export default function LoginPage() {
   }
 
   // MFA step state
-  const [mfaState, setMfaState]         = useState<{ challengeId: string } | null>(null)
+  const [mfaState, setMfaState]         = useState<{ challengeId: string; method: MfaMethod } | null>(null)
+  // Fase 27c: con aplicación autenticadora, quien perdió el teléfono puede entrar con un código de respaldo.
+  const [useBackup, setUseBackup]       = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMessage, setResendMessage] = useState('')
 
@@ -98,7 +101,8 @@ export default function LoginPage() {
     try {
       const res = await authApi.login(data.email, data.password)
       if (isMfaRequiredResponse(res)) {
-        setMfaState({ challengeId: res.mfa_challenge_id })
+        setMfaState({ challengeId: res.mfa_challenge_id, method: res.mfa_method ?? 'email' })
+        setUseBackup(false)
       } else {
         setAuth(res.user, res.accessToken, res.refreshToken)
         // SCRUM-175 — '/dashboard' ya no existe (SCRUM-711); navegar directo a la pantalla de
@@ -146,7 +150,7 @@ export default function LoginPage() {
     setResendMessage('')
     try {
       const res = await authApi.mfaResend(mfaState.challengeId)
-      setMfaState({ challengeId: res.mfa_challenge_id })
+      setMfaState({ challengeId: res.mfa_challenge_id, method: 'email' })
       setResendMessage(t('auth:mfa.resendSuccess'))
       mfaReset()
     } catch (err: unknown) {
@@ -161,6 +165,7 @@ export default function LoginPage() {
   const handleBackToLogin = () => {
     mfaWait.clear(); resendWait.clear()
     setMfaState(null)
+    setUseBackup(false)
     setMfaError('')
     setResendMessage('')
     mfaReset()
@@ -201,25 +206,29 @@ export default function LoginPage() {
           <>
             <div className="text-center mb-6">
               <h2 className="text-lg font-bold text-slate-800">{t('auth:mfa.title')}</h2>
-              <p className="text-xs text-slate-500 mt-1">{t('auth:mfa.subtitle')}</p>
+              <p className="text-xs text-slate-500 mt-1">
+                {mfaState.method === 'totp'
+                  ? t(useBackup ? 'auth:mfa.subtitleBackup' : 'auth:mfa.subtitleTotp')
+                  : t('auth:mfa.subtitle')}
+              </p>
             </div>
 
             <form onSubmit={mfaSubmit(handleMfaVerify)} noValidate>
               <div className="mb-5">
                 <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  {t('auth:mfa.codeLabel')}
+                  {mfaState.method === 'totp' ? t(useBackup ? 'auth:mfa.backupCodeLabel' : 'auth:mfa.totpCodeLabel') : t('auth:mfa.codeLabel')}
                 </label>
                 <input
                   type="text"
-                  inputMode="numeric"
+                  inputMode={useBackup ? 'text' : 'numeric'}
                   autoComplete="one-time-code"
-                  maxLength={6}
-                  placeholder={t('auth:mfa.codePlaceholder')}
+                  maxLength={useBackup ? 11 : 6}
+                  placeholder={useBackup ? 'XXXXX-XXXXX' : t('auth:mfa.codePlaceholder')}
                   {...mfaReg('code')}
-                  className={inputCls(!!mfaErrors.code) + ' text-center text-xl tracking-[0.5em] font-mono'}
+                  className={inputCls(!!mfaErrors.code) + (useBackup ? ' text-center text-lg tracking-[0.2em] font-mono uppercase' : ' text-center text-xl tracking-[0.5em] font-mono')}
                 />
                 {mfaErrors.code && (
-                  <p className="text-red-500 text-xs mt-1 text-center">{t('auth:validation.mfaCode')}</p>
+                  <p className="text-red-500 text-xs mt-1 text-center">{t(useBackup ? 'auth:validation.backupCode' : 'auth:validation.mfaCode')}</p>
                 )}
               </div>
 
@@ -255,15 +264,26 @@ export default function LoginPage() {
                 <Button type="button" variant="ghost" onClick={handleBackToLogin} className="!text-xs">
                   {t('auth:mfa.backToLogin')}
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleResend}
-                  disabled={resendLoading || resendWait.active}
-                  className="!text-xs"
-                >
-                  {resendLoading ? '...' : t('auth:mfa.resend')}
-                </Button>
+                {mfaState.method === 'totp' ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { setUseBackup(v => !v); setMfaError(''); mfaReset() }}
+                    className="!text-xs"
+                  >
+                    {t(useBackup ? 'auth:mfa.useTotpCode' : 'auth:mfa.useBackupCode')}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleResend}
+                    disabled={resendLoading || resendWait.active}
+                    className="!text-xs"
+                  >
+                    {resendLoading ? '...' : t('auth:mfa.resend')}
+                  </Button>
+                )}
               </div>
             </form>
           </>

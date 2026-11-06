@@ -272,6 +272,47 @@ describe('LoginPage — MFA (H4)', () => {
   })
 })
 
+describe('LoginPage — MFA con aplicación autenticadora (Fase 27c)', () => {
+  async function toTotpStep() {
+    mockedApi.login.mockResolvedValue({ requires_mfa: true, mfa_challenge_id: 'ch-t', mfa_method: 'totp' } as never)
+    renderLogin()
+    await submitLogin()
+    return screen.findByPlaceholderText('auth:mfa.codePlaceholder')
+  }
+
+  it('pide el código de la aplicación y no ofrece reenviar (no hay correo)', async () => {
+    await toTotpStep()
+
+    expect(screen.getByText('auth:mfa.subtitleTotp')).toBeInTheDocument()
+    expect(screen.queryByText('auth:mfa.resend')).not.toBeInTheDocument()
+    expect(screen.getByText('auth:mfa.useBackupCode')).toBeInTheDocument()
+  })
+
+  it('permite entrar con un código de respaldo y lo manda tal cual al servidor', async () => {
+    await toTotpStep()
+    mockedApi.mfaVerify.mockRejectedValue({ response: { status: 422, data: { message: 'x' } } })
+
+    fireEvent.click(screen.getByText('auth:mfa.useBackupCode'))
+    expect(screen.getByText('auth:mfa.subtitleBackup')).toBeInTheDocument()
+    expect(screen.getByText('auth:mfa.useTotpCode')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('XXXXX-XXXXX'), { target: { value: 'ABCDE-FGHJK' } })
+    fireEvent.click(screen.getByText('auth:mfa.submit').closest('button') as HTMLButtonElement)
+    await waitFor(() => expect(mockedApi.mfaVerify).toHaveBeenCalledWith('ch-t', 'ABCDE-FGHJK'))
+  })
+
+  it('un reto sin mfa_method (servidor anterior) se trata como correo', async () => {
+    mockedApi.login.mockResolvedValue({ requires_mfa: true, mfa_challenge_id: 'ch-e' } as never)
+    renderLogin()
+    await submitLogin()
+    await screen.findByPlaceholderText('auth:mfa.codePlaceholder')
+
+    expect(screen.getByText('auth:mfa.subtitle')).toBeInTheDocument()
+    expect(screen.getByText('auth:mfa.resend')).toBeInTheDocument()
+    expect(screen.queryByText('auth:mfa.useBackupCode')).not.toBeInTheDocument()
+  })
+})
+
 describe('LoginPage — aviso tras cambiar la contraseña (SCRUM-1033)', () => {
   it('con el flag passwordChanged del router muestra el aviso de que se cerraron las sesiones', () => {
     render(

@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import { createHmac } from 'node:crypto'
 import { test, expect, type APIRequestContext } from '@playwright/test'
 import { API, data, iniciarSesion, llamar, type Tokens } from './apoyo/venta-cobrada'
 
@@ -54,6 +55,25 @@ async function pedirCodigoDeActivacion(request: APIRequestContext, token: string
   expect(r.status).toBe(200)
   return { retoId: r.body.mfa_challenge_id as string, codigo: await esperarNuevo(CODIGO, antes) }
 }
+
+// Fase 27c — código de la aplicación autenticadora (RFC 6238, SHA-1, 6 dígitos, paso de 30 s) calculado igual que lo haría el teléfono.
+const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+function base32Decode(text: string): Buffer {
+  let bits = ''
+  for (const c of text.toUpperCase()) bits += BASE32.indexOf(c).toString(2).padStart(5, '0')
+  const bytes: number[] = []
+  for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2))
+  return Buffer.from(bytes)
+}
+function totp(secret: string, step: number): string {
+  const counter = Buffer.alloc(8)
+  counter.writeBigUInt64BE(BigInt(step))
+  const mac = createHmac('sha1', base32Decode(secret)).update(counter).digest()
+  const off = mac[19] & 0x0f
+  const bin = ((mac[off] & 0x7f) << 24) | (mac[off + 1] << 16) | (mac[off + 2] << 8) | mac[off + 3]
+  return String(bin % 1_000_000).padStart(6, '0')
+}
+const pasoActual = () => Math.floor(Date.now() / 1000 / 30)
 
 test.describe.configure({ mode: 'serial' })
 
@@ -231,5 +251,82 @@ test.describe('Flujo: MFA y recuperación de clave', () => {
     expect(tope, 'el tope llega').not.toBeNull()
     expect(tope!.body).toMatchObject({ code: 'too_many_attempts' })
     expect(tope!.body.retry_after).toBeGreaterThan(0)
+  })
+  test('8. aplicación autenticadora (27c): alta con QR, ingreso sin correo, respaldos de un solo uso, regenerar, desactivar y reiniciar', async ({ request }) => {
+    try { execSync(COMANDO_TOPES, { stdio: 'pipe' }) } catch { /* los topes de los pasos anteriores no deben estorbar */ }
+    const sesion = await entrar(request, email, CLAVE)
+    expect(sesion.status).toBe(200)
+    const token = sesion.body.token as string
+
+    // Alta: la clave es obligatoria y nada queda activo hasta confirmar con un código válido.
+    expect((await conToken(request, token, 'POST', '/auth/mfa/totp/setup', { password: 'Equivocada-1' })).status).toBe(422)
+    const alta = await conToken(request, token, 'POST', '/auth/mfa/totp/setup', { password: CLAVE })
+    expect(alta.status).toBe(200)
+    expect(alta.body.otpauth_uri).toContain('otpauth://totp/')
+    expect(alta.body.qr, 'el servidor dibuja el QR').toMatch(/^data:image\/png;base64,/)
+    const secreto = alta.body.secret as string
+    expect((await conToken(request, token, 'GET', '/auth/mfa/status')).body).toMatchObject({ mfa_enabled: false })
+    expect((await conToken(request, token, 'POST', '/auth/mfa/totp/confirm', { code: '000000' })).status).toBe(422)
+
+    const confirmado = await conToken(request, token, 'POST', '/auth/mfa/totp/confirm', { code: totp(secreto, pasoActual()) })
+    expect(confirmado.status).toBe(200)
+    const respaldos = confirmado.body.backup_codes as string[]
+    expect(respaldos).toHaveLength(10)
+    expect(new Set(respaldos).size).toBe(10)
+    const estado = (await conToken(request, token, 'GET', '/auth/mfa/status')).body
+    expect(estado).toMatchObject({ mfa_enabled: true, mfa_method: 'totp', backup_codes_remaining: 10 })
+    expect(JSON.stringify(estado), 'el secreto no vuelve a salir').not.toContain(secreto)
+
+    // Ingreso: el reto indica «totp» y NO se envía ningún correo.
+    const correosAntes = ultimos(CODIGO)
+    const login = await entrar(request, email, CLAVE)
+    expect(login.body).toMatchObject({ requires_mfa: true, mfa_method: 'totp' })
+    expect(ultimos(CODIGO), 'sin correo de código').toEqual(correosAntes)
+    const reto = login.body.mfa_challenge_id as string
+    expect((await publico(request, 'POST', '/auth/mfa/resend', { mfa_challenge_id: reto })).status, 'no hay código que reenviar').toBe(422)
+    expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto, code: '000000' })).status).toBe(422)
+
+    // El alta ya gastó el paso actual: el siguiente (dentro de la tolerancia de ±1 paso) entra, y repetirlo no sirve.
+    const codigo = totp(secreto, pasoActual() + 1)
+    const reto2 = (await entrar(request, email, CLAVE)).body.mfa_challenge_id as string
+    const dentro = await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto2, code: codigo })
+    expect(dentro.status).toBe(200)
+    expect(dentro.body.token).toBeTruthy()
+    const reto3 = (await entrar(request, email, CLAVE)).body.mfa_challenge_id as string
+    expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto3, code: codigo })).status, 'un código gastado no vuelve a servir').toBe(422)
+
+    // Un respaldo sirve una sola vez.
+    const reto4 = (await entrar(request, email, CLAVE)).body.mfa_challenge_id as string
+    expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto4, code: respaldos[0] })).status).toBe(200)
+    const reto5 = (await entrar(request, email, CLAVE)).body.mfa_challenge_id as string
+    expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto5, code: respaldos[0] })).status, 'el respaldo ya se gastó').toBe(422)
+    expect((await conToken(request, token, 'GET', '/auth/mfa/status')).body.backup_codes_remaining).toBe(9)
+
+    // Regenerar pide clave y un código (aquí, un respaldo) e invalida los anteriores.
+    expect((await conToken(request, token, 'POST', '/auth/mfa/backup-codes/regenerate', { password: 'Equivocada-1', code: respaldos[1] })).status).toBe(422)
+    expect((await conToken(request, token, 'POST', '/auth/mfa/backup-codes/regenerate', { password: CLAVE, code: '000000' })).status).toBe(422)
+    const nuevos = await conToken(request, token, 'POST', '/auth/mfa/backup-codes/regenerate', { password: CLAVE, code: respaldos[1] })
+    expect(nuevos.status).toBe(200)
+    expect(nuevos.body.backup_codes).toHaveLength(10)
+    const reto6 = (await entrar(request, email, CLAVE)).body.mfa_challenge_id as string
+    expect((await publico(request, 'POST', '/auth/mfa/verify', { mfa_challenge_id: reto6, code: respaldos[2] })).status, 'los respaldos viejos ya no sirven').toBe(422)
+
+    // Desactivar pide clave y un código de la aplicación o un respaldo; con un código malo, nada cambia.
+    const pedir = await conToken(request, token, 'POST', '/auth/mfa/disable', { password: CLAVE })
+    expect(pedir.body).toMatchObject({ method: 'totp' })
+    expect(pedir.body.mfa_challenge_id).toBeUndefined()
+    expect((await conToken(request, token, 'POST', '/auth/mfa/disable/confirm', { code: '000000' })).status).toBe(422)
+    expect((await conToken(request, token, 'GET', '/auth/mfa/status')).body).toMatchObject({ mfa_enabled: true })
+    expect((await conToken(request, token, 'POST', '/auth/mfa/disable/confirm', { code: nuevos.body.backup_codes[0] })).status).toBe(200)
+    expect((await entrar(request, email, CLAVE)).body.requires_mfa, 'sin MFA entra directo').toBeUndefined()
+
+    // Reinicio por Gerencia: borra secreto y respaldos (se vuelve a activar para comprobarlo).
+    const otra = (await entrar(request, email, CLAVE)).body.token as string
+    const alta2 = await conToken(request, otra, 'POST', '/auth/mfa/totp/setup', { password: CLAVE })
+    const secreto2 = alta2.body.secret as string
+    expect((await conToken(request, otra, 'POST', '/auth/mfa/totp/confirm', { code: totp(secreto2, pasoActual()) })).status).toBe(200)
+    expect((await llamar(request, tokens, 'gerencia', 'POST', `/admin/security/users/${ctx.userId}/mfa/reset`)).status).toBe(200)
+    expect((await conToken(request, otra, 'GET', '/auth/mfa/status')).body).toMatchObject({ mfa_enabled: false, mfa_method: null })
+    expect((await entrar(request, email, CLAVE)).body.requires_mfa, 'tras el reinicio entra sin segundo factor').toBeUndefined()
   })
 })
