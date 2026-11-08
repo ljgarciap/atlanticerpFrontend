@@ -15,7 +15,7 @@ import BodegaSettingsPanel from '@/components/BodegaSettingsPanel'
 import ServiciosSettingsPanel from '@/components/ServiciosSettingsPanel'
 import GlobalSettingsPanel from '@/components/GlobalSettingsPanel'
 import CatalogsPanel from '@/components/CatalogsPanel'
-import ApproverSubstitutesPanel from '@/components/ApproverSubstitutesPanel'
+import ApproversTab from '@/components/ApproversTab'
 
 /**
  * SCRUM-944/945 — vista NUEVA, exclusiva de superadmin, que agrega en un solo lugar todos los
@@ -51,7 +51,7 @@ const TABS: { key: TabKey; panel: React.ComponentType }[] = [
   { key: 'crm',              panel: CrmSettingsPanel },
   { key: 'salesCommissions', panel: SalesCommissionTiersPanel },
   { key: 'catalogs',         panel: CatalogsPanel },
-  { key: 'approvers',        panel: ApproverSubstitutesPanel },
+  { key: 'approvers',        panel: ApproversTab },
   { key: 'global',           panel: GlobalSettingsPanel },
 ]
 
