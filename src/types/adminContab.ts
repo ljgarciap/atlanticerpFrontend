@@ -91,6 +91,8 @@ export interface FiscalSettings {
    *  acá desde una constante hardcodeada en el backend (regla dura del workspace sobre umbrales de
    *  negocio, ver CLAUDE.md raíz). Entero, mínimo 1. */
   petty_cash_max_intentos_rechazo: number
+  /** Fase 28 — base de cálculo de la comisión externa: el monto con impuesto (default) o sin él. */
+  comision_externa_base: 'total' | 'base_imponible'
   /** SCRUM-1019 — horas máximas para reintentar un documento electrónico antes de requerir acción manual. Entero 1–720, obligatorio (default 24 en el backend). */
   fe_reintento_max_horas: number
   /** Fase 6b — ¿la empresa envía documentos a una autoridad fiscal? `false` con el proveedor `none` o el ambiente apagado. */
@@ -257,6 +259,16 @@ export interface BankMovement {
 export interface BankMovementListResponse {
   data: BankMovement[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
+  /** Fase 28 — salidas (devolución/comisión) sin cuenta, sin importar los filtros activos. */
+  pendientes_sin_cuenta?: { cantidad: number; monto: number }
+}
+
+/** Fase 28 — filtros del listado de movimientos. */
+export interface BankMovementFilters {
+  tipo?: TipoMovimiento
+  desde?: string
+  hasta?: string
+  sinCuenta?: boolean
 }
 
 // Batch 2 del cuerpo principal de la épica (SCRUM-513→518, REQ-436→441) — Facturación.
@@ -1010,6 +1022,9 @@ export interface AccountStatement {
   tarifa: AccountStatementTarifa | null
   regimen_fiscal: RegimenFiscal
   terminos_pago: string
+  /** Fase 28 — días de crédito propios del cliente (null = rige el global) y los que realmente se aplican. */
+  dias_credito?: number | null
+  dias_credito_efectivo?: number
   // Batch 9 (SCRUM-534→538, REQ-457→461).
   saldo: number
   saldo_a_favor: boolean
@@ -1469,6 +1484,8 @@ export interface CommissionTier {
   monto_maximo: number | null
   porcentaje: number
   orden: number
+  /** Fase 28 — solo en la respuesta de crear/editar: huecos en la escala que no bloquean el guardado. */
+  avisos?: string[]
 }
 
 export type CreateCommissionTierPayload = Omit<CommissionTier, 'id'>
@@ -1659,6 +1676,10 @@ export interface ArchitectCommissionRow {
   /** `false` → fila con aviso "Completar datos fiscales" (RN4 REQ-510); los montos de sus
    *  proyectos (salvo "Aún no generada") no se pueden calcular. */
   datos_fiscales_completos: boolean
+  /** Fase 28 — sin régimen fiscal los totales con impuesto no se calculan: `true` si hay comisión generada que aún no suma por eso. */
+  regimen_pendiente?: boolean
+  /** Fase 28 — comisión (sin impuesto) de los proyectos generados/pagados que no suman a `generada`/`pagada`/`pendiente` por falta de régimen. */
+  comision_sin_regimen?: number
   /** Desglose de la fila (mockup del ticket) — pagada + pendiente = generada, acotado a los
    *  proyectos ya filtrados de este arquitecto (no a su universo completo). */
   generada: number
@@ -2333,6 +2354,11 @@ export interface PaymentMethodSalesPendiente {
 }
 
 export interface PaymentMethodSalesResumen {
+  /** Fase 28 — notas de crédito aplicadas del periodo (importes en negativo), para conciliar con el Libro de facturas. */
+  notas_credito: { cantidad: number; base_imponible: number; itbms: number; total: number }
+  pendientes_total: number
+  /** Fase 28 — cobradas + pendientes + notas de crédito: debe coincidir con el total del Libro de facturas. */
+  total_libro: number
   facturas_cobradas: number
   base_imponible: number
   itbms: number

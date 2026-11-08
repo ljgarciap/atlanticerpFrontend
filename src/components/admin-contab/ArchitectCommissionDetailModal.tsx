@@ -323,6 +323,10 @@ export default function ArchitectCommissionDetailModal(
           )}
         </div>
 
+        {markPaidMutation.data?.avisos?.map((a, i) => (
+          <p key={i} role="status" data-testid="aviso-pago" className="px-5 pb-2 text-[11px] text-amber-700 dark:text-amber-400">{a}</p>
+        ))}
+
         <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-100 dark:border-slate-700">
           <Button variant="secondary" onClick={onClose}>{t('comisionesExternas.datosFiscales.cancel')}</Button>
           {canManage && pendienteFactura && (

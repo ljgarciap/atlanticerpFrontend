@@ -276,5 +276,23 @@
     "loading": "Cargando…",
     "loadError": "No se pudieron cargar los aprobadores.",
     "saveError": "No se pudo guardar."
+  },
+  "processApprovers": {
+    "title": "Aprobadores por proceso (Admin & Contab)",
+    "subtitle": "Por defecto, cada proceso lo decide el aprobador primario y sus suplentes. Si designas personas para un proceso, solo ellas (y superadmin) lo deciden; vaciar la lista lo devuelve al aprobador primario.",
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar los aprobadores por proceso.",
+    "followsPrimary": "Sigue al aprobador primario y sus suplentes.",
+    "remove": "Quitar",
+    "add": "Agregar",
+    "choose": "Elegir persona…",
+    "addLabel": "Agregar aprobador",
+    "saveError": "No se pudo guardar.",
+    "processes": {
+      "caja_chica": "Caja chica",
+      "arqueo": "Arqueo de caja",
+      "anulacion_cobro": "Anulación de cobros y devoluciones",
+      "nota_credito": "Notas de crédito"
+    }
   }
 }

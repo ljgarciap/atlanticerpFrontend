@@ -23,7 +23,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/api/adminContabApi', () => ({
   adminContabApi: {
     bankAccounts: { list: vi.fn(), create: vi.fn(), update: vi.fn(), deactivate: vi.fn(), reactivate: vi.fn() },
-    bankMovements: { list: vi.fn(), assignAccount: vi.fn() },
+    bankMovements: { list: vi.fn(), assignAccount: vi.fn(), reassignAccount: vi.fn() },
   },
 }))
 
@@ -217,5 +217,60 @@ describe('BankAccountsPage', () => {
 
     fireEvent.click(screen.getByText('Banco Demo B — adminContab:cuentasBancarias.tipos.corriente ****9034 · USD'))
     await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(1, 1, 20))
+  })
+  // ── Fase 28 (grupo 4) — tesorería ───────────────────────────────────────────────────────
+
+  it('Fase 28 — muestra el pendiente de salidas sin cuenta y «Ver pendientes» aplica el filtro', async () => {
+    mockedApi.bankMovements.list.mockImplementation(() => Promise.resolve({
+      data: makeMovements(), meta: { total: 3, per_page: 20, current_page: 1, last_page: 1 },
+      pendientes_sin_cuenta: { cantidad: 2, monto: 120 },
+    }))
+    renderPage()
+
+    expect(await screen.findByTestId('pendientes-sin-cuenta')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('adminContab:cuentasBancarias.verPendientes'))
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(undefined, 1, 20, { sinCuenta: true }))
+  })
+
+  it('Fase 28 — filtrar por tipo reenvía la consulta con el filtro y reinicia la página', async () => {
+    renderPage()
+    await screen.findByText('Comisión Vendedor')
+
+    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.movimientos.tipo'), { target: { value: 'devolucion' } })
+    await waitFor(() => expect(mockedApi.bankMovements.list).toHaveBeenLastCalledWith(undefined, 1, 20, { tipo: 'devolucion' }))
+  })
+
+  it('Fase 28 — «Corregir cuenta» solo aparece en movimientos no-cobro con cuenta y exige motivo', async () => {
+    mockedApi.bankMovements.list.mockImplementation(() => Promise.resolve({
+      data: [
+        { id: 20, fecha: '2026-08-04', tipo: 'comision', concepto: 'Comisión con cuenta', monto: 90, direccion: 'salida', bank_account_id: 1, bank_account_label: 'Banco Demo B' },
+        { id: 10, fecha: '2026-08-01', tipo: 'cobro', concepto: 'Cobro factura F-100', monto: 500, direccion: 'entrada', bank_account_id: 1, bank_account_label: 'Banco Demo B' },
+      ],
+      meta: { total: 2, per_page: 20, current_page: 1, last_page: 1 },
+    }))
+    mockedApi.bankMovements.reassignAccount.mockResolvedValue({} as BankMovement)
+    renderPage()
+    await screen.findByText('Comisión con cuenta')
+
+    expect(screen.getAllByText('adminContab:cuentasBancarias.corregir.boton')).toHaveLength(1)
+    fireEvent.click(screen.getByText('adminContab:cuentasBancarias.corregir.boton'))
+
+    const guardar = screen.getByText('common:actions.save').closest('button')!
+    expect(guardar).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.corregir.cuentaNueva'), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText('adminContab:cuentasBancarias.corregir.motivo'), { target: { value: 'Salió por la otra cuenta' } })
+    expect(guardar).not.toBeDisabled()
+    fireEvent.click(guardar)
+
+    await waitFor(() => expect(mockedApi.bankMovements.reassignAccount).toHaveBeenCalledWith(20, 2, 'Salió por la otra cuenta'))
+  })
+  it('Fase 28 — al desactivar una cuenta con movimientos muestra el aviso del backend antes de cerrar', async () => {
+    mockedApi.bankAccounts.deactivate.mockResolvedValue({ ...makeAccounts()[0], activa: false, avisos: ['La cuenta tiene 3 movimiento(s) registrados.'] })
+    renderPage()
+    fireEvent.click((await screen.findAllByLabelText('adminContab:cuentasBancarias.detail'))[0])
+    fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.deleteAccount'))
+    fireEvent.click(await screen.findByText('adminContab:cuentasBancarias.confirmDeleteButton'))
+
+    expect(await screen.findByTestId('avisos-desactivar')).toHaveTextContent('3 movimiento')
   })
 })

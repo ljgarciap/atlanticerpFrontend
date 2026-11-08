@@ -1,3 +1,4 @@
+import { parseApiValidationError, summaryMessage } from '@/lib/apiValidationError'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -39,6 +40,10 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
     monto_minimo: 0, monto_maximo: null, porcentaje: 0, orden: (tiers?.length ?? 0) + 1,
   })
 
+  // Fase 28: el backend rechaza solapes con 422 y avisa de huecos en la respuesta; ambos se muestran sin cerrar el formulario.
+  const [error, setError] = useState<string | null>(null)
+  const [avisos, setAvisos] = useState<string[]>([])
+
   const sorted = [...(tiers ?? [])].sort((a, b) => a.orden - b.orden)
 
   // Fase 14d (3.5): el tramo que se aplica es el de mayor mínimo que no supera el total (límite inferior inclusivo), así que se muestra
@@ -67,10 +72,15 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
   }
 
   function submit() {
+    setError(null)
+    const handlers = {
+      onSuccess: (res: CommissionTier) => { setAvisos(res.avisos ?? []); cancelEdit() },
+      onError: (err: unknown) => setError(summaryMessage(parseApiValidationError(err), t('adminContab:comisionesInternas.tramos.errorGuardar'))),
+    }
     if (editingId !== null) {
-      updateTier.mutate({ id: editingId, data: form }, { onSuccess: cancelEdit })
+      updateTier.mutate({ id: editingId, data: form }, handlers)
     } else {
-      createTier.mutate(form, { onSuccess: cancelEdit })
+      createTier.mutate(form, handlers)
     }
   }
 
@@ -134,6 +144,12 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
           </tbody>
         </table>
 
+        {avisos.length > 0 && (
+          <ul role="status" data-testid="avisos-tramos" className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-2 py-1.5 mb-3 list-disc pl-5">
+            {avisos.map((a, i) => <li key={i}>{a}</li>)}
+          </ul>
+        )}
+
         {editable && (adding || editingId !== null) && (
           <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-3 mb-3 grid grid-cols-2 gap-2">
             <label className="text-[11px] text-slate-500">
@@ -161,6 +177,7 @@ export default function CommissionTiersModal({ editable, onClose }: Props) {
                 className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-2 py-1.5 text-xs"
               />
             </label>
+            {error && <p role="alert" className="col-span-2 text-[11px] text-red-600">{error}</p>}
             <div className="col-span-2 flex justify-end gap-2 mt-1">
               <Button variant="secondary" className="!text-xs !py-1.5" onClick={cancelEdit}>{t('common:actions.cancel')}</Button>
               <Button className="!text-xs !py-1.5" onClick={submit} loading={saving}>{t('common:actions.save')}</Button>

@@ -276,5 +276,23 @@
     "loading": "Loading…",
     "loadError": "Could not load the approvers.",
     "saveError": "Could not save."
+  },
+  "processApprovers": {
+    "title": "Approvers by process (Admin & Accounting)",
+    "subtitle": "By default, each process is decided by the primary approver and substitutes. If you name people for a process, only they (and superadmin) decide it; emptying the list returns it to the primary approver.",
+    "loading": "Loading…",
+    "loadError": "The approvers by process could not be loaded.",
+    "followsPrimary": "Follows the primary approver and substitutes.",
+    "remove": "Remove",
+    "add": "Add",
+    "choose": "Choose a person…",
+    "addLabel": "Add approver",
+    "saveError": "Could not save.",
+    "processes": {
+      "caja_chica": "Petty cash",
+      "arqueo": "Cash count",
+      "anulacion_cobro": "Payment voids and refunds",
+      "nota_credito": "Credit notes"
+    }
   }
 }

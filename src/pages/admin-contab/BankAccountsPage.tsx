@@ -5,14 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { isAxiosError } from 'axios'
 import {
-  useBankAccounts, useCreateBankAccount, useBankMovements, useAssignBankMovementAccount,
+  useBankAccounts, useCreateBankAccount, useBankMovements, useAssignBankMovementAccount, useReassignBankMovementAccount,
 } from '@/hooks/useAdminContab'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { IcoDollarSign, IcoEye, IcoPlus } from '@/components/icons'
 import BankAccountDetailModal from './BankAccountDetailModal'
-import type { BankAccount, BankMovement, CreateBankAccountPayload } from '@/types/adminContab'
+import type { BankAccount, BankMovement, BankMovementFilters, CreateBankAccountPayload, TipoMovimiento } from '@/types/adminContab'
+import { parseApiValidationError, summaryMessage } from '@/lib/apiValidationError'
 import { getRegion } from '@/lib/region'
 
 /**
@@ -73,8 +74,12 @@ export default function BankAccountsPage() {
   const [movementsPage, setMovementsPage]       = useState(1)
   const [movementsPerPage, setMovementsPerPage] = useState<number | 'all'>(20)
   // SCRUM-947 — cambiar de tab (cuenta) reinicia la página, misma convención que un filtro nuevo.
-  useEffect(() => { setMovementsPage(1) }, [selectedTab])
-  const { data: movementsResult } = useBankMovements(movementsAccountId, movementsPage, movementsPerPage)
+  // Fase 28 — filtros de tipo, fechas y «sin cuenta».
+  const [movFilters, setMovFilters] = useState<BankMovementFilters>({})
+  const activeFilters = (movFilters.tipo || movFilters.desde || movFilters.hasta || movFilters.sinCuenta) ? movFilters : undefined
+  useEffect(() => { setMovementsPage(1) }, [selectedTab, movFilters])
+  const { data: movementsResult } = useBankMovements(movementsAccountId, movementsPage, movementsPerPage, activeFilters)
+  const pendientes = movementsResult?.pendientes_sin_cuenta
   const movements     = movementsResult?.data
   const movementsMeta = movementsResult?.meta
 
@@ -187,6 +192,17 @@ export default function BankAccountsPage() {
         <DeletedAccountsList accounts={deletedAccounts} onDetail={setDetailAccount} t={t} />
       ) : (
         <>
+          {pendientes && pendientes.cantidad > 0 && (
+            <div role="status" data-testid="pendientes-sin-cuenta" className="mb-3 flex items-center justify-between gap-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
+              <span>{t('adminContab:cuentasBancarias.pendientesSinCuenta', { cantidad: pendientes.cantidad, monto: formatCurrency(pendientes.monto, 'USD') })}</span>
+              {!movFilters.sinCuenta && (
+                <button type="button" className="font-medium underline" onClick={() => setMovFilters(f => ({ ...f, sinCuenta: true }))}>
+                  {t('adminContab:cuentasBancarias.verPendientes')}
+                </button>
+              )}
+            </div>
+          )}
+          <MovementFilters value={movFilters} onChange={setMovFilters} t={t} />
           <MovementsTable movements={movements ?? []} activeAccounts={activeAccounts} t={t} />
           {movementsMeta && (
             <Pagination
@@ -248,12 +264,63 @@ function DeletedAccountsList(
   )
 }
 
+function MovementFilters(
+  { value, onChange, t }:
+  { value: BankMovementFilters; onChange: (v: BankMovementFilters) => void; t: (key: string) => string },
+) {
+  return (
+    <div className="mb-3 flex flex-wrap items-end gap-3 text-xs" data-testid="filtros-movimientos">
+      <label className="text-slate-500">
+        {t('adminContab:cuentasBancarias.movimientos.tipo')}
+        <select
+          aria-label={t('adminContab:cuentasBancarias.movimientos.tipo')}
+          value={value.tipo ?? ''} onChange={(e) => onChange({ ...value, tipo: (e.target.value || undefined) as TipoMovimiento | undefined })}
+          className={inputClass(false) + ' !w-auto mt-1'}
+        >
+          <option value="">{t('adminContab:cuentasBancarias.filtros.todos')}</option>
+          {(['cobro', 'devolucion', 'comision'] as const).map(k => (
+            <option key={k} value={k}>{t(`adminContab:cuentasBancarias.movimientoTipos.${k}`)}</option>
+          ))}
+        </select>
+      </label>
+      <label className="text-slate-500">
+        {t('adminContab:cuentasBancarias.filtros.desde')}
+        <input type="date" value={value.desde ?? ''} onChange={(e) => onChange({ ...value, desde: e.target.value || undefined })} className={inputClass(false) + ' !w-auto mt-1'} />
+      </label>
+      <label className="text-slate-500">
+        {t('adminContab:cuentasBancarias.filtros.hasta')}
+        <input type="date" value={value.hasta ?? ''} onChange={(e) => onChange({ ...value, hasta: e.target.value || undefined })} className={inputClass(false) + ' !w-auto mt-1'} />
+      </label>
+      <label className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 pb-1.5">
+        <input type="checkbox" checked={!!value.sinCuenta} onChange={(e) => onChange({ ...value, sinCuenta: e.target.checked || undefined })} />
+        {t('adminContab:cuentasBancarias.filtros.sinCuenta')}
+      </label>
+    </div>
+  )
+}
+
 function MovementRow(
   { movement, activeAccounts, t }:
   { movement: BankMovement; activeAccounts: BankAccount[]; t: (key: string) => string },
 ) {
   const [assigning, setAssigning] = useState(false)
   const assignAccount = useAssignBankMovementAccount()
+  // Fase 28 — corregir una cuenta ya asignada (no cobros: su cuenta nace del cobro): cuenta nueva + motivo.
+  const reassign = useReassignBankMovementAccount()
+  const [correcting, setCorrecting] = useState(false)
+  const [newAccountId, setNewAccountId] = useState(0)
+  const [motivo, setMotivo] = useState('')
+  const [reassignError, setReassignError] = useState<string | null>(null)
+  const canCorrect = movement.tipo !== 'cobro' && movement.bank_account_id !== null
+  const motivoOk = motivo.trim().length >= 10 && newAccountId > 0
+
+  function submitReassign() {
+    setReassignError(null)
+    reassign.mutate({ id: movement.id, bankAccountId: newAccountId, motivo: motivo.trim() }, {
+      onSuccess: () => { setCorrecting(false); setMotivo(''); setNewAccountId(0) },
+      onError: (err) => setReassignError(summaryMessage(parseApiValidationError(err), t('adminContab:cuentasBancarias.corregir.error'))),
+    })
+  }
 
   // RN1 REQ-534 — solo movimientos de tipo "comision" sin cuenta pueden asignarse acá.
   const canAssign = movement.tipo === 'comision' && movement.bank_account_id === null
@@ -274,6 +341,36 @@ function MovementRow(
         )}
       </td>
       <td className="py-2.5 px-4 text-right">
+        {canCorrect && !correcting && (
+          <Button variant="outline" onClick={() => setCorrecting(true)}>{t('adminContab:cuentasBancarias.corregir.boton')}</Button>
+        )}
+        {canCorrect && correcting && (
+          <div className="inline-flex flex-col items-end gap-1.5 text-left">
+            <select
+              aria-label={t('adminContab:cuentasBancarias.corregir.cuentaNueva')}
+              value={newAccountId} onChange={(e) => setNewAccountId(Number(e.target.value))}
+              className={inputClass(false) + ' !w-auto'}
+            >
+              <option value={0} disabled>{t('adminContab:cuentasBancarias.selectAccountPlaceholder')}</option>
+              {activeAccounts.filter(a => a.id !== movement.bank_account_id).map(a => (
+                <option key={a.id} value={a.id}>{accountLabel(a, t)}</option>
+              ))}
+            </select>
+            <textarea
+              aria-label={t('adminContab:cuentasBancarias.corregir.motivo')}
+              placeholder={t('adminContab:cuentasBancarias.corregir.motivo')}
+              value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2}
+              className={inputClass(false) + ' !w-56'}
+            />
+            {reassignError && <p role="alert" className="text-[11px] text-red-600 max-w-56">{reassignError}</p>}
+            <div className="inline-flex gap-2">
+              <button type="button" onClick={() => { setCorrecting(false); setReassignError(null) }} className="text-slate-400 hover:text-slate-600 text-xs">
+                {t('common:actions.cancel')}
+              </button>
+              <Button disabled={!motivoOk || reassign.isPending} onClick={submitReassign}>{t('common:actions.save')}</Button>
+            </div>
+          </div>
+        )}
         {canAssign && !assigning && (
           <Button variant="outline" onClick={() => setAssigning(true)}>{t('adminContab:cuentasBancarias.seleccionarCuenta')}</Button>
         )}

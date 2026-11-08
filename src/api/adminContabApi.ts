@@ -35,7 +35,7 @@ import type {
   ReportsComisiones, ReportsNotasCredito,
   ClientCollectionReport, ClientCollectionReportParams,
   InvoiceBookReport, InvoiceBookReportParams,
-  PaymentMethodSalesReport, PaymentMethodSalesReportParams,
+  PaymentMethodSalesReport, PaymentMethodSalesReportParams, BankMovementFilters,
   HomePendientes,
   HomeResumenMes,
   HomeVencidosPorVencer,
@@ -138,8 +138,8 @@ export const adminContabApi = {
     update: (id: number, data: UpdateBankAccountPayload): Promise<BankAccount> =>
       api.put<BankAccount>(`/admin-contab/bank-accounts/${id}`, data).then(r => r.data),
 
-    deactivate: (id: number): Promise<BankAccount> =>
-      api.put<BankAccount>(`/admin-contab/bank-accounts/${id}/deactivate`).then(r => r.data),
+    deactivate: (id: number): Promise<BankAccount & { avisos?: string[] }> =>
+      api.put<BankAccount & { avisos?: string[] }>(`/admin-contab/bank-accounts/${id}/deactivate`).then(r => r.data),
 
     reactivate: (id: number): Promise<BankAccount> =>
       api.put<BankAccount>(`/admin-contab/bank-accounts/${id}/reactivate`).then(r => r.data),
@@ -147,10 +147,18 @@ export const adminContabApi = {
 
   bankMovements: {
     // SCRUM-947 — pagina server-side (antes devolvía el array completo).
-    list: (bankAccountId?: number, page?: number, perPage?: number | 'all'): Promise<BankMovementListResponse> =>
+    list: (bankAccountId?: number, page?: number, perPage?: number | 'all', filters?: BankMovementFilters): Promise<BankMovementListResponse> =>
       api.get<BankMovementListResponse>('/admin-contab/bank-movements', {
-        params: { bank_account_id: bankAccountId, page, per_page: perPage },
+        params: {
+          bank_account_id: bankAccountId, page, per_page: perPage,
+          tipo: filters?.tipo, desde: filters?.desde || undefined, hasta: filters?.hasta || undefined,
+          sin_cuenta: filters?.sinCuenta ? 1 : undefined,
+        },
       }).then(r => r.data),
+
+    // Fase 28 — corregir la cuenta de un movimiento ya asignado (motivo obligatorio, auditado).
+    reassignAccount: (id: number, bankAccountId: number, motivo: string): Promise<BankMovement> =>
+      api.put<BankMovement>(`/admin-contab/bank-movements/${id}/reassign-account`, { bank_account_id: bankAccountId, motivo }).then(r => r.data),
 
     assignAccount: (id: number, bankAccountId: number): Promise<BankMovement> =>
       api.put<BankMovement>(`/admin-contab/bank-movements/${id}/assign-account`, { bank_account_id: bankAccountId }).then(r => r.data),
@@ -383,6 +391,12 @@ export const adminContabApi = {
 
   // Batch 8 del cuerpo principal (SCRUM-529→533, REQ-452→456) — Estado de Cuenta. Batch 9
   // (SCRUM-534→538, REQ-457→461) agrega desde/hasta al mismo endpoint (respuesta superset).
+  clientCreditDays: {
+    // Fase 28 — días de crédito propios del cliente (null = usa el global de Configuración Fiscal).
+    set: (masterClientId: number, diasCredito: number | null): Promise<{ master_client_id: number; dias_credito: number | null; dias_credito_efectivo: number }> =>
+      api.put(`/admin-contab/clientes/${masterClientId}/dias-credito`, { dias_credito: diasCredito }).then(r => r.data),
+  },
+
   accountStatement: {
     searchClients: (search: string): Promise<AccountStatementClientOption[]> =>
       api.get<{ data: AccountStatementClientOption[] }>('/admin-contab/account-statement/clients', { params: { search } })
@@ -743,8 +757,8 @@ export const adminContabApi = {
 
     // REQ-515 — cadena de validación completa en el backend (autoridad final); el frontend hace el
     // mismo chequeo antes de ofrecer el botón, solo para evitar un viaje al servidor que va a fallar.
-    markPaid: (pipelineCardId: number): Promise<{ fecha_pago: string }> =>
-      api.post<{ fecha_pago: string }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/mark-paid`).then(r => r.data),
+    markPaid: (pipelineCardId: number): Promise<{ fecha_pago: string; avisos?: string[] }> =>
+      api.post<{ fecha_pago: string; avisos?: string[] }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/mark-paid`).then(r => r.data),
 
     // REQ-518 — despacha un correo async al arquitecto, solo disponible en estado "Pendiente Cuenta de cobro".
     sendReminder: (pipelineCardId: number): Promise<void> =>

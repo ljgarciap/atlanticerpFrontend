@@ -46,11 +46,16 @@
         "diasCreditoFactura": "Credit term (days)",
         "pettyCashMaxIntentosRechazo": "Petty cash — max. rejection attempts",
         "feReintentoMaxHoras": "FE max. retry hours",
-        "feReintentoMaxHorasAyuda": "Maximum hours to retry a document before manual action is required (1–720)"
+        "feReintentoMaxHorasAyuda": "Maximum hours to retry a document before manual action is required (1–720)",
+        "comisionExternaBase": "External commission basis"
       },
       "regimen": {
         "general": "General regime taxpayer",
         "pequeno": "Small taxpayer"
+      },
+      "comisionBase": {
+        "total": "Project total (tax included)",
+        "base_imponible": "Taxable base (before tax)"
       }
     },
     "facturacionElectronica": {
@@ -251,6 +256,20 @@
       "cobro": "Payment received",
       "devolucion": "Refund",
       "comision": "Commission"
+    },
+    "pendientesSinCuenta": "{{cantidad}} outgoing movement(s) without an account, totalling {{monto}}.",
+    "verPendientes": "View pending",
+    "filtros": {
+      "todos": "All",
+      "desde": "From",
+      "hasta": "To",
+      "sinCuenta": "Without account only"
+    },
+    "corregir": {
+      "boton": "Correct account",
+      "cuentaNueva": "New account",
+      "motivo": "Reason (at least 10 characters)",
+      "error": "The account could not be corrected."
     }
   },
   "facturacion": {
@@ -722,6 +741,14 @@
     "regimen": {
       "con_itbms": "With {{tax}}",
       "sin_itbms": "Without {{tax}}"
+    },
+    "diasCredito": {
+      "global": "Credit: {{dias}} days (default)",
+      "propio": "Credit: {{dias}} days (this client's own)",
+      "editar": "Change",
+      "input": "Credit days",
+      "usarGlobal": "Use the default",
+      "error": "The credit days could not be saved."
     }
   },
   "notasCredito": {
@@ -988,6 +1015,7 @@
       "verImprimir": "View / Print PDF"
     },
     "tramos": {
+      "errorGuardar": "The tier could not be saved.",
       "title": "Tiered commission table",
       "subtitle": "Applies to the salesperson's total orders for the month — not per individual project",
       "columnas": {
@@ -1106,7 +1134,8 @@
       "error": "Could not save. Check the data and try again.",
       "cancel": "Cancel",
       "save": "Save"
-    }
+    },
+    "regimenPendiente": "Pending tax regime ({{monto}} commission before tax)"
   },
   "arqueoCaja": {
     "title": "Cash Count",
@@ -1568,6 +1597,8 @@
       "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Period total",
+      "conciliacionTitle": "Reconciliation with the invoice book:",
+      "conciliacion": "Collected {{cobradas}} + pending {{pendientes}} + credit notes {{notas}} = {{libro}} (book total).",
       "pendientesTitle": "Pending collection (no payment method yet)",
       "columnas": {
         "fecha": "Date",

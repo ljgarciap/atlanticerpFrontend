@@ -181,7 +181,9 @@ test.describe('Flujo de tesorería (movimientos bancarios)', () => {
 
     expect((await api(request, 'vendedor', 'PUT', ruta, cuenta)).status).toBe(403)
     expect((await api(request, 'gerencia', 'PUT', ruta, cuenta)).status, 'Gerencia no asigna (carve-out de REQ-534)').toBe(403)
-    expect((await api(request, 'gerencia3', 'PUT', ruta, cuenta)).status, 'ni siquiera el aprobador primario').toBe(403)
+    // Fase 28: el aprobador primario (o un suplente) es segundo asignador cuando Contabilidad no está. Se prueba que PASA el gate
+    // con un cuerpo inválido (422), sin asignar de verdad: el movimiento sigue sin cuenta para los pasos siguientes.
+    expect((await api(request, 'gerencia3', 'PUT', ruta, {})).status, 'el aprobador primario pasa el gate (la cuenta es obligatoria)').toBe(422)
 
     expect((await api(request, 'contabilidad', 'PUT', ruta, {})).status, 'la cuenta es obligatoria').toBe(422)
     expect((await api(request, 'contabilidad', 'PUT', ruta, { bank_account_id: 99999999 })).status, 'cuenta inexistente').toBe(422)

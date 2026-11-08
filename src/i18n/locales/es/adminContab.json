@@ -46,11 +46,16 @@
         "diasCreditoFactura": "Plazo de crédito (días)",
         "pettyCashMaxIntentosRechazo": "Caja chica — máximo de intentos de rechazo",
         "feReintentoMaxHoras": "Horas máximas de reintento de FE",
-        "feReintentoMaxHorasAyuda": "Horas máximas para reintentar un documento antes de requerir acción manual (1–720)"
+        "feReintentoMaxHorasAyuda": "Horas máximas para reintentar un documento antes de requerir acción manual (1–720)",
+        "comisionExternaBase": "Base de la comisión externa"
       },
       "regimen": {
         "general": "Contribuyente régimen general",
         "pequeno": "Pequeño contribuyente"
+      },
+      "comisionBase": {
+        "total": "Total del proyecto (con impuesto)",
+        "base_imponible": "Base imponible (sin impuesto)"
       }
     },
     "facturacionElectronica": {
@@ -253,6 +258,20 @@
       "cobro": "Cobro",
       "devolucion": "Devolución",
       "comision": "Comisión"
+    },
+    "pendientesSinCuenta": "{{cantidad}} salida(s) sin cuenta asignada por {{monto}}.",
+    "verPendientes": "Ver pendientes",
+    "filtros": {
+      "todos": "Todos",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "sinCuenta": "Solo sin cuenta"
+    },
+    "corregir": {
+      "boton": "Corregir cuenta",
+      "cuentaNueva": "Cuenta nueva",
+      "motivo": "Motivo (mínimo 10 caracteres)",
+      "error": "No se pudo corregir la cuenta."
     }
   },
   "facturacion": {
@@ -726,6 +745,14 @@
     "regimen": {
       "con_itbms": "Con {{tax}}",
       "sin_itbms": "Sin {{tax}}"
+    },
+    "diasCredito": {
+      "global": "Crédito: {{dias}} días (valor por defecto)",
+      "propio": "Crédito: {{dias}} días (propio de este cliente)",
+      "editar": "Cambiar",
+      "input": "Días de crédito",
+      "usarGlobal": "Usar el valor por defecto",
+      "error": "No se pudieron guardar los días de crédito."
     }
   },
   "notasCredito": {
@@ -992,6 +1019,7 @@
       "verImprimir": "Ver / Imprimir PDF"
     },
     "tramos": {
+      "errorGuardar": "No se pudo guardar el tramo.",
       "title": "Tabla de comisión escalonada",
       "subtitle": "Se aplica sobre el total de pedidos del vendedor en el mes — no por proyecto individual",
       "columnas": {
@@ -1117,7 +1145,8 @@
       "error": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
       "cancel": "Cancelar",
       "save": "Guardar"
-    }
+    },
+    "regimenPendiente": "Pendiente de régimen ({{monto}} de comisión sin impuesto)"
   },
   "arqueoCaja": {
     "title": "Arqueo de Caja",
@@ -1580,6 +1609,8 @@
       "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Total del período",
+      "conciliacionTitle": "Conciliación con el Libro de facturas:",
+      "conciliacion": "Cobradas {{cobradas}} + pendientes {{pendientes}} + notas de crédito {{notas}} = {{libro}} (total del libro).",
       "pendientesTitle": "Pendientes de cobro (sin método de pago todavía)",
       "columnas": {
         "fecha": "Fecha",

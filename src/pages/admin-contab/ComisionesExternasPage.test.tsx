@@ -214,6 +214,23 @@ describe('ComisionesExternasPage — REQ-510 datos fiscales incompletos', () => 
   })
 })
 
+describe('ComisionesExternasPage — Fase 28 pendiente de régimen', () => {
+  it('un arquitecto sin régimen muestra «pendiente de régimen» con su comisión en vez de un 0 mudo', async () => {
+    const architect = makeArchitectRow({ datos_fiscales_completos: false, regimen_fiscal: null, regimen_pendiente: true, comision_sin_regimen: 1000, generada: 0 })
+    mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [architect] }))
+    renderPage()
+
+    expect(await screen.findByTestId('regimen-pendiente')).toHaveTextContent('adminContab:comisionesExternas.regimenPendiente')
+  })
+
+  it('con régimen completo no aparece el aviso', async () => {
+    mockedApi.commissionsExternal.summary.mockResolvedValue(makeSummary({ arquitectos: [makeArchitectRow()] }))
+    renderPage()
+    await screen.findAllByText(/Arq\. Juan Pérez/)
+    expect(screen.queryByTestId('regimen-pendiente')).toBeNull()
+  })
+})
+
 describe('ComisionesExternasPage — REQ-511 cálculo por régimen', () => {
   it('Escenario 1 (Con ITBMS) — muestra comisión, impuesto y total del proyecto', async () => {
     const architect = makeArchitectRow({

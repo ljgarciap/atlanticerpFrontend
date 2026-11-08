@@ -24,6 +24,8 @@ export default function BankAccountDetailModal({ account, onClose }: Props) {
   const reactivate = useReactivateBankAccount()
   const updateAccount = useUpdateBankAccount()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // Fase 28: si la cuenta tenía movimientos, el backend avisa; se muestra antes de cerrar.
+  const [avisos, setAvisos] = useState<string[]>([])
 
   // SCRUM-857 (REQ-458) — antes no había forma de editar ningún campo de una cuenta ya creada;
   // agregado principalmente para poder completar el número de cuenta completo sin borrar/recrear.
@@ -110,11 +112,18 @@ export default function BankAccountDetailModal({ account, onClose }: Props) {
               <Button variant="secondary" onClick={() => setConfirmingDelete(false)}>{t('common:actions.cancel')}</Button>
               <Button
                 variant="danger" loading={deactivate.isPending}
-                onClick={() => deactivate.mutate(account.id, { onSuccess: onClose })}
+                onClick={() => deactivate.mutate(account.id, { onSuccess: (res) => { if (res?.avisos && res.avisos.length > 0) setAvisos(res.avisos); else onClose() } })}
               >
                 {t('adminContab:cuentasBancarias.confirmDeleteButton')}
               </Button>
             </div>
+          </div>
+        )}
+
+        {avisos.length > 0 && (
+          <div role="status" data-testid="avisos-desactivar" className="mb-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 p-3 text-xs text-amber-800 dark:text-amber-300">
+            {avisos.map((a, i) => <p key={i}>{a}</p>)}
+            <Button variant="secondary" className="mt-2" onClick={onClose}>{t('common:actions.close')}</Button>
           </div>
         )}
 

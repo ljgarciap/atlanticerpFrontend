@@ -269,7 +269,14 @@ function ArchitectRow(
           </span>
         </td>
         <td className="py-2.5 pr-3 text-slate-700 dark:text-slate-200">{architect.empresa ?? '—'}</td>
-        <td className="py-2.5 pr-3 font-semibold text-primary-dark">{formatCurrency(architect.generada)}</td>
+        <td className="py-2.5 pr-3 font-semibold text-primary-dark">
+          {formatCurrency(architect.generada)}
+          {architect.regimen_pendiente && (
+            <span data-testid="regimen-pendiente" className="block text-[10.5px] font-normal text-amber-700 dark:text-amber-400">
+              {t('adminContab:comisionesExternas.regimenPendiente', { monto: formatCurrency(architect.comision_sin_regimen ?? 0) })}
+            </span>
+          )}
+        </td>
         <td className="py-2.5 pr-3 text-slate-700 dark:text-slate-200">{formatCurrency(architect.pagada)}</td>
         <td className="py-2.5 pr-3 text-amber-700 dark:text-amber-400">{formatCurrency(architect.pendiente)}</td>
         <td className="py-2.5 pr-3">
