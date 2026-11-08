@@ -78,8 +78,11 @@ export const bodegaApi = {
     // SCRUM-454 (REQ-384, Bloque B4) — catálogo editable de ubicaciones físicas de una bodega,
     // base del chip "Espacio libre". Sin hard-delete (`update` con `is_active: false`).
     locations: {
-      list: (warehouseId: number): Promise<{ data: WarehouseLocationRow[] }> =>
-        api.get<{ data: WarehouseLocationRow[] }>(`/bodega/warehouses/${warehouseId}/locations`).then(r => r.data),
+      // Fase 29: por defecto solo las activas; `incluirInactivas` trae también las desactivadas.
+      list: (warehouseId: number, incluirInactivas = false): Promise<{ data: WarehouseLocationRow[] }> =>
+        api.get<{ data: WarehouseLocationRow[] }>(`/bodega/warehouses/${warehouseId}/locations`, {
+          params: incluirInactivas ? { incluir_inactivas: 1 } : undefined,
+        }).then(r => r.data),
 
       create: (warehouseId: number, codigo: string): Promise<WarehouseLocationMutationResponse> =>
         api.post<WarehouseLocationMutationResponse>(`/bodega/warehouses/${warehouseId}/locations`, { codigo }).then(r => r.data),
@@ -113,7 +116,8 @@ export const bodegaApi = {
   // SCRUM-467→472 (REQ-397→402) — Kardex.
   kardex: {
     list: (params?: {
-      search?: string; tipo?: string; warehouse_id?: number; page?: number; per_page?: number | 'all'
+      search?: string; tipo?: string; warehouse_id?: number; producto_id?: number; desde?: string; hasta?: string
+      page?: number; per_page?: number | 'all'
     }): Promise<KardexListResponse> =>
       api.get<KardexListResponse>('/bodega/kardex', { params }).then(r => r.data),
   },

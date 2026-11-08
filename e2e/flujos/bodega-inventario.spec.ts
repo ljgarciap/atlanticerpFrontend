@@ -74,8 +74,9 @@ test.describe('Flujo de Bodega: inventario', () => {
     expect((await ajuste(request, 'asistentebodega', campos())).status, 'un ajuste pendiente bloquea otro del mismo producto y almacén').toBe(409)
 
     expect((await api(request, 'liderbodega', 'POST', `/bodega/adjustment-requests/lines/${linea}/approve`)).status, 'el jefe de bodega no aprueba').toBe(403)
-    expect((await api(request, 'gerencia', 'POST', `/bodega/adjustment-requests/lines/${linea}/approve`)).status, 'otra cuenta de Gerencia tampoco').toBe(403)
-    const ok = await api(request, 'gerencia3', 'POST', `/bodega/adjustment-requests/lines/${linea}/approve`)
+    // Fase 29: Gerencia (rol) también decide, aunque no sea el aprobador designado; quien no es Gerencia ni aprobador sigue en 403.
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/adjustment-requests/lines/${linea}/approve`)).status, 'la asistente no aprueba').toBe(403)
+    const ok = await api(request, 'gerencia', 'POST', `/bodega/adjustment-requests/lines/${linea}/approve`)
     expect(ok.status).toBe(200)
     expect(ok.body.estado).toBe('Aprobada')
     expect(await stock(request, ctx.central), 'al aprobar el stock sube').toBe(antes + 5)
@@ -104,8 +105,9 @@ test.describe('Flujo de Bodega: inventario', () => {
     expect(await stock(request, ctx.central), 'solicitar no mueve nada').toBe(origenAntes)
 
     expect((await api(request, 'liderbodega', 'POST', `/bodega/relocations/${id}/approve`)).status).toBe(403)
-    expect((await api(request, 'gerencia', 'POST', `/bodega/relocations/${id}/approve`)).status).toBe(403)
-    const ok = await api(request, 'gerencia3', 'POST', `/bodega/relocations/${id}/approve`)
+    // Fase 29: Gerencia (rol) también decide, aunque no sea el aprobador designado.
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/relocations/${id}/approve`)).status, 'la asistente no aprueba').toBe(403)
+    const ok = await api(request, 'gerencia', 'POST', `/bodega/relocations/${id}/approve`)
     expect(ok.status).toBe(200)
     expect(ok.body.estado).toBe('aprobada')
     expect(await stock(request, ctx.central)).toBe(origenAntes - 2)
@@ -140,9 +142,10 @@ test.describe('Flujo de Bodega: inventario', () => {
     expect((await api(request, 'asistentebodega', 'POST', `/bodega/general-counts/${id}/evaluate`, { lines: contado })).status, 'enviado no se vuelve a evaluar').toBe(422)
 
     expect((await api(request, 'liderbodega', 'POST', `/bodega/general-counts/${id}/approve`)).status).toBe(403)
-    expect((await api(request, 'gerencia', 'POST', `/bodega/general-counts/${id}/approve`)).status).toBe(403)
+    expect((await api(request, 'asistentebodega', 'POST', `/bodega/general-counts/${id}/approve`)).status, 'la asistente no aprueba').toBe(403)
     expect((await api(request, 'gerencia3', 'POST', `/bodega/general-counts/${id}/reject`, {})).status, 'rechazar exige motivo').toBe(422)
-    expect((await api(request, 'gerencia3', 'POST', `/bodega/general-counts/${id}/approve`)).status).toBe(200)
+    // Fase 29: Gerencia (rol) también aprueba, no solo el aprobador designado.
+    expect((await api(request, 'gerencia', 'POST', `/bodega/general-counts/${id}/approve`)).status).toBe(200)
 
     const antes = await stock(request, ctx.central, primero.producto.id)
     expect((await api(request, 'asistentebodega', 'POST', `/bodega/general-counts/${id}/apply`)).status, 'aplicar es solo del jefe de bodega').toBe(403)

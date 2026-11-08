@@ -461,7 +461,7 @@ export function useApproveAmountChange(orderId: number) {
 export function useRejectAmountChange(orderId: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => comprasApi.orders.rejectAmountChange(orderId),
+    mutationFn: (motivo: string) => comprasApi.orders.rejectAmountChange(orderId, motivo),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['compras/orders', orderId] })
       qc.invalidateQueries({ queryKey: ['compras/orders'] })

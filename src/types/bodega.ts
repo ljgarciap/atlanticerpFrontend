@@ -1492,6 +1492,9 @@ export interface BodegaRutaDiaItem {
   project:            string | null
   address:            string | null
   repartidor:         string | null
+  /** Fase 29: pedido con fecha comprometida anterior a hoy y sin entregar. */
+  atrasado:           boolean
+  fecha_compromiso:   string | null
 }
 
 export interface BodegaRutasDiaResponse {

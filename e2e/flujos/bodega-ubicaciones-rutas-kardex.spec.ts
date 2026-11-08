@@ -48,21 +48,23 @@ test.describe('Flujo de Bodega: ubicaciones, rutas del día y kardex', () => {
     expect((await api(request, 'liderbodega', 'PATCH', `/warehouses/${central}/locations/${segunda.body.id}`, { codigo })).status).toBe(422)
     expect((await api(request, 'liderbodega', 'PATCH', `/warehouses/${sala}/locations/${id}`, { codigo: 'X' })).status, 'la ubicación es de otra bodega').toBe(404)
     expect((await api(request, 'liderbodega', 'PATCH', `/warehouses/${central}/locations/${segunda.body.id}`, { codigo: `${codigo}-C` })).status).toBe(200)
-    // Hallazgo: cualquier perfil con «bodega.write» (también el auxiliar) crea ubicaciones; no hay un permiso angosto como en otras pantallas.
+    // Fase 29: escribir ubicaciones exige el permiso angosto «bodega.locations.manage»; el auxiliar ya no lo tiene.
     const delAuxiliar = await api(request, 'auxiliarbodega', 'POST', `/warehouses/${central}/locations`, { codigo: `${codigo}-AUX` })
-    expect(delAuxiliar.status, 'el auxiliar de bodega también escribe ubicaciones').toBe(201)
+    expect(delAuxiliar.status, 'el auxiliar de bodega ya no escribe ubicaciones').toBe(403)
 
     // Chip «Espacio libre»: lista las ubicaciones activas sin existencias; una desactivada sale.
     const libres = async () => ((await api(request, 'liderbodega', 'GET', `/warehouses/${central}?chip=espacio_libre`)).body.ubicaciones as string[])
     expect(await libres()).toContain(codigo)
     expect((await api(request, 'liderbodega', 'PATCH', `/warehouses/${central}/locations/${id}`, { is_active: false })).status).toBe(200)
     expect(await libres(), 'una ubicación desactivada no se ofrece').not.toContain(codigo)
-    const todas = (await api(request, 'liderbodega', 'GET', `/warehouses/${central}/locations`)).body.data as { codigo: string; is_active: boolean }[]
-    expect(todas.find(l => l.codigo === codigo)?.is_active, 'el listado conserva las inactivas').toBe(false)
+    const activas = (await api(request, 'liderbodega', 'GET', `/warehouses/${central}/locations`)).body.data as { codigo: string; is_active: boolean }[]
+    expect(activas.find(l => l.codigo === codigo), 'por defecto el listado oculta las desactivadas').toBeUndefined()
+    const todas = (await api(request, 'liderbodega', 'GET', `/warehouses/${central}/locations?incluir_inactivas=1`)).body.data as { codigo: string; is_active: boolean }[]
+    expect(todas.find(l => l.codigo === codigo)?.is_active, 'con incluir_inactivas se ven y conservan el estado').toBe(false)
     expect((await api(request, 'auxiliarbodega', 'GET', `/warehouses/${central}/locations`)).status).toBe(200)
 
     // Se deja desactivadas las de prueba (no hay borrado).
-    for (const [b, l] of [[central, segunda.body.id], [sala, otra.body.id], [central, delAuxiliar.body.id]] as const) {
+    for (const [b, l] of [[central, segunda.body.id], [sala, otra.body.id]] as const) {
       expect((await api(request, 'liderbodega', 'PATCH', `/warehouses/${b}/locations/${l}`, { is_active: false })).status).toBe(200)
     }
   })

@@ -68,7 +68,7 @@ function renderPage(initialUrl = '/bodega/bodegas') {
 
 // SCRUM-1021 — BodegasPage lee `useAuthStore(s => s.user?.id)` y `usePermission(...)`: el mock evalúa el
 // selector contra un usuario real (id 1) en vez de devolver siempre un valor fijo.
-function mockUser(permissions: string[] = ['bodega.read', 'bodega.write']) {
+function mockUser(permissions: string[] = ['bodega.read', 'bodega.write', 'bodega.locations.manage']) {
   mockedUseAuthStore.mockImplementation(((selector?: (s: { user: unknown }) => unknown) => {
     const state = { user: { id: 1, permissions } }
     return selector ? selector(state) : state
@@ -612,7 +612,7 @@ describe('BodegasPage — solo consulta por permiso y navegación', () => {
     })
 
     it('con bodega.read se conservan las acciones de siempre (no cambia para Bodega)', async () => {
-      mockUser(['bodega.read', 'bodega.write'])
+      mockUser(['bodega.read', 'bodega.write', 'bodega.locations.manage'])
       renderPage()
 
       await screen.findByText('CRISTAL-IMPERIAL')
@@ -620,6 +620,15 @@ describe('BodegasPage — solo consulta por permiso y navegación', () => {
       expect(screen.getByText('bodega:warehouses.relocationRequests.openButton')).toBeInTheDocument()
       expect(screen.getByText('bodega:warehouses.table.relocate')).toBeInTheDocument()
     })
+  })
+
+  // Fase 29 — administrar ubicaciones exige el permiso angosto: con solo `bodega.write` el botón no aparece.
+  it('sin bodega.locations.manage no se ofrece administrar ubicaciones', async () => {
+    mockUser(['bodega.read', 'bodega.write'])
+    renderPage()
+
+    await screen.findByText('CRISTAL-IMPERIAL')
+    expect(screen.queryByText('bodega:warehouses.locations.manageButton')).not.toBeInTheDocument()
   })
 
   // SCRUM-1023 — el buscador vuelve a quedar diminuto si comparte fila con los filtros (flex-1 = flex-basis 0%).

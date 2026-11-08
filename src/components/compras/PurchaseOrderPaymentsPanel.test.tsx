@@ -192,7 +192,13 @@ describe('PurchaseOrderPaymentsPanel (SCRUM-252)', () => {
     await waitFor(() => expect(screen.getByText('compras:orders.detail.payments.approveAmountChange')).toBeInTheDocument())
     expect(screen.getByText('compras:orders.detail.payments.rejectAmountChange')).toBeInTheDocument()
 
+    // Fase 29: rechazar pide motivo (mínimo 10 caracteres); con menos, el botón de confirmar sigue deshabilitado.
     fireEvent.click(screen.getByText('compras:orders.detail.payments.rejectAmountChange'))
-    await waitFor(() => expect(mockedComprasApi.orders.rejectAmountChange).toHaveBeenCalledWith(12))
+    const confirmar = await screen.findByText('compras:orders.detail.payments.confirmRejectAmountChange')
+    fireEvent.change(screen.getByLabelText('compras:orders.detail.payments.rejectReasonLabel'), { target: { value: 'corto' } })
+    expect(confirmar.closest('button')).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('compras:orders.detail.payments.rejectReasonLabel'), { target: { value: 'El proveedor no justificó el aumento' } })
+    fireEvent.click(confirmar)
+    await waitFor(() => expect(mockedComprasApi.orders.rejectAmountChange).toHaveBeenCalledWith(12, 'El proveedor no justificó el aumento'))
   })
 })

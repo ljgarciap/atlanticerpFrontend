@@ -1,4 +1,7 @@
 {
+  "rutasDia": {
+    "overdue": "Atrasado desde {{date}}"
+  },
   "warehouses": {
     "title": "Bodegas",
     "subtitle": "Ubicación física del inventario, bodega por bodega",
@@ -125,6 +128,7 @@
       }
     },
     "locations": {
+        "showInactive": "Mostrar también las desactivadas",
       "manageButton": "Administrar ubicaciones",
       "title": "Ubicaciones — {{warehouse}}",
       "code": "Código",
@@ -146,6 +150,8 @@
     "title": "Movimientos de inventario",
     "subtitle": "Historial completo de entradas, salidas, ajustes, reubicaciones y devoluciones",
     "filters": {
+      "from": "Desde",
+      "to": "Hasta",
       "search": "Buscar producto...",
       "type": "Todos los tipos",
       "warehouse": "Todas las bodegas",
