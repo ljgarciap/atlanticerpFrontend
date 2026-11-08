@@ -69,6 +69,11 @@ test.describe('Flujo de la comisión de cartera', () => {
   test('3. tramos: solo el aprobador configurado los edita; validaciones y borrado', async ({ request }) => {
     const nuevo = { monto_minimo: 900000, monto_maximo: 900100, porcentaje: 7, orden: 99 }
     let id: number | undefined
+    // Fase 28: un tramo nuevo no puede solaparse con otro. El último tramo es abierto (sin tope), así que se acota para
+    // dejar sitio al de prueba y se restaura al terminar.
+    const tramos = (await api(request, 'contabilidad', 'GET', '/commissions/cartera/tiers')).body as { id: number; monto_maximo: number | null }[]
+    const abierto = tramos.find(t => t.monto_maximo === null)!
+    expect((await api(request, 'gerencia3', 'PUT', `/commissions/cartera/tiers/${abierto.id}`, { monto_maximo: 899999.99 })).status).toBe(200)
     try {
       for (const rol of ['vendedor', 'contabilidad', 'asistenteadministrativa', 'gerencia'] as const) {
         expect((await api(request, rol, 'POST', '/commissions/cartera/tiers', nuevo)).status, `${rol} no crea tramos`).toBe(403)
@@ -91,10 +96,13 @@ test.describe('Flujo de la comisión de cartera', () => {
       const rep = (await api(request, 'contabilidad', 'GET', '/reports/commission-tiers')).body
       expect((rep.tiers as { monto_minimo: number }[]).some(t => t.monto_minimo === 900000)).toBe(true)
 
-      // No se valida el solapamiento ni el orden repetido: un tramo que cubre lo mismo que otro se acepta.
-      const solapado = await api(request, 'gerencia3', 'POST', '/commissions/cartera/tiers', { monto_minimo: 900050, monto_maximo: 900060, porcentaje: 9, orden: 99 })
-      expect(solapado.status, 'tramos solapados y con el mismo orden se aceptan').toBe(201)
-      expect((await api(request, 'gerencia3', 'DELETE', `/commissions/cartera/tiers/${solapado.body.id}`)).status).toBe(204)
+      // Fase 28: un tramo que cubre lo mismo que otro se rechaza (solape), igual que un orden repetido.
+      const solapado = await api(request, 'gerencia3', 'POST', '/commissions/cartera/tiers', { monto_minimo: 900050, monto_maximo: 900060, porcentaje: 9, orden: 98 })
+      expect(solapado.status, 'tramos solapados se rechazan').toBe(422)
+      const mismoOrden = await api(request, 'gerencia3', 'POST', '/commissions/cartera/tiers', { monto_minimo: 910000, monto_maximo: 910100, porcentaje: 9, orden: 99 })
+      expect(mismoOrden.status, 'el mismo orden se rechaza').toBe(422)
+      // Un PUT parcial no puede invertir el tramo (mínimo mayor que el máximo).
+      expect((await api(request, 'gerencia3', 'PUT', `/commissions/cartera/tiers/${id}`, { monto_minimo: 999999 })).status).toBe(422)
 
       expect((await api(request, 'contabilidad', 'DELETE', `/commissions/cartera/tiers/${id}`)).status).toBe(403)
     } finally {
@@ -102,6 +110,8 @@ test.describe('Flujo de la comisión de cartera', () => {
         expect((await api(request, 'gerencia3', 'DELETE', `/commissions/cartera/tiers/${id}`)).status).toBe(204)
         expect((await api(request, 'gerencia3', 'DELETE', `/commissions/cartera/tiers/${id}`)).status, 'borrar dos veces → 404').toBe(404)
       }
+      // Se devuelve el tramo abierto a su estado original (sin tope).
+      expect((await api(request, 'gerencia3', 'PUT', `/commissions/cartera/tiers/${abierto.id}`, { monto_maximo: null })).status).toBe(200)
     }
     const rep = (await api(request, 'contabilidad', 'GET', '/reports/commission-tiers')).body
     expect((rep.tiers as { monto_minimo: number }[]).some(t => t.monto_minimo >= 900000), 'el flujo no deja tramos de prueba').toBe(false)
