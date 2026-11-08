@@ -40,6 +40,10 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
   // Fase 13 (2.7): aviso (no bloqueo) cuando el pago acumulado supera lo recibido.
   const [paymentWarning, setPaymentWarning] = useState<string | null>(null)
 
+  // Fase 29: rechazar un cambio de monto pide motivo (mínimo 10 caracteres).
+  const [showRejectForm, setShowRejectForm] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+
   const [showAmountChangeForm, setShowAmountChangeForm] = useState(false)
   const [newAmount, setNewAmount] = useState('')
 
@@ -123,14 +127,33 @@ export default function PurchaseOrderPaymentsPanel({ order }: Props) {
                 </Button>
                 <Button
                   variant="outline" className="!text-xs !px-2 !py-1"
-                  loading={rejectAmountChange.isPending}
-                  onClick={() => rejectAmountChange.mutate()}
+                  onClick={() => setShowRejectForm(v => !v)}
                 >
                   {t('compras:orders.detail.payments.rejectAmountChange')}
                 </Button>
               </div>
             )}
           </div>
+          {isApprover && showRejectForm && (
+            <div className="mt-2 space-y-2" data-testid="rechazo-cambio-monto">
+              <label className="block text-xs font-medium" htmlFor="motivo-rechazo-monto">
+                {t('compras:orders.detail.payments.rejectReasonLabel')}
+              </label>
+              <textarea
+                id="motivo-rechazo-monto" rows={2} value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                className="w-full border border-amber-300 rounded-lg px-2 py-1 text-xs text-slate-800"
+              />
+              <Button
+                className="!text-xs !px-2 !py-1"
+                loading={rejectAmountChange.isPending}
+                disabled={rejectReason.trim().length < 10}
+                onClick={() => rejectAmountChange.mutate(rejectReason.trim(), { onSuccess: () => { setShowRejectForm(false); setRejectReason('') } })}
+              >
+                {t('compras:orders.detail.payments.confirmRejectAmountChange')}
+              </Button>
+            </div>
+          )}
           <p className="mt-1.5">{t('compras:orders.detail.payments.pendingAmountChangeBlocksActions')}</p>
         </div>
       )}

@@ -35,10 +35,10 @@ export function useWarehouseDetail(
 }
 
 // SCRUM-454 (REQ-384, Bloque B4) — catálogo editable de ubicaciones físicas por bodega.
-export function useWarehouseLocations(warehouseId: number | null) {
+export function useWarehouseLocations(warehouseId: number | null, incluirInactivas = false) {
   return useQuery({
-    queryKey: ['bodega/warehouses', warehouseId, 'locations'],
-    queryFn:  () => bodegaApi.warehouses.locations.list(warehouseId as number),
+    queryKey: ['bodega/warehouses', warehouseId, 'locations', incluirInactivas],
+    queryFn:  () => bodegaApi.warehouses.locations.list(warehouseId as number, incluirInactivas),
     enabled:  warehouseId !== null,
   })
 }
@@ -107,7 +107,8 @@ export function useRejectRelocationRequest() {
 
 // SCRUM-467→472 (REQ-397→402) — Kardex.
 export function useKardex(params?: {
-  search?: string; tipo?: string; warehouse_id?: number; page?: number; per_page?: number | 'all'
+  search?: string; tipo?: string; warehouse_id?: number; producto_id?: number; desde?: string; hasta?: string
+  page?: number; per_page?: number | 'all'
 }) {
   return useQuery({
     queryKey: ['bodega/kardex', params],

@@ -67,6 +67,8 @@ export default function BodegasPage() {
   // ningún botón de acción (administrar ubicaciones, solicitudes de reubicación, "Reubicar" en tablas).
   // Quien sí tiene bodega.read ve la pantalla exactamente igual que antes.
   const hasBodegaRead = usePermission('bodega.read')
+  // Fase 29: administrar ubicaciones exige el permiso angosto, no solo escribir en Bodega.
+  const canManageLocations = usePermission('bodega.locations.manage')
   const soloConsultaPorPermiso = !hasBodegaRead
 
   const { data: families } = useQuery({
@@ -118,7 +120,7 @@ export default function BodegasPage() {
           <p className="text-[12px] text-slate-500">{t('bodega:warehouses.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {isUbicacionExacta && !soloConsultaPorPermiso && (
+          {isUbicacionExacta && !soloConsultaPorPermiso && canManageLocations && (
             <Button variant="outline" className="!text-xs !px-3 !py-1.5" onClick={() => setShowLocationsModal(true)}>
               {t('bodega:warehouses.locations.manageButton')}
             </Button>
@@ -811,7 +813,8 @@ function WarehouseLocationsModal({ warehouseId, warehouseName, onClose }: {
   onClose: () => void
 }) {
   const { t } = useTranslation(['common', 'bodega'])
-  const { data, isFetching } = useWarehouseLocations(warehouseId)
+  const [showInactive, setShowInactive] = useState(false)
+  const { data, isFetching } = useWarehouseLocations(warehouseId, showInactive)
   const create = useCreateWarehouseLocation()
   const update = useUpdateWarehouseLocation()
 
@@ -860,6 +863,11 @@ function WarehouseLocationsModal({ warehouseId, warehouseName, onClose }: {
           <Button onClick={submitNew} loading={create.isPending}>{t('bodega:warehouses.locations.add')}</Button>
         </div>
         {error && <p className="text-red-600 text-xs mb-3">{error}</p>}
+
+        <label className="flex items-center gap-2 text-xs text-slate-600 mb-2">
+          <input type="checkbox" checked={showInactive} onChange={e => setShowInactive(e.target.checked)} />
+          {t('bodega:warehouses.locations.showInactive')}
+        </label>
 
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
           {locations.length === 0 && !isFetching && (

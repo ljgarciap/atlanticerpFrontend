@@ -32,7 +32,7 @@ export default function BodegaRutasDiaPage() {
           {t('bodega:rutasDia.title', 'Rutas de entrega del día')}
         </h1>
         <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5">
-          {t('bodega:rutasDia.subtitle', 'Todas las entregas y recolecciones programadas para hoy')}
+          {t('bodega:rutasDia.subtitle', 'Las entregas y recolecciones de hoy, y las atrasadas sin entregar')}
         </p>
       </div>
 
@@ -55,6 +55,14 @@ export default function BodegaRutasDiaPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{item.order_number}</span>
                     <span className="text-[11px] text-slate-400">{item.stage}</span>
+                    {item.atrasado && (
+                      <span
+                        data-testid="ruta-atrasado"
+                        className="text-[10.5px] font-semibold px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200"
+                      >
+                        {t('bodega:rutasDia.overdue', { date: item.fecha_compromiso ?? '' })}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                     {item.customer}{item.project ? ` · ${item.project}` : ''}

@@ -401,6 +401,8 @@
         "approveAmountChange": "Aprobar cambio",
         "approveAmountChangeError": "No se pudo aprobar el cambio de monto.",
         "rejectAmountChange": "Rechazar cambio",
+        "rejectReasonLabel": "Motivo del rechazo (mínimo 10 caracteres)",
+        "confirmRejectAmountChange": "Confirmar rechazo",
         "rejectAmountChangeError": "No se pudo rechazar el cambio de monto.",
         "history": "Historial de pagos",
         "historyEmpty": "Todavía no hay pagos registrados.",

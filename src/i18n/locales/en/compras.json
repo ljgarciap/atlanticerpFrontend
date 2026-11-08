@@ -401,6 +401,8 @@
         "approveAmountChange": "Approve change",
         "approveAmountChangeError": "Could not approve the amount change.",
         "rejectAmountChange": "Reject change",
+        "rejectReasonLabel": "Reason for rejection (at least 10 characters)",
+        "confirmRejectAmountChange": "Confirm rejection",
         "rejectAmountChangeError": "Could not reject the amount change.",
         "history": "Payment history",
         "historyEmpty": "No payments registered yet.",

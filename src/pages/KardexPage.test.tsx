@@ -91,4 +91,17 @@ describe('KardexPage', () => {
       expect.objectContaining({ search: 'CRISTAL', tipo: 'Devolución', warehouse_id: 1 }),
     ))
   })
+
+  it('filtra por rango de fechas (Fase 29)', async () => {
+    mockedApi.kardex.list.mockResolvedValue(EMPTY_RESPONSE)
+    renderPage()
+    await waitFor(() => expect(mockedApi.kardex.list).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('bodega:kardex.filters.from'), { target: { value: '2026-11-01' } })
+    fireEvent.change(screen.getByLabelText('bodega:kardex.filters.to'), { target: { value: '2026-11-07' } })
+
+    await waitFor(() => expect(mockedApi.kardex.list).toHaveBeenLastCalledWith(
+      expect.objectContaining({ desde: '2026-11-01', hasta: '2026-11-07' }),
+    ))
+  })
 })

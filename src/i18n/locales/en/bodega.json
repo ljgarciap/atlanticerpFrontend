@@ -1,4 +1,7 @@
 {
+  "rutasDia": {
+    "overdue": "Overdue since {{date}}"
+  },
   "warehouses": {
     "title": "Warehouses",
     "subtitle": "Physical location of inventory, warehouse by warehouse",
@@ -125,6 +128,7 @@
       }
     },
     "locations": {
+        "showInactive": "Also show deactivated",
       "manageButton": "Manage locations",
       "title": "Locations — {{warehouse}}",
       "code": "Code",
@@ -146,6 +150,8 @@
     "title": "Inventory movements",
     "subtitle": "Full history of entries, exits, adjustments, relocations and returns",
     "filters": {
+      "from": "From",
+      "to": "To",
       "search": "Search product...",
       "type": "All types",
       "warehouse": "All warehouses",

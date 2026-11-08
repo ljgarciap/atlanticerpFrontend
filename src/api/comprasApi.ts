@@ -193,8 +193,8 @@ export const comprasApi = {
       api.patch<{ total_amount: number }>(`/compras/orders/${id}/approve-amount-change`).then(r => r.data),
 
     // SCRUM-252 (hallazgo de Gerencia Test) — "Rechazar cambio", solo Gerencia.
-    rejectAmountChange: (id: number): Promise<{ total_amount: number }> =>
-      api.patch<{ total_amount: number }>(`/compras/orders/${id}/reject-amount-change`).then(r => r.data),
+    rejectAmountChange: (id: number, motivo: string): Promise<{ total_amount: number }> =>
+      api.patch<{ total_amount: number }>(`/compras/orders/${id}/reject-amount-change`, { motivo }).then(r => r.data),
   },
 
   payments: {

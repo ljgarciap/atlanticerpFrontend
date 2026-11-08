@@ -22,6 +22,9 @@ export default function KardexPage() {
   const [query, setQuery] = useState('')
   const [tipo, setTipo] = useState('')
   const [warehouseId, setWarehouseId] = useState('')
+  // Fase 29: rango de fechas (inclusivo).
+  const [desde, setDesde] = useState('')
+  const [hasta, setHasta] = useState('')
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
 
@@ -29,11 +32,13 @@ export default function KardexPage() {
     search: query || undefined,
     tipo: tipo || undefined,
     warehouse_id: warehouseId ? Number(warehouseId) : undefined,
+    desde: desde || undefined,
+    hasta: hasta || undefined,
     page, per_page: perPage,
   })
 
   const clearFilters = () => {
-    setSearch(''); setQuery(''); setTipo(''); setWarehouseId(''); setPage(1)
+    setSearch(''); setQuery(''); setTipo(''); setWarehouseId(''); setDesde(''); setHasta(''); setPage(1)
   }
 
   const rows = data?.data ?? []
@@ -73,6 +78,16 @@ export default function KardexPage() {
           <option value="">{t('bodega:kardex.filters.warehouse')}</option>
           {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
         </select>
+        <input
+          type="date" value={desde} max={hasta || undefined} aria-label={t('bodega:kardex.filters.from')}
+          onChange={e => { setDesde(e.target.value); setPage(1) }}
+          className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+        />
+        <input
+          type="date" value={hasta} min={desde || undefined} aria-label={t('bodega:kardex.filters.to')}
+          onChange={e => { setHasta(e.target.value); setPage(1) }}
+          className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+        />
         <Button variant="outline" onClick={clearFilters}>{t('bodega:kardex.filters.clear')}</Button>
       </div>
 
