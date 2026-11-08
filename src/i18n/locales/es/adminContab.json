@@ -46,11 +46,16 @@
         "diasCreditoFactura": "Plazo de crédito (días)",
         "pettyCashMaxIntentosRechazo": "Caja chica — máximo de intentos de rechazo",
         "feReintentoMaxHoras": "Horas máximas de reintento de FE",
-        "feReintentoMaxHorasAyuda": "Horas máximas para reintentar un documento antes de requerir acción manual (1–720)"
+        "feReintentoMaxHorasAyuda": "Horas máximas para reintentar un documento antes de requerir acción manual (1–720)",
+        "comisionExternaBase": "Base de la comisión externa"
       },
       "regimen": {
         "general": "Contribuyente régimen general",
         "pequeno": "Pequeño contribuyente"
+      },
+      "comisionBase": {
+        "total": "Total del proyecto (con impuesto)",
+        "base_imponible": "Base imponible (sin impuesto)"
       }
     },
     "facturacionElectronica": {
@@ -1140,7 +1145,8 @@
       "error": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
       "cancel": "Cancelar",
       "save": "Guardar"
-    }
+    },
+    "regimenPendiente": "Pendiente de régimen ({{monto}} de comisión sin impuesto)"
   },
   "arqueoCaja": {
     "title": "Arqueo de Caja",

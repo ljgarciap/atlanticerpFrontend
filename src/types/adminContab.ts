@@ -91,6 +91,8 @@ export interface FiscalSettings {
    *  acá desde una constante hardcodeada en el backend (regla dura del workspace sobre umbrales de
    *  negocio, ver CLAUDE.md raíz). Entero, mínimo 1. */
   petty_cash_max_intentos_rechazo: number
+  /** Fase 28 — base de cálculo de la comisión externa: el monto con impuesto (default) o sin él. */
+  comision_externa_base: 'total' | 'base_imponible'
   /** SCRUM-1019 — horas máximas para reintentar un documento electrónico antes de requerir acción manual. Entero 1–720, obligatorio (default 24 en el backend). */
   fe_reintento_max_horas: number
   /** Fase 6b — ¿la empresa envía documentos a una autoridad fiscal? `false` con el proveedor `none` o el ambiente apagado. */
@@ -1674,6 +1676,10 @@ export interface ArchitectCommissionRow {
   /** `false` → fila con aviso "Completar datos fiscales" (RN4 REQ-510); los montos de sus
    *  proyectos (salvo "Aún no generada") no se pueden calcular. */
   datos_fiscales_completos: boolean
+  /** Fase 28 — sin régimen fiscal los totales con impuesto no se calculan: `true` si hay comisión generada que aún no suma por eso. */
+  regimen_pendiente?: boolean
+  /** Fase 28 — comisión (sin impuesto) de los proyectos generados/pagados que no suman a `generada`/`pagada`/`pendiente` por falta de régimen. */
+  comision_sin_regimen?: number
   /** Desglose de la fila (mockup del ticket) — pagada + pendiente = generada, acotado a los
    *  proyectos ya filtrados de este arquitecto (no a su universo completo). */
   generada: number

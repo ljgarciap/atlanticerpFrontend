@@ -68,6 +68,7 @@ function buildSchema(t: (key: string) => string) {
     retencion_proveedores_activa:    z.boolean(),
     dias_credito_factura: z.coerce.number().int().min(1, t('adminContab:fiscal.validation.required')),
     petty_cash_max_intentos_rechazo: z.coerce.number().int().min(1, t('adminContab:fiscal.validation.required')),
+    comision_externa_base: z.enum(['total', 'base_imponible']),
     // SCRUM-1019 — obligatorio (columna NOT NULL, default 24 en el backend): nunca se envía null ni "".
     fe_reintento_max_horas: z.coerce.number({ invalid_type_error: msgFe }).int(msgFe).min(1, msgFe).max(720, msgFe),
   })
@@ -240,6 +241,13 @@ export default function FiscalSettingsPanel() {
                 disabled={!editMode}
                 className={inputClass(!!errors.dias_credito_factura)}
               />
+            </TextField>
+            {/* Fase 28 — sobre qué monto se calcula la comisión externa (afecta las comisiones aún no pagadas). */}
+            <TextField label={t('adminContab:fiscal.datosFiscales.fields.comisionExternaBase')} className="sm:col-span-2">
+              <select {...register('comision_externa_base')} disabled={!editMode} className={inputClass(false)}>
+                <option value="total">{t('adminContab:fiscal.datosFiscales.comisionBase.total')}</option>
+                <option value="base_imponible">{t('adminContab:fiscal.datosFiscales.comisionBase.base_imponible')}</option>
+              </select>
             </TextField>
             {/* Batch 21 de Caja Chica (SCRUM-618→623, REQ-542) — umbral de la regla de "2
                 intentos" movido acá desde una constante hardcodeada en el backend (regla dura del

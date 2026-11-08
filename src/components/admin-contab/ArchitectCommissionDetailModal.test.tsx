@@ -149,6 +149,15 @@ describe('ArchitectCommissionDetailModal', () => {
     await waitFor(() => expect(mockedApi.commissionsExternal.markPaid).toHaveBeenCalledWith(1))
   })
 
+  it('Fase 28 — avisa si la comisión se pagó sin cuenta de pago', async () => {
+    mockedApi.commissionsExternal.markPaid.mockResolvedValue({ fecha_pago: '2026-08-25', avisos: ['La comisión se pagó sin cuenta de pago.'] })
+    renderModal()
+
+    fireEvent.click(screen.getByText('comisionesExternas.detalleModal.marcarPagado'))
+
+    expect(await screen.findByTestId('aviso-pago')).toHaveTextContent('sin cuenta de pago')
+  })
+
   it('REQ-514 RN1 — comprobante de retención solo aparece con régimen retención_50', () => {
     renderModal({ architect: { regimen_fiscal: 'con_itbms' } })
     expect(screen.queryByText('comisionesExternas.detalleModal.comprobanteRetencion')).not.toBeInTheDocument()

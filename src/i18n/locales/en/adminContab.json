@@ -46,11 +46,16 @@
         "diasCreditoFactura": "Credit term (days)",
         "pettyCashMaxIntentosRechazo": "Petty cash — max. rejection attempts",
         "feReintentoMaxHoras": "FE max. retry hours",
-        "feReintentoMaxHorasAyuda": "Maximum hours to retry a document before manual action is required (1–720)"
+        "feReintentoMaxHorasAyuda": "Maximum hours to retry a document before manual action is required (1–720)",
+        "comisionExternaBase": "External commission basis"
       },
       "regimen": {
         "general": "General regime taxpayer",
         "pequeno": "Small taxpayer"
+      },
+      "comisionBase": {
+        "total": "Project total (tax included)",
+        "base_imponible": "Taxable base (before tax)"
       }
     },
     "facturacionElectronica": {
@@ -1129,7 +1134,8 @@
       "error": "Could not save. Check the data and try again.",
       "cancel": "Cancel",
       "save": "Save"
-    }
+    },
+    "regimenPendiente": "Pending tax regime ({{monto}} commission before tax)"
   },
   "arqueoCaja": {
     "title": "Cash Count",

@@ -757,8 +757,8 @@ export const adminContabApi = {
 
     // REQ-515 — cadena de validación completa en el backend (autoridad final); el frontend hace el
     // mismo chequeo antes de ofrecer el botón, solo para evitar un viaje al servidor que va a fallar.
-    markPaid: (pipelineCardId: number): Promise<{ fecha_pago: string }> =>
-      api.post<{ fecha_pago: string }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/mark-paid`).then(r => r.data),
+    markPaid: (pipelineCardId: number): Promise<{ fecha_pago: string; avisos?: string[] }> =>
+      api.post<{ fecha_pago: string; avisos?: string[] }>(`/admin-contab/commissions/external/projects/${pipelineCardId}/mark-paid`).then(r => r.data),
 
     // REQ-518 — despacha un correo async al arquitecto, solo disponible en estado "Pendiente Cuenta de cobro".
     sendReminder: (pipelineCardId: number): Promise<void> =>

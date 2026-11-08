@@ -47,6 +47,7 @@ function makeSettings(overrides: Partial<FiscalSettings> = {}): FiscalSettings {
     primary_approver_user_id: 1,
     dias_credito_factura: 30,
     petty_cash_max_intentos_rechazo: 2,
+    comision_externa_base: 'total',
     fe_reintento_max_horas: 24,
     ...overrides,
   }
@@ -161,6 +162,21 @@ describe('FiscalSettingsPanel', () => {
 
     await waitFor(() => expect(mockedApi.fiscalSettings.update).toHaveBeenCalledWith(
       expect.objectContaining({ petty_cash_max_intentos_rechazo: 3 }),
+    ))
+  })
+
+  it('Fase 28 — permite cambiar la base de cálculo de la comisión externa y la envía en el PUT', async () => {
+    mockedApi.fiscalSettings.update.mockResolvedValue(makeSettings({ comision_externa_base: 'base_imponible' }))
+    renderPage()
+    await screen.findByDisplayValue('2')
+
+    fireEvent.click(screen.getByText('common:actions.edit'))
+    fireEvent.change(screen.getByDisplayValue('adminContab:fiscal.datosFiscales.comisionBase.total'), { target: { value: 'base_imponible' } })
+    fireEvent.click(await screen.findByText('adminContab:fiscal.saveChanges'))
+    fireEvent.click(screen.getByText('common:actions.confirm'))
+
+    await waitFor(() => expect(mockedApi.fiscalSettings.update).toHaveBeenCalledWith(
+      expect.objectContaining({ comision_externa_base: 'base_imponible' }),
     ))
   })
 
