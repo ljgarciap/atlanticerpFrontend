@@ -1568,6 +1568,8 @@
       "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Period total",
+      "conciliacionTitle": "Reconciliation with the invoice book:",
+      "conciliacion": "Collected {{cobradas}} + pending {{pendientes}} + credit notes {{notas}} = {{libro}} (book total).",
       "pendientesTitle": "Pending collection (no payment method yet)",
       "columnas": {
         "fecha": "Date",

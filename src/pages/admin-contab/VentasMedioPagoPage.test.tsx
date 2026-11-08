@@ -33,7 +33,10 @@ const mockedApi = vi.mocked(adminContabApi, true)
 
 function makeReport(overrides: Partial<PaymentMethodSalesReport> = {}): PaymentMethodSalesReport {
   return {
-    resumen: { facturas_cobradas: 1, base_imponible: 7850.47, itbms: 549.53, total: 8400 },
+    resumen: {
+      facturas_cobradas: 1, base_imponible: 7850.47, itbms: 549.53, total: 8400,
+      notas_credito: { cantidad: 1, base_imponible: -100, itbms: -7, total: -107 }, pendientes_total: 500, total_libro: 8793,
+    },
     filas: [{
       fecha: '2026-01-05', cliente: 'Torres Pacífico', documento: 'F-4201',
       base_imponible: 7850.47, itbms: 549.53, total: 8400,
@@ -68,6 +71,14 @@ describe('VentasMedioPagoPage', () => {
 
     await waitFor(() => expect(mockedApi.reports.ventasMedioPago).toHaveBeenCalledWith(expect.objectContaining({ masterClientId: undefined })))
     await waitFor(() => expect(screen.getByText('F-4201')).toBeInTheDocument())
+  })
+
+  it('Fase 28 — muestra la conciliación con el Libro de facturas', async () => {
+    renderPage()
+
+    const bloque = await screen.findByTestId('conciliacion-libro')
+    expect(bloque.textContent).toContain('8,793')
+    expect(bloque.textContent).toContain('500')
   })
 
   it('renders all 9 real payment method columns', async () => {

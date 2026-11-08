@@ -1580,6 +1580,8 @@
       "itbms": "{{tax}}",
       "total": "Total",
       "totalPeriodo": "Total del período",
+      "conciliacionTitle": "Conciliación con el Libro de facturas:",
+      "conciliacion": "Cobradas {{cobradas}} + pendientes {{pendientes}} + notas de crédito {{notas}} = {{libro}} (total del libro).",
       "pendientesTitle": "Pendientes de cobro (sin método de pago todavía)",
       "columnas": {
         "fecha": "Fecha",

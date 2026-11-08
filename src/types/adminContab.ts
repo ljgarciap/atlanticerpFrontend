@@ -2333,6 +2333,11 @@ export interface PaymentMethodSalesPendiente {
 }
 
 export interface PaymentMethodSalesResumen {
+  /** Fase 28 — notas de crédito aplicadas del periodo (importes en negativo), para conciliar con el Libro de facturas. */
+  notas_credito: { cantidad: number; base_imponible: number; itbms: number; total: number }
+  pendientes_total: number
+  /** Fase 28 — cobradas + pendientes + notas de crédito: debe coincidir con el total del Libro de facturas. */
+  total_libro: number
   facturas_cobradas: number
   base_imponible: number
   itbms: number

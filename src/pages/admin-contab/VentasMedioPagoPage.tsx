@@ -157,6 +157,17 @@ export default function VentasMedioPagoPage() {
               <Kpi label={t('adminContab:reportes.ventasMedioPago.total')} value={money(data.resumen.total)} good />
             </div>
 
+            {/* Fase 28 — conciliación con el Libro de facturas: el libro incluye pendientes y notas de crédito. */}
+            <div className="mb-5 rounded-lg bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-600 dark:text-slate-300" data-testid="conciliacion-libro">
+              <span className="font-semibold">{t('adminContab:reportes.ventasMedioPago.conciliacionTitle')}</span>{' '}
+              {t('adminContab:reportes.ventasMedioPago.conciliacion', {
+                cobradas: money(data.resumen.total),
+                pendientes: money(data.resumen.pendientes_total),
+                notas: money(data.resumen.notas_credito.total),
+                libro: money(data.resumen.total_libro),
+              })}
+            </div>
+
             {data.filas.length === 0 ? (
               <p className="text-sm text-slate-400 text-center py-10">{t('adminContab:reportes.ventasMedioPago.sinFacturas')}</p>
             ) : (
