@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import EstadoCuentaPage from './EstadoCuentaPage'
 import { adminContabApi } from '@/api/adminContabApi'
+import { useAuthStore } from '@/store/authStore'
 import type {
   AccountStatementClientOption, AccountStatementProjectOption, AccountStatement, AccountStatementMovement,
 } from '@/types/adminContab'
@@ -28,6 +29,7 @@ vi.mock('@/api/adminContabApi', () => ({
       searchClients: vi.fn(), projects: vi.fn(), generate: vi.fn(), downloadExcel: vi.fn(), downloadPdf: vi.fn(),
     },
     compensaciones: { downloadPdf: vi.fn() },
+    clientCreditDays: { set: vi.fn() },
   },
 }))
 
@@ -648,5 +650,37 @@ describe('EstadoCuentaPage — SCRUM-947 paginación', () => {
     fireEvent.click(screen.getByText('estadoCuenta.busqueda.buscar'))
 
     expect(await screen.findByText(/12,345\.00/)).toBeInTheDocument()
+  })
+})
+
+describe('EstadoCuentaPage — Fase 28 días de crédito', () => {
+  async function buscar() {
+    renderPage()
+    await selectClient()
+    fireEvent.click(screen.getByText('estadoCuenta.busqueda.buscar'))
+    return screen.findByTestId('dias-credito')
+  }
+
+  it('muestra los días de crédito aplicables y no ofrece editarlos sin el permiso', async () => {
+    useAuthStore.setState({ user: { permissions: [] } as never })
+    mockedApi.accountStatement.generate.mockResolvedValue(makeStatement({ dias_credito: null, dias_credito_efectivo: 30 }))
+    const bloque = await buscar()
+
+    expect(bloque).toHaveTextContent('estadoCuenta.diasCredito.global')
+    expect(screen.queryByText('estadoCuenta.diasCredito.editar')).toBeNull()
+  })
+
+  it('quien administra registros puede fijar los días de crédito del cliente', async () => {
+    useAuthStore.setState({ user: { permissions: ['admin_contab.records.manage'] } as never })
+    mockedApi.accountStatement.generate.mockResolvedValue(makeStatement({ dias_credito: null, dias_credito_efectivo: 30 }))
+    mockedApi.clientCreditDays.set.mockResolvedValue({ master_client_id: 7, dias_credito: 60, dias_credito_efectivo: 60 })
+    const bloque = await buscar()
+
+    fireEvent.click(screen.getByText('estadoCuenta.diasCredito.editar'))
+    fireEvent.change(screen.getByLabelText('estadoCuenta.diasCredito.input'), { target: { value: '60' } })
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    await waitFor(() => expect(mockedApi.clientCreditDays.set).toHaveBeenCalledWith(7, 60))
+    await waitFor(() => expect(bloque).toHaveTextContent('estadoCuenta.diasCredito.propio'))
   })
 })

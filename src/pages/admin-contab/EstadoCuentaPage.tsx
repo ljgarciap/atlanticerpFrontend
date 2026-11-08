@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useAccountStatementClients, useAccountStatementProjects, useGenerateAccountStatement,
-  useDownloadAccountStatementExcel, useDownloadAccountStatementPdf,
+  useDownloadAccountStatementExcel, useDownloadAccountStatementPdf, useSetClientCreditDays,
 } from '@/hooks/useAdminContab'
 import type { AccountStatementClientOption, AccountStatementMovement, AccountStatementMovementRecibo } from '@/types/adminContab'
 import { adminContabApi } from '@/api/adminContabApi'
+import { useAuthStore } from '@/store/authStore'
+import { parseApiValidationError, summaryMessage } from '@/lib/apiValidationError'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import AppLogo from '@/components/AppLogo'
@@ -72,6 +74,27 @@ export default function EstadoCuentaPage() {
   const pdfMutation       = useDownloadAccountStatementPdf()
 
   const statement = generateMutation.data ?? null
+
+  // Fase 28 — días de crédito del cliente, editables por quien administra registros (Contabilidad, Asistente, Gerencia).
+  const permissions = useAuthStore(s => s.user?.permissions) ?? []
+  const canEditCredit = permissions.includes('admin_contab.records.manage') || permissions.includes('superadmin.all')
+  const setCreditDays = useSetClientCreditDays()
+  const [editingCredit, setEditingCredit] = useState(false)
+  const [creditDraft, setCreditDraft] = useState('')
+  const [creditError, setCreditError] = useState<string | null>(null)
+  const [creditOverride, setCreditOverride] = useState<{ propio: number | null; efectivo: number } | null>(null)
+  useEffect(() => { setCreditOverride(null); setEditingCredit(false) }, [statement])
+  const creditPropio = creditOverride ? creditOverride.propio : statement?.dias_credito ?? null
+  const creditEfectivo = creditOverride ? creditOverride.efectivo : statement?.dias_credito_efectivo
+
+  function saveCreditDays(value: number | null) {
+    if (!statement) return
+    setCreditError(null)
+    setCreditDays.mutate({ masterClientId: statement.master_client_id, diasCredito: value }, {
+      onSuccess: (res) => { setCreditOverride({ propio: res.dias_credito, efectivo: res.dias_credito_efectivo }); setEditingCredit(false) },
+      onError: (err) => setCreditError(summaryMessage(parseApiValidationError(err), t('estadoCuenta.diasCredito.error'))),
+    })
+  }
 
   // REQ-461 — apertura automática con cliente preseleccionado desde Facturación (u otras
   // pantallas). RN1: genera de inmediato, sin que el usuario presione "Buscar". RN2: un id
@@ -297,6 +320,38 @@ export default function EstadoCuentaPage() {
                     terminos: statement.terminos_pago,
                   })}
                 </div>
+                {creditEfectivo !== undefined && (
+                  <div className="text-[11.5px] text-slate-500 mt-1 flex items-center gap-2 flex-wrap" data-testid="dias-credito">
+                    <span>
+                      {creditPropio === null
+                        ? t('estadoCuenta.diasCredito.global', { dias: creditEfectivo })
+                        : t('estadoCuenta.diasCredito.propio', { dias: creditEfectivo })}
+                    </span>
+                    {canEditCredit && !editingCredit && (
+                      <button type="button" className="underline" onClick={() => { setCreditDraft(String(creditEfectivo)); setEditingCredit(true) }}>
+                        {t('estadoCuenta.diasCredito.editar')}
+                      </button>
+                    )}
+                    {canEditCredit && editingCredit && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <input
+                          type="number" min={1} max={365} value={creditDraft} aria-label={t('estadoCuenta.diasCredito.input')}
+                          onChange={e => setCreditDraft(e.target.value)}
+                          className="w-20 rounded border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-1.5 py-0.5"
+                        />
+                        <button type="button" className="font-medium text-primary-dark" disabled={setCreditDays.isPending || Number(creditDraft) < 1}
+                          onClick={() => saveCreditDays(Number(creditDraft))}>{t('common:actions.save')}</button>
+                        {creditPropio !== null && (
+                          <button type="button" className="underline" disabled={setCreditDays.isPending} onClick={() => saveCreditDays(null)}>
+                            {t('estadoCuenta.diasCredito.usarGlobal')}
+                          </button>
+                        )}
+                        <button type="button" className="text-slate-400" onClick={() => setEditingCredit(false)}>{t('common:actions.cancel')}</button>
+                      </span>
+                    )}
+                    {creditError && <span role="alert" className="text-red-600">{creditError}</span>}
+                  </div>
+                )}
               </div>
               <ExportMenu
                 t={t} onPdf={descargarPdf} onExcel={descargarExcel}

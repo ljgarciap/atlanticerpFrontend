@@ -391,6 +391,12 @@ export const adminContabApi = {
 
   // Batch 8 del cuerpo principal (SCRUM-529→533, REQ-452→456) — Estado de Cuenta. Batch 9
   // (SCRUM-534→538, REQ-457→461) agrega desde/hasta al mismo endpoint (respuesta superset).
+  clientCreditDays: {
+    // Fase 28 — días de crédito propios del cliente (null = usa el global de Configuración Fiscal).
+    set: (masterClientId: number, diasCredito: number | null): Promise<{ master_client_id: number; dias_credito: number | null; dias_credito_efectivo: number }> =>
+      api.put(`/admin-contab/clientes/${masterClientId}/dias-credito`, { dias_credito: diasCredito }).then(r => r.data),
+  },
+
   accountStatement: {
     searchClients: (search: string): Promise<AccountStatementClientOption[]> =>
       api.get<{ data: AccountStatementClientOption[] }>('/admin-contab/account-statement/clients', { params: { search } })

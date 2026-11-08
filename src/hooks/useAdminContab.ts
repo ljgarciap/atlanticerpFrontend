@@ -1528,3 +1528,10 @@ export function useHomeCalendarToday() {
     queryFn:  () => adminContabApi.home.calendar.list(range),
   })
 }
+
+export function useSetClientCreditDays() {
+  return useMutation({
+    mutationFn: ({ masterClientId, diasCredito }: { masterClientId: number; diasCredito: number | null }) =>
+      adminContabApi.clientCreditDays.set(masterClientId, diasCredito),
+  })
+}

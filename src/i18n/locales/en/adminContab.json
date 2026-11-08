@@ -736,6 +736,14 @@
     "regimen": {
       "con_itbms": "With {{tax}}",
       "sin_itbms": "Without {{tax}}"
+    },
+    "diasCredito": {
+      "global": "Credit: {{dias}} days (default)",
+      "propio": "Credit: {{dias}} days (this client's own)",
+      "editar": "Change",
+      "input": "Credit days",
+      "usarGlobal": "Use the default",
+      "error": "The credit days could not be saved."
     }
   },
   "notasCredito": {

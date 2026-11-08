@@ -1020,6 +1020,9 @@ export interface AccountStatement {
   tarifa: AccountStatementTarifa | null
   regimen_fiscal: RegimenFiscal
   terminos_pago: string
+  /** Fase 28 — días de crédito propios del cliente (null = rige el global) y los que realmente se aplican. */
+  dias_credito?: number | null
+  dias_credito_efectivo?: number
   // Batch 9 (SCRUM-534→538, REQ-457→461).
   saldo: number
   saldo_a_favor: boolean

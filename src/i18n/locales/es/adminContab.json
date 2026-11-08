@@ -740,6 +740,14 @@
     "regimen": {
       "con_itbms": "Con {{tax}}",
       "sin_itbms": "Sin {{tax}}"
+    },
+    "diasCredito": {
+      "global": "Crédito: {{dias}} días (valor por defecto)",
+      "propio": "Crédito: {{dias}} días (propio de este cliente)",
+      "editar": "Cambiar",
+      "input": "Días de crédito",
+      "usarGlobal": "Usar el valor por defecto",
+      "error": "No se pudieron guardar los días de crédito."
     }
   },
   "notasCredito": {
