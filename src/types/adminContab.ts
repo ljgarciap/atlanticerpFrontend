@@ -257,6 +257,16 @@ export interface BankMovement {
 export interface BankMovementListResponse {
   data: BankMovement[]
   meta: { total: number; per_page: number; current_page: number; last_page: number }
+  /** Fase 28 — salidas (devolución/comisión) sin cuenta, sin importar los filtros activos. */
+  pendientes_sin_cuenta?: { cantidad: number; monto: number }
+}
+
+/** Fase 28 — filtros del listado de movimientos. */
+export interface BankMovementFilters {
+  tipo?: TipoMovimiento
+  desde?: string
+  hasta?: string
+  sinCuenta?: boolean
 }
 
 // Batch 2 del cuerpo principal de la épica (SCRUM-513→518, REQ-436→441) — Facturación.

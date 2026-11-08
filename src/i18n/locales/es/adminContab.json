@@ -253,6 +253,20 @@
       "cobro": "Cobro",
       "devolucion": "Devolución",
       "comision": "Comisión"
+    },
+    "pendientesSinCuenta": "{{cantidad}} salida(s) sin cuenta asignada por {{monto}}.",
+    "verPendientes": "Ver pendientes",
+    "filtros": {
+      "todos": "Todos",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "sinCuenta": "Solo sin cuenta"
+    },
+    "corregir": {
+      "boton": "Corregir cuenta",
+      "cuentaNueva": "Cuenta nueva",
+      "motivo": "Motivo (mínimo 10 caracteres)",
+      "error": "No se pudo corregir la cuenta."
     }
   },
   "facturacion": {
@@ -993,7 +1007,7 @@
     },
     "tramos": {
       "errorGuardar": "No se pudo guardar el tramo.",
-        "title": "Tabla de comisión escalonada",
+      "title": "Tabla de comisión escalonada",
       "subtitle": "Se aplica sobre el total de pedidos del vendedor en el mes — no por proyecto individual",
       "columnas": {
         "rango": "Total de pedidos en el mes",

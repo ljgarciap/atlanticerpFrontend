@@ -251,6 +251,20 @@
       "cobro": "Payment received",
       "devolucion": "Refund",
       "comision": "Commission"
+    },
+    "pendientesSinCuenta": "{{cantidad}} outgoing movement(s) without an account, totalling {{monto}}.",
+    "verPendientes": "View pending",
+    "filtros": {
+      "todos": "All",
+      "desde": "From",
+      "hasta": "To",
+      "sinCuenta": "Without account only"
+    },
+    "corregir": {
+      "boton": "Correct account",
+      "cuentaNueva": "New account",
+      "motivo": "Reason (at least 10 characters)",
+      "error": "The account could not be corrected."
     }
   },
   "facturacion": {
@@ -989,7 +1003,7 @@
     },
     "tramos": {
       "errorGuardar": "The tier could not be saved.",
-        "title": "Tiered commission table",
+      "title": "Tiered commission table",
       "subtitle": "Applies to the salesperson's total orders for the month — not per individual project",
       "columnas": {
         "rango": "Total orders in the month",

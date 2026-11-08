@@ -15,7 +15,7 @@ import type {
   CashPositionWindowDays, UpdateDailyCashCountEntryPayload, CashFlowExportView,
   PettyCashNewExpenseLine, CreatePettyCashReportPayload, UpdatePettyCashExpensePayload,
   ReportsPeriodo, ClientCollectionReportParams,
-  InvoiceBookReportParams, PaymentMethodSalesReportParams,
+  InvoiceBookReportParams, PaymentMethodSalesReportParams, BankMovementFilters,
 } from '@/types/adminContab'
 
 const FISCAL_SETTINGS_KEY  = ['admin-contab', 'fiscal-settings']
@@ -25,8 +25,8 @@ const COMPANY_PROFILE_KEY  = ['admin-contab', 'company-profile']
 const LOCATIONS_KEY        = ['admin-contab', 'locations']
 const CONTACTS_KEY         = ['admin-contab', 'contacts']
 const BANK_ACCOUNTS_KEY    = ['admin-contab', 'bank-accounts']
-const bankMovementsKey     = (bankAccountId?: number, page?: number, perPage?: number | 'all') =>
-  ['admin-contab', 'bank-movements', bankAccountId ?? 'all', page ?? 1, perPage ?? 20]
+const bankMovementsKey     = (bankAccountId?: number, page?: number, perPage?: number | 'all', filters?: BankMovementFilters) =>
+  ['admin-contab', 'bank-movements', bankAccountId ?? 'all', page ?? 1, perPage ?? 20, filters ?? null]
 
 export function useFiscalSettings() {
   return useQuery({
@@ -214,10 +214,24 @@ export function useReactivateBankAccount() {
   })
 }
 
-export function useBankMovements(bankAccountId?: number, page?: number, perPage?: number | 'all') {
+export function useBankMovements(bankAccountId?: number, page?: number, perPage?: number | 'all', filters?: BankMovementFilters) {
   return useQuery({
-    queryKey: bankMovementsKey(bankAccountId, page, perPage),
-    queryFn:  () => adminContabApi.bankMovements.list(bankAccountId, page, perPage),
+    queryKey: bankMovementsKey(bankAccountId, page, perPage, filters),
+    queryFn:  () => filters
+      ? adminContabApi.bankMovements.list(bankAccountId, page, perPage, filters)
+      : adminContabApi.bankMovements.list(bankAccountId, page, perPage),
+  })
+}
+
+export function useReassignBankMovementAccount() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, bankAccountId, motivo }: { id: number; bankAccountId: number; motivo: string }) =>
+      adminContabApi.bankMovements.reassignAccount(id, bankAccountId, motivo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-contab', 'bank-movements'] })
+      qc.invalidateQueries({ queryKey: BANK_ACCOUNTS_KEY })
+    },
   })
 }
 

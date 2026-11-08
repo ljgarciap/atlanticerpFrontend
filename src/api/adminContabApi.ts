@@ -35,7 +35,7 @@ import type {
   ReportsComisiones, ReportsNotasCredito,
   ClientCollectionReport, ClientCollectionReportParams,
   InvoiceBookReport, InvoiceBookReportParams,
-  PaymentMethodSalesReport, PaymentMethodSalesReportParams,
+  PaymentMethodSalesReport, PaymentMethodSalesReportParams, BankMovementFilters,
   HomePendientes,
   HomeResumenMes,
   HomeVencidosPorVencer,
@@ -138,8 +138,8 @@ export const adminContabApi = {
     update: (id: number, data: UpdateBankAccountPayload): Promise<BankAccount> =>
       api.put<BankAccount>(`/admin-contab/bank-accounts/${id}`, data).then(r => r.data),
 
-    deactivate: (id: number): Promise<BankAccount> =>
-      api.put<BankAccount>(`/admin-contab/bank-accounts/${id}/deactivate`).then(r => r.data),
+    deactivate: (id: number): Promise<BankAccount & { avisos?: string[] }> =>
+      api.put<BankAccount & { avisos?: string[] }>(`/admin-contab/bank-accounts/${id}/deactivate`).then(r => r.data),
 
     reactivate: (id: number): Promise<BankAccount> =>
       api.put<BankAccount>(`/admin-contab/bank-accounts/${id}/reactivate`).then(r => r.data),
@@ -147,10 +147,18 @@ export const adminContabApi = {
 
   bankMovements: {
     // SCRUM-947 — pagina server-side (antes devolvía el array completo).
-    list: (bankAccountId?: number, page?: number, perPage?: number | 'all'): Promise<BankMovementListResponse> =>
+    list: (bankAccountId?: number, page?: number, perPage?: number | 'all', filters?: BankMovementFilters): Promise<BankMovementListResponse> =>
       api.get<BankMovementListResponse>('/admin-contab/bank-movements', {
-        params: { bank_account_id: bankAccountId, page, per_page: perPage },
+        params: {
+          bank_account_id: bankAccountId, page, per_page: perPage,
+          tipo: filters?.tipo, desde: filters?.desde || undefined, hasta: filters?.hasta || undefined,
+          sin_cuenta: filters?.sinCuenta ? 1 : undefined,
+        },
       }).then(r => r.data),
+
+    // Fase 28 — corregir la cuenta de un movimiento ya asignado (motivo obligatorio, auditado).
+    reassignAccount: (id: number, bankAccountId: number, motivo: string): Promise<BankMovement> =>
+      api.put<BankMovement>(`/admin-contab/bank-movements/${id}/reassign-account`, { bank_account_id: bankAccountId, motivo }).then(r => r.data),
 
     assignAccount: (id: number, bankAccountId: number): Promise<BankMovement> =>
       api.put<BankMovement>(`/admin-contab/bank-movements/${id}/assign-account`, { bank_account_id: bankAccountId }).then(r => r.data),
