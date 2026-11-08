@@ -1469,6 +1469,8 @@ export interface CommissionTier {
   monto_maximo: number | null
   porcentaje: number
   orden: number
+  /** Fase 28 — solo en la respuesta de crear/editar: huecos en la escala que no bloquean el guardado. */
+  avisos?: string[]
 }
 
 export type CreateCommissionTierPayload = Omit<CommissionTier, 'id'>

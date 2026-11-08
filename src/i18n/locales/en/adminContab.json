@@ -988,7 +988,8 @@
       "verImprimir": "View / Print PDF"
     },
     "tramos": {
-      "title": "Tiered commission table",
+      "errorGuardar": "The tier could not be saved.",
+        "title": "Tiered commission table",
       "subtitle": "Applies to the salesperson's total orders for the month — not per individual project",
       "columnas": {
         "rango": "Total orders in the month",

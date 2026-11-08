@@ -992,7 +992,8 @@
       "verImprimir": "Ver / Imprimir PDF"
     },
     "tramos": {
-      "title": "Tabla de comisión escalonada",
+      "errorGuardar": "No se pudo guardar el tramo.",
+        "title": "Tabla de comisión escalonada",
       "subtitle": "Se aplica sobre el total de pedidos del vendedor en el mes — no por proyecto individual",
       "columnas": {
         "rango": "Total de pedidos en el mes",

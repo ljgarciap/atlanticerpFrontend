@@ -104,3 +104,35 @@ describe('CommissionTiersModal — Fase 14g', () => {
     expect(screen.queryByText('adminContab:comisionesInternas.tramos.difiereDeVentas')).toBeNull()
   })
 })
+
+describe('CommissionTiersModal — Fase 28', () => {
+  it('muestra el error 422 de solape y deja el formulario abierto', async () => {
+    mockedApi.commissionsInternal.tiers.list.mockResolvedValue([makeTier()])
+    mockedApi.commissionsInternal.tiers.create.mockRejectedValue(
+      Object.assign(new Error('422'), {
+        isAxiosError: true,
+        response: { status: 422, data: { message: 'El tramo se solapa con el de 0.00 a 20000.00.', errors: { monto_minimo: ['El tramo se solapa con el de 0.00 a 20000.00.'] } } },
+      }),
+    )
+    renderModal()
+
+    fireEvent.click(await screen.findByText('adminContab:comisionesInternas.tramos.agregar'))
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('se solapa')
+    expect(screen.getByText('common:actions.save')).toBeInTheDocument()
+  })
+
+  it('muestra los avisos de huecos que devuelve el backend al guardar', async () => {
+    mockedApi.commissionsInternal.tiers.list.mockResolvedValue([makeTier()])
+    mockedApi.commissionsInternal.tiers.create.mockResolvedValue(
+      makeTier({ id: 2, monto_minimo: 40000, orden: 2, avisos: ['Hueco entre 20000.00 y 40000.00'] }),
+    )
+    renderModal()
+
+    fireEvent.click(await screen.findByText('adminContab:comisionesInternas.tramos.agregar'))
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    expect(await screen.findByTestId('avisos-tramos')).toHaveTextContent('Hueco entre')
+  })
+})
