@@ -156,7 +156,8 @@ test.describe('Flujo de Compras: reposición, proveedores y agencias', () => {
     expect(alta.status, JSON.stringify(alta.body).slice(0, 200)).toBe(201)
     const id = alta.body.id as number
     const repetida = await api(request, 'lidercompras', 'POST', '/liquidation-agencies', { name: nombre })
-    expect(repetida.status, 'el nombre de agencia se puede repetir').toBe(201)
+    expect(repetida.status, 'Fase 29b: el nombre de agencia es único (sin distinguir mayúsculas)').toBe(422)
+    expect((await api(request, 'lidercompras', 'POST', '/liquidation-agencies', { name: nombre.toUpperCase() })).status).toBe(422)
 
     expect((await api(request, 'lidercompras', 'PUT', `/liquidation-agencies/${id}`, { pending_payment_amount: -1, paid_amount: 0 })).status, 'montos no negativos').toBe(422)
     const pago = await api(request, 'lidercompras', 'PUT', `/liquidation-agencies/${id}`, { pending_payment_amount: 120.5, paid_amount: 30 })
