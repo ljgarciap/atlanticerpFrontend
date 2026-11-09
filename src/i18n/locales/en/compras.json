@@ -352,7 +352,8 @@
       "en_transito": "In transit",
       "en_aduana": "In customs",
       "en_transito_local": "In local transit",
-      "recibido": "Received"
+      "recibido": "Received",
+      "aprobada": "Approved"
     },
     "detail": {
       "title": "Order #{{id}}",
@@ -489,7 +490,17 @@
       "carrier": "Carrier",
       "actualArrival": "Actual arrival",
       "history": "View change history",
-      "historyEmpty": "No changes recorded"
+      "historyEmpty": "No changes recorded",
+      "historyField": {
+        "container_number": "Container number",
+        "carrier": "Carrier",
+        "estimated_arrival_date": "Estimated arrival",
+        "actual_arrival_date": "Actual arrival",
+        "shipping_type": "Shipping type",
+        "who_pays_shipping": "Who pays shipping",
+        "shipping_cost": "Shipping cost",
+        "modality": "Modality"
+      }
     },
     "documents": {
       "title": "Shipment documents",
@@ -507,7 +518,9 @@
       "remove": "Remove",
       "removeReason": "Reason (min. 10 characters)",
       "removeConfirm": "Remove",
-      "removeCancel": "Cancel"
+      "removeCancel": "Cancel",
+      "replace": "Replace",
+      "replaceFile": "Replacement file"
     },
     "providerConfirmation": {
       "validate": "Validate",
@@ -912,7 +925,16 @@
         "ya_en_camino": "A purchase is already on the way"
       },
       "empty": "This family has no products.",
-      "emptyList": "No families created yet."
+      "emptyList": "No families created yet.",
+      "stockByWarehouse": "Stock by warehouse:",
+      "edit": {
+        "open": "Edit",
+        "name": "Name",
+        "currency": "Currency",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate",
+        "error": "Could not save the family."
+      }
     },
     "technicalSpec": {
       "title": "Technical spec sheet",
@@ -980,6 +1002,18 @@
         "title": "Remove contact",
         "confirm": "Remove {{name}} from this agency's contacts?",
         "lastContactError": "You can't remove the agency's only contact."
+      },
+      "dataTitle": "Agency details",
+      "dataEdit": "Edit",
+      "inactive": "Deactivated",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "dataForm": {
+        "name": "Name",
+        "contact_name": "Main contact",
+        "phone": "Phone",
+        "email": "Email",
+        "error": "Could not save the agency details."
       }
     }
   },
@@ -1147,6 +1181,14 @@
       "orders": "Orders",
       "provider": "Supplier",
       "quantity": "Quantity"
+    },
+    "terms": {
+      "hint": "Min. {{min}} · multiple {{multiple}}",
+      "min": "Minimum",
+      "multiple": "Multiple",
+      "edit": "Purchase terms",
+      "save": "Save",
+      "saveError": "Could not save the purchase terms."
     }
   },
   "replacements": {
@@ -1161,8 +1203,8 @@
     "status": {
       "pendiente": "Pending",
       "pendiente_gerencia": "Pending Management",
-      "aprobada": "Approved",
-      "rechazada": "Rejected"
+      "aprobada": "Substitute accepted",
+      "rechazada": "Original kept"
     },
     "table": {
       "original": "Original product",
@@ -1176,8 +1218,8 @@
       "generateOrder": "Generate order",
       "viewOrder": "View generated order",
       "generateRequest": "Generate request",
-      "approve": "Approve",
-      "reject": "Reject"
+      "approve": "Accept substitute",
+      "reject": "Keep original"
     },
     "errors": {
       "generateGeneric": "Could not generate the order.",

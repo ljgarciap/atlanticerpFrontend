@@ -88,7 +88,26 @@ export default function ReplenishmentPage() {
 
   const quantityOf = (p: ReplenishmentProduct) => {
     const text = qtyText[p.catalog_product_id]
-    return text === undefined ? p.faltante : Math.max(0, Math.floor(Number(text) || 0))
+    return text === undefined ? (p.sugerida ?? p.faltante) : Math.max(0, Math.floor(Number(text) || 0))
+  }
+
+  // Fase 29b — cantidad mínima y múltiplo de compra del proveedor principal; los edita quien puede editar Compras.
+  const canEditTerms = usePermission('compras.edit')
+  const [termsOpen, setTermsOpen] = useState<number | null>(null)
+  const [termsForm, setTermsForm] = useState<{ min: string; multiple: string }>({ min: '', multiple: '' })
+  async function saveTerms(p: ReplenishmentProduct, providerId: number) {
+    try {
+      await comprasApi.replenishment.setPurchaseTerms(p.catalog_product_id, {
+        provider_id: providerId,
+        min_order_quantity: termsForm.min === '' ? null : Math.max(1, Math.floor(Number(termsForm.min))),
+        order_multiple: termsForm.multiple === '' ? null : Math.max(1, Math.floor(Number(termsForm.multiple))),
+      })
+      setTermsOpen(null)
+      setQtyText(prev => { const next = { ...prev }; delete next[p.catalog_product_id]; return next })
+      await queryClient.invalidateQueries({ queryKey: ['compras', 'replenishment'] })
+    } catch {
+      useToastStore.getState().show(t('compras:replenishment.terms.saveError'), 'error')
+    }
   }
 
   /**
@@ -286,11 +305,32 @@ export default function ReplenishmentPage() {
                         <td className="px-3 py-2 text-right">
                           {g.providerId !== null && (
                             <input
-                              type="number" min={1} step={1} value={qtyText[id] ?? String(p.faltante)}
+                              type="number" min={1} step={1} value={qtyText[id] ?? String(p.sugerida ?? p.faltante)}
                               onChange={e => setQtyText(prev => ({ ...prev, [id]: e.target.value }))}
                               className="w-20 px-2 py-1 border border-slate-300 rounded text-sm text-right bg-white dark:bg-slate-900"
                               aria-label={t('compras:replenishment.quantityOf', { reference: p.reference })}
                             />
+                          )}
+                          {g.providerId !== null && (p.min_order_quantity != null || p.order_multiple != null) && (
+                            <p className="mt-1 text-[11px] text-slate-500" data-testid={`terms-hint-${id}`}>
+                              {t('compras:replenishment.terms.hint', { min: p.min_order_quantity ?? '—', multiple: p.order_multiple ?? '—' })}
+                            </p>
+                          )}
+                          {g.providerId !== null && canEditTerms && (
+                            termsOpen === id ? (
+                              <div className="mt-1 flex items-center justify-end gap-1" data-testid={`terms-form-${id}`}>
+                                <input type="number" min={1} value={termsForm.min} onChange={e => setTermsForm(f => ({ ...f, min: e.target.value }))}
+                                  className="w-16 px-1 py-0.5 border border-slate-300 rounded text-xs text-right bg-white dark:bg-slate-900" aria-label={t('compras:replenishment.terms.min')} placeholder={t('compras:replenishment.terms.min')} />
+                                <input type="number" min={1} value={termsForm.multiple} onChange={e => setTermsForm(f => ({ ...f, multiple: e.target.value }))}
+                                  className="w-16 px-1 py-0.5 border border-slate-300 rounded text-xs text-right bg-white dark:bg-slate-900" aria-label={t('compras:replenishment.terms.multiple')} placeholder={t('compras:replenishment.terms.multiple')} />
+                                <button type="button" className="text-xs text-primary hover:underline" onClick={() => { void saveTerms(p, g.providerId as number) }}>{t('compras:replenishment.terms.save')}</button>
+                              </div>
+                            ) : (
+                              <button type="button" className="mt-1 block ml-auto text-[11px] text-primary hover:underline"
+                                onClick={() => { setTermsForm({ min: String(p.min_order_quantity ?? ''), multiple: String(p.order_multiple ?? '') }); setTermsOpen(id) }}>
+                                {t('compras:replenishment.terms.edit')}
+                              </button>
+                            )
                           )}
                         </td>
                       </tr>

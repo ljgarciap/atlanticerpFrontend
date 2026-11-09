@@ -152,6 +152,8 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
         category: data.category as ProviderCategory | null | undefined,
         email: data.email === '' ? null : data.email,
         tax_id_dv: data.tax_id_dv === '' ? null : data.tax_id_dv,
+        // Fase 29b — si otra persona editó el proveedor entre tanto, el servidor responde 409 y no pisa nada.
+        version: provider?.version,
       }
       await updateProvider.mutateAsync({ id: providerId, data: payload })
       setAiFields(new Set())

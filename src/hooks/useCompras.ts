@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { comprasApi, type ProviderListParams, type PurchaseOrderListParams, type InventoryListParams } from '@/api/comprasApi'
 import type {
   ProviderPayload, PurchaseOrderPayload, ShippingInfoPayload, DocumentCategory, ComprasSettings,
-  LiquidationAgencyPayload, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload, InventoryProductPayload,
+  LiquidationAgencyPayload, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload, LiquidationAgencyDataPayload, InventoryFamilyUpdatePayload, InventoryProductPayload,
   PurchaseOrderClaimPayload, ClaimListParams, ReportGranularity, CreateReplacementRequestPayload, GoodsReceiptPayload,
   OrderDocLang,
 } from '@/types/compras'
@@ -512,6 +512,18 @@ export function useUpdateLiquidationAgencyPayment(agencyId: number) {
   })
 }
 
+// Fase 29b — nombre, contacto principal y activación de la agencia.
+export function useUpdateLiquidationAgencyData(agencyId: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: LiquidationAgencyDataPayload) => comprasApi.liquidationAgencies.updateData(agencyId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['compras/liquidation-agencies', agencyId] })
+      qc.invalidateQueries({ queryKey: ['compras/liquidation-agencies'] })
+    },
+  })
+}
+
 // SCRUM-255 (REQ-192)
 export function useCreateLiquidationAgencyContact(agencyId: number) {
   const qc = useQueryClient()
@@ -562,6 +574,17 @@ export function useRemovePurchaseOrderDocument() {
   return useMutation({
     mutationFn: ({ orderId, documentId, motivo }: { orderId: number; documentId: number; motivo: string }) =>
       comprasApi.documents.remove(orderId, documentId, motivo),
+    onSuccess: (_data, { orderId }) =>
+      qc.invalidateQueries({ queryKey: ['compras/orders', orderId, 'documents'] }),
+  })
+}
+
+/** Fase 29b — reemplazar un documento del checklist en una sola operación. */
+export function useReplacePurchaseOrderDocument() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, documentId, file, motivo }: { orderId: number; documentId: number; file: File; motivo: string }) =>
+      comprasApi.documents.replace(orderId, documentId, file, motivo),
     onSuccess: (_data, { orderId }) =>
       qc.invalidateQueries({ queryKey: ['compras/orders', orderId, 'documents'] }),
   })
@@ -740,6 +763,15 @@ export function useInventoryFamilies(page = 1, perPage: number | 'all' = 20) {
     queryKey:  ['compras/families', page, perPage],
     queryFn:   () => comprasApi.families.list(page, perPage),
     staleTime: 300_000,
+  })
+}
+
+/** Fase 29b — editar/renombrar/desactivar una familia. */
+export function useUpdateFamily() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: InventoryFamilyUpdatePayload }) => comprasApi.families.update(id, data),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['compras/families'] }),
   })
 }
 

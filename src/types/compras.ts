@@ -26,6 +26,8 @@ export interface Provider {
   origin:           ProviderOrigin
   currency:         string
   is_active:        boolean
+  /** Fase 29b — versión del registro: se reenvía al guardar para no pisar cambios de otra persona (409). */
+  version?:         string
   // SCRUM-186 (2026-08-06): columna "Contacto" de la tabla principal.
   contact_name:     string | null
   // REQ-124/REQ-123: null = "Sin calificar" / "Sin compras registradas aún" — nunca 0/fecha inventada.
@@ -91,6 +93,7 @@ export interface ProviderPayload {
   category?:             ProviderCategory | null
   currency?:             string | null
   is_active?:            boolean
+  version?:              string
   contact_name?:         string | null
   whatsapp?:             string | null
   phone?:                string | null
@@ -130,6 +133,8 @@ export interface PurchaseOrderSummary {
   // exponerlo — sin esto Lider Compras no tiene forma de diferenciar el origen (RN3 explícita).
   origin_module:               'servicios' | null
   status:                    string
+  // Fase 29b — «aprobada» cuando la orden ya fue aprobada pero su estado real sigue en por_aprobar.
+  status_visible?:           string
   next_status:               string | null
   is_critical:                boolean
   modality:                   Modality
@@ -587,6 +592,17 @@ export interface LiquidationAgency {
   paid_amount:             number
   last_payment_date:       string | null
   next_payment_date:       string | null
+  /** Fase 29b — una agencia solo se desactiva, nunca se borra. */
+  is_active?:              boolean
+}
+
+/** Fase 29b — datos editables de la agencia (nombre, contacto principal) y su activación. */
+export interface LiquidationAgencyDataPayload {
+  name?:         string
+  contact_name?: string | null
+  phone?:        string | null
+  email?:        string | null
+  is_active?:    boolean
 }
 
 export interface LiquidationAgencyPayload {
@@ -679,7 +695,8 @@ export type DocumentCategory =
 /** REQ-155 — checklist de documentos del envío. */
 /** Fase 24b — un cambio de contenedor o transportista, tomado de la auditoría de la orden. */
 export interface ShippingHistoryEntry {
-  field:      'container_number' | 'carrier'
+  /** Fase 29b — además del contenedor y el transportista: llegada, tipo de envío, quién paga, costo y modalidad. */
+  field:      'container_number' | 'carrier' | 'estimated_arrival_date' | 'actual_arrival_date' | 'shipping_type' | 'who_pays_shipping' | 'shipping_cost' | 'modality'
   old:        string | null
   new:        string | null
   changed_by: string | null
@@ -847,6 +864,10 @@ export interface InventoryFamilyDetail {
   can_manage:     boolean
   total_value:    number | null
   product_count:  number
+  /** Fase 29b — moneda y modalidad de compra de la familia. */
+  currency?:      string
+  /** Fase 29b — existencias de toda la familia sumadas por almacén. */
+  stock_por_almacen?: { warehouse_id: number; warehouse_name: string | null; quantity: number }[]
   // Lote 4 (SCRUM-243, 2026-08-17) — antes un shape mínimo propio (`InventoryFamilyProductRow`,
   // eliminado); el mockup pide la misma tabla completa de 21 columnas que "Productos"
   // (`InventoryProduct`, ya usado por `ProductsTab`) al expandir una familia, no un resumen aparte.
@@ -865,6 +886,8 @@ export interface InventoryFamilyListItem {
   name:          string
   description:   string | null
   product_count: number
+  is_active?:    boolean
+  currency?:     string
   // Lote 4 (SCRUM-243, 2026-08-17) — antes solo viajaba en el detalle; el mockup nuevo lo pide en
   // cada card colapsada del listado. `null` en modo restringido (Ventas & Diseño).
   total_value:   number | null
@@ -1261,6 +1284,10 @@ export interface ReplenishmentProduct {
   orders:             ReplenishmentOrderRef[]
   /** Proveedores entre los que se puede ordenar este producto (el principal incluido). */
   providers:          { id: number; name: string }[]
+  /** Fase 29b — cantidad que conviene comprar según el mínimo y el múltiplo del proveedor principal (igual a lo que falta si no hay condiciones). */
+  sugerida?:          number
+  min_order_quantity?: number | null
+  order_multiple?:    number | null
 }
 
 export interface ReplenishmentGroup {
@@ -1273,4 +1300,11 @@ export interface ReplenishmentResponse {
   /** Ítems de pedidos sin producto de catálogo: no se pueden ordenar desde esta pantalla. */
   custom_items_count: number
   total_products:     number
+}
+
+/** Fase 29b — editar, renombrar, desactivar y elegir moneda/modalidad de una familia. */
+export interface InventoryFamilyUpdatePayload {
+  name?:      string
+  currency?:  string
+  is_active?: boolean
 }

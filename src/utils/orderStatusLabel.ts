@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next'
  * una modalidad que cambie su texto, así que se muestra siempre la etiqueta de «Pendiente». El parámetro `modality` se conserva por
  * compatibilidad con quien lo pasa: `undefined` (un <select> con todos los estados) usa el texto combinado neutral ya existente.
  */
+/** Fase 29b — pasa `status_visible` cuando exista: una orden aprobada que sigue «por_aprobar» se muestra «Aprobada». */
 export function orderStatusLabel(t: TFunction, status: string, modality?: string | null): string {
   if (status !== 'pendiente_liquidar' || modality === undefined) {
     return t(`compras:orders.status.${status}`)

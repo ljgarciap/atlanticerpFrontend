@@ -5,7 +5,7 @@ import { isAxiosError } from 'axios'
 import {
   useLiquidationAgency, useCreateLiquidationAgencyContact,
   useUpdateLiquidationAgencyContact, useRemoveLiquidationAgencyContact,
-  useUpdateLiquidationAgencyPayment,
+  useUpdateLiquidationAgencyPayment, useUpdateLiquidationAgencyData,
 } from '@/hooks/useCompras'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -13,6 +13,64 @@ import type { LiquidationAgencyContact, LiquidationAgencyDetail } from '@/types/
 
 function fmtMoney(n: number): string {
   return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2 })
+}
+
+/** Fase 29b — nombre y contacto principal editables, y activar/desactivar (una agencia no se borra). */
+function AgencyDataSection({ agency }: { agency: LiquidationAgencyDetail }) {
+  const { t } = useTranslation(['common', 'compras'])
+  const update = useUpdateLiquidationAgencyData(agency.id)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState({ name: agency.name, contact_name: agency.contact_name ?? '', phone: agency.phone ?? '', email: agency.email ?? '' })
+  const [error, setError] = useState<string | null>(null)
+  const active = agency.is_active !== false
+
+  function fail(err: unknown) {
+    const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
+    setError(data?.errors?.name?.[0] ?? data?.message ?? t('compras:agencies.detail.dataForm.error'))
+  }
+
+  function save() {
+    setError(null)
+    update.mutate(
+      { name: draft.name.trim(), contact_name: draft.contact_name.trim() || null, phone: draft.phone.trim() || null, email: draft.email.trim() || null },
+      { onSuccess: () => setEditing(false), onError: fail },
+    )
+  }
+
+  return (
+    <Card variant="panel" className="p-5 mb-4" data-testid="agency-data">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold text-slate-500 uppercase">{t('compras:agencies.detail.dataTitle')}</p>
+        <div className="flex items-center gap-3">
+          {!active && <span className="text-[11px] font-semibold text-amber-700" data-testid="agency-inactive">{t('compras:agencies.detail.inactive')}</span>}
+          {!editing && (
+            <button onClick={() => { setDraft({ name: agency.name, contact_name: agency.contact_name ?? '', phone: agency.phone ?? '', email: agency.email ?? '' }); setError(null); setEditing(true) }}
+              className="text-[12px] font-semibold text-primary hover:underline">{t('compras:agencies.detail.dataEdit')}</button>
+          )}
+          <button onClick={() => update.mutate({ is_active: !active }, { onError: fail })} data-testid="agency-toggle-active"
+            className="text-[12px] font-semibold text-slate-600 hover:underline">
+            {active ? t('compras:agencies.detail.deactivate') : t('compras:agencies.detail.reactivate')}
+          </button>
+        </div>
+      </div>
+      {editing ? (
+        <div className="flex flex-wrap gap-2 items-end">
+          {(['name', 'contact_name', 'phone', 'email'] as const).map(f => (
+            <label key={f} className="flex flex-col gap-1 text-[11px] text-slate-500">
+              {t(`compras:agencies.detail.dataForm.${f}`)}
+              <input type="text" value={draft[f]} onChange={e => setDraft(d => ({ ...d, [f]: e.target.value }))}
+                className="rounded-md border border-slate-300 px-2 py-1 text-sm bg-white dark:bg-slate-900" aria-label={t(`compras:agencies.detail.dataForm.${f}`)} />
+            </label>
+          ))}
+          <Button variant="secondary" onClick={() => { setEditing(false); setError(null) }}>{t('compras:agencies.detail.contactForm.cancel')}</Button>
+          <Button onClick={save} disabled={draft.name.trim() === ''} loading={update.isPending}>{t('compras:agencies.detail.contactForm.save')}</Button>
+        </div>
+      ) : (
+        <p className="text-sm text-slate-700">{[agency.contact_name, agency.phone, agency.email].filter(Boolean).join(' · ') || '—'}</p>
+      )}
+      {error && <p className="mt-2 text-xs text-red-500" role="alert">{error}</p>}
+    </Card>
+  )
 }
 
 /** SCRUM-254 (REQ-191) — carga manual de "situación de pago" (mock, ver AgenciesSummaryPage). */
@@ -249,6 +307,7 @@ export default function AgencyDetailPage() {
 
       <h1 className="text-lg font-bold text-slate-900 mb-4">{agency.name}</h1>
 
+      <AgencyDataSection agency={agency} />
       <PaymentSection agency={agency} />
 
       <Card variant="panel" className="p-5 mb-4">

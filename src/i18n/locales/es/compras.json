@@ -352,7 +352,8 @@
       "en_transito": "En tránsito",
       "en_aduana": "En aduana",
       "en_transito_local": "En tránsito local",
-      "recibido": "Recibido"
+      "recibido": "Recibido",
+      "aprobada": "Aprobada"
     },
     "detail": {
       "title": "Orden #{{id}}",
@@ -489,7 +490,17 @@
       "carrier": "Naviera / transportista",
       "actualArrival": "Llegada real",
       "history": "Ver historial de cambios",
-      "historyEmpty": "Sin cambios registrados"
+      "historyEmpty": "Sin cambios registrados",
+      "historyField": {
+        "container_number": "Número de contenedor",
+        "carrier": "Naviera / transportista",
+        "estimated_arrival_date": "Llegada estimada",
+        "actual_arrival_date": "Llegada real",
+        "shipping_type": "Tipo de envío",
+        "who_pays_shipping": "Quién paga el envío",
+        "shipping_cost": "Costo de envío",
+        "modality": "Modalidad"
+      }
     },
     "documents": {
       "title": "Documentos del envío",
@@ -507,7 +518,9 @@
       "remove": "Quitar",
       "removeReason": "Motivo (mín. 10 caracteres)",
       "removeConfirm": "Quitar",
-      "removeCancel": "Cancelar"
+      "removeCancel": "Cancelar",
+      "replace": "Reemplazar",
+      "replaceFile": "Archivo de reemplazo"
     },
     "providerConfirmation": {
       "validate": "Validar",
@@ -912,7 +925,16 @@
         "ya_en_camino": "Ya hay una compra en camino"
       },
       "empty": "Esta familia no tiene productos.",
-      "emptyList": "No hay familias creadas todavía."
+      "emptyList": "No hay familias creadas todavía.",
+      "stockByWarehouse": "Existencias por almacén:",
+      "edit": {
+        "open": "Editar",
+        "name": "Nombre",
+        "currency": "Moneda",
+        "deactivate": "Desactivar",
+        "reactivate": "Reactivar",
+        "error": "No se pudo guardar la familia."
+      }
     },
     "technicalSpec": {
       "title": "Ficha técnica",
@@ -980,6 +1002,18 @@
         "title": "Quitar contacto",
         "confirm": "¿Quitar a {{name}} de los contactos de esta agencia?",
         "lastContactError": "No se puede quitar el único contacto de la agencia."
+      },
+      "dataTitle": "Datos de la agencia",
+      "dataEdit": "Editar",
+      "inactive": "Desactivada",
+      "deactivate": "Desactivar",
+      "reactivate": "Reactivar",
+      "dataForm": {
+        "name": "Nombre",
+        "contact_name": "Contacto principal",
+        "phone": "Teléfono",
+        "email": "Correo",
+        "error": "No se pudieron guardar los datos de la agencia."
       }
     }
   },
@@ -1147,6 +1181,14 @@
       "orders": "Pedidos",
       "provider": "Proveedor",
       "quantity": "Cantidad"
+    },
+    "terms": {
+      "hint": "Mín. {{min}} · múltiplo {{multiple}}",
+      "min": "Mínimo",
+      "multiple": "Múltiplo",
+      "edit": "Condiciones de compra",
+      "save": "Guardar",
+      "saveError": "No se pudieron guardar las condiciones de compra."
     }
   },
   "replacements": {
@@ -1161,8 +1203,8 @@
     "status": {
       "pendiente": "Pendiente",
       "pendiente_gerencia": "Pendiente Gerencia",
-      "aprobada": "Aprobada",
-      "rechazada": "Rechazada"
+      "aprobada": "Sustituto aceptado",
+      "rechazada": "Se mantiene el original"
     },
     "table": {
       "original": "Producto original",
@@ -1176,8 +1218,8 @@
       "generateOrder": "Generar orden",
       "viewOrder": "Ver orden generada",
       "generateRequest": "Generar solicitud",
-      "approve": "Aprobar",
-      "reject": "Rechazar"
+      "approve": "Aceptar sustituto",
+      "reject": "Mantener original"
     },
     "errors": {
       "generateGeneric": "No se pudo generar la orden.",
