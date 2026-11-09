@@ -312,7 +312,10 @@
       "newQuote": "+ Nueva cotización",
       "empty": "Sin clientes",
       "daysAgo": "{{days}} días",
-      "never": "Sin contacto registrado"
+      "never": "Sin contacto registrado",
+      "inactive": "(inactivo)",
+      "deactivate": "Desactivar",
+      "reactivate": "Reactivar"
     },
     "actions": {
       "catalog": "Catálogo",
@@ -398,7 +401,8 @@
       "consumidorFinal": "Consumidor final",
       "consumidorFinalAyuda": "Se factura como CONSUMIDOR FINAL, sin {{fiscalId}} ni DV. El PDF interno conserva el nombre del cliente y lo indica; la representación impresa fiscal la emite el proveedor autorizado (PAC).",
       "soloGerenciaContabilidad": "Solo Gerencia y Contabilidad pueden marcar un cliente como Consumidor final."
-    }
+    },
+    "showInactive": "Mostrar inactivos"
   },
   "architects": {
     "title": "Asociados",
@@ -420,8 +424,17 @@
       "edit": "Editar",
       "save": "Guardar",
       "cancel": "Cancelar",
-      "saveError": "No se pudo guardar el cambio"
-    }
+      "saveError": "No se pudo guardar el cambio",
+      "deactivate": "Desactivar",
+      "reactivate": "Reactivar",
+      "role": "Rol",
+      "roles": {
+        "comision": "Comisión",
+        "asociado": "Asociado"
+      }
+    },
+    "showInactive": "Mostrar inactivos",
+    "inactive": "(inactivo)"
   },
   "quotesList": {
     "title": "Cotizaciones",

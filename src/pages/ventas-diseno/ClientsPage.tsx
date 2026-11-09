@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuthStore } from '@/store/authStore'
+import { hasAnyPermission } from '@/lib/accessGuards'
 import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import type { SubClientCategory, ClientListRow } from '@/types/ventasDiseno'
 import { Card } from '@/components/ui/Card'
@@ -53,11 +55,20 @@ export default function VentasDisenoClientsPage() {
   const [openClientId, setOpenClientId] = useState<number | null>(null)
   const [projectsClientId, setProjectsClientId] = useState<{ id: number; name: string } | null>(null)
   const [showCreate, setShowCreate] = useState(false)
+  // Fase 31a — los clientes dados de baja se ocultan; quien edita puede verlos y reactivarlos.
+  const [showInactive, setShowInactive] = useState(false)
+  const qc = useQueryClient()
+  const canEdit = hasAnyPermission(useAuthStore(s => s.user)?.permissions, ['ventas_diseno.edit'])
+  const activeMutation = useMutation({
+    mutationFn: (v: { id: number; active: boolean }) => ventasDisenoApi.clients.setActive(v.id, v.active),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ventas-diseno-clients'] }),
+  })
 
   const { data, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-clients', activeFilters, searchTerm, page, perPage],
+    queryKey: ['ventas-diseno-clients', activeFilters, searchTerm, page, perPage, showInactive],
     queryFn: () => ventasDisenoApi.clients.list({
       search: searchTerm || undefined,
+      incluir_inactivos: showInactive || undefined,
       category: categories.length > 0 ? categories : undefined,
       stale: staleOnly ? true : undefined,
       page,
@@ -130,6 +141,12 @@ export default function VentasDisenoClientsPage() {
             {label}
           </button>
         ))}
+        {canEdit && (
+          <label className="flex items-center gap-1.5 text-[12px] text-slate-600 ml-auto">
+            <input type="checkbox" checked={showInactive} onChange={e => { setShowInactive(e.target.checked); setPage(1) }} />
+            {t('ventasDiseno:clients.showInactive')}
+          </label>
+        )}
         {/* SCRUM-718 — mismo estilo de "seleccionado" que los chips de categoría (criterio 5:
             experiencia visual consistente entre los 5 chips), ya no usa la paleta ámbar que
             lo distinguía como excluyente. */}
@@ -171,7 +188,10 @@ export default function VentasDisenoClientsPage() {
                   onClick={() => setOpenClientId(row.id)}
                   className="cursor-pointer border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
                 >
-                  <td className="py-2 px-3 font-medium text-slate-900 dark:text-slate-100">{row.name}</td>
+                  <td className="py-2 px-3 font-medium text-slate-900 dark:text-slate-100">
+                    {row.name}
+                    {row.is_active === false && <span className="ml-2 text-[11px] font-normal text-slate-500">{t('ventasDiseno:clients.table.inactive')}</span>}
+                  </td>
                   <td className="py-2 px-3">
                     <div className="flex gap-1">
                       {row.categories.map(c => (
@@ -202,6 +222,15 @@ export default function VentasDisenoClientsPage() {
                     >
                       {t('ventasDiseno:clients.table.viewProjects')}
                     </Button>
+                    {canEdit && (
+                      <Button
+                        variant="secondary"
+                        disabled={activeMutation.isPending}
+                        onClick={e => { e.stopPropagation(); activeMutation.mutate({ id: row.id, active: row.is_active === false }) }}
+                      >
+                        {row.is_active === false ? t('ventasDiseno:clients.table.reactivate') : t('ventasDiseno:clients.table.deactivate')}
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

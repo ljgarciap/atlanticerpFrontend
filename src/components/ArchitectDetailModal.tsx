@@ -8,6 +8,8 @@ import { ventasDisenoApi } from '@/api/ventasDisenoApi'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IcoClose } from '@/components/icons'
+import { useAuthStore } from '@/store/authStore'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 interface Props {
   architectId: number
@@ -24,6 +26,7 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
   const navigate = useNavigate()
   const qc = useQueryClient()
 
+  const canEdit = hasAnyPermission(useAuthStore(s => s.user)?.permissions, ['ventas_diseno.edit'])
   const [isEditing, setIsEditing] = useState(false)
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -58,6 +61,14 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
       const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
       const firstFieldError = data?.errors ? Object.values(data.errors)[0]?.[0] : undefined
       setError(firstFieldError ?? data?.message ?? t('ventasDiseno:architects.detail.saveError'))
+    },
+  })
+
+  const activeMutation = useMutation({
+    mutationFn: (active: boolean) => ventasDisenoApi.architects.setActive(architectId, active),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-architect', architectId] })
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-architects'] })
     },
   })
 
@@ -126,6 +137,7 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
                       <th className="py-2 pr-2">{t('ventasDiseno:clients.projectsModal.project')}</th>
                       <th className="py-2 pr-2">{t('ventasDiseno:clients.projectsModal.stage')}</th>
                       <th className="py-2 pr-2">{t('ventasDiseno:clients.projectsModal.amount')}</th>
+                      <th className="py-2 pr-2">{t('ventasDiseno:architects.detail.role')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -150,6 +162,9 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
                           <td className="py-2 pr-2 text-slate-700 dark:text-slate-200">
                             {p.amount != null ? `$${Number(p.amount).toLocaleString()}` : '—'}
                           </td>
+                          <td className="py-2 pr-2 text-slate-700 dark:text-slate-200">
+                            {p.role ? t(`ventasDiseno:architects.detail.roles.${p.role}`) : '—'}
+                          </td>
                         </tr>
                       )
                     })}
@@ -171,6 +186,11 @@ export default function ArchitectDetailModal({ architectId, onClose }: Props) {
           ) : (
             <>
               <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
+              {architect && canEdit && (
+                <Button variant="secondary" disabled={activeMutation.isPending} onClick={() => activeMutation.mutate(architect.is_active === false)}>
+                  {architect.is_active === false ? t('ventasDiseno:architects.detail.reactivate') : t('ventasDiseno:architects.detail.deactivate')}
+                </Button>
+              )}
               {architect && <Button onClick={startEdit}>{t('ventasDiseno:architects.detail.edit')}</Button>}
             </>
           )}

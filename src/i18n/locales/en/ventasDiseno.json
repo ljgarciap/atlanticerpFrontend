@@ -312,7 +312,10 @@
       "newQuote": "+ New quote",
       "empty": "No clients",
       "daysAgo": "{{days}} days",
-      "never": "No contact registered"
+      "never": "No contact registered",
+      "inactive": "(inactive)",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate"
     },
     "actions": {
       "catalog": "Catalog",
@@ -398,7 +401,8 @@
       "consumidorFinal": "Final consumer",
       "consumidorFinalAyuda": "Invoiced as CONSUMIDOR FINAL, with no tax ID or check digit. The internal PDF keeps the customer's name and says so; the fiscal printed version is issued by the authorized provider (PAC).",
       "soloGerenciaContabilidad": "Only Gerencia and Contabilidad can mark a customer as Final consumer."
-    }
+    },
+    "showInactive": "Show inactive"
   },
   "architects": {
     "title": "Associates",
@@ -420,8 +424,17 @@
       "edit": "Edit",
       "save": "Save",
       "cancel": "Cancel",
-      "saveError": "Could not save the change"
-    }
+      "saveError": "Could not save the change",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "role": "Role",
+      "roles": {
+        "comision": "Commission",
+        "asociado": "Associate"
+      }
+    },
+    "showInactive": "Show inactive",
+    "inactive": "(inactive)"
   },
   "quotesList": {
     "title": "Quotes",

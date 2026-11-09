@@ -248,6 +248,7 @@ export interface ClientListRow {
   name:                string
   default_price_type:  PriceType | null
   categories:           SubClientCategory[]
+  is_active?:           boolean
   active_projects:      number
   lost_projects:        number
   total_projects:       number
@@ -349,6 +350,8 @@ export interface ClientProjectRow {
   project:     { id: number; name: string }
   stage:       PipelineStage
   amount:      number | null
+  /** Fase 31a — solo en el detalle del asociado: figura por la comisión o como asociado del proyecto. */
+  role?:       'comision' | 'asociado'
 }
 
 export interface CreateClientPayload {
@@ -523,6 +526,8 @@ export interface Architect {
   name:   string
   phone:  string | null
   email:  string | null
+  /** Fase 31a — un asociado dado de baja se oculta de las listas salvo que se pidan. */
+  is_active?: boolean
   // SCRUM-1121 — la tabla de Arquitectos es la base única de asociados.
   type?:     AssociateType
   document?: string | null
