@@ -7,6 +7,9 @@ interface Props {
   insumos:   Insumo[]
   canEdit:   boolean
   onRequest: (insumo: Insumo) => void
+  /** Fase 30 — corregir el mínimo y dar de baja (desactiva; el historial se conserva). */
+  onEditMinimo?: (insumo: Insumo) => void
+  onRemove?:     (insumo: Insumo) => void
 }
 
 // REQ-273 — badge OK/Bajo mínimo, mismas 2 clases que EstadoBadge de InventarioPage.tsx (no
@@ -41,7 +44,7 @@ function SolicitudBadge() {
 // (nunca se deshabilita ni se reemplaza por el badge, a diferencia de ToolTable — un insumo
 // puede tener varias solicitudes activas a lo largo del tiempo), visible solo para
 // Lider Servicios/Líder de Servicios y superadmin (`canEdit`, ver InsumosPanel.tsx).
-export default function InsumoTable({ insumos, canEdit, onRequest }: Props) {
+export default function InsumoTable({ insumos, canEdit, onRequest, onEditMinimo, onRemove }: Props) {
   const { t } = useTranslation('servicios')
 
   if (insumos.length === 0) {
@@ -100,6 +103,16 @@ export default function InsumoTable({ insumos, canEdit, onRequest }: Props) {
                         onClick={() => onRequest(insumo)}
                       >
                         {t('insumos.table.requestButton')}
+                      </Button>
+                    )}
+                    {canEdit && onEditMinimo && (
+                      <Button variant="secondary" className="!px-2.5 !py-1 !text-xs" onClick={() => onEditMinimo(insumo)}>
+                        {t('insumos.table.editMinimo')}
+                      </Button>
+                    )}
+                    {canEdit && onRemove && (
+                      <Button variant="secondary" className="!px-2.5 !py-1 !text-xs" onClick={() => onRemove(insumo)}>
+                        {t('insumos.table.remove')}
                       </Button>
                     )}
                   </div>

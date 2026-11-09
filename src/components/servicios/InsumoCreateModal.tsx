@@ -34,12 +34,14 @@ export default function InsumoCreateModal({ excludedProductIds, onClose, onCreat
   const [product, setProduct]   = useState<ProductOption | null>(null)
   const [minimo, setMinimo]     = useState('')
   const [cantidad, setCantidad] = useState('')
+  const [existencia, setExistencia] = useState('')
 
   const mutation = useMutation({
     mutationFn: () => serviciosApi.insumos.create({
       catalog_product_id: product!.id,
       minimo:             Number(minimo),
-      cantidad_inicial:   Number(cantidad),
+      cantidad_inicial:   Number(cantidad || 0),
+      ...(existencia.trim() !== '' && Number(existencia) > 0 ? { existencia_inicial: Number(existencia) } : {}),
     }),
     onSuccess: onCreated,
     onError: (err) => {
@@ -50,7 +52,7 @@ export default function InsumoCreateModal({ excludedProductIds, onClose, onCreat
 
   const canSubmit = product !== null
     && minimo.trim() !== '' && Number(minimo) > 0
-    && cantidad.trim() !== '' && Number(cantidad) > 0
+    && (Number(cantidad || 0) > 0 || Number(existencia || 0) > 0)
 
   if (!product) {
     return (
@@ -92,11 +94,22 @@ export default function InsumoCreateModal({ excludedProductIds, onClose, onCreat
           </label>
           <label className="text-sm block">
             <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
-              {t('insumos.createModal.cantidadInicial')}<span className="text-red-500"> *</span>
+              {t('insumos.createModal.cantidadInicial')}
             </span>
             <input
-              type="number" min={1} step="1"
+              type="number" min={0} step="1"
               value={cantidad} onChange={e => setCantidad(e.target.value)}
+              className={INPUT_CLASSES}
+            />
+            <span className="block text-[11px] text-slate-400 mt-1">{t('insumos.createModal.cantidadInicialHelp')}</span>
+          </label>
+          <label className="text-sm block">
+            <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+              {t('insumos.createModal.existenciaInicial')}
+            </span>
+            <input
+              type="number" min={0} step="1"
+              value={existencia} onChange={e => setExistencia(e.target.value)}
               className={INPUT_CLASSES}
             />
           </label>

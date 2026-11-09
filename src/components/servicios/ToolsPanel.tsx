@@ -19,7 +19,7 @@ const BODEGA = 'bodega'
 // canEditTicketStatus en TicketsPage.tsx). Técnico interno y otros roles del módulo ven la
 // pantalla completa en modo lectura.
 function canManageTools(permissions: readonly string[] | undefined): boolean {
-  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
+  return hasAnyPermission(permissions, ['servicios.assets.manage'])
 }
 
 // REQ-268→272 (Batch 13 Grupo D parte 1). Sub-vista "Herramientas" de Insumos y Herramientas.

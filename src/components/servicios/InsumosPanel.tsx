@@ -15,7 +15,7 @@ import { IcoPlus } from '@/components/icons'
 // canManageTools en ToolsPanel.tsx (no se reexporta desde ahí a propósito: son 2 sub-vistas que
 // Backend Dev puede evolucionar por separado, ver docblock de InsumosPanel/ToolsPanel).
 function canManageInsumos(permissions: readonly string[] | undefined): boolean {
-  return hasAnyPermission(permissions, ['servicios.tickets.manage'])
+  return hasAnyPermission(permissions, ['servicios.assets.manage'])
 }
 
 // REQ-273→275 (Batch Grupo D parte 2, SCRUM-343/344/345). Sub-vista "Insumos" de Insumos y
@@ -52,7 +52,18 @@ export default function InsumosPanel() {
       {isLoading ? (
         <p className="text-slate-400 text-sm">{t('insumos.table.loading')}</p>
       ) : (
-        <InsumoTable insumos={insumos} canEdit={canEdit} onRequest={setRequestTarget} />
+        <InsumoTable
+          insumos={insumos} canEdit={canEdit} onRequest={setRequestTarget}
+          onEditMinimo={insumo => {
+            const valor = window.prompt(t('insumos.table.editMinimoPrompt', { nombre: insumo.nombre ?? '' }), String(insumo.minimo))
+            if (valor === null || valor.trim() === '' || !Number.isInteger(Number(valor)) || Number(valor) < 0) return
+            void serviciosApi.insumos.updateMinimo(insumo.id, Number(valor)).then(invalidate)
+          }}
+          onRemove={insumo => {
+            if (!window.confirm(t('insumos.table.removeConfirm', { nombre: insumo.nombre ?? '' }))) return
+            void serviciosApi.insumos.remove(insumo.id).then(invalidate)
+          }}
+        />
       )}
 
       {createOpen && (

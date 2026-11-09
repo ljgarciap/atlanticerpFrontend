@@ -401,9 +401,12 @@ describe('ToolsAndSuppliesPage — REQ-271 alta de herramienta nueva', () => {
     renderPage()
 
     fireEvent.click(await screen.findByText('tools.table.receiveButton'))
+    // Fase 30 — recibir pide una referencia de compra antes de confirmar.
+    fireEvent.change(await screen.findByLabelText('tools.table.receiveReferenciaLabel'), { target: { value: 'FAC-1234' } })
+    fireEvent.click(screen.getByText('tools.table.receiveConfirm'))
 
     await waitFor(() => {
-      expect(mockedApi.tools.receivePurchase).toHaveBeenCalledWith(9)
+      expect(mockedApi.tools.receivePurchase).toHaveBeenCalledWith(9, 'FAC-1234')
     })
   })
 

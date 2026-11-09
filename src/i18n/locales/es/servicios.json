@@ -321,7 +321,10 @@
       "requestButton": "Solicitar",
       "estadoChangeError": "No se pudo actualizar el estado.",
       "assignmentChangeError": "No se pudo actualizar la asignación.",
-      "receiveError": "No se pudo confirmar la recepción."
+      "receiveError": "No se pudo confirmar la recepción.",
+      "receiveReferenciaLabel": "Referencia de compra (factura u orden)",
+      "receiveReferenciaPlaceholder": "Ej. FAC-1234",
+      "receiveConfirm": "Confirmar"
     },
     "estados": {
       "good": "Buen estado",
@@ -368,7 +371,11 @@
         "actions": "Acciones"
       },
       "requestButton": "Solicitar",
-      "disponibleNegativoTooltip": "Disponible negativo — el consumo registrado supera el stock que había. Revisar el Kardex de este insumo."
+      "disponibleNegativoTooltip": "Disponible negativo — el consumo registrado supera el stock que había. Revisar el Kardex de este insumo.",
+      "editMinimo": "Editar mínimo",
+      "editMinimoPrompt": "Nuevo mínimo para {{nombre}}",
+      "remove": "Dar de baja",
+      "removeConfirm": "¿Dar de baja «{{nombre}}»? Su historial se conserva."
     },
     "estados": {
       "ok": "OK",
@@ -391,7 +398,9 @@
       "cantidadInicial": "Cantidad inicial a solicitar",
       "back": "Atrás",
       "save": "Agregar",
-      "error": "No se pudo registrar el insumo."
+      "error": "No se pudo registrar el insumo.",
+      "existenciaInicial": "Existencia inicial (opcional)",
+      "cantidadInicialHelp": "Cantidad a comprar; puede ser 0 si ya tienes existencia."
     }
   },
   "toolKardex": {
@@ -656,7 +665,11 @@
         "alreadySigned": "Este informe ya fue firmado por el cliente y no puede volver a firmarse.",
         "notAllowed": "No tienes acceso a este informe.",
         "backToTicket": "Volver al ticket"
-      }
+      },
+      "saveDraft": "Guardar borrador",
+      "draftNotice": "Informe en borrador: no desbloquea el cierre del ticket hasta completarlo.",
+      "deletePhoto": "Quitar foto",
+      "deletePhotoError": "No se pudo quitar la foto."
     },
     "claimSheet": {
       "fieldLabel": "Hoja de Reclamo",
@@ -693,7 +706,17 @@
       "lockedNotice": "Esta Hoja de Reclamo ya fue completada y no puede editarse.",
       "save": "Guardar Hoja de Reclamo",
       "saveError": "No se pudo guardar la Hoja de Reclamo. Intenta de nuevo.",
-      "pdfError": "No se pudo generar el PDF. Intenta de nuevo."
+      "pdfError": "No se pudo generar el PDF. Intenta de nuevo.",
+      "saveDraft": "Guardar borrador",
+      "draftSaved": "Borrador guardado",
+      "draftNotice": "Hoja en borrador: no desbloquea el cierre del reclamo hasta completarla.",
+      "reopen": "Reabrir hoja",
+      "reopenTitle": "Reabrir hoja de reclamo",
+      "reopenWarning": "La hoja volverá a estar pendiente y el reclamo no podrá cerrarse hasta completarla de nuevo.",
+      "reopenMotivo": "Motivo (mínimo 10 caracteres)",
+      "reopenConfirm": "Reabrir",
+      "reopenError": "No se pudo reabrir la hoja.",
+      "reopenedNotice": "Reabierta: {{motivo}}"
     },
     "quoteModal": {
       "title": "Cotización de Servicio",

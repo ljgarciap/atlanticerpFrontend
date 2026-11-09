@@ -601,7 +601,9 @@ export interface SaveInspectionReportPayload {
   internal_technician_id?:   number | null
   findings?:                 InspectionReportFindingInput[]
   materiales?:               InspectionReportMaterialInput[]
-  conclusion:                string
+  conclusion?:               string
+  /** Fase 30 — guardar a medias: no completa el informe ni desbloquea el cierre. */
+  borrador?:                 boolean
   requiere_seguimiento?:     boolean
   proximos_pasos?:           string | null
   firma_tecnico_nombre?:     string | null
@@ -650,14 +652,19 @@ export interface ClaimSheetDetail {
   diagnostico:             ClaimSheetDiagnostico | null
   firma_responsable:       string | null
   estado:                  'pending' | 'completed'
+  /** Fase 30 — la hoja se reabrió con motivo. */
+  reopened_at?:            string | null
+  reopened_reason?:        string | null
   created_at:              string | null
 }
 
 export interface SaveClaimSheetPayload {
   descripcion_problema?:  string | null
   fecha_reclamo?:          string | null
-  diagnostico:             ClaimSheetDiagnostico
-  firma_responsable:       string
+  diagnostico?:            ClaimSheetDiagnostico
+  firma_responsable?:      string
+  /** Fase 30 — borrador: diagnóstico y firma opcionales, no completa la hoja. */
+  borrador?:               boolean
 }
 
 // Fase 4 — Servicios, Batch 11 (REQ-229→234, SCRUM-292→297). Cotización de Servicio.
@@ -1218,6 +1225,8 @@ export interface CreateInsumoPayload {
   catalog_product_id: number
   minimo:             number
   cantidad_inicial:   number
+  /** Fase 30 — existencia que ya se tiene: entra a la Reserva como Entrada, no como solicitud. */
+  existencia_inicial?: number
 }
 
 // REQ-276 — libro mayor (kardex) de movimientos de HERRAMIENTAS. CONCEPTO DISTINTO de

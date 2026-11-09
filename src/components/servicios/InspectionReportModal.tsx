@@ -234,8 +234,18 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
     }
   }
 
+  async function removeSavedPhoto(id: number) {
+    try {
+      await serviciosApi.inspectionReports.deletePhoto(ticketId, id)
+      await qc.invalidateQueries({ queryKey: ['servicios-inspection-report', ticketId] })
+    } catch (err) {
+      const msg = isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined
+      toast(msg ?? t('tickets.inspectionReport.deletePhotoError'), 'error')
+    }
+  }
+
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (borrador: boolean = false) => {
       let report;
 
       if (modo === 'archivo_subido') {
@@ -266,6 +276,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
           findings:                [...catalogFindings, ...extras],
           materiales:              materiales,
           conclusion,
+          ...(borrador ? { borrador: true } : {}),
           requiere_seguimiento:    requiereSeguimiento,
           proximos_pasos:          requiereSeguimiento ? proximosPasos : null,
           firma_tecnico_nombre:    firmaTecnico.trim() || null,
@@ -494,6 +505,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
                 draft={draftPhotos.filter(p => p.categoria === 'antes')}
                 canEdit={canEdit}
                 onAdd={files => addDraftPhotos(files, 'antes')}
+                onRemoveSaved={id => void removeSavedPhoto(id)}
                 onRemoveDraft={removeDraftPhoto}
                 inputRef={antesInputRef}
               />
@@ -503,6 +515,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
                 draft={draftPhotos.filter(p => p.categoria === 'despues')}
                 canEdit={canEdit}
                 onAdd={files => addDraftPhotos(files, 'despues')}
+                onRemoveSaved={id => void removeSavedPhoto(id)}
                 onRemoveDraft={removeDraftPhoto}
                 inputRef={despuesInputRef}
               />
@@ -593,8 +606,13 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
           <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>
             {t('tickets.detail.cancel')}
           </Button>
+          {canEdit && modo === 'formulario' && existing?.estado !== 'completed' && (
+            <Button variant="secondary" onClick={() => mutation.mutate(true)} disabled={mutation.isPending}>
+              {t('tickets.inspectionReport.saveDraft')}
+            </Button>
+          )}
           {canEdit && (
-            <Button onClick={() => mutation.mutate()} disabled={!canSave} loading={mutation.isPending}>
+            <Button onClick={() => mutation.mutate(false)} disabled={!canSave} loading={mutation.isPending}>
               {t('tickets.inspectionReport.save')}
             </Button>
           )}
@@ -652,17 +670,27 @@ export interface PhotoSectionProps {
   canEdit:       boolean
   onAdd:         (files: FileList | null) => void
   onRemoveDraft: (key: string) => void
+  /** Fase 30 — quitar una foto ya guardada (si el informe no está firmado). */
+  onRemoveSaved?: (id: number) => void
   inputRef:      React.RefObject<HTMLInputElement>
 }
 
-export function PhotoSection({ photos, draft, canEdit, onAdd, onRemoveDraft, inputRef }: PhotoSectionProps) {
+export function PhotoSection({ photos, draft, canEdit, onAdd, onRemoveDraft, onRemoveSaved, inputRef }: PhotoSectionProps) {
   const { t } = useTranslation('servicios')
   return (
     <div className="flex flex-wrap gap-2">
       {photos.map(p => (
-        <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
-          <img src={p.url} alt="" className="w-full h-full object-cover" />
-        </a>
+        <div key={p.id} className="relative w-16 h-16">
+          <a href={p.url} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
+            <img src={p.url} alt="" className="w-full h-full object-cover" />
+          </a>
+          {canEdit && onRemoveSaved && (
+            <button type="button" aria-label={t('tickets.inspectionReport.deletePhoto')} onClick={() => onRemoveSaved(p.id)}
+              className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5">
+              <IcoClose size={10} />
+            </button>
+          )}
+        </div>
       ))}
       {draft.map(p => (
         <div key={p.key} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 flex items-center justify-center bg-slate-50 dark:bg-slate-700/40">
