@@ -331,7 +331,7 @@ export default function OrdersPage() {
                 <td className="px-4 py-3">
                   <ReceptionBadge status={o.reception_status} t={t} />
                 </td>
-                <td className="px-4 py-3 text-slate-600">{orderStatusLabel(t, o.status, o.modality)}</td>
+                <td className="px-4 py-3 text-slate-600">{orderStatusLabel(t, o.status_visible ?? o.status, o.modality)}</td>
                 <td className="px-4 py-3 text-slate-600">{o.created_by_name ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-600">
                   {o.has_multiple_projects ? (

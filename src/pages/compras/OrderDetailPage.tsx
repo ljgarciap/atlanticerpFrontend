@@ -217,7 +217,7 @@ export default function OrderDetailPage() {
             {order.provider_name ?? '—'}
           </SummaryField>
           <SummaryField label={t('compras:orders.detail.summary.status')}>
-            {orderStatusLabel(t, order.status, order.modality)}
+            {orderStatusLabel(t, order.status_visible ?? order.status, order.modality)}
           </SummaryField>
           <SummaryField label={t('compras:orders.detail.summary.orderDate')}>
             {formatDateFromTimestamp(order.created_at)}

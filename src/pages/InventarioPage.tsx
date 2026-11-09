@@ -18,6 +18,7 @@ import { IcoClose, IcoCheck, IcoAlertTriangle, IcoFileText, IcoChevronDown, IcoC
 import { TechnicalSpecModal } from '@/components/TechnicalSpecModal'
 import { WarehouseMultiSelect } from '@/components/WarehouseMultiSelect'
 import { FamilyCombobox } from '@/components/compras/FamilyCombobox'
+import { FamilyEditPanel } from '@/components/compras/FamilyEditPanel'
 import { ProviderMultiPicker, type ProviderOption } from '@/components/compras/ProviderMultiPicker'
 import WarehouseStockModal from '@/components/compras/WarehouseStockModal'
 import { InventoryProductsTable } from '@/components/compras/InventoryProductsTable'
@@ -1536,6 +1537,8 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
 function FamiliesTab({ previewVentas }: { previewVentas: boolean }) {
   const { t } = useTranslation(['common', 'compras'])
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  // Fase 29b — familia que se está editando (renombrar, moneda/modalidad, desactivar).
+  const [editingFamilyId, setEditingFamilyId] = useState<number | null>(null)
   const [detailId, setDetailId] = useState<number | null>(null)
   const [autoPrefillId, setAutoPrefillId] = useState<number | null>(null)
   // SCRUM-244 — mismo WarehouseStockModal dedicado que ProductsTab (rebote 2026-08-16).
@@ -1602,6 +1605,12 @@ function FamiliesTab({ previewVentas }: { previewVentas: boolean }) {
                     </div>
                   )}
                   {canManage && (
+                    <button type="button" data-testid={`family-edit-btn-${f.id}`} className="text-xs font-semibold text-primary hover:underline"
+                      onClick={() => setEditingFamilyId(id => (id === f.id ? null : f.id))}>
+                      {t('compras:inventory.families.edit.open')}
+                    </button>
+                  )}
+                  {canManage && (
                     <Button
                       variant="secondary"
                       className="!text-xs !px-3 !py-1.5"
@@ -1615,8 +1624,16 @@ function FamiliesTab({ previewVentas }: { previewVentas: boolean }) {
                 </div>
               </div>
 
+              {editingFamilyId === f.id && <FamilyEditPanel family={f} onClose={() => setEditingFamilyId(null)} />}
+
               {isExpanded && (
                 <div>
+                  {detail && detail.id === f.id && (detail.stock_por_almacen?.length ?? 0) > 0 && (
+                    <p className="text-xs text-slate-500 px-4 pt-2" data-testid="family-stock-by-warehouse">
+                      {t('compras:inventory.families.stockByWarehouse')}{' '}
+                      {detail.stock_por_almacen?.map(w => `${w.warehouse_name ?? '—'}: ${formatInt(w.quantity)}`).join(' · ')}
+                    </p>
+                  )}
                   {isExpanded && generatePurchase.isSuccess && (
                     <p className="text-xs text-emerald-700 flex items-center gap-1 px-4 pt-2">
                       <IcoCheck size={12} />

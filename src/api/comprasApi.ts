@@ -7,7 +7,7 @@ import type {
   ShippingInfoPayload, ShippingHistoryEntry, PurchaseOrderDocument, DocumentCategory,
   LiquidationAgency, LiquidationAgencyPayload, ProviderConfirmationValidation, ProviderBankExtraction,
   LiquidationAgencySummaryResponse, LiquidationAgencyDetail,
-  LiquidationAgencyContact, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload,
+  LiquidationAgencyContact, LiquidationAgencyContactPayload, LiquidationAgencyPaymentPayload, LiquidationAgencyDataPayload, InventoryFamilyUpdatePayload,
   PurchaseOrderPayment, RegisteredPurchaseOrderPayment,
   PurchaseOrderClaimListResponse, PurchaseOrderClaimDetail, PurchaseOrderClaimPayload, PurchaseOrderClaimPhoto,
   ClaimListParams,
@@ -231,6 +231,10 @@ export const comprasApi = {
     updatePayment: (id: number, data: LiquidationAgencyPaymentPayload): Promise<LiquidationAgency> =>
       api.put<LiquidationAgency>(`/compras/liquidation-agencies/${id}`, data).then(r => r.data),
 
+    /** Fase 29b — corregir nombre y contacto principal, y activar/desactivar. */
+    updateData: (id: number, data: LiquidationAgencyDataPayload): Promise<LiquidationAgency> =>
+      api.put<LiquidationAgency>(`/compras/liquidation-agencies/${id}`, data).then(r => r.data),
+
     // SCRUM-255 (REQ-192)
     contacts: {
       create: (agencyId: number, data: LiquidationAgencyContactPayload): Promise<LiquidationAgencyContact> =>
@@ -262,6 +266,16 @@ export const comprasApi = {
     // Fase 24a — baja lógica con motivo (≥10 caracteres); el archivo se conserva.
     remove: (orderId: number, documentId: number, motivo: string): Promise<void> =>
       api.delete(`/compras/orders/${orderId}/documents/${documentId}`, { data: { motivo } }).then(() => undefined),
+
+    // Fase 29b — reemplazo en una sola operación: sube el nuevo (misma categoría) y retira el anterior con motivo.
+    replace: (orderId: number, documentId: number, file: File, motivo: string): Promise<PurchaseOrderDocument> => {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('motivo', motivo)
+      return api.post<PurchaseOrderDocument>(`/compras/orders/${orderId}/documents/${documentId}/replace`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    },
 
     // SCRUM-211 (ADR-SCRUM211) — validación con IA del documento de confirmación de proveedor.
     validate: (orderId: number, documentId: number): Promise<{ job_id: string }> =>
@@ -449,6 +463,9 @@ export const comprasApi = {
     /** Guarda el proveedor elegido para un producto. `expectedProviderId`: el principal que la pantalla cree que tiene (null = sin proveedor); 409 si cambió. */
     assignProvider: (productId: number, providerId: number, expectedProviderId: number | null): Promise<{ catalog_product_id: number; provider_id: number | null }> =>
       api.put(`/compras/replenishment/products/${productId}/provider`, { provider_id: providerId, expected_provider_id: expectedProviderId }).then(r => r.data),
+    /** Fase 29b — cantidad mínima y múltiplo de compra de un proveedor para un producto (vacío = sin restricción). */
+    setPurchaseTerms: (productId: number, data: { provider_id: number; min_order_quantity: number | null; order_multiple: number | null }): Promise<{ catalog_product_id: number }> =>
+      api.put(`/compras/replenishment/products/${productId}/purchase-terms`, data).then(r => r.data),
   },
 
   replacementRequests: {
@@ -532,6 +549,10 @@ export const comprasApi = {
     // create() que se usaba como placeholder mientras este endpoint no existía.
     create: (name: string): Promise<{ id: number; name: string; description: string | null }> =>
       api.post<{ id: number; name: string; description: string | null }>('/compras/families', { name }).then(r => r.data),
+
+    /** Fase 29b — editar/renombrar/desactivar y elegir moneda y modalidad (nunca se borra). */
+    update: (id: number, data: InventoryFamilyUpdatePayload): Promise<{ id: number; name: string; is_active: boolean; currency: string; modality: string }> =>
+      api.patch(`/compras/families/${id}`, data).then(r => r.data),
 
     // SCRUM-243 (REQ-180) — crea 1 orden "Por aprobar" por proveedor distinto de la familia.
     // Fase 20b — solo compra la necesidad real (reorden − existencias − en camino − por ingresar) y lista lo que omitió.

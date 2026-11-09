@@ -26,7 +26,7 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
-vi.mock('@/api/comprasApi', () => ({ comprasApi: { replenishment: { get: vi.fn(), assignProvider: vi.fn() }, providers: { list: vi.fn() } } }))
+vi.mock('@/api/comprasApi', () => ({ comprasApi: { replenishment: { get: vi.fn(), assignProvider: vi.fn(), setPurchaseTerms: vi.fn() }, providers: { list: vi.fn() } } }))
 
 const mockedApi = vi.mocked(comprasApi, true)
 
@@ -59,6 +59,31 @@ describe('ReplenishmentPage (SCRUM-1184)', () => {
     vi.clearAllMocks()
     mockedApi.replenishment.assignProvider.mockResolvedValue({ catalog_product_id: 0, provider_id: null })
     useAuthStore.setState({ user: null })
+  })
+
+  it('Fase 29b — la cantidad inicial es la sugerida por mínimo y múltiplo, y quien edita Compras guarda las condiciones', async () => {
+    useAuthStore.setState({ user: { id: 2, role: 'lider_compras', permissions: ['compras.edit'] } as never })
+    mockedApi.replenishment.setPurchaseTerms.mockResolvedValue({ catalog_product_id: 1 })
+    renderPage({
+      groups: [{ provider: ALFA, products: [product(1, { faltante: 7, sugerida: 12, min_order_quantity: 10, order_multiple: 6 })] }],
+      custom_items_count: 0, total_products: 1,
+    })
+    const group = await screen.findByTestId('group-1')
+    expect((within(group).getByLabelText('compras:replenishment.quantityOf:REF-1') as HTMLInputElement).value).toBe('12')
+    expect(within(group).getByTestId('terms-hint-1')).toHaveTextContent('compras:replenishment.terms.hint')
+
+    fireEvent.click(within(group).getByText('compras:replenishment.terms.edit'))
+    const form = within(group).getByTestId('terms-form-1')
+    fireEvent.change(within(form).getByLabelText('compras:replenishment.terms.min'), { target: { value: '20' } })
+    fireEvent.change(within(form).getByLabelText('compras:replenishment.terms.multiple'), { target: { value: '5' } })
+    fireEvent.click(within(form).getByText('compras:replenishment.terms.save'))
+    await waitFor(() => expect(mockedApi.replenishment.setPurchaseTerms).toHaveBeenCalledWith(1, { provider_id: 1, min_order_quantity: 20, order_multiple: 5 }))
+  })
+
+  it('Fase 29b — sin compras.edit no se ofrece editar las condiciones de compra', async () => {
+    renderPage({ groups: [{ provider: ALFA, products: [product(1)] }], custom_items_count: 0, total_products: 1 })
+    const group = await screen.findByTestId('group-1')
+    expect(within(group).queryByText('compras:replenishment.terms.edit')).not.toBeInTheDocument()
   })
 
   it('muestra un estado vacío cuando no hay pedidos sin stock', async () => {

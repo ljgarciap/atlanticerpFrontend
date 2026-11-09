@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 import {
   usePurchaseOrders, usePurchaseOrder, useProviders, useAdvancePurchaseOrder,
   useAdvanceRemainderPurchaseOrder, useConfirmPendingOrderReceipts, useUpdateShippingInfo,
-  usePurchaseOrderDocuments, useUploadPurchaseOrderDocument, useRemovePurchaseOrderDocument, useShippingHistory,
+  usePurchaseOrderDocuments, useUploadPurchaseOrderDocument, useRemovePurchaseOrderDocument, useReplacePurchaseOrderDocument, useShippingHistory,
 } from '@/hooks/useCompras'
 import { usePermission } from '@/hooks/usePermission'
 import { comprasApi } from '@/api/comprasApi'
@@ -255,6 +255,8 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
   const { data: documentsData } = usePurchaseOrderDocuments(order.id)
   const uploadDocument = useUploadPurchaseOrderDocument()
   const removeDocument = useRemovePurchaseOrderDocument()
+  const replaceDocument = useReplacePurchaseOrderDocument()
+  const [replaceFile, setReplaceFile] = useState<File | null>(null)
   // Fase 24a — quitar un documento pide un motivo (≥10 caracteres); Fase 24b — historial del envío, a demanda.
   const [removingId, setRemovingId] = useState<number | null>(null)
   const [removeReason, setRemoveReason] = useState('')
@@ -429,7 +431,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
           <ul className="space-y-0.5 text-[11px] text-slate-500">
             {(historyData?.data ?? []).map((h, i) => (
               <li key={i}>
-                {t(`compras:logistics.shippingInfo.${h.field === 'carrier' ? 'carrier' : 'container'}`)}: {h.old ?? '—'} → {h.new ?? '—'}
+                {t(`compras:logistics.shippingInfo.historyField.${h.field}`)}: {h.old ?? '—'} → {h.new ?? '—'}
                 {' · '}{h.changed_by ?? '—'}{' · '}{new Date(h.changed_at).toLocaleString()}
               </li>
             ))}
@@ -527,7 +529,7 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
                   {t(`compras:logistics.documents.category.${doc.category}`)}
                 </a>
                 {canAdvance && removingId !== doc.id && (
-                  <button type="button" onClick={() => { setRemovingId(doc.id); setRemoveReason('') }} className="text-[11px] text-red-600 hover:underline">
+                  <button type="button" onClick={() => { setRemovingId(doc.id); setRemoveReason(''); setReplaceFile(null) }} className="text-[11px] text-red-600 hover:underline">
                     {t('compras:logistics.documents.remove')}
                   </button>
                 )}
@@ -551,6 +553,21 @@ function ShipmentCard({ order }: { order: PurchaseOrderSummary }) {
                   </button>
                   <button type="button" onClick={() => setRemovingId(null)} className="px-2 py-1 border border-slate-200 rounded text-xs">
                     {t('compras:logistics.documents.removeCancel')}
+                  </button>
+                  {/* Fase 29b — reemplazar = subir el nuevo y retirar este en una sola operación (mismo motivo). */}
+                  <input
+                    type="file" data-testid={`replace-file-${doc.id}`}
+                    aria-label={t('compras:logistics.documents.replaceFile')}
+                    onChange={e => setReplaceFile(e.target.files?.[0] ?? null)}
+                    className="text-[11px] max-w-[9rem]"
+                  />
+                  <button
+                    type="button" data-testid={`replace-confirm-${doc.id}`}
+                    disabled={removeReason.trim().length < 10 || replaceFile === null || replaceDocument.isPending}
+                    onClick={() => replaceFile && replaceDocument.mutate({ orderId: order.id, documentId: doc.id, file: replaceFile, motivo: removeReason.trim() }, { onSuccess: () => { setRemovingId(null); setReplaceFile(null) } })}
+                    className="px-2 py-1 border border-primary/40 text-primary rounded text-xs disabled:opacity-50"
+                  >
+                    {t('compras:logistics.documents.replace')}
                   </button>
                 </div>
               )}
