@@ -9,6 +9,8 @@ import ReportsYearlyChart from '@/components/servicios/ReportsYearlyChart'
 import ReportsCommissionSection from '@/components/servicios/ReportsCommissionSection'
 import ReportsLibraryTable from '@/components/servicios/ReportsLibraryTable'
 import type { ReportsPeriodParams } from '@/types/servicios'
+import { hasAnyPermission } from '@/lib/accessGuards'
+import { useAuthStore } from '@/store/authStore'
 
 /**
  * Fase 4 — Servicios, Batch 17/18 (REQ-280→286, SCRUM-350→356). Página "Reportes".
@@ -30,6 +32,8 @@ import type { ReportsPeriodParams } from '@/types/servicios'
  */
 export default function ServiciosReportsPage() {
   const { t } = useTranslation('servicios')
+  // Fase 30 — la carga por técnico y la comisión las ven el Líder de Servicios y Gerencia (el backend responde 403 al resto).
+  const verEquipo = hasAnyPermission(useAuthStore(s => s.user)?.permissions, ['servicios.reports.team'])
 
   const now = new Date()
   const [period, setPeriod] = useState<ReportsPeriodParams>({ year: now.getFullYear(), month: now.getMonth() + 1 })
@@ -49,14 +53,14 @@ export default function ServiciosReportsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
         <ReportsTypeDonut period={period} />
-        <ReportsTechnicianBars period={period} />
+        {verEquipo && <ReportsTechnicianBars period={period} />}
       </div>
 
       <div className="mb-4">
         <ReportsYearlyChart year={period.year} />
       </div>
 
-      <ReportsCommissionSection globalPeriod={period} />
+      {verEquipo && <ReportsCommissionSection globalPeriod={period} />}
 
       <ReportsLibraryTable />
     </>

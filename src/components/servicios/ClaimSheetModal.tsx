@@ -13,6 +13,8 @@ interface Props {
   ticketId:     number
   ticketNumero: string
   canEdit:      boolean
+  /** Fase 30 — quien gestiona tickets puede reabrir una hoja completada. */
+  canReopen?:   boolean
   onClose:      () => void
   onSaved:      () => void
 }
@@ -24,7 +26,7 @@ const DIAGNOSTICOS: ClaimSheetDiagnostico[] = ['defectuoso', 'no_procede', 'uso_
 // de solo lectura, precargadas por el backend desde el ticket — nunca se capturan a mano (RN de
 // la spec). RN5: una vez `estado=completed` la hoja queda en solo lectura TOTAL, sin excepción de
 // rol — a diferencia de Informe de Inspección, que sigue editable después de Completado.
-export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClose, onSaved }: Props) {
+export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, canReopen = false, onClose, onSaved }: Props) {
   const { t }   = useTranslation('servicios')
   const qc      = useQueryClient()
   const toast   = useToastStore(s => s.show)
@@ -35,6 +37,8 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClo
   const [firmaResponsable, setFirmaResponsable]         = useState('')
   const [hydrated, setHydrated]                         = useState(false)
   const [downloadingPdf, setDownloadingPdf]             = useState(false)
+  const [reopening, setReopening]                       = useState(false)
+  const [reopenMotivo, setReopenMotivo]                 = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['servicios-claim-sheet', ticketId],
@@ -55,11 +59,12 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClo
   const isLocked    = !canEdit || isCompleted
 
   const mutation = useMutation({
-    mutationFn: () => serviciosApi.claimSheets.save(ticketId, {
+    mutationFn: (borrador: boolean) => serviciosApi.claimSheets.save(ticketId, {
       descripcion_problema: descripcionProblema.trim() || null,
       fecha_reclamo:         fechaReclamo || null,
-      diagnostico:           diagnostico as ClaimSheetDiagnostico,
-      firma_responsable:     firmaResponsable.trim(),
+      ...(diagnostico !== '' ? { diagnostico } : {}),
+      ...(firmaResponsable.trim() !== '' ? { firma_responsable: firmaResponsable.trim() } : {}),
+      ...(borrador ? { borrador: true } : {}),
     }),
     // Visual Review (2026-08-11) — reabrir el modal justo después de guardar podía mostrar
     // campos vacíos: `invalidateQueries` dispara el refetch en segundo plano, pero el modal ya se
@@ -77,6 +82,21 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClo
     onError: (err) => {
       const msg = isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined
       toast(msg ?? t('tickets.claimSheet.saveError'), 'error')
+    },
+  })
+
+  // Fase 30 — reabrir una hoja completada con motivo; vuelve a quedar pendiente y editable.
+  const reopenMutation = useMutation({
+    mutationFn: () => serviciosApi.claimSheets.reopen(ticketId, reopenMotivo.trim()),
+    onSuccess: (result) => {
+      qc.setQueryData(['servicios-claim-sheet', ticketId], result)
+      void qc.invalidateQueries({ queryKey: ['servicios-tickets'] })
+      setReopening(false)
+      setReopenMotivo('')
+    },
+    onError: (err) => {
+      const msg = isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined
+      toast(msg ?? t('tickets.claimSheet.reopenError'), 'error')
     },
   })
 
@@ -178,6 +198,31 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClo
               {isCompleted && (
                 <p className="text-[11.5px] text-slate-400 italic">{t('tickets.claimSheet.lockedNotice')}</p>
               )}
+              {!isCompleted && data?.id != null && (
+                <p className="text-[11.5px] text-slate-400 italic">{t('tickets.claimSheet.draftNotice')}</p>
+              )}
+              {data?.reopened_reason && !isCompleted && (
+                <p className="text-[11.5px] text-amber-600">{t('tickets.claimSheet.reopenedNotice', { motivo: data.reopened_reason })}</p>
+              )}
+              {isCompleted && canReopen && !reopening && (
+                <div>
+                  <Button variant="secondary" onClick={() => setReopening(true)}>{t('tickets.claimSheet.reopen')}</Button>
+                </div>
+              )}
+              {isCompleted && canReopen && reopening && (
+                <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/10 p-3">
+                  <p className="text-xs text-slate-600 dark:text-slate-300">{t('tickets.claimSheet.reopenWarning')}</p>
+                  <textarea rows={2} value={reopenMotivo} onChange={e => setReopenMotivo(e.target.value)}
+                    placeholder={t('tickets.claimSheet.reopenMotivo')}
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm" />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="secondary" onClick={() => setReopening(false)} disabled={reopenMutation.isPending}>{t('tickets.detail.cancel')}</Button>
+                    <Button onClick={() => reopenMutation.mutate()} disabled={reopenMotivo.trim().length < 10} loading={reopenMutation.isPending}>
+                      {t('tickets.claimSheet.reopenConfirm')}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-100 dark:border-slate-700 shrink-0">
@@ -185,7 +230,12 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, onClo
                 {t('tickets.detail.cancel')}
               </Button>
               {!isLocked && (
-                <Button onClick={() => mutation.mutate()} disabled={!canSave} loading={mutation.isPending}>
+                <Button variant="secondary" onClick={() => mutation.mutate(true)} disabled={mutation.isPending}>
+                  {t('tickets.claimSheet.saveDraft')}
+                </Button>
+              )}
+              {!isLocked && (
+                <Button onClick={() => mutation.mutate(false)} disabled={!canSave} loading={mutation.isPending}>
                   {t('tickets.claimSheet.save')}
                 </Button>
               )}

@@ -743,6 +743,7 @@ export default function TicketDetailModal({ ticketId, canEdit, onClose, initialD
           ticketId={ticket.id}
           ticketNumero={ticket.numero}
           canEdit={canEditClaimSheet(user?.permissions, user?.id, ticket.internal_technician?.id)}
+          canReopen={hasAnyPermission(user?.permissions, ['servicios.tickets.manage'])}
           onClose={() => setClaimSheetOpen(false)}
           onSaved={() => {
             setClaimSheetOpen(false)

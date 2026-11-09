@@ -356,6 +356,18 @@ export const serviciosApi = {
       }).then(r => r.data)
     },
 
+    // Fase 30 — borrar o reemplazar una foto (el backend lo bloquea con el informe firmado, 409).
+    deletePhoto: (ticketId: number, photoId: number): Promise<void> =>
+      api.delete(`/servicios/tickets/${ticketId}/inspection-report/photos/${photoId}`).then(() => undefined),
+
+    replacePhoto: (ticketId: number, photoId: number, file: File): Promise<InspectionReportPhoto> => {
+      const form = new FormData()
+      form.append('file', file)
+      return api.post<InspectionReportPhoto>(`/servicios/tickets/${ticketId}/inspection-report/photos/${photoId}/replace`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data)
+    },
+
     // REQ-244 — Ver/Imprimir. Informe lleno, solo disponible cuando ya existe (el modal solo
     // ofrece este botón después de Completado). Mismo patrón blob que tickets.downloadPdf().
     downloadPdf: async (ticketId: number, numero: string): Promise<void> => {
@@ -387,6 +399,10 @@ export const serviciosApi = {
 
     save: (ticketId: number, data: SaveClaimSheetPayload): Promise<ClaimSheetDetail> =>
       api.put<ClaimSheetDetail>(`/servicios/tickets/${ticketId}/claim-sheet`, data).then(r => r.data),
+
+    // Fase 30 — reabrir una hoja completada con motivo (≥ 10 caracteres).
+    reopen: (ticketId: number, motivo: string): Promise<ClaimSheetDetail> =>
+      api.patch<ClaimSheetDetail>(`/servicios/tickets/${ticketId}/claim-sheet/reabrir`, { motivo }).then(r => r.data),
 
     // REQ-279 — solo disponible con la hoja ya Completada (RN2). Mismo patrón blob que
     // inspectionReports.downloadPdf().
@@ -547,9 +563,14 @@ export const serviciosApi = {
     // Genera las unidades reales (cada una con código nuevo, todas en bodega). La respuesta real
     // es la purchase request actualizada (estado 'recibida') spreadeada + `tools: Tool[]` — no
     // `{ data: Tool[] }` como se había asumido originalmente.
-    receivePurchase: (requestId: number): Promise<Tool[]> =>
-      api.post<ReceiveToolPurchaseResponse>(`/servicios/tools/purchase-requests/${requestId}/recibir`)
+    // Fase 30 — recibir exige una referencia de compra (factura u orden, texto libre).
+    receivePurchase: (requestId: number, referencia: string): Promise<Tool[]> =>
+      api.post<ReceiveToolPurchaseResponse>(`/servicios/tools/purchase-requests/${requestId}/recibir`, { referencia })
         .then(r => r.data.tools),
+
+    // Fase 30 — baja (desactiva; el historial se conserva). 422 si está asignada a un técnico.
+    remove: (id: number): Promise<void> =>
+      api.delete(`/servicios/tools/${id}`).then(() => undefined),
   },
 
   // Fase 4 — Servicios, Batch Grupo D parte 2 (REQ-273→275, SCRUM-343→345). Insumos.
@@ -564,6 +585,13 @@ export const serviciosApi = {
     // caller (InsumoRequestModal) no intenta mergearla en la fila, solo invalida `insumos.list()`.
     requestPurchase: (id: number, data: CreateInsumoSolicitudPayload): Promise<InsumoPurchaseRequest> =>
       api.post<InsumoPurchaseRequest>(`/servicios/insumos/${id}/solicitar`, data).then(r => r.data),
+
+    // Fase 30 — corregir el mínimo y dar de baja un insumo.
+    updateMinimo: (id: number, minimo: number): Promise<Insumo> =>
+      api.patch<Insumo>(`/servicios/insumos/${id}`, { minimo }).then(r => r.data),
+
+    remove: (id: number): Promise<void> =>
+      api.delete(`/servicios/insumos/${id}`).then(() => undefined),
 
     // REQ-275 — RECONCILIADO 2026-08-13: NO existe /servicios/insumos/catalog-search — el
     // catálogo real es el mismo lookup.products() de tickets (ver `lookup` abajo), ya excluyendo

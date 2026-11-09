@@ -321,7 +321,10 @@
       "requestButton": "Request",
       "estadoChangeError": "Could not update the status.",
       "assignmentChangeError": "Could not update the assignment.",
-      "receiveError": "Could not confirm the receipt."
+      "receiveError": "Could not confirm the receipt.",
+      "receiveReferenciaLabel": "Purchase reference (invoice or order)",
+      "receiveReferenciaPlaceholder": "E.g. INV-1234",
+      "receiveConfirm": "Confirm"
     },
     "estados": {
       "good": "Good condition",
@@ -368,7 +371,11 @@
         "actions": "Actions"
       },
       "requestButton": "Request",
-      "disponibleNegativoTooltip": "Negative available stock — recorded consumption exceeds what was in stock. Review this supply's Kardex."
+      "disponibleNegativoTooltip": "Negative available stock — recorded consumption exceeds what was in stock. Review this supply's Kardex.",
+      "editMinimo": "Edit minimum",
+      "editMinimoPrompt": "New minimum for {{nombre}}",
+      "remove": "Remove",
+      "removeConfirm": "Remove “{{nombre}}”? Its history is kept."
     },
     "estados": {
       "ok": "OK",
@@ -391,7 +398,9 @@
       "cantidadInicial": "Initial quantity to request",
       "back": "Back",
       "save": "Add",
-      "error": "Could not register the supply."
+      "error": "Could not register the supply.",
+      "existenciaInicial": "Initial stock (optional)",
+      "cantidadInicialHelp": "Quantity to buy; can be 0 if you already have stock."
     }
   },
   "toolKardex": {
@@ -656,7 +665,11 @@
         "alreadySigned": "This report was already signed by the client and cannot be signed again.",
         "notAllowed": "You don't have access to this report.",
         "backToTicket": "Back to ticket"
-      }
+      },
+      "saveDraft": "Save draft",
+      "draftNotice": "Draft report: it does not unlock closing the ticket until it is completed.",
+      "deletePhoto": "Remove photo",
+      "deletePhotoError": "Could not remove the photo."
     },
     "claimSheet": {
       "fieldLabel": "Claim Sheet",
@@ -693,7 +706,17 @@
       "lockedNotice": "This Claim Sheet has already been completed and can no longer be edited.",
       "save": "Save Claim Sheet",
       "saveError": "Could not save the Claim Sheet. Please try again.",
-      "pdfError": "Could not generate the PDF. Please try again."
+      "pdfError": "Could not generate the PDF. Please try again.",
+      "saveDraft": "Save draft",
+      "draftSaved": "Draft saved",
+      "draftNotice": "Draft sheet: it does not unlock closing the claim until it is completed.",
+      "reopen": "Reopen sheet",
+      "reopenTitle": "Reopen claim sheet",
+      "reopenWarning": "The sheet goes back to pending and the claim cannot be closed until it is completed again.",
+      "reopenMotivo": "Reason (at least 10 characters)",
+      "reopenConfirm": "Reopen",
+      "reopenError": "Could not reopen the sheet.",
+      "reopenedNotice": "Reopened: {{motivo}}"
     },
     "quoteModal": {
       "title": "Service Quote",
