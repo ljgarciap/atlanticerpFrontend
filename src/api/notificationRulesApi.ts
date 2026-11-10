@@ -24,6 +24,9 @@ export interface NotificationRule {
 
 export interface NotificationRuleRegistry {
   models:           Record<string, string[]>
+  /** Fase 31b — módulo de cada modelo (`crm`, `compras`, `bodega`, `servicios`) y sus eventos disponibles. Opcionales por compatibilidad. */
+  modules?:         Record<string, string>
+  events?:          Record<string, TriggerEvent[]>
   operators:        Operator[]
   recipient_types:  RecipientType[]
 }

@@ -8,6 +8,7 @@ import {
   type Operator,
   type RecipientType,
   type Channel,
+  type TriggerEvent,
 } from '@/api/notificationRulesApi'
 import { usersApi } from '@/api/usersApi'
 import { rolesApi } from '@/api/rolesApi'
@@ -33,10 +34,12 @@ const EMPTY_FORM: NotificationRulePayload = {
 interface FormProps {
   rule:    NotificationRule | null
   models:  Record<string, string[]>
+  modules?: Record<string, string>
+  events?:  Record<string, TriggerEvent[]>
   onClose: () => void
 }
 
-function RuleForm({ rule, models, onClose }: FormProps) {
+function RuleForm({ rule, models, modules = {}, events = {}, onClose }: FormProps) {
   const { t } = useTranslation(['common', 'security'])
   const qc    = useQueryClient()
   const isEdit = rule !== null
@@ -73,6 +76,8 @@ function RuleForm({ rule, models, onClose }: FormProps) {
   })
 
   const fields = models[form.trigger_model] ?? []
+  const eventOptions: TriggerEvent[] = events[form.trigger_model] ?? ['created', 'updated']
+  const isCrmModel = (modules[form.trigger_model] ?? 'crm') === 'crm'
 
   const toggleChannel = (ch: Channel) => {
     setForm(f => ({
@@ -108,10 +113,18 @@ function RuleForm({ rule, models, onClose }: FormProps) {
           </label>
           <select
             value={form.trigger_model}
-            onChange={e => setForm(f => ({ ...f, trigger_model: e.target.value, field: null, operator: null }))}
+            onChange={e => setForm(f => {
+              const evs = events[e.target.value] ?? ['created', 'updated']
+              const crm = (modules[e.target.value] ?? 'crm') === 'crm'
+              return {
+                ...f, trigger_model: e.target.value, field: null, operator: null,
+                trigger_event: evs.includes(f.trigger_event) ? f.trigger_event : evs[0],
+                recipient_type: !crm && f.recipient_type === 'project_assignees' ? 'user' : f.recipient_type,
+              }
+            })}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800">
             <option value="">{t('common:labels.selectOption')}</option>
-            {Object.keys(models).map(m => <option key={m} value={m}>{m}</option>)}
+            {Object.keys(models).map(m => <option key={m} value={m}>{modules[m] && modules[m] !== 'crm' ? `${modules[m]} · ${m}` : m}</option>)}
           </select>
         </div>
 
@@ -123,8 +136,7 @@ function RuleForm({ rule, models, onClose }: FormProps) {
             value={form.trigger_event}
             onChange={e => setForm(f => ({ ...f, trigger_event: e.target.value as 'created' | 'updated' }))}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800">
-            <option value="created">{t('security:notificationRules.events.created')}</option>
-            <option value="updated">{t('security:notificationRules.events.updated')}</option>
+            {eventOptions.map(ev => <option key={ev} value={ev}>{t(`security:notificationRules.events.${ev}`)}</option>)}
           </select>
         </div>
 
@@ -185,7 +197,7 @@ function RuleForm({ rule, models, onClose }: FormProps) {
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800">
             <option value="user">{t('security:notificationRules.recipientTypes.user')}</option>
             <option value="role">{t('security:notificationRules.recipientTypes.role')}</option>
-            <option value="project_assignees">{t('security:notificationRules.recipientTypes.projectAssignees')}</option>
+            {isCrmModel && <option value="project_assignees">{t('security:notificationRules.recipientTypes.projectAssignees')}</option>}
           </select>
         </div>
 
@@ -278,6 +290,8 @@ export default function NotificationRulesPage() {
 
   const rules  = data?.data ?? []
   const models = data?.registry.models ?? {}
+  const modules = data?.registry.modules
+  const events = data?.registry.events
 
   return (
     <div>
@@ -286,7 +300,7 @@ export default function NotificationRulesPage() {
         <Button onClick={() => setForm(null)}>{t('security:notificationRules.actions.create')}</Button>
       </div>
 
-      {form !== false && <RuleForm rule={form === null ? null : form} models={models} onClose={() => setForm(false)} />}
+      {form !== false && <RuleForm rule={form === null ? null : form} models={models} modules={modules} events={events} onClose={() => setForm(false)} />}
 
       <Card variant="panel" className="overflow-hidden">
         {isFetching && !data && (

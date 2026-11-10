@@ -114,6 +114,7 @@
       "range": "Allowed range: {{min}} to {{max}}",
       "rangeError": "Enter a whole number between {{min}} and {{max}}.",
       "groups": {
+        "general": "General",
         "security": "Security",
         "auth": "Authentication",
         "documents": "Documents",
@@ -133,6 +134,7 @@
         "impersonation_alert_blocked_writes_per_session": "Above this number of blocked write attempts within a single session, superadmins receive a security alert (a sign of a script)."
       },
       "labels": {
+        "support_contact": "Support contact (free text)",
         "purchase_approval_no_rule": "Require approval for orders no rule covers",
         "password_reset_free_per_hour": "Resets per hour without operator password",
         "password_reset_expiration_hours": "Activation link lifetime (hours)",

@@ -78,6 +78,17 @@ export default function DepartmentsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   })
 
+  const [reassigning, setReassigning] = useState<number | null>(null)
+  const { data: allDepts = [] } = useQuery({
+    queryKey: ['departments', 'all'],
+    queryFn:  () => departmentsApi.listAll(),
+    enabled:  reassigning !== null,
+  })
+  const reassign = useMutation({
+    mutationFn: ({ id, to }: { id: number; to: number | null }) => departmentsApi.reassign(id, to),
+    onSuccess: () => { setReassigning(null); qc.invalidateQueries({ queryKey: ['departments'] }); qc.invalidateQueries({ queryKey: ['users'] }) },
+  })
+
   const departments = data?.data ?? []
   const meta        = data?.meta
   const lastPage    = meta?.last_page ?? 1
@@ -153,6 +164,15 @@ export default function DepartmentsPage() {
                       >
                         {t('common:actions.edit')}
                       </Button>
+                      {(dept.user_count ?? 0) > 0 && (
+                        <Button
+                          variant="outline"
+                          className="!px-2.5 !py-1 !text-xs"
+                          onClick={() => setReassigning(reassigning === dept.id ? null : dept.id)}
+                        >
+                          {t('security:departments.actions.reassign', { count: dept.user_count })}
+                        </Button>
+                      )}
                       <button
                         onClick={() => toggleStatus.mutate({ id: dept.id, is_active: !dept.is_active })}
                         className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
@@ -165,6 +185,28 @@ export default function DepartmentsPage() {
                     </div>
                   </td>
                 </tr>
+                {reassigning === dept.id && (
+                  <tr key={`reassign-${dept.id}`}>
+                    <td colSpan={3} className="px-4 py-2 bg-slate-50 dark:bg-slate-900/40">
+                      <div className="flex items-center gap-2 text-sm">
+                        <label htmlFor={`reassign-to-${dept.id}`} className="text-xs text-slate-600">
+                          {t('security:departments.reassign.label', { count: dept.user_count })}
+                        </label>
+                        <select
+                          id={`reassign-to-${dept.id}`}
+                          defaultValue=""
+                          onChange={e => reassign.mutate({ id: dept.id, to: e.target.value === '' ? null : Number(e.target.value) })}
+                          className="px-2 py-1 border border-slate-300 rounded-lg text-xs bg-white"
+                        >
+                          <option value="" disabled>{t('common:labels.selectOption')}</option>
+                          <option value="">{t('security:departments.reassign.none')}</option>
+                          {allDepts.filter(d => d.id !== dept.id).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                        {reassign.isError && <span className="text-red-500 text-xs">{t('common:messages.saveError')}</span>}
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {form !== false && form !== null && form.id === dept.id && (
                   <tr key={`edit-${dept.id}`}>
                     <td colSpan={3} className="p-0">

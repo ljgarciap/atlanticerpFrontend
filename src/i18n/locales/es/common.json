@@ -114,6 +114,7 @@
       "range": "Rango permitido: {{min}} a {{max}}",
       "rangeError": "Ingresa un número entero entre {{min}} y {{max}}.",
       "groups": {
+        "general": "General",
         "security": "Seguridad",
         "auth": "Autenticación",
         "documents": "Documentos",
@@ -133,6 +134,7 @@
         "impersonation_alert_blocked_writes_per_session": "Al superar este número de intentos de escritura bloqueados dentro de una sola sesión, los superadmins reciben una alerta de seguridad (señal de un script)."
       },
       "labels": {
+        "support_contact": "Contacto de soporte (texto libre)",
         "purchase_approval_no_rule": "Exigir aprobación a las órdenes que ninguna regla cubre",
         "password_reset_free_per_hour": "Restablecimientos por hora sin contraseña del operador",
         "password_reset_expiration_hours": "Vigencia del enlace de activación (horas)",

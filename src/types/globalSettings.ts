@@ -5,8 +5,10 @@
 export interface GlobalSettingItem {
   key: string
   /** Enteros (rango `min`..`max`) o interruptores booleanos (ej. `password_reset_enabled`). */
-  value: number | boolean
-  type: 'integer' | 'boolean'
+  value: number | boolean | string
+  /** `text` (Fase 31b): texto libre de hasta `max_length` caracteres. */
+  type: 'integer' | 'boolean' | 'text'
+  max_length?: number
   /** Solo para `integer`; los booleanos no tienen rango. */
   min?: number
   max?: number
