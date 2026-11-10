@@ -12,6 +12,7 @@ import { getHomeRoute } from '@/lib/homeRoute'
 import { returnPathFor } from '@/lib/returnPath'
 import { isMfaRequiredResponse, type MfaMethod } from '@/types/auth'
 import AppLogo from '@/components/AppLogo'
+import SupportContactLine from '@/components/SupportContactLine'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 
@@ -369,6 +370,7 @@ export default function LoginPage() {
               >
                 {t('auth:login.forgotPassword')}
               </Link>
+              <SupportContactLine className="text-xs text-slate-500 dark:text-slate-400" />
             </div>
           </form>
         )}

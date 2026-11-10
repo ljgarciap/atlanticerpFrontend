@@ -1,3 +1,4 @@
+import SupportContactLine from '@/components/SupportContactLine'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -224,6 +225,7 @@ export default function TopBar({ moduleLabel, tabs = [], activeTab, onTab, backL
                     className="sm:hidden w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 font-medium">
                     {t('common:nav.settings')}
                   </button>
+                  <SupportContactLine className="px-4 py-2 text-[11px] text-slate-500 border-t border-slate-100" />
                   <hr className="my-1 border-slate-100" />
                   <button onClick={() => { setUserMenuOpen(false); void handleLogout() }}
                     className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 font-medium">
