@@ -12,7 +12,7 @@ import type {
   CommissionsSummary, QuoteListResult, AuditLogResult, PricingSettingsValue, QuoteConditionsSettingsValue, CatalogProductRef,
   SalesCommissionTier, SalesCommissionTierInput,
   CatalogProductFamilyRef, CatalogProductFamilyDetail, QuoteItemBulkResult,
-  ProjectListResult, CatalogListResult, CatalogItem, CatalogTechnicalSheetUploadResult,
+  ProjectListResult, CatalogListResult, CatalogItem, CatalogTechnicalSheetUploadResult, CatalogTechnicalSheetVersion,
   CatalogPdfExportStatus, CatalogSendPdfResult,
   OrderListResult, OrderDetail, OrderStatus, OrdersSettingsValue, QuoteVersionsResult, QuoteItemPricePreview,
   PipelineCardProductDeliveryRow, PipelineCardProductDeliveryAssignmentPayload,
@@ -525,6 +525,10 @@ export const ventasDisenoApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then(r => r.data)
     },
+
+    // Fase 32 — versiones anteriores de la ficha (las que se reemplazaron o quitaron), con enlace temporal.
+    technicalSheetHistory: (id: number): Promise<CatalogTechnicalSheetVersion[]> =>
+      api.get<{ data: CatalogTechnicalSheetVersion[] }>(`/ventas-diseno/catalog/${id}/technical-sheet/history`).then(r => r.data.data),
 
     // Fase 23 (#7) — quita la ficha técnica (204).
     deleteTechnicalSheet: (id: number): Promise<void> =>

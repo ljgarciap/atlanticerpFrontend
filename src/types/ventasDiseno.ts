@@ -1149,3 +1149,13 @@ export interface OrderDetail extends OrderRow {
 export interface OrdersSettingsValue {
   margin_drop_threshold_pts: number
 }
+
+/** Fase 32 — versión retirada de la ficha técnica de un producto (`GET /catalog/{id}/technical-sheet/history`). */
+export interface CatalogTechnicalSheetVersion {
+  id:             number
+  filename:       string
+  uploaded_at:    string | null
+  retired_at:     string
+  retired_reason: string | null
+  url:            string
+}

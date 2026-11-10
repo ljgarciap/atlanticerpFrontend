@@ -251,6 +251,8 @@
       "family": "Familia",
       "available": "Disponible",
       "technicalSheetTitle": "Ficha técnica",
+        "sheetHistoryTitle": "Versiones anteriores de la ficha",
+        "sheetRetiredOn": "Retirada el {{date}}",
       "technicalSheetLoaded": "Ficha técnica cargada",
       "viewDocument": "Ver documento",
       "viewDocumentError": "No se pudo abrir el documento.",

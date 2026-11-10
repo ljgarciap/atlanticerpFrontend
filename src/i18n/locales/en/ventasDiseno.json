@@ -251,6 +251,8 @@
       "family": "Family",
       "available": "Available",
       "technicalSheetTitle": "Technical sheet",
+        "sheetHistoryTitle": "Previous versions of the sheet",
+        "sheetRetiredOn": "Retired on {{date}}",
       "technicalSheetLoaded": "Technical sheet uploaded",
       "viewDocument": "View document",
       "viewDocumentError": "Could not open the document.",
