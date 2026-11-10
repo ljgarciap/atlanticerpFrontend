@@ -664,6 +664,8 @@
       "pdfError": "Could not generate the PDF. Please try again.",
       "viewOnMobile": "View on mobile",
       "mobile": {
+        "saveDraft": "Save draft",
+        "draftSaved": "Draft saved. Complete and sign it when you finish.",
         "backToForm": "Back to form",
         "formTitle": "Inspection Report — {{numero}}",
         "signatureTitle": "Client signature",

@@ -664,6 +664,8 @@
       "pdfError": "No se pudo generar el PDF. Intenta de nuevo.",
       "viewOnMobile": "Ver en móvil",
       "mobile": {
+        "saveDraft": "Guardar borrador",
+        "draftSaved": "Borrador guardado. Complétalo y fírmalo cuando termines.",
         "backToForm": "Volver al formulario",
         "formTitle": "Informe de Inspección — {{numero}}",
         "signatureTitle": "Firma del cliente",
