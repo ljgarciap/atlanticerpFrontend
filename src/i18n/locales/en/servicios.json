@@ -731,7 +731,8 @@
       "reopenMotivo": "Reason (at least 10 characters)",
       "reopenConfirm": "Reopen",
       "reopenError": "Could not reopen the sheet.",
-      "reopenedNotice": "Reopened: {{motivo}}"
+      "reopenedNotice": "Reopened: {{motivo}}",
+      "reopenedBy": "By {{nombre}}."
     },
     "quoteModal": {
       "title": "Service Quote",

@@ -731,7 +731,8 @@
       "reopenMotivo": "Motivo (mínimo 10 caracteres)",
       "reopenConfirm": "Reabrir",
       "reopenError": "No se pudo reabrir la hoja.",
-      "reopenedNotice": "Reabierta: {{motivo}}"
+      "reopenedNotice": "Reabierta: {{motivo}}",
+      "reopenedBy": "Por {{nombre}}."
     },
     "quoteModal": {
       "title": "Cotización de Servicio",
