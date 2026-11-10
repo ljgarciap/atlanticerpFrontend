@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { serviciosApi } from '@/api/serviciosApi'
 import { Card } from '@/components/ui/Card'
@@ -35,6 +35,12 @@ export default function InternalTechnicianCreateModal({ onClose, onCreated, tech
   const { options: specialties } = useTechnicianSpecialties()
   const toast   = useToastStore(s => s.show)
   const isEdit  = technician !== undefined
+  const [userId, setUserId] = useState<string>(technician?.user_id ? String(technician.user_id) : '')
+  const { data: linkable } = useQuery({
+    queryKey: ['servicios/internal-technicians/linkable-users', technician?.id ?? null],
+    queryFn:  () => serviciosApi.internalTechnicians.linkableUsers(technician?.id),
+    enabled:  isEdit,
+  })
   const [form, setForm] = useState<FormState>(technician ? {
     nombre: technician.nombre, telefono: technician.telefono ?? '', email: technician.email ?? '',
     especialidad: technician.especialidad,
@@ -48,9 +54,16 @@ export default function InternalTechnicianCreateModal({ onClose, onCreated, tech
         email:        form.email.trim() || undefined,
         especialidad: form.especialidad,
       }
-      return technician
-        ? serviciosApi.internalTechnicians.update(technician.id, payload)
-        : serviciosApi.internalTechnicians.create(payload)
+      if (!technician) return serviciosApi.internalTechnicians.create(payload)
+      const nuevo = userId === '' ? null : Number(userId)
+      return serviciosApi.internalTechnicians.update(technician.id, payload).then(async saved => {
+        // Fase 32 — solo se toca el vínculo si cambió.
+        if (nuevo !== (technician.user_id ?? null)) {
+          await serviciosApi.internalTechnicians.linkUser(technician.id, nuevo)
+          return { ...saved, user_id: nuevo }
+        }
+        return saved
+      })
     },
     onSuccess: onCreated,
     onError: (err) => {
@@ -106,6 +119,18 @@ export default function InternalTechnicianCreateModal({ onClose, onCreated, tech
             </span>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} className={INPUT_CLASSES} />
           </label>
+          {isEdit && (
+            <label className="text-sm block">
+              <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                {t('technicians.internal.createModal.linkedUser')}
+              </span>
+              <select value={userId} onChange={e => setUserId(e.target.value)} className={INPUT_CLASSES} data-testid="technician-linked-user">
+                <option value="">{t('technicians.internal.createModal.noLinkedUser')}</option>
+                {linkable?.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+              <span className="block text-[11px] text-slate-400 mt-1">{t('technicians.internal.createModal.linkedUserHelp')}</span>
+            </label>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-100 dark:border-slate-700">

@@ -137,6 +137,9 @@
       },
       "createModal": {
         "title": "New internal technician",
+        "linkedUser": "Linked user",
+        "noLinkedUser": "No linked user",
+        "linkedUserHelp": "Links the profile to the technician's account so they see their own visits and commission.",
         "nombre": "Name",
         "especialidad": "Specialty",
         "telefono": "Phone",

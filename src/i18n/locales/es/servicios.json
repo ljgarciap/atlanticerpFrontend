@@ -137,6 +137,9 @@
       },
       "createModal": {
         "title": "Nuevo técnico interno",
+        "linkedUser": "Usuario vinculado",
+        "noLinkedUser": "Sin usuario vinculado",
+        "linkedUserHelp": "Liga la ficha a la cuenta del técnico: así ve sus visitas y su comisión.",
         "nombre": "Nombre",
         "especialidad": "Especialidad",
         "telefono": "Teléfono",

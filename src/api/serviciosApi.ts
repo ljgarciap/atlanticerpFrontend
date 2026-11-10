@@ -245,6 +245,12 @@ export const serviciosApi = {
     remove: (id: number): Promise<void> =>
       api.delete(`/servicios/internal-technicians/${id}`).then(() => undefined),
 
+    // Fase 32 — ligar la ficha a un usuario (PATCH parcial de la Fase 30) y usuarios que se pueden ligar.
+    linkUser: (id: number, userId: number | null): Promise<InternalTechnician> =>
+      api.patch<InternalTechnician>(`/servicios/internal-technicians/${id}`, { user_id: userId }).then(r => r.data),
+    linkableUsers: (fichaId?: number): Promise<{ id: number; name: string }[]> =>
+      api.get<{ data: { id: number; name: string }[] }>('/servicios/internal-technicians/linkable-users', { params: fichaId ? { ficha_id: fichaId } : {} }).then(r => r.data.data),
+
     // REQ-260 — Agenda equipo. `technicianId` acota a un único técnico (RN2). SCRUM-803 — `view`
     // ('day'|'week'|'month', default 'day' en el backend) + `date` (Y-m-d, default hoy) acotan el
     // periodo mostrado.
