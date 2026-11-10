@@ -25,6 +25,8 @@ export default function KardexPage() {
   // Fase 29: rango de fechas (inclusivo).
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
+  // Fase 32: producto exacto (se elige desde una fila del propio Kardex; el buscador de texto sigue aparte).
+  const [producto, setProducto] = useState<{ id: number; reference: string } | null>(null)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<number | 'all'>(20)
 
@@ -34,11 +36,12 @@ export default function KardexPage() {
     warehouse_id: warehouseId ? Number(warehouseId) : undefined,
     desde: desde || undefined,
     hasta: hasta || undefined,
+    producto_id: producto?.id,
     page, per_page: perPage,
   })
 
   const clearFilters = () => {
-    setSearch(''); setQuery(''); setTipo(''); setWarehouseId(''); setDesde(''); setHasta(''); setPage(1)
+    setSearch(''); setQuery(''); setTipo(''); setWarehouseId(''); setDesde(''); setHasta(''); setProducto(null); setPage(1)
   }
 
   const rows = data?.data ?? []
@@ -91,6 +94,13 @@ export default function KardexPage() {
         <Button variant="outline" onClick={clearFilters}>{t('bodega:kardex.filters.clear')}</Button>
       </div>
 
+      {producto && (
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary" data-testid="kardex-product-chip">
+          {t('bodega:kardex.filters.exactProduct', { reference: producto.reference })}
+          <button type="button" aria-label={t('bodega:kardex.filters.removeProduct')} onClick={() => { setProducto(null); setPage(1) }}>×</button>
+        </div>
+      )}
+
       <Card variant="panel" className="overflow-hidden overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -117,7 +127,17 @@ export default function KardexPage() {
             {rows.map(m => (
               <tr key={m.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateTimeShort(m.fecha)}</td>
-                <td className="px-4 py-3 text-slate-800 font-semibold">{m.producto.reference}</td>
+                <td className="px-4 py-3 text-slate-800 font-semibold">
+                  {m.producto.id != null && m.producto.reference ? (
+                    <button
+                      type="button" title={t('bodega:kardex.filters.onlyThisProduct')} className="font-semibold hover:underline"
+                      onClick={() => { setProducto({ id: m.producto.id as number, reference: m.producto.reference as string }); setPage(1) }}
+                      data-testid={`kardex-product-${m.id}`}
+                    >
+                      {m.producto.reference}
+                    </button>
+                  ) : m.producto.reference}
+                </td>
                 <td className="px-4 py-3 text-slate-600">{m.bodega}</td>
                 <td className="px-4 py-3 text-slate-600">{m.tipo}</td>
                 <td className={`px-4 py-3 font-semibold ${m.cantidad >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>

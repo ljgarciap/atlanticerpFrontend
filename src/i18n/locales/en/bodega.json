@@ -155,7 +155,10 @@
       "search": "Search product...",
       "type": "All types",
       "warehouse": "All warehouses",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "exactProduct": "Product only: {{reference}}",
+      "removeProduct": "Remove product filter",
+      "onlyThisProduct": "Show only this product's movements"
     },
     "table": {
       "date": "Date",

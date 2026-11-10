@@ -155,7 +155,10 @@
       "search": "Buscar producto...",
       "type": "Todos los tipos",
       "warehouse": "Todas las bodegas",
-      "clear": "Limpiar filtros"
+      "clear": "Limpiar filtros",
+      "exactProduct": "Solo producto: {{reference}}",
+      "removeProduct": "Quitar filtro de producto",
+      "onlyThisProduct": "Ver solo los movimientos de este producto"
     },
     "table": {
       "date": "Fecha",
