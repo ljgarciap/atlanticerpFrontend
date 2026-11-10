@@ -62,7 +62,8 @@ function GlobalSettingRow({ item }: { item: GlobalSettingItem }) {
   const { t } = useTranslation(['common', 'auth'])
   const qc = useQueryClient()
 
-  const isBoolean = item.type === 'boolean' || typeof item.value === 'boolean'
+  const isText = item.type === 'text'
+  const isBoolean = !isText && (item.type === 'boolean' || typeof item.value === 'boolean')
   const min = item.min ?? 0
   const max = item.max ?? 0
 
@@ -80,7 +81,7 @@ function GlobalSettingRow({ item }: { item: GlobalSettingItem }) {
 
   const mutation = useMutation({
     gcTime: 0, // la contraseña del operador viaja en las variables: no se conserva en el MutationCache
-    mutationFn: (vars: { next: number | boolean; password?: string }) =>
+    mutationFn: (vars: { next: number | boolean | string; password?: string }) =>
       globalSettingsApi.update(item.key, vars.next, vars.password),
     onSuccess:  () => { setOperatorPassword(''); setReauthError(null); qc.invalidateQueries({ queryKey: QUERY_KEY }) },
     onError: (err: unknown) => {
@@ -103,7 +104,7 @@ function GlobalSettingRow({ item }: { item: GlobalSettingItem }) {
   // producción arranca apagado). Si no hay clave i18n, no se muestra nada.
   const helpText = t(`common:globalSettings.globalTab.help.${item.key.replace(/\./g, '_')}`, { defaultValue: '' })
 
-  const dirty = isBoolean ? checked !== settingToBool(item.value) : value !== String(item.value)
+  const dirty = isText ? value !== String(item.value) : isBoolean ? checked !== settingToBool(item.value) : value !== String(item.value)
   const label = t(item.label_key, { defaultValue: item.key })
 
   const apiError = mutation.isError ? parseApiValidationError(mutation.error) : null
@@ -140,6 +141,7 @@ function GlobalSettingRow({ item }: { item: GlobalSettingItem }) {
 
   function submit() {
     const password = critical ? operatorPassword : undefined
+    if (isText) { setLocalError(null); mutation.mutate({ next: value }); return }
     if (isBoolean) {
       if (critical && operatorPassword === '') { setLocalError(t('common:globalSettings.globalTab.passwordRequired')); return }
       setLocalError(null); mutation.mutate({ next: checked, password }); return
@@ -181,6 +183,32 @@ function GlobalSettingRow({ item }: { item: GlobalSettingItem }) {
         {passwordField}
         {helpText && <p className="mt-1 ml-7 text-[11px] text-slate-500">{helpText}</p>}
         {errorText && <p role="alert" className="mt-1 ml-7 text-xs text-red-500">{errorText}</p>}
+      </div>
+    )
+  }
+
+  if (isText) {
+    return (
+      <div>
+        <label className="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1" htmlFor={`global-setting-${item.key}`}>
+          {label}
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id={`global-setting-${item.key}`}
+            type="text" maxLength={item.max_length} value={value}
+            aria-invalid={errorText ? true : undefined}
+            onChange={e => edit(e.target.value)}
+            className={`w-80 max-w-full rounded-md border px-3 py-1.5 text-sm ${errorText ? 'border-red-400' : 'border-slate-300'}`}
+          />
+          {dirty && (
+            <Button className="!text-xs !py-1.5" onClick={submit} loading={mutation.isPending}>
+              {t('common:actions.save')}
+            </Button>
+          )}
+        </div>
+        {helpText && <p className="mt-1 text-[11px] text-slate-500">{helpText}</p>}
+        {errorText && <p role="alert" className="mt-1 text-xs text-red-500">{errorText}</p>}
       </div>
     )
   }

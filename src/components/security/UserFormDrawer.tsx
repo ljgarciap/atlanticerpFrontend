@@ -65,7 +65,7 @@ export default function UserFormDrawer({ user, onClose, onSaved }: Props) {
   const isBusy        = createUser.isPending || updateUser.isPending
 
   const qc                          = useQueryClient()
-  const { data: departments = [] }  = useQuery({ queryKey: ['departments', 'all'],        queryFn: departmentsApi.listAll })
+  const { data: departments = [] }  = useQuery({ queryKey: ['departments', 'all', user?.department?.id ?? null], queryFn: () => departmentsApi.listAll(user?.department?.id ?? null) })
   const { data: levels = [] }       = useQuery({ queryKey: ['security-levels', 'all'],    queryFn: levelsApi.listAll })
   const { data: roles = [] }        = useQuery({ queryKey: ['roles'],                     queryFn: rolesApi.list })
   // SCRUM-822 — picker de jefe directo: candidatos activos, excluyendo al propio usuario en

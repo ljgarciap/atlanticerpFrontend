@@ -403,5 +403,16 @@ describe('GlobalSettingsPanel', () => {
       await waitFor(() => expect(mockedApi.update).toHaveBeenCalledWith('documents.max_size_mb', 600, undefined))
     })
   })
-})
 
+  // Fase 31b — ajustes de texto además de enteros.
+  it('un ajuste de texto se edita y se envía como texto, sin contraseña', async () => {
+    mockedApi.list.mockResolvedValue([makeItem({ key: 'support_contact', value: 'a@x.com', type: 'text', max_length: 200, group: 'general', label_key: 'globalSettings.globalTab.labels.support_contact' })])
+    mockedApi.update.mockResolvedValue(makeItem({ key: 'support_contact', value: 'b@x.com', type: 'text' }))
+    renderPanel()
+
+    fireEvent.change(await screen.findByDisplayValue('a@x.com'), { target: { value: 'b@x.com' } })
+    fireEvent.click(screen.getByText('common:actions.save'))
+
+    await waitFor(() => expect(mockedApi.update).toHaveBeenCalledWith('support_contact', 'b@x.com', undefined))
+  })
+})

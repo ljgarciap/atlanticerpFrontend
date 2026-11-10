@@ -330,7 +330,12 @@
       "name": "Nombre"
     },
     "actions": {
-      "create": "Nuevo departamento"
+      "create": "Nuevo departamento",
+      "reassign": "Reasignar usuarios ({{count}})"
+    },
+    "reassign": {
+      "label": "Mover {{count}} usuario(s) a:",
+      "none": "Sin departamento"
     },
     "messages": {
       "createSuccess": "Departamento creado",

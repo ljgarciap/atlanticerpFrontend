@@ -11,7 +11,7 @@ export const globalSettingsApi = {
   list: (): Promise<GlobalSettingItem[]> =>
     api.get<{ data: GlobalSettingItem[] }>('/admin/global-settings').then(r => r.data.data),
 
-  update: (key: string, value: number | boolean, operatorPassword?: string): Promise<GlobalSettingItem> =>
+  update: (key: string, value: number | boolean | string, operatorPassword?: string): Promise<GlobalSettingItem> =>
     api.put<GlobalSettingItem | { data: GlobalSettingItem }>(
       `/admin/global-settings/${encodeURIComponent(key)}`,
       operatorPassword ? { value, operator_password: operatorPassword } : { value },
