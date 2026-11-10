@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { IcoSettings } from '@/components/icons'
 import WarehouseSaleRulesPanel from '@/components/WarehouseSaleRulesPanel'
 import WarehousesAdminPanel from '@/components/WarehousesAdminPanel'
+import AssistantMappingPanel from '@/components/AssistantMappingPanel'
 
 /**
  * SCRUM-500 — hallazgo de Senior Review en Batch B1 (Home de Bodega): los 5 umbrales de
@@ -191,6 +192,9 @@ export default function BodegaSettingsPanel() {
 
       {/* SCRUM-1196 — qué bodegas surten ventas y cuál es la de despacho por defecto (sin deploy). */}
       <WarehouseSaleRulesPanel />
+
+      {/* Fase 32 — quién atiende las llegadas de cada vendedor (mapeo editable, antes solo por API). */}
+      <AssistantMappingPanel />
     </div>
   )
 }
