@@ -52,7 +52,7 @@ describe('ArchitectsPage', () => {
     expect(await screen.findByText('Arq. Fernando Solís')).toBeInTheDocument()
     expect(screen.getByText('6000-0000')).toBeInTheDocument()
     expect(screen.getByText('fernando@example.com')).toBeInTheDocument()
-    expect(mockedApi.architects.listAll).toHaveBeenCalledWith('')
+    expect(mockedApi.architects.listAll).toHaveBeenCalledWith('', false)
   })
 
   it('muestra el estado vacío cuando no hay arquitectos', async () => {
@@ -67,7 +67,7 @@ describe('ArchitectsPage', () => {
 
     fireEvent.change(screen.getByPlaceholderText('common:labels.searchPlaceholder'), { target: { value: 'Fernando' } })
 
-    await waitFor(() => expect(mockedApi.architects.listAll).toHaveBeenCalledWith('Fernando'))
+    await waitFor(() => expect(mockedApi.architects.listAll).toHaveBeenCalledWith('Fernando', false))
   })
 
   it('clic en una fila abre el detalle del arquitecto', async () => {

@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import ArchitectDetailModal from '@/components/ArchitectDetailModal'
 import { useDebouncedSearchTerm } from '@/hooks/useDebouncedValue'
+import { useAuthStore } from '@/store/authStore'
+import { hasAnyPermission } from '@/lib/accessGuards'
 
 // SCRUM-907 — pantalla "Arquitectos" del menú CRM: directorio global de solo consulta/edición
 // limitada de los arquitectos que ya alimentan Comisiones Externas (misma BD, ver
@@ -17,10 +19,13 @@ export default function ArchitectsPage() {
   // SCRUM-1176 — el campo responde al instante; la consulta sale tras 250 ms sin teclear (mínimo 2 caracteres; vaciar restaura el listado).
   const searchTerm = useDebouncedSearchTerm(search)
   const [openArchitectId, setOpenArchitectId] = useState<number | null>(null)
+  // Fase 31a — los asociados dados de baja se ocultan; quien edita puede verlos.
+  const [showInactive, setShowInactive] = useState(false)
+  const canEdit = hasAnyPermission(useAuthStore(s => s.user)?.permissions, ['ventas_diseno.edit'])
 
   const { data: architects, isLoading } = useQuery({
-    queryKey: ['ventas-diseno-architects', searchTerm],
-    queryFn:  () => ventasDisenoApi.architects.listAll(searchTerm),
+    queryKey: ['ventas-diseno-architects', searchTerm, showInactive],
+    queryFn:  () => ventasDisenoApi.architects.listAll(searchTerm, showInactive),
   })
 
   const rows = architects ?? []
@@ -49,6 +54,12 @@ export default function ArchitectsPage() {
           onChange={e => setSearch(e.target.value)}
           className={inputClass}
         />
+        {canEdit && (
+          <label className="flex items-center gap-1.5 text-[12px] text-slate-600">
+            <input type="checkbox" checked={showInactive} onChange={e => setShowInactive(e.target.checked)} />
+            {t('ventasDiseno:architects.showInactive')}
+          </label>
+        )}
       </Card>
 
       <Card variant="panel" className="overflow-x-auto">
@@ -73,7 +84,7 @@ export default function ArchitectsPage() {
                   onClick={() => setOpenArchitectId(a.id)}
                   className="cursor-pointer border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
                 >
-                  <td className="py-2 px-3 font-medium text-slate-900 dark:text-slate-100">{a.name}</td>
+                  <td className="py-2 px-3 font-medium text-slate-900 dark:text-slate-100">{a.name}{a.is_active === false && <span className="ml-2 text-[11px] font-normal text-slate-500">{t('ventasDiseno:architects.inactive')}</span>}</td>
                   <td className="py-2 px-3 text-slate-700 dark:text-slate-200">{a.phone ?? '—'}</td>
                   <td className="py-2 px-3 text-slate-700 dark:text-slate-200">{a.email ?? '—'}</td>
                   <td className="py-2 px-3">

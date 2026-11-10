@@ -264,6 +264,10 @@ export const ventasDisenoApi = {
 
       remove: (subClientId: number, contactId: number): Promise<void> =>
         api.delete(`/ventas-diseno/sub-clients/${subClientId}/contacts/${contactId}`).then(() => undefined),
+
+      // Fase 31a — reemplaza un contacto por otro en una sola operación (sirve para el contacto único).
+      replace: (subClientId: number, contactId: number, data: Omit<SubClientContact, 'id'>): Promise<SubClientContact> =>
+        api.post<SubClientContact>(`/ventas-diseno/sub-clients/${subClientId}/contacts/${contactId}/replace`, data).then(r => r.data),
     },
 
   },
@@ -273,8 +277,12 @@ export const ventasDisenoApi = {
   // Pipeline, REQ-010).
   clients: {
     // SCRUM-754 (2026-08-18) — paginación real de backend, mismo contrato que projects.list.
-    list: (filters: { search?: string; category?: SubClientCategory[]; stale?: boolean; page?: number; per_page?: number | 'all' } = {}): Promise<ClientListResult> =>
+    list: (filters: { search?: string; category?: SubClientCategory[]; stale?: boolean; incluir_inactivos?: boolean; page?: number; per_page?: number | 'all' } = {}): Promise<ClientListResult> =>
       api.get<ClientListResult>('/ventas-diseno/clients', { params: filters }).then(r => r.data),
+
+    // Fase 31a — baja (o reactivación) de un cliente: se desactiva, nunca se borra.
+    setActive: (id: number, isActive: boolean): Promise<{ id: number; is_active: boolean }> =>
+      api.patch<{ id: number; is_active: boolean }>(`/ventas-diseno/clients/${id}/active`, { is_active: isActive }).then(r => r.data),
 
     get: (id: number): Promise<ClientDetail> =>
       api.get<ClientDetail>(`/ventas-diseno/clients/${id}`).then(r => r.data),
@@ -582,8 +590,12 @@ export const ventasDisenoApi = {
       api.get<{ data: Architect[] }>('/ventas-diseno/architects', { params: { sub_client_id: subClientId, search } }).then(r => r.data.data),
 
     // SCRUM-907 — directorio global (sin sub_client_id) para la pantalla "Arquitectos".
-    listAll: (search = ''): Promise<Architect[]> =>
-      api.get<{ data: Architect[] }>('/ventas-diseno/architects', { params: { search: search || undefined } }).then(r => r.data.data),
+    listAll: (search = '', incluirInactivos = false): Promise<Architect[]> =>
+      api.get<{ data: Architect[] }>('/ventas-diseno/architects', { params: { search: search || undefined, incluir_inactivos: incluirInactivos ? 1 : undefined } }).then(r => r.data.data),
+
+    // Fase 31a — baja (o reactivación) de un asociado: se desactiva, nunca se borra.
+    setActive: (id: number, isActive: boolean): Promise<{ id: number; is_active: boolean }> =>
+      api.patch<{ id: number; is_active: boolean }>(`/ventas-diseno/architects/${id}/active`, { is_active: isActive }).then(r => r.data),
 
     get: (id: number): Promise<ArchitectDetail> =>
       api.get<ArchitectDetail>(`/ventas-diseno/architects/${id}`).then(r => r.data),
