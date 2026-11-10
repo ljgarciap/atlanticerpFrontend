@@ -334,6 +334,8 @@
       "contacts": "Contacts",
       "addContact": "+ Add contact",
       "editContact": "Edit",
+      "replaceContact": "Replace contact",
+      "replaceContactHelp": "Creates the new contact with these details and retires the old one; quotes move to the new contact.",
       "newQuote": "+ New quote",
       "newQuoteUnavailable": "Available once Quote is implemented",
       "exentoItbms": "{{tax}}-exempt"

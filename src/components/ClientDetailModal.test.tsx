@@ -27,7 +27,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       addSubClient: vi.fn(), updateSubClientCategory: vi.fn(),
     },
     subClients: {
-      contacts: { create: vi.fn(), update: vi.fn(), remove: vi.fn() },
+      contacts: { create: vi.fn(), update: vi.fn(), remove: vi.fn(), replace: vi.fn() },
     },
   },
 }))
@@ -145,5 +145,17 @@ describe('ClientDetailModal', () => {
     fireEvent.click(screen.getByText('common:actions.add'))
 
     expect(await screen.findByText('El correo electrónico debe ser una dirección de correo válida.')).toBeInTheDocument()
+  })
+
+  it('Fase 32: reemplazar un contacto envía los datos nuevos a una sola operación', async () => {
+    mockedApi.subClients.contacts.replace.mockResolvedValue({ id: 101, name: 'Luis Gómez', role: 'client', phone: '6000-0000', email: null })
+    renderModal()
+    fireEvent.click(await screen.findByText('ventasDiseno:clients.detail.editContact'))
+    fireEvent.change(screen.getByDisplayValue('Ana Pérez'), { target: { value: 'Luis Gómez' } })
+    fireEvent.click(screen.getByTestId('replace-contact-100'))
+    await waitFor(() => expect(mockedApi.subClients.contacts.replace).toHaveBeenCalledWith(10, 100, {
+      name: 'Luis Gómez', role: 'client', phone: '6000-0000', email: null,
+    }))
+    expect(mockedApi.subClients.contacts.update).not.toHaveBeenCalled()
   })
 })
