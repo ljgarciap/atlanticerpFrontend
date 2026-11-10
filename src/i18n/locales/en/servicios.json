@@ -306,6 +306,10 @@
       "estadoLabel": "Filter by status"
     },
     "table": {
+        "remove": "Retire",
+        "removeConfirm": "Retire tool {{codigo}}? Its history is kept, and it cannot be retired while assigned to a technician.",
+        "removeCancel": "Cancel",
+        "removeError": "The tool could not be retired",
       "loading": "Loading...",
       "empty": "No tools for this filter",
       "groupHeader": "{{count}} unit(s) ({{summary}})",
@@ -378,7 +382,15 @@
       "editMinimo": "Edit minimum",
       "editMinimoPrompt": "New minimum for {{nombre}}",
       "remove": "Remove",
-      "removeConfirm": "Remove “{{nombre}}”? Its history is kept."
+      "removeConfirm": "Remove “{{nombre}}”? Its history is kept.",
+      "removeError": "The supply could not be retired"
+    },
+    "minimoModal": {
+      "title": "Edit minimum",
+      "minimo": "Minimum",
+      "cancel": "Cancel",
+      "save": "Save",
+      "error": "The minimum could not be saved"
     },
     "estados": {
       "ok": "OK",

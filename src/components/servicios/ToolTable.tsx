@@ -4,6 +4,10 @@ import type { Tool, ToolPurchaseRequest, InternalTechnician } from '@/types/serv
 import ToolEstadoSelect from './ToolEstadoSelect'
 import ToolAssignmentSelect from './ToolAssignmentSelect'
 import ToolReceiveButton from './ToolReceiveButton'
+import { useState } from 'react'
+import { isAxiosError } from 'axios'
+import { serviciosApi } from '@/api/serviciosApi'
+import ConfirmModal from '@/components/ConfirmModal'
 import { Button } from '@/components/ui/Button'
 import { formatDateShort } from '@/utils/dates'
 
@@ -73,6 +77,10 @@ export default function ToolTable({ tools, purchaseRequests, technicians, canEdi
   const { t } = useTranslation('servicios')
 
   const groups = groupTools(tools, purchaseRequests)
+  // Fase 32 — baja de una herramienta con confirmación propia (el servidor responde 422 si está asignada).
+  const [removeTarget, setRemoveTarget] = useState<Tool | null>(null)
+  const [removing, setRemoving]         = useState(false)
+  const [removeError, setRemoveError]   = useState<string | null>(null)
 
   if (groups.length === 0) {
     return (
@@ -144,13 +152,23 @@ export default function ToolTable({ tools, purchaseRequests, technicians, canEdi
                           )}
                         </div>
                       ) : canEdit ? (
-                        <Button
-                          variant="secondary"
-                          className="!px-2.5 !py-1 !text-xs"
-                          onClick={() => onRequestReplenish(unit)}
-                        >
-                          {t('tools.table.requestButton')}
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="secondary"
+                            className="!px-2.5 !py-1 !text-xs"
+                            onClick={() => onRequestReplenish(unit)}
+                          >
+                            {t('tools.table.requestButton')}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="!px-2.5 !py-1 !text-xs"
+                            onClick={() => { setRemoveError(null); setRemoveTarget(unit) }}
+                            data-testid={`tool-remove-${unit.id}`}
+                          >
+                            {t('tools.table.remove')}
+                          </Button>
+                        </div>
                       ) : null}
                     </td>
                   </tr>
@@ -176,6 +194,25 @@ export default function ToolTable({ tools, purchaseRequests, technicians, canEdi
           </div>
         </div>
       ))}
+
+      {removeTarget && (
+        <ConfirmModal
+          title={t('tools.table.remove')}
+          message={t('tools.table.removeConfirm', { codigo: removeTarget.codigo_unico })}
+          confirmLabel={t('tools.table.remove')}
+          cancelLabel={t('tools.table.removeCancel')}
+          loading={removing}
+          error={removeError}
+          onCancel={() => setRemoveTarget(null)}
+          onConfirm={() => {
+            setRemoving(true)
+            serviciosApi.tools.remove(removeTarget.id)
+              .then(() => { setRemoveTarget(null); onChanged() })
+              .catch(err => setRemoveError(isAxiosError(err) ? ((err.response?.data as { message?: string } | undefined)?.message ?? t('tools.table.removeError')) : t('tools.table.removeError')))
+              .finally(() => setRemoving(false))
+          }}
+        />
+      )}
     </div>
   )
 }

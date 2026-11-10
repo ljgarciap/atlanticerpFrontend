@@ -306,6 +306,10 @@
       "estadoLabel": "Filtrar por estado"
     },
     "table": {
+        "remove": "Dar de baja",
+        "removeConfirm": "¿Dar de baja la herramienta {{codigo}}? Su historial se conserva y no se puede dar de baja si está asignada a un técnico.",
+        "removeCancel": "Cancelar",
+        "removeError": "No se pudo dar de baja la herramienta",
       "loading": "Cargando...",
       "empty": "Sin herramientas para este filtro",
       "groupHeader": "{{count}} unidad(es) ({{summary}})",
@@ -378,7 +382,15 @@
       "editMinimo": "Editar mínimo",
       "editMinimoPrompt": "Nuevo mínimo para {{nombre}}",
       "remove": "Dar de baja",
-      "removeConfirm": "¿Dar de baja «{{nombre}}»? Su historial se conserva."
+      "removeConfirm": "¿Dar de baja «{{nombre}}»? Su historial se conserva.",
+      "removeError": "No se pudo dar de baja el insumo"
+    },
+    "minimoModal": {
+      "title": "Editar mínimo",
+      "minimo": "Mínimo",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "error": "No se pudo guardar el mínimo"
     },
     "estados": {
       "ok": "OK",
