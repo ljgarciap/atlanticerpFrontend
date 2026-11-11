@@ -481,6 +481,35 @@ export function useTeamMembersByRole(role: BodegaTeamMemberRole, enabled: boolea
   })
 }
 
+/** Fase 32 — mapeo vendedor→asistente de llegadas. */
+export function useAssistantMapping() {
+  return useQuery({ queryKey: ['bodega/assistant-mapping'], queryFn: () => bodegaApi.assistantMapping.list() })
+}
+
+export function useSetAssistantMapping() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sellerId, assistantId }: { sellerId: number; assistantId: number }) => bodegaApi.assistantMapping.set(sellerId, assistantId),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bodega/assistant-mapping'] }) },
+  })
+}
+
+export function useRemoveAssistantMapping() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => bodegaApi.assistantMapping.remove(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bodega/assistant-mapping'] }) },
+  })
+}
+
+export function useReassignPendingToMappedAssistant() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (sellerId: number) => bodegaApi.assistantMapping.reassignPending(sellerId),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bodega/orders'] }) },
+  })
+}
+
 /** REQ-294/297/299/300/302 — resumen completo de Home; incluye también los paneles que NO cambian
  * con el toggle (REQ-301/303/304, ver `types/bodega.ts`) porque el backend real los devuelve en el
  * mismo `summary()`, no en un endpoint separado. */

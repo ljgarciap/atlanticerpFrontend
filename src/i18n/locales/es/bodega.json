@@ -155,7 +155,10 @@
       "search": "Buscar producto...",
       "type": "Todos los tipos",
       "warehouse": "Todas las bodegas",
-      "clear": "Limpiar filtros"
+      "clear": "Limpiar filtros",
+      "exactProduct": "Solo producto: {{reference}}",
+      "removeProduct": "Quitar filtro de producto",
+      "onlyThisProduct": "Ver solo los movimientos de este producto"
     },
     "table": {
       "date": "Fecha",
@@ -791,6 +794,22 @@
     "saved": "Cambios guardados",
     "saveError": "No se pudo guardar la configuración",
     "forbidden": "No tienes acceso a esta pantalla.",
+    "assistantMapping": {
+      "title": "Asistente de llegadas por vendedor",
+      "help": "Cada vendedor puede tener un asistente de Bodega que atiende sus pedidos. Cambiar el asistente no mueve los pedidos ya creados: usa «Reasignar pendientes» para pasarle los que aún no se entregan.",
+      "loading": "Cargando mapeo…",
+      "empty": "Ningún vendedor tiene asistente asignado.",
+      "columns": { "seller": "Vendedor", "assistant": "Asistente", "actions": "Acciones" },
+      "seller": "Vendedor",
+      "assistant": "Asistente",
+      "select": "Elegir…",
+      "save": "Guardar mapeo",
+      "remove": "Quitar",
+      "removeConfirm": "¿Quitar el asistente de {{name}}? Los pedidos ya creados no cambian.",
+      "reassign": "Reasignar pendientes",
+      "reassigned": "Pedidos reasignados: {{count}}",
+      "error": "No se pudo completar la acción"
+    },
     "warehouseRules": {
       "title": "Reglas de bodega",
       "help": "Qué bodegas pueden surtir pedidos de venta, cuál es la de despacho por defecto (siempre una, y de venta) y cuáles se excluyen del «Disponible». Lo de una bodega de venta excluida (p. ej. Sala de exhibición 1) se muestra aparte a los vendedores.",

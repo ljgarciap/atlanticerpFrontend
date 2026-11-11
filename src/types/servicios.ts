@@ -655,6 +655,8 @@ export interface ClaimSheetDetail {
   /** Fase 30 — la hoja se reabrió con motivo. */
   reopened_at?:            string | null
   reopened_reason?:        string | null
+  /** Fase 32 — nombre de quien la reabrió (puede faltar en hojas reabiertas antes). */
+  reopened_by?:            string | null
   created_at:              string | null
 }
 

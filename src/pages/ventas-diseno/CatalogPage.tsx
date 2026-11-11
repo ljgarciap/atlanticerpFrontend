@@ -615,6 +615,8 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
           </div>
         )}
 
+        {canEditSheet && <TechnicalSheetHistory productId={item.id} refreshKey={item.technical_sheet_filename ?? ''} />}
+
         <div className="flex justify-end mt-5">
           <Button variant="outline" onClick={onClose}>{t('ventasDiseno:catalogScreen.detail.close')}</Button>
         </div>
@@ -630,6 +632,34 @@ function ProductDetailModal({ item, onClose, onUploaded }: {
           }}
         />
       )}
+    </div>
+  )
+}
+
+/** Fase 32 — versiones anteriores de la ficha: reemplazar o quitar no las pierde; aquí se consultan (solo lectura). */
+function TechnicalSheetHistory({ productId, refreshKey }: { productId: number; refreshKey: string }) {
+  const { t } = useTranslation(['ventasDiseno'])
+  const { data } = useQuery({
+    queryKey: ['ventas-diseno-catalog-sheet-history', productId, refreshKey],
+    queryFn:  () => ventasDisenoApi.catalog.technicalSheetHistory(productId),
+  })
+  if (!data || data.length === 0) return null
+  return (
+    <div className="mt-4" data-testid="technical-sheet-history">
+      <h4 className="text-[12px] font-bold text-slate-700 dark:text-slate-200 mb-1">
+        {t('ventasDiseno:catalogScreen.detail.sheetHistoryTitle')}
+      </h4>
+      <ul className="space-y-1">
+        {data.map(v => (
+          <li key={v.id} className="flex items-center justify-between gap-2 text-[11.5px] text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-lg px-3 py-1.5">
+            <span className="min-w-0 truncate">
+              <a href={v.url} target="_blank" rel="noreferrer" className="font-semibold text-[#3D7E7A] hover:underline">{v.filename}</a>
+              {' · '}{t('ventasDiseno:catalogScreen.detail.sheetRetiredOn', { date: v.retired_at.slice(0, 10) })}
+              {v.retired_reason ? ` · ${v.retired_reason}` : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

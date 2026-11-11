@@ -28,6 +28,7 @@ import type {
   BodegaRutasDiaResponse,
   WarehouseSaleRule,
   NewWarehouse,
+  AssistantMappingRow
 } from '@/types/bodega'
 
 // SCRUM-329 Batch B2 — parámetros de filtro de "Ver Inventario". Nombres verificados contra
@@ -54,6 +55,21 @@ import type { OutlookCalendarEvent } from '@/types/calendar'
 
 // SCRUM-451→456 (REQ-381→386) — pantalla "Bodegas".
 export const bodegaApi = {
+  // Fase 32 — mapeo vendedor→asistente (rutas de la Fase 29a: alta, quitar y reasignar pendientes).
+  assistantMapping: {
+    list: (): Promise<AssistantMappingRow[]> =>
+      api.get<{ data: AssistantMappingRow[] }>('/bodega/warehouse-assistant-mapping').then(r => r.data.data),
+
+    set: (sellerId: number, assistantId: number): Promise<{ id: number }> =>
+      api.post<{ id: number }>('/bodega/warehouse-assistant-mapping', { seller_id: sellerId, assistant_id: assistantId }).then(r => r.data),
+
+    remove: (id: number): Promise<void> =>
+      api.delete(`/bodega/warehouse-assistant-mapping/${id}`).then(() => undefined),
+
+    reassignPending: (sellerId: number): Promise<{ reasignados: number; assistant_id: number }> =>
+      api.post<{ reasignados: number; assistant_id: number }>('/bodega/warehouse-assistant-mapping/reassign-pending', { seller_id: sellerId }).then(r => r.data),
+  },
+
   // SCRUM-171 RN2 — ver docblock de `BodegaRutasDiaResponse` en types/bodega.ts.
   rutasDia: {
     // Ruta real: routes/bodega.php:33, dentro de Route::prefix('home') — confirmado en

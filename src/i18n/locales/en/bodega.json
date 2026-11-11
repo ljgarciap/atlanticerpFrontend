@@ -155,7 +155,10 @@
       "search": "Search product...",
       "type": "All types",
       "warehouse": "All warehouses",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "exactProduct": "Product only: {{reference}}",
+      "removeProduct": "Remove product filter",
+      "onlyThisProduct": "Show only this product's movements"
     },
     "table": {
       "date": "Date",
@@ -791,6 +794,22 @@
     "saved": "Changes saved",
     "saveError": "Could not save the settings",
     "forbidden": "You don't have access to this screen.",
+    "assistantMapping": {
+      "title": "Arrivals assistant per seller",
+      "help": "Each seller can have a Warehouse assistant who handles their orders. Changing the assistant does not move existing orders: use “Reassign pending” to give them the ones not yet delivered.",
+      "loading": "Loading mapping…",
+      "empty": "No seller has an assigned assistant.",
+      "columns": { "seller": "Seller", "assistant": "Assistant", "actions": "Actions" },
+      "seller": "Seller",
+      "assistant": "Assistant",
+      "select": "Choose…",
+      "save": "Save mapping",
+      "remove": "Remove",
+      "removeConfirm": "Remove the assistant of {{name}}? Existing orders do not change.",
+      "reassign": "Reassign pending",
+      "reassigned": "Orders reassigned: {{count}}",
+      "error": "The action could not be completed"
+    },
     "warehouseRules": {
       "title": "Warehouse rules",
       "help": "Which warehouses can fulfil sales orders, which one is the default dispatch warehouse (always one, and a sales one) and which ones are excluded from «Available». Stock in an excluded sales warehouse (e.g. Sala de exhibición 1) is shown separately to sellers.",

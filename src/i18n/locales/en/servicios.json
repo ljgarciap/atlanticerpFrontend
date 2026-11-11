@@ -137,6 +137,9 @@
       },
       "createModal": {
         "title": "New internal technician",
+        "linkedUser": "Linked user",
+        "noLinkedUser": "No linked user",
+        "linkedUserHelp": "Links the profile to the technician's account so they see their own visits and commission.",
         "nombre": "Name",
         "especialidad": "Specialty",
         "telefono": "Phone",
@@ -303,6 +306,10 @@
       "estadoLabel": "Filter by status"
     },
     "table": {
+        "remove": "Retire",
+        "removeConfirm": "Retire tool {{codigo}}? Its history is kept, and it cannot be retired while assigned to a technician.",
+        "removeCancel": "Cancel",
+        "removeError": "The tool could not be retired",
       "loading": "Loading...",
       "empty": "No tools for this filter",
       "groupHeader": "{{count}} unit(s) ({{summary}})",
@@ -375,7 +382,15 @@
       "editMinimo": "Edit minimum",
       "editMinimoPrompt": "New minimum for {{nombre}}",
       "remove": "Remove",
-      "removeConfirm": "Remove “{{nombre}}”? Its history is kept."
+      "removeConfirm": "Remove “{{nombre}}”? Its history is kept.",
+      "removeError": "The supply could not be retired"
+    },
+    "minimoModal": {
+      "title": "Edit minimum",
+      "minimo": "Minimum",
+      "cancel": "Cancel",
+      "save": "Save",
+      "error": "The minimum could not be saved"
     },
     "estados": {
       "ok": "OK",
@@ -649,6 +664,8 @@
       "pdfError": "Could not generate the PDF. Please try again.",
       "viewOnMobile": "View on mobile",
       "mobile": {
+        "saveDraft": "Save draft",
+        "draftSaved": "Draft saved. Complete and sign it when you finish.",
         "backToForm": "Back to form",
         "formTitle": "Inspection Report — {{numero}}",
         "signatureTitle": "Client signature",
@@ -716,7 +733,8 @@
       "reopenMotivo": "Reason (at least 10 characters)",
       "reopenConfirm": "Reopen",
       "reopenError": "Could not reopen the sheet.",
-      "reopenedNotice": "Reopened: {{motivo}}"
+      "reopenedNotice": "Reopened: {{motivo}}",
+      "reopenedBy": "By {{nombre}}."
     },
     "quoteModal": {
       "title": "Service Quote",

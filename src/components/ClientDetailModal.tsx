@@ -83,6 +83,19 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
     onError: (err: unknown) => setContactError(contactErrorMessage(err)),
   })
 
+  // Fase 32 — reemplazar: crea el contacto nuevo y retira el viejo en una sola operación (las cotizaciones pasan al nuevo).
+  const replaceContactMutation = useMutation({
+    mutationFn: (contactId: number) => ventasDisenoApi.subClients.contacts.replace(subClient.id, contactId, {
+      name: draft.name, role: draft.role, phone: draft.phone || null, email: draft.email || null,
+    }),
+    onSuccess: () => {
+      setContactError(null)
+      setEditingContactId(null)
+      qc.invalidateQueries({ queryKey: ['ventas-diseno-client'] })
+    },
+    onError: (err: unknown) => setContactError(contactErrorMessage(err)),
+  })
+
   function startEdit(c: SubClientContact) {
     setContactError(null)
     setAddingContact(false)
@@ -171,6 +184,16 @@ function SubClientCard({ subClient }: { subClient: SubClientDetail }) {
                 className="rounded-md border border-slate-300 px-2 py-1 text-sm w-36"
               />
               <Button variant="secondary" onClick={() => { setEditingContactId(null); setContactError(null) }}>{t('common:actions.cancel')}</Button>
+              <Button
+                variant="secondary"
+                onClick={() => replaceContactMutation.mutate(c.id)}
+                disabled={!contactFormValid || replaceContactMutation.isPending}
+                loading={replaceContactMutation.isPending}
+                title={t('ventasDiseno:clients.detail.replaceContactHelp')}
+                data-testid={`replace-contact-${c.id}`}
+              >
+                {t('ventasDiseno:clients.detail.replaceContact')}
+              </Button>
               <Button
                 onClick={() => editContactMutation.mutate(c.id)}
                 disabled={!contactFormValid || editContactMutation.isPending}

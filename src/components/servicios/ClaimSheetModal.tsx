@@ -202,7 +202,10 @@ export default function ClaimSheetModal({ ticketId, ticketNumero, canEdit, canRe
                 <p className="text-[11.5px] text-slate-400 italic">{t('tickets.claimSheet.draftNotice')}</p>
               )}
               {data?.reopened_reason && !isCompleted && (
-                <p className="text-[11.5px] text-amber-600">{t('tickets.claimSheet.reopenedNotice', { motivo: data.reopened_reason })}</p>
+                <p className="text-[11.5px] text-amber-600">
+                  {t('tickets.claimSheet.reopenedNotice', { motivo: data.reopened_reason })}
+                  {data.reopened_by ? ` ${t('tickets.claimSheet.reopenedBy', { nombre: data.reopened_by })}` : ''}
+                </p>
               )}
               {isCompleted && canReopen && !reopening && (
                 <div>

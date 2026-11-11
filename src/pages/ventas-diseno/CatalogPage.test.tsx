@@ -29,6 +29,7 @@ vi.mock('@/api/ventasDisenoApi', () => ({
       list: vi.fn(),
       get: vi.fn(),
       technicalSheetUrl: vi.fn(),
+      technicalSheetHistory: vi.fn().mockResolvedValue([]),
       uploadTechnicalSheet: vi.fn(),
       deleteTechnicalSheet: vi.fn(),
       sendPdf: vi.fn(),
@@ -411,6 +412,26 @@ describe('VentasDisenoCatalogPage', () => {
 
     expect(await screen.findByText('ventasDiseno:catalogScreen.detail.missingNoPermission')).toBeInTheDocument()
     expect(screen.queryByText('ventasDiseno:catalogScreen.detail.uploadButton')).not.toBeInTheDocument()
+  })
+
+  it('Fase 32 — con permiso de edición se listan las versiones anteriores de la ficha', async () => {
+    conEdicion()
+    mockedApi.catalog.technicalSheetHistory.mockResolvedValue([
+      { id: 1, filename: 'ficha-v1.pdf', uploaded_at: '2026-01-01T10:00:00Z', retired_at: '2026-02-03T10:00:00Z', retired_reason: 'replaced', url: 'https://s3.example/v1' },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByText('IL-DEC-1410A · 770 Lights'))
+
+    const history = await screen.findByTestId('technical-sheet-history')
+    expect(history).toHaveTextContent('ficha-v1.pdf')
+    expect(screen.getByText('ficha-v1.pdf').closest('a')).toHaveAttribute('href', 'https://s3.example/v1')
+  })
+
+  it('Fase 32 — sin permiso de edición no se pide el historial', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByText('IL-DEC-1410A · 770 Lights'))
+    await screen.findByText('ventasDiseno:catalogScreen.detail.missingNoPermission')
+    expect(mockedApi.catalog.technicalSheetHistory).not.toHaveBeenCalled()
   })
 
   it('Fase 23 (#7) — con permiso de edición se puede quitar la ficha cargada', async () => {

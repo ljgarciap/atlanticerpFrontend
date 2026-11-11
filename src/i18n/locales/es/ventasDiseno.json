@@ -251,6 +251,8 @@
       "family": "Familia",
       "available": "Disponible",
       "technicalSheetTitle": "Ficha técnica",
+        "sheetHistoryTitle": "Versiones anteriores de la ficha",
+        "sheetRetiredOn": "Retirada el {{date}}",
       "technicalSheetLoaded": "Ficha técnica cargada",
       "viewDocument": "Ver documento",
       "viewDocumentError": "No se pudo abrir el documento.",
@@ -334,6 +336,8 @@
       "contacts": "Contactos",
       "addContact": "+ Agregar contacto",
       "editContact": "Editar",
+      "replaceContact": "Reemplazar contacto",
+      "replaceContactHelp": "Crea el contacto nuevo con estos datos y retira el anterior; las cotizaciones pasan al nuevo.",
       "newQuote": "+ Nueva cotización",
       "newQuoteUnavailable": "Disponible cuando Cotización esté implementada",
       "exentoItbms": "Exento de {{tax}}"

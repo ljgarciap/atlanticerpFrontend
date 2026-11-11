@@ -104,4 +104,25 @@ describe('KardexPage', () => {
       expect.objectContaining({ desde: '2026-11-01', hasta: '2026-11-07' }),
     ))
   })
+
+  it('Fase 32: elegir un producto desde una fila filtra por producto exacto y se puede quitar', async () => {
+    mockedApi.kardex.list.mockResolvedValue({
+      data: [{
+        id: 9, fecha: '2026-07-21T10:00:00Z',
+        producto: { id: 77, reference: 'CRISTAL-IMPERIAL', description: 'Modelo' },
+        bodega: 'Bodega Central', tipo: 'Entrada', cantidad: 5,
+        referencia: 'Orden #5 recibida', realizado_por: 'Sistema', saldo_inicial: 0, saldo_resultante: 5,
+      }],
+      meta: { total: 1, per_page: 5, current_page: 1, last_page: 1 },
+    })
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('kardex-product-9'))
+    await waitFor(() => expect(mockedApi.kardex.list).toHaveBeenLastCalledWith(expect.objectContaining({ producto_id: 77 })))
+    expect(screen.getByTestId('kardex-product-chip')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('bodega:kardex.filters.removeProduct'))
+    await waitFor(() => expect(mockedApi.kardex.list).toHaveBeenLastCalledWith(expect.objectContaining({ producto_id: undefined })))
+    expect(screen.queryByTestId('kardex-product-chip')).toBeNull()
+  })
 })

@@ -215,6 +215,10 @@ export const authApi = {
   getDepartments: (): Promise<{ data: { id: number; name: string }[] }> =>
     api.get('/auth/departments').then(r => r.data as { data: { id: number; name: string }[] }),
 
+  // Fase 32 — contacto de soporte configurado por Gerencia (público: se muestra también en el ingreso).
+  getSupportContact: (): Promise<{ data: { support_contact: string } }> =>
+    api.get('/auth/support-contact').then(r => r.data as { data: { support_contact: string } }),
+
   mfaStatus: (): Promise<MfaStatus> =>
     api.get('/auth/mfa/status').then(r => r.data as MfaStatus),
 

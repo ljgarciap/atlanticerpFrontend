@@ -209,6 +209,43 @@ export default function InspectionReportMobilePage() {
     },
   })
 
+  // Fase 32 — borrador desde el móvil: guarda a medias SIN firma; solo el informe completado desbloquea el cierre.
+  const draftMutation = useMutation({
+    mutationFn: async () => {
+      const catalogFindings: InspectionReportFindingInput[] = fields.map(field => ({
+        label: field.label, value: values[fieldKey(field)] ?? '', ticket_product_id: field.ticket_product_id, is_additional: false,
+      }))
+      const extras: InspectionReportFindingInput[] = extraFindings.map(f => ({
+        label: f.label, value: f.value, ticket_product_id: null, is_additional: true,
+      }))
+      const report = await serviciosApi.inspectionReports.save(ticketId, {
+        fecha_inspeccion:       fecha || null,
+        hora_inicio:             horaInicio || null,
+        hora_fin:                horaFin || null,
+        internal_technician_id:  tecnicoId === '' ? null : tecnicoId,
+        findings:                [...catalogFindings, ...extras],
+        materiales,
+        conclusion,
+        borrador:                true,
+        requiere_seguimiento:    requiereSeguimiento,
+        proximos_pasos:          requiereSeguimiento ? proximosPasos : null,
+        firma_cliente_nombre:    firmaCliente.trim() || null,
+      })
+      for (const photo of draftPhotos) {
+        await serviciosApi.inspectionReports.uploadPhoto(ticketId, photo.file, photo.categoria)
+      }
+      return report
+    },
+    onSuccess: () => {
+      setDraftPhotos([])
+      toast(t('tickets.inspectionReport.mobile.draftSaved'), 'success')
+    },
+    onError: (err) => {
+      const msg = isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined
+      toast(msg ?? t('tickets.inspectionReport.mobile.saveError'), 'error')
+    },
+  })
+
   if (!Number.isFinite(ticketId) || loadingTicket) {
     return <div className="p-4 text-sm text-slate-400">{t('technicians.internal.card.loading')}</div>
   }
@@ -423,6 +460,12 @@ export default function InspectionReportMobilePage() {
 
             <Button className="!py-3 !text-base" disabled={!canContinueToSign} onClick={continueToSign}>
               {t('tickets.inspectionReport.mobile.continueToSign')}
+            </Button>
+            <Button
+              variant="secondary" className="!py-3 !text-base" onClick={() => draftMutation.mutate()}
+              loading={draftMutation.isPending} data-testid="mobile-save-draft"
+            >
+              {t('tickets.inspectionReport.mobile.saveDraft')}
             </Button>
           </>
         ) : (

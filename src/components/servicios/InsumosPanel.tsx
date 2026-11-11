@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/Button'
 import InsumoTable from './InsumoTable'
 import InsumoCreateModal from './InsumoCreateModal'
 import InsumoRequestModal from './InsumoRequestModal'
+import InsumoMinimoModal from './InsumoMinimoModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import { isAxiosError } from 'axios'
 import type { Insumo } from '@/types/servicios'
 import { IcoPlus } from '@/components/icons'
 
@@ -28,6 +31,10 @@ export default function InsumosPanel() {
 
   const [createOpen, setCreateOpen]       = useState(false)
   const [requestTarget, setRequestTarget] = useState<Insumo | null>(null)
+  const [minimoTarget, setMinimoTarget]   = useState<Insumo | null>(null)
+  const [removeTarget, setRemoveTarget]   = useState<Insumo | null>(null)
+  const [removing, setRemoving]           = useState(false)
+  const [removeError, setRemoveError]     = useState<string | null>(null)
 
   const { data: insumos = [], isLoading } = useQuery({
     queryKey: ['servicios-insumos'],
@@ -54,15 +61,8 @@ export default function InsumosPanel() {
       ) : (
         <InsumoTable
           insumos={insumos} canEdit={canEdit} onRequest={setRequestTarget}
-          onEditMinimo={insumo => {
-            const valor = window.prompt(t('insumos.table.editMinimoPrompt', { nombre: insumo.nombre ?? '' }), String(insumo.minimo))
-            if (valor === null || valor.trim() === '' || !Number.isInteger(Number(valor)) || Number(valor) < 0) return
-            void serviciosApi.insumos.updateMinimo(insumo.id, Number(valor)).then(invalidate)
-          }}
-          onRemove={insumo => {
-            if (!window.confirm(t('insumos.table.removeConfirm', { nombre: insumo.nombre ?? '' }))) return
-            void serviciosApi.insumos.remove(insumo.id).then(invalidate)
-          }}
+          onEditMinimo={setMinimoTarget}
+          onRemove={insumo => { setRemoveError(null); setRemoveTarget(insumo) }}
         />
       )}
 
@@ -71,6 +71,33 @@ export default function InsumosPanel() {
           excludedProductIds={insumos.map(i => i.catalog_product_id)}
           onClose={() => setCreateOpen(false)}
           onCreated={() => { setCreateOpen(false); invalidate() }}
+        />
+      )}
+
+      {minimoTarget && (
+        <InsumoMinimoModal
+          insumo={minimoTarget}
+          onClose={() => setMinimoTarget(null)}
+          onSaved={() => { setMinimoTarget(null); invalidate() }}
+        />
+      )}
+
+      {removeTarget && (
+        <ConfirmModal
+          title={t('insumos.table.remove')}
+          message={t('insumos.table.removeConfirm', { nombre: removeTarget.nombre ?? '' })}
+          confirmLabel={t('insumos.table.remove')}
+          cancelLabel={t('insumos.minimoModal.cancel')}
+          loading={removing}
+          error={removeError}
+          onCancel={() => setRemoveTarget(null)}
+          onConfirm={() => {
+            setRemoving(true)
+            serviciosApi.insumos.remove(removeTarget.id)
+              .then(() => { setRemoveTarget(null); invalidate() })
+              .catch(err => setRemoveError(isAxiosError(err) ? ((err.response?.data as { message?: string } | undefined)?.message ?? t('insumos.table.removeError')) : t('insumos.table.removeError')))
+              .finally(() => setRemoving(false))
+          }}
         />
       )}
 

@@ -527,7 +527,16 @@ export interface BodegaTeamMember {
  * (`BodegaRoles::TEAM_MEMBERS_QUERY_MAP` en el backend es la fuente de verdad). `/bodega/home/team`
  * (`useBodegaHomeTeam`) sigue existiendo aparte, fijo a `asistente_bodega`, solo para el selector
  * "Equipo" del Home (REQ-296) — no reusar ese hook para listar Courier/Picker. */
-export type BodegaTeamMemberRole = 'asistente_bodega' | 'courier' | 'picker'
+export type BodegaTeamMemberRole = 'asistente_bodega' | 'courier' | 'picker' | 'vendedor'
+
+/** Fase 32 — fila del mapeo vendedor→asistente de llegadas (`GET /bodega/warehouse-assistant-mapping`). */
+export interface AssistantMappingRow {
+  id:             number
+  seller_id:      number
+  seller_name:    string
+  assistant_id:   number
+  assistant_name: string
+}
 
 /** REQ-294 — el backend ya resuelve nombre + resumen de una línea del usuario/equipo objetivo
  * (`BodegaHomeService::saludo()`), server-computed según `scope`/`owner_id`. */
