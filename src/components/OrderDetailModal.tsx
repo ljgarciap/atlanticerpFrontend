@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useShortageReasons } from '@/hooks/useFixedLists'
 import { useOrderDetail, useOrderWarehouseBreakdown, useExportOrderItemsExcel } from '@/hooks/useBodega'
 import type { OrderItemDetail } from '@/types/bodega'
 import FullScreenWindow from '@/components/FullScreenWindow'
@@ -39,15 +40,15 @@ interface Props {
  */
 /** SCRUM-1148 — `shortage_reason` guarda el código del motivo del pendiente (`sin_stock`, `danado`...) o
  *  `otra:<texto libre>`; devuelve el texto legible (nunca el código crudo), o null si el artículo no tiene pendiente. */
-function shortageLabel(code: string | null, t: (key: string) => string): string | null {
+function shortageLabel(code: string | null, label: (key: string) => string): string | null {
   if (code === null || code === '') return null
-  if (code.startsWith('otra:')) return `${t('bodega:pedidos.registerDeliveryModal.shortageReasons.otra')}: ${code.slice('otra:'.length)}`
-  const known = ['sin_stock', 'no_encontrado', 'danado', 'reservado_otro_pedido', 'referencia_equivocada', 'otra']
-  return known.includes(code) ? t(`bodega:pedidos.registerDeliveryModal.shortageReasons.${code}`) : code
+  if (code.startsWith('otra:')) return `${label('otra')}: ${code.slice('otra:'.length)}`
+  return label(code)
 }
 
 export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet }: Props) {
   const { t } = useTranslation(['common', 'bodega'])
+  const shortageReasons = useShortageReasons()
   const { data: order, isLoading } = useOrderDetail(orderId)
   const [itemsExpanded, setItemsExpanded] = useState(false)
   const [warehousesForItem, setWarehousesForItem] = useState<OrderItemDetail | null>(null)
@@ -215,7 +216,7 @@ export default function OrderDetailModal({ orderId, onClose, onOpenPickingSheet 
                           {/* SCRUM-1148 — motivo/comentario del artículo pendiente: permanente, se ve en la tarjeta original
                               (ya con despacho parcial) y en la Faltante, sin importar el estado del pedido. */}
                           <td className="px-3 py-2 text-slate-600 dark:text-slate-300 break-words max-w-xs" data-testid={`pending-reason-${item.id}`}>
-                            {shortageLabel(item.shortage_reason, t) ?? '—'}
+                            {shortageLabel(item.shortage_reason, shortageReasons.label) ?? '—'}
                           </td>
                         </tr>
                       ))}

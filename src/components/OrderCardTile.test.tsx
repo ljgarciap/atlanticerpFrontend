@@ -13,6 +13,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => opts ? `${key}:${JSON.stringify(opts)}` : key }),
 }))
 
+vi.mock('@/hooks/useFixedLists', () => ({
+  useShortageReasons: () => ({ options: [], label: (k: string) => k }),
+}))
 vi.mock('@/hooks/useBodega', () => ({
   useOrderInvoiceStatus: vi.fn(),
   // SCRUM-832 — InvoiceStatusModal ahora usa este hook para "Ver / Imprimir PDF".

@@ -400,12 +400,8 @@ export interface OrderBoardFilters {
 /** REQ-324 RN1 — catálogo fijo de motivos de faltante, igual a `OrderItem::SHORTAGE_REASONS` en
  * el backend. `otra` exige `motivo_detalle` (texto libre) — el backend lo persiste concatenado
  * (`"otra:<texto>"`), el frontend siempre manda los 2 campos por separado. */
-export type OrderShortageReason =
-  | 'sin_stock' | 'no_encontrado' | 'danado' | 'reservado_otro_pedido' | 'referencia_equivocada' | 'otra'
-
-export const ORDER_SHORTAGE_REASONS: OrderShortageReason[] = [
-  'sin_stock', 'no_encontrado', 'danado', 'reservado_otro_pedido', 'referencia_equivocada', 'otra',
-]
+/** Fase 34a — clave de un catálogo por empresa (`shortage_reason`); las de siempre son `SHORTAGE_REASON_KEYS` (`useFixedLists`). */
+export type OrderShortageReason = string
 
 export interface RegisterDeliveryItemPayload {
   order_item_id:  number

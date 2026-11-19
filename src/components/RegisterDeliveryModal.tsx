@@ -5,7 +5,7 @@ import { isAxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { useOrderDetail, useOrderWarehouseBreakdown, useRegisterDelivery } from '@/hooks/useBodega'
 import type { OrderItemDetail, OrderShortageReason, RegisterDeliveryItemPayload } from '@/types/bodega'
-import { ORDER_SHORTAGE_REASONS } from '@/types/bodega'
+import { useShortageReasons } from '@/hooks/useFixedLists'
 import FullScreenWindow from '@/components/FullScreenWindow'
 import { Button } from '@/components/ui/Button'
 import { IcoPencil, IcoLock } from '@/components/icons'
@@ -33,7 +33,8 @@ function buildInitialRows(items: OrderItemDetail[]): Record<number, DeliveryRowS
   return rows
 }
 
-const shortageReasonSchema = z.enum(ORDER_SHORTAGE_REASONS as [OrderShortageReason, ...OrderShortageReason[]])
+// La validez de la clave contra el catálogo de la empresa la decide el backend; acá solo se exige que venga elegida.
+const shortageReasonSchema = z.string().min(1)
 
 /** Zod (RHF no aplica acá — el número de filas es dinámico y ya sembrado desde el pedido, no un
  * formulario de longitud fija; mismo criterio de "validar con zod, estado local simple" que ya
@@ -70,6 +71,7 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
   const { t } = useTranslation(['common', 'bodega'])
   const { data: order, isLoading } = useOrderDetail(orderId)
   const registerDelivery = useRegisterDelivery()
+  const shortageReasons = useShortageReasons()
 
   const [rows, setRows] = useState<Record<number, DeliveryRowState>>({})
   const [rowsInitialized, setRowsInitialized] = useState(false)
@@ -304,10 +306,8 @@ export default function RegisterDeliveryModal({ orderId, onClose }: Props) {
                                   ].join(' ')}
                                 >
                                   <option value="">{t('bodega:pedidos.registerDeliveryModal.motivoPlaceholder')}</option>
-                                  {ORDER_SHORTAGE_REASONS.map(reason => (
-                                    <option key={reason} value={reason}>
-                                      {t(`bodega:pedidos.registerDeliveryModal.shortageReasons.${reason}`)}
-                                    </option>
+                                  {shortageReasons.options.map(reason => (
+                                    <option key={reason.key} value={reason.key}>{reason.label}</option>
                                   ))}
                                 </select>
                                 {errors?.motivo && (

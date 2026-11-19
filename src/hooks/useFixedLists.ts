@@ -23,6 +23,10 @@ function useCatalogList(domain: string, fallbackKeys: readonly string[], i18nNs:
 
 export const RETURN_REASON_KEYS = ['danado_defectuoso', 'no_corresponde', 'cliente_cambio_opinion', 'excedente', 'error_instalacion', 'otra'] as const
 
+/** Fase 34a — motivos de faltante al entregar un pedido (`sin_stock` y `otra` son de sistema). */
+export const SHORTAGE_REASON_KEYS = ['sin_stock', 'no_encontrado', 'danado', 'reservado_otro_pedido', 'referencia_equivocada', 'otra'] as const
+
 export const useAdjustmentReasons = () => useCatalogList('adjustment_reason', ADJUSTMENT_MOTIVOS, 'bodega', 'adjustments.newModal.reasons')
 export const useReturnReasons = () => useCatalogList('return_reason', RETURN_REASON_KEYS, 'bodega', 'returns.reasons')
 export const useTechnicianSpecialties = () => useCatalogList('technician_specialty', ['general', 'warranty'], 'servicios', 'technicians.internal.specialty')
+export const useShortageReasons = () => useCatalogList('shortage_reason', SHORTAGE_REASON_KEYS, 'bodega', 'pedidos.registerDeliveryModal.shortageReasons')
