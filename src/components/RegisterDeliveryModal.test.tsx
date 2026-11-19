@@ -8,6 +8,13 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => opts ? `${key}:${JSON.stringify(opts)}` : key }),
 }))
 
+vi.mock('@/hooks/useFixedLists', () => ({
+  useShortageReasons: () => {
+    const label = (k: string) => `bodega:pedidos.registerDeliveryModal.shortageReasons.${k}`
+    return { options: ['sin_stock', 'no_encontrado', 'danado', 'reservado_otro_pedido', 'referencia_equivocada', 'otra'].map(key => ({ key, label: label(key) })), label }
+  },
+}))
+
 vi.mock('@/hooks/useBodega', () => ({
   useOrderDetail: vi.fn(),
   useOrderWarehouseBreakdown: vi.fn(),
