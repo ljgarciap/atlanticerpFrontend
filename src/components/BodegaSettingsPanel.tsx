@@ -60,7 +60,7 @@ const FIELD_RANGES = {
 
 function buildSchema(t: TFunction) {
   const intField = (min: number, max: number) =>
-    z.coerce.number({ invalid_type_error: t('bodega:settings.validation.required') })
+    z.coerce.number({ error: t('bodega:settings.validation.required') })
       .int(t('bodega:settings.validation.integer'))
       .min(min, t('bodega:settings.validation.range', { min, max }))
       .max(max, t('bodega:settings.validation.range', { min, max }))
@@ -79,7 +79,8 @@ function buildSchema(t: TFunction) {
     fraude_ip_lookback_dias:            intField(FIELD_RANGES.fraude_ip_lookback_dias.min, FIELD_RANGES.fraude_ip_lookback_dias.max),
   })
 }
-type FormData = z.infer<ReturnType<typeof buildSchema>>
+type FormInput = z.input<ReturnType<typeof buildSchema>>
+type FormData = z.output<ReturnType<typeof buildSchema>>
 
 function mutationErrorMessage(err: unknown, fallback: string): string {
   const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
@@ -111,7 +112,7 @@ export default function BodegaSettingsPanel() {
   const schema = buildSchema(t)
   const {
     register, handleSubmit, reset, formState: { errors, isDirty },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<FormInput, unknown, FormData>({ resolver: zodResolver(schema) })
 
   useEffect(() => {
     if (settings) reset(settings)

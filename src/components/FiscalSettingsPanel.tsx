@@ -70,10 +70,11 @@ function buildSchema(t: (key: string) => string) {
     petty_cash_max_intentos_rechazo: z.coerce.number().int().min(1, t('adminContab:fiscal.validation.required')),
     comision_externa_base: z.enum(['total', 'base_imponible']),
     // SCRUM-1019 — obligatorio (columna NOT NULL, default 24 en el backend): nunca se envía null ni "".
-    fe_reintento_max_horas: z.coerce.number({ invalid_type_error: msgFe }).int(msgFe).min(1, msgFe).max(720, msgFe),
+    fe_reintento_max_horas: z.coerce.number({ error: msgFe }).int(msgFe).min(1, msgFe).max(720, msgFe),
   })
 }
-type FormData = z.infer<ReturnType<typeof buildSchema>>
+type FormInput = z.input<ReturnType<typeof buildSchema>>
+type FormData = z.output<ReturnType<typeof buildSchema>>
 
 function buildRateSchema(t: (key: string) => string) {
   const required = t('adminContab:fiscal.validation.required')
@@ -81,10 +82,11 @@ function buildRateSchema(t: (key: string) => string) {
     descripcion: z.string().min(1, required),
     // No z.coerce.number() a secas: Number('') es 0, no NaN, así que un campo vacío pasaría
     // silenciosamente min(0) — se valida primero como string no vacío y recién después se coerciona.
-    porcentaje: z.string().min(1, required).pipe(z.coerce.number().min(0).max(100)),
+    porcentaje: z.string().min(1, required).transform(v => Number(v)).pipe(z.number().min(0).max(100)),
   })
 }
-type RateFormData = z.infer<ReturnType<typeof buildRateSchema>>
+type RateFormInput = z.input<ReturnType<typeof buildRateSchema>>
+type RateFormData = z.output<ReturnType<typeof buildRateSchema>>
 
 export default function FiscalSettingsPanel() {
   const { t } = useTranslation(['common', 'adminContab'])
@@ -104,7 +106,7 @@ export default function FiscalSettingsPanel() {
   const [addingRate, setAddingRate]     = useState(false)
 
   const schema = buildSchema(t)
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInput, unknown, FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -112,7 +114,7 @@ export default function FiscalSettingsPanel() {
     if (settings) reset(settings)
   }, [settings, reset])
 
-  const rateForm = useForm<RateFormData>({ resolver: zodResolver(buildRateSchema(t)) })
+  const rateForm = useForm<RateFormInput, unknown, RateFormData>({ resolver: zodResolver(buildRateSchema(t)) })
 
   if (isLoading) {
     return <div className="max-w-3xl mx-auto px-6 py-8 text-slate-400 text-sm">{t('common:labels.loading')}</div>
@@ -494,7 +496,7 @@ function TextField({ label, error, className, children }: { label: string; error
 type BooleanFieldName = 'pac_doc_factura_habilitado' | 'pac_doc_nota_credito_habilitado' | 'retencion_proveedores_activa'
 
 function ToggleRow(
-  { label, control, name, disabled }: { label: string; control: Control<FormData>; name: BooleanFieldName; disabled: boolean },
+  { label, control, name, disabled }: { label: string; control: Control<FormInput>; name: BooleanFieldName; disabled: boolean },
 ) {
   return (
     <Controller

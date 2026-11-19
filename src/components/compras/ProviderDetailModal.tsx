@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { IcoClose } from '@/components/icons'
 import ImageLightboxModal from '@/components/ImageLightboxModal'
-import { buildSchema, useProviderCategoryOptions, type ProviderFormData } from './ProviderFormDrawer'
+import { buildSchema, useProviderCategoryOptions, type ProviderFormData, type ProviderFormInput } from './ProviderFormDrawer'
 import type { ProviderCategory, ProviderBankField } from '@/types/compras'
 
 /**
@@ -72,7 +72,7 @@ export default function ProviderDetailModal({ providerId, onClose }: Props) {
   }
 
   const schema = useMemo(() => buildSchema(t, true), [t])
-  const { register, handleSubmit, reset, getValues, setValue, formState: { errors } } = useForm<ProviderFormData>({
+  const { register, handleSubmit, reset, getValues, setValue, formState: { errors } } = useForm<ProviderFormInput, unknown, ProviderFormData>({
     resolver: zodResolver(schema),
   })
 
