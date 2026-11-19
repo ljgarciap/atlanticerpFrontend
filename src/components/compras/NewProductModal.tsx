@@ -45,7 +45,8 @@ function buildSchema(t: TFunction) {
     additional_cost_type:   z.enum(['monto', 'porcentaje']),
   })
 }
-type FormData = z.infer<ReturnType<typeof buildSchema>>
+type FormInput = z.input<ReturnType<typeof buildSchema>>
+type FormData = z.output<ReturnType<typeof buildSchema>>
 
 interface Props {
   // SCRUM-194: necesario para el precheck de referencia de fábrica, que solo bloquea si el
@@ -66,7 +67,7 @@ export default function NewProductModal({ providerId, onClose, onAdd }: Props) {
   const schema = useMemo(() => buildSchema(t), [t])
   const {
     register, handleSubmit, watch, setError, clearErrors, formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormInput, unknown, FormData>({
     resolver: zodResolver(schema),
     defaultValues: { additional_cost_type: 'monto' },
   })

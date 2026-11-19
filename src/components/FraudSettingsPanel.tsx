@@ -34,7 +34,7 @@ const FIELD_RANGES = {
 
 function buildSchema(t: TFunction) {
   const intField = (min: number, max: number) =>
-    z.coerce.number({ invalid_type_error: t('adminContab:fraudSettings.validation.required') })
+    z.coerce.number({ error: t('adminContab:fraudSettings.validation.required') })
       .int(t('adminContab:fraudSettings.validation.integer'))
       .min(min, t('adminContab:fraudSettings.validation.range', { min, max }))
       .max(max, t('adminContab:fraudSettings.validation.range', { min, max }))
@@ -47,7 +47,8 @@ function buildSchema(t: TFunction) {
     comision_pendiente_dias:               intField(FIELD_RANGES.comision_pendiente_dias.min, FIELD_RANGES.comision_pendiente_dias.max),
   })
 }
-type FormData = z.infer<ReturnType<typeof buildSchema>>
+type FormInput = z.input<ReturnType<typeof buildSchema>>
+type FormData = z.output<ReturnType<typeof buildSchema>>
 
 function mutationErrorMessage(err: unknown, fallback: string): string {
   const data = isAxiosError<{ message?: string; errors?: Record<string, string[]> }>(err) ? err.response?.data : undefined
@@ -73,7 +74,7 @@ export default function FraudSettingsPanel() {
   const schema = buildSchema(t)
   const {
     register, handleSubmit, reset, formState: { errors, isDirty },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<FormInput, unknown, FormData>({ resolver: zodResolver(schema) })
 
   useEffect(() => {
     if (settings) reset(settings)

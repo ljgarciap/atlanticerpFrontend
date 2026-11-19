@@ -104,7 +104,8 @@ export function buildSchema(t: TFunction, isEdit: boolean) {
     path: ['email'],
   })
 }
-export type ProviderFormData = z.infer<ReturnType<typeof buildSchema>>
+export type ProviderFormInput = z.input<ReturnType<typeof buildSchema>>
+export type ProviderFormData = z.output<ReturnType<typeof buildSchema>>
 type FormData = ProviderFormData
 
 interface Props {
@@ -198,7 +199,7 @@ export default function ProviderFormDrawer({ providerId, onClose, onSaved }: Pro
   }
 
   const schema = useMemo(() => buildSchema(t, isEdit), [t, isEdit])
-  const { register, handleSubmit, reset, getValues, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, getValues, setValue, formState: { errors } } = useForm<ProviderFormInput, unknown, FormData>({
     resolver: zodResolver(schema),
     defaultValues: { currency: 'USD', is_active: true },
   })
