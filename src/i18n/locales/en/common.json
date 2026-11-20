@@ -98,7 +98,12 @@
         "sla_dias": "SLA (business days)",
         "color": "Color (hex)",
         "subtipos": "Subtypes (comma-separated)",
-        "categoria": "Stage category"
+        "categoria": "Stage category",
+        "obligatorio": "Required to complete",
+        "paises": "Countries (PA, CO, US; empty = all)",
+        "sin_cuenta_bancaria": "No bank account",
+        "inmediato": "Immediate",
+        "caja_chica": "Petty cash"
       }
     },
     "globalTab": {
@@ -292,8 +297,6 @@
     "saveError": "Could not save.",
     "processes": {
       "caja_chica": "Petty cash",
-      "obligatorio": "Required to complete",
-      "paises": "Countries (PA, CO, US; empty = all)",
       "arqueo": "Cash count",
       "anulacion_cobro": "Payment voids and refunds",
       "nota_credito": "Credit notes"
