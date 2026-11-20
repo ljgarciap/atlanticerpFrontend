@@ -32,4 +32,6 @@ export interface CatalogDomain {
   props:  Record<string, CatalogPropDef>
   /** Propiedades (y `sort_order`) que una entrada de SISTEMA no puede cambiar: el código depende de ellas. */
   locked_when_system?: string[]
+  /** Fase 34c — conjunto fijo de entradas: solo se editan las existentes (sin altas). */
+  fixed_set?: boolean
 }

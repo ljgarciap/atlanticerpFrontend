@@ -112,7 +112,7 @@ export default function InspectionReportMobilePage() {
     const nextExtras: ExtraFinding[] = []
     existing.findings.forEach((finding, idx) => {
       if (!finding.is_additional) {
-        const match = fields.find(f => f.label === finding.label && f.ticket_product_id === finding.ticket_product_id)
+        const match = fields.find(f => (finding.key ? f.key === finding.key : f.label === finding.label) && f.ticket_product_id === finding.ticket_product_id)
         if (match) {
           nextValues[fieldKey(match)] = finding.value
           return
@@ -171,6 +171,7 @@ export default function InspectionReportMobilePage() {
     mutationFn: async (signatureBlob: Blob) => {
       const catalogFindings: InspectionReportFindingInput[] = fields.map(field => ({
         label:              field.label,
+        key:                field.key,
         value:              values[fieldKey(field)] ?? '',
         ticket_product_id:  field.ticket_product_id,
         is_additional:      false,
@@ -213,7 +214,7 @@ export default function InspectionReportMobilePage() {
   const draftMutation = useMutation({
     mutationFn: async () => {
       const catalogFindings: InspectionReportFindingInput[] = fields.map(field => ({
-        label: field.label, value: values[fieldKey(field)] ?? '', ticket_product_id: field.ticket_product_id, is_additional: false,
+        label: field.label, key: field.key, value: values[fieldKey(field)] ?? '', ticket_product_id: field.ticket_product_id, is_additional: false,
       }))
       const extras: InspectionReportFindingInput[] = extraFindings.map(f => ({
         label: f.label, value: f.value, ticket_product_id: null, is_additional: true,

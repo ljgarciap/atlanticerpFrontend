@@ -156,7 +156,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
 
     existing.findings.forEach((finding, idx) => {
       if (!finding.is_additional) {
-        const match = fields.find(f => f.label === finding.label && f.ticket_product_id === finding.ticket_product_id)
+        const match = fields.find(f => (finding.key ? f.key === finding.key : f.label === finding.label) && f.ticket_product_id === finding.ticket_product_id)
         if (match) {
           nextValues[fieldKey(match)] = finding.value
           return
@@ -257,6 +257,7 @@ export default function InspectionReportModal({ ticketId, ticketTipo, productos,
       } else {
         const catalogFindings: InspectionReportFindingInput[] = fields.map(field => ({
           label:              field.label,
+          key:                field.key,
           value:              values[fieldKey(field)] ?? '',
           ticket_product_id:  field.ticket_product_id,
           is_additional:      false,
@@ -647,7 +648,7 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
 export function DynamicField({ field, value, disabled, onChange }: { field: InspectionReportField; value: string; disabled: boolean; onChange: (v: string) => void }) {
   if (field.type === 'select' && field.options) {
     return (
-      <Field label={field.label}>
+      <Field label={field.obligatorio ? `${field.label} *` : field.label}>
         <select value={value || field.options[0]} disabled={disabled} onChange={e => onChange(e.target.value)}
           className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm disabled:opacity-60">
           {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -657,7 +658,7 @@ export function DynamicField({ field, value, disabled, onChange }: { field: Insp
   }
 
   return (
-    <Field label={field.label}>
+    <Field label={field.obligatorio ? `${field.label} *` : field.label}>
       <textarea rows={2} value={value} disabled={disabled} onChange={e => onChange(e.target.value)}
         className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 px-2 py-2 text-sm disabled:opacity-60" />
     </Field>
