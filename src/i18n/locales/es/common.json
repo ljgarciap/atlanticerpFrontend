@@ -98,7 +98,12 @@
         "sla_dias": "SLA (días hábiles)",
         "color": "Color (hex)",
         "subtipos": "Subtipos (separados por coma)",
-        "categoria": "Categoría de la etapa"
+        "categoria": "Categoría de la etapa",
+        "obligatorio": "Obligatorio al completar",
+        "paises": "Países (PA, CO, US; vacío = todos)",
+        "sin_cuenta_bancaria": "Sin cuenta bancaria",
+        "inmediato": "Cobro inmediato",
+        "caja_chica": "Caja chica"
       }
     },
     "globalTab": {
@@ -292,8 +297,6 @@
     "saveError": "No se pudo guardar.",
     "processes": {
       "caja_chica": "Caja chica",
-      "obligatorio": "Obligatorio al completar",
-      "paises": "Países (PA, CO, US; vacío = todos)",
       "arqueo": "Arqueo de caja",
       "anulacion_cobro": "Anulación de cobros y devoluciones",
       "nota_credito": "Notas de crédito"
