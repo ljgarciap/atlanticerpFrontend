@@ -530,6 +530,8 @@ export interface InspectionReportField {
   type:                  'text' | 'textarea' | 'select'
   options:               string[] | null
   quote_recommendation:  boolean
+  /** Fase 34c — la empresa lo marcó obligatorio: hace falta valor para COMPLETAR el informe (no para el borrador). */
+  obligatorio:           boolean
   ticket_product_id:     number | null
 }
 
@@ -537,6 +539,8 @@ export interface InspectionReportField {
 // desde el catálogo, ver InspectionReportService::normalizeFindings(), nunca se infiere del label).
 export interface InspectionReportFindingInput {
   label:               string
+  /** Fase 34c — clave del campo de sistema (la etiqueta es editable por empresa); el backend empareja por ella. */
+  key?:                string | null
   value:               string
   ticket_product_id:   number | null
   is_additional:        boolean

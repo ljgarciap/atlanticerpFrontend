@@ -71,4 +71,19 @@ describe('InspectionReportModal — informe firmado', () => {
     await waitFor(() => expect(screen.getByText('Ver en móvil')).toBeTruthy())
     expect(screen.queryByText('Este informe ya fue firmado por el cliente y no puede modificarse.')).toBeNull()
   })
+
+  // Fase 34c — la etiqueta es editable por empresa: un informe ya guardado se empareja con el campo por su clave, y el obligatorio se marca.
+  it('Fase 34c — hidrata por clave aunque la etiqueta cambió y marca el campo obligatorio', async () => {
+    api.inspectionReports.fields.mockResolvedValue([
+      { key: 'checklist_tecnico', label: 'Lista de verificación', type: 'textarea', options: null, quote_recommendation: false, obligatorio: true, ticket_product_id: null },
+    ])
+    api.inspectionReports.get.mockResolvedValue({
+      ...informe(false),
+      findings: [{ label: 'Checklist técnico', key: 'checklist_tecnico', value: 'Revisado en sitio', ticket_product_id: null, is_additional: false, is_quote_recommendation: false }],
+    } as never)
+    renderModal()
+    expect(await screen.findByText('Lista de verificación *')).toBeTruthy()
+    expect(await screen.findByDisplayValue('Revisado en sitio')).toBeTruthy()
+    expect(screen.queryByText('Checklist técnico')).toBeNull()
+  })
 })

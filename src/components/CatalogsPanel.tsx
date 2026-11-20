@@ -200,7 +200,7 @@ export default function CatalogsPanel() {
           <ul>
             {(entries.data ?? []).map(e => <EntryRow key={e.id} domain={active} entry={e} defs={def.props} propLabel={propLabel} lockedWhenSystem={def.locked_when_system} extraLanguages={extraLanguages} />)}
           </ul>
-          <NewEntryForm domain={active} defs={def.props} propLabel={propLabel} extraLanguages={extraLanguages} />
+          {!def.fixed_set && <NewEntryForm domain={active} defs={def.props} propLabel={propLabel} extraLanguages={extraLanguages} />}
         </>
       )}
     </Card>

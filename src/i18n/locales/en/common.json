@@ -292,6 +292,7 @@
     "saveError": "Could not save.",
     "processes": {
       "caja_chica": "Petty cash",
+      "obligatorio": "Required to complete",
       "paises": "Countries (PA, CO, US; empty = all)",
       "arqueo": "Cash count",
       "anulacion_cobro": "Payment voids and refunds",
